@@ -1,0 +1,364 @@
+[
+  {
+    "crop_path": "workspace/derived/doc-c267c4cd071f/table-candidates/p0017.png",
+    "source_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
+    "page_no": 17,
+    "reader": "calibration-B",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "Barrette Outdoor Living Miami-Dade NOA drawing sheet 9 of 9 ('PARTS') for extruded PVC vinyl fencing, showing parts/components details, a post-and-footing design section drawing, and Table 1 (maximum post spacing and footing dimensions).",
+    "grid": {
+      "headers": ["WIND EXPOSURE", "FOOTING DEPTH", "MAX. POST SPACING"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "12\" DIAMETER FOOTING",
+      "3000 PSI CONCRETE",
+      "MAX. 119\" LONG POST",
+      "MAXIMUM 72\" FENCE",
+      "18\" EXCEPT BREEZEWOOD MODELS POST LENGHT=(DEPTH+7\")",
+      "ALUMINUM REINFORCEMENT POST LENGHT-1\" - BREEZEWOOD, 48\" - ALL OTHERS",
+      "DEPTH + 6\"",
+      "SEE FOOTING TABLE FOR MINIMUM DEPTH: 12\" DIAM. X DEPTH 3000 PSI CONCRETE",
+      "Acceptance No 24-0117.05, Expiration Date 03/13/2029",
+      "ASCE 7-10"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Table 1 rows are bracketed on the right: rows B/30\"/97\" and B/24\"/66\" are bracketed 'NON HVHZ'; rows C/36\"/88\", C/30\"/68\", D/36\"/75\", D/30\"/56\" are all bracketed 'HVHZ AND NON HVHZ'. Note text below table: 'HVHZ: MIAMI-DADE AND BROWARD COUNTIES / WIND EXPOSURES AS DEFINED IN THE ASCE 7-10'. Title block: Barrette Outdoor Living, drawn by F. Riofrio, PE stamp Robert Nieminen Lic No 59166, Sheet 9 of 9, Drawing 'PARTS', Rev 1 24-0117.05 01/28/25, Title 'EXTRUDED PVC VINYL FENCING'."
+  },
+  {
+    "crop_path": "workspace/derived/doc-32e36a07ab44/table-candidates/p0011.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf",
+    "page_no": 11,
+    "reader": "calibration-B",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "CertainTeed Miami-Dade NOA drawing sheet 8 of 8 for Fence (Columbia, Imperial and Chesterfield models), showing parts/components details, post-and-footing design section, and Table 1 (maximum post spacing and footing dimensions).",
+    "grid": {
+      "headers": ["WIND EXPOSURE", "FOOTING DEPTH", "MAX. POST SPACING"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "12\" DIAMETER FOOTING",
+      "3000 PSI CONCRETE",
+      "MAX. 119\" LONG POST",
+      "MAXIMUM 72\" FENCE",
+      "48\" ALUMINUM REINFORCEMENT",
+      "DEPTH + 6\"",
+      "SEE FOOTING TABLE FOR MAXIMUM DEPTH: 12\" DIAM. X DEPTH 3000 PSI CONCRETE",
+      "Acceptance No 12-1106.11, Expiration Date 03/13/2018",
+      "ASCE 7-10"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Unlike the other Table-1 pages in this batch, this table has NO 'NON HVHZ' / 'HVHZ AND NON HVHZ' bracket column printed beside the rows - just the plain 6-row table followed by the HVHZ definition note. Product listed as 'Fence - COLUMBIA, IMPERIAL AND CHESTERFIELD MODELS' (no Breezewood), and correspondingly the post-length exception note for Breezewood seen on other sheets is absent here. Title block also shows a second, older stamp 'PRODUCT RENEWED... Acceptance No 11-1028.05 Expiration Date 03/13/2013' partially visible/overlapped near the current one. Engineer: Pedro M. De Figueiredo PE 52609, EngCo Inc. Sheet 8 of 8, Drawing Number 12-048, Date 03/02/12."
+  },
+  {
+    "crop_path": "workspace/derived/doc-7a08132799a1/table-candidates/p0016.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+    "page_no": 16,
+    "reader": "calibration-B",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "CertainTeed Miami-Dade NOA drawing sheet 9 of 9 for extruded PVC vinyl fencing (Columbia, Imperial, Chesterfield and Breezewood models), showing parts/components details, post-and-footing design section, and Table 1 (maximum post spacing and footing dimensions).",
+    "grid": {
+      "headers": ["WIND EXPOSURE", "FOOTING DEPTH", "MAX. POST SPACING"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "12\" DIAMETER FOOTING",
+      "3000 PSI CONCRETE",
+      "MAX. 119\" LONG POST",
+      "MAXIMUM 72\" FENCE",
+      "18\" EXCEPT BREEZEWOOD MODELS POST LENGHT=(DEPTH+7\")",
+      "ALUMINUM REINFORCEMENT POST LENGHT-1\" - BREEZEWOOD, 48\" - ALL OTHERS",
+      "DEPTH + 6\"",
+      "Acceptance No 21-0125.07, Expiration Date 03/13/2024",
+      "ASCE 7-10"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Same Table 1 content and bracketing as the p0017/doc-c267c4cd071f page: rows B/30\"/97\" and B/24\"/66\" bracketed 'NON HVHZ'; the remaining four rows (C/36\"/88\", C/30\"/68\", D/36\"/75\", D/30\"/56\") bracketed 'HVHZ AND NON HVHZ'. Engineer: Pedro M. De Figueiredo PE 52609, sealed 01/26/2021. Title block: 'MIAMI-DADE BCCO', Sheet 9 of 9, Drawing # 20-178, Date 12/06/2020, Title 'EXTRUDED PVC VINYL FENCING', Models: Columbia, Imperial & Chesterfield / Breezewood."
+  },
+  {
+    "crop_path": "workspace/derived/doc-3c8ab51045c7/table-candidates/p0017.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+    "page_no": 17,
+    "reader": "calibration-B",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "CertainTeed Miami-Dade NOA drawing sheet 9 of 9 for extruded PVC vinyl fencing (Columbia, Imperial, Chesterfield, Breezewood models), showing parts/components details, post-and-footing design section, and Table 1 (maximum post spacing and footing dimensions).",
+    "grid": {
+      "headers": ["WIND EXPOSURE", "FOOTING DEPTH", "MAX. POST SPACING"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "12\" DIAMETER FOOTING",
+      "3000 PSI CONCRETE",
+      "MAX. 119\" LONG POST",
+      "MAXIMUM 72\" FENCE",
+      "18\" EXCEPT BREEZEWOOD MODELS POST LENGHT=(DEPTH+7\")",
+      "ALUMINUM REINFORCEMENT POST LENGHT-1\" - BREEZEWOOD, 48\" - ALL OTHERS",
+      "DEPTH + 6\"",
+      "ASCE 7-10"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Identical Table 1 content/bracketing to the other two CertainTeed sheets in this batch (NON HVHZ for the two B rows; HVHZ AND NON HVHZ for the C and D rows). This page shows two different acceptance-number stamps: a top-right 'PRODUCT RENEWED' stamp reading Acceptance No 23-0314.05 / Expiration 03/13/2029, and a separate lower-right 'MIAMI-DADE BCCO / PRODUCT REVISED' stamp reading Acceptance No 21-0125.07 / Expiration 03/13/2024 - likely a superseded/underlying acceptance number retained on the sheet. Engineer: Pedro M. De Figueiredo PE 52609. Drawing # 20-178, Sheet 9 of 9, Date 12/06/2020."
+  },
+  {
+    "crop_path": "workspace/derived/doc-88dcd8a73079/table-candidates/p0006.png",
+    "source_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.06-simtek-fence.pdf",
+    "page_no": 6,
+    "reader": "calibration-B",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "Barrette Outdoor Living Miami-Dade NOA drawing sheet 1 of 3 titled 'Polyethylene Plastic Shell Fence', showing the Allegheny / EcoStone six-foot fence panel drawing, post cap and stiffener details, a bill-of-materials table, and a fence-height/exposure minimum-footing table.",
+    "grid": {
+      "headers": ["Fence Height", "Exposure", "Min. Footing Req'd Depth", "Min. Footing Req'd Diameter"],
+      "rows": [
+        {"cells": ["Up to 48\"", "B", "24\"", "12\""], "illegible": []},
+        {"cells": ["Up to 48\"", "C", "30\"", "12\""], "illegible": []},
+        {"cells": ["49\" to 76\"", "B", "34\"", "12\""], "illegible": []},
+        {"cells": ["49\" to 76\"", "C", "36\"", "12\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "71.25\" max (panel width)",
+      "75.25\" max panel",
+      "102\" post",
+      "27.5\"",
+      "6\" min.",
+      "12\" dia.",
+      "2500 psi concrete minimum",
+      "1\" max. grade line",
+      "0.120\" approx. wall thickness",
+      "2\" (panel stiffener tube)",
+      "4\" approx. pocket depth",
+      "6.5\" / 5\" / 3\" (post cap dims)",
+      "75 mph Fastest Mile Wind Speed OR 115 mph (Ultimate 3 sec. gust)",
+      "DESIGN 2023 FBC 1616.2.1",
+      "ASCE 7-16",
+      "Acceptance No 24-0117.06, Expiration Date 04/04/2028"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Page has a second, distinct table: a bill of materials for the '6 foot Bufftech privacy fence' - ITEM 1 CAP, WEIGHT .35 LBS.; ITEM 2 PANEL STIFFENER, WEIGHT 5 LBS., LENGTH 70 1/4\"; ITEM 3 SIMTEK PANEL, WEIGHT 60 LBS., LENGTH 70\"; ITEM 4 5\" X 5\" O.D. POST, WEIGHT 30 LBS., LENGTH 102\". The transcribed grid above is the footing/exposure table (clearer, closer to the requested wind-exposure-footing format); the BOM table is not included in the grid. Row grouping in the footing table: 'Up to 48\"' spans the B/C rows, '49\" to 76\"' spans its own B/C rows - shown here with the fence-height value repeated per row for clarity, not necessarily repeated on the physical page. Title: 'Polyethylene Plastic Shell Fence', Sheet 1 of 3, drawn by F. Riofrio, PE stamp Robert Nieminen No 59166."
+  },
+  {
+    "crop_path": "workspace/derived/doc-88dcd8a73079/table-candidates/p0008.png",
+    "source_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.06-simtek-fence.pdf",
+    "page_no": 8,
+    "reader": "calibration-B",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "Barrette Outdoor Living Miami-Dade NOA drawing sheet 3 of 3 titled 'Polyethylene Plastic Shell Fence', showing the Sherwood / Ashland six-foot fence panel drawing, post cap and stiffener details, a bill-of-materials table, and a fence-height/exposure minimum-footing table.",
+    "grid": {
+      "headers": ["Fence Height", "Exposure", "Min. Footing Req'd Depth", "Min. Footing Req'd Diameter"],
+      "rows": [
+        {"cells": ["Up to 48\"", "B", "24\"", "12\""], "illegible": []},
+        {"cells": ["Up to 48\"", "C", "30\"", "12\""], "illegible": []},
+        {"cells": ["49\" to 76\"", "B", "34\"", "12\""], "illegible": []},
+        {"cells": ["49\" to 76\"", "C", "36\"", "12\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "71.25\" max (panel width)",
+      "75.25\" max.",
+      "72\" panel",
+      "102\" post",
+      "27.5\"",
+      "6\" min.",
+      "12\" dia.",
+      "2500 psi concrete minimum",
+      "1\" max. grade line",
+      "0.120\" approx. wall thickness",
+      "2\" (panel stiffener tube)",
+      "4\" approx. pocket depth",
+      "6.5\" / 5\" / 3\" (post cap dims)",
+      "75 mph Fastest Mile Wind Speed OR 115 mph (Ultimate 3 sec. gust)",
+      "DESIGN 2023 FBC 1616.2.1",
+      "ASCE 7-16",
+      "Acceptance No 24-0117.06, Expiration Date 04/04/2028"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Same footing/exposure table and same BOM table content/values as p0006 in this same document (doc-88dcd8a73079) - only the panel style name and drawing (Sherwood/Ashland, wood-grain texture, sheet 3 of 3) differ from that page (Allegheny/EcoStone, stone texture, sheet 1 of 3). BOM: ITEM 1 CAP .35 LBS.; ITEM 2 PANEL STIFFENER 5 LBS., 70 1/4\"; ITEM 3 SIMTEK PANEL 60 LBS., 70\"; ITEM 4 5\"X5\" O.D. POST 30 LBS., 102\"."
+  },
+  {
+    "crop_path": "workspace/derived/doc-3a8071e73dba/table-candidates/p0017.png",
+    "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+    "page_no": 17,
+    "reader": "calibration-B",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "Bufftech consumer installation guide page 17, section 'Semi-Private Fence' (Includes: Imperial, Imperial with Select Cedar Texture), showing an installation diagram with post/rail/gate hardware callouts, an embedment detail for the optional line-post aluminum insert, and the 'Maximum Post Spacing and Footing Dimensions' table.",
+    "grid": {
+      "headers": ["Wind Exposure", "Footing Depth", "Max. Post Spacing"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "POST CENTERS: 4 X 4 POSTS = 96\", 5 X 5 POSTS = 97\"",
+      "DIG HOLES 30\" DEEP OR TO FROST LINE",
+      "4 X 4 POSTS = 10\", 5 X 5 POSTS = 12\" (post hole diameter)",
+      "CONCRETE 3000 P.S.I. MINIMUM",
+      "ALLOW 1\" FOR HINGE AND 3/4\" FOR LATCH SYSTEM",
+      "LOCK TOP RAIL IN POST WITH #8 X 3/4\" SCREW",
+      "SECURE MID-RAIL TO PICKETS WITH (2) #8 X 1-1/2\" SCREWS, CAPS AND WASHERS",
+      "1/2\" REBAR",
+      "TO COMPLY WITH THE HIGH VELOCITY HURRICANE ZONES SECTION R44003.1.2.1 OF THE FLORIDA BUILDING CODE, A STEEL INSERT MUST BE ADDED TO THE TOP RAIL AND THE CENTER PICKET MUST BE ATTACHED TO THE TOP AND BOTTOM RAIL WITH (2) #8 X 1-1/2\" SCREWS, CAPS, AND WASHERS",
+      "Aluminum insert ends 1\" from top of post (on Brookline and Breezewood)"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Same 6-row footing table and values as the NOA drawing sheets, bracketed here as 'NON HVHZ' (first two rows) and 'HVHZ and NON HVHZ' (remaining four rows, lower-case 'and'). Footnote: 'HVHZ: Miami-Dade and Broward counties wind exposures as defined in the ASCE 7-10.' In the embedment-detail section drawing, two numeric callouts near GROUND LEVEL/GRAVEL FILL read '30' and '2' with no visible inch mark - printed plainly without quotation marks in that particular section view (elsewhere on the page comparable dimensions are given with \" marks), so transcribed literally as printed. Page footer number: 17."
+  },
+  {
+    "crop_path": "workspace/derived/doc-3a8071e73dba/table-candidates/p0019.png",
+    "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+    "page_no": 19,
+    "reader": "calibration-B",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "Bufftech consumer installation guide page 19, section 'Semi-Private Fence' (Includes: Breezewood with Select Cedar Texture), showing an installation diagram with post/rail/gate hardware callouts, an embedment detail for the optional line-post aluminum insert, and the 'Maximum Post Spacing and Footing Dimensions' table.",
+    "grid": {
+      "headers": ["Wind Exposure", "Footing Depth", "Max. Post Spacing"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "POST CENTERS: 5 x 5 Posts = 97\"",
+      "DIG HOLES 30\" DEEP OR TO FROST LINE",
+      "5 X 5 POSTS = 12\" (post hole diameter)",
+      "CONCRETE 3000 P.S.I. MINIMUM",
+      "ALLOW 1\" FOR HINGE AND 3/4\" FOR LATCH SYSTEM",
+      "LOCK TOP RAIL IN POST WITH #8 X 3/4\" SCREW",
+      "SECURE MID-BRACE TO TOP AND BOTTOM RAIL WITH (2) #8 X 1-1/2\" SCREWS, CAPS AND WASHERS",
+      "1/2\" REBAR",
+      "TO COMPLY WITH THE HIGH VELOCITY HURRICANE ZONES SECTION R44003.1.2.1 OF THE FLORIDA BUILDING CODE, A STEEL INSERT MUST BE ADDED TO THE TOP RAIL AND THE MID-BRACE MUST BE ATTACHED TO THE TOP AND BOTTOM RAIL WITH (2) #8 X 1-1/2\" SCREWS, CAPS, AND WASHERS",
+      "Aluminum insert ends 1\" from top of post (on Brookline and Breezewood)",
+      "'Stepping Recommended' banner"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Same 6-row footing table, values, and HVHZ bracketing ('NON HVHZ' / 'HVHZ and NON HVHZ') as page 17 of this same document. Only one post size (5x5) is referenced here (Breezewood uses only 5x5 posts), vs. page 17 which lists both 4x4 and 5x5 options. Embedment-detail numeric callouts again read '30' and '2' without visible inch marks. Page footer number: 19."
+  },
+  {
+    "crop_path": "workspace/derived/doc-3a8071e73dba/table-candidates/p0029.png",
+    "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+    "page_no": 29,
+    "reader": "calibration-B",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "Bufftech consumer installation guide page 29, section 'Privacy Fence' (Includes: Brookline, Brookline with CertaGrain Texture), showing an installation diagram with tongue-and-groove picket, end-channel and gate hardware callouts, an embedment detail for the optional line-post aluminum insert, and the 'Maximum Post Spacing and Footing Dimensions' table.",
+    "grid": {
+      "headers": ["Wind Exposure", "Footing Depth", "Max. Post Spacing"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "POST CENTERS: 5 X 5 POSTS = 72\"",
+      "DIG HOLES 30\" DEEP OR TO FROST LINE",
+      "POST HOLES: 5 X 5 POSTS = 12\"",
+      "CONCRETE 3000 P.S.I. MINIMUM",
+      "ALLOW 1\" FOR HINGE AND 3/4\" FOR LATCH SYSTEM",
+      "ATTACH END CHANNEL TO POST WITH 4 SCREWS",
+      "HOLD TOP RAILS IN POST WITH LOCK RING",
+      "HOLD BOTTOM RAILS IN POST WITH LOCK RING",
+      "1/2\" REBAR",
+      "MINIMUM 106\" INSERT REQUIRED TO COMPLY WITH THE HIGH VELOCITY HURRICANE ZONES SECTION R44003.1.2.1 OF THE FLORIDA BUILDING CODE",
+      "'* CHANGING PICKET ORIENTATION CAN AFFECT HORIZONTAL ALIGNMENT OF FENCE PANELS.'",
+      "'Stepping Recommended' banner"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Same 6-row footing table, values, and HVHZ bracketing as pages 17 and 19 of this document. Note the POST CENTERS value here is 72\" (privacy-style panel spacing), which differs from the 96\"/97\" post-center values on the semi-private-fence pages (17, 19) even though the underlying Table-1 wind-exposure/footing numbers are identical across all three pages. The HVHZ compliance note on this page is worded differently from pages 17/19 - it specifies a 'MINIMUM 106\" INSERT' rather than describing a steel insert + screw attachment procedure. Page footer number: 29."
+  },
+  {
+    "crop_path": "workspace/derived/doc-2b81f4c2925e/table-candidates/p0006.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-22-0616.10-CertainTeed-SimTek-molded-fence-2022-2028-superseded.pdf",
+    "page_no": 6,
+    "reader": "calibration-B",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "CertainTeed (SimTek molded fence) Miami-Dade NOA drawing sheet 1 of 3 titled 'Polyethylene Plastic Shell Fence, NOA No. 20-0303.01', showing the Allegheny / EcoStone six-foot fence panel drawing, post cap and stiffener details, a bill-of-materials table, and a fence-height/exposure minimum-footing table.",
+    "grid": {
+      "headers": ["Fence Height", "Exposure", "Min. Footing Req'd Depth", "Min. Footing Req'd Diameter"],
+      "rows": [
+        {"cells": ["Up to 48\"", "B", "24\"", "12\""], "illegible": []},
+        {"cells": ["Up to 48\"", "C", "30\"", "12\""], "illegible": []},
+        {"cells": ["49\" to 76\"", "B", "34\"", "12\""], "illegible": []},
+        {"cells": ["49\" to 76\"", "C", "36\"", "12\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "71.25\" max (panel width)",
+      "75.25\" max panel",
+      "102\" post",
+      "27.5\"",
+      "6\" min.",
+      "12\" dia.",
+      "2500 psi concrete minimum",
+      "1\" max. grade line",
+      "0.120\" approx. wall thickness",
+      "2\" (panel stiffener tube)",
+      "4\" approx. pocket depth",
+      "6.5\" / 5\" / 3\" (post cap dims)",
+      "75 mph Fastest Mile Wind Speed OR 115 mph (Ultimate 3 sec. gust)",
+      "DESIGN 2020 FBC 1616.2.1",
+      "ASCE 7-16",
+      "Acceptance No 22-0616.10, Expiration Date 04/04/2028"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Same footing/exposure table and BOM table content as doc-88dcd8a73079 p0006/p0008 (identical numbers), but this sheet cites 'DESIGN 2020 FBC 1616.2.1' rather than 2023. Two acceptance stamps visible: a struck-through/older 'PRODUCT REVISED' stamp reading Acceptance No 21-0125.06, Expiration 04/04/2023, and the current 'PRODUCT RENEWED' stamp reading Acceptance No 22-0616.10, Expiration 04/04/2028. Rev table in title block lists Rev 1: 18-0208.02, 04/15/19; Rev 2: 20-0303.01, 11/30/20. Sheet 1 of 3, Drawing 'FENCING', Date 11/30/2020, engineer stamp Robert Nieminen (Miami stamp overlapping company name box, partly obscured but not part of the table data)."
+  }
+]

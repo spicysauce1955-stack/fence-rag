@@ -301,6 +301,68 @@ recorded, not a quiet adjustment. The shape of the fix: add an `interface` field
 to the gold schema (`search` | `resolve` | `facts`), default `search`, and route
 each question accordingly.
 
+### G15 — OCR loses the numbers, and now it is measured
+
+A blind manual verification pass (seven Sonnet agents, page images only, no
+access to the pipeline's output) transcribed all 44 distinct pages flagged
+`table_not_reconstructed`. For every value a reader could see, the store was
+checked for it:
+
+| Value class | Values | Present | Missing | Recall |
+|---|---|---|---|---|
+| contains a digit | 534 | 314 | **220** | **0.588** |
+| no digit | 471 | 440 | 31 | 0.934 |
+| all | 1005 | 754 | 251 | 0.750 |
+
+OCR reads the words on these pages and loses the numbers. The missing values are
+the load-bearing ones — footing depths and maximum post spacings out of Table 1.
+Two independent readers agreed on 174 of 174 cells, so this is a measurement of
+the pipeline, not of reader noise.
+
+The flag itself was a true positive on 37 of 44 pages. The 7 false positives all
+share one cause: a caption reading `SEE TABLE 1 ON SHEET n` or `MAXIMUM POST
+SPACING NOT TO EXCEED nn"` above a drawing, which trips `_mentions_table` while
+the table lives on another sheet.
+
+**Not closed because** it is the scanned-table experiment's whole subject, now
+with ground truth to measure against. Full detail:
+`workspace/reports/manual-verification-round-1.md`.
+
+### G16 — The curated dataset has verified errors, uncorrected
+
+`data/structural/*.json` was checked against its own sources for the first time:
+30 claims, **25 confirmed, 4 contradicted, 1 unverifiable**. All four
+contradictions are in `certainteed-bufftech-structural.json`, and three were
+cross-checked against Barrette's correct parallel entry for the same fact.
+
+| Severity | Claim | Source says |
+|---|---|---|
+| critical | Exposure B / 24″ / 66″ row labelled `HVHZ and Non-HVHZ` | bracketed `NON HVHZ` only, NOA 23-0314.05 sheet 9 |
+| major | Nieminen PE licence 59166 = Connecticut | seal reads `STATE OF FLORIDA` |
+| major | NOA 22-0616.10 = SimTek, `Cementitious` | cover reads `Polyethylene Plastic Shell Fence` |
+| major | hat-shaped insert 4.500″ wide, 0.036″ wall | 2.750″ base, single 0.080″ wall; other figures belong to two other items |
+
+The critical one would license a 24″ footing in a high-velocity hurricane zone
+where the source does not.
+
+**Not closed because** `data/` is read-only corpus and amending someone's
+research dataset is their call, not mine. Every finding carries its page and the
+quoted source text in
+`workspace/tests/agent-verify-structural-json.json`. Coverage is 30 claims of
+roughly 111 list entries — a sample; two files carry no PDF-backed numeric claims
+this method can check.
+
+### G17 — Readings exist but no fact has been reviewed
+
+1,051 candidate readings are stored in `table_read_candidates`, each with its
+source crop and crop SHA-256; 348 cells where two independent readers agreed are
+marked `agent_verified`. That status is deliberately not promotable —
+`table_review.promote` refuses it, and refuses any candidate whose crop is
+missing from disk. **Zero facts promoted; the facts table is unchanged at 1,664.**
+
+**Not closed because** promotion needs a person. The queue is ready and the gate
+is tested; nothing is blocked except the sign-off.
+
 ### G10 — Not built at all (deliberate)
 
 Dense/semantic retrieval · visual page retrieval · reranking · a served HTTP API

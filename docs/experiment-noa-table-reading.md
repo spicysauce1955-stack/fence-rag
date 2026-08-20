@@ -44,6 +44,23 @@ So the failure is not resolution and not the parser. It is that a value in these
 tables is a short numeric string inside dense line-work, and whole-page OCR
 reads it at coin-flip reliability.
 
+## 1a. What the manual pass changed about this design
+
+Two premises here were wrong, and the design should be revisited before it is
+built:
+
+- **"A value in these tables is a short numeric string inside dense line-work,
+  and whole-page OCR reads it at coin-flip reliability."** True of OCR, but the
+  pages themselves are not the problem: readers found 42 of 44 fully legible at
+  200 dpi and needed no abstentions. The binding constraint is tesseract.
+- **The scale of the loss was unknown.** It is now measured: 41% of numeric
+  values on these pages are absent from the store, against 7% of non-numeric
+  values. That raises this experiment's priority and narrows its target to
+  numbers specifically.
+
+Also: 7 of the 44 flagged pages have no table at all, so the experiment's input
+set should be the 37 that do.
+
 ## 2. Hypothesis
 
 Per-cell OCR is a materially easier problem than per-page OCR. If the grid
@@ -146,8 +163,15 @@ Rules, to be enforced in code rather than by convention:
 
 The experiment is worth adopting only if all of these hold on a labelled subset.
 
-**Ground truth.** 8 pages already have independently verified values, from the
-structural gold questions: the Table 1 wind/exposure grid in NOA 12-1106.11,
+**Ground truth.** Superseded by measurement: a blind manual verification pass
+now provides transcriptions of all 37 flagged pages that carry a real table, 348
+cells of them double-read with 174/174 inter-reader agreement — see
+`workspace/reports/manual-verification-round-1.md`. Use that as the labelled set.
+The claim below overstated what was available when this was written: only 4
+flagged pages had gold-anchored values, and none was a table cell.
+
+Original text: 8 pages have independently verified values, from the structural
+gold questions: the Table 1 wind/exposure grid in NOA 12-1106.11,
 23-0314.05 and 24-0117.05 (B 30″/97″, B 24″/66″ non-HVHZ, C 36″/88″, C 30″/68″,
 D 36″/75″, D 30″/56″, 12″-diameter footing, 3000 PSI), plus the Barrette
 22-0217.05 Ø18″ × 41″ footing. Those readings were confirmed by rendering the

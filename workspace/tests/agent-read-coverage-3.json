@@ -1,0 +1,277 @@
+[
+ {
+  "crop_path": "workspace/derived/doc-c267c4cd071f/table-candidates/p0009.png",
+  "source_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
+  "page_no": 9,
+  "reader": "coverage-3",
+  "is_table": false,
+  "table_kind": "drawing_only",
+  "what_the_page_is": "Drawing sheet 1 of 9 titled 'EXTRUDED PVC VINYL FENCING': general notes, a product-rating box, and six small elevation drawings of fence models (Columbia, Imperial, Chesterfield, Chesterfield w/Lattice, Chesterfield, Breezewood) each with a max-post-spacing callout; no data table/grid is present.",
+  "grid": null,
+  "other_values_on_page": [
+   "Wind: 75 MPH fastest mile / 115 MPH ultimate 3 sec. gust",
+   "Florida Building Code 2023 - 8th Edition, HVHZ",
+   "PVC ASTM G155, D638, D1929, D2843, D635",
+   "Aluminum parts 6063-T6",
+   "Max post spacing (Columbia, Sheet 2 of 9): not to exceed 96 1/8\"",
+   "Max post spacing (Imperial, Sheet 3 of 9): not to exceed 97\"",
+   "Max post spacing (Chesterfield, Sheet 4 of 9): not to exceed 96 1/8\"",
+   "Max post spacing (Chesterfield w/ Lattice, Sheet 5 of 9): not to exceed 96 1/8\"",
+   "Max post spacing (Chesterfield, Sheet 6 of 9): not to exceed 75 7/16\"",
+   "Max post spacing (Breezewood, Sheet 7 of 9): not to exceed 97\"",
+   "Panel height 72\" on each elevation",
+   "PE: Robert Nieminen, License No. 59166",
+   "NOA Acceptance No 24-0117.05, Expiration Date 03/13/2029",
+   "Drawing: FENCING, Sheet 1 of 9, Date 01/28/2025",
+   "Nemo|etc., 353 Christian Street Unit #13, Oxford CT 06478",
+   "Barrette Outdoor Living, 231 Ship Canal Pkwy, Buffalo NY 14218"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "The pipeline's 'table' flag is a false positive triggered by the repeated phrase 'SEE TABLE 1 ON SHEET 10' (a cross-reference, not a table on this page). No cell grid exists here to recover."
+ },
+ {
+  "crop_path": "workspace/derived/doc-c267c4cd071f/table-candidates/p0014.png",
+  "source_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
+  "page_no": 14,
+  "reader": "coverage-3",
+  "is_table": true,
+  "table_kind": "bill_of_materials",
+  "what_the_page_is": "Drawing sheet 6 of 9 for Model Chesterfield 6'x6': horizontal/vertical section details, assembly isometric, and a 'BILL OF MATERIAL' table listing parts J, L, A, M, Q.",
+  "grid": {
+   "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+   "rows": [
+    {"cells": ["J", ".875 X 7 X 62.75 TONGUE AND GROOVE PICKET", "P.V.C."], "illegible": []},
+    {"cells": ["L", "2 X 6 X 73.5 DECO RAIL", "P.V.C."], "illegible": []},
+    {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+    {"cells": ["M", "LOCK RING", "POLYETHYLENE"], "illegible": []},
+    {"cells": ["Q", "#8 X .75 SCREW", "STAINLESS STEEL"], "illegible": []}
+   ]
+  },
+  "other_values_on_page": [
+   "MODEL: CHESTERFIELD - 6'X6'",
+   "Max post spacing not to exceed 75 1/2\"",
+   "Max fence height 72\"",
+   "Max. 62 3/4\" pickets",
+   "Max. 119\" long post; vertical section max 72\", 60\" dimension shown",
+   "Pickets with 5 degree end cuts, width 7 3/8\"",
+   "PE: Robert Nieminen, License No. 59166",
+   "NOA Acceptance No 24-0117.05, Expiration Date 03/13/2029",
+   "Drawing: CHESTERFIELD, Sheet 6 of 9, Date 01/28/2025"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "Bill of Material table is clean and fully legible at native resolution; no zoom needed."
+ },
+ {
+  "crop_path": "workspace/derived/doc-32e36a07ab44/table-candidates/p0006.png",
+  "source_path": "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf",
+  "page_no": 6,
+  "reader": "coverage-3",
+  "is_table": true,
+  "table_kind": "bill_of_materials",
+  "what_the_page_is": "Drawing sheet 3 of 8 for Model Imperial 8'x6' (CertainTeed): horizontal/vertical section details, assembly isometric, and a 'BILL OF MATERIAL' table listing parts G, H, A, I, P, Q, R, S, T.",
+  "grid": {
+   "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+   "rows": [
+    {"cells": ["G", ".875 X 3 X 71.5 PICKET", "P.V.C."], "illegible": []},
+    {"cells": ["H", "2 X 4 X 95.5 ROUTED RAIL", "P.V.C."], "illegible": []},
+    {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+    {"cells": ["I", "HOURGLASS G-60 STEEL CHANNEL X 92", "GALVANIZED STEEL"], "illegible": []},
+    {"cells": ["P", ".5 INCH BULLET CLIP", "NYLON"], "illegible": []},
+    {"cells": ["Q", "#8 X .75 SET SCREW", "STAINLESS STEEL"], "illegible": []},
+    {"cells": ["R", "#8 X 1.5 SCREW", "STAINLESS STEEL"], "illegible": []},
+    {"cells": ["S", "SNAP CAP WASHER", "NYLON"], "illegible": []},
+    {"cells": ["T", "SNAP CAP", "P.V.C."], "illegible": []}
+   ]
+  },
+  "other_values_on_page": [
+   "MODEL: IMPERIAL - 8' X 6'",
+   "Max post spacing not to exceed 97\"",
+   "Max fence height 72\"",
+   "Max. 71 1/2\" pickets; 47\" and 14 1/2\" vertical section dimensions",
+   "Max. 119\" long post",
+   "PE: Pedro M. De Figueiredo, License No. 52609, dated APR 14 2017 (renewal note)",
+   "NOA Acceptance No 12-1106.11, Expiration Date 03/13/2018 (superseded by 11-1028.05 revision note also shown)",
+   "Drawing Number 12-048, Sheet 3 of 8, Date 03/02/12, Design by PPMF",
+   "CertainTeed, 231 Ship Canal Parkway, Buffalo NY 14218"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "Lower scan quality (mean OCR confidence 54.7) but the Bill of Material text is crisp under 2x zoom; every cell confirmed legible, none illegible. Page carries two stamped approval blocks (a 'PRODUCT RENEWED'/APR 14 2017 note referencing 12-1106.11 exp 03/13/2018, and a 'PRODUCT REVISED' stamp referencing acceptance No 11-1028.05 exp 03/13/2013) -- both are historical revision stamps on the drawing, not part of the BOM table."
+ },
+ {
+  "crop_path": "workspace/derived/doc-7a08132799a1/table-candidates/p0008.png",
+  "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+  "page_no": 8,
+  "reader": "coverage-3",
+  "is_table": false,
+  "table_kind": "drawing_only",
+  "what_the_page_is": "Drawing sheet 1 of 9 titled 'EXTRUDED PVC VINYL FENCING' (CertainTeed models Columbia/Imperial/Chesterfield/Breezewood): general notes, product-rating box, and six small elevation drawings each with a max-post-spacing callout; no data table/grid is present.",
+  "grid": null,
+  "other_values_on_page": [
+   "Wind: 75 MPH fastest mile / 115 MPH ultimate 3 sec. gust",
+   "Florida Building Code 2020 - 7th Edition, HVHZ",
+   "PVC ASTM G155, D638, D1929, D2843, D635; Aluminum 6063-T6",
+   "Max post spacing (Columbia, Sheet 2 of 9): not to exceed 96 1/8\"",
+   "Max post spacing (Imperial, Sheet 3 of 9): not to exceed 97\"",
+   "Max post spacing (Chesterfield, Sheet 4 of 9): not to exceed 96 1/8\"",
+   "Max post spacing (Chesterfield w/ Lattice, Sheet 5 of 9): not to exceed 96 1/8\"",
+   "Max post spacing (Chesterfield, Sheet 6 of 9): not to exceed 75 7/16\"",
+   "Max post spacing (Breezewood, Sheet 7 of 9): not to exceed 97\"",
+   "Panel height 72\" on each elevation",
+   "PE: Pedro M. De Figueiredo, License No. 52609, 01/26/2021",
+   "NOA Acceptance No 21-0125.07, Expiration Date 03/13/2024",
+   "Drawing #20-178, Sheet 1 of 9, Date 12/06/2020",
+   "CertainTeed, 231 Ship Canal Parkway, Buffalo NY 14218"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "Same layout/false-positive cause as p0009 of the Barrette doc: 'SEE TABLE 1 ON SHEET 9' cross-references trigger the table flag but no grid exists on this page."
+ },
+ {
+  "crop_path": "workspace/derived/doc-7a08132799a1/table-candidates/p0012.png",
+  "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+  "page_no": 12,
+  "reader": "coverage-3",
+  "is_table": true,
+  "table_kind": "bill_of_materials",
+  "what_the_page_is": "Drawing sheet 5 of 9 for Model Chesterfield w/ Lattice 8'x6': horizontal/vertical section details, assembly isometric, and a 'BILL OF MATERIAL' table listing parts J, L, A, N, K, and two lattice-channel items whose item-code glyphs are illegible, plus Q and M.",
+  "grid": {
+   "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+   "rows": [
+    {"cells": ["J", ".875 X 7 X 46.25 TONGUE AND GROOVE PICKET", "P.V.C."], "illegible": []},
+    {"cells": ["L", "2 X 6 X 94.5 DECO RAIL", "P.V.C."], "illegible": []},
+    {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+    {"cells": ["N", "3 X 3 X 94.5 ACCENT RAIL", "P.V.C."], "illegible": []},
+    {"cells": ["K", "U-SHAPPED G-60 STEEL CHANNEL X 92", "GALVANIZED STEEL"], "illegible": []},
+    {"cells": ["?", "13 X 90.75 LATTICE PANEL", "P.V.C."], "illegible": ["item_code"]},
+    {"cells": ["?1", ".75 X 1 X90.75 HORIZONTAL CHANNEL", "P.V.C."], "illegible": ["item_code"]},
+    {"cells": ["?1", ".75 X 1 X 13.125 VERTICAL CHANNEL", "P.V.C."], "illegible": ["item_code"]},
+    {"cells": ["Q", "#8 X .75 SCREW", "STAINLESS STEEL"], "illegible": []},
+    {"cells": ["M", "LOCK RING", "POLYETHYLENE"], "illegible": []}
+   ]
+  },
+  "other_values_on_page": [
+   "MODEL CHESTERFIELD W/ LATTICE - 8' X 6'",
+   "Max post spacing not to exceed 96 1/8\"",
+   "Max fence height 72\"",
+   "Max. 62 3/4\" pickets; 43 1/2\" and 13/8\", 4 3/8\" vertical section dimensions",
+   "Max. 119\" long post",
+   "#8X3/4\" SS screws, 4 top / 4 bottom, 2 per side; #8X3/4\" SS screw rail retainer",
+   "PE: Pedro M. De Figueiredo, License No. 52609, 01/26/2021",
+   "NOA Acceptance No 21-0125.07, Expiration Date 03/13/2024",
+   "Drawing #20-178, Sheet 5 of 9, Date 12/06/2020"
+  ],
+  "reading_confidence": "medium",
+  "illegible": ["item_code column, row 'LATTICE PANEL' (printed as a hollow box glyph, not a legible letter)", "item_code column, row 'HORIZONTAL CHANNEL' (hollow box glyph + '1')", "item_code column, row 'VERTICAL CHANNEL' (hollow box glyph + '1')"],
+  "notes": "Zoomed 5x on the ITEM column: three consecutive rows show a printed hollow-rectangle glyph instead of a clear letter (likely 'O' or 'D' rendered oddly by the plotter/scan), each followed by nothing or a '1'. Could not confidently resolve to a specific character, so left as '?' / '?1' rather than guessing. All PART DESCRIPTION and MATERIAL text is fully legible."
+ },
+ {
+  "crop_path": "workspace/derived/doc-3c8ab51045c7/table-candidates/p0011.png",
+  "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+  "page_no": 11,
+  "reader": "coverage-3",
+  "is_table": true,
+  "table_kind": "bill_of_materials",
+  "what_the_page_is": "Drawing sheet 3 of 9 for Model Imperial 8'x6': horizontal/vertical section details, assembly isometric, and a 'BILL OF MATERIAL' table listing parts G, H, A, I, P, Q, R, S, T.",
+  "grid": {
+   "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+   "rows": [
+    {"cells": ["G", ".875 X 3 X 71.5 PICKET", "P.V.C."], "illegible": []},
+    {"cells": ["H", "2 X 4 X 95.5 ROUTED RAIL", "P.V.C."], "illegible": []},
+    {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+    {"cells": ["I", "HOURGLASS G-60 STEEL CHANNEL X 92", "GALVANIZED STEEL"], "illegible": []},
+    {"cells": ["P", ".5 INCH BULLET CLIP", "NYLON"], "illegible": []},
+    {"cells": ["Q", "#8 X .75 SET SCREW", "STAINLESS STEEL"], "illegible": []},
+    {"cells": ["R", "#8 X 1.5 SCREW", "STAINLESS STEEL"], "illegible": []},
+    {"cells": ["S", "SNAP CAP WASHER", "NYLON"], "illegible": []},
+    {"cells": ["T", "SNAP CAP", "P.V.C."], "illegible": []}
+   ]
+  },
+  "other_values_on_page": [
+   "MODEL: IMPERIAL - 8' X 6'",
+   "Max post spacing not to exceed 97\"",
+   "Max fence height 72\"",
+   "Max. 71 1/2\" pickets; 47\" and 14 1/2\" vertical section dimensions",
+   "Max. 119\" long post",
+   "PE: Pedro De Figueiredo, License No. 52609, 01/26/2021",
+   "NOA Acceptance No 23-0314.05, Expiration Date 03/13/2029 (PRODUCT RENEWED stamp); also shows prior NOA 21-0125.07 Expiration Date 03/13/2024 (PRODUCT REVISED stamp)",
+   "Drawing #20-178, Sheet 3 of 9, Date 12/06/2020"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "Clearest scan of the three Imperial-model BOM pages seen in this batch; every cell confirmed under zoom."
+ },
+ {
+  "crop_path": "workspace/derived/doc-3c8ab51045c7/table-candidates/p0015.png",
+  "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+  "page_no": 15,
+  "reader": "coverage-3",
+  "is_table": true,
+  "table_kind": "bill_of_materials",
+  "what_the_page_is": "Drawing sheet 7 of 9 for Model Breezewood 8'x6': horizontal/vertical section details, assembly isometric, and a 'BILL OF MATERIAL' table listing parts A, B2, H, M, G, Q, R, K, P1.",
+  "grid": {
+   "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+   "rows": [
+    {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+    {"cells": ["B2", "2X6 HORIZONTAL BEAM", "P.V.C."], "illegible": []},
+    {"cells": ["H", "1 3/4\" X 3 1/2\" RAIL", "P.V.C."], "illegible": []},
+    {"cells": ["M", "LOCK RINGS", "POLYETHYLENE"], "illegible": []},
+    {"cells": ["G", "7/8 X 3 PICKETS", "P.V.C."], "illegible": []},
+    {"cells": ["Q", "#8 X 3/4\" SET SCREWS", "STAINLESS STEEL"], "illegible": []},
+    {"cells": ["R", "#8 X 1 1/2\" SET SCREWS", "STAINLESS STEEL"], "illegible": []},
+    {"cells": ["K", "U-SHAPPED G-60 STEEL CHANNEL", "GALVANIZED STEEL"], "illegible": []},
+    {"cells": ["P1", "POST REINF. FULL LENGTH -1\"", "ALUMINUM"], "illegible": []}
+   ]
+  },
+  "other_values_on_page": [
+   "MODEL: BREEZEWOOD - 8'X6'",
+   "Max post spacing not to exceed 97\"",
+   "Max fence height 72\"",
+   "Max. 107\" long post",
+   "PE: Pedro De Figueiredo, License No. 52609, 01/26/2021",
+   "NOA Acceptance No 23-0314.05, Expiration Date 03/13/2029 (PRODUCT RENEWED); also shows prior NOA 21-0125.07 Expiration Date 03/13/2024 (PRODUCT REVISED)",
+   "Drawing #20-178, Sheet 7 of 9, Date 12/06/2020"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "Full BOM verified under zoom, all 9 rows legible."
+ },
+ {
+  "crop_path": "workspace/derived/doc-8727ba0fd4d4/table-candidates/p0004.png",
+  "source_path": "manuals/certainteed-bufftech/structural/NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf",
+  "page_no": 4,
+  "reader": "coverage-3",
+  "is_table": true,
+  "table_kind": "bill_of_materials",
+  "what_the_page_is": "Drawing sheet 2 of 8 for Model Columbia 8'x6' (oldest NOA in this batch, 2007/2008 drawing): horizontal/vertical section details, assembly isometric, a fence elevation, and a 'BILL OF MATERIAL' table listing parts C, B, A, D, P, Q (three trailing rows left blank).",
+  "grid": {
+   "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+   "rows": [
+    {"cells": ["C", ".875 X 6 X 71.5 RIBBED PICKET", "P.V.C."], "illegible": []},
+    {"cells": ["B", "3.5 X 3.5 X 94.5 ROUTED RAIL", "P.V.C."], "illegible": []},
+    {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+    {"cells": ["D", "ALUMINUM CHANNEL X 92 FOR 3.5 SQ. RAIL", "6063-T5 ALUMINUM"], "illegible": []},
+    {"cells": ["P", ".5 INCH BULLET CLIP", "NYLON"], "illegible": []},
+    {"cells": ["Q", "#8 X .75 SET SCREW", "STAINLESS STEEL"], "illegible": []}
+   ]
+  },
+  "other_values_on_page": [
+   "MODEL: COLUMBIA - 8' X 6'",
+   "Maximum post spacing 96 1/8\"",
+   "Max fence height 72\"; fence elevation shows 36\" + 36\" rail spacing",
+   "Max. 71 1/2\" pickets; 30 3/4\" and 30 3/4\" vertical section dimensions",
+   "Max. 107\" long post",
+   "Engineering: EngCo Inc., CA 8116, 6971 W. Sunrise Blvd. 104, Plantation FL 33313",
+   "PE: Pedro De Figueiredo, License No. 52609, seal dated FEB 06 2008",
+   "NOA Acceptance No 06-1019.01, Approval/Renewal Date 03/13/2008",
+   "Drawing Number 07-315, Sheet 2 of 8, Date 10/18/07, Design by PPMF",
+   "Drafting: PK Drafting & More",
+   "CertainTeed, 231 Ship Canal Parkway, Buffalo NY 14218"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "Three blank rows follow row Q in the printed table grid; left out of the transcribed grid since they contain no text (not illegible, simply empty)."
+ }
+]

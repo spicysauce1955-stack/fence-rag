@@ -1,0 +1,295 @@
+[
+  {
+    "crop_path": "workspace/derived/doc-8727ba0fd4d4/table-candidates/p0010.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf",
+    "page_no": 10,
+    "reader": "coverage-2",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "CertainTeed engineering drawing sheet (8 of 8) titled 'Parts and Components (cont.)' / 'Post and Footing Design' for the Columbia, Imperial and Chesterfield fence models, showing a post/footing cross-section and a small footing table.",
+    "grid": {
+      "headers": ["FOOTING DIAMETER", "FOOTING DEPTH", "MAXIMUM POST SPACING"],
+      "rows": [
+        {"cells": ["12'", "24'", "48'"], "illegible": []},
+        {"cells": ["12'", "30'", "97'"], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "12\" DIAM. X DEPTH, 3000 PSI CONCRETE (text note)",
+      "48' ALUMINUM REINFORCEMENT (dimension label, same single-tick mark as table)",
+      "MAX. 107' LONG POST",
+      "MAXIMUM 72' FENCE (dimension label near top of post)",
+      "Drawing Number 07-315, Sheet 8 of 8",
+      "NOAN 06-1019-01 (Miami-Dade stamp, hand-annotated)",
+      "PE Seal: Pedro De Figueiredo, PE 52609",
+      "Q- #8X0.75 SET SCREW STAINLESS STEEL",
+      "R- #8X1.50 SET SCREW STAINLESS STEEL",
+      "P- 1/2\" BULLET CLIP NYLON",
+      "T- 8/8 SNAP CAPS PVC",
+      "S- 8/8 SNAP CAP WASHER NYLON",
+      "Date: 10/18/07"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "The table's unit marks are printed as a single tick/prime (') on every dimension on this sheet (footing diameter/depth, post spacing, aluminum reinforcement length, post length), not a double-prime (\"). Given the context (a 12-inch-diameter footing, 24-30 inch deep, with 48-97 inch post spacing) these clearly denote inches; the sheet's font/drafting convention just uses a single stroke throughout, including in the '12\" DIAM' text note where the same single-tick glyph appears. Transcribed exactly as printed rather than normalized to \". No digits were guessed."
+  },
+  {
+    "crop_path": "workspace/derived/doc-c267c4cd071f/table-candidates/p0012.png",
+    "source_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
+    "page_no": 12,
+    "reader": "coverage-2",
+    "is_table": true,
+    "table_kind": "bill_of_materials",
+    "what_the_page_is": "Barrette Outdoor Living / Nemo Engineering drawing sheet (4 of 9) for Model: Chesterfield - 8' x 6', showing horizontal/vertical sections, assembly isometric, fence elevation, and a Bill of Material table.",
+    "grid": {
+      "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+      "rows": [
+        {"cells": ["J", ".875 X 7 X 62.75 TONGUE AND GROOVE PICKET", "P.V.C."], "illegible": []},
+        {"cells": ["L", "2 X 6 DECO RAIL", "P.V.C."], "illegible": []},
+        {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+        {"cells": ["K", "U-SHAPPED G-60 STEEL CHANNEL X 92", "GALVANIZED STEEL"], "illegible": []},
+        {"cells": ["M", "LOCK RING", "POLYETHYLENE"], "illegible": []},
+        {"cells": ["Q", "#8 X .75 SET SCREWS", "STAILESS STEEL"], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "MAX. FENCE HEIGHT 72'",
+      "SEE TABLE 1 ON SHEET 10 - MAXIMUM POST SPACING NOT TO EXCEED 96 1/8'",
+      "MAX. 62 3/4' PICKETS",
+      "MAX. 119' LONG POST",
+      "5 X 5 X 107 ROUTED POST",
+      "U-SHAPPED G-60 STEEL CHANNEL X 92",
+      "PE License No. 59166, Robert Nieminen, State of Florida, dated 2015-01-28 (stamp)",
+      "Rev # I, Description 24-0117.05, Date 01/28/25",
+      "Miami-Dade Acceptance No. 24-0117.05, Expiration Date 03/13/2029 (red stamp)",
+      "Drawing: CHESTERFIELD, Date 01/28/2025, Sheet 4 of 9, Scale NTS"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Bill of Material printed 'U-SHAPPED' (not 'U-SHAPED') and 'STAILESS STEEL' (not 'STAINLESS STEEL') - both transcribed verbatim as they appear, these look like source typos rather than OCR errors. Same drawing content reused across several related NOA filings per 'applies_also_to' in the assignment."
+  },
+  {
+    "crop_path": "workspace/derived/doc-32e36a07ab44/table-candidates/p0005.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf",
+    "page_no": 5,
+    "reader": "coverage-2",
+    "is_table": true,
+    "table_kind": "bill_of_materials",
+    "what_the_page_is": "CertainTeed / EngCo Inc. engineering drawing sheet (2 of 8) for Model: Columbia - 8' x 6', showing horizontal/vertical sections, assembly isometric, fence elevation, and a Bill of Material table.",
+    "grid": {
+      "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+      "rows": [
+        {"cells": ["C", ".875 X 6 X 71.5 RIBBED PICKET", "P.V.C."], "illegible": []},
+        {"cells": ["B", "3.5 X 3.5 X 94.5 ROUTED RAIL", "P.V.C."], "illegible": []},
+        {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+        {"cells": ["D", "ALUMINUM CHANNEL X 92 FOR 3.5 SQ. RAIL", "6063-T5 ALUMINUM"], "illegible": []},
+        {"cells": ["P", ".5 INCH BULLET CLIP", "NYLON"], "illegible": []},
+        {"cells": ["Q", "#8 X .75 SET SCREW", "STAINLESS STEEL"], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "MAX. FENCE HEIGHT 72'",
+      "SEE TABLE 1 ON SHEET 8 - MAXIMUM POST SPACING NOT TO EXCEED 96 1/8'",
+      "MAX. 71 1/2' PICKETS",
+      "MAX. 119' LONG POST",
+      "PE Seal: Pedro M. De Figueiredo, License No. 52609, State of Florida, sealed APR 14 2012",
+      "Top stamp: PRODUCT REVISED, Acceptance No 11-1028.05, Expiration Date 03/13/2013",
+      "Bottom stamp: PRODUCT RENEWED, Acceptance No 12-1106.11, Expiration Date 03/13/2018",
+      "Drawing Number 12-048, Sheet 2 of 8, Date 03/02/12, Design by PPMF"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Two Miami-Dade Product Control stamps appear stacked on this sheet (a 'PRODUCT REVISED' 11-1028.05 stamp and a 'PRODUCT RENEWED' 12-1106.11 stamp), consistent with this NOA package superseding an earlier acceptance number."
+  },
+  {
+    "crop_path": "workspace/derived/doc-32e36a07ab44/table-candidates/p0009.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf",
+    "page_no": 9,
+    "reader": "coverage-2",
+    "is_table": true,
+    "table_kind": "bill_of_materials",
+    "what_the_page_is": "CertainTeed / EngCo Inc. engineering drawing sheet (6 of 8) for Model: Chesterfield - 6' x 6', showing horizontal/vertical sections, assembly isometric, fence elevation, and a Bill of Material table.",
+    "grid": {
+      "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+      "rows": [
+        {"cells": ["J", ".875 X 7 X 62.75 TONGUE AND GROOVE PICKET", "P.V.C."], "illegible": []},
+        {"cells": ["L", "2 X 6 X 73.5 DECO RAIL.", "P.V.C."], "illegible": []},
+        {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+        {"cells": ["M", "LOCK RING", "POLYETHYLENE"], "illegible": []},
+        {"cells": ["Q", "#8 X .75 SCREW", "STAINLESS STEEL"], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "MAX. FENCE HEIGHT 72'",
+      "SEE TABLE 1 ON SHEET 8 - MAXIMUM POST SPACING NOT TO EXCEED 75 1/2'",
+      "MAX. 62 3/4' PICKETS",
+      "MAX. 119' LONG POST",
+      "PE Seal: Pedro M. De Figueiredo, License No. 52609",
+      "PRODUCT RENEWED stamp: Acceptance No 12-1106.11, Expiration Date 03/13/2018",
+      "PRODUCT REVISED stamp: Acceptance No 11-1028.05, Expiration Date 03/13/2013",
+      "Drawing Number 12-048, Sheet 6 of 8, Date 03/02/12"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Same document as the p0005 entry above (NOA-12-1106.11), different sheet/model variant (Chesterfield 6'x6' vs Columbia 8'x6')."
+  },
+  {
+    "crop_path": "workspace/derived/doc-7a08132799a1/table-candidates/p0011.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+    "page_no": 11,
+    "reader": "coverage-2",
+    "is_table": true,
+    "table_kind": "bill_of_materials",
+    "what_the_page_is": "CertainTeed / PPMF Inc. engineering drawing sheet (4 of 9) for Model: Chesterfield - 8' x 6', showing horizontal/vertical sections, assembly isometric, fence elevation, and a Bill of Material table.",
+    "grid": {
+      "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+      "rows": [
+        {"cells": ["J", ".875 X 7 X 62.75 TONGUE AND GROOVE PICKET", "P.V.C."], "illegible": []},
+        {"cells": ["L", "2 X 6 DECO RAIL", "P.V.C."], "illegible": []},
+        {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+        {"cells": ["K", "U-SHAPPED G-60 STEEL CHANNEL X 92", "GALVANIZED STEEL"], "illegible": []},
+        {"cells": ["M", "LOCK RING", "POLYETHYLENE"], "illegible": []},
+        {"cells": ["Q", "#8 X .75 SET SCREWS", "STAILESS STEEL"], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "MAX. FENCE HEIGHT 72'",
+      "SEE TABLE 1 ON SHEET 9 - MAXIMUM POST SPACING NOT TO EXCEED 96 1/8'",
+      "MAX. 62 3/4' PICKETS",
+      "MAX. 119' LONG POST",
+      "PE Seal: Pedro M. De Figueiredo, License No. 52609, dated 01/26/2021",
+      "Miami-Dade BCCO stamp: PRODUCT REVISED, Acceptance No 21-0125.07, Expiration Date 03/13/2024",
+      "Drawing #20-178, Sheet 4 of 9, Date 12/06/2020, Models: Columbia, Imperial & Chesterfield / Breezewood"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Same Bill of Material content and same 'U-SHAPPED' / 'STAILESS STEEL' spellings as the p0012 (Barrette) entry above - this looks like a recurring drawing template reused across CertainTeed/Barrette NOA filings for the Chesterfield 8'x6' model."
+  },
+  {
+    "crop_path": "workspace/derived/doc-3c8ab51045c7/table-candidates/p0009.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+    "page_no": 9,
+    "reader": "coverage-2",
+    "is_table": true,
+    "table_kind": "drawing_only",
+    "what_the_page_is": "Summary/index sheet (1 of 9) showing six small fence-elevation drawings for each model variant (Columbia, Imperial, Chesterfield, Chesterfield w/ Lattice, Chesterfield, Breezewood) each labeled with its max post spacing and referencing the sheet it is detailed on, plus a block of General Notes and a boxed Product Rating statement. No actual table grid with rows/columns is present.",
+    "grid": null,
+    "other_values_on_page": [
+      "PRODUCT RATING: 75 MPH FASTED [sic] MILE WIND SPEED OR 115 MPH (ULTIMATE 3 SEC. GUST)",
+      "Florida Building Code 2020 - 7th Edition including High Velocity Hurricane Zones (HVHZ)",
+      "ASTM G155, ASTM D638, ASTM D1929, ASTM D2843 and ASTM D635 (PVC material)",
+      "Aluminum parts to be 6063-T6",
+      "Semi-Privacy Model: Columbia, Sheet 2 of 9, max post spacing NOT TO EXCEED 96 1/8'",
+      "Semi-Privacy Model: Imperial, Sheet 3 of 9, max post spacing NOT TO EXCEED 97'",
+      "Privacy Model: Chesterfield, Sheet 4 of 9, max post spacing NOT TO EXCEED 96 1/8'",
+      "Privacy Model: Chesterfield w/ Lattice, Sheet 5 of 9, max post spacing NOT TO EXCEED 96 1/8'",
+      "Privacy Model: Chesterfield, Sheet 6 of 9, max post spacing NOT TO EXCEED 75 7/16'",
+      "Semi-Privacy Model: Breezewood, Sheet 7 of 9, max post spacing NOT TO EXCEED 97'",
+      "PE Seal: Pedro M. De Figueiredo, License No. 52609, dated 01/26/2021",
+      "Miami-Dade stamp: Acceptance No 23-0314.05, Expiration Date 03/13/2029",
+      "Drawing #20-178, Sheet 1 of 9, Date 12/06/2020"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "The pipeline's 'names a table but no cell grid could be recovered' flag is correct in the sense that there is no real cell grid on this page - it is a general-notes/index sheet with six small elevation drawings, not a data table. The boxed 'PRODUCT RATING' text is a two-line statement, not a table."
+  },
+  {
+    "crop_path": "workspace/derived/doc-3c8ab51045c7/table-candidates/p0014.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+    "page_no": 14,
+    "reader": "coverage-2",
+    "is_table": true,
+    "table_kind": "bill_of_materials",
+    "what_the_page_is": "CertainTeed / PPMF Inc. engineering drawing sheet (6 of 9) for Model: Chesterfield - 6' x 6', showing horizontal/vertical sections, assembly isometric, fence elevation, and a Bill of Material table.",
+    "grid": {
+      "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+      "rows": [
+        {"cells": ["J", ".875 X 7 X 62.75 TONGUE AND GROOVE PICKET", "P.V.C."], "illegible": []},
+        {"cells": ["L", "2 X 6 X 73.5 DECO RAIL", "P.V.C."], "illegible": []},
+        {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+        {"cells": ["M", "LOCK RING", "POLYETHYLENE"], "illegible": []},
+        {"cells": ["Q", "#8 X .75 SCREW", "STAINLESS STEEL"], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "MAX. FENCE HEIGHT 72'",
+      "SEE TABLE 1 ON SHEET 9 - MAXIMUM POST SPACING NOT TO EXCEED 75 1/2'",
+      "MAX. 62 3/4' PICKETS",
+      "MAX. 119' LONG POST",
+      "PE Seal: Pedro M. De Figueiredo, License No. 52609, dated 01/26/2021",
+      "Miami-Dade stamp: PRODUCT RENEWED, Acceptance No 23-0314.05, Expiration Date 03/13/2029",
+      "Second stamp: PRODUCT REVISED, Acceptance No 21-0125.07, Expiration Date 03/13/2024",
+      "Drawing #20-178, Sheet 6 of 9, Date 12/06/2020"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Same drawing/BOM content as the p0009 entry (doc-32e36a07ab44) for the Chesterfield 6'x6' model, reused under a newer NOA number (23-0314.05) with an older superseded stamp (21-0125.07) still visible underneath."
+  },
+  {
+    "crop_path": "workspace/derived/doc-8727ba0fd4d4/table-candidates/p0003.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf",
+    "page_no": 3,
+    "reader": "coverage-2",
+    "is_table": true,
+    "table_kind": "drawing_only",
+    "what_the_page_is": "Summary/index sheet (1 of 8) showing five small fence-elevation drawings for each model variant (Columbia, Imperial, Chesterfield, Chesterfield w/ Lattice, Chesterfield) each labeled with its max post spacing and referencing the sheet it is detailed on, plus a block of General Notes and a boxed Product Rating statement. No actual table grid with rows/columns is present.",
+    "grid": null,
+    "other_values_on_page": [
+      "PRODUCT RATING: 75 MPH FASTED [sic] MILE WIND SPEED OR 90 MPH 3 SECOND GUST",
+      "Florida Building Code 2004 Edition (2006 Supplement) including High Velocity Hurricane Zones",
+      "ASTM G155, ASTM D638, ASTM D1929, ASTM D2843 and ASTM D635 (PVC material)",
+      "Aluminum parts to be 6063-T6",
+      "Semi-Privacy Model: Columbia, Sheet 2 of 8, max post spacing 96 1/8'",
+      "Semi-Privacy Model: Imperial, Sheet 3 of 8, max post spacing 97'",
+      "Privacy Model: Chesterfield, Sheet 4 of 8, max post spacing 96 1/8'",
+      "Privacy Model: Chesterfield w/ Lattice, Sheet 5 of 8, max post spacing 96 1/8'",
+      "Privacy Model: Chesterfield, Sheet 6 of 8, max post spacing 75 1/2'",
+      "Engineer Seal: Pedro De Figueiredo, PE 52609, dated FEB 06 2008",
+      "Miami-Dade stamp: Date 03/13/2008, NOA# 06-1019.01",
+      "Drawing Number 07-315, Sheet 1 of 8, Date 10/18/07, Design by PPMF, Drafting: PK Drafting & More"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Same page role as the p0009 entry above (doc-3c8ab51045c7) - an index/general-notes sheet, not a data table. Product rating here is 90 MPH 3-second gust (older 2004 FBC edition) vs. 115 MPH in the later 2023 NOA package for the same fence family."
+  },
+  {
+    "crop_path": "workspace/derived/doc-f87aa202ef21/table-candidates/p0047.png",
+    "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+    "page_no": 47,
+    "reader": "coverage-2",
+    "is_table": true,
+    "table_kind": "spec_table",
+    "what_the_page_is": "A reproduction of ASCE 7 Figure 26.8-1 'Topographic Factor, Kzt' (Chapter 26, Wind Loads: General Requirements) - two diagrams (escarpment and 2-D ridge/3-D hill), a 'Topographic Multipliers' lookup table (K1/K2/K3), footnotes, notation, equations, and a second smaller 'Parameters for Speed-Up over Hills and Escarpments' table.",
+    "grid": {
+      "headers": ["H/Lh", "K1 2D Ridge", "K1 2D Escarpment", "K1 3D Axisymmetrical Hill", "x/Lh", "K2 2D Escarpment", "K2 All Other Cases", "z/Lh", "K3 2D Ridge", "K3 2D Escarpment", "K3 3D Axisymmetrical Hill"],
+      "rows": [
+        {"cells": ["0.20", "0.29", "0.17", "0.21", "0.00", "1.00", "1.00", "0.00", "1.00", "1.00", "1.00"], "illegible": []},
+        {"cells": ["0.25", "0.36", "0.21", "0.26", "0.50", "0.88", "0.67", "0.10", "0.74", "0.78", "0.67"], "illegible": []},
+        {"cells": ["0.30", "0.43", "0.26", "0.32", "1.00", "0.75", "0.33", "0.20", "0.55", "0.61", "0.45"], "illegible": []},
+        {"cells": ["0.35", "0.51", "0.30", "0.37", "1.50", "0.63", "0.00", "0.30", "0.41", "0.47", "0.30"], "illegible": []},
+        {"cells": ["0.40", "0.58", "0.34", "0.42", "2.00", "0.50", "0.00", "0.40", "0.30", "0.37", "0.20"], "illegible": []},
+        {"cells": ["0.45", "0.65", "0.38", "0.47", "2.50", "0.38", "0.00", "0.50", "0.22", "0.29", "0.14"], "illegible": []},
+        {"cells": ["0.50", "0.72", "0.43", "0.53", "3.00", "0.25", "0.00", "0.60", "0.17", "0.22", "0.09"], "illegible": []},
+        {"cells": ["", "", "", "", "3.50", "0.13", "0.00", "0.70", "0.12", "0.17", "0.06"], "illegible": []},
+        {"cells": ["", "", "", "", "4.00", "0.00", "0.00", "0.80", "0.09", "0.14", "0.04"], "illegible": []},
+        {"cells": ["", "", "", "", "", "", "", "0.90", "0.07", "0.11", "0.03"], "illegible": []},
+        {"cells": ["", "", "", "", "", "", "", "1.00", "0.05", "0.08", "0.02"], "illegible": []},
+        {"cells": ["", "", "", "", "", "", "", "0.50", "0.01", "0.02", "0.00"], "illegible": []},
+        {"cells": ["", "", "", "", "", "", "", "2.00", "0.00", "0.00", "0.00"], "illegible": []}
+      ]
+    },
+    "other_values_on_page": [
+      "Kzt = (1 + K1 K2 K3)^2",
+      "K2 = (1 - |x| / mu*Lh)",
+      "K3 = e^(-gamma*z/Lh)",
+      "Second table 'Parameters for Speed-Up over Hills and Escarpments': Hill Shape | K1/(H/Lh) Exposure B,C,D | gamma | mu Upwind of Crest | mu Downwind of Crest",
+      "2D ridges (or valleys with negative H): B=1.30, C=1.45, D=1.55, gamma=3, mu upwind=1.5, mu downwind=1.5",
+      "2D escarpments: B=0.75, C=0.85, D=0.95, gamma=2.5, mu upwind=1.5, mu downwind=4",
+      "3D axisymmetrical hill: B=0.95, C=1.05, D=1.15, gamma=4, mu upwind=1.5, mu downwind=1.5",
+      "Page number 43 (bottom of page), Chapter 26 Wind Loads: General Requirements, Figure 26.8-1"
+    ],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "This is a generic ASCE 7 topographic wind-speed-up factor table reprinted in the CLFMI chain-link guide - it is not fence-specific footing/post-spacing data. The main 'Topographic Multipliers' table actually packs three separate lookup tables (K1 with 7 rows, K2 with 9 rows, K3 with 13 rows) into one set of printed table rows, so shorter columns are blank in later rows - transcribed as printed with empty strings for those blanks, not as illegible. One value stood out: the second-to-last row of the z/Lh column reads '0.50' where the standard ASCE 7 progression (…1.00, 1.50, 2.00) would suggest '1.50' - zoomed in and confirmed the printed glyphs are '0', '.', '5', '0', so this is transcribed literally as a likely source-document typo, not corrected or guessed. A second, smaller table ('Parameters for Speed-Up over Hills and Escarpments') is summarized in other_values_on_page rather than in the grid, since the schema holds one grid per page."
+  }
+]

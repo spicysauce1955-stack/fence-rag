@@ -1,0 +1,303 @@
+[
+{
+  "crop_path": "workspace/derived/doc-2b81f4c2925e/table-candidates/p0008.png",
+  "source_path": "manuals/certainteed-bufftech/structural/NOA-22-0616.10-CertainTeed-SimTek-molded-fence-2022-2028-superseded.pdf",
+  "page_no": 8,
+  "reader": "coverage-1",
+  "is_table": true,
+  "table_kind": "wind_exposure_footing",
+  "what_the_page_is": "PE-sealed drawing sheet 3 of 3 for the CertainTeed/SimTek 'Sherwood / Ashland Six Foot Fence Panel', with panel/post/cap/detail drawings, an item parts table, and a footing depth/diameter table by fence height and exposure category.",
+  "grid": {
+    "headers": ["Fence Height", "Exposure", "Min. Footing Depth", "Min. Footing Diameter"],
+    "rows": [
+      {"cells": ["Up to 48\"", "B", "24\"", "12\""], "illegible": []},
+      {"cells": ["Up to 48\"", "C", "30\"", "12\""], "illegible": []},
+      {"cells": ["49\" to 76\"", "B", "34\"", "12\""], "illegible": []},
+      {"cells": ["49\" to 76\"", "C", "36\"", "12\""], "illegible": []}
+    ]
+  },
+  "other_values_on_page": [
+    "second table on page: ITEM NO./PART DESCRIPTION/WEIGHT/LENGTH - 1 CAP .35 LBS.; 2 PANEL STIFFENER 5 LBS. 70 1/4\"; 3 SIMTEK PANEL 60 LBS. 70\"; 4 5\" X 5\" o.d. POST 30 LBS. 102\"",
+      "DESIGN 2020 FBC 1616.2.1 based on wind loads per ASCE 7-16",
+    "75 mph Fastest Mile Wind Speed OR 115 mph (Ultimate 3 sec. gust)",
+    "2500 psi concrete minimum",
+    "panel width 71.25\" max, panel height 72\", post length 102\", post size 5\"x5\" o.d., 12\" dia. footing, 6\" min gravel fill, post embedment depth 27.5\", 1\" max grade line",
+    "post cap: 6.5\" base, 5\" base, 3\" height",
+    "panel stiffener tube: 1 1/2\" x 1 1/2\" x 18 gauge wall square galvanized steel tube, 0.120\" approx. wall thickness, 4\" approx. pocket depth",
+    "PE License No 59166, Florida (name illegible in seal)",
+    "NOA/Acceptance No 22-0616.10, Expiration Date 04/04/2028 (red 'PRODUCT RENEWED' stamp)",
+    "NOA/Acceptance No 21-0125.06, Expiration Date 04/04/2023 (black 'PRODUCT REVISED' stamp)",
+    "Drawing title FENCING, Sheet 3 of 3, Date 11/30/2020, Scale NTS",
+    "Rev # table: 1 18-0208.02 04/15/19; 2 19-1202.04 03/05/20; 3 20-0303.01 11/30/20",
+    "Title block: Polyethylene Plastic Shell Fence, NOA No. 20-0303.01, CertainTeed, 803 Belden Road, Jackson, Michigan 49203"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "Page has two distinct real tables: a footing-depth/exposure table (captured in grid) and a smaller item/weight/length parts table (captured in other_values_on_page since it uses a different column structure). Likely flagged by the pipeline because the footing table's column headers and cell grid are small, faint, hand-adjacent text near a lot of drawing linework - genuinely hard to OCR as a grid, but clearly legible on the image."
+},
+{
+  "crop_path": "workspace/derived/doc-c267c4cd071f/table-candidates/p0011.png",
+  "source_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
+  "page_no": 11,
+  "reader": "coverage-1",
+  "is_table": true,
+  "table_kind": "bill_of_materials",
+  "what_the_page_is": "PE-sealed drawing sheet 3 of 9 for the Barrette 'IMPERIAL - 8' X 6'' fence model, showing horizontal/vertical section, assembly, and post-spacing views plus a Bill of Material table.",
+  "grid": {
+    "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+    "rows": [
+      {"cells": ["G", ".875 X 3 X 71.5 PICKET", "P.V.C."], "illegible": []},
+      {"cells": ["H", "2 X 4 X 95.5 ROUTED RAIL", "P.V.C."], "illegible": []},
+      {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+      {"cells": ["I", "HOURGLASS G-60 STEEL CHANNEL X 92", "GALVANIZED STEEL"], "illegible": []},
+      {"cells": ["P", ".5 INCH BULLET CLIP", "NYLON"], "illegible": []},
+      {"cells": ["Q", "#8 X .75 SET SCREW", "STAINLESS STEEL"], "illegible": []},
+      {"cells": ["R", "#8 X 1.5 SCREW", "STAINLESS STEEL"], "illegible": []},
+      {"cells": ["S", "SNAP CAP WASHER", "NYLON"], "illegible": []},
+      {"cells": ["T", "SNAP CAP", "P.V.C."], "illegible": []}
+    ]
+  },
+  "other_values_on_page": [
+    "Maximum post spacing not to exceed 97\" (see Table 1 on Sheet 10)",
+    "Max fence height 72\", max long post 119\", max 71 1/2\" pickets, 47\" and 14 1/2\" rail spacings, 2\" grade offset",
+    "#8X1 1/2\" SS SMS fasteners at 1/2 points (top/bottom/interm. rail) and 1/4 points (intermediate rail)",
+    "PE License No 59166, Robert Nieminen, State of Florida",
+    "NOA/Acceptance No 24-0117.05 (red 'PRODUCT REVISED' stamp)",
+    "Drawing title IMPERIAL, Sheet 3 of 9, Date 01/28/2025, Scale NTS",
+    "Rev # 1: 24-0117.05, 01/28/25",
+    "Barrette Outdoor Living, 231 Ship Canal Pkwy, Buffalo, NY 14218"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "Handwritten blue expiration date under the red stamp is not confidently legible (looks like it starts '07/1' and ends '2029' but a digit in the middle is ambiguous) - omitted rather than guessed. Bill of Material table is clean and fully legible; likely flagged only due to page-level OCR noise from the dense dimensioned drawings surrounding it."
+},
+{
+  "crop_path": "workspace/derived/doc-32e36a07ab44/table-candidates/p0004.png",
+  "source_path": "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf",
+  "page_no": 4,
+  "reader": "coverage-1",
+  "is_table": false,
+  "table_kind": "drawing_only",
+  "what_the_page_is": "Cover/index sheet (Sheet 1 of 8) showing five small fence-model elevation drawings (Columbia, Imperial, Chesterfield, Chesterfield w/ Lattice, Chesterfield privacy), general notes, a product rating box, and the CertainTeed title block - no data table on this page.",
+  "grid": null,
+  "other_values_on_page": [
+    "Product rating: 75 MPH Fastest Mile Wind Speed OR 115 MPH (Ultimate 3 sec. gust)",
+    "Max post spacing not to exceed: 96 1/8\" (Columbia), 97\" (Imperial), 96 1/8\" (Chesterfield), 96 1/8\" (Chesterfield w/ Lattice), 75 1/2\" (Chesterfield privacy)",
+    "Panel height 72\" on all five drawings",
+    "Florida Building Code 2010 (HVHZ) edition compliance",
+    "ASTM G155, ASTM D638, ASTM D1929, ASTM D2843, ASTM D635 (PVC material standards); aluminum parts 6063-T6",
+    "PE License No 52609, Pedro M. De Figueiredo, Engineer Seal date APR 14 2012, EngCo Inc., 5595 Orange Dr. 201, Davie, FL 33314",
+    "NOA/Acceptance No 12-1106.11, Expiration Date 03/13/2018 (red 'PRODUCT RENEWED' stamp)",
+    "NOA/Acceptance No 11-1028.05, Expiration Date 03/13/2013 (black 'PRODUCT REVISED' stamp)",
+    "Drawing Number 12-048, Sheet 1 of 8, Date 03/02/12, Scale NA, Design by PPMF",
+    "CertainTeed, 231 Ship Canal Parkway, Buffalo, New York 14218"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "No cell-grid table present. The pipeline's flag is almost certainly from the phrase 'SEE TABLE 1 ON SHEET 8' printed three times above the small drawings, which OCR'd as table content - that referenced Table 1 is not on this page."
+},
+{
+  "crop_path": "workspace/derived/doc-32e36a07ab44/table-candidates/p0008.png",
+  "source_path": "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf",
+  "page_no": 8,
+  "reader": "coverage-1",
+  "is_table": true,
+  "table_kind": "bill_of_materials",
+  "what_the_page_is": "PE-sealed drawing sheet 5 of 8 for the CertainTeed 'CHESTERFIELD W/ LATTICE - 8' X 6'' fence model, with horizontal/vertical section, assembly, and post-spacing drawings plus a Bill of Material table.",
+  "grid": {
+    "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+    "rows": [
+      {"cells": ["J", ".875 X 7 X 46.25 TONGUE AND GROOVE PICKET", "P.V.C."], "illegible": []},
+      {"cells": ["L", "2 X 6 X 94.5 DECO RAIL", "P.V.C."], "illegible": []},
+      {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+      {"cells": ["N", "3 X 3 X 94.5 ACCENT RAIL", "P.V.C."], "illegible": []},
+      {"cells": ["K", "U-SHAPPED G-60 STEEL CHANNEL X 92", "GALVANIZED STEEL"], "illegible": []},
+      {"cells": ["O", "13 X 90.75 LATTICE PANEL", "P.V.C."], "illegible": []},
+      {"cells": ["O1", ".75 X 1 X90.75 HORIZONTAL CHANNEL", "P.V.C."], "illegible": []},
+      {"cells": ["O1", ".75 X 1 X 13.125 VERTICAL CHANNEL", "P.V.C."], "illegible": []},
+      {"cells": ["Q", "#8 X .75 SCREW", "STAINLESS STEEL"], "illegible": []},
+      {"cells": ["M", "LOCK RING", "POLYETHYLENE"], "illegible": []}
+    ]
+  },
+  "other_values_on_page": [
+    "Maximum post spacing not to exceed 96 1/8\" (see Table 1 on Sheet 8)",
+    "Max fence height 72\", max long post 119\", max 62 3/4\" pickets, max 46 1/4\" pickets, pickets with 5 degree endcuts, 7 3/8\" picket width, 94 1/2\" section width",
+    "#8X3/4\" SS screws, 4 top / 4 bottom, 2 per side; rail retainer screw #8X3/4\" SS",
+    "PE License No 52609, Pedro M. De Figueiredo, State of Florida",
+    "NOA/Acceptance No 12-1106.11, Expiration Date 03/13/2018 (red 'PRODUCT RENEWED' stamp)",
+    "NOA/Acceptance No 11-1028.05, Expiration Date 03/13/2013 (black 'PRODUCT REVISED' stamp)",
+    "Drawing Number 12-048, Sheet 5 of 8, Date 03/02/12, Scale NA"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "Bill of Material table is clean and fully legible. Page is dense with dimensioned line drawings which likely produced noisy OCR that could plausibly miss the small table grid."
+},
+{
+  "crop_path": "workspace/derived/doc-7a08132799a1/table-candidates/p0010.png",
+  "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+  "page_no": 10,
+  "reader": "coverage-1",
+  "is_table": true,
+  "table_kind": "bill_of_materials",
+  "what_the_page_is": "PE-sealed drawing sheet 3 of 9 for the CertainTeed 'IMPERIAL - 8' X 6'' fence model (Columbia, Imperial & Chesterfield family), with horizontal/vertical section, assembly, and post-spacing drawings plus a Bill of Material table.",
+  "grid": {
+    "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+    "rows": [
+      {"cells": ["G", ".875 X 3 X 71.5 PICKET", "P.V.C."], "illegible": []},
+      {"cells": ["H", "2 X 4 X 95.5 ROUTED RAIL", "P.V.C."], "illegible": []},
+      {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+      {"cells": ["I", "HOURGLASS G-60 STEEL CHANNEL X 92", "GALVANIZED STEEL"], "illegible": []},
+      {"cells": ["P", ".5 INCH BULLET CLIP", "NYLON"], "illegible": []},
+      {"cells": ["Q", "#8 X .75 SET SCREW", "STAINLESS STEEL"], "illegible": []},
+      {"cells": ["R", "#8 X 1.5 SCREW", "STAINLESS STEEL"], "illegible": []},
+      {"cells": ["S", "SNAP CAP WASHER", "NYLON"], "illegible": []},
+      {"cells": ["T", "SNAP CAP", "P.V.C."], "illegible": []}
+    ]
+  },
+  "other_values_on_page": [
+    "Maximum post spacing not to exceed 97\" (see Table 1 on Sheet 9)",
+    "Max fence height 72\", max long post 119\", max 71 1/2\" pickets, 47\" and 14 1/2\" rail spacings, 2\" grade offset",
+    "PE License No 52609, Pedro De Figueiredo, State of Florida, 01/26/2021",
+    "PPMF Inc., Engineering Services, 9715 W. Broward Blvd., Plantation, FL 33324",
+    "NOA/Acceptance No 21-0125.07, Expiration Date 03/13/2024 (black 'PRODUCT REVISED' stamp)",
+    "Drawing #20-178, Sheet 3 of 9, Date 12/06/2020, Scale NA",
+    "Product category: FENCES; Product material: PVC; Models: Columbia, Imperial & Chesterfield / Breezewood",
+    "CertainTeed, 231 Ship Canal Parkway, Buffalo, New York 14218"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "Identical Bill of Material content to the Barrette IMPERIAL sheet (doc-c267c4cd071f p0011) - same parts list carried across NOA successors. Table is fully legible."
+},
+{
+  "crop_path": "workspace/derived/doc-7a08132799a1/table-candidates/p0014.png",
+  "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+  "page_no": 14,
+  "reader": "coverage-1",
+  "is_table": true,
+  "table_kind": "bill_of_materials",
+  "what_the_page_is": "PE-sealed drawing sheet 7 of 9 for the CertainTeed 'BREEZEWOOD - 8'X6'' fence model, with horizontal section, post cut-out, vertical section, assembly, and post-spacing drawings plus a Bill of Material table.",
+  "grid": {
+    "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+    "rows": [
+      {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+      {"cells": ["B2", "2X6 HORIZONTAL BEAM", "P.V.C."], "illegible": []},
+      {"cells": ["H", "1 3/4\" X 3 1/2\" RAIL", "P.V.C."], "illegible": []},
+      {"cells": ["M", "LOCK RINGS", "POLYETHYLENE"], "illegible": []},
+      {"cells": ["G", "7/8 X 3 PICKETS", "P.V.C."], "illegible": []},
+      {"cells": ["Q", "#8 X 3/4\" SET SCREWS", "STAINLESS STEEL"], "illegible": []},
+      {"cells": ["R", "#8 X 1 1/2\" SET SCREWS", "STAINLESS STEEL"], "illegible": []},
+      {"cells": ["K", "U-SHAPPED G-60 STEEL CHANNEL", "GALVANIZED STEEL"], "illegible": []},
+      {"cells": ["P1", "POST REINF. FULL LENGTH -1\"", "ALUMINUM"], "illegible": []}
+    ]
+  },
+  "other_values_on_page": [
+    "Maximum post spacing not to exceed 97\" (see Table 1 on Sheet 9)",
+    "Max fence height 72\", max long post 107\"",
+    "PE License No 52609, Pedro De Figueiredo, State of Florida, 01/26/2021",
+    "NOA/Acceptance No 21-0125.07, Expiration Date 03/13/2024 (black 'PRODUCT REVISED' stamp)",
+    "Drawing #20-178, Sheet 7 of 9, Date 12/06/2020, Scale NA",
+    "CertainTeed, 231 Ship Canal Parkway, Buffalo, New York 14218"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "Bill of Material table fully legible. Different model/part list from the Imperial sheets (Breezewood uses horizontal beam B2 and 1\" full-length aluminum post reinforcement P1)."
+},
+{
+  "crop_path": "workspace/derived/doc-3c8ab51045c7/table-candidates/p0013.png",
+  "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+  "page_no": 13,
+  "reader": "coverage-1",
+  "is_table": true,
+  "table_kind": "bill_of_materials",
+  "what_the_page_is": "PE-sealed drawing sheet 5 of 9 for the CertainTeed 'CHESTERFIELD W/ LATTICE - 8' X 6'' fence model, with horizontal/vertical section, assembly, and post-spacing drawings plus a Bill of Material table.",
+  "grid": {
+    "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+    "rows": [
+      {"cells": ["J", ".875 X 7 X 46.25 TONGUE AND GROOVE PICKET", "P.V.C."], "illegible": []},
+      {"cells": ["L", "2 X 6 X 94.5 DECO RAIL", "P.V.C."], "illegible": []},
+      {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+      {"cells": ["N", "3 X 3 X 94.5 ACCENT RAIL", "P.V.C."], "illegible": []},
+      {"cells": ["K", "U-SHAPED G-60 STEEL CHANNEL X 92", "GALVANIZED STEEL"], "illegible": []},
+      {"cells": ["O", "13 X 90.75 LATTICE PANEL", "P.V.C."], "illegible": []},
+      {"cells": ["O1", ".75 X 1 X90.75 HORIZONTAL CHANNEL", "P.V.C."], "illegible": []},
+      {"cells": ["O1", ".75 X 1 X 13.125 VERTICAL CHANNEL", "P.V.C."], "illegible": []},
+      {"cells": ["Q", "#8 X .75 SCREW", "STAINLESS STEEL"], "illegible": []},
+      {"cells": ["M", "LOCK RING", "POLYETHYLENE"], "illegible": []}
+    ]
+  },
+  "other_values_on_page": [
+    "Maximum post spacing not to exceed 96 1/8\" (see Table 1 on Sheet 9)",
+    "Max fence height 72\", max long post 119\", max 62 3/4\" pickets, max 46 1/4\" pickets, pickets with 5 degree endcuts, 7 3/8\" picket width, 94 1/2\" section width",
+    "PE License No 52609, Pedro M. De Figueiredo, State of Florida, 01/26/2021",
+    "NOA/Acceptance No 23-0314.05, Expiration Date 03/13/2029 (blue handwritten stamp)",
+    "NOA/Acceptance No 21-0125.07, Expiration Date 03/13/2024 (black 'PRODUCT REVISED' stamp)",
+    "Drawing #20-178, Sheet 5 of 9, Date 12/06/2020, Scale NA",
+    "CertainTeed, 231 Ship Canal Parkway, Buffalo, New York 14218"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "Same Chesterfield w/ Lattice Bill of Material as doc-c267c4cd071f p0013 (Barrette version) and doc-32e36a07ab44 p0008 (2012 CertainTeed version) - identical part list carried across successive NOA revisions."
+},
+{
+  "crop_path": "workspace/derived/doc-c267c4cd071f/table-candidates/p0013.png",
+  "source_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
+  "page_no": 13,
+  "reader": "coverage-1",
+  "is_table": true,
+  "table_kind": "bill_of_materials",
+  "what_the_page_is": "PE-sealed drawing sheet 5 of 9 for the Barrette 'CHESTERFIELD W/ LATTICE - 8' X 6'' fence model, with horizontal/vertical section, assembly, and post-spacing drawings plus a Bill of Material table.",
+  "grid": {
+    "headers": ["ITEM", "PART DESCRIPTION", "MATERIAL"],
+    "rows": [
+      {"cells": ["J", ".875 X 7 X 46.25 TONGUE AND GROOVE PICKET", "P.V.C."], "illegible": []},
+      {"cells": ["L", "2 X 6 X 94.5 DECO RAIL", "P.V.C."], "illegible": []},
+      {"cells": ["A", "5 X 5 X 107 ROUTED POST", "P.V.C."], "illegible": []},
+      {"cells": ["N", "3 X 3 X 94.5 ACCENT RAIL", "P.V.C."], "illegible": []},
+      {"cells": ["K", "U-SHAPED G-60 STEEL CHANNEL X 92", "GALVANIZED STEEL"], "illegible": []},
+      {"cells": ["O", "13 X 90.75 LATTICE PANEL", "P.V.C."], "illegible": []},
+      {"cells": ["O1", ".75 X 1 X90.75 HORIZONTAL CHANNEL", "P.V.C."], "illegible": []},
+      {"cells": ["O1", ".75 X 1 X 13.125 VERTICAL CHANNEL", "P.V.C."], "illegible": []},
+      {"cells": ["Q", "#8 X .75 SCREW", "STAINLESS STEEL"], "illegible": []},
+      {"cells": ["M", "LOCK RING", "POLYETHYLENE"], "illegible": []}
+    ]
+  },
+  "other_values_on_page": [
+    "Maximum post spacing not to exceed 96 1/8\" (see Table 1 on Sheet 10)",
+    "Max fence height 72\", max long post 119\", max 62 3/4\" pickets, max 46 1/4\" pickets, pickets with 5 degree endcuts, 7 3/8\" picket width, 94 1/2\" section width",
+    "#8X3/4\" SS screws, 4 top / 4 bottom, 2 per side; rail retainer screw #8X3/4\" SS",
+    "PE License No 59166, Robert Nieminen, State of Florida, 2025-01-28",
+    "NOA/Acceptance No 24-0117.05, Expiration Date 03/17/2029 (partially handwritten, red 'PRODUCT REVISED' stamp)",
+    "Drawing title CHESTERFIELD, Sheet 5 of 9, Date 01/28/2025, Scale NTS",
+    "Barrette Outdoor Living, 231 Ship Canal Pkwy, Buffalo, NY 14218"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "Same Bill of Material as the other Chesterfield w/ Lattice sheets in this batch; only drawer/PE/date/NOA metadata differs. Fully legible."
+},
+{
+  "crop_path": "workspace/derived/doc-3c8ab51045c7/table-candidates/p0007.png",
+  "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+  "page_no": 7,
+  "reader": "coverage-1",
+  "is_table": false,
+  "table_kind": "drawing_only",
+  "what_the_page_is": "General-notes / product-rating sheet (Sheet 1 of 2) for the CertainTeed 'BROOKLINE - 6'x6'' fence model, with a simple elevation drawing showing max post spacing, general notes, and title block - no data table on this page.",
+  "grid": null,
+  "other_values_on_page": [
+    "Maximum post spacing not to exceed 72\"",
+    "Panel height 72-1/2\"",
+    "Product rating: 75 MPH Fastest Mile Wind Speed OR 115 MPH (Ultimate 3 sec. gust)",
+    "Florida Building Code 2020 - 7th Edition (HVHZ) compliance",
+    "ASTM G155, ASTM C158, ASTM D1929, ASTM D635 (PVC material standards); aluminum parts 6063-T6",
+    "PE License No 59166, Robert Nieminen, State of Florida, 2021-01-25",
+    "NOA/Acceptance No 23-0314.05, Expiration Date 03/13/2029 (blue handwritten 'PRODUCT RENEWED' stamp)",
+    "NOA/Acceptance No 21-0125.07, Expiration Date 03/13/2024 (black 'PRODUCT REVISED' stamp)",
+    "Rev # 1: 20-0303.02, 1/25/2021",
+    "Drawing title BROOKLINE, Sheet 1 of 2, Date 1/25/2021, Scale NTS, NOA No. 20-0303.02",
+    "CertainTeed, 803 Belden Road, Jackson, Michigan 49203"
+  ],
+  "reading_confidence": "high",
+  "illegible": [],
+  "notes": "No cell-grid table present. The 'MAXIMUM POST SPACING NOT TO EXCEED 72\"' caption above the elevation drawing is likely what triggered the table-keyword flag; there is no tabular data on this page."
+}
+]
