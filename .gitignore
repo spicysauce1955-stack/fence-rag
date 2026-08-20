@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 .DS_Store
+workspace/pylibs/
+workspace/derived/
+workspace/indexes/

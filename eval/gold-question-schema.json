@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Gold evaluation question",
+  "type": "object",
+  "required": ["id", "category", "question", "answerable", "verification"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^gq-[0-9]{3}$"},
+    "category": {
+      "type": "string",
+      "enum": ["exact_product", "exact_identifier", "conditional_table_lookup",
+               "paraphrase", "table_retrieval", "visual_evidence",
+               "current_version", "historical_version", "comparison",
+               "no_answer", "conflict", "source_verification"]
+    },
+    "question": {"type": "string"},
+    "answerable": {"type": "boolean",
+      "description": "false for no_answer questions: the corpus must NOT contain this"},
+    "expected_documents": {
+      "type": "array",
+      "description": "repo-relative source paths; >1 for comparison/conflict questions",
+      "items": {"type": "string"}
+    },
+    "expected_pages": {
+      "type": "object",
+      "description": "source_path -> 1-based page numbers that carry the evidence",
+      "additionalProperties": {"type": "array", "items": {"type": "integer"}}
+    },
+    "expected_element_type": {
+      "type": "string",
+      "enum": ["paragraph", "heading", "table", "figure", "drawing", "list", "any"]
+    },
+    "expected_answer": {"type": ["string", "null"]},
+    "expected_answer_terms": {
+      "type": "array",
+      "description": "literal strings that MUST appear in the retrieved evidence text for the answer to count as supported; keep them short and exact (e.g. \"36\", \"Exposure C\")",
+      "items": {"type": "string"}
+    },
+    "query_terms": {
+      "type": "array",
+      "description": "the search string(s) a user would realistically type",
+      "items": {"type": "string"}
+    },
+    "required_conditions": {
+      "type": "object",
+      "description": "e.g. {\"wind_speed_mph\": 130, \"exposure_category\": \"C\"}"
+    },
+    "expects_image_evidence": {"type": "boolean"},
+    "verification": {
+      "type": "object",
+      "required": ["method", "confirmed"],
+      "properties": {
+        "method": {"type": "string", "description": "exact command / how the page was read"},
+        "confirmed": {"type": "boolean"},
+        "quote": {"type": "string", "description": "short literal quote from the source page"},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}

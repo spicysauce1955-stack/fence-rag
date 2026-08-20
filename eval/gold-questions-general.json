@@ -1,0 +1,730 @@
+{
+  "set": "general",
+  "generated_by": "subagent",
+  "questions": [
+    {
+      "id": "gq-101",
+      "category": "exact_product",
+      "question": "Which Wam Bam manual covers assembling the Cambridge 6 ft vinyl privacy fence, and what product number is on it?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/wam-bam/cambridge-BL19110-install-guide.pdf"
+      ],
+      "expected_pages": {
+        "manuals/wam-bam/cambridge-BL19110-install-guide.pdf": [
+          1
+        ]
+      },
+      "expected_element_type": "heading",
+      "expected_answer": "The Cambridge assembly instructions, product number BL19110 – \"CAMBRIDGE 6 FT VINYL PRIVACY FENCE WITH POST AND NO-DIG STEEL PIPE ANCHOR KIT (6'H X 6'W)\", version 120525.",
+      "expected_answer_terms": [
+        "CAMBRIDGE",
+        "BL19110",
+        "NO-DIG STEEL PIPE ANCHOR KIT"
+      ],
+      "query_terms": [
+        "Cambridge privacy fence install manual",
+        "Wam Bam Cambridge BL19110",
+        "Cambridge 6 ft vinyl fence instructions"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 1 -l 1 manuals/wam-bam/cambridge-BL19110-install-guide.pdf -",
+        "confirmed": true,
+        "quote": "CAMBRIDGE / ASSEMBLY INSTRUCTIONS / BL19110 / 6 FT VINYL PRIVACY FENCE WITH POST AND NO-DIG STEEL PIPE ANCHOR KIT (6’H X 6’W)",
+        "notes": "Cover page. Cambridge is a Wam Bam pipe-anchor (no-dig) product; the matching gate is BL19111 and finishing post BL19112 (page 3)."
+      }
+    },
+    {
+      "id": "gq-102",
+      "category": "exact_product",
+      "question": "I need the installation sheet for the Freedom Wellington 6x6 semi-privacy panel. How do I work out the post hole on-center spacing from it?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/freedom-outdoor-living/73013822_Wellington6x6Semi-PrivacyPanel_Instructions.pdf"
+      ],
+      "expected_pages": {
+        "manuals/freedom-outdoor-living/73013822_Wellington6x6Semi-PrivacyPanel_Instructions.pdf": [
+          1
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "Freedom Outdoor Living sheet 73013822, \"Wellington 6x6 Semi-Privacy Panel INSTALLATION INSTRUCTIONS\". On-center post spacing = panel width (X) + 3/8\" for brackets + post width (Y). The sheet also calls for coarse gravel, 6\" per hole.",
+      "expected_answer_terms": [
+        "Wellington 6x6 Semi-Privacy Panel",
+        "Coarse Gravel",
+        "on-center"
+      ],
+      "query_terms": [
+        "Wellington 6x6 semi privacy panel instructions",
+        "Freedom Wellington panel install",
+        "73013822"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 1 -l 1 manuals/freedom-outdoor-living/73013822_Wellington6x6Semi-PrivacyPanel_Instructions.pdf -",
+        "confirmed": true,
+        "quote": "Measure the width of the fence panel (X) plus 3/8\" for brackets. Then measure the width of the post (Y) (Fig. 2). Add these measurements together. This is the on-center measurement for post hole location.",
+        "notes": "The 3/8 on the page uses a Unicode fraction slash, so \"3/8\" as plain ASCII is NOT a safe grader term; \"on-center\" and \"Coarse Gravel\" are literal."
+      }
+    },
+    {
+      "id": "gq-103",
+      "category": "exact_product",
+      "question": "Where are the Illusions pergola kit installation instructions, and what post size does the kit ship with?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/illusions-vinyl-fence/pergola-kit-installation-instructions.pdf"
+      ],
+      "expected_pages": {
+        "manuals/illusions-vinyl-fence/pergola-kit-installation-instructions.pdf": [
+          1
+        ]
+      },
+      "expected_element_type": "list",
+      "expected_answer": "Illusions \"Pergola Kits\" installation instructions (PERGOLA INSTALLATION INSTRUCTIONS 0425). The kit includes 8\" x 8\" vinyl posts, 2\" x 6\" headers and rafters with aluminum inserts, and 1.5\" x 1.5\" shade tubing.",
+      "expected_answer_terms": [
+        "Pergola Kits",
+        "8” x 8” Vinyl Posts",
+        "Shade Tubing"
+      ],
+      "query_terms": [
+        "Illusions pergola kit installation",
+        "vinyl pergola instructions",
+        "pergola post size"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 1 -l 1 manuals/illusions-vinyl-fence/pergola-kit-installation-instructions.pdf -",
+        "confirmed": true,
+        "quote": "What’s Included: • 8” x 8” Vinyl Posts • 2” x 6” Headers with Aluminum Inserts",
+        "notes": "Inch marks on this page are curly right double quotes (U+201D), not ASCII."
+      }
+    },
+    {
+      "id": "gq-104",
+      "category": "exact_product",
+      "question": "Where is the Weatherables cross buck gate install guide, and how much shorter than the opening do I cut the rails on a single gate?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/weatherables/weatherables-crossbuck-gate-installation.pdf"
+      ],
+      "expected_pages": {
+        "manuals/weatherables/weatherables-crossbuck-gate-installation.pdf": [
+          1,
+          2
+        ]
+      },
+      "expected_element_type": "list",
+      "expected_answer": "\"Cross Buck Fence Gate Installation Guide\" (Weatherables). For a single gate, cut the rails 2 1/2\" shorter than the gate opening size (96\" opening -> 93.5\" rails). For a double gate the pair is 4\" shorter, i.e. cut 2\" off each leaf.",
+      "expected_answer_terms": [
+        "Cross Buck Fence Gate Installation Guide",
+        "2 1/2”",
+        "93.5”"
+      ],
+      "query_terms": [
+        "crossbuck gate installation Weatherables",
+        "cross buck gate rail cut length",
+        "vinyl crossbuck gate instructions"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 2 -l 2 manuals/weatherables/weatherables-crossbuck-gate-installation.pdf -",
+        "confirmed": true,
+        "quote": "For a single gate, cut the rails to a length 2 1/2” shorter than the gate opening size ... if your gate opening size is 96”, cut each of the rails to 93.5”.",
+        "notes": "PDF page 1 carries only the title line; the cut rule is on PDF page 2."
+      }
+    },
+    {
+      "id": "gq-105",
+      "category": "paraphrase",
+      "question": "My back yard drops away pretty steeply. How do I make the fence follow the hillside?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/wam-bam/murphys-vinyl-fence-laws.pdf"
+      ],
+      "expected_pages": {
+        "manuals/wam-bam/murphys-vinyl-fence-laws.pdf": [
+          4,
+          5
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "Two options: STEP the fence (rails stay horizontal, order longer posts and trim them down) or SLOPE it (rails follow the grade). Wam Bam recommends stepping for most styles; Even Stephen and Simple Simon should only be sloped. If the slope is greater than 10 degrees, order large anchors regardless of style.",
+      "expected_answer_terms": [
+        "STEPPED",
+        "SLOPED",
+        "10 degrees"
+      ],
+      "query_terms": [
+        "fence on a hillside",
+        "fence following uneven ground",
+        "sloped yard fence installation"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 4 -l 4 manuals/wam-bam/murphys-vinyl-fence-laws.pdf -",
+        "confirmed": true,
+        "quote": "There are two ways to tackle a fence line with ground that slopes either up or down. You can step or slope your fence ... If slope is greater than 10 degrees, please order large anchors regardless of your fence style.",
+        "notes": "Question deliberately avoids the document's own words 'rack', 'step' and 'slope'. PDF pages 4-5 = printed pages 2-3."
+      }
+    },
+    {
+      "id": "gq-106",
+      "category": "paraphrase",
+      "question": "What keeps a vinyl gate from drooping and dragging after a couple of seasons?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf",
+        "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf"
+      ],
+      "expected_pages": {
+        "manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf": [
+          7
+        ],
+        "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf": [
+          7
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "Stiffen the hinge and latch posts: all hinge and latch posts require reinforcement with aluminum post inserts high enough to attach the gate hardware, or the post can be filled with concrete and rebar (2 rebar separator clips per post, about 6\" from top and bottom). Gates also need 2\" clearance under the bottom rail on level ground.",
+      "expected_answer_terms": [
+        "stiffener",
+        "rebar",
+        "aluminum post inserts"
+      ],
+      "query_terms": [
+        "gate sagging vinyl fence",
+        "stop gate from dropping",
+        "reinforce gate post vinyl"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 7 -l 7 manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf -",
+        "confirmed": true,
+        "quote": "Gate hinge and latch posts as well as end posts can be solidified by using an aluminum gate post stiffener inside each post or by filling post with concrete and rebar.",
+        "notes": "The word 'sag' never appears; the document says 'solidify' / 'stiffener'. This file is byte-identical to manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf (sha256 match), so both paths are listed as acceptable."
+      }
+    },
+    {
+      "id": "gq-107",
+      "category": "paraphrase",
+      "question": "The concrete guys splashed the posts while setting the footings. What does the master spec say to clean that off with?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx"
+      ],
+      "expected_pages": {
+        "manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx": [
+          1
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "Clean the fence with mild household detergent and rinse well with clean water; remove mortar from exposed posts using a 10 percent solution of muriatic acid followed immediately by several rinses with clean water.",
+      "expected_answer_terms": [
+        "muriatic acid",
+        "10 percent",
+        "mild household detergent"
+      ],
+      "query_terms": [
+        "remove concrete stains vinyl fence post",
+        "cleaning mortar off vinyl fence",
+        "CSI vinyl fence cleaning spec"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "python3 -c \"import zipfile,xml.etree.ElementTree as ET; ...\" over unzip -p 'manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx' word/document.xml (w:p paragraph text extraction)",
+        "confirmed": true,
+        "quote": "Remove mortar from exposed posts using a 10 percent solution of muriatic acid followed immediately by several rinses with clean water.",
+        "notes": "DOCX has no page concept; expected_pages uses [1] as a single-unit placeholder. Section 32 31 23, PART 3 EXECUTION / CLEANING."
+      }
+    },
+    {
+      "id": "gq-108",
+      "category": "paraphrase",
+      "question": "All the posts in the delivery look identical. How do I tell which one is meant for a corner?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf"
+      ],
+      "expected_pages": {
+        "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf": [
+          3
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "The inside of each Weatherables post is marked: line posts have no marking, end posts have red dots, corner posts have green dots, and custom/blank posts are marked \"custom\" or \"blank\".",
+      "expected_answer_terms": [
+        "green dots",
+        "red dots",
+        "Line Posts - no marking"
+      ],
+      "query_terms": [
+        "how to identify corner post vinyl fence",
+        "post markings line end corner",
+        "which post goes where fence kit"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 3 -l 3 manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf -",
+        "confirmed": true,
+        "quote": "The inside of each post is marked to identify the specific post definition: Line Posts - no marking / End Posts - red dots / Corner Posts - green dots",
+        "notes": "Sidebar callout next to Step 4 on page 3."
+      }
+    },
+    {
+      "id": "gq-109",
+      "category": "paraphrase",
+      "question": "How is a fence post beefed up so the run survives hurricane gusts?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf"
+      ],
+      "expected_pages": {
+        "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf": [
+          2
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "Heavy-duty heavy-wall posts must be used: VH55 series 5\" x 5\" or VH88 series 8\" x 8\" posts with an average wall thickness of .250\". The 5x5 post is ordered 3 ft longer than the section installed (2\" above the top of the section); the 8x8 post 4 ft longer. If the post code does not start with \"VH\" it is the wrong post for a certified installation.",
+      "expected_answer_terms": [
+        ".250”",
+        "Heavy Duty Posts",
+        "VH88"
+      ],
+      "query_terms": [
+        "strengthen fence post for wind",
+        "heavy duty post high wind vinyl fence",
+        "hurricane rated vinyl fence post"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 2 -l 2 manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf -",
+        "confirmed": true,
+        "quote": "Heavy Wall 5” x 5” average wall thickness .250” for all styles up to 6ft. height fence ... In order to properly certify installation with the 75 MPH Wind Kit, HEAVY DUTY Posts must be used.",
+        "notes": "Question avoids 'heavy duty', 'wall thickness' and 'U-channel'. Galvanized U-channels and the VPS post-supporter donut are the other reinforcement pieces (page 1 and 3)."
+      }
+    },
+    {
+      "id": "gq-110",
+      "category": "table_retrieval",
+      "question": "How many pounds of concrete does the Bufftech gate guide's concrete table call for on a 5x5 gate post at 6 ft fence height?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf",
+        "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf"
+      ],
+      "expected_pages": {
+        "manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf": [
+          7
+        ],
+        "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf": [
+          7
+        ]
+      },
+      "expected_element_type": "table",
+      "expected_answer": "285 lbs. (Same row: 5x5 post at 6 ft → line or corner post 140 lbs, end post filled with concrete 240 lbs, gate post 285 lbs. Figures are based on a 5x5 hole of 12\" diameter, 30\" deep.)",
+      "expected_answer_terms": [
+        "Concrete Usage for Posts",
+        "285 lbs",
+        "140 lbs"
+      ],
+      "query_terms": [
+        "concrete per post table vinyl fence",
+        "how much concrete gate post 5x5",
+        "bags of concrete fence post chart"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 7 -l 7 manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf -",
+        "confirmed": true,
+        "quote": "5x5   6'   140 lbs   240 lbs   285 lbs",
+        "notes": "Table header 'Concrete Usage for Posts'; note under table: 'Figures based on 4x4 hole=10\", 5x5 hole=12\", both 30\" deep.' Duplicate file listed for both repo paths."
+      }
+    },
+    {
+      "id": "gq-111",
+      "category": "table_retrieval",
+      "question": "On the Catalyst Cape Cod SKU sheet, what is the SKU for the 4' x 8' Cape Cod classic picket straight panel, and for the matching 5\" x 5\" line post?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/barrette-outdoor-living/catalyst-capecod-sku-sheet.pdf"
+      ],
+      "expected_pages": {
+        "manuals/barrette-outdoor-living/catalyst-capecod-sku-sheet.pdf": [
+          2
+        ]
+      },
+      "expected_element_type": "table",
+      "expected_answer": "Panel SKU 73011681 (4' x 8' Cape Cod Classic Picket Straight Panel, 48\"H); 5\" x 5\" x 84\" line post SKU 73011754.",
+      "expected_answer_terms": [
+        "73011681",
+        "73011754",
+        "Cape Cod Classic Picket Straight Panel"
+      ],
+      "query_terms": [
+        "Cape Cod picket panel SKU",
+        "Catalyst Cape Cod part numbers",
+        "4x8 Cape Cod straight panel item number"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 2 -l 2 manuals/barrette-outdoor-living/catalyst-capecod-sku-sheet.pdf -",
+        "confirmed": true,
+        "quote": "4' x 8' Cape Cod Classic Picket Straight Panel (48\"H) (B)   73011681",
+        "notes": "SKU table on page 2 of the 3-page sheet; page 1 is the style/spec page (CAT25-D-514650 | Rev 12/25)."
+      }
+    },
+    {
+      "id": "gq-112",
+      "category": "conditional_table_lookup",
+      "question": "Local code says design for 130 mph wind. For a 6 ft chain link fence with 2 3/8\" Schedule 40 regular-grade posts, what maximum line post spacing does the CLFMI guide give before correction factors?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf"
+      ],
+      "expected_pages": {
+        "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf": [
+          19
+        ]
+      },
+      "expected_element_type": "table",
+      "expected_answer": "3.3 feet. Table 4 (wind speed 130 MPH, Exposure Category B), Group IA ASTM F1043 Schedule 40 / F1083 regular grade (30,000 psi yield), 2 3/8\" post, 6 ft fence height column: S = 3.3 ft. This base value must still be multiplied by Cf1 x Cf2 x Cf3.",
+      "expected_answer_terms": [
+        "TABLE 4",
+        "130 MPH",
+        "3.3"
+      ],
+      "required_conditions": {
+        "wind_speed_mph": 130,
+        "exposure_category": "B",
+        "fence_height_ft": 6,
+        "post_size_in": "2 3/8",
+        "post_group": "Group IA Schedule 40 regular grade (30,000 psi)"
+      },
+      "query_terms": [
+        "line post spacing 130 mph 6 foot fence",
+        "CLFMI wind load table post spacing",
+        "max post spacing chain link wind"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 19 -l 19 manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf -",
+        "confirmed": true,
+        "quote": "2 3/8”   13.3 9.8 7.5 4.8 3.3 2.4 1.9 1.5 1.2  (columns 3, 3.5, 4, 5, 6, 7, 8, 9, 10 ft)",
+        "notes": "Answer changes with the stated conditions: the same post in the 50,000 psi high-strength group gives 5.5 ft at 6 ft height. All 12 tables are Exposure B; Exposure C/D require Cf2 from Table 14 on page 29 (C = 0.67 for 0-15 ft)."
+      }
+    },
+    {
+      "id": "gq-113",
+      "category": "conditional_table_lookup",
+      "question": "I'm running an 8 ft high Illusions privacy fence with the 75 mph wind kit, so I have to use the 8\" x 8\" posts. How deep and how wide does the post hole have to be?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf"
+      ],
+      "expected_pages": {
+        "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf": [
+          3
+        ]
+      },
+      "expected_element_type": "figure",
+      "expected_answer": "No less than 42\" below grade and no less than 15\" in diameter for 8\" x 8\" posts (versus 30\" deep and 12\" diameter for 5\" x 5\" posts), with a premium wet or dry concrete mix, 3000 PSI minimum.",
+      "expected_answer_terms": [
+        "42”",
+        "15”",
+        "3000 PSI"
+      ],
+      "required_conditions": {
+        "fence_height_ft": 8,
+        "post_size_in": "8x8",
+        "wind_kit": "75 MPH"
+      },
+      "query_terms": [
+        "8x8 post hole depth Illusions",
+        "wind kit post footing depth vinyl fence",
+        "how deep 8 inch vinyl post"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 3 -l 3 manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf -",
+        "confirmed": true,
+        "quote": "No less than 30” below grade for 5” x 5” posts and 42” for 8” x 8” posts. The diameter of the hole should be no less than 12” for 5” x 5” posts and 15” for 8” x 8” posts",
+        "notes": "The 8x8 post is itself conditional: page 2 requires VH88 8x8 posts for 7' to 8' heights, VH55 5x5 up to 6'."
+      }
+    },
+    {
+      "id": "gq-114",
+      "category": "visual_evidence",
+      "question": "On the Weatherables Captiva 4 ft pool fence CAD detail, what are the panel's overall dimensions and the picket height?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/weatherables/structural/weatherables-cad-captiva-4x6-pool.png"
+      ],
+      "expected_pages": {
+        "manuals/weatherables/structural/weatherables-cad-captiva-4x6-pool.png": [
+          1
+        ]
+      },
+      "expected_element_type": "drawing",
+      "expected_answer": "71.75\" wide overall, 48.5\" overall height, with 41.5\" of picket between the rails, a 2\" post reveal above the top rail, and pickets spaced 3.7\" typical.",
+      "expected_answer_terms": [
+        "71.75",
+        "48.5",
+        "41.5"
+      ],
+      "query_terms": [
+        "Captiva pool fence panel dimensions",
+        "Weatherables pool fence CAD drawing",
+        "4 ft pool fence panel size"
+      ],
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "Read tool on manuals/weatherables/structural/weatherables-cad-captiva-4x6-pool.png (viewed directly); cross-checked with `tesseract manuals/weatherables/structural/weatherables-cad-captiva-4x6-pool.png - --psm 11`",
+        "confirmed": true,
+        "quote": "71.75\" ... 48.5\" ... 41.5\" ... 3.7\" typ.",
+        "notes": "PNG has no text layer at all - this is pure image evidence. tesseract --psm 11 recovers 71.75\", 48.5\" and 41.5\" but mangles the 3.7\" picket-gap callout to '3p,', so 3.7 is deliberately NOT a grader term. --psm 6 loses most of it; psm 11 is much better on CAD line-work."
+      }
+    },
+    {
+      "id": "gq-115",
+      "category": "visual_evidence",
+      "question": "On the Weatherables Augusta 8 ft privacy CAD detail, what is the overall panel height and what reinforces the rails?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png"
+      ],
+      "expected_pages": {
+        "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png": [
+          1
+        ]
+      },
+      "expected_element_type": "drawing",
+      "expected_answer": "95.5\" overall height by 72\" wide, built from three 1.5\" x 5.5\" x 71.5\" rails (top, mid and bottom) with two 39.5\" picket bays between them; the rails are reinforced with U-Channels.",
+      "expected_answer_terms": [
+        "95.5",
+        "U-Channels",
+        "39.5"
+      ],
+      "query_terms": [
+        "Augusta 8 ft privacy panel dimensions",
+        "Weatherables Augusta CAD detail",
+        "U channel rail reinforcement vinyl privacy panel"
+      ],
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "Read tool on manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png (viewed directly); cross-checked with `tesseract manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png - --psm 11`",
+        "confirmed": true,
+        "quote": "95.5\" (overall height) ... 72\" (width) ... 1.5\" x 5.5\" x 71.5\" ... U-Channels",
+        "notes": "PNG, no text layer. tesseract --psm 11 yields '95.5\"', '39.5\"' and 'U-Channels' cleanly but garbles the rail callout to '5'x 5.5\" x 71.5\"' - so 71.5 is not used as a grader term. Filename '8x6' means 8 ft high x 6 ft wide."
+      }
+    },
+    {
+      "id": "gq-116",
+      "category": "no_answer",
+      "question": "What torque should the gate hinge fasteners be tightened to on a vinyl fence gate, in inch-pounds?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "expected_answer_terms": [],
+      "query_terms": [
+        "gate hinge screw torque spec",
+        "vinyl fence fastener torque inch pounds",
+        "how tight to tighten gate hinge bolts"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout over all 137 corpus PDFs into /tmp scratch, then `grep -ril \"torque\" <txtdir>` -> 0 files; `grep -riE \"ft[ -]?lbs?\\b|in[ -]?lbs?\\b|inch[ -]pounds\" <txtdir>` -> 0 files; `grep -ic torque` on the ARCAT .docx text -> 0. Additionally rendered and OCR'd all 143 pages of the 8 Wam Bam guides (pdftoppm -r 130 -png + tesseract --psm 6) because two of them have a corrupt text layer; the only 'torque' hits are 'Cordless Drill (preferably with a high-torque setting)' in the tool list, which is a tool recommendation, not a fastener torque value.",
+        "confirmed": true,
+        "quote": "Cordless Drill (preferably with a high-torque setting)",
+        "notes": "No numeric fastener torque appears anywhere. The closest guidance is qualitative: the Bufftech gate guide page 7 says only 'Avoid overtightening fasteners'. A retrieval system will likely surface that page - correct behaviour is to say the value is not specified. Caveat: scanned NOAs and the Showtech catalogs were checked via text layer only (they have none), but they are engineering approvals and product catalogs, not fastener-level assembly documents."
+      }
+    },
+    {
+      "id": "gq-117",
+      "category": "no_answer",
+      "question": "What is the list price per section of an Illusions V300 6 ft privacy fence?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "expected_answer_terms": [],
+      "query_terms": [
+        "Illusions V300 price per section",
+        "vinyl privacy fence cost per foot",
+        "Illusions fence price list"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "grep -r -o '\\$ *[0-9][0-9.,]*' over pdftotext output of all 137 corpus PDFs -> only 4 distinct hits, all tool/lumber costs: '$25', '$30' (post pounders, Wam Bam nantucket spec sheet and Windsor guide), '$35.' (Windsor guide) and '$10.00' (a length of wood, Murphy's Vinyl Fence Laws). Also inspected manuals/illusions-vinyl-fence/product-price-catalog-186pg.pdf directly: its order forms have '$ EACH' / '$ TOTAL' column headers and 'ADD $- PER RAIL PER SECTION' lines with the price fields blank.",
+        "confirmed": true,
+        "quote": "CODE   DESCRIPTION   COLOR   QUANTITY   $ EACH   $ TOTAL",
+        "notes": "The 186-page Illusions document is titled a price catalog but ships with every price cell empty (dealer fills them in); it only carries colour multipliers such as '(BG) x 1.10'. There is no product pricing anywhere in the corpus."
+      }
+    },
+    {
+      "id": "gq-118",
+      "category": "no_answer",
+      "question": "What Miami-Dade County NOA number and mph wind rating do Wam Bam vinyl fence panels carry?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "expected_answer_terms": [],
+      "query_terms": [
+        "Wam Bam fence wind rating mph",
+        "Wam Bam Miami Dade NOA",
+        "no-dig vinyl fence hurricane approval"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "grep -ril 'NOA\\|Miami\\|Dade' over the pdftotext output of all 17 manuals/wam-bam/**.pdf -> 0 files; grep -ri -o 'mph' -> 0 hits. Because nervous-nelly-VF15100 and steady-freddy-VF16100 have a corrupt (mojibake) text layer, all 143 pages of the 8 affected/related Wam Bam guides were additionally rendered (pdftoppm -r 130 -png) and OCR'd (tesseract --psm 6) into one file; grep -iE 'miami|dade|\\bNOA\\b' and grep -i 'mph' over that OCR text also return 0 hits.",
+        "confirmed": true,
+        "quote": "In high wind applications, it is recommended to drive the 4 extra screws into the top and bottom rails to further secure the panel",
+        "notes": "The quote (Cambridge guide page 25) is the ONLY wind-related guidance in the whole Wam Bam set and is qualitative - no mph figure, no NOA, no engineering approval. The corpus has 15 other Miami-Dade NOAs (Barrette, CertainTeed, Illusions, VEKA), so this is a strong distractor trap: a retriever will surface a foreign manufacturer's NOA."
+      }
+    },
+    {
+      "id": "gq-119",
+      "category": "comparison",
+      "question": "Weatherables versus Illusions - what wind speed does each say its vinyl privacy fence can be installed to withstand, and with what height limit?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
+        "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf"
+      ],
+      "expected_pages": {
+        "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf": [
+          1
+        ],
+        "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf": [
+          1,
+          4
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "Weatherables: all privacy fences 6 feet tall and below can be installed to withstand wind gusts of up to 130 mph. Illusions: independently tested and certified to withstand winds up to 75 miles per hour - privacy series V300, V3215 and V3700 up to 8 ft height, spaced picket series V400, V352 and V700 up to 4 ft - and only when installed with the 75 MPH Wind Kit and heavy-duty VH posts. So Weatherables claims the higher number but caps it at 6 ft, while Illusions certifies a lower speed to a taller 8 ft panel.",
+      "expected_answer_terms": [
+        "130 mph",
+        "75 miles per hour",
+        "6 feet tall and below"
+      ],
+      "query_terms": [
+        "Weatherables vs Illusions wind rating",
+        "vinyl privacy fence mph rating comparison",
+        "how many mph is vinyl fence rated for"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 1 -l 1 manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf - ; pdftotext -layout -f 4 -l 4 manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf -",
+        "confirmed": true,
+        "quote": "All of our privacy fences 6 feet tall and below can be installed to withstand wind gusts of up to 130 mph. | Illusions Vinyl Fences have been independently tested and certified to withstand winds up to 75 miles per hour.",
+        "notes": "Two different bases: the Weatherables claim is a marketing spec-sheet statement, the Illusions one is tied to Miami-Dade NOA# 09-0826.07 and a certification return form. Page 1 of the Illusions PDF also carries 'Meets Dade County 75MPH Wind Load Independent Tests. 8' Maximum Width X 8' Maximum Height.'"
+      }
+    },
+    {
+      "id": "gq-120",
+      "category": "comparison",
+      "question": "How much racking does Bufftech quote for its Chesterfield privacy fence compared with what Digger Specialties quotes for its Kingston privacy panel?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/bufftech-catalog-2014.pdf",
+        "manuals/industry-standards/Digger-Specialties-Polyvinyl-Fence-Brochure_Racking-Post-Spacing.pdf"
+      ],
+      "expected_pages": {
+        "manuals/certainteed-bufftech/bufftech-catalog-2014.pdf": [
+          29
+        ],
+        "manuals/industry-standards/Digger-Specialties-Polyvinyl-Fence-Brochure_Racking-Post-Spacing.pdf": [
+          9
+        ]
+      },
+      "expected_element_type": "table",
+      "expected_answer": "Bufftech: Chesterfield privacy styles are flagged 'Racks up to 10 degrees' (accents reduce the amount of rack). Digger Specialties: Kingston privacy comes with 2\" standard rack, with an optional 7-degree rackable section giving 12\" of drop per 8' section. So Bufftech quotes rack as an angle (10 degrees) and Digger quotes both an angle (7 degrees) and a linear drop (12\" per 8' section).",
+      "expected_answer_terms": [
+        "Racks up to 10 degrees",
+        "Rackable",
+        "12” per 8’ Section"
+      ],
+      "query_terms": [
+        "how much does vinyl privacy fence rack",
+        "Chesterfield racking degrees",
+        "Kingston rackable section 8 foot"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 29 -l 29 manuals/certainteed-bufftech/bufftech-catalog-2014.pdf - ; pdftotext -layout -f 9 -l 9 manuals/industry-standards/Digger-Specialties-Polyvinyl-Fence-Brochure_Racking-Post-Spacing.pdf -",
+        "confirmed": true,
+        "quote": "W Racks up to 10 degrees *Accents will reduce the amount of rack | Kingston ... 2” Standard / Optional 7º Rackable Section (12” per 8’ Section)",
+        "notes": "WARNING for the pipeline: page 29 of the Bufftech 2014 catalog has a badly broken ToUnicode font map - most spec cells extract as mojibake (e.g. 'i} ÌÃ\\Ê{¿]Êx¿Ê&ÊÈ¿' is really 'Heights: 4', 5' & 6''). The 'Racks up to 10 degrees' footnote and the style names happen to extract cleanly. The Digger degree sign is U+00BA (masculine ordinal), not U+00B0."
+      }
+    },
+    {
+      "id": "gq-121",
+      "category": "source_verification",
+      "question": "In the Showtech 2022 PVC fence catalog, what is the model code for the full privacy fence and the recommended panel size - and show the catalog page it comes from.",
+      "answerable": true,
+      "expected_documents": [
+        "china/manuals/showtech/PVC-fence-catalog-2022.pdf"
+      ],
+      "expected_pages": {
+        "china/manuals/showtech/PVC-fence-catalog-2022.pdf": [
+          4
+        ]
+      },
+      "expected_element_type": "figure",
+      "expected_answer": "ST001 - FULL PRIVACY FENCE, recommended size 6' high x 8' wide (panel width dimensioned 96\" [2438mm]). The same page also carries ST002 lattice top, ST003 scalloped picket top, ST004 closed picket top, ST005 picket top and ST006 high privacy fence at 8' high x 8' wide.",
+      "expected_answer_terms": [
+        "ST001",
+        "FULL PRIVACY FENCE",
+        "2438mm"
+      ],
+      "query_terms": [
+        "Showtech ST001 privacy fence",
+        "Showtech PVC fence catalog model numbers",
+        "China PVC fence 6x8 privacy panel model"
+      ],
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "pdftoppm -r 150 -png -f 4 -l 4 china/manuals/showtech/PVC-fence-catalog-2022.pdf <scratch>/st22 ; tesseract <scratch>/st22-04.png - --psm 6",
+        "confirmed": true,
+        "quote": "ST001 - FULL PRIVACY FENCE / RECOMMENDED SIZE : 6' HIGH X 8' WIDE / 96\" [2438mm] ... ST006 - HIGH PRIVACY FENCE / RECOMMENDED SIZE : 8' HIGH X 8' WIDE",
+        "notes": "China track. This PDF has ZERO text layer (14 pages, text_chars_total 0) - the answer only exists in the page image, so the OCR path must run. OCR of the surrounding photography is very noisy, but the model codes and the RECOMMENDED SIZE lines are large clean type and come through reliably. The 6'/8' apostrophes OCR as a curly quote, so they are not used as grader terms."
+      }
+    },
+    {
+      "id": "gq-122",
+      "category": "source_verification",
+      "question": "For the current CertainTeed Miami-Dade approval covering Chesterfield, Columbia, Imperial and Breezewood vinyl fencing, what is the NOA number, its expiration date, and its missile impact rating? Back it with the approval page itself.",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "expected_pages": {
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf": [
+          1
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "NOA No. 23-0314.05, approval date 05/04/2023, expiration date 03/13/2029. MISSILE IMPACT RATING: None. It renews NOA #21-0125.07 and is issued to CertainTeed LLC, 803 Belden Road, Jackson, MI 49203, covering Drawing No. 20-178 'Extruded PVC Vinyl Fencing Columbia, Imperial, Chesterfield, and Breezewood Models' plus the 'Brookline Fencing Model' drawing.",
+      "expected_answer_terms": [
+        "23-0314.05",
+        "03/13/2029",
+        "MISSILE IMPACT RATING: None"
+      ],
+      "query_terms": [
+        "CertainTeed Miami Dade NOA Chesterfield",
+        "vinyl fence NOA expiration date",
+        "Chesterfield HVHZ approval number"
+      ],
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "pdftoppm -r 200 -png -f 1 -l 1 'manuals/certainteed-bufftech/structural/NOA-23-0314.05-...-current-2023-2029.pdf' <scratch>/noa23 ; tesseract <scratch>/noa23-01.png - --psm 6",
+        "confirmed": true,
+        "quote": "MISSILE IMPACT RATING: None ... This NOA renews NOA #21-0125.07 ... NOA No. 23-0314.05 / Expiration Date: 03/13/2029 / Approval Date: 05/04/2023",
+        "notes": "Scanned PDF, no text layer - answer must come from the page image via OCR. The signature block OCRs as noise ('He 4 : Ut~'), but the NOA number, dates and the MISSILE IMPACT RATING line are clean. Note the superseded predecessor NOA-21-0125.07 is also in the corpus, which makes this a genuine current-vs-superseded discrimination test."
+      }
+    }
+  ]
+}

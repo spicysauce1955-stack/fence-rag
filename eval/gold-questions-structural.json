@@ -1,0 +1,839 @@
+{
+  "set": "structural",
+  "generated_by": "subagent",
+  "questions": [
+    {
+      "id": "gq-001",
+      "category": "exact_identifier",
+      "question": "Find Miami-Dade NOA 23-0314.05 - who is the applicant on it and when does it expire?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "expected_pages": {
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf": [
+          1
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "Applicant is CertainTeed LLC, 803 Belden Road, Jackson, MI 49203. NOA No. 23-0314.05 was approved 05/04/2023 and expires 03/13/2029. It renews NOA #21-0125.07.",
+      "expected_answer_terms": [
+        "23-0314.05",
+        "CertainTeed LLC",
+        "03/13/2029",
+        "05/04/2023"
+      ],
+      "query_terms": [
+        "NOA 23-0314.05",
+        "Miami-Dade NOA 23-0314.05 expiration date",
+        "CertainTeed vinyl fence NOA applicant"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftoppm -r 200 -png -f 1 -l 1 'manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf' $SP/ct23 ; tesseract $SP/ct23-01.png - --psm 6",
+        "confirmed": true,
+        "quote": "This NOA renews NOA #21-0125.07 ... NOA No. 23-0314.05 Expiration Date: 03/13/2029 Approval Date: 05/04/2023",
+        "notes": "Page is image-only (no text layer). OCR of page 1 is clean; applicant block reads 'CertainTeed LLC / 803 Belden Road / Jackson, MI 49203'."
+      }
+    },
+    {
+      "id": "gq-002",
+      "category": "exact_identifier",
+      "question": "Whose Florida P.E. seal - license number 52609 - is on the Extruded PVC Vinyl Fencing drawings inside Miami-Dade NOA 23-0314.05?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "expected_pages": {
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf": [
+          1,
+          9,
+          15,
+          16,
+          17
+        ]
+      },
+      "expected_element_type": "figure",
+      "expected_answer": "Pedro De Figueiredo, P.E., Florida licence No. 52609, of PPMF Inc. He prepared and sealed Drawing No. 20-178 (sheets 1-9 of 9) on 01/26/2021. (The separate 2-sheet Brookline drawing was sealed by Robert Nieminen, P.E.)",
+      "expected_answer_terms": [
+        "52609",
+        "Pedro De Figueiredo"
+      ],
+      "query_terms": [
+        "Florida PE license 52609",
+        "who sealed drawing 20-178",
+        "engineer of record CertainTeed vinyl fence NOA"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftoppm -r 200 -png 'manuals/certainteed-bufftech/structural/NOA-23-0314.05-...pdf' $SP/ct23 ; tesseract $SP/ct23-09.png - --psm 6 ; tesseract $SP/ct23-01.png - --psm 6",
+        "confirmed": true,
+        "quote": "signed and sealed by Pedro De Figueiredo, P.E., on 01/26/2021 (page 1); 'No. 52609' / 'PE 52609' inside the seal on drawing sheets",
+        "notes": "The clean spelling 'Pedro De Figueiredo' comes from page 1 (OCR reliable). OCR of the seal on the drawing sheets mangles the surname (e.g. 'Pedro De Figutredo') but reproduces the licence number 52609 correctly on pages 9, 15, 16 and 17."
+      }
+    },
+    {
+      "id": "gq-003",
+      "category": "exact_identifier",
+      "question": "What is the Miami-Dade NOA number for VEKA's PVC Privacy Fence panels, and which engineer signed and sealed the drawings?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/industry-standards/structural/Miami-Dade-NOA_VEKA-Inc_PVC-Privacy-Fence-Panels_24-0729.04.pdf"
+      ],
+      "expected_pages": {
+        "manuals/industry-standards/structural/Miami-Dade-NOA_VEKA-Inc_PVC-Privacy-Fence-Panels_24-0729.04.pdf": [
+          1
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "NOA No. 24-0729.04, issued to Veka, Inc. (Fombell, PA). Drawing No. NOA-Privfence, 'PVC Privacy Fence', sheets 1 through 3 of 3, signed and sealed by Lucas A. Turner, P.E. on July 16, 2024. Approved 10/03/2024, expires 08/14/2029.",
+      "expected_answer_terms": [
+        "24-0729.04",
+        "Lucas A. Turner",
+        "08/14/2029",
+        "PVC Privacy Fence"
+      ],
+      "query_terms": [
+        "VEKA PVC privacy fence NOA number",
+        "Veka Inc Miami-Dade notice of acceptance engineer",
+        "NOA 24-0729.04"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftoppm -r 200 -png -f 1 -l 1 'manuals/industry-standards/structural/Miami-Dade-NOA_VEKA-Inc_PVC-Privacy-Fence-Panels_24-0729.04.pdf' $SP/veka ; tesseract $SP/veka-1.png - --psm 6",
+        "confirmed": true,
+        "quote": "APPROVAL DOCUMENT: Drawing No. NOA-Privfence, titled \" PVC Privacy Fence \", dated June 17, 2024 ... signed and sealed by Lucas A. Turner, P.E. on July 16, 2024 ... NOA No. 24-0729.04 Expiration Date: 08/14/2029",
+        "notes": "Scanned page, OCR clean."
+      }
+    },
+    {
+      "id": "gq-004",
+      "category": "conditional_table_lookup",
+      "question": "I'm installing Bufftech Chesterfield fence in Miami-Dade in Exposure C. If I pour a 36 inch deep footing, what is the maximum post spacing the NOA allows?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "expected_pages": {
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf": [
+          17
+        ]
+      },
+      "expected_element_type": "table",
+      "expected_answer": "88 inches. Table 1 on sheet 9 of 9 gives Wind Exposure C / footing depth 36\" / max post spacing 88\", valid for HVHZ and non-HVHZ. (A 30\" footing in Exposure C drops the spacing to 68\".) Footing is 12\" diameter, 3000 PSI concrete.",
+      "expected_answer_terms": [
+        "88",
+        "POST SPACING AND FOOTING DIMENSIONS",
+        "HVHZ: MIAMI-DADE AND BROWARD COUNTIES",
+        "ASCE 7-10"
+      ],
+      "query_terms": [
+        "Exposure C 36 inch footing maximum post spacing vinyl fence NOA",
+        "Bufftech post spacing footing depth table HVHZ",
+        "max post spacing exposure C"
+      ],
+      "required_conditions": {
+        "exposure_category": "C",
+        "footing_depth_in": 36,
+        "hvhz": true,
+        "wind_speed_mph": 115
+      },
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "pdftoppm -r 400 -png -f 17 -l 17 '<NOA-23-0314.05>.pdf' $SP/ct23hi ; python3 crop(300,3100,2500,4100) ; tesseract $SP/t1hi.png - --psm 6 ; and read the cropped PNG visually with the Read tool",
+        "confirmed": true,
+        "quote": "TABLE 1 MAXIMUM POST SPACING AND FOOTING DIMENSIONS | WIND EXPOSURE / FOOTING DEPTH / MAX. POST SPACING | C 36\" 88\" HVHZ AND NON HVHZ",
+        "notes": "Read visually from the rendered page image; the full table is B 30\"/97\" and B 24\"/66\" (NON HVHZ only), C 36\"/88\" and C 30\"/68\" (HVHZ and non-HVHZ), D 36\"/75\" and D 30\"/56\" (HVHZ and non-HVHZ). OCR of this table is only partly reliable: the C row ('36' and '88') is recovered by tesseract at both 200 and 400 dpi, but the B and D rows are garbled. Note the hand-curated JSON in data/structural/ mislabels the B 24\"/66\" row as HVHZ - the drawing shows both B rows as NON HVHZ. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. '88' survives at all four resolutions; '36' only at 150/200/400 and 'HVHZ AND NON HVHZ' only at 200/300/400, so both were dropped from the term list even though they are on the page. The answer value must ultimately be confirmed from the page image."
+      }
+    },
+    {
+      "id": "gq-005",
+      "category": "conditional_table_lookup",
+      "question": "For a 6 ft high chain link fence in a 130 mph wind zone, what maximum line post spacing does the CLFMI guide give for a 2 3/8 inch Schedule 40 regular grade steel line post?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf"
+      ],
+      "expected_pages": {
+        "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf": [
+          19
+        ]
+      },
+      "expected_element_type": "table",
+      "expected_answer": "3.3 feet. Table 4 (Line Post Selection: Wind Speed 130 MPH, Exposure Category B), Group IA ASTM F1043 Schedule 40 / ASTM F1083 Regular Grade (30,000 psi yield), 2 3/8\" post, 6 ft fence height column = 3.3 ft. This base value S must still be multiplied by Cf1 x Cf2 x Cf3.",
+      "expected_answer_terms": [
+        "TABLE 4",
+        "130 MPH",
+        "2 3/8",
+        "3.3",
+        "EXPOSURE CATEGORY"
+      ],
+      "query_terms": [
+        "chain link 130 mph 6 ft fence 2 3/8 line post spacing",
+        "CLFMI table 130 mph line post selection",
+        "line post maximum spacing wind speed table"
+      ],
+      "required_conditions": {
+        "wind_speed_mph": 130,
+        "exposure_category": "B",
+        "fence_height_ft": 6,
+        "line_post_size_in": "2 3/8",
+        "post_group": "Group IA Schedule 40, ASTM F1083 Regular Grade (30,000 psi yield)"
+      },
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 19 -l 19 'manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf' -",
+        "confirmed": true,
+        "quote": "TABLE 4 LINE POST SELECTION: WIND SPEED 130 MPH EXPOSURE CATEGORY “B” ... 2 3/8” 13.3 9.8 7.5 4.8 3.3 2.4 1.9 1.5 1.2",
+        "notes": "Text-layer PDF, layout extraction is exact. Column order is fence height 3, 3.5, 4, 5, 6, 7, 8, 9, 10 ft, so the 6 ft value is the 5th number = 3.3."
+      }
+    },
+    {
+      "id": "gq-006",
+      "category": "conditional_table_lookup",
+      "question": "Barrette full privacy railing, 72 inch high panel, 130 mph wind in Exposure D - what post spacing does the engineering report recommend and what load governs?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf"
+      ],
+      "expected_pages": {
+        "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf": [
+          22
+        ]
+      },
+      "expected_element_type": "table",
+      "expected_answer": "1.67 ft (20 inches) on centre, governed by 46.7 psf wind load. (In Exposure B&C at the same 130 mph the 72\" panel gets 2 ft / 24 in at 38.5 psf.)",
+      "expected_answer_terms": [
+        "130MPH WIND",
+        "EXPOSURE D",
+        "1.67FT (20in)",
+        "46.7 psf wind",
+        "72"
+      ],
+      "query_terms": [
+        "Barrette privacy railing 130 mph exposure D post spacing 72 inch panel",
+        "privacy railing post spacing table wind exposure D",
+        "recommended post spacing 130 mph"
+      ],
+      "required_conditions": {
+        "wind_speed_mph": 130,
+        "exposure_category": "D",
+        "panel_height_in": 72
+      },
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 22 -l 22 'manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf' -",
+        "confirmed": true,
+        "quote": "130MPH WIND‑EXPOSURE D ... 72   1.67FT (20in)   46.7 psf wind",
+        "notes": "Text-layer PDF; the report is by Jacek Sluzynski, PE, dated 8/25/2021. Note the internal page footer says '22 of 18' - the PDF has 23 pages against an 18-page body numbering, so page identifiers must be PDF page numbers."
+      }
+    },
+    {
+      "id": "gq-007",
+      "category": "conditional_table_lookup",
+      "question": "With the Illusions 75 MPH wind kit, how deep and how wide does the post hole have to be for 8x8 posts versus 5x5 posts?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf"
+      ],
+      "expected_pages": {
+        "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf": [
+          3
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "8\" x 8\" posts: hole no less than 42\" below grade and no less than 15\" in diameter. 5\" x 5\" posts: no less than 30\" below grade and no less than 12\" diameter. Concrete is 3000 PSI minimum with 6\" gravel fill below and 6\" of concrete above the gravel; post sits 2\" min above ground level.",
+      "expected_answer_terms": [
+        "42",
+        "15",
+        "30",
+        "12",
+        "3000 PSI"
+      ],
+      "query_terms": [
+        "Illusions 75 mph wind kit post hole depth 8x8 post",
+        "how deep post hole vinyl fence wind kit",
+        "post hole diameter 5x5 vs 8x8"
+      ],
+      "required_conditions": {
+        "post_size_in": "8x8",
+        "wind_speed_mph": 75
+      },
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 3 -l 4 'manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf' -",
+        "confirmed": true,
+        "quote": "No less than 30” below grade for 5” x 5” posts and 42” for 8” x 8” posts. The diameter of the hole should be no less than 12” for 5” x 5” posts and 15” for 8” x 8” posts (See Figure 1).",
+        "notes": "Text-layer PDF; the Figure 1 callouts (6\", 32\", 6\", CONCRETE 3000 PSI MINIMUM, GRAVEL FILL, 12\" (15\" FOR 8\"x8\" POSTS)) also extract cleanly."
+      }
+    },
+    {
+      "id": "gq-008",
+      "category": "conditional_table_lookup",
+      "question": "In the MecaWind freestanding wall example for a 6 ft tall fence at 120 mph in Exposure C, what velocity pressure qh does it compute?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/industry-standards/structural/MECA-Fence-Wind-Load-Worked-Example_ASCE7-16.pdf"
+      ],
+      "expected_pages": {
+        "manuals/industry-standards/structural/MECA-Fence-Wind-Load-Worked-Example_ASCE7-16.pdf": [
+          1
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "qh = 26.60 psf, from qh = 0.00256 * Kh * Kzt * Kd * Ke * V^2 with Kh = 0.849, Kd = 0.85, Kzt = 1.0, ASCE 7-16, Exposure C, 120.0 mph, 6 ft wall.",
+      "expected_answer_terms": [
+        "26.60 psf",
+        "120.0 mph",
+        "Exposure Category",
+        "ASCE 7-16",
+        "0.849"
+      ],
+      "query_terms": [
+        "fence wind load 120 mph exposure C velocity pressure qh",
+        "freestanding wall wind load worked example ASCE 7-16",
+        "qh psf 6 ft fence"
+      ],
+      "required_conditions": {
+        "wind_speed_mph": 120,
+        "exposure_category": "C",
+        "wall_height_ft": 6,
+        "standard": "ASCE 7-16"
+      },
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout 'manuals/industry-standards/structural/MECA-Fence-Wind-Load-Worked-Example_ASCE7-16.pdf' -",
+        "confirmed": true,
+        "quote": "qh        = (0.00256 * Kh * Kzt * Kd * Ke * V^2) * LF                       = 26.60 psf",
+        "notes": "Text-layer PDF, exact. Same page also gives Cf = 1.300 and Case A/B design wind force F = 21162 lb for the 6 ft x 120 ft wall."
+      }
+    },
+    {
+      "id": "gq-009",
+      "category": "table_retrieval",
+      "question": "Show me the maximum post spacing and footing dimensions table from the current CertainTeed / Bufftech extruded PVC vinyl fence NOA.",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "expected_pages": {
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf": [
+          17
+        ]
+      },
+      "expected_element_type": "table",
+      "expected_answer": "Table 1 'Maximum Post Spacing and Footing Dimensions' on sheet 9 of 9 of Drawing 20-178 (PDF page 17): B/30\"/97\" and B/24\"/66\" non-HVHZ; C/36\"/88\" and C/30\"/68\" HVHZ and non-HVHZ; D/36\"/75\" and D/30\"/56\" HVHZ and non-HVHZ. HVHZ = Miami-Dade and Broward Counties; wind exposures per ASCE 7-10.",
+      "expected_answer_terms": [
+        "POST SPACING AND FOOTING DIMENSIONS",
+        "HVHZ: MIAMI-DADE AND BROWARD COUNTIES",
+        "ASCE 7-10",
+        "FOOTING TABLE"
+      ],
+      "query_terms": [
+        "maximum post spacing and footing dimensions table vinyl fence NOA",
+        "Table 1 footing depth post spacing wind exposure",
+        "Bufftech footing table"
+      ],
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "pdftoppm -r 200 -png -f 17 -l 17 '<NOA-23-0314.05>.pdf' $SP/ct23 ; tesseract $SP/ct23-17.png - --psm 6 ; plus visual read of a crop of the table region",
+        "confirmed": true,
+        "quote": "TABLE 1 MAXIMUM POST SPACING AND FOOTING DIMENSIONS ... HVHZ: MIAMI-DADE AND BROWARD COUNTIES / WIND EXPOSURES AS DEFINED IN THE ASCE 7-10",
+        "notes": "Sheet 9 of 9 is PDF page 17 (page order in this scan is: p1 NOA cover, p2-6 evidence E-1..E-5, p7-8 Brookline sheets 1-2 of 2, p9-17 drawing 20-178 sheets 1-9 of 9). Table headings and footnotes OCR cleanly; the numeric cells do not, so image evidence is required for the values. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. 'TABLE 1' itself is lost at 400 dpi, so the longer caption string is used instead."
+      }
+    },
+    {
+      "id": "gq-010",
+      "category": "table_retrieval",
+      "question": "I need the whole recommended post spacing table for Barrette privacy railing at 130 mph - both exposure groups, all panel heights.",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf"
+      ],
+      "expected_pages": {
+        "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf": [
+          22
+        ]
+      },
+      "expected_element_type": "table",
+      "expected_answer": "PDF page 22 carries both 130 mph tables. 130MPH WIND-EXPOSURE B&C: <=42\" -> 6FT (68in) @ 50plf top rail; 48\" -> 4.5FT (54in); 54\" -> 3.5FT (42in); 60\" -> 3FT (34in); 66\" -> 2.5FT (30in); 72\" -> 2FT (24in), all at 38.5 psf wind. 130MPH WIND-EXPOSURE D: <=42\" -> 5FT (60in); 48\" -> 4FT (48in); 54\" -> 3FT (34in); 60\" -> 2.5FT (30in); 66\" -> 2FT (24in); 72\" -> 1.67FT (20in), all at 46.7 psf wind.",
+      "expected_answer_terms": [
+        "130MPH WIND",
+        "RECOMMENDED POST SPACING (O.C.)",
+        "GOVERNING LOAD",
+        "38.5 psf wind",
+        "46.7 psf wind"
+      ],
+      "query_terms": [
+        "post spacing table 130 mph privacy railing",
+        "recommended post spacing O.C. governing load table",
+        "Barrette privacy panel post spacing wind table"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftotext -layout -f 22 -l 22 'manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf' -",
+        "confirmed": true,
+        "quote": "130MPH WIND‑EXPOSURE B&C  HEIGHT OF THE PANEL (in)   RECOMMENDED POST SPACING (O.C.)   GOVERNING LOAD",
+        "notes": "Text-layer PDF; page 22 also holds the 120 mph B&C and 120 mph D tables, so a retriever returning this page satisfies the request."
+      }
+    },
+    {
+      "id": "gq-011",
+      "category": "current_version",
+      "question": "Which Miami-Dade NOA is currently in force for the Columbia / Imperial / Chesterfield / Breezewood vinyl fence line, and which NOA did it replace?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
+        "manuals/certainteed-bufftech/structural/NOA-24-0117.05-Barrette-successor-extruded-pvc-fencing-post-CertainTeed-transfer-2029.pdf",
+        "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-24-0117.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+        "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf"
+      ],
+      "expected_pages": {
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf": [
+          1
+        ],
+        "manuals/certainteed-bufftech/structural/NOA-24-0117.05-Barrette-successor-extruded-pvc-fencing-post-CertainTeed-transfer-2029.pdf": [
+          1
+        ],
+        "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-24-0117.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf": [
+          1
+        ],
+        "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf": [
+          1
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "NOA No. 24-0117.05, held by Barrette Outdoor Living, Inc. (545 Tilton Road, Egg Harbor City, NJ 08215). Approved 04/24/2025, expires 03/13/2029. It revises NOA #23-0314.05, the earlier CertainTeed LLC acceptance.",
+      "expected_answer_terms": [
+        "revises NOA #23-0314.05",
+        "04/24/2025",
+        "Egg Harbor City",
+        "Robert Nieminen",
+        "Extruded PVC Vinyl Fencing"
+      ],
+      "query_terms": [
+        "current NOA Columbia Imperial Chesterfield vinyl fence",
+        "which NOA replaced 23-0314.05",
+        "Barrette Outdoor Living extruded PVC vinyl fencing current NOA"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftoppm -r 200 -png -f 1 -l 1 'manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf' $SP/b24 ; tesseract $SP/b24-01.png - --psm 6 ; plus visual read of a crop of the NOA-number block",
+        "confirmed": true,
+        "quote": "This NOA revises NOA #23-0314.05 and consists of this page 1 ... NOA No. 24-0117.05  Expiration Date: 03/13/2029  Approval Date: 04/24/2025",
+        "notes": "The NOA number line OCRs badly ('NOs No. 247.8'), so it was confirmed by reading a rendered crop visually. This file is byte-identical in four corpus locations (same sha256), all four listed as acceptable. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. PIPELINE SIGNAL: the string '24-0117.05' is NOT recoverable by tesseract from page 1 at any resolution tried (the NOA-number line sits under a stamp and consistently mis-reads, e.g. 'NOs No. 247.8'). '03/13/2029' only survives at 150/200 dpi. Both were therefore dropped from the term list; the NOA number was confirmed by reading a rendered crop visually. 'Barrette' is also unusable: the document itself prints the applicant as 'Barette Outdoor Living, Inc.' with one r."
+      }
+    },
+    {
+      "id": "gq-012",
+      "category": "current_version",
+      "question": "Is VEKA's PVC privacy fence approval still current, and what earlier acceptance does it supersede?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/industry-standards/structural/Miami-Dade-NOA_VEKA-Inc_PVC-Privacy-Fence-Panels_24-0729.04.pdf"
+      ],
+      "expected_pages": {
+        "manuals/industry-standards/structural/Miami-Dade-NOA_VEKA-Inc_PVC-Privacy-Fence-Panels_24-0729.04.pdf": [
+          1
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "Yes - NOA 24-0729.04 was approved 10/03/2024 and runs to 08/14/2029. It revises and renews NOA #21-0308.05.",
+      "expected_answer_terms": [
+        "24-0729.04",
+        "revises and renews NOA #21-0308.05",
+        "08/14/2029",
+        "10/03/2024"
+      ],
+      "query_terms": [
+        "is VEKA privacy fence NOA current",
+        "NOA 24-0729.04 supersedes",
+        "Veka PVC privacy fence expiration"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftoppm -r 200 -png -f 1 -l 1 'manuals/industry-standards/structural/Miami-Dade-NOA_VEKA-Inc_PVC-Privacy-Fence-Panels_24-0729.04.pdf' $SP/veka ; tesseract $SP/veka-1.png - --psm 6",
+        "confirmed": true,
+        "quote": "This NOA revises and renews NOA #21-0308.05 and consists of this page 1, evidence submitted pages E-1, E-2 & E-3 ... NOA No. 24-0729.04 Expiration Date: 08/14/2029 Approval Date: 10/03/2024",
+        "notes": "Scanned page, OCR clean."
+      }
+    },
+    {
+      "id": "gq-013",
+      "category": "historical_version",
+      "question": "Back in the 2013 CertainTeed acceptance NOA 12-1106.11, which drawing was the approval document and how many sheets did it have?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf"
+      ],
+      "expected_pages": {
+        "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf": [
+          1
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "Drawing No. 12-048, titled 'Fence Columbia, Imperial and Chesterfield Models', sheets 1 through 8 of 8, prepared by EngCo, Inc., dated March 02, 2012, signed and sealed by Pedro De Figueiredo, P.E. NOA 12-1106.11 renewed NOA #11-1028.05, was approved 04/04/2013 and expired 03/13/2018.",
+      "expected_answer_terms": [
+        "12-1106.11",
+        "12-048",
+        "Fence Columbia, Imperial and Chesterfield Models",
+        "EngCo",
+        "03/13/2018"
+      ],
+      "query_terms": [
+        "NOA 12-1106.11 approval document drawing",
+        "old CertainTeed fence NOA drawing 12-048",
+        "2013 CertainTeed vinyl fence NOA sheets"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftoppm -r 200 -png -f 1 -l 1 'manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf' $SP/ct12 ; tesseract $SP/ct12-01.png - --psm 6",
+        "confirmed": true,
+        "quote": "APPROVAL DOCUMENT: Drawing No. 12-048, titled “Fence Columbia, Imperial and Chesterfield Models”, sheets 1 through 8 of 8, prepared by EngCo, Inc., dated March 02, 2012 ... This NOA renews NOA # 11-1028.05 ... NOA No. 12-1106.11 Expiration Date: 03/13/2018 Approval Date: 04/04/2013",
+        "notes": "Must resolve to the legacy 11-page PDF, not the current 23-0314.05 / 24-0117.05 packages, which cite drawing 20-178 instead. Sheet 8 of 8 (PDF page 11) of this legacy drawing carries the same Table 1 values as the current drawing (12\" diameter footing, B 30/97, B 24/66, C 36/88, C 30/68), verified visually."
+      }
+    },
+    {
+      "id": "gq-014",
+      "category": "historical_version",
+      "question": "The superseded 2021 CertainTeed NOA 21-0125.07 - when did it expire and which NOA did it revise?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf"
+      ],
+      "expected_pages": {
+        "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf": [
+          1
+        ]
+      },
+      "expected_element_type": "paragraph",
+      "expected_answer": "NOA 21-0125.07 was approved 03/18/2021 and expired 03/13/2024. It revised NOA #20-0303.02. Its approval document was already Drawing No. 20-178 sealed by Pedro De Figueiredo, P.E. on 01/26/2021 plus the 2-sheet Brookline drawing by Robert Nieminen, P.E.",
+      "expected_answer_terms": [
+        "21-0125.07",
+        "revises NOA #20-0303.02",
+        "03/18/2021",
+        "20-178"
+      ],
+      "query_terms": [
+        "NOA 21-0125.07 expiration",
+        "which NOA did 21-0125.07 revise",
+        "superseded CertainTeed vinyl fence NOA 2021"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "pdftoppm -r 200 -png -f 1 -l 1 'manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf' $SP/ct21 ; tesseract $SP/ct21-01.png - --psm 6",
+        "confirmed": true,
+        "quote": "This NOA revises NOA #20-0303.02 and consists of this page 1, evidence submitted pages E-1, E-2, E-3, & E-4 ... NOA No. 21-0125.07 Expiration Date: 03/13/2024 Approval Date: 03/18/2021",
+        "notes": "Must resolve to the 16-page superseded PDF, not 23-0314.05 (which renews it) or 24-0117.05. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. '03/13/2024' only survives at 200/400 dpi (the expiration line is partly covered by a signature), so it was dropped from the term list although it is on the page."
+      }
+    },
+    {
+      "id": "gq-015",
+      "category": "conflict",
+      "question": "Barrette has two live Miami-Dade NOAs for extruded PVC vinyl fencing. Do they call for the same post footing, and if not what does each one specify?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-22-0217.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf"
+      ],
+      "expected_pages": {
+        "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-22-0217.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf": [
+          1,
+          12
+        ],
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf": [
+          1,
+          17
+        ]
+      },
+      "expected_element_type": "drawing",
+      "expected_answer": "No, they conflict. NOA 22-0217.05 (drawing 001 'PVC Vinyl Fencing', sheet 9 of 9, Jacek Sluzynski, P.E., 3/6/2022) calls for a 18 inch diameter footing, 41 inches of 3000 PSI concrete below grade plus 6 inches of gravel fill. NOA 24-0117.05 (drawing 'Extruded PVC Vinyl Fencing Columbia, Imperial, Chesterfield and Breezewood Models', sheet 9 of 9, Robert Nieminen, P.E., 01/28/2025) calls for a 12 inch diameter footing with depth from Table 1 (24 to 36 inches by wind exposure) plus 6 inches of gravel.",
+      "expected_answer_terms": [
+        "22-0217.05",
+        "Jacek Sluzynski",
+        "Drawing No. 001",
+        "PVC VINYL FENCING NOA",
+        "POST SPACING AND FOOTING DIMENSIONS",
+        "ASCE 7-10"
+      ],
+      "query_terms": [
+        "Barrette vinyl fence NOA footing diameter conflict",
+        "18 inch vs 12 inch footing vinyl fence NOA",
+        "post footing diameter depth Barrette extruded PVC vinyl fencing"
+      ],
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "pdftoppm -r 200 -png 'manuals/freedom-outdoor-living/structural/MiamiDade-NOA-22-0217.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf' $SP/b22 ; pdftoppm -r 400 -png -f 12 -l 12 (same) $SP/b22hi ; visual read of crops of $SP/b22-12.png ; and pdftoppm -r 200 -png -f 17 -l 17 'manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf' + visual read of the Table 1 crop",
+        "confirmed": true,
+        "quote": "22-0217.05 sheet 9 of 9: 'Ø18\"' with '41\"' below GRADE LINE, 'CONCRETE 3000 P.S.I. MINIMUM', '6\"' 'GRAVEL FILL'.  24-0117.05 sheet 9 of 9: '12\" DIAMETER FOOTING', '3000 PSI CONCRETE', 'SEE FOOTING TABLE FOR MINIMUM DEPTH'",
+        "notes": "The 18\" diameter and 41\" depth were read visually from the rendered page; OCR of that page is very poor (at 400 dpi only '918\"' is recovered for Ø18\", and 41 is not recovered at all), so expected_answer_terms are limited to strings tesseract does return. NOA 22-0217.05 page 1: applicant Barrette Outdoor Living, 740 North Main Street; revises & renews NOA #18-0410.01; approved 03/31/2022, expires 05/25/2027 - i.e. both acceptances are simultaneously in force for 'Extruded PVC Vinyl Fencing'. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. On 22-0217.05 page 12 only the title-block string 'PVC VINYL FENCING NOA' is stable; 'CONCRETE', 'GRAVEL', 'GRADE', '18' and '41' are all resolution-dependent or absent, so the conflicting footing numbers themselves are image-only evidence."
+      }
+    },
+    {
+      "id": "gq-016",
+      "category": "conflict",
+      "question": "The old Barrette Active Yards NOA and the current Barrette vinyl fence NOA give different post footing sizes - what does each say?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf",
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf"
+      ],
+      "expected_pages": {
+        "manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf": [
+          1,
+          7
+        ],
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf": [
+          17
+        ]
+      },
+      "expected_element_type": "drawing",
+      "expected_answer": "Legacy NOA 10-1217.01 (Drawing USF2010NOAAY 'Active Yards Fence Systems', Richard Ovid Boyette, P.E., approved 04/07/2011) shows a 16 inch diameter footing, 36 inches of 3000 P.S.I. minimum concrete plus 6 inches of gravel fill, with posts at 96 inches on centre. The current NOA 24-0117.05 shows a 12 inch diameter footing with the depth taken from Table 1 (24-36 inches depending on wind exposure) plus gravel fill.",
+      "expected_answer_terms": [
+        "16",
+        "36",
+        "96",
+        "CONCRETE",
+        "42485",
+        "POST SPACING AND FOOTING DIMENSIONS",
+        "ASCE 7-10"
+      ],
+      "query_terms": [
+        "Barrette Active Yards footing diameter",
+        "16 inch footing 36 inch deep vinyl fence NOA",
+        "old vs new Barrette vinyl fence footing size"
+      ],
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "pdftoppm -r 200 -png -f 2 -l 14 'manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf' $SP/b10a ; tesseract $SP/b10a-07.png - --psm 6 ; visual read of crops (250,1550,1300,2200) and (950,1050,2000,2050) of $SP/b10a-07.png",
+        "confirmed": true,
+        "quote": "CONCRETE 3000 P.S.I. MINIMUM / GRAVEL FILL / 16\"ø / 36\" / 6\"  and 'POSTS LOCATED 96\" ON CENTER'",
+        "notes": "The 16\"ø and 36\" dimensions were read visually from the rendered PNG; tesseract returns them only as '16°9' and 'PER 36'. The same footing detail repeats on every drawing sheet (PDF pages 3-14); page 7 is sheet 5 of 12 (8' Mulberry Semi Privacy 3\" panel). OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. On the legacy sheet '16', '36', '96', 'CONCRETE' and '42485' all survive at every resolution ('16' comes through as part of '16\"o'); '3000 P.S.I' and 'GRAVEL FILL' do not, so they were dropped."
+      }
+    },
+    {
+      "id": "gq-017",
+      "category": "comparison",
+      "question": "When the Columbia/Imperial/Chesterfield fence approval moved from CertainTeed to Barrette, did the allowable post spacing change - and did the engineer of record change?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf"
+      ],
+      "expected_pages": {
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf": [
+          1,
+          17
+        ],
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf": [
+          1,
+          17
+        ]
+      },
+      "expected_element_type": "table",
+      "expected_answer": "The Table 1 values are unchanged: B 30\"/97\" and B 24\"/66\" non-HVHZ, C 36\"/88\" and C 30\"/68\", D 36\"/75\" and D 30\"/56\", ASCE 7-10 exposures, 12\" diameter footing. What changed is the sealing engineer and the drawing date: 23-0314.05 uses Drawing No. 20-178 dated 12/06/2020 by PPMF, Inc., sealed by Pedro De Figueiredo, P.E. (FL 52609) on 01/26/2021, while 24-0117.05 uses a drawing prepared by Nemo etc. dated 01/28/2025 and sealed by Robert Nieminen, P.E. Table 1 also moves from sheet 9 references reading 'SEE TABLE 1 ON SHEET 9' to 'SEE TABLE 1 ON SHEET 10' in the Barrette set.",
+      "expected_answer_terms": [
+        "Pedro De Figueiredo",
+        "Robert Nieminen",
+        "TABLE 1",
+        "POST SPACING AND FOOTING DIMENSIONS",
+        "ASCE 7-10"
+      ],
+      "query_terms": [
+        "did post spacing change CertainTeed to Barrette vinyl fence NOA",
+        "compare NOA 23-0314.05 and 24-0117.05 post spacing table",
+        "engineer of record change Barrette CertainTeed fence"
+      ],
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "tesseract $SP/ct23-01.png - --psm 6 ; tesseract $SP/b24-01.png - --psm 6 ; visual read of Table 1 crops from $SP/ct23-17.png and $SP/b24-17.png",
+        "confirmed": true,
+        "quote": "23-0314.05 p1: 'signed and sealed by Pedro De Figueiredo, P.E., on 01/26/2021'. 24-0117.05 p1: 'prepared by Nemo etc., dated 01/28/2025, signed and sealed by Robert Nieminen, P.E., on 01/28/2025'.",
+        "notes": "Both Table 1 blocks were read visually side by side and are numerically identical. Interior cross-references differ ('SEE TABLE 1 ON SHEET 9' vs 'SEE TABLE 1 ON SHEET 10'), which is a useful discriminator between the two packages. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. All five terms are recoverable from the combined four-page evidence set at every resolution tested."
+      }
+    },
+    {
+      "id": "gq-018",
+      "category": "comparison",
+      "question": "Compare the Weatherables Augusta privacy panel CAD details for the 6 ft wide and the 8 ft wide panel - what changes?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png",
+        "manuals/weatherables/structural/weatherables-cad-augusta-8x8-privacy.png"
+      ],
+      "expected_pages": {
+        "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png": [
+          1
+        ],
+        "manuals/weatherables/structural/weatherables-cad-augusta-8x8-privacy.png": [
+          1
+        ]
+      },
+      "expected_element_type": "drawing",
+      "expected_answer": "Overall panel width and rail length change; the vertical build-up does not. Augusta 8x6: 72\" overall width, rails 1.5\" x 5.5\" x 71.5\". Augusta 8x8: 96\" overall width, rails 1.5\" x 5.5\" x 95.5\". Both are 95.5\" tall with the same stack - 2\" reveal, 5.5\" rail, 39.5\", 5.5\" mid rail, 39.5\", 5.5\" bottom rail - and both use U-Channels in the rails.",
+      "expected_answer_terms": [
+        "72",
+        "96",
+        "U-Channels",
+        "39.5",
+        "5.5"
+      ],
+      "query_terms": [
+        "Weatherables Augusta privacy panel dimensions 6 ft vs 8 ft",
+        "Augusta 8x8 privacy rail length",
+        "Weatherables CAD detail privacy panel U-channel"
+      ],
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "Read tool on manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png and weatherables-cad-augusta-8x8-privacy.png (viewed directly); tesseract on both PNGs for term recoverability",
+        "confirmed": true,
+        "quote": "8x6 sheet: 72\" overall, '1.5\" x 5.5\" x 71.5\"', 95.5\" high, 'U-Channels'. 8x8 sheet: 96\" overall, '1.5\" x 5.5\" x 95.5\"', 95.5\" high, 'U-Channels'.",
+        "notes": "These corpus entries are PNG images, not PDFs. Values read visually. OCR on them is weak: '72\"', '96\"', '39.5\"', '5.5\"' and 'U-Channels' come through, but the rail lengths do not (the 8x8 rail reads as '98.5' instead of 95.5), so image evidence is required.  Term check run with tesseract --psm 6 directly on the two PNGs: the 8x6 sheet yields '72', 'U-Channels', '39.5'; the 8x8 sheet yields '96', 'U-Channels', '5.5'. All five terms are therefore present across the combined two-document evidence set, but no single sheet carries all of them."
+      }
+    },
+    {
+      "id": "gq-019",
+      "category": "visual_evidence",
+      "question": "Show me the post and footing cross-section from the current Bufftech vinyl fence NOA - what footing diameter, concrete strength and post reinforcement does it detail?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "expected_pages": {
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf": [
+          17
+        ]
+      },
+      "expected_element_type": "drawing",
+      "expected_answer": "The 'POST AND FOOTING DESIGN' detail on sheet 9 of 9 (PDF page 17) shows a 12\" diameter footing, 3000 PSI concrete, gravel fill under the concrete, existing soil around it, depth per the footing table, and an aluminium post reinforcement whose length is (post length - 1\") for Breezewood and 48\" for all other models; the post projects 18\" above grade except on Breezewood models where it is (post length - (depth + 7)).",
+      "expected_answer_terms": [
+        "POST AND FOOTING DESIGN",
+        "3000 PSI CONCRETE",
+        "EXISTING SOIL",
+        "FOOTING TABLE"
+      ],
+      "query_terms": [
+        "vinyl fence post footing cross section 12 inch diameter 3000 psi",
+        "aluminum post reinforcement footing detail Bufftech NOA",
+        "post and footing design detail vinyl fence"
+      ],
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "pdftoppm -r 200 -png -f 17 -l 17 '<NOA-23-0314.05>.pdf' $SP/ct23 ; python3 crop(1050,700,2100,2200) -> $SP/ct23p17_footing.png ; Read tool on that PNG",
+        "confirmed": true,
+        "quote": "12\" DIAMETER FOOTING ... ALUMINUM REINFORCEMENT POST LENGHT-1\" - BREEZEWOOD 48\" - ALL OTHERS ... EXISTING SOIL ... SEE FOOTING TABLE FOR MINIMUM DEPTH: 12\" DIAM. X DEPTH 3000 PSI CONCRETE ... GRAVEL FILL",
+        "notes": "Read visually. Note the drawing itself misspells LENGTH as 'LENGHT'. OCR returns '3000 PSI CONCRETE', 'EXISTING SOIL', 'GRAVEL' and '12\" DIAM' but not the rotated '12\" DIAMETER FOOTING' label, hence image evidence is required. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. 'GRAVEL' (150/200/400) and '12' (150/200 only) were dropped; the 12\" footing diameter and the aluminium-reinforcement callout are rotated text that tesseract does not read at all, which is exactly why this is a visual_evidence item."
+      }
+    },
+    {
+      "id": "gq-020",
+      "category": "visual_evidence",
+      "question": "On the Illusions Vinyl Fence PE-stamped drawings, what does the concrete foundation detail for the 4 ft tongue-and-groove solid panel show?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf",
+        "manuals/illusions-vinyl-fence/75mph-wind-kit-noa-miami-dade.pdf"
+      ],
+      "expected_pages": {
+        "manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf": [
+          3
+        ],
+        "manuals/illusions-vinyl-fence/75mph-wind-kit-noa-miami-dade.pdf": [
+          3
+        ]
+      },
+      "expected_element_type": "drawing",
+      "expected_answer": "Sheet 1 of 18 (style V300-4, Vinyl 4' High Tongue & Groove Solid Panel) shows a concrete foundation 42\" deep x 12\" diameter, with the 5\"x5\" heavy wall post set 32\" underground and 2\" from ground level to the bottom of the fence section; overall post 84\" with 48\" of panel above grade. Sealed by Thomas Alan Dixon, P.E., Florida licence No. 34222, and rated for 75 MPH fastest mile wind speed per FBC 1615.2.1.",
+      "expected_answer_terms": [
+        "CONCRETE FOUNDATION",
+        "32",
+        "42",
+        "GROUND LEVEL"
+      ],
+      "query_terms": [
+        "Illusions vinyl fence concrete foundation depth 4 ft panel",
+        "Illusions NOA drawing post underground depth",
+        "V300-4 tongue and groove solid panel foundation detail"
+      ],
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "pdftoppm -r 200 -png -f 2 -l 20 'manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf' $SP/ill ; PIL rotate(-90) -> $SP/illr-03.png ; Read tool on $SP/illr-03.png ; tesseract $SP/illr-03.png - --psm 6",
+        "confirmed": true,
+        "quote": "32\" UNDERGROUND 2\" FROM GROUND LEVEL TO BOTTOM OF SECTION / CONCRETE FOUNDATION (42\"X12\") ... THIS FENCE, ITS VERTICAL SUPPORTS, AND FOUNDATIONS, ARE IN COMPLIANCE WITH THE 2010 FLORIDA BUILDING CODE. THIS FENCE WAS TESTED FOR A 75 MPH FASTEST MILE WIND SPEED PER FBC 1615.2.1",
+        "notes": "IMPORTANT pipeline signal: every drawing sheet in this NOA (PDF pages 3-20) is rendered rotated 90 degrees. Without rotating the page image first, tesseract returns essentially nothing. After rotation OCR recovers '32\" UNDERGROUND', 'CONCRETE FOUNDATION (42\"X12\")', 'V300-4' and the 75 MPH note. This PDF is byte-identical to manuals/illusions-vinyl-fence/75mph-wind-kit-noa-miami-dade.pdf (same sha256); both are listed. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. After the required -90 degree rotation, 'CONCRETE FOUNDATION', '32', '42' and 'GROUND LEVEL' survive at every resolution; 'V300-4' (200/400 only), '75 MPH FASTEST MILE' (150/200 only) and '34222' (200/300/400) do not, so they were dropped from the term list."
+      }
+    },
+    {
+      "id": "gq-021",
+      "category": "source_verification",
+      "question": "How deep does VEKA's approved drawing bury the post for the Tahoe II privacy fence, and what is under the concrete?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/industry-standards/structural/Miami-Dade-NOA_VEKA-Inc_PVC-Privacy-Fence-Panels_24-0729.04.pdf"
+      ],
+      "expected_pages": {
+        "manuals/industry-standards/structural/Miami-Dade-NOA_VEKA-Inc_PVC-Privacy-Fence-Panels_24-0729.04.pdf": [
+          5,
+          6
+        ]
+      },
+      "expected_element_type": "drawing",
+      "expected_answer": "Sheet 2 of 3 (PDF page 6) shows the Tahoe II post set 27.25 inches below grade in a 12 inch square hole of 3000 PSI minimum concrete, with 6 inches of gravel fill beneath the concrete, and a 72 inch 6063-T6 aluminium post reinforcement that must extend to the bottom of the post. (The Breckenridge fence on sheet 3 uses 28 inches instead.) The whole system is rated 75 mph fastest mile / 115 mph 3-second gust with a design pressure of 17.71 PSF.",
+      "expected_answer_terms": [
+        "17.71",
+        "DESIGN PRESSURE",
+        "FASTEST MILE",
+        "TAHOE",
+        "3000 PSI MIN",
+        "CONCRETE"
+      ],
+      "query_terms": [
+        "VEKA Tahoe II post embedment depth concrete hole",
+        "Veka privacy fence footing gravel fill aluminum reinforcement",
+        "VEKA design pressure 17.71 psf"
+      ],
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "pdftoppm -r 200 -png -f 5 -l 7 'manuals/industry-standards/structural/Miami-Dade-NOA_VEKA-Inc_PVC-Privacy-Fence-Panels_24-0729.04.pdf' $SP/veka ; visual read of crops (0,900,900,1800) of veka-6.png, (0,850,1000,1800) of veka-7.png and (500,1450,1600,1850) of veka-5.png ; tesseract on all three pages",
+        "confirmed": true,
+        "quote": "'27.25\"' from grade to bottom of concrete with '6\" GRAVEL FILL' below, '12\" SQ. CONCRETE HOLE (3000 PSI MIN.)', BOM item 2 '72\" ALUMINUM POST REINFORCEMENT  6063-T6 ALUM.'; sheet 1: '(DESIGN PRESSURE = 17.71 PSF)'",
+        "notes": "The 27.25\" (Tahoe II) and 28\" (Breckenridge) embedment figures are rotated dimension text and are NOT recoverable by tesseract at 200 dpi in either orientation - they were read from the page image and that is why this is a source_verification item. '12” SQ', 'CONCRETE HOLE', 'GRAVEL', the BOM line and '17.71 PSF' do OCR. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. On page 6 only 'CONCRETE' and '3000 PSI MIN' are fully stable; '12\" SQ' (150/200/300), 'ALUMINUM POST REINFORCEMENT' and '6063-T6' (200/300/400) and 'GRAVEL' (never) are not, so the sheet-1 wind-load-rating strings from page 5 carry the term check instead."
+      }
+    },
+    {
+      "id": "gq-022",
+      "category": "source_verification",
+      "question": "The legacy Barrette Active Yards NOA says the fence is approved for 75 mph sustained wind - what 3-second gust speed and which code edition do the drawings actually state?",
+      "answerable": true,
+      "expected_documents": [
+        "manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf"
+      ],
+      "expected_pages": {
+        "manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf": [
+          7
+        ]
+      },
+      "expected_element_type": "drawing",
+      "expected_answer": "90 MPH for a 3-second gust. The note reads that the fence, its vertical supports and foundations comply with the 2007 Florida Building Code with 2009 supplement Sec. 1612.2.1 and ASCE 7-05 Sec. 6.5.14, and is approved for a sustained wind velocity of 75 MPH (90 MPH for 3 second gust) when post centres are 96\" on centre. Sealed by Richard Boyette, FL P.E. 42485.",
+      "expected_answer_terms": [
+        "VELOCITY OF 75 MPH (90 MPH FOR 3 SECOND GUST)",
+        "2007 FLORIDA BUILDING CODE",
+        "42485",
+        "96",
+        "CONCRETE"
+      ],
+      "query_terms": [
+        "Active Yards fence 3 second gust wind speed",
+        "Barrette legacy NOA 90 mph gust 75 mph sustained",
+        "Richard Boyette PE 42485 fence drawing wind speed"
+      ],
+      "expects_image_evidence": true,
+      "verification": {
+        "method": "pdftoppm -r 200 -png -f 2 -l 14 'manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf' $SP/b10a ; tesseract $SP/b10a-07.png - --psm 6 ; plus visual read of crops of the same page",
+        "confirmed": true,
+        "quote": "THIS FENCE, ITS VERTICAL SUPPORTS AND FOUNDATIONS, ARE IN COMPLIANCE WITH 2007 FLORIDA BUILDING CODE WITH 2009 SUPPLEMENT SEC.1612.2.1; ASCE 7-05 SEC. 6.5.14. THIS FENCE IS APPROVED FOR SUSTAINED WIND VELOCITY OF 75 MPH (90 MPH FOR 3 SECOND GUST) WHEN THE POST CENTERS ARE LOCATED 96\" ON CENTER ... Richard Boyette, FL P.E. 42485",
+        "notes": "This 90 mph gust figure directly contradicts the 115 MPH ultimate 3-second gust stated on the current CertainTeed/Barrette drawings (e.g. NOA 23-0314.05 PDF page 7: '75 MPH FASTEST MILE WIND SPEED OR 115 MPH (ULTIMATE 3 SEC. GUST)') - a version artefact of ASCE 7-05 vs ASCE 7-10 wind maps. OCR of this block is clean; the same note repeats on all 12 drawing sheets (PDF pages 3-14). OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. 'ASCE 7-05' only survives at 200/300/400 dpi and was dropped; the rest are stable at every resolution."
+      }
+    }
+  ]
+}
