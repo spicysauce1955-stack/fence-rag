@@ -17,8 +17,9 @@ Two things that must not be confused:
 Governing documents, in order of authority: `docs/mvp-implementation-spec.md` (authoritative),
 `guide.md` (the contract it implements, including 12 numbered prohibitions),
 `docs/target-architecture.md` (informative future direction), `rag-pipeline-plan.md` (historical
-audit). `docs/phase-checkpoints.md` records what was built, tested, and deliberately left undone,
-with measured numbers. Read the spec's prohibition list before touching extraction or ingestion.
+audit). `docs/state-and-gaps.md` is the current snapshot — measured state and every known gap, read
+it first; `docs/phase-checkpoints.md` records what was built, tested and deliberately left undone,
+phase by phase. Read the spec's prohibition list before touching extraction or ingestion.
 
 ## Commands
 

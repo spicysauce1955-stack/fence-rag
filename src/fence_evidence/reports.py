@@ -88,6 +88,61 @@ def environment_report() -> str:
     return "\n".join(lines) + "\n"
 
 
+def _scanned_table_paragraph() -> str:
+    """Measured, not asserted: what OCR table reconstruction actually produced."""
+    from .paths import EVIDENCE_DB
+    lead = (
+        "The wind-load and footing tables inside the NOA packages are line-work in a "
+        "scanned engineering drawing, not text. pdfplumber cannot see them at all (no "
+        "text layer), so a conservative OCR word-grid reconstructor was implemented: "
+        "words cluster into rows, recurring x-positions become columns, and the "
+        "candidate grid is rejected unless it has at least three columns, three rows, "
+        "30% numeric cells, few single-character cells, and adequate word confidence.")
+    if not EVIDENCE_DB.is_file():
+        return lead + "\n\nNo store has been built yet, so its yield is unmeasured."
+    conn = connect()
+    try:
+        grids = conn.execute("""SELECT d.source_path, e.page_no, t.n_rows, t.n_cols
+              FROM tables t JOIN elements e ON e.element_id = t.element_id
+              JOIN documents d ON d.document_id = e.document_id
+             WHERE t.detector = 'ocr-word-grid'
+             ORDER BY d.source_path, e.page_no""").fetchall()
+        gaps = conn.execute("""SELECT COUNT(*) FROM quality_issues
+             WHERE kind = 'table_not_reconstructed'""").fetchone()[0]
+        structural_grids = conn.execute("""SELECT COUNT(*) FROM tables t
+              JOIN elements e ON e.element_id = t.element_id
+              JOIN documents d ON d.document_id = e.document_id
+             WHERE t.detector = 'ocr-word-grid' AND d.structural = 1""").fetchone()[0]
+    finally:
+        conn.close()
+    docs = sorted({Path(g["source_path"]).name for g in grids})
+    body = [lead, "",
+            f"Measured yield across the full corpus: **{len(grids)} grids accepted** in "
+            f"{len(docs)} document(s), and **{gaps} pages** where a table is named but no "
+            f"grid could be recovered."]
+    if grids:
+        body += ["", _table(["Document", "Page", "Grid"],
+                            [[f"`{Path(g['source_path']).name[:52]}`", g["page_no"],
+                              f"{g['n_rows']}x{g['n_cols']}"] for g in grids])]
+    body += ["",
+             "The split matters more than the total. What it recovers are scanned "
+             "**catalog and specification** tables: picket size and spacing grids, rail "
+             "and steel-reinforcement columns, ASCE terrain exposure constants. What it "
+             f"does not recover is the material this corpus exists for. Only "
+             f"{structural_grids} of these grids sits in a structural document, and none "
+             "is a wind/exposure/footing table off an NOA drawing sheet: tesseract reads "
+             "those pages at roughly 50% mean word confidence, and every candidate grid "
+             "there was rejected by the gates that stop it inventing values. Rendering at "
+             "400 and 500 dpi instead of 300 did not improve confidence.",
+             "",
+             "The consequence is stated rather than hidden. For those pages the preserved "
+             "page image plus the OCR text is the faithful representation, a "
+             "`table_not_reconstructed` quality issue is recorded, and the evaluation "
+             "report names the Phase 7 experiment — visual or model-based page reading — "
+             "that this failure would justify."]
+    return "\n".join(body)
+
+
 def corpus_audit_report() -> str:
     recs = load_manifest()
     on_disk = [r for r in recs if r.get("sha256")]
@@ -193,6 +248,10 @@ def corpus_audit_report() -> str:
         "filename or curated title says so, otherwise `unknown`. Ingestion then upgrades",
         "it from evidence inside the documents — an NOA that names a previous approval",
         "marks that approval superseded.",
+        "",
+        "## Scanned tables: what could and could not be recovered",
+        "",
+        _scanned_table_paragraph(),
         "",
         "## Highest-value material",
         "",

@@ -125,6 +125,28 @@ filename or curated title says so, otherwise `unknown`. Ingestion then upgrades
 it from evidence inside the documents — an NOA that names a previous approval
 marks that approval superseded.
 
+## Scanned tables: what could and could not be recovered
+
+The wind-load and footing tables inside the NOA packages are line-work in a scanned engineering drawing, not text. pdfplumber cannot see them at all (no text layer), so a conservative OCR word-grid reconstructor was implemented: words cluster into rows, recurring x-positions become columns, and the candidate grid is rejected unless it has at least three columns, three rows, 30% numeric cells, few single-character cells, and adequate word confidence.
+
+Measured yield across the full corpus: **9 grids accepted** in 6 document(s), and **73 pages** where a table is named but no grid could be recovered.
+
+| Document | Page | Grid |
+|---|---|---|
+| `bufftech-catalog-2014.pdf` | 28 | 29x8 |
+| `bufftech-installation-guide-afence.pdf` | 31 | 13x3 |
+| `bufftech-vinyl-catalog-standardfencing.pdf` | 4 | 9x3 |
+| `bufftech-vinyl-catalog-standardfencing.pdf` | 19 | 20x8 |
+| `bufftech-vinyl-catalog-standardfencing.pdf` | 20 | 32x11 |
+| `NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf` | 2 | 4x3 |
+| `CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_W` | 31 | 35x9 |
+| `CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_W` | 39 | 11x12 |
+| `nervous-nelly-VF15100-install-guide.pdf` | 10 | 8x7 |
+
+The split matters more than the total. What it recovers are scanned **catalog and specification** tables: picket size and spacing grids, rail and steel-reinforcement columns, ASCE terrain exposure constants. What it does not recover is the material this corpus exists for. Only 1 of these grids sits in a structural document, and none is a wind/exposure/footing table off an NOA drawing sheet: tesseract reads those pages at roughly 50% mean word confidence, and every candidate grid there was rejected by the gates that stop it inventing values. Rendering at 400 and 500 dpi instead of 300 did not improve confidence.
+
+The consequence is stated rather than hidden. For those pages the preserved page image plus the OCR text is the faithful representation, a `table_not_reconstructed` quality issue is recorded, and the evaluation report names the Phase 7 experiment — visual or model-based page reading — that this failure would justify.
+
 ## Highest-value material
 
 The 22 scanned PDFs carry 358 pages and include nearly every

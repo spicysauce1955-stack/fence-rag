@@ -81,6 +81,7 @@ for hit in search_evidence("racking degrees Chesterfield", limit=5):
 | `docs/mvp-implementation-spec.md` | **authoritative** specification |
 | `docs/target-architecture.md` | informative future direction |
 | `docs/phase-checkpoints.md` | per-phase record: implemented, tested, incomplete |
+| `docs/state-and-gaps.md` | current snapshot: measured state, and every known gap |
 | `workspace/reports/` | environment, corpus audit, dependency options, pilot selection, coverage, evaluation |
 | `eval/gold-questions-*.json` | 44 hand-verified benchmark questions |
 
