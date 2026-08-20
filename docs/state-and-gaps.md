@@ -63,14 +63,19 @@ plus 81 whose text layer decoded to mojibake and was rejected.
 | A1 pilot preservation assertions | all | all | pass |
 | A2 retrieval contract | all fields, images resolve | all | pass |
 | A3 document recall@10 | ≥ 0.80 | 0.805 | pass |
-| A3 evidence support | ≥ 0.70 | **0.623** | **fail** |
-| A4 no-answer precision | ≥ 0.66 | 0.667 | pass |
+| A3 evidence support | ≥ 0.70 | **0.623** (0.672 with the second stage) | **fail** |
+| A4 no-answer precision | ≥ 0.66 | **0.333** on 18 negatives | **fail** |
+| A4b false-unsupported rate | ≤ 0.20 | 0.146 | pass |
 | A5 full-corpus coverage report | no silent skips | 0 skipped, 0 failures | pass |
 | A6 idempotency and rebuildability | tests pass | pass | pass |
 | A7 every fact carries provenance | all | all | pass |
 | A8 failure categories recorded with the experiment each justifies | yes | yes | pass |
 
-Nine of ten met. The one failure is A3's evidence support, discussed below.
+Eight of eleven met. A3's evidence support and A4's no-answer precision both
+fail, and A4's earlier 0.667 turned out to be an artefact of a three-question
+negative set — see G1 and G7 below. A4b is new: it is the other half of A4, added
+because a no-answer detector can score well by declaring almost everything
+unsupported.
 
 ---
 
@@ -99,12 +104,25 @@ support:
 | current_version | gq-011 | version-aware ranking is not implemented |
 | no_answer | gq-117 | a price question; the corpus has blank price cells, which read as an answerable match |
 
-**Not closed because** the honest fix is a Phase 7 experiment, and the guide
-requires a measured failure plus a stated acceptance criterion before building
-one. Those are written up in `workspace/reports/evaluation-report.md`. One
-ranking change was tried and rejected on evidence: raising the `heading_path`
-BM25 weight from 0.55 to 1.6 lifts recall@10 to 0.854 and MRR to 0.683 but drops
-no-answer precision from 0.667 to 0.333.
+**Second-stage within-page retrieval was built and measured against this gap.**
+It lifts unit support to 0.672 with document recall, page support, no-answer
+precision and the false-unsupported rate all unchanged to three decimals — but
+0.672 < 0.70, so it is **rejected as default** and retained behind an opt-in
+flag. Full measurement trail, including the replacement design that made things
+worse (0.540) and the information-floor trade-off, in
+`docs/second-stage-evaluation.md`.
+
+Diagnosis of the residual, measured: of 51 answer terms still unreached, **38 are
+not on any retrieved page** — a first-stage recall deficit no within-page stage
+can address — and most of the remaining 13 are terms that do not appear in the
+query at all, so selecting them would mean targeting the answers. The lever that
+could actually close A3 is the relevance audit's F1 recommendation (project a
+heading when no unit beneath it carries it), which is an indexing change held
+pending review.
+
+One earlier ranking change was also rejected on evidence: raising the
+`heading_path` BM25 weight from 0.55 to 1.6 lifts recall@10 to 0.854 and MRR to
+0.683 but halves no-answer precision.
 
 ### G2 — Scanned NOA tables are never turned into cells
 
@@ -129,19 +147,34 @@ confidence. This needs visual or model-based page reading, which is deferred by
 prohibition 9 until the evaluation justifies it. It now does; the experiment is
 specified but not built.
 
-### G3 — Version status is `unknown` for 129 of 144 documents
+### G3 — Version status is `unknown` for 132 of 144 documents (partly addressed)
 
 Status is derived conservatively — `active`/`superseded` only when the filename,
-curated title, or another document's text says so. 24 supersession edges were
-discovered from NOA text and 12 documents are marked superseded, but most
-install guides and catalogs carry no version marker at all. `resolve_document_
-version` returns `unknown` for them, and `effective_at` returns `None` whenever
-no chain member has a parseable issue date, which is most of them.
+curated title, or another document's text says so. Most install guides and
+catalogs carry no version marker at all, and that part is unchanged: 132
+`unknown`, 9 `superseded`, 3 `active`.
 
-**Not closed because** inventing a status would be worse than admitting one is
-absent. Closing it needs either issue dates extracted from document bodies
-(Phase 6 found 84 `effective_date` and 75 `expiration_date` facts, currently
-unused for this) or human curation.
+**What was fixed.** Integrating the date facts surfaced an inverted edge: the
+status update marked the `to` side of a `superseded_by` edge, which is the
+*newer* approval. Every current NOA was therefore labelled superseded and the
+whole CertainTeed→Barrette chain resolved with no active member. Corrected, with
+a regression test asserting the direction: the current Barrette NOA 24-0117.05
+and its three duplicate filings are no longer superseded, and the 2006 approval
+06-1019.01 now correctly is.
+
+**What was added.** `resolve_document_version` now reads the Phase 6
+`effective_date` and `expiration_date` facts at query time (see
+`src/fence_evidence/versions.py`). They cover all 17 NOA documents. Every date
+carries its element, page and review status; disagreeing facts produce a
+`conflict` and no asserted value rather than a guess; an expiry verdict always
+echoes the date it was judged against; and a member whose approval has expired is
+never offered as active. Stored classification is not written from resolution, so
+this respects the audit review gate.
+
+**Still open.** The 132 `unknown` documents are unaffected — they have no dates
+to find. And the `active` answer is often `None` even for a chain whose newest
+member is demonstrably in force, because "active" still requires an explicit
+marker; the expiry verdict now carries that information instead.
 
 ### G4 — A DOCX has no page image or bounding boxes
 
@@ -167,13 +200,36 @@ exists — there is no review UI or workflow, only the column. `post_spacing_in`
 (3) and `racking_degrees` (5) are thin for the reason in G2. `exposure_category`
 (15) is low because exposure appears mostly inside unreconstructed tables.
 
-### G7 — The no-answer threshold rests on three negatives
+### G7 — No-answer detection does not work, and now we know why
 
-The gold set has 3 `no_answer` questions, so `no_answer_precision` moves in
-steps of 0.333 and the calibrated score floor (17.0) is fitted to very little.
-The rarest-term signal added later is corpus-derived and should generalise
-better, but neither is well validated. More negative questions would be the
-cheapest real improvement to the benchmark.
+The negative set was expanded from 3 to 18 questions, deliberately built in three
+classes: 5 **absent-subject** (a manufacturer, standard or material genuinely not
+in the corpus), 5 **adjacent-vocabulary** (every word occurs, often on one page,
+but nothing answers the question) and 5 **near-miss** (the corpus covers the
+topic *and* the product, and documents the asked-for property for other product
+families — e.g. Bufftech Danbury footing depth, where the exposure table appears
+four times in the same PDF but only on the Imperial, Breezewood, Brookline and
+Chesterfield pages).
+
+On that set no lexical feature separates the classes. Mean values, answerable vs
+unanswerable: rarest query term present in the best result 0.244 vs 0.444 (the
+*wrong* direction), term coverage 0.733 vs 0.747, score margin 0.248 vs 0.294,
+top relevance 22.3 vs 20.5 on a 9–50 range. This is a property of the question
+classes, not a tuning failure — a near-miss question is by construction one whose
+words are all present.
+
+Worse, the previous rule was one-sided. Combining a score floor with rarest-term
+presence reached 0.611 precision while declaring **24 of 41 answerable
+questions** unsupported. The rule now keeps only what fires for a checkable
+reason — a query term absent from the entire corpus, or no results at all —
+scoring 0.333 precision at a 0.146 false-unsupported rate, and both numbers are
+reported together from now on.
+
+**Not closed because** it needs evidence-grounded checking rather than a
+threshold: does a retrieved element actually state a value *for the subject
+asked about*. The fact layer, with its subject and conditions columns, is the
+foundation for that; a per-class breakdown of where it fails is in
+`workspace/reports/evaluation-report.md`.
 
 ### G8 — One known-bad gold annotation, left in place
 
@@ -189,6 +245,33 @@ data: no corpus page has both a non-zero `/Rotate` and a text layer (the rotatio
 path), and no document currently has two versions (the version-scoping path in
 the projection, `get_page`, `get_element_context` and facts). Both are covered by
 unit tests only.
+
+### G12 — The retrieval projection has measured relevance defects
+
+A full relevance audit is in `workspace/reports/projection-relevance-audit.md`,
+re-runnable with `python3 -m fence_evidence.cli audit`. Headline findings, none
+acted on pending review: 33.9% of headings are unreachable by any route and 27
+pages are absent from the index entirely (F1); 46.5% of units duplicate another
+unit's text, and 29.5% of top-10 slots hold duplicated text (F2); 20.2% of slots
+repeat a page already in the list (F3); 45% of units are under 80 characters
+(F4); table units carry whole grids up to 4,532 characters (F5); 33 units are
+residual mojibake (F7); and 33.9% of units are OCR text ranked identically to
+clean text with no confidence signal exposed (F8).
+
+### G13 — The scanned-table experiment is designed, not run
+
+`docs/experiment-noa-table-reading.md` specifies a four-stage per-cell OCR method
+for the 73 flagged pages, with a review gate that forbids promoting any numeric
+fact without a human accepting the specific cell, and acceptance criteria in
+which a single confidently-wrong numeric cell fails the experiment outright. The
+input artefacts exist: `python3 -m fence_evidence.cli noa-table-crops` writes 44
+full-page crops (73 flagged pages deduplicate to 44 distinct contents) with
+SHA-256s and a manifest. Nothing reads values yet.
+
+A finding from building that input: the ruled-band detector locks onto fence
+picket line-work. On one page it clipped the real table off the bottom of the
+crop, so the preserved crop is always the full page and the band is recorded only
+as a hint.
 
 ### G10 — Not built at all (deliberate)
 

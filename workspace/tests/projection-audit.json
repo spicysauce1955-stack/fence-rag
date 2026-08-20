@@ -1,0 +1,172 @@
+{
+  "coverage": {
+    "elements": 81794,
+    "projected": 54209,
+    "projected_share": 0.6628,
+    "excluded_by_type": {
+      "heading": {
+        "elements": 20925,
+        "chars": 371337
+      },
+      "figure": {
+        "elements": 6660,
+        "chars": 0
+      }
+    },
+    "headings": 20925,
+    "headings_unreachable": 7097,
+    "headings_unreachable_share": 0.3392,
+    "pages": 2147,
+    "pages_with_units": 2117,
+    "pages_without_units": 30,
+    "pages_without_units_but_with_elements": 27
+  },
+  "unit_shape": {
+    "units": 10886,
+    "length": {
+      "min": 1,
+      "p10": 8,
+      "median": 99,
+      "p90": 696,
+      "max": 4532,
+      "mean": 255.2
+    },
+    "under_20_chars": 1941,
+    "under_80_chars": 4899,
+    "over_1400_chars": 432,
+    "by_type": {
+      "paragraph": {
+        "n": 8304,
+        "min": 1,
+        "avg": 224,
+        "max": 2783
+      },
+      "list": {
+        "n": 1461,
+        "min": 6,
+        "avg": 318,
+        "max": 2008
+      },
+      "table": {
+        "n": 603,
+        "min": 26,
+        "avg": 381,
+        "max": 4532
+      },
+      "drawing": {
+        "n": 221,
+        "min": 2,
+        "avg": 689,
+        "max": 2576
+      },
+      "ocr_supplement": {
+        "n": 202,
+        "min": 1,
+        "avg": 154,
+        "max": 692
+      },
+      "caption": {
+        "n": 89,
+        "min": 6,
+        "avg": 349,
+        "max": 1917
+      },
+      "drawing_label": {
+        "n": 6,
+        "min": 8,
+        "avg": 58,
+        "max": 110
+      }
+    },
+    "elements_per_unit": {
+      "1": 4807,
+      "2": 1213,
+      "3": 704,
+      "4": 627,
+      "5": 548,
+      "6": 463,
+      "7": 270,
+      "8": 574,
+      "9": 200,
+      "10": 139,
+      "11": 168,
+      "12": 96
+    },
+    "duplicate_text_groups": 1533,
+    "units_with_duplicate_text": 5060,
+    "duplicate_share": 0.4648,
+    "worst_duplicates": [
+      {
+        "occurrences": 178,
+        "documents": 1,
+        "text": "Illusions Fence \u00a92020 All Rights Reserved"
+      },
+      {
+        "occurrences": 150,
+        "documents": 14,
+        "text": "1. None."
+      },
+      {
+        "occurrences": 78,
+        "documents": 1,
+        "text": "*Required support for gate posts and strength for hardware c"
+      },
+      {
+        "occurrences": 61,
+        "documents": 7,
+        "text": "USE (2) PIECES OF 1/2\" REBAR IN HINGE,"
+      },
+      {
+        "occurrences": 61,
+        "documents": 1,
+        "text": "Gate Hardware | Model # | SOS#\nHeavy-Duty Gate Latch - Black"
+      },
+      {
+        "occurrences": 44,
+        "documents": 9,
+        "text": "1, None."
+      },
+      {
+        "occurrences": 37,
+        "documents": 11,
+        "text": "1. By Miami-Dade County Department of Regulatory and Economi"
+      },
+      {
+        "occurrences": 37,
+        "documents": 1,
+        "text": "------------------------------------------------------------"
+      }
+    ],
+    "residual_mojibake_units": 33,
+    "ocr_units": 3693,
+    "ocr_share": 0.3392
+  },
+  "result_list_composition": {
+    "queries": 59,
+    "slots": 590,
+    "by_element_type": {
+      "paragraph": 437,
+      "list": 67,
+      "table": 49,
+      "drawing": 24,
+      "caption": 5,
+      "drawing_label": 4,
+      "ocr_supplement": 4
+    },
+    "slots_with_duplicated_text": 186,
+    "duplicated_share": 0.3153,
+    "slots_under_40_chars": 80,
+    "tiny_share": 0.1356,
+    "slots_repeating_a_page": 97,
+    "repeat_page_share": 0.1644,
+    "mean_distinct_pages_per_list": 8.36
+  },
+  "within_page_ceiling": {
+    "questions": 41,
+    "unit_support_now": 0.6226,
+    "within_page_ceiling": 0.7692,
+    "headroom": 0.1466,
+    "questions_improvable": 13,
+    "questions_already_at_full_support": 16
+  }
+}

@@ -1,0 +1,306 @@
+{
+  "set": "no-answer",
+  "generated_by": "subagent",
+  "questions": [
+    {
+      "id": "gq-201",
+      "category": "no_answer",
+      "question": "What footing depth and maximum post spacing does Bufftech specify for a Danbury picket fence in Wind Exposure C?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Bufftech Danbury footing depth exposure C",
+        "Danbury max post spacing wind exposure",
+        "CertainTeed Danbury fence footing dimensions"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -inE 'danbury' over the element dump -> 42 doc/page hits, none on a page carrying wind data; grep -inE 'danbury' | grep -icE 'exposure|wind|mph|footing depth' -> 2 hits, both the table-of-contents table of bufftech-gate-install-guide.pdf p2 / bufftech-gate-installation-guide.pdf p2 (a contents listing, no values). FTS: SELECT COUNT(*) FROM retrieval_fts WHERE retrieval_fts MATCH '\"Danbury\" AND \"exposure\"' -> 0; '\"Danbury\" AND \"footing\"' -> 0; '\"Rothbury\" AND \"exposure\"' -> 0. Then enumerated which pages of manuals/certainteed-bufftech/bufftech-fence-installation-guide-2024.pdf carry the 'MAXIMUM POST SPACING AND FOOTING DIMENSIONS' heading -> p17, p19, p29, p31 only, and mapped page->style headings: p17 Imperial, p19 Breezewood, p29 Brookline, p31 Chesterfield. Danbury/Rothbury are pp.10-11 and carry no wind table. pdftotext -layout over all 137 corpus PDFs into a scratch dir, then grep -rilE over it for 'Danbury' AND 'Exposure' on the same page -> none. End-to-end check: PYTHONPATH=src python3 -m fence_evidence.cli search \"Bufftech Danbury footing depth exposure C\" -k 3 returns manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf p29 ('Wind Footing Max. Post / Exposure Depth Spacing / B 30\" 97\"') - a genuine wind-exposure footing table, on a page belonging to a different style.",
+        "confirmed": true,
+        "notes": "class: near-miss -- The identical Wind Exposure B/C/D footing-depth + max-post-spacing table (C = 36\" footing / 88\" spacing) IS in the very same PDF, four times, but only on the Imperial (p17), Breezewood (p19), Brookline (p29) and Chesterfield (p31) style pages. Danbury is a spaced-picket style and appears on pp.10-11 with no wind data at all, and it is absent from every Miami-Dade NOA in the corpus (the NOAs cover only Columbia, Imperial, Chesterfield, Breezewood, Brookline). A retriever will almost certainly return the p17/p19/p31 table and a naive scorer will call it supported; the correct answer is that Bufftech never publishes wind-exposure footings for Danbury."
+      }
+    },
+    {
+      "id": "gq-202",
+      "category": "no_answer",
+      "question": "What is the notched Izod impact strength (ASTM D256), in ft-lb per inch of notch, of the PVC compound used in Illusions vinyl fence profiles?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Illusions vinyl fence Izod impact ft-lb per inch",
+        "Illusions PVC ASTM D256 impact value",
+        "EverStrong profile notched izod impact strength"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -inE 'izod' -> 38 hits; grouped by source_path they are (a) the Barrette/CertainTeed Miami-Dade NOA material-property tables, which DO give 'Izod Impact FTxlbs/in notch 17.0 D-256', and (b) five Illusions documents plus the industry-standards ASTM flyer, where the only text is the list entry 'D256 - To determine Izod impact properties' with no value. FTS: '\"Izod\" AND \"Illusions\"' -> 6 units, all that same list line or the F964 weathering paragraph. pdftotext -layout over all 137 corpus PDFs into a scratch dir, then grep -rilE over it for 'Izod' -> 6 files, same set. Because manuals/illusions-vinyl-fence/structural/noa-14-1209.01-*.pdf is image-only, I also rendered its drawing sheet (pdftoppm -r 150 -png -f 4 -l 4) and read the PNG: its 'PVC Material Specifications' block lists only Control Tensile Strength 6332, Weathered Tensile Strength 6690, Percentage Change +5.6%, Rate of Burning 0.0 mm/min, Smoke Density 63.5, Self Ignition 380 C (D-638/D-635/D-2843/D-1929). No D-256 row exists on any Illusions sheet.",
+        "confirmed": true,
+        "notes": "class: near-miss -- Illusions' own ASTM flyer names ASTM D256 as a specification it meets, on the same page as tensile, flexural and cell-class data, but never publishes an Izod number. The value 17.0 ft-lb/in notch IS published, for Barrette/CertainTeed PVC, in the Miami-Dade NOA drawing tables - a foreign-manufacturer trap. Nearest Illusions-specific impact figure is a different property: 'minimum impact resistance of 0.6 in.-lb/mil (2670 J/m) after weathering' (the ASTM F964 weathering requirement, per D4226, not a D256 Izod result)."
+      }
+    },
+    {
+      "id": "gq-203",
+      "category": "no_answer",
+      "question": "How many pounds of gate weight is the Illusions Extra Strong Hinge rated to support?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Illusions extra strong hinge weight rating lbs",
+        "Illusions vinyl gate hinge load capacity pounds",
+        "IESH hinge supports gates up to"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: dumped both pages of manuals/illusions-vinyl-fence/extra-strong-hinge-brochure.pdf in full from the element rows - it gives dimensions (15\" overall, 10.5\" load-bearing arm, 1.5\", 7.75\"), material (stainless steel), a patent number (11/949,361) and only qualitative claims: 'HIGHER LOAD CAPACITY', 'vastly increased load bearing capac[ity]', 'PERFECT FOR LARGER, HEAVIER GATES'. grep -E '^manuals/illusions' over the element dump | grep -oiE 'lbs?|pounds' -> zero weight units in ANY Illusions document (the only 'lb' substring hits are 'in.-lb/mil' and the word 'compounds'). Also grepped hinge lines corpus-wide for 'lbs|pound|weight|rated|capacity': the only numeric hinge ratings anywhere are in manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf p106. End-to-end check: PYTHONPATH=src python3 -m fence_evidence.cli search \"Illusions extra strong hinge weight rating lbs\" -k 3 returns the correct document (manuals/illusions-vinyl-fence/extra-strong-hinge-brochure.pdf p2) at rank 1 - the right page, containing no number.",
+        "confirmed": true,
+        "notes": "class: near-miss -- The corpus contains a dedicated two-page brochure for exactly this hinge, and gate-hinge weight ratings ARE tabulated for a different manufacturer: the Freedom catalog p106 'Support Gates Up To' column gives Heavy-Duty Strap Hinge 75 lbs and Standard Strap Hinge 35 lbs. Illusions publishes only comparative marketing language. Very high lexical overlap with the correct document, zero numeric answer."
+      }
+    },
+    {
+      "id": "gq-204",
+      "category": "no_answer",
+      "question": "What aluminum alloy and wall thickness are the Weatherables aluminum post and rail inserts (stiffeners) made from?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Weatherables aluminum insert alloy wall thickness",
+        "Weatherables post stiffener 6005-T5",
+        "aluminum insert gauge weatherables vinyl fence"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -inE '6005|6063|6061|alloy' -> 87 element hits, every one inside a Barrette/CertainTeed/VEKA Miami-Dade NOA, the Barrette privacy-railing PE report, the ASTM compilation, the CLFMI manual or the Wheatland SpecCheck. Not one is a Weatherables or TriWest document. FTS: '\"Weatherables\" AND \"alloy\"' -> 0; '\"Weatherables\" AND \"6005\"' -> 0. grep over all Weatherables/TriWest rows for 'aluminum' returns only unqualified mentions ('install aluminum insert on the hinge side', 'reinforce the post with either concrete or an aluminum insert to at least 22\" above grade', 'the top and bottom rails have aluminum stiffeners inside them', 'aluminum-reinforced bottom rail'). Because the six Weatherables CAD sheets are PNGs whose only text is OCR, I opened manuals/weatherables/structural/weatherables-cad-augusta-8x8-privacy.png with the Read tool and read it visually: it dimensions the panel (96\", 95.5\", 1.5\" x 5.5\" x 95.5\" rails) and labels 'U-Channels' with no alloy, temper or thickness callout. End-to-end check: PYTHONPATH=src python3 -m fence_evidence.cli search \"Weatherables aluminum insert alloy wall thickness\" -k 3 returns as its top hit manuals/weatherables/weatherables-4-rail-fence-installation-2024.pdf p3 ('0.150\" wall thickness ... 0.090\" wall thickness'). I rendered that page (pdftoppm -r 150 -png -f 3 -l 3) and read it: those two figures dimension the VINYL 5\"x5\" post section and the VINYL 1.50\"x5.50\" ranch rail section in a TOP VIEW callout, not the aluminum insert.",
+        "confirmed": true,
+        "notes": "class: near-miss -- Weatherables mandates an aluminum insert for fences over 6' and for high-wind installs but never specifies the metal. The exact answer shape IS in the corpus for other brands: the Barrette NOA drawings say 'RAIL INSERT: 6005-T5 ALUMINUM' with 0.090\" wall. Alloy vocabulary and Weatherables vocabulary are both dense in the corpus but never co-occur. Confirmed distractor: the live retriever's top hit for this exact query is a page that literally says '0.090\" wall thickness' - but for the PVC rail profile of a ranch-rail fence, not for an aluminum stiffener. A term-overlap scorer will treat that as the answer."
+      }
+    },
+    {
+      "id": "gq-205",
+      "category": "no_answer",
+      "question": "How much can a Weatherables tongue-and-groove privacy fence panel rack, in inches over an 8 ft span?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Weatherables privacy panel racking inches over 8 feet",
+        "how much does weatherables T&G privacy fence rack for slope",
+        "weatherables privacy fence slope accommodation"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: read manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf p4 ('Stepping vs Racking') in full from the element rows. Its racking paragraph is an unfilled template: 'Each individual fence style is able to accommodate a defined degree of slope (x inches over x feet)... check the spec diagram for your specific style of fence'. The referenced per-style spec diagrams are not in the corpus for any privacy style. grep over all Weatherables/TriWest rows for 'rack' -> the ONLY numeric racking statement is weatherables-3-rail-fence-installation-2024.pdf p6: 'This fence panel can rack up to 6\" over an 8 ft. span' (a 3-rail ranch style, not privacy). grep -inE 'rack' on weatherables-privacy-fencing-specsheet.pdf rows and the 2026 full-line catalog rows -> no racking figure. Also checked the two Augusta and the Pembroke CAD PNGs visually - dimensions only, no racking note.",
+        "confirmed": true,
+        "notes": "class: near-miss -- The corpus states a racking allowance for the Weatherables 3-rail ranch panel (6\" over 8 ft) and for other brands (Barrette 'Max 8 degrees of rack, or 1\" per foot'; Freedom 'racks 1 inch per foot'; a whole Digger Specialties racking brochure), and the Weatherables master instructions devote a section titled 'Stepping vs Racking' to the topic - but the number for the privacy panels is literally left as the placeholder 'x inches over x feet'. Highest-scoring passage will be a real racking sentence for the wrong product."
+      }
+    },
+    {
+      "id": "gq-206",
+      "category": "no_answer",
+      "question": "What is the minimum ambient temperature at which a Bufftech vinyl fence may be installed?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "minimum temperature to install vinyl fence",
+        "Bufftech cold weather installation temperature limit",
+        "how cold is too cold to install vinyl fence"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -icE for each of 'minimum temperature' -> 0, 'cold weather' -> 0, 'freezing' -> 0, '40 ?°?F|40 degrees' -> 0, 'do not install.{0,40}temp' -> 0, 'ambient' -> 0; '50 ?°?F' -> 1 (a rail dimension, not a temperature limit). grep -inE 'temperature' -> 23 hits, all of which I read: they are (a) the >100 degF colour recommendation, (b) the Frost Line glossary entry, (c) ASTM method names (D648 heat distortion temperature, D1929 self-ignition temperature), (d) two generic ARCAT storage clauses. FTS: '\"minimum temperature\"' 0, '\"cold weather\"' 0, '\"installation temperature\"' 0. pdftotext -layout over all 137 corpus PDFs into a scratch dir, then grep -rilE over it for 'minimum temperature|cold weather' -> 0 files. python3 -c \"import zipfile,re; strip tags from word/document.xml\" on manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx, then counted each term: 'temperature' 2 (both generic storage/ventilation boilerplate, no number).",
+        "confirmed": true,
+        "notes": "class: adjacent-vocabulary -- Every word of the question occurs, and temperature guidance for vinyl fence DOES exist in the same documents on adjacent lines: '*In climates where the temperature exceeds 100 degrees Fahrenheit, we recommend installing Arctic Blend, Brazilian Blend, Sierra Blend...' (an upper bound, and a colour recommendation, not an install limit) and 'Caution - In climates that experience freeze-thaw cycles, this installation method could result in post cracking over time'. There is no low-temperature installation limit anywhere in the corpus, for any manufacturer."
+      }
+    },
+    {
+      "id": "gq-207",
+      "category": "no_answer",
+      "question": "What is the coefficient of linear thermal expansion of Illusions vinyl fence PVC, in inches per inch per degree F?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "coefficient of thermal expansion vinyl fence PVC",
+        "Illusions PVC ASTM D696 thermal expansion value",
+        "how much does a vinyl fence rail expand per degree"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -inE 'D696' -> 6 element hits, all the same catalogue line 'D696 - Test Method for Coefficient of Linear Thermal Expansion of Plastics Between 30C and 30C with a Vitreous Silica Dilatometer', in five Illusions documents and the industry-standards ASTM flyer. No value follows it in any copy. FTS: '\"coefficient of thermal expansion\"' -> 0; '\"thermal expansion\"' -> 8 units, which are the D696 list line plus the Bufftech marketing sentence 'a more secure connection that allows for thermal expansion season after season'; '\"in/in\"' -> 3 units, all unrelated (OCR noise on NOA drawings and a CLFMI post-property table in in^3/in^4). pdftotext -layout over all 137 corpus PDFs into a scratch dir, then grep -rilE over it for 'coefficient of (linear )?thermal expansion' -> 0 files (the phrase only reaches the store via the same list line). python3 -c \"import zipfile,re; strip tags from word/document.xml\" on manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx, then counted each term: 'thermal expansion' 0.",
+        "confirmed": true,
+        "notes": "class: adjacent-vocabulary -- The exact standard for the exact property is named by Illusions itself, and expansion-and-contraction instructions are everywhere ('leave a 1\" gap between rail ends inside post to allow for expansion', 'measure and mark panel 1/2\" shorter than stiffeners... needed for expansion and contraction'). The corpus therefore gives the practical allowance but never the material coefficient. Pure term-overlap will score the D696 line and the 1\" gap line very highly."
+      }
+    },
+    {
+      "id": "gq-208",
+      "category": "no_answer",
+      "question": "How many inches below the frost line must a vinyl fence post footing extend?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "how far below frost line post footing",
+        "inches below frost line fence post hole depth",
+        "footing depth below frost line requirement"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -i 'frost line' -> 174 FTS units / dozens of element rows; I listed every distinct phrasing (grep -i 'frost line' | cut -f4 | sort -u). All of them are one of: 'Dig holes 30\" deep or to frost line', 'down to your specified frost line', 'Installed 30\" below the ground (or to frost line)', 'Varies: Must be below frost line', 'Check local codes for frost line depth and regulations', and the glossary entry 'Frost Line - Lowest level in soil that freezes... varies from 0\" in warm regions to 3' or more in cold-winter areas'. FTS: '\"below the frost line\"' -> 0; '\"below frost line\"' -> 4, all the Weatherables 'Varies: Must be below frost line' caption with no dimension. python3 -c \"import zipfile,re; strip tags from word/document.xml\" on manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx, then counted each term: 'frost' 0.",
+        "confirmed": true,
+        "notes": "class: adjacent-vocabulary -- 'frost line', 'below', 'footing', 'depth' and 'inches' all co-occur repeatedly, sometimes in one sentence, and the corpus even defines the frost line - but no source ever states an extension below it. The closest statements are 'to frost line' (i.e. down to, not below) and an explicit deferral: 'Check local codes for frost line depth and regulations'. The correct behaviour is to report that the corpus defers this to local code."
+      }
+    },
+    {
+      "id": "gq-209",
+      "category": "no_answer",
+      "question": "What is the ASTM E84 flame spread index of Illusions vinyl fence PVC material?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Illusions vinyl fence flame spread index ASTM E84",
+        "vinyl fence E84 flame spread rating number",
+        "PVC fence surface burning characteristics index"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -icE 'E84' -> 0 (the corpus writes it 'E-84-04'); grep -inE 'flame spread|flammab|smoke dens' -> 7 element hits which I read individually: the Illusions/industry-standards ASTM flyer line 'E-84-04 - Used to determine the flame spread value of PVC material; Illusions burn rate is significantly lower than allowed value' (no number, no allowed value quoted), the Bufftech 2014 catalog feature table checkbox 'Class A rating for flame spread' (a class, no index, different manufacturer), and NOA evidence-log lines naming 'Smoke Density test (ASTM D 2843), and Rate of Burn (ASTM D 635)'. grep -inE 'flame spread index|flame.spread.{0,20}[0-9]|index of [0-9]' -> 0. FTS: '\"E84\"' 0, '\"Class A\"' 2 (the Bufftech table plus an unrelated AASHTO chain-link line). pdftotext -layout over all 137 corpus PDFs into a scratch dir, then grep -rilE over it for 'E84' -> 0 files.",
+        "confirmed": true,
+        "notes": "class: adjacent-vocabulary -- The test standard is cited by name on the same page as the question's other terms, and a fire class ('Class A') is claimed elsewhere in the corpus for a different brand, so both a term-overlap retriever and a lenient grader will think this is answered. No numeric flame-spread index (nor the 'allowed value' it is compared against) appears anywhere. Note the Illusions NOA drawings do give Rate of Burning 0.0 mm/min and Smoke Density 63.5 - different properties under D-635 and D-2843."
+      }
+    },
+    {
+      "id": "gq-210",
+      "category": "no_answer",
+      "question": "Which ASCE 7 wind exposure category does the Weatherables 130 mph wind-gust rating apply to?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Weatherables 130 mph wind exposure category",
+        "weatherables vinyl fence ASCE 7 exposure B C D",
+        "what exposure category is the 130 mph fence rating"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -inE 'exposure' -> collected the distinct source_path/page set. Wind exposure categories appear only in Barrette/CertainTeed/Freedom Miami-Dade NOAs and Bufftech install guides, the Barrette privacy-railing PE report, the Illusions 75 mph wind-kit NOA, the CLFMI chain-link wind-load guide and the MECA ASCE 7-16 worked example. FTS: '\"Weatherables\" AND \"exposure\"' -> 4 units, all of which I printed: they are the limited-warranty exclusions ('exposure to harmful chemicals') and the care sentence 'vinyl fencing will have dirt exposure from atmospheric conditions'. Read every Weatherables wind statement (grep 'weatherables' | grep -inE '130|mph|wind'): the brochure/catalog/spec-sheet claim 'gusts up to 130 mph (for heights 6 feet and under)' and the master-instruction pages 14-18 tabulate sustained/gust pairs per style (Panel Privacy 120/137, Panel Privacy with Lattice 115/130, T&G Privacy 110/130, etc.). None names an exposure category, a design pressure, ASCE 7, or a test standard. FTS '\"ASCE\" AND \"Weatherables\"' style checks and pdftotext -layout over all 137 corpus PDFs into a scratch dir, then grep -rilE over it for 'Weatherables.*Exposure' on one page -> nothing.",
+        "confirmed": true,
+        "notes": "class: adjacent-vocabulary -- Every token of the question appears in the corpus, and 'exposure' appears inside Weatherables' own documents - just meaning chemical/dirt exposure. Meanwhile real Exposure B/C/D tables sit in the NOAs for other brands, so a retriever will happily fuse 'Weatherables 130 mph' with 'Exposure C 36\" footing'. Weatherables never publishes an exposure category, a wind-load psf, or the test report behind the 130 mph figure."
+      }
+    },
+    {
+      "id": "gq-211",
+      "category": "no_answer",
+      "question": "What is the Texas Department of Insurance (TDI) windstorm product evaluation number for these vinyl fence panels?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "TDI windstorm product evaluation vinyl fence",
+        "Texas Department of Insurance fence approval number",
+        "Texas windstorm certification vinyl privacy fence"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -icE 'Texas' -> 0; 'windstorm' -> 0; '\\bTDI\\b' -> 0 in the element dump and 0 in the table_cells dump. FTS: '\"Texas\"' 0, '\"windstorm\"' 0, '\"TDI\"' 0. pdftotext -layout over all 137 corpus PDFs into a scratch dir, then grep -rilE over it for 'Texas|windstorm|\\bTDI\\b' -> 0 of 137 files. python3 -c \"import zipfile,re; strip tags from word/document.xml\" on manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx, then counted each term: Texas 0, windstorm 0, TDI 0. Also checked the jurisdiction vocabulary that IS present: 'Florida Building Code' 97, 'Broward' 32, 'HVHZ' many, 'Hawaii' 3, 'California' 1 (an incidental address), 'Ontario' 0, 'International Residential Code' 0, 'Title 24' 0.",
+        "confirmed": true,
+        "notes": "class: absent-subject -- A code-jurisdiction absence. The corpus is deep on one jurisdiction only - Miami-Dade/Broward HVHZ under the Florida Building Code, with 15+ NOAs - and contains no Texas material of any kind (the word 'Texas' never occurs). A retriever will return Florida NOAs with real approval numbers, which is the wrong jurisdiction and the wrong scheme."
+      }
+    },
+    {
+      "id": "gq-212",
+      "category": "no_answer",
+      "question": "Which GB or GB/T standard number does the Showtech PVC fence catalog cite for its PVC compound?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Showtech PVC fence GB/T standard number",
+        "China vinyl fence GB standard compliance",
+        "GB/T PVC fence profile standard Showtech"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -oE 'GB[ /]?T?[ -]?[0-9]{3,6}' over the whole element dump -> zero matches; the same regex over the table_cells dump -> zero. FTS: '\"GB/T\"' -> 0. FTS '\"GB\"' -> 22 units, all of which are OCR noise or drawing revision initials (e.g. 'REV BY DATE 1 GB | 08-12-14' on the Illusions Dixon sheets). pdftotext -layout over all 137 corpus PDFs into a scratch dir, then grep -rilE over it for 'GB/T|GB *[0-9]{4,5}' -> 0 of 137 files. All three Showtech catalogs are image-only, so the store's OCR text is the evidence; I read the standards claim it does contain: 'high quality products, meet ASTM F964 and D1748 ... SGS, ISO9001 certifications' (PVC-fence-catalog-2022 p3, PVC-fence-catalog-2024 p4). I also rendered china/manuals/showtech/Showtech-WPC-fence-decking-catalog-2024.pdf p9 (pdftoppm -r 130 -png -f 9 -l 9) and read the PNG: the certificate strip is a row of thumbnail images (a US patent, a Chinese patent certificate, a building-materials test-centre report, a CE/DTC certificate) at a resolution where no standard number is legible in the source file itself.",
+        "confirmed": true,
+        "notes": "class: absent-subject -- A standards-number absence with a twist worth knowing: the repo's own architecture notes describe the China track as 'reference GB standards rather than ASTM', but no GB or GB/T number occurs anywhere in the corpus - the Chinese manufacturer advertises ASTM F964, ASTM D1748, SGS and ISO9001 instead. Closest thing to an answer is that ASTM claim."
+      }
+    },
+    {
+      "id": "gq-213",
+      "category": "no_answer",
+      "question": "What is the maximum post spacing for a Ply Gem 6 ft vinyl privacy fence?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Ply Gem vinyl fence post spacing",
+        "PlyGem privacy fence installation post centers",
+        "Ply Gem 6 ft vinyl fence panel specifications"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -icE 'Ply *Gem' -> 0 in the element dump and 0 in the table_cells dump. FTS: '\"Ply Gem\"' -> 0. pdftotext -layout over all 137 corpus PDFs into a scratch dir, then grep -rilE over it for 'Ply *Gem' -> 0 of 137 files. python3 -c \"import zipfile,re; strip tags from word/document.xml\" on manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx, then counted each term: 'Ply Gem' 0. Also verified the manufacturer inventory directly: SELECT DISTINCT manufacturer FROM documents covers Barrette Outdoor Living (Bufftech/SimTek), Catalyst Fence Solutions, CertainTeed, Freedom Outdoor Living, Illusions Vinyl Fence / Eastern Wholesale Fence, Wam Bam, Weatherables/TriWest, VEKA, Digger Specialties, Wheatland, CLFMI, MECA and Zhejiang Showtech. Spot-checked other plausible absentees the same way: 'Superior Plastic' 0, 'Homeland Vinyl' 0, 'Ameristar' 0, 'Jerith' 0 (while 'ActiveYards' 5 and 'Master Halco' 4 DO occur, so those would not have been valid).",
+        "confirmed": true,
+        "notes": "class: absent-subject -- A manufacturer absence, and the easiest class - but a real trap because maximum post spacing for 6 ft vinyl privacy fence is abundantly documented for seven other brands (e.g. 97\" for Bufftech Imperial, 96\" on-centre for Weatherables), so a retriever will return a confident number from the wrong company."
+      }
+    },
+    {
+      "id": "gq-214",
+      "category": "no_answer",
+      "question": "What wall thickness and material spec apply to the HDPE (high-density polyethylene) fence panels in this product range?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "HDPE fence panel wall thickness",
+        "high density polyethylene privacy fence specification",
+        "HDPE vs PVC fence panel material spec"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -icE 'HDPE' -> 0; 'high.density polyethylene' -> 0; 'polyethylene' -> 0 in the element dump and the table_cells dump. FTS: '\"HDPE\"' -> 0. pdftotext -layout over all 137 corpus PDFs into a scratch dir, then grep -rilE over it for 'HDPE|high.density polyethylene' -> 0 of 137 files. python3 -c \"import zipfile,re; strip tags from word/document.xml\" on manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx, then counted each term: HDPE 0, polyethylene 0. Cross-checked the polymers and materials that ARE covered so the absence is specific and not just a spelling miss: PVC/vinyl throughout, 'Rigid Poly (Vinyl Chloride)' and CPVC in D1784 citations, WPC / wood-plastic composite (Showtech WPC catalog, ASTM D7032), SimTek's 'polypropylene and fiberglass composite design', aluminium 6005-T5, galvanised steel and steel stiffeners. 'bamboo' 0 and 'ABS' only as a substring of ordinary words.",
+        "confirmed": true,
+        "notes": "class: absent-subject -- A material absence. The corpus is entirely PVC/vinyl, molded polypropylene-fiberglass composite, WPC, aluminium and steel; polyethylene is never mentioned in any form. Wall thicknesses ARE tabulated in abundance for PVC and aluminium profiles (0.135\", 0.090\", 0.07\", .060\", .055\"), which is exactly what makes this look answerable."
+      }
+    },
+    {
+      "id": "gq-215",
+      "category": "no_answer",
+      "question": "Is there a pet door / dog door insert available for a vinyl privacy fence panel, and what size opening does it need?",
+      "answerable": false,
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "pet door insert vinyl fence panel",
+        "dog door for privacy fence panel size",
+        "vinyl fence dog door kit opening dimensions"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -icE 'pet door|dog door|doggie' -> 0 in the element dump and 0 in the table_cells dump. pdftotext -layout over all 137 corpus PDFs into a scratch dir, then grep -rilE over it for 'pet door|dog door|doggie' -> 0 of 137 files. python3 -c \"import zipfile,re; strip tags from word/document.xml\" on manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx, then counted each term: 'pet door' 0, 'dog door' 0. Checked neighbouring accessory vocabulary so the absence is not a naming problem: the corpus documents post caps (including solar/LED caps), gate hardware kits, hinges, latches (Magna/Lokk/hatchet/gravity), drop rods, transition brackets, u-mount rail brackets, rail-end brackets, gate sockets, post stiffeners/inserts, wall and surface mounts, lattice and picket accents, pergola kits and vinyl adhesive; but 'privacy screen' 0, 'gate closer' 0, 'electric fence' 0, 'razor' 0, 'windscreen' 1 (incidental). 'dog ear' occurs only as a picket cap profile.",
+        "confirmed": true,
+        "notes": "class: absent-subject -- An accessory-type absence. Panel cut-down and field-modification instructions DO exist (Freedom RTA cut-down instructions, picket removal for scalloped panels), and 'pet' style safety language appears in gate warnings, so a retriever will surface plausible-looking cut-and-modify pages. No pet/dog door product or opening dimension exists in the corpus."
+      }
+    }
+  ]
+}

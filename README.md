@@ -53,7 +53,9 @@ Searching:
 ```bash
 python3 -m fence_evidence.cli search "footing depth exposure C" -k 5
 python3 -m fence_evidence.cli search "post spacing" --element-type table
-python3 -m fence_evidence.cli resolve 23-0314.05        # supersession chain
+python3 -m fence_evidence.cli audit                     # relevance audit of the index
+python3 -m fence_evidence.cli noa-table-crops           # crops for the unreadable table pages
+python3 -m fence_evidence.cli resolve 23-0314.05 --as-of 2026-08-20
 python3 -m fence_evidence.cli page doc-3c8ab51045c7 17  # a page and its elements
 python3 -m fence_evidence.cli region element-...        # image evidence
 ```
@@ -82,6 +84,9 @@ for hit in search_evidence("racking degrees Chesterfield", limit=5):
 | `docs/target-architecture.md` | informative future direction |
 | `docs/phase-checkpoints.md` | per-phase record: implemented, tested, incomplete |
 | `docs/state-and-gaps.md` | current snapshot: measured state, and every known gap |
+| `docs/second-stage-evaluation.md` | within-page retrieval: measurement and the decision not to default it on |
+| `docs/experiment-noa-table-reading.md` | designed, not run: per-cell reading of the 73 scanned table pages |
+| `workspace/reports/projection-relevance-audit.md` | relevance audit of the index; recommendations not applied |
 | `workspace/reports/` | environment, corpus audit, dependency options, pilot selection, coverage, evaluation |
 | `eval/gold-questions-*.json` | 44 hand-verified benchmark questions |
 

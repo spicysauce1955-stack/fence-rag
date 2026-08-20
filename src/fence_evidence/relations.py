@@ -95,7 +95,13 @@ def derive_relations(conn: sqlite3.Connection) -> dict[str, int]:
                     counts["same_product_as"] += 1
 
     # --- version_status from discovered edges (never downgrades curated data)
-    for r in conn.execute("""SELECT DISTINCT to_document_id AS d FROM relations
+    #
+    # Edge direction matters and was inverted here once: a `superseded_by` edge
+    # reads subject -> object, so its *from* side is the document that has been
+    # superseded and its *to* side is the newer approval doing the superseding.
+    # Marking the `to` side flagged every current NOA as superseded and left the
+    # whole CertainTeed/Barrette chain with no active member at all.
+    for r in conn.execute("""SELECT DISTINCT from_document_id AS d FROM relations
                              WHERE relation_type='superseded_by'"""):
         conn.execute("""UPDATE documents SET version_status='superseded',
             version_status_basis='named as a previous approval by a later NOA'

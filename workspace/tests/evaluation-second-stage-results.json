@@ -7,7 +7,7 @@
     "recall_at_k": 0.805,
     "page_recall_at_k": 0.659,
     "mrr": 0.552,
-    "evidence_support": 0.623,
+    "evidence_support": 0.672,
     "page_evidence_support": 0.769,
     "no_answer_precision": 0.333,
     "false_unsupported_rate": 0.146,
@@ -19,30 +19,28 @@
       "gq-015",
       "gq-019"
     ],
-    "passed": 27,
+    "passed": 32,
     "by_category": {
       "comparison": {
         "n": 4,
         "doc_hits": 4,
-        "passed": 1,
+        "passed": 2,
         "failures": [
           "gq-119",
-          "gq-120",
-          "gq-017"
+          "gq-120"
         ],
-        "mean_support": 0.467
+        "mean_support": 0.516
       },
       "conditional_table_lookup": {
         "n": 7,
         "doc_hits": 5,
-        "passed": 3,
+        "passed": 4,
         "failures": [
           "gq-113",
           "gq-004",
-          "gq-006",
-          "gq-007"
+          "gq-006"
         ],
-        "mean_support": 0.517
+        "mean_support": 0.574
       },
       "conflict": {
         "n": 2,
@@ -73,13 +71,12 @@
       "exact_product": {
         "n": 4,
         "doc_hits": 4,
-        "passed": 1,
+        "passed": 2,
         "failures": [
           "gq-102",
-          "gq-103",
           "gq-104"
         ],
-        "mean_support": 0.333
+        "mean_support": 0.417
       },
       "historical_version": {
         "n": 2,
@@ -124,32 +121,30 @@
         "doc_hits": 4,
         "passed": 4,
         "failures": [],
-        "mean_support": 0.734
+        "mean_support": 0.834
       },
       "table_retrieval": {
         "n": 4,
         "doc_hits": 3,
-        "passed": 2,
+        "passed": 3,
         "failures": [
-          "gq-009",
-          "gq-010"
+          "gq-009"
         ],
-        "mean_support": 0.85
+        "mean_support": 0.9
       },
       "visual_evidence": {
         "n": 4,
         "doc_hits": 3,
-        "passed": 2,
+        "passed": 3,
         "failures": [
-          "gq-019",
-          "gq-020"
+          "gq-019"
         ],
-        "mean_support": 0.812
+        "mean_support": 0.938
       }
     },
     "skipped_not_ingested": [],
-    "second_stage": false,
-    "second_stage_attachments": 0,
+    "second_stage": true,
+    "second_stage_attachments": 354,
     "acceptance": {
       "A3_recall_at_10_ge_0.80": true,
       "A3_evidence_support_ge_0.70": false,
@@ -184,7 +179,7 @@
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 32.559,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 5,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -269,7 +264,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 27.774,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 4,
       "element_types": [
         "paragraph",
         "caption",
@@ -328,19 +323,19 @@
         "manuals/illusions-vinyl-fence/pergola-kit-installation-instructions.pdf"
       ],
       "equivalent_documents": [],
-      "support": 0.333,
+      "support": 0.667,
       "page_support": 1.0,
       "found_terms": [
-        "Pergola Kits"
+        "Pergola Kits",
+        "8\u201d x 8\u201d Vinyl Posts"
       ],
       "missing_terms": [
-        "8\u201d x 8\u201d Vinyl Posts",
         "Shade Tubing"
       ],
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 17.266,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 5,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -355,7 +350,7 @@
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
-      "passed": false,
+      "passed": true,
       "top_hits": [
         {
           "source_path": "manuals/illusions-vinyl-fence/pergola-kit-installation-instructions.pdf",
@@ -421,7 +416,7 @@
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 19.494,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 4,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -500,7 +495,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 12.226,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 3,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -580,7 +575,7 @@
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 8.974,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 2,
       "element_types": [
         "paragraph",
         "list",
@@ -657,7 +652,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 23.921,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 8,
       "element_types": [
         "paragraph",
         "list",
@@ -747,7 +742,7 @@
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 12.836,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 1,
       "element_types": [
         "paragraph",
         "table",
@@ -829,7 +824,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 15.462,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 3,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -914,7 +909,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 12.241,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 9,
       "element_types": [
         "table",
         "table",
@@ -1001,7 +996,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 32.029,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 8,
       "element_types": [
         "table",
         "table",
@@ -1094,7 +1089,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 33.059,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 5,
       "element_types": [
         "paragraph",
         "table",
@@ -1192,7 +1187,7 @@
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 17.968,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 6,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -1344,7 +1339,7 @@
       "element_type_ok": true,
       "image_evidence_ok": true,
       "top_score": 16.574,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 3,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -1421,7 +1416,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 18.205,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 6,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -1495,7 +1490,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 20.452,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 7,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -1575,7 +1570,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 15.88,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 5,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -1660,7 +1655,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 12.829,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 4,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -1743,7 +1738,7 @@
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 16.323,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 1,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -1829,7 +1824,7 @@
       "element_type_ok": true,
       "image_evidence_ok": true,
       "top_score": 15.445,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 4,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -1915,7 +1910,7 @@
       "element_type_ok": true,
       "image_evidence_ok": true,
       "top_score": 18.606,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 10,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -1998,7 +1993,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 38.876,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 10,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -2084,7 +2079,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 31.704,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 4,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -2169,7 +2164,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 34.487,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 8,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -2255,7 +2250,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 20.366,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 4,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -2332,7 +2327,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 17.049,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 1,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -2412,7 +2407,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 9.101,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 8,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -2481,7 +2476,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 24.885,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 10,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -2579,7 +2574,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 23.381,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 6,
       "element_types": [
         "list",
         "paragraph",
@@ -2666,7 +2661,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 16.529,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 9,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -2753,7 +2748,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 25.989,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 2,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -2831,7 +2826,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 9.097,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 2,
       "element_types": [
         "paragraph",
         "table",
@@ -2904,7 +2899,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 15.014,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 5,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -2988,7 +2983,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 16.031,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 6,
       "element_types": [
         "list",
         "list",
@@ -3069,7 +3064,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 17.961,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 4,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -3144,7 +3139,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 14.506,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 2,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -3227,7 +3222,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 17.45,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 8,
       "element_types": [
         "paragraph",
         "list",
@@ -3315,7 +3310,7 @@
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 19.959,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 10,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -3396,7 +3391,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 13.44,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 10,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -3478,7 +3473,7 @@
       "element_type_ok": false,
       "image_evidence_ok": false,
       "top_score": 31.4,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 9,
       "element_types": [
         "table",
         "table",
@@ -3579,7 +3574,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 33.513,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 1,
       "element_types": [
         "table",
         "paragraph",
@@ -3681,7 +3676,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 24.348,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 5,
       "element_types": [
         "table",
         "paragraph",
@@ -3753,21 +3748,21 @@
         "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf"
       ],
       "equivalent_documents": [],
-      "support": 0.4,
+      "support": 0.8,
       "page_support": 1.0,
       "found_terms": [
+        "42",
         "15",
+        "30",
         "12"
       ],
       "missing_terms": [
-        "42",
-        "30",
         "3000 PSI"
       ],
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 26.831,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 8,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -3782,7 +3777,7 @@
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
-      "passed": false,
+      "passed": true,
       "top_hits": [
         {
           "source_path": "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf",
@@ -3840,7 +3835,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 50.398,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 7,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -3935,7 +3930,7 @@
       "element_type_ok": false,
       "image_evidence_ok": false,
       "top_score": 32.007,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 8,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -4013,21 +4008,21 @@
         "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf"
       ],
       "equivalent_documents": [],
-      "support": 0.4,
+      "support": 0.6,
       "page_support": 1.0,
       "found_terms": [
         "130MPH WIND",
+        "RECOMMENDED POST SPACING (O.C.)",
         "GOVERNING LOAD"
       ],
       "missing_terms": [
-        "RECOMMENDED POST SPACING (O.C.)",
         "38.5 psf wind",
         "46.7 psf wind"
       ],
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 25.789,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 6,
       "element_types": [
         "table",
         "paragraph",
@@ -4042,7 +4037,7 @@
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
-      "passed": false,
+      "passed": true,
       "top_hits": [
         {
           "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
@@ -4116,7 +4111,7 @@
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 19.882,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 7,
       "element_types": [
         "list",
         "list",
@@ -4202,7 +4197,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 11.455,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 10,
       "element_types": [
         "paragraph",
         "list",
@@ -4287,7 +4282,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 18.987,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 10,
       "element_types": [
         "paragraph",
         "list",
@@ -4378,7 +4373,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 22.867,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 9,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -4476,7 +4471,7 @@
       "element_type_ok": false,
       "image_evidence_ok": false,
       "top_score": 19.769,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 8,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -4569,7 +4564,7 @@
       "element_type_ok": false,
       "image_evidence_ok": true,
       "top_score": 24.549,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 6,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -4650,21 +4645,21 @@
         "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-24-0117.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
         "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf"
       ],
-      "support": 0.4,
+      "support": 0.6,
       "page_support": 0.8,
       "found_terms": [
+        "Pedro De Figueiredo",
         "TABLE 1",
         "POST SPACING AND FOOTING DIMENSIONS"
       ],
       "missing_terms": [
-        "Pedro De Figueiredo",
         "Robert Nieminen",
         "ASCE 7-10"
       ],
       "element_type_ok": false,
       "image_evidence_ok": true,
       "top_score": 19.954,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 10,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -4679,7 +4674,7 @@
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
-      "passed": false,
+      "passed": true,
       "top_hits": [
         {
           "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
@@ -4752,7 +4747,7 @@
       "element_type_ok": true,
       "image_evidence_ok": true,
       "top_score": 17.025,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 4,
       "element_types": [
         "drawing_label",
         "drawing",
@@ -4829,7 +4824,7 @@
       "element_type_ok": false,
       "image_evidence_ok": false,
       "top_score": 20.561,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 7,
       "element_types": [
         "paragraph",
         "drawing",
@@ -4913,20 +4908,20 @@
         "manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf"
       ],
       "equivalent_documents": [],
-      "support": 0.25,
+      "support": 0.75,
       "page_support": 1.0,
       "found_terms": [
+        "CONCRETE FOUNDATION",
+        "32",
         "42"
       ],
       "missing_terms": [
-        "CONCRETE FOUNDATION",
-        "32",
         "GROUND LEVEL"
       ],
       "element_type_ok": false,
       "image_evidence_ok": true,
       "top_score": 27.805,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 10,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -4941,7 +4936,7 @@
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
-      "passed": false,
+      "passed": true,
       "top_hits": [
         {
           "source_path": "manuals/illusions-vinyl-fence/product-price-catalog-186pg.pdf",
@@ -5017,7 +5012,7 @@
       "element_type_ok": false,
       "image_evidence_ok": true,
       "top_score": 28.765,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 7,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -5086,21 +5081,20 @@
         "manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf"
       ],
       "equivalent_documents": [],
-      "support": 0.6,
+      "support": 1.0,
       "page_support": 1.0,
       "found_terms": [
         "VELOCITY OF 75 MPH (90 MPH FOR 3 SECOND GUST)",
         "2007 FLORIDA BUILDING CODE",
-        "96"
-      ],
-      "missing_terms": [
         "42485",
+        "96",
         "CONCRETE"
       ],
+      "missing_terms": [],
       "element_type_ok": false,
       "image_evidence_ok": true,
       "top_score": 43.748,
-      "second_stage_attachments": 0,
+      "second_stage_attachments": 10,
       "element_types": [
         "paragraph",
         "paragraph",

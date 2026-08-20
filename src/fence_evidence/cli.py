@@ -53,7 +53,8 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("resolve", help="resolve a document or approval id to its version chain")
     p.add_argument("identifier")
-    p.add_argument("--at", help="ISO date")
+    p.add_argument("--at", help="ISO date: which member was effective then")
+    p.add_argument("--as-of", help="ISO date to judge expiry against (default: today)")
 
     p = sub.add_parser("facts", help="Phase 6: extract or query structured facts")
     p.add_argument("--extract", action="store_true")
@@ -63,6 +64,12 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("evaluate", help="Phase 4: run the gold evaluation set")
     p.add_argument("-k", type=int, default=10)
+
+    p = sub.add_parser("audit", help="relevance audit of the retrieval projection (read-only)")
+    p.add_argument("-k", type=int, default=10)
+
+    sub.add_parser("noa-table-crops",
+                   help="export source crops for the pages whose tables OCR could not rebuild")
 
     sub.add_parser("rebuild-index", help="rebuild the retrieval projection from canonical rows")
     sub.add_parser("stats", help="store statistics")
@@ -118,7 +125,7 @@ def main(argv: list[str] | None = None) -> int:
         _print(get_element_context(args.element_id, before=args.before, after=args.after))
     elif args.cmd == "resolve":
         from .retrieval import resolve_document_version
-        _print(resolve_document_version(args.identifier, at=args.at))
+        _print(resolve_document_version(args.identifier, at=args.at, as_of=args.as_of))
     elif args.cmd == "facts":
         from .facts import extract_facts, query_facts
         if args.extract:
@@ -139,6 +146,12 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "evaluate":
         from .evaluate import run_evaluation
         _print(run_evaluation(k=args.k)["summary"])
+    elif args.cmd == "audit":
+        from .audit import run_audit
+        _print(run_audit(k=args.k))
+    elif args.cmd == "noa-table-crops":
+        from .noa_tables import export_crops
+        _print(export_crops())
     elif args.cmd == "rebuild-index":
         from .store import build_retrieval_units, connect
         conn = connect()

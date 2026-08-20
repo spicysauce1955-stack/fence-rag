@@ -69,6 +69,9 @@ def _returned_evidence(r) -> str:
     support is measured against the whole returned record rather than one field.
     """
     parts = [r.text or "", " > ".join(r.heading_path or [])]
+    for extra in (getattr(r, "within_page_evidence", None) or []):
+        parts.append(extra.get("text") or "")
+        parts.append(" > ".join(extra.get("heading_path") or []))
     return _norm("\n".join(parts))
 
 
@@ -87,39 +90,42 @@ def _document_frequency(conn, term: str) -> int:
 def _looks_unsupported(query: str, results, conn) -> tuple[bool, str]:
     """Decide whether the corpus actually answers this question.
 
-    A bare score floor does not transfer between corpus sizes, and an OR query
-    always matches something. The signal used instead is the *rarest* term in the
-    question: if the corpus's least common query term never appears in the best
-    result, the match is a pile of common words and the question is not answered.
-    A term the corpus does not contain at all is stronger evidence still.
+    Calibrated against 18 negative questions (up from 3), deliberately including
+    five "near-miss" cases — the corpus covers the topic and the product but
+    never states the asked-for value — and five "adjacent-vocabulary" cases where
+    every word occurs, often on one page.
+
+    Measured on that set, no lexical feature separates answerable from
+    unanswerable questions. Mean values, answerable vs unanswerable: rarest term
+    present in the best result 0.244 vs 0.444 (*wrong* direction), term coverage
+    0.733 vs 0.747, score margin 0.248 vs 0.294, top relevance 22.3 vs 20.5. That
+    is a property of the question classes, not a tuning failure: a near-miss
+    question is one whose words are all present.
+
+    An earlier rule combined a score floor with rarest-term presence and reached
+    0.611 precision — while flagging 24 of 41 *answerable* questions as
+    unsupported. A verdict that fires on half of all real questions is worse than
+    no verdict, so those signals were removed.
+
+    What remains fires only for a reason a reader can check: the query contains a
+    word the corpus does not contain anywhere, or there are no results at all.
+    Everything else is reported as a continuous coverage number rather than a
+    verdict.
     """
     if not results:
         return True, "no results"
     _expr, sources = build_match_expression(query)
     terms = []
-    seen = set()
-    for t in sources:
-        t = t.strip("\"'").lower()
-        if len(t) < 3 or t in STOPWORDS or t in UNIT_WORDS or t in seen:
+    for raw in sources:
+        t = raw.strip("\"'").lower()
+        if len(t) < 3 or t in STOPWORDS or t in UNIT_WORDS or t in terms:
             continue
-        seen.add(t)
         terms.append(t)
     if not terms:
         return True, "query carries no content terms"
-    dfs = [(t, _document_frequency(conn, t)) for t in terms]
-    absent = [t for t, df in dfs if df == 0]
+    absent = [t for t in terms if _document_frequency(conn, t) == 0]
     if absent:
         return True, f"term(s) absent from the whole corpus: {', '.join(absent[:4])}"
-    present = sorted((d for d in dfs if d[1] > 0), key=lambda d: d[1])
-    if not present:
-        return True, "no query term occurs in the corpus"
-    rarest = [t for t, _df in present[:2]]
-    top_text = _returned_evidence(results[0])
-    if not any(_norm(t) in top_text for t in rarest):
-        return True, (f"the rarest query term(s) ({', '.join(rarest)}) do not appear in "
-                      f"the best result")
-    if results[0].score < NO_ANSWER_SCORE_FLOOR:
-        return True, f"top relevance {results[0].score:.1f} below the floor {NO_ANSWER_SCORE_FLOOR}"
     return False, ""
 
 
@@ -151,9 +157,10 @@ def _equivalent_paths(conn, paths: set[str]) -> set[str]:
     return out
 
 
-def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None) -> dict:
+def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
+                      second_stage: bool = False) -> dict:
     query = _query_for(q)
-    results = search_evidence(query, limit=k, conn=conn)
+    results = search_evidence(query, limit=k, conn=conn, second_stage=second_stage)
     declared_docs = set(q.get("expected_documents") or [])
     expected_docs = _equivalent_paths(conn, declared_docs)
     expected_pages: dict[str, list[int]] = dict(q.get("expected_pages") or {})
@@ -209,6 +216,8 @@ def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None) -> dict:
     top_score = results[0].score if results else 0.0
     answerable = q.get("answerable", True)
     unsupported, why_unsupported = _looks_unsupported(query, results, conn)
+    attached = sum(1 for r in results
+                   if r.retrieval_reason.get("second_stage", {}).get("attached"))
     if answerable:
         passed = doc_rank is not None and (support is None or support >= 0.5)
     else:
@@ -227,6 +236,8 @@ def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None) -> dict:
         "missing_terms": [t for t in terms if t not in found_terms],
         "element_type_ok": type_ok, "image_evidence_ok": image_ok,
         "top_score": round(top_score, 3),
+        "second_stage_attachments": attached,
+        "element_types": [r.element_type for r in results],
         "reported_unsupported": unsupported,
         "unsupported_reason": why_unsupported,
         "passed": passed,
@@ -238,7 +249,8 @@ def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None) -> dict:
 
 
 def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
-                   only_ingested: bool = False, report_name: str = "evaluation") -> dict:
+                   only_ingested: bool = False, report_name: str = "evaluation",
+                   second_stage: bool = False) -> dict:
     """Run the gold set.
 
     ``only_ingested`` restricts the run to questions whose expected documents are
@@ -261,7 +273,8 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
                     continue
                 kept.append(q)
             questions = kept
-        rows = [evaluate_question(q, k=k, conn=conn) for q in questions]
+        rows = [evaluate_question(q, k=k, conn=conn, second_stage=second_stage)
+                for q in questions]
     finally:
         conn.close()
 
@@ -289,6 +302,7 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
         c["mean_support"] = round(statistics.mean(c["support"]), 3) if c["support"] else None
         c.pop("support")
 
+    false_unsupported = [r for r in answerable if r["reported_unsupported"]]
     summary = {
         "k": k,
         "questions": len(rows),
@@ -302,15 +316,24 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
         "no_answer_precision": round(
             sum(1 for r in unanswerable if r["passed"]) / len(unanswerable), 3)
         if unanswerable else None,
+        # The other half of the picture. A detector can reach high no-answer
+        # precision by declaring almost everything unsupported, so the two are
+        # always reported together.
+        "false_unsupported_rate": round(len(false_unsupported) / len(answerable), 3)
+        if answerable else None,
+        "false_unsupported_ids": [r["id"] for r in false_unsupported],
         "passed": sum(1 for r in rows if r["passed"]),
         "by_category": {k2: v for k2, v in sorted(by_cat.items())},
         "skipped_not_ingested": skipped,
+        "second_stage": second_stage,
+        "second_stage_attachments": sum(r.get("second_stage_attachments") or 0 for r in rows),
         "acceptance": {},
     }
     summary["acceptance"] = {
         "A3_recall_at_10_ge_0.80": summary["recall_at_k"] >= 0.80,
         "A3_evidence_support_ge_0.70": (summary["evidence_support"] or 0) >= 0.70,
         "A4_no_answer_precision_ge_0.66": (summary["no_answer_precision"] or 0) >= 0.66,
+        "A4b_false_unsupported_le_0.20": (summary["false_unsupported_rate"] or 1.0) <= 0.20,
     }
     out = {"summary": summary, "results": rows}
     with open_write(TESTS_DIR / f"{report_name}-results.json") as f:
@@ -410,6 +433,9 @@ def _write_report(out: dict, report_name: str = "evaluation") -> None:
         f"{s['page_evidence_support']} | reported |",
         f"| No-answer precision | {s['no_answer_precision']} | A4 ≥ 0.66 — "
         f"{'PASS' if s['acceptance']['A4_no_answer_precision_ge_0.66'] else 'FAIL'} |",
+        f"| False-unsupported rate (answerable questions wrongly declared unsupported) | "
+        f"{s['false_unsupported_rate']} | A4b ≤ 0.20 — "
+        f"{'PASS' if s['acceptance']['A4b_false_unsupported_le_0.20'] else 'FAIL'} |",
         "",
         "## By category",
         "",
@@ -444,8 +470,9 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("-k", type=int, default=DEFAULT_K)
     ap.add_argument("--only-ingested", action="store_true")
+    ap.add_argument("--second-stage", action="store_true")
     ap.add_argument("--name", default="evaluation")
     args = ap.parse_args()
     out = run_evaluation(k=args.k, only_ingested=args.only_ingested,
-                         report_name=args.name)
+                         report_name=args.name, second_stage=args.second_stage)
     print(json.dumps(out["summary"], indent=2)[:3000])

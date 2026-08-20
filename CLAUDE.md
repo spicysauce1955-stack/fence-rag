@@ -32,6 +32,7 @@ python3 -m fence_evidence.cli search "footing depth exposure C" -k 5
 python3 -m fence_evidence.cli evaluate        # gold question set
 python3 -m fence_evidence.cli facts --extract
 python3 -m fence_evidence.cli report          # regenerate workspace/reports/
+python3 -m fence_evidence.cli audit           # relevance audit of the retrieval projection
 python3 tests/run_tests.py                    # 101 tests, stdlib only
 
 # the pre-existing dataset builders (they own their outputs; see below)
@@ -132,6 +133,14 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   Those pages carry a `table_not_reconstructed` issue and the page image is the evidence.
 - `pdftotext -bbox-layout` already reports word boxes in *display* space; only the page attributes
   are unrotated. Do not add a rotation transform — that bug was found and removed once.
+- Headings are excluded from `retrieval_units`, and 33.9% of them are reachable nowhere else. The
+  relevance audit lists this and six other defects; its recommendations are deliberately unapplied
+  pending review, so do not "fix" the projection casually.
+- A `superseded_by` edge reads subject → object: its *from* side is the superseded document. Marking
+  the wrong side once labelled every current NOA superseded; `tests/test_versions.py` guards it.
+- No-answer detection does not work on near-miss questions and cannot be fixed with a threshold —
+  the features measurably do not separate. Report `no_answer_precision` and
+  `false_unsupported_rate` together, never one alone.
 
 ## Constraints when building the pipeline
 

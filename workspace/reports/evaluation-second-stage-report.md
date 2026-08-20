@@ -9,7 +9,7 @@ Every gold question was runnable.
 | Document recall@10 | 0.805 | A3 ≥ 0.80 — PASS |
 | Page recall@10 | 0.659 | reported |
 | MRR | 0.552 | reported |
-| Evidence support (terms in the retrieved unit) | 0.623 | A3 ≥ 0.70 — FAIL |
+| Evidence support (terms in the retrieved unit) | 0.672 | A3 ≥ 0.70 — FAIL |
 | Page evidence support (terms anywhere on a retrieved page) | 0.769 | reported |
 | No-answer precision | 0.333 | A4 ≥ 0.66 — FAIL |
 | False-unsupported rate (answerable questions wrongly declared unsupported) | 0.146 | A4b ≤ 0.20 — PASS |
@@ -18,26 +18,26 @@ Every gold question was runnable.
 
 | Category | n | doc hits | passed | mean support | failing ids |
 |---|---|---|---|---|---|
-| comparison | 4 | 4 | 1 | 0.467 | gq-119, gq-120, gq-017 |
-| conditional_table_lookup | 7 | 5 | 3 | 0.517 | gq-113, gq-004, gq-006, gq-007 |
+| comparison | 4 | 4 | 2 | 0.516 | gq-119, gq-120 |
+| conditional_table_lookup | 7 | 5 | 4 | 0.574 | gq-113, gq-004, gq-006 |
 | conflict | 2 | 1 | 0 | 0.298 | gq-015, gq-016 |
 | current_version | 2 | 1 | 1 | 0.6 | gq-011 |
 | exact_identifier | 3 | 3 | 3 | 1.0 | — |
-| exact_product | 4 | 4 | 1 | 0.333 | gq-102, gq-103, gq-104 |
+| exact_product | 4 | 4 | 2 | 0.417 | gq-102, gq-104 |
 | historical_version | 2 | 2 | 2 | 1.0 | — |
 | no_answer | 18 | 0 | 6 | None | gq-116, gq-117, gq-118, gq-201, gq-202, gq-203, gq-204, gq-206, gq-207, gq-208, gq-210, gq-215 |
 | paraphrase | 5 | 3 | 2 | 0.467 | gq-106, gq-108, gq-109 |
-| source_verification | 4 | 4 | 4 | 0.734 | — |
-| table_retrieval | 4 | 3 | 2 | 0.85 | gq-009, gq-010 |
-| visual_evidence | 4 | 3 | 2 | 0.812 | gq-019, gq-020 |
+| source_verification | 4 | 4 | 4 | 0.834 | — |
+| table_retrieval | 4 | 3 | 3 | 0.9 | gq-009 |
+| visual_evidence | 4 | 3 | 3 | 0.938 | gq-019 |
 
 ## Phase 7 — experiments this evaluation would justify
 
 Only categories that actually failed appear here. Nothing below is built.
 
-### conditional_table_lookup — 4 of 7 failing
+### conditional_table_lookup — 3 of 7 failing
 
-- **Problem**: conditional_table_lookup questions fail lexical retrieval (failing ids: gq-113, gq-004, gq-006, gq-007).
+- **Problem**: conditional_table_lookup questions fail lexical retrieval (failing ids: gq-113, gq-004, gq-006).
 - **Experiment**: Table-aware structured lookup keyed on conditions (wind speed, exposure, height) resolved against table_cells and facts.
 - **Acceptance**: Answers the conditional questions with the correct cell, and returns 'outside documented range' rather than a nearest-neighbour value.
 
@@ -59,15 +59,15 @@ Only categories that actually failed appear here. Nothing below is built.
 - **Experiment**: Dense semantic retrieval over the pilot corpus.
 - **Acceptance**: Improves recall@10 on paraphrase questions by >=0.15 without reducing recall on exact_identifier or conditional_table_lookup.
 
-### table_retrieval — 2 of 4 failing
+### table_retrieval — 1 of 4 failing
 
-- **Problem**: table_retrieval questions fail lexical retrieval (failing ids: gq-009, gq-010).
+- **Problem**: table_retrieval questions fail lexical retrieval (failing ids: gq-009).
 - **Experiment**: Field-boosted lexical retrieval that ranks table units above prose when the query asks for a table.
 - **Acceptance**: Improves table_retrieval recall@10 without reducing overall recall.
 
-### visual_evidence — 2 of 4 failing
+### visual_evidence — 1 of 4 failing
 
-- **Problem**: visual_evidence questions fail lexical retrieval (failing ids: gq-019, gq-020).
+- **Problem**: visual_evidence questions fail lexical retrieval (failing ids: gq-019).
 - **Experiment**: Visual/page-level retrieval for drawing-heavy documents.
 - **Acceptance**: Improves recall@10 on visual_evidence questions without reducing lexical recall elsewhere.
 
@@ -82,14 +82,6 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 - expected: manuals/freedom-outdoor-living/73013822_Wellington6x6Semi-PrivacyPanel_Instructions.pdf
 - doc rank: 1 · unit support: 0.333 · page support: 1.0 · missing terms: ['Coarse Gravel', 'on-center']
 - top hit: manuals/freedom-outdoor-living/73013822_Wellington6x6Semi-PrivacyPanel_Instructions.pdf p1 score 27.774
-
-### gq-103 — exact_product
-*Where are the Illusions pergola kit installation instructions, and what post size does the kit ship with?*
-
-- query: `Illusions pergola kit installation vinyl pergola instructions pergola post size`
-- expected: manuals/illusions-vinyl-fence/pergola-kit-installation-instructions.pdf
-- doc rank: 1 · unit support: 0.333 · page support: 1.0 · missing terms: ['8” x 8” Vinyl Posts', 'Shade Tubing']
-- top hit: manuals/illusions-vinyl-fence/pergola-kit-installation-instructions.pdf p2 score 17.2664
 
 ### gq-104 — exact_product
 *Where is the Weatherables cross buck gate install guide, and how much shorter than the opening do I cut the rails on a single gate?*
@@ -259,14 +251,6 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 - doc rank: 8 · unit support: 0.2 · page support: 0.4 · missing terms: ['130MPH WIND', 'EXPOSURE D', '1.67FT (20in)', '46.7 psf wind']
 - top hit: manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf p4 score 24.3478
 
-### gq-007 — conditional_table_lookup
-*With the Illusions 75 MPH wind kit, how deep and how wide does the post hole have to be for 8x8 posts versus 5x5 posts?*
-
-- query: `Illusions 75 mph wind kit post hole depth 8x8 post how deep post hole vinyl fence wind kit post hole diameter 5x5 vs 8x8`
-- expected: manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf
-- doc rank: 1 · unit support: 0.4 · page support: 1.0 · missing terms: ['42', '30', '3000 PSI']
-- top hit: manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf p4 score 26.8314
-
 ### gq-009 — table_retrieval
 *Show me the maximum post spacing and footing dimensions table from the current CertainTeed / Bufftech extruded PVC vinyl fence NOA.*
 
@@ -274,14 +258,6 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 - expected: manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf
 - doc rank: None · unit support: 1.0 · page support: 1.0 · missing terms: []
 - top hit: manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf p29 score 32.0071
-
-### gq-010 — table_retrieval
-*I need the whole recommended post spacing table for Barrette privacy railing at 130 mph - both exposure groups, all panel heights.*
-
-- query: `post spacing table 130 mph privacy railing recommended post spacing O.C. governing load table Barrette privacy panel post spacing wind table`
-- expected: manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf
-- doc rank: 8 · unit support: 0.4 · page support: 1.0 · missing terms: ['RECOMMENDED POST SPACING (O.C.)', '38.5 psf wind', '46.7 psf wind']
-- top hit: manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf p4 score 25.7889
 
 ### gq-011 — current_version
 *Which Miami-Dade NOA is currently in force for the Columbia / Imperial / Chesterfield / Breezewood vinyl fence line, and which NOA did it replace?*
@@ -307,14 +283,6 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 - doc rank: 6 · unit support: 0.429 · page support: 0.571 · missing terms: ['CONCRETE', '42485', 'POST SPACING AND FOOTING DIMENSIONS', 'ASCE 7-10']
 - top hit: manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx p1 score 24.5487
 
-### gq-017 — comparison
-*When the Columbia/Imperial/Chesterfield fence approval moved from CertainTeed to Barrette, did the allowable post spacing change - and did the engineer of record change?*
-
-- query: `did post spacing change CertainTeed to Barrette vinyl fence NOA compare NOA 23-0314.05 and 24-0117.05 post spacing table engineer of record change Barrette CertainTeed fence`
-- expected: manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf, manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf
-- doc rank: 2 · unit support: 0.4 · page support: 0.8 · missing terms: ['Pedro De Figueiredo', 'Robert Nieminen', 'ASCE 7-10']
-- top hit: manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf p8 score 19.954
-
 ### gq-019 — visual_evidence
 *Show me the post and footing cross-section from the current Bufftech vinyl fence NOA - what footing diameter, concrete strength and post reinforcement does it detail?*
 
@@ -322,12 +290,4 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 - expected: manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf
 - doc rank: None · unit support: 1.0 · page support: 1.0 · missing terms: []
 - top hit: manuals/certainteed-bufftech/structural/NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf p8 score 20.5615
-
-### gq-020 — visual_evidence
-*On the Illusions Vinyl Fence PE-stamped drawings, what does the concrete foundation detail for the 4 ft tongue-and-groove solid panel show?*
-
-- query: `Illusions vinyl fence concrete foundation depth 4 ft panel Illusions NOA drawing post underground depth V300-4 tongue and groove solid panel foundation detail`
-- expected: manuals/illusions-vinyl-fence/75mph-wind-kit-noa-miami-dade.pdf, manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf
-- doc rank: 2 · unit support: 0.25 · page support: 1.0 · missing terms: ['CONCRETE FOUNDATION', '32', 'GROUND LEVEL']
-- top hit: manuals/illusions-vinyl-fence/product-price-catalog-186pg.pdf p14 score 27.8052
 
