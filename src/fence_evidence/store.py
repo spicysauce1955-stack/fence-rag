@@ -187,6 +187,44 @@ CREATE VIRTUAL TABLE IF NOT EXISTS retrieval_fts USING fts5(
     tokenize = "unicode61 remove_diacritics 2"
 );
 
+-- ------------------------------- table reading candidates (review-gated)
+--
+-- Readings of a scanned table, from any reader: an agent looking at the page
+-- image, a future per-cell OCR pass, or a person. Nothing here is a fact. A row
+-- becomes a fact only through fence_evidence.table_review.promote, which
+-- refuses any status other than 'accepted' or 'corrected' — and in particular
+-- refuses 'agent_verified', because two agents agreeing is a better reading,
+-- not an accountable review.
+CREATE TABLE IF NOT EXISTS table_read_candidates (
+    candidate_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+    document_id     TEXT NOT NULL REFERENCES documents(document_id),
+    version_id      TEXT NOT NULL,
+    page_no         INTEGER NOT NULL,
+    crop_path       TEXT NOT NULL,
+    crop_sha256     TEXT,
+    reader          TEXT NOT NULL,
+    reader_kind     TEXT NOT NULL,          -- agent | ocr | human
+    is_table        INTEGER,
+    table_kind      TEXT,
+    row_index       INTEGER,
+    col_index       INTEGER,
+    row_label       TEXT,
+    col_label       TEXT,
+    value           TEXT,
+    illegible       INTEGER NOT NULL DEFAULT 0,
+    reading_confidence TEXT,
+    notes           TEXT,
+    review_status   TEXT NOT NULL DEFAULT 'unreviewed',
+    reviewed_value  TEXT,
+    reviewer        TEXT,
+    reviewed_at     TEXT,
+    promoted_fact_id INTEGER,
+    created_at      TEXT NOT NULL,
+    UNIQUE(document_id, page_no, reader, row_index, col_index)
+);
+CREATE INDEX IF NOT EXISTS ix_trc_page ON table_read_candidates(document_id, page_no);
+CREATE INDEX IF NOT EXISTS ix_trc_status ON table_read_candidates(review_status);
+
 -- ------------------------------------------------------------- phase 6
 CREATE TABLE IF NOT EXISTS facts (
     fact_id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -531,4 +569,5 @@ def stats(conn: sqlite3.Connection) -> dict:
         "quality_issues": one("SELECT COUNT(*) FROM quality_issues"),
         "retrieval_units": one("SELECT COUNT(*) FROM retrieval_units"),
         "facts": one("SELECT COUNT(*) FROM facts"),
+        "table_read_candidates": one("SELECT COUNT(*) FROM table_read_candidates"),
     }

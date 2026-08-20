@@ -75,6 +75,17 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("audit", help="relevance audit of the retrieval projection (read-only)")
     p.add_argument("-k", type=int, default=10)
 
+    p = sub.add_parser("table-review",
+                       help="load reader transcriptions of scanned tables and compare them")
+    p.add_argument("--load-dir", help="directory of agent-read-*.json files")
+    p.add_argument("--agreement", nargs=2, metavar=("READER_A", "READER_B"))
+    p.add_argument("--mark-agreed", nargs=2, metavar=("READER_A", "READER_B"),
+                   help="flag cells two readers read identically as agent_verified "
+                        "(still not promotable)")
+    p.add_argument("--compare-pipeline", action="store_true",
+                   help="how many reader-visible values the pipeline's OCR actually has")
+    p.add_argument("--reader")
+
     sub.add_parser("noa-table-crops",
                    help="export source crops for the pages whose tables OCR could not rebuild")
 
@@ -158,6 +169,23 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "audit":
         from .audit import run_audit
         _print(run_audit(k=args.k))
+    elif args.cmd == "table-review":
+        from pathlib import Path as _P
+        from . import table_review as tr
+        from .store import connect as _c
+        conn = _c()
+        out = {}
+        if args.load_dir:
+            out["loaded"] = tr.load_directory(conn, _P(args.load_dir))
+        if args.mark_agreed:
+            out["marked_agent_verified"] = tr.mark_agent_verified(conn, tuple(args.mark_agreed))
+        if args.agreement:
+            out["agreement"] = tr.agreement(conn, tuple(args.agreement))
+        if args.compare_pipeline:
+            out["vs_pipeline"] = tr.compare_with_pipeline(conn, reader=args.reader)
+        out["summary"] = tr.summary(conn)
+        conn.close()
+        _print(out)
     elif args.cmd == "noa-table-crops":
         from .noa_tables import export_crops
         _print(export_crops())
