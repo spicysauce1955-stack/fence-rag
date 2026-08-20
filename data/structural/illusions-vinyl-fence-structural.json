@@ -1,0 +1,154 @@
+{
+  "manufacturer": "Illusions Fence",
+  "brand": "Illusions Vinyl Fence",
+  "pass": 2,
+  "focus": "Structural engineering & installation-depth content",
+  "engineering_letters": [
+    {
+      "document": "Miami-Dade County NOA 14-1209.01",
+      "issuer": "Miami-Dade County RER Product Control Section",
+      "issued_to": "Eastern Wholesale Fence Co., Inc., 274 Middle Island Rd., Medford, NY 11763",
+      "approval_date": "2015-03-12",
+      "expiration_date": "2019-12-09",
+      "note": "Expiration date on the document (Dec 9, 2019) has passed; document obtained is the last-issued/most recent NOA text found. Renews and revises NOA #11-0107.02, which itself traces to original NOA #09-0826.07. No newer/renewed NOA number (post-2019) was located in this pass -- treat 14-1209.01 as possibly lapsed pending a renewal filing; could not confirm current active NOA number.",
+      "approval_document": "Drawing titled 'Illusions Vinyl Fence', sheets 1 through 18 of 18, dated 12/01/2014, prepared by Eastern Wholesale Fence Co., Inc., signed and sealed by Thomas A. Dixon, P.E.",
+      "engineer_of_record": {
+        "name": "Thomas A. Dixon, P.E.",
+        "firm": "Dixon Engineering, Inc.",
+        "florida_license_number": "34222",
+        "firm_address": "Thonotosassa, Florida 33771 (also listed 10410 Main Street)"
+      },
+      "product_control_examiner": "Carlos M. Utrera, P.E.",
+      "code_conformance": "2010 Florida Building Code (FBC), including High Velocity Hurricane Zone (HVHZ) requirements; drawings note vertical supports and foundations comply with FBC per PIC 1615.2.1, tested for 75 MPH fastest-mile wind speed",
+      "missile_impact_rating": "None",
+      "evidence_submitted": {
+        "tests": [
+          "Dynamic Wind Load Testing and Static Load Post Testing on 4ft, 6ft, and 8ft high vinyl Illusions fence systems -- Architectural Testing, Inc., Test Report No. 87954.01-119-18, dated 05/06/2009, Revision 4 dated 09/16/2009, signed and sealed by Joseph A. Reed, P.E.",
+          "Artificial Outdoor Exposure per ASTM G155-05a, Tensile Testing per ASTM D638-03, Rate of Burning per ASTM D635-06, Smoke Density per ASTM D2843-99, Self Ignition Temperature per ASTM D1929-96 -- Architectural Testing, Inc., Report No. 87954.03-119-18, dated 08/18/2009, signed and sealed by Joseph A. Reed, P.E."
+        ],
+        "calculations": [
+          "Fence foundation calculations prepared by Dixon Engineering, Inc., dated 12/08/2014, signed and sealed by Thomas A. Dixon, P.E.",
+          "Original fence foundation calculations dated 10/16/09, prepared/signed/sealed by Fred S. Cardwell, P.E. (submitted under prior NOA #09-0826.07)"
+        ],
+        "statement_letters": [
+          "Statement letter of code conformance to 2010 FBC issued by Dixon Engineering, Inc., dated 12/02/2014, signed and sealed by Thomas A. Dixon, P.E.",
+          "Statement letter of no financial interest issued by Dixon Engineering, Inc., dated 12/02/2014, signed and sealed by Thomas A. Dixon, P.E."
+        ]
+      },
+      "styles_covered_in_drawing_set": [
+        "V300-4", "V300-5", "V300-6", "V300-8",
+        "V3215D-6", "V3215DS-6", "V3215SQ-6",
+        "V352-4TR", "V401-4TR",
+        "V700-4", "V706-4", "V707-4",
+        "V3700-6", "V3701-6"
+      ],
+      "note_on_scope": "Drawing set is 18 sheets total; sheets viewed (1-16) cover the styles listed above (privacy T&G, lattice-top privacy, and spaced-picket series up to 8ft). Remaining sheets not distinctly captured (PDF page extraction returned duplicate content for the tail pages) -- likely additional picket/gate style variants of the same series, not confirmed.",
+      "local_file": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf"
+    }
+  ],
+  "racking_stepping_supplement": {
+    "found_illusions_specific_content": false,
+    "notes": "No Illusions/Eastern Wholesale Fence-branded slope-installation guide, racking chart, or max rake angle in degrees or rise-per-foot was located for V3707/Grand Illusions or any Illusions series. Illusions' own Installation Instructions PDF and GATES Instructions PDF (already in manuals/) do not mention racking, stepping, or slope installation at all -- this remains a confirmed gap in Illusions' published literature, not merely an unindexed document. General industry data (non-Illusions, for context only, NOT to be attributed to Illusions): competitor/industry guides cite natural racking limits of roughly 10 degrees before requiring enlarged routed holes, with absolute limits around 15-35 degrees depending on style (privacy panels rack the least, ~3in over an 8ft section per Hoover Fence; picket/post-rail styles rack more). These numbers are explicitly NOT Illusions-sourced and should not be used as authoritative for Illusions products.",
+    "illusions_specific_max_rake_angle_degrees": null,
+    "illusions_specific_rise_per_foot": null
+  },
+  "post_spacing_supplement": {
+    "found_new_numeric_values": true,
+    "source": "Miami-Dade NOA 14-1209.01 PE-stamped structural drawings (Dixon Engineering, Inc.)",
+    "caveat": "The install manuals still say only 'see appropriate style spec sheet' for on-center spacing (confirmed again this pass -- Illusions-Vinyl-Fence-Installation-Instructions_0224.pdf and the assembled-panel instructions both defer to a per-style spec sheet rather than stating spacing directly). The NOA structural drawings DO show dimensioned panel/foundation layouts per style, reproduced below as documented -- but the overall dimension callouts on the shop drawings describe the drawn foundation-to-foundation footprint for the pictured 2-post test section, not an explicit 'post spacing O.C. = X inches' label. We report the as-drawn numbers without inferring an O.C. spacing value that isn't explicitly labeled, per the instruction not to fabricate.",
+    "foundation_and_embedment_by_height": [
+      {
+        "height_ft": 4,
+        "styles": ["V300-4", "V700-4", "V706-4", "V707-4"],
+        "concrete_foundation_footing_in": "42 x 12",
+        "post_embedment_below_grade_in": 32,
+        "clearance_ground_level_to_bottom_of_section_in": 2,
+        "post_size": "5x5 heavy wall"
+      },
+      {
+        "height_ft": 5,
+        "styles": ["V300-5"],
+        "concrete_foundation_footing_in": "42 x 12",
+        "post_embedment_below_grade_in": 32,
+        "clearance_ground_level_to_bottom_of_section_in": 2,
+        "post_size": "5x5 heavy wall"
+      },
+      {
+        "height_ft": 6,
+        "styles": ["V300-6", "V3215D-6", "V3215DS-6", "V3215SQ-6", "V3700-6", "V3701-6"],
+        "concrete_foundation_footing_in": "42 x 12",
+        "post_embedment_below_grade_in": 32,
+        "clearance_ground_level_to_bottom_of_section_in": 2,
+        "post_size": "5x5 heavy wall"
+      },
+      {
+        "height_ft": 8,
+        "styles": ["V300-8"],
+        "concrete_foundation_footing_in": "46.5 x 22",
+        "post_embedment_below_grade_in": 32,
+        "clearance_ground_level_to_bottom_of_section_in": 2,
+        "post_size": "8x8 heavy wall"
+      },
+      {
+        "height_ft": 4,
+        "styles": ["V352-4TR", "V401-4TR"],
+        "concrete_foundation_footing_in": "42 x 12",
+        "post_embedment_below_grade_in": 32,
+        "clearance_ground_level_to_bottom_of_section_in": 2,
+        "post_size": "5x5 heavy wall"
+      }
+    ],
+    "general_manual_hole_spec_confirmed_again": {
+      "hole_diameter_5x5_post_in": "10-12 (general install manual) / no less than 12 per style spec drawing",
+      "hole_diameter_8x8_post_in": "no less than 15",
+      "hole_depth_5x5_post_in": "no less than 30 below grade (general manual) / 32 per NOA-certified drawing",
+      "hole_depth_8x8_post_in": "no less than 32 (general manual, non-wind-kit) / 32 per NOA drawing (75MPH kit doc separately states up to 42 for the 8x8 wind-kit case)"
+    }
+  },
+  "hvhz_noa_approvals": [
+    {
+      "noa_number": "14-1209.01",
+      "status": "Expiration date printed on document: December 9, 2019 (approval date March 12, 2015). No confirmation found in this pass of an active renewal beyond this number -- flagged as a gap.",
+      "supersedes": ["11-0107.02", "09-0826.07"],
+      "scope": "Illusions Vinyl Fence -- covers the 75 MPH Wind Kit certified styles/heights listed under engineering_letters above",
+      "already_known_from_pass_1": true
+    },
+    {
+      "search_result": "No additional/separate Illusions or Eastern Wholesale Fence Miami-Dade NOA documents (for higher wind ratings, other styles, or gates specifically) were found in this pass via Miami-Dade County's Product Control search tool or general web search. The Miami-Dade Product Control 'Fences' HVHZ category search returned only competitor NOAs (Deacero/Design Master Fence NOA 21-0917.08, Barrette Outdoor Living NOA 24-0117.05 and 24-0117.06) -- Eastern Wholesale Fence/Illusions did not appear in the live current-listing search results, which is consistent with the 14-1209.01 NOA having expired without a located renewal.",
+      "florida_statewide_product_approval": "No Florida Building Code statewide Product Approval (FL#) was found for Illusions Vinyl Fence / Eastern Wholesale Fence via floridabuilding.org search in this pass. Only the Miami-Dade County NOA path was found -- consistent with pass 1."
+    }
+  ],
+  "structural_reinforcement_supplement": {
+    "aluminum_post_insert_api9": {
+      "already_known_from_pass_1": true,
+      "additional_detail_found": "API9 = 4.5in x 4.5in x 9ft aluminum post insert, sized to run the full length of a 9ft post (matches standard post length for up to 6-8ft fence height), so it is a full-length insert rather than a partial-depth insert -- no separate 'insertion depth' spec exists because it is not a partial fill. Confirmed in Illusions Vinyl Fence Spring Product Catalog (2019) accessories section and Illusions' Aluminum Post Inserts product page.",
+      "bom_confirmation": "The NOA-certified structural drawings list a generic 'POST INSERT' line item (qty 2 per post) in the bill of materials for the 75MPH-rated sections, consistent with a post insert being part of the certified/tested assembly, though the drawings do not name it as API9 specifically."
+    },
+    "steel_post_reinforcement": {
+      "illusions_branded_steel_option_found": false,
+      "notes": "No Illusions/Eastern Wholesale Fence-branded steel post insert or steel reinforcement product was found. Illusions' own marketing (buyvinylfence.com dealer page, profencesupply.com) explicitly states Illusions posts 'do not need inserts' due to 100% virgin vinyl construction, and contrasts this with competitor products that require wood inserts. Steel inserts, rebar, and post stiffeners referenced in this pass (ISP Fence, Alliance Fence & Supply, Hoover Fence, mftfence.com) are generic third-party/aftermarket products for vinyl fence in general, NOT Illusions-branded or Illusions-specified components. This is a confirmed gap: Illusions does not appear to publish its own steel reinforcement or rebar spec."
+    },
+    "gate_and_corner_post_practice": {
+      "illusions_specific": "Illusions Heavy Duty posts (VH55, VH88 series, 0.250in average wall thickness) are specified by Illusions for gate posts and high-wind/corner applications, per the general Installation Instructions and Gate Installation Instructions PDFs (already in manuals/). No Illusions-published rebar sizing or rebar-in-post spec was found.",
+      "generic_industry_practice_not_illusions_sourced": "Hoover Fence generic guidance: end/gate posts filled with concrete plus 2 pieces of 1/2in rebar, rebar run from bottom of hole to half the post height (end posts) or 12in down from top (gate posts), using rebar separator clips to hold rebar in opposing corners. This is explicitly a third-party (Hoover Fence) practice, not confirmed as an Illusions-specified method."
+    }
+  },
+  "documents": [
+    {
+      "title": "Miami-Dade NOA 14-1209.01 -- Illusions Vinyl Fence (full 18-sheet PE-stamped structural drawing set, evidence page, and cover page)",
+      "type": "engineering_letter_and_structural_drawings",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf",
+      "source_url": "https://illusionsfence.com/wp-content/uploads/2015/07/NOA-14-1209.01.pdf",
+      "new_in_this_pass": false,
+      "note": "File was already present in manuals/illusions-vinyl-fence/ from pass 1, but its structural content (PE engineer of record, foundation calcs, dimensioned per-style drawings, test report numbers) had not been extracted/documented. Copied into the new structural/ subfolder with a descriptive name; content mined in this pass."
+    }
+  ],
+  "remaining_gaps": [
+    "No PE-stamped engineering letter or wind certification found for wind speeds other than 75 MPH (e.g., no 110/130/150 MPH ASCE 7 letter). Illusions' certification program is scoped entirely to the Miami-Dade 75 MPH HVHZ standard.",
+    "No Illusions-specific racking/stepping slope-installation guide, max rake angle, or rise-per-foot chart exists in any located Illusions document.",
+    "No explicit numeric on-center post spacing table per style was found; only the general install manual's deferral to 'style spec sheet' (which was not locatable outside the CADDetails paywall) and the NOA drawings' dimensioned-but-unlabeled foundation layouts.",
+    "CADDetails.com CAD/spec files remain behind a mandatory free-registration login wall -- confirmed again this pass (PDF/DWG/DWF/VWX/Construction Specs downloads all require login); could not retrieve without creating an account.",
+    "Could not confirm whether NOA 14-1209.01 has been renewed past its printed Dec 9, 2019 expiration date -- no active/current Eastern Wholesale Fence or Illusions NOA number was found in a live Miami-Dade Product Control HVHZ Fences search.",
+    "No Illusions-branded steel post reinforcement, rebar spec, or corner/gate-post rebar sizing guidance found -- only the aluminum API9 insert and heavy-wall (0.250in) vinyl post options are Illusions-published."
+  ]
+}

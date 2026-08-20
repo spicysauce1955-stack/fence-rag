@@ -1,0 +1,1021 @@
+{
+  "manufacturer": "Wam Bam Fence Co",
+  "brand": "Wam Bam",
+  "website": "https://wambamfence.com",
+  "source_urls": [
+    "https://wambamfence.com",
+    "https://wambamfence.com/product/6ft-h-x-7ft-w-steady-freddy-vinyl-fence-panel-30.html",
+    "https://wambamfence.com/installation-guide/vinyl-fencing-18/6ft-h-x-7ft-w-steady-freddy-vinyl-fence-panel-30.html",
+    "https://wambamfence.com/installation-guide/vinyl-fencing-18/5ft-h-x-7ft-w-nervous-nelly-vinyl-fence-panel-29.html",
+    "https://wambamfence.com/installation-guide/cambridge-vinyl-privacy-fence-kit-with-no-dig-post-223.html",
+    "https://wambamfence.com/installation-guide/windsor-vinyl-fence-kit-with-no-dig-post-207.html",
+    "https://wambamfence.com/installation-guide/sturbridge-vinyl-yard-pool-fence-kit-with-no-dig-post-4ft-h-x-6ft-w-80.html",
+    "https://wambamfence.com/installation-guide/all-american-flat-top-vinyl-fence-kit-with-no-dig-post-228.html",
+    "https://wambamfence.com/installation-guide/vinyl-gates-7/4ft-h-x-4ft-w-even-steven-vinyl-gate-36.html",
+    "https://wambamfence.com/installation-guide/vinyl-gates-7/4ft-h-x-4ft-w-plain-jane-vinyl-gate-22.html",
+    "https://wambamfence.com/installation-guide/vinyl-gates-7/5ft-h-x-4ft-w-nervous-nelly-vinyl-gate-24.html",
+    "https://wambamfence.com/installation-guide/vinyl-gates-7/6ft-h-x-6ft-w-privacy-gate-adjustable-width-68.html",
+    "https://wambamfence.com/installation-guide/posts-and-accessories-57/vinyl-surface-mount-43.html",
+    "https://wambamfence.com/box-contents/double-gate-kit-with-drop-rod-57.html",
+    "https://wambamfence.com/knowledgebase/what-is-the-wall-thickness-of-your-vinyl",
+    "https://wambamfence.com/knowledgebase/how-to-deal-with-sloping-ground",
+    "https://wambamfence.com/knowledgebase/no-dig-fence-potential-frost-heave",
+    "https://wambamfence.com/knowledgebase/how-far-do-i-drive-my-large-anchor-into-the-ground",
+    "https://wambamfence.com/page/installation-guides-35.html",
+    "https://wambamfence.com/page/faq-52/limited-lifetime-warranty-21.html",
+    "https://www.homedepot.com/p/WamBam-Fence-3-5-ft-H-x-6-ft-W-No-Dig-All-American-Scallop-Top-White-Vinyl-Spaced-Picket-Dog-Eared-Fence-Panel-with-Post-and-Anchor-ZP19041/311721201"
+  ],
+  "product_lines": [
+    {
+      "line_name": "Privacy Fences",
+      "assemblies": [
+        {
+          "assembly_id": "VF16100",
+          "assembly_type": "panel",
+          "assembly_name": "Steady Freddy Vinyl Fence Panel",
+          "style": "privacy (tongue-and-groove vertical boards)",
+          "height_options_in": [72],
+          "width_on_center_in": 84,
+          "color_options": ["White"],
+          "texture_finish": ["Smooth"],
+          "material_grade": {
+            "resin": "PVC (grade not specified as virgin vs. regrind on public pages)",
+            "uv_inhibitors": null,
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Limited Lifetime Warranty"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "VF16100-A",
+              "component_type": "post",
+              "component_name": "Universal No-Dig Post (4-way channel/groove, bracketless)",
+              "nominal_dimensions_in": "4 x 4",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": ".080 (per general WamBam professional-grade vinyl post spec; not confirmed panel-specific)",
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["VF16100-B", "VF16100-C"],
+              "fasteners": []
+            },
+            {
+              "component_id": "VF16100-Pipe",
+              "component_type": "post_stiffener_steel",
+              "component_name": "WamBam Pipe Anchor (Large), steel no-dig anchor with leveling donut",
+              "nominal_dimensions_in": "1 5/8 D",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Galvanized steel",
+              "compatible_component_ids": ["VF16100-A"],
+              "fasteners": []
+            },
+            {
+              "component_id": "VF16100-B",
+              "component_type": "rail",
+              "component_name": "Top/Bottom Horizontal Rail",
+              "nominal_dimensions_in": "1.5 x 5.5",
+              "actual_dimensions_in": "1.5 x 5.5",
+              "wall_thickness_in": ".090",
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["VF16100-A", "VF16100-C"],
+              "fasteners": [
+                { "type": "self-drilling stainless steel screw", "size": "1 1/4 in", "material": "stainless steel", "qty_per_assembly": "4" },
+                { "type": "self-drilling stainless steel screw", "size": "3/4 in", "material": "stainless steel", "qty_per_assembly": "4" }
+              ]
+            },
+            {
+              "component_id": "VF16100-C",
+              "component_type": "picket",
+              "component_name": "Privacy Board (tongue-and-groove, interlocking)",
+              "nominal_dimensions_in": "1/2 x 12",
+              "actual_dimensions_in": "62 7/8 length (approx, panel-specific)",
+              "wall_thickness_in": ".050-.060",
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["VF16100-B"],
+              "fasteners": []
+            },
+            {
+              "component_id": "VF16100-Cap",
+              "component_type": "post_cap",
+              "component_name": "Post Cap (vinyl-welded)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["VF16100-A"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 84,
+            "post_depth_below_grade_in": "Post buried 1-3 in on flat ground (float above pipe); pipe anchor (large) driven approx. 42 in into ground, leaving 42 in above ground",
+            "frost_line_note": "No-dig steel pipe anchor system (not concrete); WamBam markets this as frost-heave-resistant vs. traditional concrete footings; if a pipe does heave, it can be reset by removing panel/post and re-driving the pipe.",
+            "footing_diameter_in": "1 5/8 in diameter steel pipe anchor",
+            "concrete_footing_spec": "None — no-dig system uses driven galvanized steel pipe anchor with leveling donut in place of a concrete footing"
+          },
+          "slope_accommodation": {
+            "method": "both",
+            "max_rake_angle_deg": "Up to ~10 deg without modification; 10-15 deg requires angle-cut rails/boards; beyond 15 deg requires manufacturer consultation",
+            "hardware_required": ["Extra post", "Extra bracket set (if stepping requires splitting a panel)"],
+            "notes": "Steady Freddy uses an open-groove post (no bracket) allowing sloped/racked installation, unlike bracket-style panels. WamBam recommends stepping over sloping in most cases for a level, professional appearance."
+          }
+        },
+        {
+          "assembly_id": "BL19110",
+          "assembly_type": "panel",
+          "assembly_name": "Cambridge Vinyl Privacy Fence Kit with No-Dig Post",
+          "style": "privacy (tongue-and-groove interlocking boards in track/channel)",
+          "height_options_in": [72],
+          "width_on_center_in": 74,
+          "color_options": ["White"],
+          "texture_finish": ["Smooth"],
+          "material_grade": {
+            "resin": "PVC (high quality PVC per product description)",
+            "uv_inhibitors": null,
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Limited Lifetime Warranty"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "BL19110-A",
+              "component_type": "post_stiffener_steel",
+              "component_name": "Pipe Anchor",
+              "nominal_dimensions_in": "1 5/8 D x 78 1/2 L",
+              "actual_dimensions_in": "1 5/8 x 78.5",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Galvanized steel",
+              "compatible_component_ids": ["BL19110-B"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BL19110-B",
+              "component_type": "post",
+              "component_name": "Post",
+              "nominal_dimensions_in": "4 x 4",
+              "actual_dimensions_in": "4 x 4 x 76",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19110-A", "BL19110-C"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BL19110-C",
+              "component_type": "bracket",
+              "component_name": "Rail Bracket",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19110-B", "BL19110-D"],
+              "fasteners": [
+                { "type": "1 in self-drilling stainless steel screw", "size": "1 in", "material": "stainless steel", "qty_per_assembly": "34 total (screws part G)" }
+              ]
+            },
+            {
+              "component_id": "BL19110-D",
+              "component_type": "rail",
+              "component_name": "Top/Bottom Rail",
+              "nominal_dimensions_in": "1.5 x 3.5",
+              "actual_dimensions_in": "1.5 x 3.5 x 69.75",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19110-C"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BL19110-E",
+              "component_type": "picket",
+              "component_name": "Privacy Board (interlocking, track-mounted)",
+              "nominal_dimensions_in": "0.5 x 12",
+              "actual_dimensions_in": "0.5 x 12 x 66.375",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19110-F"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BL19110-F",
+              "component_type": "channel",
+              "component_name": "Board Retention Channel",
+              "nominal_dimensions_in": "1.5 x 1",
+              "actual_dimensions_in": "1.5 x 1 x 62.875",
+              "wall_thickness_in": null,
+              "profile_depth_in": "1.5 x 1 (channel cavity)",
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19110-B", "BL19110-E"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BL19110-H",
+              "component_type": "post_cap",
+              "component_name": "Post Cap",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19110-B"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 74,
+            "post_depth_below_grade_in": "3-5 in on flat ground (bury post, compact soil); inside-post-to-inside-post clear span should measure 70 in",
+            "frost_line_note": "No-dig steel pipe anchor system, not concrete footing; see WamBam frost-heave guidance (anchors typically driven 24-40 in depending on style).",
+            "footing_diameter_in": "1 5/8 in diameter steel pipe anchor",
+            "concrete_footing_spec": "None — driven galvanized steel pipe anchor in place of concrete"
+          },
+          "slope_accommodation": {
+            "method": "stepping",
+            "max_rake_angle_deg": null,
+            "hardware_required": ["Extra post", "Extra bracket set"],
+            "notes": "Cambridge uses a bracket/channel system (not an open-groove post) and is stepped only, not rackable/sloped. If yard slope exceeds approx. 4-5 in per 6 ft panel, split the panel and add an extra post + bracket set. Optional high-wind reinforcement: drive 4 additional screws into top/bottom rails."
+          }
+        },
+        {
+          "assembly_id": "BL19107",
+          "assembly_type": "panel",
+          "assembly_name": "Windsor Vinyl Fence Kit with No-Dig Post",
+          "style": "semi-privacy / picket (privacy fence with picket-spaced infill and middle rail)",
+          "height_options_in": [60],
+          "width_on_center_in": 72,
+          "color_options": ["White"],
+          "texture_finish": ["Smooth"],
+          "material_grade": {
+            "resin": "PVC",
+            "uv_inhibitors": null,
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Limited Lifetime Warranty"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "BL19107-A",
+              "component_type": "post_stiffener_steel",
+              "component_name": "Pipe Anchor",
+              "nominal_dimensions_in": "1 5/8 D x 78 3/4 L",
+              "actual_dimensions_in": "1 5/8 x 78.75",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Galvanized steel",
+              "compatible_component_ids": ["BL19107-B"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BL19107-B",
+              "component_type": "post",
+              "component_name": "Post",
+              "nominal_dimensions_in": "4 x 4",
+              "actual_dimensions_in": "4 x 4 x 66",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19107-A", "BL19107-C", "BL19107-D"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BL19107-C",
+              "component_type": "bracket",
+              "component_name": "Top/Bottom Bracket",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19107-B", "BL19107-E"],
+              "fasteners": [
+                { "type": "self-drilling stainless steel screw", "size": "1 in", "material": "stainless steel", "qty_per_assembly": "4 per bracket" }
+              ]
+            },
+            {
+              "component_id": "BL19107-D",
+              "component_type": "bracket",
+              "component_name": "Middle Bracket",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19107-B", "BL19107-F"],
+              "fasteners": [
+                { "type": "self-drilling stainless steel screw", "size": "1 in", "material": "stainless steel", "qty_per_assembly": "2 per bracket" }
+              ]
+            },
+            {
+              "component_id": "BL19107-E",
+              "component_type": "rail",
+              "component_name": "Top/Bottom Rail",
+              "nominal_dimensions_in": "3.5 x 3.5",
+              "actual_dimensions_in": "3.5 x 3.5 x 67.75",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19107-C"],
+              "fasteners": [
+                { "type": "self-drilling stainless steel screw", "size": "3/4 in", "material": "stainless steel", "qty_per_assembly": "4" }
+              ]
+            },
+            {
+              "component_id": "BL19107-F",
+              "component_type": "rail",
+              "component_name": "Middle Rail",
+              "nominal_dimensions_in": "1.5 x 1.5",
+              "actual_dimensions_in": "1.5 x 1.5 x 67.75",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19107-D"],
+              "fasteners": [
+                { "type": "self-drilling stainless steel screw", "size": "3/4 in", "material": "stainless steel", "qty_per_assembly": "4" }
+              ]
+            },
+            {
+              "component_id": "BL19107-G",
+              "component_type": "picket",
+              "component_name": "Picket",
+              "nominal_dimensions_in": "1.5 x 7/8",
+              "actual_dimensions_in": "1.5 x 0.875 x 55.875",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19107-E"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BL19107-I",
+              "component_type": "post_cap",
+              "component_name": "Post Cap",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19107-B"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 72,
+            "post_depth_below_grade_in": "4-5 in on flat ground",
+            "frost_line_note": "No-dig steel pipe anchor system, not concrete footing.",
+            "footing_diameter_in": "1 5/8 in diameter steel pipe anchor",
+            "concrete_footing_spec": "None — driven galvanized steel pipe anchor in place of concrete"
+          },
+          "slope_accommodation": {
+            "method": "stepping",
+            "max_rake_angle_deg": null,
+            "hardware_required": ["Extra post", "Extra bracket set"],
+            "notes": "If yard slope exceeds approx. 4-5 in per 6 ft panel, split the panel and purchase an extra post and brackets. Middle rail should be installed at least 48 in above grade to conform with most pool codes (verify local regulations)."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Picket Fences",
+      "assemblies": [
+        {
+          "assembly_id": "ZP19084",
+          "assembly_type": "panel",
+          "assembly_name": "All-American Flat Top Picket Fence Kit with No-Dig Post",
+          "style": "picket (flat top; scallop-top variant sold as ZP19041)",
+          "height_options_in": [42],
+          "width_on_center_in": 72,
+          "color_options": ["White"],
+          "texture_finish": ["Smooth"],
+          "material_grade": {
+            "resin": "PVC",
+            "uv_inhibitors": null,
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Limited Lifetime Warranty"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "ZP19084-A",
+              "component_type": "post_stiffener_steel",
+              "component_name": "Pipe Anchor",
+              "nominal_dimensions_in": "1 5/8 D x 44 7/8 L",
+              "actual_dimensions_in": "1.625 x 44.875",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Galvanized steel",
+              "compatible_component_ids": ["ZP19084-B"],
+              "fasteners": []
+            },
+            {
+              "component_id": "ZP19084-B",
+              "component_type": "post",
+              "component_name": "Post",
+              "nominal_dimensions_in": "2 x 3.5",
+              "actual_dimensions_in": "2 x 3.5 x 44.625",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["ZP19084-A", "ZP19084-C"],
+              "fasteners": []
+            },
+            {
+              "component_id": "ZP19084-C",
+              "component_type": "bracket",
+              "component_name": "Rail Bracket",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["ZP19084-B", "ZP19084-D"],
+              "fasteners": [
+                { "type": "1 in self-drilling stainless steel screw", "size": "1 in", "material": "stainless steel", "qty_per_assembly": "24 total across panel" }
+              ]
+            },
+            {
+              "component_id": "ZP19084-D",
+              "component_type": "rail",
+              "component_name": "Top/Bottom Rail",
+              "nominal_dimensions_in": "1.5 x 3.5",
+              "actual_dimensions_in": "1.5 x 3.5 x 68.25",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["ZP19084-C"],
+              "fasteners": []
+            },
+            {
+              "component_id": "ZP19084-F",
+              "component_type": "picket",
+              "component_name": "Picket",
+              "nominal_dimensions_in": "3/8 x 2.75",
+              "actual_dimensions_in": "0.375 x 2.75 x 40",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["ZP19084-D"],
+              "fasteners": []
+            },
+            {
+              "component_id": "ZP19084-H",
+              "component_type": "post_cap",
+              "component_name": "Post Cap",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["ZP19084-B"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 72,
+            "post_depth_below_grade_in": "3-4 in",
+            "frost_line_note": "No-dig steel pipe anchor system, not concrete footing.",
+            "footing_diameter_in": "1 5/8 in diameter steel pipe anchor",
+            "concrete_footing_spec": "None — driven galvanized steel pipe anchor in place of concrete; optional (2) 1 in self-drilling hex head steel screws to secure post to pipe anchor"
+          },
+          "slope_accommodation": {
+            "method": "stepping",
+            "max_rake_angle_deg": null,
+            "hardware_required": ["Extra post", "Extra bracket set"],
+            "notes": "If slope exceeds 3-4 in per 6 ft, split panels and purchase an extra post & brackets."
+          }
+        },
+        {
+          "assembly_id": "VF15100",
+          "assembly_type": "panel",
+          "assembly_name": "Nervous Nelly Vinyl Fence Panel",
+          "style": "picket (rail-and-picket, rackable/sloped-capable)",
+          "height_options_in": [60],
+          "width_on_center_in": 84,
+          "color_options": ["White"],
+          "texture_finish": ["Smooth"],
+          "material_grade": {
+            "resin": "PVC",
+            "uv_inhibitors": null,
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Limited Lifetime Warranty"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "VF15100-Post",
+              "component_type": "post",
+              "component_name": "Universal No-Dig Post (open-groove, bracketless)",
+              "nominal_dimensions_in": "4 x 4",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "VF15100-Pipe",
+              "component_type": "post_stiffener_steel",
+              "component_name": "WamBam Pipe Anchor (Large)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Galvanized steel",
+              "compatible_component_ids": ["VF15100-Post"],
+              "fasteners": []
+            },
+            {
+              "component_id": "VF15100-Rails",
+              "component_type": "rail",
+              "component_name": "Top/Bottom/Middle Rails",
+              "nominal_dimensions_in": "1.5 x 3.5 (top/bottom); 1.5 x 4.5 (middle)",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["VF15100-Post"],
+              "fasteners": []
+            },
+            {
+              "component_id": "VF15100-Picket",
+              "component_type": "picket",
+              "component_name": "Picket",
+              "nominal_dimensions_in": "1.5 x 1",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["VF15100-Rails"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 84,
+            "post_depth_below_grade_in": null,
+            "frost_line_note": "No-dig steel pipe anchor system, not concrete footing.",
+            "footing_diameter_in": null,
+            "concrete_footing_spec": "None — driven galvanized steel pipe anchor in place of concrete"
+          },
+          "slope_accommodation": {
+            "method": "both",
+            "max_rake_angle_deg": "Up to ~10 deg without modification; 10-15 deg requires enlarging picket holes / angle-cutting rails; beyond 15 deg requires manufacturer consultation",
+            "hardware_required": ["Extra post", "Extra bracket set (if stepping)", "Rat-tail file / Dremel router / fine-tooth jigsaw (to enlarge top-rail picket holes for sloped install)"],
+            "notes": "Nervous Nelly must adhere to specified rail heights to be ICC pool-code compliant if installed around a pool."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Yard & Pool Fences",
+      "assemblies": [
+        {
+          "assembly_id": "BL19103",
+          "assembly_type": "panel",
+          "assembly_name": "Sturbridge Vinyl Yard & Pool Fence Kit with No-Dig Post",
+          "style": "picket (alternating thin/wide picket, pool code compliant spacing)",
+          "height_options_in": [48],
+          "width_on_center_in": 72,
+          "color_options": ["White"],
+          "texture_finish": ["Smooth"],
+          "material_grade": {
+            "resin": "PVC",
+            "uv_inhibitors": null,
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Limited Lifetime Warranty"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "BL19103-A",
+              "component_type": "post_stiffener_steel",
+              "component_name": "Pipe Anchor",
+              "nominal_dimensions_in": "1 5/8 D x 58 1/2 L",
+              "actual_dimensions_in": "1.625 x 58.5",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Galvanized steel",
+              "compatible_component_ids": ["BL19103-B"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BL19103-B",
+              "component_type": "post",
+              "component_name": "Post",
+              "nominal_dimensions_in": "4 x 4",
+              "actual_dimensions_in": "4 x 4 x 53",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19103-A", "BL19103-C"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BL19103-C",
+              "component_type": "bracket",
+              "component_name": "Rail Bracket",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19103-B", "BL19103-D"],
+              "fasteners": [
+                { "type": "1 in self-drilling stainless steel screw", "size": "1 in", "material": "stainless steel", "qty_per_assembly": "24 total" }
+              ]
+            },
+            {
+              "component_id": "BL19103-D",
+              "component_type": "rail",
+              "component_name": "Top/Bottom Horizontal Rail",
+              "nominal_dimensions_in": "1.5 x 3.5",
+              "actual_dimensions_in": "1.5 x 3.5 x 67.75",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19103-C"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BL19103-E",
+              "component_type": "picket",
+              "component_name": "Thin Picket",
+              "nominal_dimensions_in": "7/8 x 1.5",
+              "actual_dimensions_in": "0.875 x 1.5 x 45",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19103-D"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BL19103-F",
+              "component_type": "picket",
+              "component_name": "Wide Picket",
+              "nominal_dimensions_in": "1.5 x 3",
+              "actual_dimensions_in": "1.5 x 3 x 45",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19103-D"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BL19103-H",
+              "component_type": "post_cap",
+              "component_name": "Post Cap",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BL19103-B"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 72,
+            "post_depth_below_grade_in": "3-4 in on flat ground",
+            "frost_line_note": "No-dig steel pipe anchor system, not concrete footing.",
+            "footing_diameter_in": "1 5/8 in diameter steel pipe anchor",
+            "concrete_footing_spec": "None — driven galvanized steel pipe anchor in place of concrete"
+          },
+          "slope_accommodation": {
+            "method": "stepping",
+            "max_rake_angle_deg": null,
+            "hardware_required": ["Extra post", "Extra bracket set"],
+            "notes": "If yard slope exceeds 3-4 in per 6 ft panel, split panels and add an extra post and brackets. Top rail must be installed at least 48 in above ground to conform with most pool codes (verify local regulations)."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Gates",
+      "assemblies": [
+        {
+          "assembly_id": "VG24100",
+          "assembly_type": "single_gate",
+          "assembly_name": "Even Steven Vinyl Gate",
+          "style": "picket (matches Sturbridge/All-American family framing)",
+          "height_options_in": [48],
+          "width_on_center_in": 48,
+          "color_options": ["White"],
+          "texture_finish": ["Smooth"],
+          "material_grade": {
+            "resin": "PVC",
+            "uv_inhibitors": null,
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Limited Lifetime Warranty"
+          },
+          "sub_assemblies": [
+            { "component_id": "VG24100-A", "component_type": "bracket", "component_name": "Corner Bracket", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl (PVC)", "compatible_component_ids": [], "fasteners": [] },
+            { "component_id": "VG24100-D", "component_type": "rail", "component_name": "Horizontal Rail", "nominal_dimensions_in": "1.5 x 4.5", "actual_dimensions_in": "1.5 x 4.5 x 38.75", "wall_thickness_in": ".090", "profile_depth_in": null, "material": "Vinyl (PVC)", "compatible_component_ids": ["VG24100-A"], "fasteners": [] },
+            { "component_id": "VG24100-E", "component_type": "rail", "component_name": "Middle Rail", "nominal_dimensions_in": "5/8 x 4.5", "actual_dimensions_in": "0.625 x 4.5 x 38.75", "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl (PVC)", "compatible_component_ids": ["VG24100-A"], "fasteners": [] },
+            { "component_id": "VG24100-B", "component_type": "picket", "component_name": "Vertical Stile", "nominal_dimensions_in": "1.5 x 4.5", "actual_dimensions_in": "1.5 x 4.5 x 29.5", "wall_thickness_in": ".060", "profile_depth_in": null, "material": "Vinyl (PVC)", "compatible_component_ids": ["VG24100-A"], "fasteners": [] },
+            { "component_id": "VG24100-F", "component_type": "bracket", "component_name": "Gate Brace with Hardware (diagonal anti-sag brace)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl (PVC) tube, telescoping", "compatible_component_ids": [], "fasteners": [{ "type": "hex bolt / lock washer / nut", "size": "2 sets", "material": "steel", "qty_per_assembly": "2 bolts, 2 washers, 2 nuts" }] },
+            { "component_id": "VG24100-H", "component_type": "hinge", "component_name": "Spring-Loaded Self-Closing Hinge", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl/metal composite with tension pin", "compatible_component_ids": [], "fasteners": [{ "type": "self-drilling stainless steel screw", "size": "2 in (black)", "material": "stainless steel", "qty_per_assembly": "6 (3 per hinge)" }] },
+            { "component_id": "VG24100-IJ", "component_type": "latch", "component_name": "Latch Catch and Latch Finger (two-sided operable latch)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl/metal composite", "compatible_component_ids": [], "fasteners": [{ "type": "self-drilling stainless steel screw", "size": "1 1/4 in (black)", "material": "stainless steel", "qty_per_assembly": "6" }] },
+            { "component_id": "VG24100-C", "component_type": "post_stiffener_steel", "component_name": "Metal Post Stabilizer (hinge post only)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Steel", "compatible_component_ids": [], "fasteners": [] }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 48,
+            "post_depth_below_grade_in": "Small WamBam anchor: driven 36 in into ground, 24 in remains above ground",
+            "frost_line_note": "No-dig steel pipe anchor system.",
+            "footing_diameter_in": null,
+            "concrete_footing_spec": "None — small pipe anchor driven into ground; metal post stabilizer used on hinge post only"
+          },
+          "slope_accommodation": {
+            "method": "stepping",
+            "max_rake_angle_deg": null,
+            "hardware_required": [],
+            "notes": "WamBam gates are not rackable and must be installed on a relatively flat surface. Hinge tension is adjustable via a 2 3/4 in gate tension pin."
+          }
+        },
+        {
+          "assembly_id": "VG24200",
+          "assembly_type": "single_gate",
+          "assembly_name": "Plain Jane Vinyl Gate",
+          "style": "picket (arched top with 8 pickets)",
+          "height_options_in": [48],
+          "width_on_center_in": 48,
+          "color_options": ["White"],
+          "texture_finish": ["Smooth"],
+          "material_grade": {
+            "resin": "PVC",
+            "uv_inhibitors": null,
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Limited Lifetime Warranty"
+          },
+          "sub_assemblies": [
+            { "component_id": "VG24200-A", "component_type": "bracket", "component_name": "Corner Bracket", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl (PVC)", "compatible_component_ids": [], "fasteners": [] },
+            { "component_id": "VG24200-Picket", "component_type": "picket", "component_name": "Picket (8 per gate)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl (PVC)", "compatible_component_ids": ["VG24200-A"], "fasteners": [] },
+            { "component_id": "VG24200-H", "component_type": "hinge", "component_name": "Spring-Loaded Self-Closing Hinge", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl/metal composite with tension pin", "compatible_component_ids": [], "fasteners": [] },
+            { "component_id": "VG24200-Latch", "component_type": "latch", "component_name": "Latch Catch and Latch Finger", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl/metal composite", "compatible_component_ids": [], "fasteners": [] },
+            { "component_id": "VG24200-C", "component_type": "post_stiffener_steel", "component_name": "Metal Post Stabilizer (hinge post only)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Steel", "compatible_component_ids": [], "fasteners": [] }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 48,
+            "post_depth_below_grade_in": "Small WamBam anchor: driven 36 in into ground, 24 in remains above ground",
+            "frost_line_note": "No-dig steel pipe anchor system.",
+            "footing_diameter_in": null,
+            "concrete_footing_spec": "None — small pipe anchor driven into ground"
+          },
+          "slope_accommodation": {
+            "method": "stepping",
+            "max_rake_angle_deg": null,
+            "hardware_required": [],
+            "notes": "WamBam gates are not rackable and must be installed on a relatively flat surface."
+          }
+        },
+        {
+          "assembly_id": "VG25100",
+          "assembly_type": "single_gate",
+          "assembly_name": "Nervous Nelly Vinyl Gate",
+          "style": "picket (ICC pool-code compliant rail spacing)",
+          "height_options_in": [60],
+          "width_on_center_in": 48,
+          "color_options": ["White"],
+          "texture_finish": ["Smooth"],
+          "material_grade": {
+            "resin": "PVC",
+            "uv_inhibitors": null,
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Limited Lifetime Warranty"
+          },
+          "sub_assemblies": [
+            { "component_id": "VG25100-A", "component_type": "bracket", "component_name": "Corner/Arch Bracket", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl (PVC)", "compatible_component_ids": [], "fasteners": [] },
+            { "component_id": "VG25100-D", "component_type": "rail", "component_name": "Top Rail (arched)", "nominal_dimensions_in": "1.5 x 3.5", "actual_dimensions_in": "1.5 x 3.5 x 42", "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl (PVC)", "compatible_component_ids": ["VG25100-A"], "fasteners": [] },
+            { "component_id": "VG25100-Picket", "component_type": "picket", "component_name": "Picket (8 per gate)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl (PVC)", "compatible_component_ids": ["VG25100-D"], "fasteners": [] },
+            { "component_id": "VG25100-H", "component_type": "hinge", "component_name": "Spring-Loaded Self-Closing Hinge", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl/metal composite with tension pin", "compatible_component_ids": [], "fasteners": [] },
+            { "component_id": "VG25100-Latch", "component_type": "latch", "component_name": "Latch Catch and Latch Finger (two-sided operable)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl/metal composite", "compatible_component_ids": [], "fasteners": [] },
+            { "component_id": "VG25100-C", "component_type": "post_stiffener_steel", "component_name": "Metal Post Stabilizer (hinge post only)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Steel", "compatible_component_ids": [], "fasteners": [] }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 48,
+            "post_depth_below_grade_in": "Large WamBam anchor used (per gate spec sheet, ~42 in embedment)",
+            "frost_line_note": "No-dig steel pipe anchor system.",
+            "footing_diameter_in": null,
+            "concrete_footing_spec": "None — large pipe anchor driven into ground"
+          },
+          "slope_accommodation": {
+            "method": "stepping",
+            "max_rake_angle_deg": null,
+            "hardware_required": [],
+            "notes": "Dimensions must adhere to spec sheet to be ICC pool-code compliant when installed around a pool. WamBam gates are not rackable and must be installed on a relatively flat surface."
+          }
+        },
+        {
+          "assembly_id": "BL19111-est",
+          "assembly_type": "single_gate",
+          "assembly_name": "6ft H x 6ft W Privacy Gate (Adjustable Width)",
+          "style": "privacy (matches Steady Freddy / Cambridge family)",
+          "height_options_in": [72],
+          "width_on_center_in": null,
+          "color_options": ["White"],
+          "texture_finish": ["Smooth"],
+          "material_grade": {
+            "resin": "PVC",
+            "uv_inhibitors": null,
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Limited Lifetime Warranty"
+          },
+          "sub_assemblies": [],
+          "post_spacing_rules": {
+            "on_center_in": null,
+            "post_depth_below_grade_in": null,
+            "frost_line_note": "No-dig steel pipe anchor system.",
+            "footing_diameter_in": null,
+            "concrete_footing_spec": "None — pipe anchor system; a gate wheel is recommended for this 6x6 privacy gate to reduce stress on post/hinges (per WamBam knowledge base)"
+          },
+          "slope_accommodation": {
+            "method": "stepping",
+            "max_rake_angle_deg": null,
+            "hardware_required": ["Gate wheel (recommended)"],
+            "notes": "WamBam gates are not rackable/sloped and must be installed on a relatively flat surface. Component-level dimensions not extracted; PDF install guide downloaded for full detail."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Posts and Accessories",
+      "assemblies": [
+        {
+          "assembly_id": "SB61000",
+          "assembly_type": "panel",
+          "assembly_name": "Vinyl Surface Mount (hardscape alternative to pipe anchor)",
+          "style": "accessory - post base plate for mounting no-dig posts to concrete/wood decks",
+          "height_options_in": null,
+          "width_on_center_in": null,
+          "color_options": ["White (powder coat)"],
+          "texture_finish": ["Smooth"],
+          "material_grade": {
+            "resin": null,
+            "uv_inhibitors": null,
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Limited Lifetime Warranty"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "SB61000-Mount",
+              "component_type": "bracket",
+              "component_name": "Surface Mount Base Plate with integral pipe stub (hot-dip galvanized, powder-coated white)",
+              "nominal_dimensions_in": "4.5 x 4.5 flange",
+              "actual_dimensions_in": "flange 4.5 x 4.5 x .375 thick; stub OD 1.6535 (42mm); stub length 47.646; stub wall .118 (3mm)",
+              "wall_thickness_in": ".118 (3mm) stub wall",
+              "profile_depth_in": null,
+              "material": "Hot-dip galvanized steel, powder-coated white",
+              "compatible_component_ids": [],
+              "fasteners": [
+                { "type": "hex head Tek screw", "size": "1/2 in", "material": "steel", "qty_per_assembly": "4" },
+                { "type": "concrete wedge/sleeve anchor (concrete install, not included)", "size": "3/8 in x 3 in", "material": "steel", "qty_per_assembly": "4" },
+                { "type": "through-bolt (wood deck install, not included)", "size": "3/8 in x 4 in", "material": "steel, with washers and nuts", "qty_per_assembly": "4" }
+              ]
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": null,
+            "post_depth_below_grade_in": "N/A (surface-mounted, no embedment)",
+            "frost_line_note": "N/A - hardscape surface mount, no in-ground embedment",
+            "footing_diameter_in": null,
+            "concrete_footing_spec": "Concrete: (4) 3/8 x 3 in wedge/sleeve anchors, no adhesive/blue screws. Wood deck: (4) 3/8 x 4 in through-bolts into added 2x6/2x8 blocking between joists. In coastal/saltwater areas, use galvanized washers as spacers between plate and concrete for airflow/corrosion prevention."
+          },
+          "slope_accommodation": {
+            "method": "stepping",
+            "max_rake_angle_deg": null,
+            "hardware_required": [],
+            "notes": "Used where a post must be mounted to concrete/wood hardscape instead of driven into soil; leveling donut atop the stub can be shifted to compensate for a slightly out-of-level mount."
+          }
+        }
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "doc_type": "installation_manual",
+      "title": "Windsor Vinyl Fence Kit with No-Dig Post — Install Guide (BL19107)",
+      "url": "https://wambamfence.com/installation-guide/windsor-vinyl-fence-kit-with-no-dig-post-207.html",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/wam-bam/windsor-BL19107-install-guide.pdf",
+      "manufacturer": "Wam Bam Fence Co",
+      "model_or_line": "Windsor / BL19107",
+      "date_or_version": "061225"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Cambridge Vinyl Privacy Fence Kit with No-Dig Post — Install Guide (BL19110)",
+      "url": "https://wambamfence.com/installation-guide/cambridge-vinyl-privacy-fence-kit-with-no-dig-post-223.html",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/wam-bam/cambridge-BL19110-install-guide.pdf",
+      "manufacturer": "Wam Bam Fence Co",
+      "model_or_line": "Cambridge / BL19110",
+      "date_or_version": "ver12052025"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Sturbridge Vinyl Yard & Pool Fence Kit with No-Dig Post — Install Guide (BL19103)",
+      "url": "https://wambamfence.com/installation-guide/sturbridge-vinyl-yard-pool-fence-kit-with-no-dig-post-4ft-h-x-6ft-w-80.html",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/wam-bam/sturbridge-BL19103-install-guide.pdf",
+      "manufacturer": "Wam Bam Fence Co",
+      "model_or_line": "Sturbridge / BL19103",
+      "date_or_version": "v12"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Steady Freddy Vinyl Fence Panel — Install Guide (VF16100)",
+      "url": "https://wambamfence.com/installation-guide/vinyl-fencing-18/6ft-h-x-7ft-w-steady-freddy-vinyl-fence-panel-30.html",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/wam-bam/steady-freddy-VF16100-install-guide.pdf",
+      "manufacturer": "Wam Bam Fence Co",
+      "model_or_line": "Steady Freddy / VF16100",
+      "date_or_version": "021921 (04124 file rev)"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Nervous Nelly Vinyl Fence Panel — Install Guide (VF15100)",
+      "url": "https://wambamfence.com/installation-guide/vinyl-fencing-18/5ft-h-x-7ft-w-nervous-nelly-vinyl-fence-panel-29.html",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/wam-bam/nervous-nelly-VF15100-install-guide.pdf",
+      "manufacturer": "Wam Bam Fence Co",
+      "model_or_line": "Nervous Nelly / VF15100",
+      "date_or_version": "042821 (04124 file rev)"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "All-American Flat Top Picket Fence with No-Dig Post — Install Guide (ZP19084)",
+      "url": "https://wambamfence.com/installation-guide/all-american-flat-top-vinyl-fence-kit-with-no-dig-post-228.html",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/wam-bam/all-american-ZP19084-install-guide.pdf",
+      "manufacturer": "Wam Bam Fence Co",
+      "model_or_line": "All-American / ZP19084",
+      "date_or_version": "012726"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Even Steven Vinyl Gate — Install Guide (VG24100)",
+      "url": "https://wambamfence.com/installation-guide/vinyl-gates-7/4ft-h-x-4ft-w-even-steven-vinyl-gate-36.html",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/wam-bam/even-steven-VG24100-gate-install-guide.pdf",
+      "manufacturer": "Wam Bam Fence Co",
+      "model_or_line": "Even Steven Gate / VG24100",
+      "date_or_version": "030121"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Plain Jane Vinyl Gate — Install Guide (VG24200)",
+      "url": "https://wambamfence.com/installation-guide/vinyl-gates-7/4ft-h-x-4ft-w-plain-jane-vinyl-gate-22.html",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/wam-bam/plain-jane-VG24200-gate-install-guide.pdf",
+      "manufacturer": "Wam Bam Fence Co",
+      "model_or_line": "Plain Jane Gate / VG24200",
+      "date_or_version": "060921"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Nervous Nelly Vinyl Gate — Install Guide (VG25100)",
+      "url": "https://wambamfence.com/installation-guide/vinyl-gates-7/5ft-h-x-4ft-w-nervous-nelly-vinyl-gate-24.html",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/wam-bam/nervous-nelly-VG25100-gate-install-guide.pdf",
+      "manufacturer": "Wam Bam Fence Co",
+      "model_or_line": "Nervous Nelly Gate / VG25100",
+      "date_or_version": "052021"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "6ft H x 6ft W Privacy Gate (Adjustable Width) — Install Guide",
+      "url": "https://wambamfence.com/installation-guide/vinyl-gates-7/6ft-h-x-6ft-w-privacy-gate-adjustable-width-68.html",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/wam-bam/privacy-gate-6ftx6ft-adjustable-install-guide.pdf",
+      "manufacturer": "Wam Bam Fence Co",
+      "model_or_line": "Privacy Gate (Adjustable Width) 6x6",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Vinyl Surface Mount — Assembly/Install Instructions (SB61000)",
+      "url": "https://wambamfence.com/installation-guide/posts-and-accessories-57/vinyl-surface-mount-43.html",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/wam-bam/vinyl-surface-mount-SB61000-install-guide.pdf",
+      "manufacturer": "Wam Bam Fence Co",
+      "model_or_line": "Vinyl Surface Mount / SB61000",
+      "date_or_version": "032321"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Murphy's Vinyl Fence Laws (general planning/installation guide covering slope, obstacles, property lines, utilities)",
+      "url": "https://files.wambamfence.com/media/assets/files/installation_guide/installation_guide_MurphysVinylFenceLaws.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/wam-bam/murphys-vinyl-fence-laws.pdf",
+      "manufacturer": "Wam Bam Fence Co",
+      "model_or_line": "All vinyl fence lines (general guide)",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Murphy's Ornamental (Aluminum) Fence Laws — general guide (not vinyl-specific; linked alongside vinyl guide, not downloaded)",
+      "url": "https://files.wambamfence.com/media/assets/files/installation_guide/MurphysOrnamentalFenceLaws.pdf",
+      "local_path": null,
+      "manufacturer": "Wam Bam Fence Co",
+      "model_or_line": "Aluminum fence lines (out of scope for this vinyl dataset)",
+      "date_or_version": null
+    }
+  ]
+}

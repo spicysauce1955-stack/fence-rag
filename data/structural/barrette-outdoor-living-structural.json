@@ -1,0 +1,370 @@
+{
+  "manufacturer": "Barrette Outdoor Living / Bufftech / SimTek / Catalyst Fence Solutions",
+  "_research_note_pass2": "Second-pass structural/engineering research. Corporate note: Miami-Dade NOA filings show the legal entity behind these vinyl/molded fence NOAs has historically been 'CertainTeed LLC' / 'CertainTeed Corporation' (Buffalo, NY) before rebranding to Barrette Outdoor Living, Inc. (545 Tilton Rd / 231 Ship Canal Pkwy, Egg Harbor City NJ / Buffalo NY) -- consistent with the existing 'certainteed-bufftech' manuals folder already in this repo. All four Miami-Dade NOA PDFs found are scanned/image-based (no embedded text layer); data below was read directly off the drawing sheets via OCR-by-eye (page images), not pdftotext.",
+  "engineering_letters": {
+    "finding": "No standalone, publicly downloadable 'engineering letter' or generic 50-state PE wind-load certification PDF was found on barretteoutdoorliving.com, bufftech.com, or catalystfence.com for the vinyl/molded fence lines. Barrette's own CSI 3-part spec sections for its OTHER product lines (Avalon Aluminum Railing, Privacy Railing, Select Series Vinyl Railing) explicitly state that PE-stamped load-calculation documentation exists but is only available on request, per-state, via Customer Service (877-265-2220) -- it is not published online. The functional equivalent of an 'engineering letter' for the vinyl/molded FENCE lines (as opposed to railing) is the set of Miami-Dade County Notice of Acceptance (NOA) packages, which ARE PE-signed-and-sealed engineering documents (see hvhz_noa_approvals below) and which the current Catalyst installation manuals explicitly direct installers to consult for wind-code compliance ('Additional products and assembly may be required to meet wind code requirements. Notice of acceptance (NOA) can be found at www.miamidade.gov/building/pc-search_app.asp' -- Vinyl Post & Rail/Ranch Rail Install Instructions, WEB REV 1.25).",
+    "identified_pe_stamps": [
+      {
+        "engineer": "Robert Nieminen, P.E.",
+        "license_no": "FL PE No. 59166",
+        "firm": "Nemo | etc. (Engineer | Test | Consult), 353 Christian Street Unit #13, Oxford, CT 06478",
+        "role": "Signed and sealed the current (2025) NOA drawings for both Extruded PVC Vinyl Fencing (Columbia/Imperial/Chesterfield/Breezewood/Brookline models) and Polyethylene Plastic Shell Fence (Allegheny/EcoStone/Sherwood/Ashland SimTek models), dated 01/28/2025",
+        "design_basis_cited": "2023 Florida Building Code, 8th Edition, including HVHZ; wind loads per ASCE 7-16 (vinyl) / ASCE 7-16 (SimTek, per FBC 1616.2.1)"
+      },
+      {
+        "engineer": "Pedro De Figueiredo, P.E.",
+        "firm": "EngCo, Inc. / PPMF, Inc.",
+        "role": "Signed and sealed the prior generations of the same NOA drawings and calculations (2007-2021), including a 'New Post Calculation based on FBC 2010' dated 04/09/2012 -- the calculation package that established the current post/footing tables."
+      },
+      {
+        "engineer": "Joseph A. Reed, P.E. / Gary Hartman, P.E.",
+        "firm": "Architectural Testing / Intertek",
+        "role": "Signed and sealed the underlying Uniform Static Air Pressure Test reports (Report #58086.01-119-18, dated 2006; Report #I6341.01-119-18-R0, dated 2018) that the NOA calculations are based on."
+      },
+      {
+        "engineer": "Helmy A. Makar, P.E., M.S.",
+        "firm": "Miami-Dade County RER Product Control Section",
+        "role": "Product Control Section Supervisor who reviewed and approved (signed) both current NOAs on 04/24/2025 on behalf of Miami-Dade County -- this is the county reviewer's seal, not the manufacturer's design engineer."
+      }
+    ]
+  },
+  "wind_load_tables": [
+    {
+      "source": "Miami-Dade NOA 24-0117.05, Extruded PVC Vinyl Fencing, Sheet 9 of 9, 'TABLE 1: MAXIMUM POST SPACING AND FOOTING DIMENSIONS'",
+      "applies_to_models": ["Columbia (semi-privacy)", "Imperial (semi-privacy)", "Chesterfield (privacy)", "Chesterfield w/ Lattice (privacy)", "Breezewood (semi-privacy)", "Brookline (6'x6' horizontal-slat)"],
+      "design_basis": "2023 FBC 8th Edition (HVHZ); fence and supports designed for 75 mph fastest-mile wind speed or 115 mph ultimate 3-second gust; wind exposures as defined in ASCE 7-10",
+      "table": [
+        { "wind_exposure": "B", "footing_depth_in": 30, "max_post_spacing_in": 97, "zone": "Non-HVHZ" },
+        { "wind_exposure": "B", "footing_depth_in": 24, "max_post_spacing_in": 66, "zone": "Non-HVHZ" },
+        { "wind_exposure": "C", "footing_depth_in": 36, "max_post_spacing_in": 88, "zone": "HVHZ and Non-HVHZ" },
+        { "wind_exposure": "C", "footing_depth_in": 30, "max_post_spacing_in": 68, "zone": "HVHZ and Non-HVHZ" },
+        { "wind_exposure": "D", "footing_depth_in": 36, "max_post_spacing_in": 75, "zone": "HVHZ and Non-HVHZ" },
+        { "wind_exposure": "D", "footing_depth_in": 30, "max_post_spacing_in": 56, "zone": "HVHZ and Non-HVHZ" }
+      ],
+      "footing_spec": "12\" diameter x depth per table, 3000 PSI concrete, 6\" gravel fill at bottom of hole",
+      "post_length_rule": "Post length = footing depth + 6' (i.e. depth + 72\") for standard models; Breezewood model uses depth + 7' (post length = depth + 84\"). Max fence height 72\" (6'), max post length 119\".",
+      "post_reinforcement_rule": "Full-length (post length minus 1\") aluminum reinforcement insert required for Breezewood model; 48\"-long aluminum reinforcement insert required for all other models (Columbia, Imperial, Chesterfield, Chesterfield w/Lattice, Brookline).",
+      "per_model_max_post_spacing_as_drawn": [
+        { "model": "Columbia (semi-privacy)", "max_post_spacing_in": "96-1/8" },
+        { "model": "Imperial (semi-privacy)", "max_post_spacing_in": "97" },
+        { "model": "Chesterfield (privacy)", "max_post_spacing_in": "96-1/8" },
+        { "model": "Chesterfield w/ Lattice (privacy)", "max_post_spacing_in": "96-1/8" },
+        { "model": "Chesterfield (alternate/taller picket config)", "max_post_spacing_in": "75-7/16" },
+        { "model": "Breezewood (semi-privacy)", "max_post_spacing_in": "97" },
+        { "model": "Brookline (6'x6', 2x6 horizontal beam/slat style)", "max_post_spacing_in": "72" }
+      ]
+    },
+    {
+      "source": "Miami-Dade NOA 24-0117.06, Polyethylene Plastic Shell Fence (SimTek), Sheet 1 of 3, 'Allegheny / EcoStone Six Foot Fence Panel drawing' and Sheet 3 of 3 'Sherwood / Ashland Six Foot Fence Panel drawing'",
+      "applies_to_models": ["Allegheny", "EcoStone", "Sherwood", "Ashland"],
+      "design_basis": "2023 FBC 1616.2.1, based on wind loads per ASCE 7-16; 75 mph Fastest Mile Wind Speed or 115 mph Ultimate 3-second gust",
+      "table": [
+        { "fence_height_range_in": "up to 48\"", "wind_exposure": "B", "min_footing_depth_in": 24, "footing_diameter_in": 12 },
+        { "fence_height_range_in": "up to 48\"", "wind_exposure": "C", "min_footing_depth_in": 30, "footing_diameter_in": 12 },
+        { "fence_height_range_in": "49\" to 76\"", "wind_exposure": "B", "min_footing_depth_in": 34, "footing_diameter_in": 12 },
+        { "fence_height_range_in": "49\" to 76\"", "wind_exposure": "C", "min_footing_depth_in": 36, "footing_diameter_in": 12 }
+      ],
+      "footing_spec": "12\" diameter, 2500 PSI concrete minimum, 6\" min. gravel fill",
+      "panel_dims": "71.25\" max panel width (CL-to-CL post spacing), 75.25\" max panel height, 102\" total post length, 1\" max grade line reveal, 27.5\" typical embedment shown in detail (up to table value)",
+      "note": "No Exposure D or HVHZ-specific row is broken out separately in this table (unlike the vinyl-fencing NOA); the SimTek NOA scope statement nonetheless certifies the product for the Florida Building Code HVHZ."
+    }
+  ],
+  "hvhz_noa_approvals": [
+    {
+      "noa_number": "24-0117.05",
+      "description": "Extruded PVC Vinyl Fencing",
+      "applicant": "Barrette Outdoor Living, Inc.",
+      "approval_date": "2025-04-24",
+      "expiration_date": "2029-03-13",
+      "status": "Approved (current)",
+      "models_covered": ["Columbia", "Imperial", "Chesterfield", "Chesterfield w/ Lattice", "Breezewood", "Brookline"],
+      "revises_prior_noa": "23-0314.05",
+      "noa_history_chain": ["06-1019.01", "11-1028.05", "12-1106.11", "15-0508.06", "18-0313.01", "18-0920.04", "20-0303.02", "21-0125.07", "23-0314.05", "24-0117.05"],
+      "reviewing_engineer": "Helmy A. Makar, P.E., M.S. (Miami-Dade County Product Control Section Supervisor)",
+      "design_engineer_of_record": "Robert Nieminen, P.E. (FL Lic. #59166), Nemo etc.",
+      "missile_impact_rating": "None",
+      "source_url": "https://www.miamidade.gov/building/library/productcontrol/noa/24011705.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf"
+    },
+    {
+      "noa_number": "24-0117.06",
+      "description": "Polyethylene Plastic Shell Fence (SimTek molded/stone-look fence)",
+      "applicant": "Barrette Outdoor Living, Inc.",
+      "approval_date": "2025-04-24",
+      "expiration_date": "2028-04-04",
+      "status": "Approved (current)",
+      "models_covered": ["Allegheny", "EcoStone", "Sherwood", "Ashland"],
+      "revises_prior_noa": "22-0616.10",
+      "reviewing_engineer": "Helmy A. Makar, P.E., M.S.",
+      "design_engineer_of_record": "Robert Nieminen, P.E. (FL Lic. #59166), Nemo etc.",
+      "missile_impact_rating": "None",
+      "possible_csi_codes": ["32 31 00 Fences and Gates", "32 31 23 Plastic Fences and Gates", "32 31 26 Wire Fences and Gates", "32 31 29 Wood Fences and Gates", "32 31 17 Expanded Metal Fences and Gates"],
+      "source_url": "https://www.miamidade.gov/building/library/productcontrol/noa/24011706.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-24-0117.06-simtek-fence.pdf"
+    },
+    {
+      "noa_number": "10-1217.01",
+      "description": "Extruded PVC Vinyl Fencing (legacy/historical approval)",
+      "applicant": "Barrette Outdoor Living, Inc.",
+      "status": "Superseded (retained for historical/basis reference)",
+      "key_fact_from_search_snippet": "This fence is approved for sustained wind velocity of 75 MPH (90 MPH for 3 second gust) when the post centers are located 96\" on center -- shows the wind-speed/spacing basis has been stable since at least 2010, and that the later NOAs' Table 1 (which adds exposure-category and footing-depth granularity) is a refinement of this original single-condition rating.",
+      "source_url": "http://www.miamidade.gov/building/library/productcontrol/noa/10121701.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf"
+    },
+    {
+      "noa_number": "10-1217.02",
+      "description": "Extruded PVC Vinyl Fencing (legacy/historical approval, companion filing to 10-1217.01)",
+      "applicant": "Barrette Outdoor Living, Inc.",
+      "status": "Superseded (retained for historical/basis reference)",
+      "source_url": "http://www.miamidade.gov/building/library/productcontrol/noa/10121702.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-10-1217.02-vinyl-fencing-legacy.pdf"
+    },
+    {
+      "note": "Miami-Dade product-control search also lists other manufacturers' fence NOAs (Deacero, VEKA, UFP Industries, All Season Fencing, PlyGem) for competitive/benchmark context, but only the two Barrette Outdoor Living, Inc. entries above are in-scope for this dataset.",
+      "search_source_url": "https://www.miamidade.gov/building/pc-result_detail_app.asp?app_alias=101784"
+    },
+    {
+      "florida_statewide_product_approval": "Not separately confirmed as distinct FL# entries outside the Miami-Dade HVHZ NOA system in this pass; the Miami-Dade NOA itself states it is valid 'to be used in Miami Dade County and other areas where allowed by the Authority Having Jurisdiction (AHJ)', which is how it typically also serves non-HVHZ Florida jurisdictions."
+    }
+  ],
+  "profile_dimension_supplement": {
+    "Horizontal_Privacy_Madison": {
+      "line_name": "Madison - Solid Horizontal Privacy (current Catalyst branding; equivalent to the 'Horizontal Privacy Vinyl Fence' entries in the base dataset)",
+      "source": "Catalyst SKU sheet CAT25-D-514650, Rev 12/25 (downloaded)",
+      "available_widths_ft": [6, 8],
+      "available_heights_ft": [4, 5, 6],
+      "rail_tiers": {
+        "Element_Reserve_or_LX_Premium_rail": {
+          "top_bottom_rail": "2\" x 6\" x 71\" (with internal steel stiffener, per 'Top/Bottom Rail with Steel')",
+          "TG_infill_boards": "7/8\" x 7\" x 66-1/2\" (qty varies 5/7/9 per panel height: 4'=5 boards, 5'=7 boards, 6'=9 boards)",
+          "aluminum_end_channel": "1\" x 1-1/2\" x 60-1/2\"",
+          "lock_rings": "N/A dimension (plastic retaining rings, qty 4)"
+        },
+        "Element_Reserve_CV_rail_(Select_tier)": {
+          "top_bottom_rail": "1-3/4\" x 7\" (per fence page rail-profile callout)",
+          "structural_post_channel": "1\" x 1-7/8\" x 56-1/4\" (labeled 'Structural Post Channels', steel U-channel)",
+          "TG_infill_boards": "7/8\" x 6\" x 66-3/4\" (10 boards per section on drive-gate BOM)"
+        }
+      },
+      "posts": {
+        "4ft_height": "5\" x 5\" x 84\" Line/Corner/End Post",
+        "5ft_height": "5\" x 5\" x 96\" Line/Corner/End Post",
+        "6ft_height": "5\" x 5\" x 107\" or 108\" Line/Corner/End Post (107\" for LX Premium tier, 108\" for Select/CV tier)",
+        "post_centers_6ft_panel": "72\" on-center (5x5 posts) per dimensioned drawing on SKU sheet",
+        "gate_post_insert": "5\" x 5\" x 94\" (4'/5' height) or 5\" x 5\" x 106\" (6' height) Gate Post Insert -- separate SKU, ordered when hardware/gate load requires reinforcement"
+      },
+      "gates": {
+        "4ft": "4' x 50-1/2\" Madison Horizontal Gate (44-1/2\"H panel)",
+        "5ft": "5' x 50-1/2\" Madison Horizontal Gate (58-1/2\"H panel)",
+        "6ft": "6' x 50-1/2\" Madison Horizontal Gate (72-1/2\"H panel) / 6' x 46\" Walk Gate / 6' x 58\" Drive Gate (Select/CV tier)",
+        "gate_extension_kit": "Builds gate up to 70\" wide (SKU 629133)"
+      },
+      "innovations_cited": ["StayStraight®", "SolarGuard®", "TimberGrain™"]
+    },
+    "Ranch_Rail_Coronado": {
+      "line_name": "Coronado - Vinyl Ranch Rail (current Catalyst branding; equivalent to base dataset's 'Post & Rail / Ranch Rail' line, works with matching Sedona Crossbuck rail)",
+      "source": "Hoover Fence Catalyst-Coronado Standard Sell Sheet (search snippet; live PDF fetch blocked) + Catalyst product page + current install manual (downloaded)",
+      "rail_configurations": ["2-rail", "3-rail", "4-rail"],
+      "available_heights_ft": [2.5, 4.5, 7],
+      "available_widths_ft": [6, 8],
+      "rail_dimension": "1-1/2\" x 5-1/2\" x 8' Coronado Ranch Rail (SKU 73012399, also fits Sedona)",
+      "line_post": "5\" x 5\" x 84\"",
+      "gate_post": "5\" x 5\" x 58\"",
+      "post_spacing_install_spec": {
+        "standard_2_and_3_rail": "96\" on-center (recommended), 10\" diameter post hole",
+        "4_rail_crossbuck": "94-3/4\" on-center (recommended) -- narrower than straight 4-rail due to crossbuck rail geometry",
+        "embedment": "Depth = local frost line + 6\" gravel/filler; hole width 10\"; rails set min. 2\" above grade",
+        "on_center_formula": "Rail width (X) + post width (Y) = common on-center post-hole spacing (per Fig. 2 of current install manual), same formula pattern as the Cameron system in the base dataset"
+      },
+      "related_lines_not_fully_dimensioned_this_pass": ["Sedona (Crossbuck Ranch Rail)", "Sierra (Diamond Ranch Rail)", "New Haven (Flat Top, ranch-rail category)"]
+    }
+  },
+  "structural_reinforcement_supplement": {
+    "vinyl_fence_post_reinforcement_inserts_per_NOA_24-0117.05": [
+      {
+        "item_code": "P",
+        "description": "48\" Post Insert",
+        "material": "Aluminum 6063-T5",
+        "cross_section_approx_in": "4.500 x 4.500 (fits inside 5x5 post, 4.940 OD / 0.170 wall)",
+        "wall_thickness_in": "0.100-0.125",
+        "use": "Standard reinforcement insert for Columbia, Imperial, Chesterfield, Chesterfield w/Lattice, and Brookline models per Table 1 footnote."
+      },
+      {
+        "item_code": "P1",
+        "description": "Shape H-1\" Post Insert",
+        "material": "Aluminum 6063-T5",
+        "use": "Alternate/'H'-profile insert geometry referenced alongside item P; exact application not fully distinguished in drawing set."
+      },
+      {
+        "item_code": "D",
+        "description": "Hat-shaped Insert",
+        "material": "Aluminum 6063-T5",
+        "dimensions_in": "3.240 H x 2.750 W, 0.750/0.562 flange, 0.080 wall, 75° draft angle",
+        "use": "Used with rail/post reinforcement assemblies (exact rail application shown on Parts sheet 8 of 9)."
+      },
+      {
+        "item_code": "I",
+        "description": "Hourglass-shaped Insert",
+        "material": "G-60 hot-dipped galvanized steel",
+        "dimensions_in": "1.69 x 0.88 x 3.000, 75° angle, 0.036 wall",
+        "use": "Rail-end reinforcement/lock insert (used with rail-to-post routed joints)."
+      },
+      {
+        "item_code": "K",
+        "description": "Channel Insert / U-Shaped G-60 Steel Channel",
+        "material": "G-60 hot-dipped galvanized steel",
+        "dimensions_in": "1.700 x 1.775, 0.080 wall (also listed as 'U-SHAPED G-60 STEEL CHANNEL X 92' in Chesterfield/Imperial/Brookline BOMs)",
+        "use": "Rail-length steel stiffener channel inside the top/bottom rail extrusion on Chesterfield, Imperial, and Brookline models -- functions the same role as the 'StayStraight' metal stiffener mentioned qualitatively in the base dataset, now with confirmed material (galvanized steel, not aluminum, on these NOA'd models) and gauge context (G-60 coating)."
+      },
+      {
+        "item_code": "Full-length aluminum reinforcement",
+        "description": "Post length minus 1\" aluminum insert",
+        "material": "Aluminum",
+        "use": "Required specifically for the Breezewood model (only model requiring full-length rather than 48\" partial reinforcement) -- Breezewood is also the only model with the deeper depth+7' post-length rule, consistent with it likely being the tallest/heaviest-panel semi-privacy style in the NOA set."
+      }
+    ],
+    "simtek_molded_fence_post_and_bracket_system_per_NOA_24-0117.06": {
+      "post_shell_material": "Linear low-density polyethylene (LLDPE), all posts",
+      "post_length_in": 102,
+      "post_weight_lb": 30,
+      "stiffener_length_in": 92,
+      "stiffener_location_from_top_in": 2.75,
+      "post_groove_height_in": 91,
+      "bracket_position_in": 73.5,
+      "posts": [
+        {
+          "type": "Corner Post (#2)",
+          "shell_thickness_in": 0.095,
+          "shell_material": "Polyethylene",
+          "steel_stiffener": "1-1/2\" x 1-1/2\" x 0.065\", 16-gauge steel tube",
+          "fill": "Rigid polyethylene foam"
+        },
+        {
+          "type": "End Post (#3)",
+          "shell_thickness_in": 0.095,
+          "shell_material": "Polyethylene",
+          "steel_stiffener": "2\" x 3\" x 0.065\", 16-gauge steel",
+          "fill": "Rigid polyethylene foam"
+        },
+        {
+          "type": "Line Post (#4)",
+          "shell_thickness_in": 0.095,
+          "shell_material": "Linear low-density polyethylene",
+          "steel_stiffener": "17-gauge HSLAS galvanized steel Z-beam, grade 60 class 2",
+          "fill": "Rigid polyethylene foam"
+        }
+      ],
+      "panel_support_bracket": {
+        "item_code": "#1",
+        "material": "Polyethylene copolymer shell, triangulated shape for improved load distribution",
+        "fasteners": "Zinc-plated 1-1/2\" #10 hex screws to ensure proper engagement with post",
+        "installation_rule": "Panel support brackets MUST be used under both sides of every panel; posts and brackets must be installed such that each panel is level.",
+        "load_rating_numeric": "Not disclosed as a numeric (lb or psf) rating in the NOA drawing set -- the bracket's structural adequacy is validated only implicitly via the whole-assembly wind-load/footing table (Table: Fence Height x Exposure -> Min. Footing Depth/Diameter), not via a standalone bracket load spec."
+      },
+      "panel_stiffener": {
+        "material": "1-1/2\" x 1-1/2\" x 18-gauge wall square galvanized steel tube",
+        "wall_thickness_approx_in": 0.120,
+        "weight_lb": 5,
+        "length_in": "70-1/4\"",
+        "location": "Top and bottom of panel, doubles as an installation spacer between posts"
+      },
+      "panel": {
+        "material": "Linear Low Density Polyethylene (LLDPE) shell with multiple kiss-offs for rigidity",
+        "weight_lb": 60,
+        "length_in": 70,
+        "max_width_CL_to_CL_in": 71.25,
+        "max_height_in": 75.25
+      },
+      "post_cap": { "base_in": 6.5, "reveal_in": 3, "attach": "friction/adhesive fit over post top" }
+    },
+    "cameron_bracket_system_load_rating": {
+      "finding": "No numeric load rating (lb, psf, or similar) was found for the Cameron Privacy Vinyl Fence bracket-mount system in any source checked this pass (barretteoutdoorliving.com, catalystfence.com, Home Depot/Lowe's listings, or general web search). The Cameron install manual describes an on-center spacing FORMULA (panel width + 1/2\" for brackets + post width = on-center hole spacing) but does not publish a bracket shear/pull-out rating. This remains an open gap.",
+      "searched_terms": ["Cameron privacy vinyl fence bracket load rating", "Cameron bracket structural spec", "Cameron bracket weight rating pounds spec sheet"]
+    },
+    "aluminum_post_inserts_general_catalog_(non-NOA_retail_SKUs)": [
+      {
+        "product": "Barrette Outdoor Living 5 in. x 5 in. x 82 in. Aluminum Post Insert",
+        "home_depot_sku": "73003718",
+        "material": "Aluminum",
+        "marketing_claim": "Designed to support fencing systems in high wind applications; also usable for general gate-post upgrades.",
+        "source": "homedepot.com product listing"
+      },
+      {
+        "product": "Louvered Vinyl Fence Metal Gate Post Insert, 5 in. x 5 in. x 100 in.",
+        "material": "Aluminum",
+        "weight_lb": 13.86,
+        "use": "Reinforces 5x5 vinyl fence posts, specifically documented for the Louvered Privacy Vinyl Fencing line (launched Jan 2022, marketed as engineered for high-wind southern/warm-weather markets).",
+        "source": "superarbor.io / Home Depot listing"
+      },
+      {
+        "product": "Cape Cod Classic Picket 5\" x 5\" x 82\" Gate Post Insert",
+        "already_in_base_dataset": true,
+        "note": "Base dataset (component_id CAT-CC-GATEPOSTINSERT) flagged material as 'inferred, not confirmed' aluminum -- the two retail listings above, plus the NOA's explicit '6063-T5 aluminum' post-insert callouts, corroborate that Barrette's gate/reinforcement post inserts across product lines are aluminum (not steel), consistent with the general industry practice noted in pass-1 competitive research (Miami-Dade-market vinyl fence suppliers also use aluminum I-beam stiffeners)."
+      }
+    ]
+  },
+  "documents": [
+    {
+      "doc_type": "engineering_approval",
+      "title": "Miami-Dade NOA 24-0117.05 - Extruded PVC Vinyl Fencing (Columbia, Imperial, Chesterfield, Breezewood, Brookline models)",
+      "url": "https://www.miamidade.gov/building/library/productcontrol/noa/24011705.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
+      "manufacturer": "Barrette Outdoor Living, Inc.",
+      "model_or_line": "Vinyl Privacy/Semi-Privacy Fence family (CertainTeed-era model names)",
+      "date_or_version": "Approved 04/24/2025, expires 03/13/2029"
+    },
+    {
+      "doc_type": "engineering_approval",
+      "title": "Miami-Dade NOA 24-0117.06 - Polyethylene Plastic Shell Fence (SimTek: Allegheny, EcoStone, Sherwood, Ashland models)",
+      "url": "https://www.miamidade.gov/building/library/productcontrol/noa/24011706.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-24-0117.06-simtek-fence.pdf",
+      "manufacturer": "Barrette Outdoor Living, Inc.",
+      "model_or_line": "SimTek molded/stone-look fence family",
+      "date_or_version": "Approved 04/24/2025, expires 04/04/2028"
+    },
+    {
+      "doc_type": "engineering_approval",
+      "title": "Miami-Dade NOA 10-1217.01 - Extruded PVC Vinyl Fencing (legacy/historical)",
+      "url": "http://www.miamidade.gov/building/library/productcontrol/noa/10121701.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf",
+      "manufacturer": "Barrette Outdoor Living, Inc.",
+      "model_or_line": "Vinyl Fence (general, 2010-era)",
+      "date_or_version": "2010 filing (superseded)"
+    },
+    {
+      "doc_type": "engineering_approval",
+      "title": "Miami-Dade NOA 10-1217.02 - Extruded PVC Vinyl Fencing (legacy/historical, companion filing)",
+      "url": "http://www.miamidade.gov/building/library/productcontrol/noa/10121702.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-10-1217.02-vinyl-fencing-legacy.pdf",
+      "manufacturer": "Barrette Outdoor Living, Inc.",
+      "model_or_line": "Vinyl Fence (general, 2010-era)",
+      "date_or_version": "2010 filing (superseded)"
+    },
+    {
+      "doc_type": "cut_sheet",
+      "title": "Madison - Solid Horizontal Privacy - Catalyst VF/MF SKU Pages (dimensions, SKUs by height/width/rail tier)",
+      "url": "https://www.catalystfence.com/wp-content/uploads/Madison_Catalyst-VF-MF-Sku-Pages_CAT25-D-514650_12-25.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/catalyst-madison-horizontal-privacy-sku-sheet.pdf",
+      "manufacturer": "Catalyst Fence Solutions",
+      "model_or_line": "Madison Solid Horizontal Privacy",
+      "date_or_version": "CAT25-D-514650, Rev 12/25"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Vinyl Post & Rail/Ranch Rail Installation Instructions (current Catalyst version, works with Coronado & Sedona)",
+      "url": "https://www.catalystfence.com/wp-content/uploads/Catalyst-Installation-Instructions-Vinyl-Post-Rail_Ranch-Rail.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/catalyst-vinyl-post-rail-ranch-rail-install-current.pdf",
+      "manufacturer": "Catalyst Fence Solutions",
+      "model_or_line": "Coronado / Sedona Ranch Rail",
+      "date_or_version": "WEB REV 1.25",
+      "note": "This manual explicitly directs installers to the Miami-Dade NOA database for wind-code compliance, corroborating the hvhz_noa_approvals entries above as the operative engineering basis."
+    }
+  ],
+  "remaining_gaps": [
+    "No numeric structural load rating (lb, psf, or torque) found for the Cameron bracket-mount system specifically.",
+    "No standalone CSI 32 31 00 3-part spec or ARCAT technical data sheet found for the vinyl fence lines (ARCAT hosts only the CSI sections for Barrette's aluminum/vinyl RAILING lines, e.g. 057300, 066300 -- not fencing). CAD/BIM resources for Catalyst fence products are confirmed to exist at catalystfencesolutions.caddetails.com, but the specific structural/wind-load CAD detail files could not be enumerated in this pass (site blocked automated crawling).",
+    "Exact virgin-PVC%/TiO2%/impact-modifier specs remain undisclosed (unchanged from pass 1).",
+    "Sedona (Crossbuck) and Sierra (Diamond) ranch-rail lines were identified by name but not fully dimensioned this pass.",
+    "The relationship between item codes P and P1 (both 6063-T5 aluminum post inserts, '48\" Post Insert' vs 'Shape H-1\" Post Insert') and which specific rail profile/model each pairs with was not fully resolved from the drawing set."
+  ]
+}

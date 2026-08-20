@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vinyl Fence Installation & BOM Schema",
+  "type": "object",
+  "properties": {
+    "manufacturer": { "type": "string" },
+    "brand": { "type": "string" },
+    "website": { "type": "string" },
+    "source_urls": { "type": "array", "items": { "type": "string" } },
+    "product_lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "line_name": { "type": "string" },
+          "assemblies": {
+            "type": "array",
+            "description": "Parent Assemblies: Panels, Gates",
+            "items": {
+              "type": "object",
+              "properties": {
+                "assembly_id": { "type": "string" },
+                "assembly_type": { "type": "string", "enum": ["panel", "gate", "single_gate", "double_gate"] },
+                "assembly_name": { "type": "string" },
+                "style": { "type": "string", "description": "e.g. privacy, semi-privacy, picket, ranch rail, shadowbox" },
+                "height_options_in": { "type": "array", "items": { "type": "number" } },
+                "width_on_center_in": { "type": "number" },
+                "color_options": { "type": "array", "items": { "type": "string" } },
+                "texture_finish": { "type": "array", "items": { "type": "string" } },
+                "material_grade": {
+                  "type": "object",
+                  "properties": {
+                    "resin": { "type": "string", "description": "e.g. virgin PVC vs. reprocessed/regrind" },
+                    "uv_inhibitors": { "type": "string" },
+                    "impact_modifiers": { "type": "string" },
+                    "titanium_dioxide_pct": { "type": "string" },
+                    "warranty": { "type": "string" }
+                  }
+                },
+                "sub_assemblies": {
+                  "type": "array",
+                  "description": "Raw components & fasteners: posts, rails, pickets, hardware",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "component_id": { "type": "string" },
+                      "component_type": {
+                        "type": "string",
+                        "enum": ["post", "rail", "picket", "post_cap", "post_stiffener_aluminum", "post_stiffener_steel", "hinge", "latch", "drop_rod", "gate_kit", "channel", "bracket", "fastener"]
+                      },
+                      "component_name": { "type": "string" },
+                      "nominal_dimensions_in": { "type": "string" },
+                      "actual_dimensions_in": { "type": "string" },
+                      "wall_thickness_in": { "type": "string" },
+                      "profile_depth_in": { "type": "string", "description": "e.g. routed rail slot / channel depth" },
+                      "material": { "type": "string" },
+                      "compatible_component_ids": { "type": "array", "items": { "type": "string" } },
+                      "fasteners": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "type": { "type": "string" },
+                            "size": { "type": "string" },
+                            "material": { "type": "string" },
+                            "qty_per_assembly": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "post_spacing_rules": {
+                  "type": "object",
+                  "properties": {
+                    "on_center_in": { "type": "number" },
+                    "post_depth_below_grade_in": { "type": "string" },
+                    "frost_line_note": { "type": "string" },
+                    "footing_diameter_in": { "type": "string" },
+                    "concrete_footing_spec": { "type": "string" }
+                  }
+                },
+                "slope_accommodation": {
+                  "type": "object",
+                  "properties": {
+                    "method": { "type": "string", "enum": ["racking", "stepping", "both"] },
+                    "max_rake_angle_deg": { "type": "string" },
+                    "hardware_required": { "type": "array", "items": { "type": "string" } },
+                    "notes": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "doc_type": { "type": "string", "enum": ["installation_manual", "spec_sheet", "cad_detail", "csi_spec", "cut_sheet", "warranty"] },
+          "title": { "type": "string" },
+          "url": { "type": "string" },
+          "local_path": { "type": "string" },
+          "manufacturer": { "type": "string" },
+          "model_or_line": { "type": "string" },
+          "date_or_version": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1459 @@
+{
+  "total_indexed_documents": 145,
+  "documents_with_verified_local_file": 141,
+  "documents_missing_local_file": 0,
+  "documents_url_only_no_download": 4,
+  "files_on_disk_not_in_index": [],
+  "documents": [
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "hvhz_noa",
+      "title": "Miami-Dade NOA 23-0314.05 \u2014 CertainTeed Extruded PVC Vinyl Fencing (Columbia, Imperial, Chesterfield, Breezewood, Brookline) \u2014 current, includes PE-sealed structural drawing set Drawing 20-178 and Brookline 2-sheet set",
+      "model_or_line": "Columbia, Imperial, Chesterfield, Chesterfield w/ Lattice, Breezewood, Brookline",
+      "date_or_version": "Approved 05/04/2023, expires 03/13/2029",
+      "url": "http://www.miamidade.gov/building/library/productcontrol/noa/23031405.pdf",
+      "local_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "hvhz_noa",
+      "title": "Miami-Dade NOA 21-0125.07 (superseded) \u2014 CertainTeed Extruded PVC Vinyl Fencing",
+      "model_or_line": "Columbia, Imperial, Chesterfield, Breezewood, Brookline",
+      "date_or_version": "Expired 03/13/2024",
+      "url": "http://www.miamidade.gov/building/library/productcontrol/noa/21012507.pdf",
+      "local_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "hvhz_noa",
+      "title": "Miami-Dade NOA 22-0616.10 (superseded) \u2014 CertainTeed SimTek Fence (molded fence brand, adjacent to but distinct from extruded-PVC Bufftech line)",
+      "model_or_line": "SimTek (molded/composite, not extruded PVC)",
+      "date_or_version": "Expired/superseded, was valid to 04/04/2028",
+      "url": "http://www.miamidade.gov/building/library/productcontrol/noa/22061610.pdf",
+      "local_path": "manuals/certainteed-bufftech/structural/NOA-22-0616.10-CertainTeed-SimTek-molded-fence-2022-2028-superseded.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "hvhz_noa",
+      "title": "Miami-Dade NOA 24-0117.05 \u2014 Barrette Outdoor Living successor filing (post-transfer of CertainTeed fence business), included for lineage only",
+      "model_or_line": "Successor to Columbia/Imperial/Chesterfield/Breezewood line under Barrette Outdoor Living (Catalyst brand)",
+      "date_or_version": "Expires 03/13/2029",
+      "url": "http://www.miamidade.gov/building/library/productcontrol/noa/24011705.pdf",
+      "local_path": "manuals/certainteed-bufftech/structural/NOA-24-0117.05-Barrette-successor-extruded-pvc-fencing-post-CertainTeed-transfer-2029.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "hvhz_noa",
+      "title": "Miami-Dade NOA 12-1106.11 (historical/expired) \u2014 Certain Teed Corporation Extruded PVC Vinyl Fencing",
+      "model_or_line": "Columbia, Imperial, Chesterfield",
+      "date_or_version": "Approved 04/04/2013, expired 03/13/2018",
+      "url": "http://www.miamidade.gov/building/library/productcontrol/noa/12110611.pdf",
+      "local_path": "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "hvhz_noa",
+      "title": "Miami-Dade NOA 06-1019.01 (historical) \u2014 earliest identified Bufftech/CertainTeed fence NOA in the renewal lineage, referencing Drawing 07-315",
+      "model_or_line": "Columbia, Imperial, Chesterfield",
+      "date_or_version": "Drawing dated 10/18/2007 (evidence log only; NOA itself not independently dated in this pass)",
+      "url": "http://www.miamidade.gov/building/library/productcontrol/noa/06101901.pdf",
+      "local_path": "manuals/certainteed-bufftech/structural/NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "install_guidance_gate_post_reinforcement",
+      "title": "How to Install Bufftech Vinyl Fence \u2014 gate/hinge/end post rebar and aluminum stiffener reinforcement methods",
+      "model_or_line": "General Bufftech gate posts",
+      "date_or_version": "Not dated; third-party site, not downloaded as PDF (HTML page)",
+      "url": "https://installvinylfencing.com/vinyl-fence-brands/how-to-install-bufftech-vinyl-fence",
+      "local_path": null,
+      "file_exists": false
+    },
+    {
+      "manufacturer": "CertainTeed / Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Bufftech Fence Installation Guide (incl. SimTek) - 2024 Edition",
+      "model_or_line": "All Bufftech fence styles (Post & Rail, Privacy, Semi-Private, HV-Post system, SimTek)",
+      "date_or_version": "2024-07 (BOL-Bufftech-and-Simtek-Instructions-4-24)",
+      "url": "https://bufftech.com/wp-content/uploads/sites/2/2024/07/BOL-Bufftech-and-Simtek-Instructions-4-24.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-fence-installation-guide-2024.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed / Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Bufftech Gate Installation Guide",
+      "model_or_line": "All Bufftech gate styles",
+      "date_or_version": "2023-10 (bufftech-install-guide-e-2201cts)",
+      "url": "https://bufftech.com/wp-content/uploads/sites/2/2023/10/bufftech-install-guide-e-2201cts.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "installation_manual",
+      "title": "Bufftech Installation Guide (American Fence & Supply reseller copy)",
+      "model_or_line": "General Bufftech fence installation (posts, rails, racking/stepping)",
+      "date_or_version": null,
+      "url": "https://www.afence.com/mm5/graphics/pdf/Bufftech%20Installation.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "installation_manual",
+      "title": "Vinyl Fence Installation Guideline (CertainTeed doc code 40-40-70743)",
+      "model_or_line": "General Bufftech fence and gate installation, incl. Florida HVHZ line post stiffener detail",
+      "date_or_version": "40-40-70743",
+      "url": "https://www.deltafenceman.com/wp-content/uploads/2018/07/FRD_Bufftech_Installation_Guide_40-40-70743.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-installation-guide-40-40-70743.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "installation_manual",
+      "title": "Bufftech Semi-Private Fence Installation Instructions",
+      "model_or_line": "Semi-Private Fence (Imperial, Columbia, Millbrook)",
+      "date_or_version": null,
+      "url": "https://www.avinylfence.com/wp-content/uploads/2020/11/INSTALL-bufftech-semiprivate.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-install-semiprivate.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "cut_sheet",
+      "title": "CertainTeed Bufftech Vinyl Fence Products Brochure/Catalog (2009-10 edition)",
+      "model_or_line": "Full Bufftech product line (all styles, colors, specifications table)",
+      "date_or_version": "Code No. 40-40-70610, (c) 10/09",
+      "url": "https://www.fenc-co.com/bufftech_brochure.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-catalog-brochure-2009.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "cut_sheet",
+      "title": "CertainTeed Bufftech Vinyl Fence Products Catalog (2014 edition)",
+      "model_or_line": "Full Bufftech product line (all styles, colors, specifications table, WindZone/racking degrees)",
+      "date_or_version": "Code No. 40-40-70610, (c) 01/14",
+      "url": "https://www.metropolitanfence.com/wp-content/uploads/files/pdfs/bufftech-catalog.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-catalog-2014.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "cut_sheet",
+      "title": "Bufftech Vinyl Fence Catalog (reseller copy, StandardFencing)",
+      "model_or_line": "Full Bufftech product line (scanned/image-based, text not machine-extractable)",
+      "date_or_version": null,
+      "url": "http://www.standardfencing.com/catalogs/vinyl.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-vinyl-catalog-standardfencing.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "CertainTeed",
+      "doc_type": "spec_sheet",
+      "title": "All Vinyl Fences Are Not Created Equal (Bufftech FAQ/spec comparison sheet)",
+      "model_or_line": "General Bufftech material/warranty FAQ",
+      "date_or_version": null,
+      "url": "https://www.hooverfence.com/mas_assets/theme/hooverfence/pdfs/bufftech-vinyl-fences-not-equal.pdf",
+      "local_path": null,
+      "file_exists": false
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "unspecified",
+      "title": "Barrette Outdoor Living Engineering Report - Full and Half Privacy Railing with Plated Posts-ScrewBoss (PE-stamped)",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/10/Privacy-Railing-2021-report-PE.pdf",
+      "local_path": "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "unspecified",
+      "title": "Miami-Dade County NOA 24-0117.05 - Barrette Outdoor Living Extruded PVC Vinyl Fence (current, expires 2029-03-13)",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://www.miamidade.gov/building/library/productcontrol/noa/24011705.pdf",
+      "local_path": "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-24-0117.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "unspecified",
+      "title": "Miami-Dade County NOA 22-0217.05 - Barrette Outdoor Living Extruded PVC Vinyl Fence (superseded, expires 2027-05-25)",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://www.miamidade.gov/building/library/productcontrol/noa/22021705.pdf",
+      "local_path": "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-22-0217.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "unspecified",
+      "title": "Miami-Dade County NOA 22-0616.10 - Bufftech (Barrette brand) Orem molded fence (adjacent brand, reference only)",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://bufftech.com/wp-content/uploads/sites/2/2023/10/Dade-NOA-22-0616.10-Orem-8-18-22.pdf",
+      "local_path": "manuals/freedom-outdoor-living/structural/Bufftech-MiamiDade-NOA-22-0616.10-Orem.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "unspecified",
+      "title": "Conway Lattice Top Vinyl Fencing Sell Sheet (2023)",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://freedomproduct.com/wp-content/uploads/2024/02/2023_Conway-Sell-Sheet.pdf",
+      "local_path": "manuals/freedom-outdoor-living/structural/2023_Conway-Sell-Sheet.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "unspecified",
+      "title": "Freedom Vinyl Fencing Special Order Catalog 2024 (already present in manuals/ from pass 1; used in pass 2 for structural/profile extraction)",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": null,
+      "local_path": "manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Ready-to-Assemble Privacy Vinyl Fence Installation Instructions",
+      "model_or_line": "Ready-to-Assemble Privacy (Full Privacy, Lattice Top, Shadowbox, Closed Top, Open Top)",
+      "date_or_version": null,
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/FREEDOM-WEB-PrivacyKit.pdf",
+      "local_path": "manuals/freedom-outdoor-living/FREEDOM-WEB-PrivacyKit_Ready-to-Assemble-Privacy-Vinyl-Fence-Install.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Picket, Closed Top & Semi-Privacy Vinyl Fence Kit Installation Instructions",
+      "model_or_line": "Picket / Closed Top / Semi-Privacy",
+      "date_or_version": "34111484",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/BOM-34111484-FREEDOM-VFPicketClosedSemiPanelKitWEB.pdf",
+      "local_path": "manuals/freedom-outdoor-living/FREEDOM-VFPicketClosedSemiPanelKit_Install.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Horizontal Privacy Vinyl Fence Kit Installation Instructions",
+      "model_or_line": "Horizontal Privacy",
+      "date_or_version": "WEB REV 2.22",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/FREEDOM_HorizontalPrivacyFencePanel.pdf",
+      "local_path": "manuals/freedom-outdoor-living/FREEDOM_HorizontalPrivacyFencePanel_Install.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Louvered Fence Installation Instructions",
+      "model_or_line": "Louvered",
+      "date_or_version": "REV 3.22",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/FREEDOM-WEB_LouveredFence.pdf",
+      "local_path": "manuals/freedom-outdoor-living/FREEDOM-WEB_LouveredFence_Install.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Ashford 4x8 Decorative Panel Installation Instructions",
+      "model_or_line": "Ashford",
+      "date_or_version": null,
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/73013029_Ashford4x8DecorativePanel_Instructions.pdf",
+      "local_path": "manuals/freedom-outdoor-living/73013029_Ashford4x8DecorativePanel_Instructions.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Brighton 6x6 Privacy Panel Installation Instructions",
+      "model_or_line": "Brighton",
+      "date_or_version": null,
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/73008781_Brighton6x6PrivacyPanel_Instructions.pdf",
+      "local_path": "manuals/freedom-outdoor-living/73008781_Brighton6x6PrivacyPanel_Instructions.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Wellington 6x6 Semi-Privacy Panel Installation Instructions",
+      "model_or_line": "Wellington",
+      "date_or_version": null,
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/73013822_Wellington6x6Semi-PrivacyPanel_Instructions.pdf",
+      "local_path": "manuals/freedom-outdoor-living/73013822_Wellington6x6Semi-PrivacyPanel_Instructions.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Vinyl Privacy Gates Installation Instructions (Hinges, Latch, Post Stiffener)",
+      "model_or_line": "Vinyl Privacy Gates (Lattice Top, Full Privacy, Open/Closed Top Picket)",
+      "date_or_version": "34111486",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VF-Privacy-Gate-Install.pdf",
+      "local_path": "manuals/freedom-outdoor-living/VF-Privacy-Gate-Install_HingesLatchDropRod.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Racking a Vinyl Gate for Full Privacy Styles",
+      "model_or_line": "Full Privacy Gate (Racking)",
+      "date_or_version": "WEB REV 3.21",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/BARRETTE-WEB_RackingGate.pdf",
+      "local_path": "manuals/freedom-outdoor-living/BARRETTE-WEB_RackingGate_Install.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Vinyl Post & Rail Gates Installation Instructions",
+      "model_or_line": "Post & Rail Gates",
+      "date_or_version": "34111487",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/11/34111487BOMWEB.pdf",
+      "local_path": "manuals/freedom-outdoor-living/VinylPostAndRailGates_Instructions.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Vinyl Privacy & Picket Gates (with Gate Post Inserts) Installation Instructions",
+      "model_or_line": "Privacy & Picket Gates",
+      "date_or_version": "34111485",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/11/BOM-34111485-Privacy-Picket_Gates-Inserts_v2WEB.pdf",
+      "local_path": "manuals/freedom-outdoor-living/VinylPrivacyPicketGate_Inserts_Instructions.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Vinyl Fence Transition Brackets Installation Instructions (Slope/Stepping)",
+      "model_or_line": "Transition Brackets (slope accommodation)",
+      "date_or_version": "WEB REV 3.21",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/BARRETTE-WEB_TransitionBrackets_Install.pdf",
+      "local_path": "manuals/freedom-outdoor-living/TransitionBrackets_Install_SlopeAccommodation.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Vinyl Fence Transition Panel Kit Installation Instructions (Slope/Stepping)",
+      "model_or_line": "Transition Panel Kit (slope accommodation)",
+      "date_or_version": null,
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VFTransitionPanelKit.pdf",
+      "local_path": "manuals/freedom-outdoor-living/VFTransitionPanelKit_SlopeAccommodation.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "5x5 Post Surface Mount Installation Instructions",
+      "model_or_line": "5x5 Post Surface Mount (concrete/patio install)",
+      "date_or_version": null,
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/5x5PostSurfaceMountWEB.pdf",
+      "local_path": "manuals/freedom-outdoor-living/5x5PostSurfaceMount_Install.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Cameron Privacy Vinyl Fence Panel Installation Instructions",
+      "model_or_line": "Cameron",
+      "date_or_version": null,
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/Cameron-Privacy-Vinyl-Panel-Instructions-WEB.pdf",
+      "local_path": "manuals/freedom-outdoor-living/CameronPrivacyVinylFencePanel_Instructions.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Horizontal Privacy Vinyl Gate Kit Installation Instructions",
+      "model_or_line": "Horizontal Privacy Gate",
+      "date_or_version": null,
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2022/10/HorizontalPrivacyGateInstructions.pdf",
+      "local_path": "manuals/freedom-outdoor-living/HorizontalPrivacyGate_Instructions.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Ready-to-Assemble Panel Cut-Down Instructions",
+      "model_or_line": "Ready-to-Assemble (panel width cut-down)",
+      "date_or_version": null,
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/Freedom_RTA_Cutdown_Instructions.pdf",
+      "local_path": "manuals/freedom-outdoor-living/Freedom_RTA_Cutdown_Instructions.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "cut_sheet",
+      "title": "Emblem 6x8 (White) Project Plan / Cut Sheet",
+      "model_or_line": "Emblem 6x8 White",
+      "date_or_version": null,
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/73014714-6x8Emblem-White-ProjectPlanning-VinylFence-ReadyToAssemble.pdf",
+      "local_path": "manuals/freedom-outdoor-living/73014714-6x8Emblem-White-ProjectPlanning.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "cut_sheet",
+      "title": "Wakefield 6x8 (White) Project Plan / Cut Sheet",
+      "model_or_line": "Wakefield 6x8 White",
+      "date_or_version": null,
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/73040126-6x8Wakefield-White-ProjectPlanning-VinylFence-ReadyToAssemble.pdf",
+      "local_path": "manuals/freedom-outdoor-living/73040126-6x8Wakefield-White-ProjectPlanning.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "spec_sheet",
+      "title": "Emblem Privacy Vinyl Fencing Sell Sheet",
+      "model_or_line": "Emblem",
+      "date_or_version": "2023",
+      "url": "https://freedomproduct.com/wp-content/uploads/2024/02/2023_Emblem_Sell-Sheet-_WEB.pdf",
+      "local_path": "manuals/freedom-outdoor-living/2023_Emblem_Sell-Sheet.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "spec_sheet",
+      "title": "Decorative Picket Vinyl Fencing Sell Sheet",
+      "model_or_line": "Decorative Picket (Wakefield family)",
+      "date_or_version": "2023",
+      "url": "https://freedomproduct.com/wp-content/uploads/2024/02/2023_Decorative-Picket_SellSheet.pdf",
+      "local_path": "manuals/freedom-outdoor-living/2023_Decorative-Picket_SellSheet.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "spec_sheet",
+      "title": "Vinyl Fencing Special Order Catalog",
+      "model_or_line": "Full vinyl fencing line (special order catalog)",
+      "date_or_version": "2024-01",
+      "url": "https://freedomproduct.com/wp-content/uploads/2024/02/2024-Freedom-VF-Catalog-01-24.pdf",
+      "local_path": "manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living",
+      "doc_type": "spec_sheet",
+      "title": "Vinyl Fence Care & Maintenance",
+      "model_or_line": "All vinyl fencing",
+      "date_or_version": null,
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/FREEDOM-WEB-VFCare.pdf",
+      "local_path": "manuals/freedom-outdoor-living/FREEDOM-WEB-VFCare_CareAndMaintenance.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "doc_type": "warranty",
+      "title": "Vinyl Fence Transferable Limited Lifetime Warranty",
+      "model_or_line": "All vinyl fencing",
+      "date_or_version": "Effective for products purchased after Jan 1, 2017",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/2017_LWS_VF_Warranty.pdf",
+      "local_path": "manuals/freedom-outdoor-living/2017_LWS_VF_Warranty.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "unspecified",
+      "title": "Miami-Dade NOA 14-1209.01 -- Illusions Vinyl Fence (full 18-sheet PE-stamped structural drawing set, evidence page, and cover page)",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://illusionsfence.com/wp-content/uploads/2015/07/NOA-14-1209.01.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "installation_manual",
+      "title": "Assembled Vinyl Fence Panel Installation Instructions",
+      "model_or_line": "V44xx / V55xx / V88xx posts, all Classic Series panel styles",
+      "date_or_version": "0224 (Feb 2024)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2024/02/Illusions-Vinyl-Fence-Installation-Instructions_0224.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/installation-instructions-assembled-panel.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "installation_manual",
+      "title": "Illusions Vinyl Fence Gate Installation Instructions",
+      "model_or_line": "V300-46, V300-48, VBG2-46, VBG4-46 gate styles",
+      "date_or_version": "0912 (2012)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2011/06/Illusions-Vinyl-Fence-GATES-Instructions.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/gate-installation-instructions.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "installation_manual",
+      "title": "75 MPH Wind Kit Installation Instructions",
+      "model_or_line": "VH55xx / VH88xx Heavy Duty posts, V300/V3215/V3700/V350/V401/V700/VO100 series",
+      "date_or_version": "0412 (April 2012)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2012/04/Illusions-75MPH-Instructions_120426.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "csi_spec",
+      "title": "75MPH Miami-Dade County Notice of Acceptance (NOA)",
+      "model_or_line": "75 MPH Wind Kit certified installations",
+      "date_or_version": "NOA-14-1209.01 (2015)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2015/07/NOA-14-1209.01.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/75mph-wind-kit-noa-miami-dade.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "warranty",
+      "title": "Illusions Vinyl Fence Warranty (Classic Illusions Fence Limited Warranty & Grand Illusions Fence Limited Warranty)",
+      "model_or_line": "Edge/Advantage/Classic Illusions Fence and Grand Illusions Fence",
+      "date_or_version": "0626 (June 2026)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2026/06/Illusions-Vinyl-Fence-Warranty-0626.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/product-warranty.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "spec_sheet",
+      "title": "Illusions Vinyl Fence ASTM Info Flyer (ASTM F964-13 compliance)",
+      "model_or_line": "All Illusions Vinyl Fence products / EverStrong Profiles",
+      "date_or_version": "2011",
+      "url": "https://illusionsfence.com/wp-content/uploads/2011/06/Illusions-Vinyl-Fence-ASTM-Info-Flyer.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/astm-info-flyer.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "installation_manual",
+      "title": "Illusions Vinyl Fence Pergola Kit Installation Instructions",
+      "model_or_line": "Vinyl Fence Pergola Kits",
+      "date_or_version": "0425 (2025)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2025/07/Illusions-Vinyl-Pergola-Kit-Instructions-0425.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/pergola-kit-installation-instructions.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "cut_sheet",
+      "title": "Illusions Vinyl Fence Product and Price Guide (item-by-item product code catalog, no pricing)",
+      "model_or_line": "All product lines - panels, gates, posts, hardware, accessories",
+      "date_or_version": "04-20-20 (April 2020), 186 pages",
+      "url": "https://illusionsfence.com/wp-content/uploads/2020/04/EWF-Product-Catalog-04-20-20-ILLUSIONS-FENCE-NO-PRICING.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/product-price-catalog-186pg.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "spec_sheet",
+      "title": "Illusions Vinyl Fence Classic Product Brochure",
+      "model_or_line": "Classic White/Beige/Gray/Clay colors",
+      "date_or_version": "0126 (Jan 2026), 24 pages",
+      "url": "https://illusionsfence.com/wp-content/uploads/2026/01/Illusions-Fence-Classic-Product-Brochure-0126.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/classic-product-brochure.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "spec_sheet",
+      "title": "Grand Illusions Advantage Product Brochure",
+      "model_or_line": "Grand Illusions Advantage (Mahogany, Walnut, Rosewood, Driftwood, Aspen, Sahara, Black)",
+      "date_or_version": "0426 (April 2026), 6 pages",
+      "url": "https://illusionsfence.com/wp-content/uploads/2026/05/Grand-Illusions-Advantage-Tri-Fold-0426.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/grand-illusions-advantage-brochure.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "spec_sheet",
+      "title": "Illusions Vinyl Gates Flyer (Uni-Weld vs Assembled Gate comparison)",
+      "model_or_line": "All gate styles",
+      "date_or_version": "0623 (June 2023)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2023/06/Illusions-Uni-Weld-and-Assembled-Gate-Flyer-0623.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/gate-types-flyer-uniweld-vs-assembled.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "spec_sheet",
+      "title": "Illusions Vinyl PVC Fence Extra Strong Hinge Brochure",
+      "model_or_line": "X-Tra Strong Hinge (IESH), for larger/heavier Uni-Weld gates",
+      "date_or_version": "2011",
+      "url": "https://illusionsfence.com/wp-content/uploads/2011/07/Illusions_Extra_Strong_Hinge.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/extra-strong-hinge-brochure.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "spec_sheet",
+      "title": "Traverse Gravity Latch Flyer",
+      "model_or_line": "Traverse Lockable Gravity Latch (compatible with Illusions Vinyl Fence and Eastern Ornamental Aluminum)",
+      "date_or_version": "0822 (Aug 2022)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2022/09/Traverse-Gravity-Latch-Flyer-0822-1.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/traverse-gravity-latch-flyer.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "cut_sheet",
+      "title": "Gate Hardware catalog page (Magnetic Gate Latch, Drop Rods, Hinges)",
+      "model_or_line": "Gate hardware - hinges, latches, drop rods",
+      "date_or_version": "050414 (May 2014)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2014/05/EWF_CATALOG_ILLUSIONS_FENCE_I-38.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/gate-hardware-catalog-page.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "spec_sheet",
+      "title": "Illusions Majestic Entranceway 8\" x 8\" PVC Vinyl Posts Tri-Fold Brochure",
+      "model_or_line": "V88xx / VH88xx 8\"x8\" Majestic posts",
+      "date_or_version": "2012",
+      "url": "https://illusionsfence.com/wp-content/uploads/2012/03/Illusions_Majestic_Entranceway.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/majestic-entranceway-8x8-posts-brochure.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Illusions Fence",
+      "doc_type": "csi_spec",
+      "title": "CAD Details and specification files for Illusions Vinyl Fence (third-party hosted, membership required)",
+      "model_or_line": "All styles - CAD and PDF spec files",
+      "date_or_version": null,
+      "url": "https://microsite.caddetails.com/3708",
+      "local_path": null,
+      "file_exists": false
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living, Inc.",
+      "doc_type": "engineering_approval",
+      "title": "Miami-Dade NOA 24-0117.05 - Extruded PVC Vinyl Fencing (Columbia, Imperial, Chesterfield, Breezewood, Brookline models)",
+      "model_or_line": "Vinyl Privacy/Semi-Privacy Fence family (CertainTeed-era model names)",
+      "date_or_version": "Approved 04/24/2025, expires 03/13/2029",
+      "url": "https://www.miamidade.gov/building/library/productcontrol/noa/24011705.pdf",
+      "local_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living, Inc.",
+      "doc_type": "engineering_approval",
+      "title": "Miami-Dade NOA 24-0117.06 - Polyethylene Plastic Shell Fence (SimTek: Allegheny, EcoStone, Sherwood, Ashland models)",
+      "model_or_line": "SimTek molded/stone-look fence family",
+      "date_or_version": "Approved 04/24/2025, expires 04/04/2028",
+      "url": "https://www.miamidade.gov/building/library/productcontrol/noa/24011706.pdf",
+      "local_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.06-simtek-fence.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living, Inc.",
+      "doc_type": "engineering_approval",
+      "title": "Miami-Dade NOA 10-1217.01 - Extruded PVC Vinyl Fencing (legacy/historical)",
+      "model_or_line": "Vinyl Fence (general, 2010-era)",
+      "date_or_version": "2010 filing (superseded)",
+      "url": "http://www.miamidade.gov/building/library/productcontrol/noa/10121701.pdf",
+      "local_path": "manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living, Inc.",
+      "doc_type": "engineering_approval",
+      "title": "Miami-Dade NOA 10-1217.02 - Extruded PVC Vinyl Fencing (legacy/historical, companion filing)",
+      "model_or_line": "Vinyl Fence (general, 2010-era)",
+      "date_or_version": "2010 filing (superseded)",
+      "url": "http://www.miamidade.gov/building/library/productcontrol/noa/10121702.pdf",
+      "local_path": "manuals/barrette-outdoor-living/structural/noa-10-1217.02-vinyl-fencing-legacy.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Catalyst Fence Solutions",
+      "doc_type": "cut_sheet",
+      "title": "Madison - Solid Horizontal Privacy - Catalyst VF/MF SKU Pages (dimensions, SKUs by height/width/rail tier)",
+      "model_or_line": "Madison Solid Horizontal Privacy",
+      "date_or_version": "CAT25-D-514650, Rev 12/25",
+      "url": "https://www.catalystfence.com/wp-content/uploads/Madison_Catalyst-VF-MF-Sku-Pages_CAT25-D-514650_12-25.pdf",
+      "local_path": "manuals/barrette-outdoor-living/structural/catalyst-madison-horizontal-privacy-sku-sheet.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Catalyst Fence Solutions",
+      "doc_type": "installation_manual",
+      "title": "Vinyl Post & Rail/Ranch Rail Installation Instructions (current Catalyst version, works with Coronado & Sedona)",
+      "model_or_line": "Coronado / Sedona Ranch Rail",
+      "date_or_version": "WEB REV 1.25",
+      "url": "https://www.catalystfence.com/wp-content/uploads/Catalyst-Installation-Instructions-Vinyl-Post-Rail_Ranch-Rail.pdf",
+      "local_path": "manuals/barrette-outdoor-living/structural/catalyst-vinyl-post-rail-ranch-rail-install-current.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Vinyl Fence Assembly and Installation Instructions - Owner's Manual V3.0 (Picket, Closed Top & Semi-Privacy)",
+      "model_or_line": "Picket / Closed Top / Semi-Privacy",
+      "date_or_version": "34106379BOM V3, 1/14 (copyright 2014)",
+      "url": "https://images.thdstatic.com/catalog/pdfImages/a9/a9ed344a-a27c-41b8-9626-2af85c17ba83.pdf",
+      "local_path": "manuals/barrette-outdoor-living/owners-manual-vinyl-fence-v3.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "warranty",
+      "title": "Vinyl Fence Transferable Limited Lifetime / 30-Year Warranty",
+      "model_or_line": "Vinyl Fence (general)",
+      "date_or_version": "Effective for purchases after Jan 1, 2017",
+      "url": "https://images.thdstatic.com/catalog/pdfImages/b0/b084e14f-53d6-40a4-8453-25df6442bc2f.pdf",
+      "local_path": "manuals/barrette-outdoor-living/warranty-vinyl-fence-30yr.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Picket, Closed Top and Semi-Privacy Panel Kit Installation Instructions",
+      "model_or_line": "Picket / Closed Top / Semi-Privacy",
+      "date_or_version": "WEB 7/21",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VFPicketClosedSemiPanelKitWEB.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-picket-closedtop-semiprivacy-panel-kit.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Semi-Privacy Enclosure Installation Instructions",
+      "model_or_line": "Semi-Privacy",
+      "date_or_version": "2021/07",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/SemiPrivacyEnclosureWEB.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-semiprivacy-enclosure.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Privacy Gate Installation Instructions",
+      "model_or_line": "Privacy Gate",
+      "date_or_version": "2021/07",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VF-Privacy-Gate-Install.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-privacy-gate.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Vinyl Fence Transition Brackets Installation Instructions",
+      "model_or_line": "Transition Brackets (slope/step hardware)",
+      "date_or_version": "WEB REV 3.21",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/BARRETTE-WEB_TransitionBrackets_Install.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-transition-brackets.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Transition Panel Kit Installation Instructions",
+      "model_or_line": "Transition Panel Kit (slope/step hardware)",
+      "date_or_version": "2021/07",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VFTransitionPanelKit.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-transition-panel-kit.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "5x5 Vinyl Fence Post Surface Mount Installation Instructions",
+      "model_or_line": "5x5 Post Surface Mount (34111488)",
+      "date_or_version": "REV 2.21",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/5x5PostSurfaceMountWEB.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-5x5-post-surface-mount.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Racking a Vinyl Gate for Full Privacy Styles",
+      "model_or_line": "Full Privacy Gate (racking / slope accommodation)",
+      "date_or_version": "WEB REV 3.21",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/BARRETTE-WEB_RackingGate.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-racking-gate.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Cameron Privacy Vinyl Fence Panel Installation Instructions",
+      "model_or_line": "Cameron",
+      "date_or_version": "WEB-REV 7.21",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/Cameron-Privacy-Vinyl-Panel-Instructions-WEB.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-cameron-privacy-vinyl-panel.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Post & Rail Gates Installation Instructions",
+      "model_or_line": "Post & Rail Gates",
+      "date_or_version": "2021/07",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/Vinyl-post-Rail-Gates-Install-Instructions.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-post-rail-gates.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Privacy & Picket Gates Installation Instructions",
+      "model_or_line": "Privacy & Picket Gates (34111485)",
+      "date_or_version": "v2 WEB, 2021/06",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/06/BOM-34111485-Privacy-Picket_Gates-Inserts_v2WEB.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-privacy-picket-gates.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Horizontal Privacy Vinyl Gate Kit Installation Instructions",
+      "model_or_line": "Horizontal Privacy Vinyl Gate Kit",
+      "date_or_version": "2022/10",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2022/10/HorizontalPrivacyGateInstructions.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-horizontal-privacy-gate-kit.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Horizontal Privacy Vinyl Fence Kit Instructions",
+      "model_or_line": "Horizontal Privacy Vinyl Fence (34111282)",
+      "date_or_version": "2021/12",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/12/BOM-34111282_HorizontalPrivacyFencePanel.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-horizontal-privacy-fence-panel.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living",
+      "doc_type": "installation_manual",
+      "title": "Vinyl Post/Rail & Ranch Rail Installation Instructions",
+      "model_or_line": "Post/Rail & Ranch Rail",
+      "date_or_version": "2021/07",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/Vinyl-Ppost-and-Ranch-Rail-Install.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-post-rail-ranch-rail.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living (Bufftech / SimTek)",
+      "doc_type": "installation_manual",
+      "title": "Bufftech and SimTek Fence Installation Guide",
+      "model_or_line": "Bufftech / SimTek (premium vinyl and molded fence lines)",
+      "date_or_version": "4/24",
+      "url": "https://bufftech.com/wp-content/uploads/sites/2/2024/07/BOL-Bufftech-and-Simtek-Instructions-4-24.pdf",
+      "local_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living (Bufftech)",
+      "doc_type": "installation_manual",
+      "title": "Bufftech Gate Installation Guide",
+      "model_or_line": "Bufftech Gates",
+      "date_or_version": "e-2201cts",
+      "url": "https://bufftech.com/wp-content/uploads/sites/2/2023/10/bufftech-install-guide-e-2201cts.pdf",
+      "local_path": "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Barrette Outdoor Living (Bufftech)",
+      "doc_type": "warranty",
+      "title": "Bufftech Fence Limited Lifetime Warranty",
+      "model_or_line": "Bufftech Vinyl Fence",
+      "date_or_version": "2/24",
+      "url": "https://bufftech.com/wp-content/uploads/sites/2/2023/10/2024_BOL_VF_Warranty-2-24.pdf",
+      "local_path": "manuals/barrette-outdoor-living/bufftech-fence-limited-lifetime-warranty.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Catalyst Fence Solutions (Barrette Outdoor Living / Bufftech successor brand)",
+      "doc_type": "warranty",
+      "title": "Vinyl, Molded & Composite Fence Warranty (Catalyst Fence Solutions)",
+      "model_or_line": "Vinyl / Molded / Composite Fence",
+      "date_or_version": "CAT26-D-634250",
+      "url": "https://www.catalystfence.com/wp-content/uploads/Vinyl-Molded-Composite-Fence-Warranty_CAT26-D-634250_WEB.pdf",
+      "local_path": "manuals/barrette-outdoor-living/catalyst-vinyl-molded-composite-fence-warranty.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Catalyst Fence Solutions",
+      "doc_type": "installation_manual",
+      "title": "Vinyl Privacy & Picket Gates Installation Instructions (Catalyst)",
+      "model_or_line": "Vinyl Privacy & Picket Gates",
+      "date_or_version": "Rev 1/25",
+      "url": "https://www.catalystfence.com/wp-content/uploads/CAT-Vinyl_Privacy_Picket-Gates-Rev-1-25_WEB.pdf",
+      "local_path": "manuals/barrette-outdoor-living/catalyst-vinyl-privacy-picket-gates.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Catalyst Fence Solutions",
+      "doc_type": "installation_manual",
+      "title": "Picket, Closed Top & Semi-Privacy Vinyl Fence Kit Installation Instructions (Catalyst)",
+      "model_or_line": "Picket / Closed Top / Semi-Privacy",
+      "date_or_version": "current (catalystfence.com)",
+      "url": "https://www.catalystfence.com/wp-content/uploads/CAT-VFPicketClosedSemiPanelKit-WEB.pdf",
+      "local_path": "manuals/barrette-outdoor-living/catalyst-install-picket-closedtop-semiprivacy-kit.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Catalyst Fence Solutions",
+      "doc_type": "cut_sheet",
+      "title": "Cape Cod - Catalyst Vinyl/Molded Fence SKU Pages (dimensions, SKUs, post/rail/picket sizes)",
+      "model_or_line": "Cape Cod Classic Picket",
+      "date_or_version": "CAT25-D-514650, Rev 12/25",
+      "url": "https://www.catalystfence.com/wp-content/uploads/Cape-Cod_Catalyst-VF-MF-Sku-Pages_CAT25-D-514650_12-25.pdf",
+      "local_path": "manuals/barrette-outdoor-living/catalyst-capecod-sku-sheet.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Catalyst Fence Solutions",
+      "doc_type": "cut_sheet",
+      "title": "Fence Accents - Catalyst SKU Sheet (post caps, blank posts, transition brackets, gate kits, hinges, latches, drop rods)",
+      "model_or_line": "Fence Accents / Hardware (cross-line: vinyl + aluminum)",
+      "date_or_version": "CAT25-D-532100, Rev 1/26",
+      "url": "https://www.catalystfence.com/wp-content/uploads/Catalyst-Sku_Fence-Accents_CAT25-D-532100_WEB.pdf",
+      "local_path": "manuals/barrette-outdoor-living/catalyst-fence-accents-hardware-sku-sheet.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "cad_detail",
+      "title": "augusta 8x6 privacy",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Augusta8x6.png",
+      "local_path": "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "cad_detail",
+      "title": "augusta 8x8 privacy",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Augusta8x8.png",
+      "local_path": "manuals/weatherables/structural/weatherables-cad-augusta-8x8-privacy.png",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "cad_detail",
+      "title": "augusta gate 44.5in",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Augusta8x44.5.png",
+      "local_path": "manuals/weatherables/structural/weatherables-cad-augusta-gate-44.5in.png",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "cad_detail",
+      "title": "pembroke 6ft privacy",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://weatherables.com/pages/pembroke-6ft-cad",
+      "local_path": "manuals/weatherables/structural/weatherables-cad-pembroke-6ft-privacy.png",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "cad_detail",
+      "title": "captiva 4x6 pool",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Captiva4x6.png",
+      "local_path": "manuals/weatherables/structural/weatherables-cad-captiva-4x6-pool.png",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "cad_detail",
+      "title": "captiva gate 48in",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Captiva4x48.png",
+      "local_path": "manuals/weatherables/structural/weatherables-cad-captiva-gate-48in.png",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "installation_manual",
+      "title": "Vinyl Fencing Installation Guide (Master Guide - Layout/Post Install, Panel Assembly by Style, Gate Assembly, High-Wind Installation)",
+      "model_or_line": "All vinyl privacy/semi-privacy/pool/picket panel styles",
+      "date_or_version": "WEA01-2017 (also distributed as 2024 CDN copy; identical content, byte-identical to Home Depot-hosted PDF)",
+      "url": "https://images.thdstatic.com/catalog/pdfImages/31/3163487c-38fc-4874-83b6-f9685b6a0bfc.pdf",
+      "local_path": "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "warranty",
+      "title": "Weatherables by USAVinyl LLC Limited Non-Prorated Warranty",
+      "model_or_line": "All vinyl fencing/railing/aluminum railing/outdoor products",
+      "date_or_version": "2017",
+      "url": "https://images.thdstatic.com/catalog/pdfImages/b5/b5ef8e38-53f1-4aa8-9677-77ebda071033.pdf",
+      "local_path": "manuals/weatherables/weatherables-limited-warranty.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "cut_sheet",
+      "title": "FENCING Brochure (full product catalog, Home Depot-hosted copy)",
+      "model_or_line": "All lines",
+      "date_or_version": null,
+      "url": "https://images.thdstatic.com/catalog/pdfImages/7f/7ff3997d-c392-463f-8182-6876f5805a99.pdf",
+      "local_path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "cut_sheet",
+      "title": "Privacy Fencing Spec Sheet (Premium and Classic style dimensions, weights, color options)",
+      "model_or_line": "Savannah, Ashton, Largo, Clearwater, Mason, Augusta, Halifax, Bradford, Scottsdale (Premium); Pembroke, Glenshire, Tuscany, Dora, Calgary, Gideon (Classic)",
+      "date_or_version": null,
+      "url": "https://www.bostadfence.com/uploads/b/fa0d8cc0-2166-11ed-83a8-792519b8e025/Weatherables_PrivacyFencing.pdf",
+      "local_path": "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "cut_sheet",
+      "title": "Full Line Catalog 2026 (digital compressed)",
+      "model_or_line": "All lines",
+      "date_or_version": "2026",
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/WEA-FulLine-2026_ForDigital-compressed.pdf",
+      "local_path": "manuals/weatherables/weatherables-full-line-catalog-2026.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "installation_manual",
+      "title": "2-Rail Horse Fence Installation Guide",
+      "model_or_line": "2-Rail Horse Fence",
+      "date_or_version": "2024",
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/2_Rail_Fence_Installation_Instructions_2024.pdf",
+      "local_path": "manuals/weatherables/weatherables-2-rail-fence-installation-2024.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "installation_manual",
+      "title": "2-Rail Horse Fence Gate Installation Guide",
+      "model_or_line": "2-Rail Horse Fence Gate",
+      "date_or_version": null,
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/2_Rail_Gate_Installation_Instructions.pdf",
+      "local_path": "manuals/weatherables/weatherables-2-rail-gate-installation.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "installation_manual",
+      "title": "3-Rail Horse Fence Installation Guide",
+      "model_or_line": "3-Rail Horse Fence",
+      "date_or_version": "2024",
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/3_Rail_Fence_Installation_Instructions_Final_2024.pdf",
+      "local_path": "manuals/weatherables/weatherables-3-rail-fence-installation-2024.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "installation_manual",
+      "title": "3-Rail Horse Fence Gate Installation Guide",
+      "model_or_line": "3-Rail Horse Fence Gate",
+      "date_or_version": null,
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/3_Rail_Gate_Installation_Instructions_Final_1.pdf",
+      "local_path": "manuals/weatherables/weatherables-3-rail-gate-installation.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "installation_manual",
+      "title": "4-Rail Horse Fence Installation Guide",
+      "model_or_line": "4-Rail Horse Fence",
+      "date_or_version": "2024",
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/4_Rail_Fence_Installation_Instructions_2024.pdf",
+      "local_path": "manuals/weatherables/weatherables-4-rail-fence-installation-2024.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "installation_manual",
+      "title": "4-Rail Horse Fence Gate Installation Guide",
+      "model_or_line": "4-Rail Horse Fence Gate",
+      "date_or_version": null,
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/4_Rail_Gate_Installation_Instructions.pdf",
+      "local_path": "manuals/weatherables/weatherables-4-rail-gate-installation.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "installation_manual",
+      "title": "Crossbuck Horse Fence Installation Guide",
+      "model_or_line": "Crossbuck Horse Fence",
+      "date_or_version": "2024",
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Crossbuck_Fence_Installation_Instructions_2024.pdf",
+      "local_path": "manuals/weatherables/weatherables-crossbuck-fence-installation-2024.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "installation_manual",
+      "title": "Crossbuck Horse Fence Gate Installation Guide",
+      "model_or_line": "Crossbuck Horse Fence Gate",
+      "date_or_version": null,
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/CrossBuck_Gate_Installation_Instructions.pdf",
+      "local_path": "manuals/weatherables/weatherables-crossbuck-gate-installation.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "cad_detail",
+      "title": "Concrete Post Mount Installation Instructions",
+      "model_or_line": "Surface-mount post base (concrete substrate)",
+      "date_or_version": null,
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/POST_MOUNT_INSTRUCTIONS_CONCRETE.pdf",
+      "local_path": "manuals/weatherables/weatherables-post-mount-instructions-concrete.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "cad_detail",
+      "title": "Wood Post Mount Installation Instructions",
+      "model_or_line": "Surface-mount post base (wood substrate)",
+      "date_or_version": null,
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/POST_MOUNT_INSTRUCTIONS_WOOD.pdf",
+      "local_path": "manuals/weatherables/weatherables-post-mount-instructions-wood.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "installation_manual",
+      "title": "General Mount Instructions",
+      "model_or_line": "General surface-mount hardware",
+      "date_or_version": null,
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/General_Mount.pdf",
+      "local_path": "manuals/weatherables/weatherables-general-mount-instructions.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "installation_manual",
+      "title": "Black WeatherGrain Panels Installation Guide",
+      "model_or_line": "Black / WeatherGrain woodgrain-finish panels",
+      "date_or_version": null,
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Black_Weathergrain_Panels_v4.pdf",
+      "local_path": "manuals/weatherables/weatherables-black-weathergrain-panels-install.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "installation_manual",
+      "title": "Premium Gate Installation Guide (2017)",
+      "model_or_line": "Premium gate (fencing/railing)",
+      "date_or_version": "2017",
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Premium_Gate_Installation_2017.pdf",
+      "local_path": "manuals/weatherables/weatherables-premium-gate-installation-2017.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "TriWest Fencing (dealer/distributor, not Weatherables) - included for reference only, not used as a data source for this Weatherables dataset",
+      "doc_type": "spec_sheet",
+      "title": "Vinyl Fencing Reference Guide (third-party dealer catalog; picket/rail/post dimensions match common industry vinyl-fence tooling but are NOT confirmed to be Weatherables-branded specs)",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://www.triwestfencing.com/VinylReferenceGuide.pdf",
+      "local_path": "manuals/weatherables/triwest-vinyl-reference-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "unspecified",
+      "title": "Home Depot-hosted WamBam Nantucket Vinyl Picket Fence w/Post and No-Dig Steel Pipe Anchor Kit (4ftH x 6ftW) spec sheet \u2014 includes 'V-3.0 Pipe Anchor Detail' dimensioned drawing, .090in wall thickness callout, box contents, and full panel elevation dimensions.",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://images.thdstatic.com/catalog/pdfImages/c3/c3664aaa-e439-4694-9513-ca2d2d7d4b6f.pdf",
+      "local_path": "manuals/wam-bam/structural/nantucket-spec-sheet-v3.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "unspecified",
+      "title": "Alternate/fuller Home Depot-hosted Nantucket spec sheet (filename tag 'WB-Nantucket-VinylPicketFence-NoDigSPAK-4H-OUT-V3.0-1114') \u2014 includes stair-step slope diagram, string-line/leveling-donut instructions, and repeated V-3.0 Pipe Anchor Detail.",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://images.thdstatic.com/catalog/pdfImages/b5/b5ed3b2b-0e93-4ce3-98a9-45f203d48b70.pdf",
+      "local_path": "manuals/wam-bam/structural/nantucket-spec-sheet-v3-alt.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "unspecified",
+      "title": "Lowe's-hosted WamBam Sturbridge Vinyl Picket Fence w/Post and No-Dig Steel Pipe Anchor Kit (4ftH x 6ftW) spec sheet \u2014 'CONFORMS TO BOCA POOL CODE' callout, .090in wall thickness, V-3.0 Pipe Anchor Detail, full dimension set.",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://pdf.lowes.com/productdocuments/a47e4819-68b7-4901-aaad-073cb7bdbe3a/44386113.pdf",
+      "local_path": "manuals/wam-bam/structural/sturbridge-spec-sheet-lowes.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "unspecified",
+      "title": "Lowe's-hosted spec sheet for a 48in x 4in x 4in WamBam vinyl fence w/post and no-dig steel pipe anchor kit (V-3.0) \u2014 Pipe Anchor Detail with 27.5in/31in/53in dimension set for a shorter (4ft-class) post/anchor combination.",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://pdf.lowes.com/productdocuments/d7c6659e-31c6-4ba6-990f-f3ab7fac3fbf/40968511.pdf",
+      "local_path": "manuals/wam-bam/structural/generic-vinyl-fence-spec-lowes.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "unspecified",
+      "title": "'Important stuff to know about installing your WamBam fence' \u2014 full Steady Freddy installation walkthrough including anchor positioner placement, leveling-donut mechanics, level-check-every-6in guidance, and post-pounder technique. This is the most structurally detailed installation document found in this pass.",
+      "model_or_line": null,
+      "date_or_version": null,
+      "url": "https://images.thdstatic.com/catalog/pdfImages/85/85249408-8856-4015-afbd-0a9b98082027.pdf",
+      "local_path": "manuals/wam-bam/structural/important-install-info-thdstatic.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "installation_manual",
+      "title": "Windsor Vinyl Fence Kit with No-Dig Post \u2014 Install Guide (BL19107)",
+      "model_or_line": "Windsor / BL19107",
+      "date_or_version": "061225",
+      "url": "https://wambamfence.com/installation-guide/windsor-vinyl-fence-kit-with-no-dig-post-207.html",
+      "local_path": "manuals/wam-bam/windsor-BL19107-install-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "installation_manual",
+      "title": "Cambridge Vinyl Privacy Fence Kit with No-Dig Post \u2014 Install Guide (BL19110)",
+      "model_or_line": "Cambridge / BL19110",
+      "date_or_version": "ver12052025",
+      "url": "https://wambamfence.com/installation-guide/cambridge-vinyl-privacy-fence-kit-with-no-dig-post-223.html",
+      "local_path": "manuals/wam-bam/cambridge-BL19110-install-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "installation_manual",
+      "title": "Sturbridge Vinyl Yard & Pool Fence Kit with No-Dig Post \u2014 Install Guide (BL19103)",
+      "model_or_line": "Sturbridge / BL19103",
+      "date_or_version": "v12",
+      "url": "https://wambamfence.com/installation-guide/sturbridge-vinyl-yard-pool-fence-kit-with-no-dig-post-4ft-h-x-6ft-w-80.html",
+      "local_path": "manuals/wam-bam/sturbridge-BL19103-install-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "installation_manual",
+      "title": "Steady Freddy Vinyl Fence Panel \u2014 Install Guide (VF16100)",
+      "model_or_line": "Steady Freddy / VF16100",
+      "date_or_version": "021921 (04124 file rev)",
+      "url": "https://wambamfence.com/installation-guide/vinyl-fencing-18/6ft-h-x-7ft-w-steady-freddy-vinyl-fence-panel-30.html",
+      "local_path": "manuals/wam-bam/steady-freddy-VF16100-install-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "installation_manual",
+      "title": "Nervous Nelly Vinyl Fence Panel \u2014 Install Guide (VF15100)",
+      "model_or_line": "Nervous Nelly / VF15100",
+      "date_or_version": "042821 (04124 file rev)",
+      "url": "https://wambamfence.com/installation-guide/vinyl-fencing-18/5ft-h-x-7ft-w-nervous-nelly-vinyl-fence-panel-29.html",
+      "local_path": "manuals/wam-bam/nervous-nelly-VF15100-install-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "installation_manual",
+      "title": "All-American Flat Top Picket Fence with No-Dig Post \u2014 Install Guide (ZP19084)",
+      "model_or_line": "All-American / ZP19084",
+      "date_or_version": "012726",
+      "url": "https://wambamfence.com/installation-guide/all-american-flat-top-vinyl-fence-kit-with-no-dig-post-228.html",
+      "local_path": "manuals/wam-bam/all-american-ZP19084-install-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "installation_manual",
+      "title": "Even Steven Vinyl Gate \u2014 Install Guide (VG24100)",
+      "model_or_line": "Even Steven Gate / VG24100",
+      "date_or_version": "030121",
+      "url": "https://wambamfence.com/installation-guide/vinyl-gates-7/4ft-h-x-4ft-w-even-steven-vinyl-gate-36.html",
+      "local_path": "manuals/wam-bam/even-steven-VG24100-gate-install-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "installation_manual",
+      "title": "Plain Jane Vinyl Gate \u2014 Install Guide (VG24200)",
+      "model_or_line": "Plain Jane Gate / VG24200",
+      "date_or_version": "060921",
+      "url": "https://wambamfence.com/installation-guide/vinyl-gates-7/4ft-h-x-4ft-w-plain-jane-vinyl-gate-22.html",
+      "local_path": "manuals/wam-bam/plain-jane-VG24200-gate-install-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "installation_manual",
+      "title": "Nervous Nelly Vinyl Gate \u2014 Install Guide (VG25100)",
+      "model_or_line": "Nervous Nelly Gate / VG25100",
+      "date_or_version": "052021",
+      "url": "https://wambamfence.com/installation-guide/vinyl-gates-7/5ft-h-x-4ft-w-nervous-nelly-vinyl-gate-24.html",
+      "local_path": "manuals/wam-bam/nervous-nelly-VG25100-gate-install-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "installation_manual",
+      "title": "6ft H x 6ft W Privacy Gate (Adjustable Width) \u2014 Install Guide",
+      "model_or_line": "Privacy Gate (Adjustable Width) 6x6",
+      "date_or_version": null,
+      "url": "https://wambamfence.com/installation-guide/vinyl-gates-7/6ft-h-x-6ft-w-privacy-gate-adjustable-width-68.html",
+      "local_path": "manuals/wam-bam/privacy-gate-6ftx6ft-adjustable-install-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "installation_manual",
+      "title": "Vinyl Surface Mount \u2014 Assembly/Install Instructions (SB61000)",
+      "model_or_line": "Vinyl Surface Mount / SB61000",
+      "date_or_version": "032321",
+      "url": "https://wambamfence.com/installation-guide/posts-and-accessories-57/vinyl-surface-mount-43.html",
+      "local_path": "manuals/wam-bam/vinyl-surface-mount-SB61000-install-guide.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "installation_manual",
+      "title": "Murphy's Vinyl Fence Laws (general planning/installation guide covering slope, obstacles, property lines, utilities)",
+      "model_or_line": "All vinyl fence lines (general guide)",
+      "date_or_version": null,
+      "url": "https://files.wambamfence.com/media/assets/files/installation_guide/installation_guide_MurphysVinylFenceLaws.pdf",
+      "local_path": "manuals/wam-bam/murphys-vinyl-fence-laws.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Wam Bam Fence Co",
+      "doc_type": "installation_manual",
+      "title": "Murphy's Ornamental (Aluminum) Fence Laws \u2014 general guide (not vinyl-specific; linked alongside vinyl guide, not downloaded)",
+      "model_or_line": "Aluminum fence lines (out of scope for this vinyl dataset)",
+      "date_or_version": null,
+      "url": "https://files.wambamfence.com/media/assets/files/installation_guide/MurphysOrnamentalFenceLaws.pdf",
+      "local_path": null,
+      "file_exists": false
+    },
+    {
+      "manufacturer": "Industry Standards / Cross-Manufacturer",
+      "doc_type": "astm_compliance_summary_flyer",
+      "title": "What is ASTM F964-13? (ASTM Info Flyer -- summarizes F964 scope, D4216 cell classification, D4226 impact test, weathering-table requirements)",
+      "model_or_line": null,
+      "date_or_version": "Undated manufacturer flyer (Illusions Fence), references ASTM F964-13",
+      "url": "https://illusionsfence.com/wp-content/uploads/2011/06/Illusions-Vinyl-Fence-ASTM-Info-Flyer.pdf",
+      "local_path": "manuals/industry-standards/ASTM-Info-Flyer_Illusions-F964-D4216-Summary.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Industry Standards / Cross-Manufacturer",
+      "doc_type": "industry_spec_reference_guide",
+      "title": "Fence SpecCheck: ASTM, AASHTO, and Federal Specifications (RR-F-191) -- cross-material index of fence-related ASTM/AASHTO/Federal standards including F1999-14(2024) and F964-13(2024)",
+      "model_or_line": null,
+      "date_or_version": "January 2025 (Wheatland Tube Company)",
+      "url": "https://www.wheatland.com/wp-content/uploads/2017/12/Fence-SpecCheck-ASTM-AASHTO-and-Federal-Specifications-RR-F-191.pdf",
+      "local_path": "manuals/industry-standards/Wheatland-Fence-SpecCheck_ASTM-AASHTO-Federal-Specs_Jan2025.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Industry Standards / Cross-Manufacturer",
+      "doc_type": "astm_standards_compilation",
+      "title": "ASTM Standards for Fence Materials and Products (compilation index, all fence materials incl. PVC F964/F1999)",
+      "model_or_line": null,
+      "date_or_version": "Undated compilation (identifier FENCE21)",
+      "url": "https://public-admin-files.s3.us-east-2.amazonaws.com/Compilations/FENCE21.pdf",
+      "local_path": "manuals/industry-standards/ASTM-Standards-for-Fence-Materials-and-Products_Compilation-FENCE21.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Industry Standards / Cross-Manufacturer",
+      "doc_type": "association_technical_bulletin",
+      "title": "Chain Link Fence Wind Load Guide for the Selection of Line Post and Line Post Spacing (WLG 2445) -- NOT vinyl-specific, downloaded as the closest real cross-manufacturer 'association engineering rule' precedent for post-spacing-vs-wind-load methodology in the fence industry",
+      "model_or_line": null,
+      "date_or_version": "Updated January 2023 (Chain Link Fence Manufacturers Institute)",
+      "url": "https://chainlinkinfo.org/wp-content/uploads/2023/02/WLG-Final-2.12-23-ml.pdf",
+      "local_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Industry Standards / Cross-Manufacturer",
+      "doc_type": "csi_masterspec_template",
+      "title": "CLFMI Product Manual -- CSI Section 32 31 13 Chain Link Fence and Gates (full 3-part master spec; not vinyl, downloaded as a real worked example of Division 32 Fences-and-Gates document structure)",
+      "model_or_line": null,
+      "date_or_version": "2015 publication (Chain Link Fence Manufacturers Institute)",
+      "url": "https://www.chainlinkinfo.org/wp-content/uploads/2015/08/CLFMI-Product-Manual-2-Section-32-31-13.pdf",
+      "local_path": "manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Industry Standards / Cross-Manufacturer",
+      "doc_type": "manufacturer_brochure_with_engineering_data",
+      "title": "Digger Specialties Polyvinyl Fence Brochure -- includes generic-applicable racking tolerance and 8 ft on-center post spacing data across multiple vinyl fence product lines",
+      "model_or_line": null,
+      "date_or_version": "2024 (Digger Specialties, Inc., distributed via North Indy Fence)",
+      "url": "https://northindyfence.com/wp-content/uploads/2024/04/Polyvinyl-Fence-Brochure-NIF.pdf",
+      "local_path": "manuals/industry-standards/Digger-Specialties-Polyvinyl-Fence-Brochure_Racking-Post-Spacing.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Industry Standards / Cross-Manufacturer",
+      "doc_type": "csi_masterspec_vinyl",
+      "title": "SECTION 32 31 23 - Plastic/Vinyl Fencing and Gates -- real manufacturer-submitted (Superior Outdoor Products) CSI 3-part master specification, full Part 1/2/3 text",
+      "model_or_line": null,
+      "date_or_version": "Copyright 2017-2025 ARCAT, Inc. / MasterFormat 2020 edition",
+      "url": "https://www.arcat.com/sdspecs/docx04/32_31_23spp.docx",
+      "local_path": "manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Industry Standards / Cross-Manufacturer",
+      "doc_type": "structural_engineering_worked_example",
+      "title": "Wind Loads on Freestanding Walls -- MecaWind worked example output (6 ft x 120 ft solid fence, ASCE 7-16, 120 mph Exposure C Category II), demonstrating the full ASCE 7 Section 29.3 solid-freestanding-wall/sign method as actually applied to fence wind-load design, including Case A/B/C force coefficients and total force calculation",
+      "model_or_line": null,
+      "date_or_version": "Article dated February 12, 2021 (Chris Rosencutter, MECA Enterprises); this is a generic engineering-methodology example (not vinyl-specific, not tied to a real project/PE stamp) produced by a structural-engineering software vendor to demonstrate their MecaWind tool",
+      "url": "https://downloads.mecaenterprises.com/articles/fence/FenceExample.pdf (article/methodology page: https://www.mecaenterprises.com/wind-loads-on-freestanding-walls)",
+      "local_path": "manuals/industry-standards/structural/MECA-Fence-Wind-Load-Worked-Example_ASCE7-16.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Industry Standards / Cross-Manufacturer",
+      "doc_type": "real_miami_dade_noa_vinyl_fence",
+      "title": "Miami-Dade County Notice of Acceptance No. 24-0729.04 -- VEKA, Inc., 'PVC Privacy Fence Panels' (Tahoe II and Breckenridge models). REAL, current, PE-sealed document (not a summary): includes full evidence-submitted approval history back to 2014, and complete engineering drawings signed/sealed by Lucas A. Turner, P.E. (FL License #58201, Turner Engineering & Consulting Inc.), reviewed/approved by Miami-Dade Product Control Section Supervisor Helmy A. Makar, P.E. Contains: wind rating (75 mph fastest-mile / 115 mph 3-second gust, design pressure 17.71 psf, per FBC Section 1616.2.1), PVC material spec table (ASTM D635/D1929/D2843/D638), full post/rail/picket dimensioned drawings, aluminum post reinforcement spec (72 in long, 6063-T6 aluminum, full-depth insert), and footing detail (12 in sq. hole, 3000 PSI min. concrete, 6 in gravel fill).",
+      "model_or_line": null,
+      "date_or_version": "Approval Date 10/03/2024; Expiration Date 08/14/2029",
+      "url": "https://www.miamidade.gov/building/library/productcontrol/noa/24072904.pdf",
+      "local_path": "manuals/industry-standards/structural/Miami-Dade-NOA_VEKA-Inc_PVC-Privacy-Fence-Panels_24-0729.04.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Industry Standards / Cross-Manufacturer",
+      "doc_type": "real_miami_dade_noa_vinyl_fence",
+      "title": "Miami-Dade County Notice of Acceptance No. 24-0117.05 -- Barrette Outdoor Living, Inc., 'Extruded PVC Vinyl Fencing' (Columbia, Imperial, Chesterfield, Breezewood, and Brookline models). REAL, current, PE-sealed document with a full evidence-submitted approval history back to 2006, demonstrating how a single product line's NOA gets revised/renewed across ~18 years and multiple FBC editions (2010 through 2023).",
+      "model_or_line": null,
+      "date_or_version": "Approval Date 04/24/2025; Expiration Date 03/13/2029",
+      "url": "https://www.miamidade.gov/building/library/productcontrol/noa/24011705.pdf",
+      "local_path": "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf",
+      "file_exists": true
+    }
+  ]
+}

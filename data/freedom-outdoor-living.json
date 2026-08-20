@@ -1,0 +1,815 @@
+{
+  "manufacturer": "Freedom Outdoor Living",
+  "brand": "Freedom",
+  "website": "https://freedomproduct.com",
+  "source_urls": [
+    "https://freedomproduct.com/product-type/vinyl-fencing",
+    "https://freedomproduct.com/products/emblem-vinyl-fencing",
+    "https://freedomproduct.com/products/wakefield-vinyl-fencing",
+    "https://freedomproduct.com/products/conway-vinyl-fencing",
+    "https://freedomproduct.com/products/freeport-vinyl-fencing",
+    "https://freedomproduct.com/products/shadowbox-semi-privacy-vinyl-fencing",
+    "https://freedomproduct.com/products/post-and-rail-vinyl-fencing",
+    "https://freedomproduct.com/products/diamond-post-rail-vinyl-fencing",
+    "https://freedomproduct.com/support",
+    "https://freedomproduct.com/literature",
+    "https://freedomproduct.com/faq",
+    "https://freedomproduct.com/plan-now-for-your-spring-fence-installation",
+    "https://freedomproduct.com/what-is-stepped-vs-racked-installation",
+    "https://www.barretteoutdoorliving.com/resources/homeowners/fencing-gates/installation-fencing-gates",
+    "https://freedomproduct.com/wp-content/uploads/2022/10/FREEDOM-WEB-PrivacyKit.pdf",
+    "https://freedomproduct.com/wp-content/uploads/2022/10/BOM-34111484-FREEDOM-VFPicketClosedSemiPanelKitWEB.pdf",
+    "https://freedomproduct.com/wp-content/uploads/2022/10/FREEDOM_HorizontalPrivacyFencePanel.pdf",
+    "https://freedomproduct.com/wp-content/uploads/2022/10/73014714-6x8Emblem-White-ProjectPlanning-VinylFence-ReadyToAssemble.pdf",
+    "https://freedomproduct.com/wp-content/uploads/2022/10/73040126-6x8Wakefield-White-ProjectPlanning-VinylFence-ReadyToAssemble.pdf",
+    "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VF-Privacy-Gate-Install.pdf",
+    "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/BARRETTE-WEB_RackingGate.pdf",
+    "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/BARRETTE-WEB_TransitionBrackets_Install.pdf"
+  ],
+  "product_lines": [
+    {
+      "line_name": "Emblem",
+      "assemblies": [
+        {
+          "assembly_id": "freedom-emblem-privacy-panel",
+          "assembly_type": "panel",
+          "assembly_name": "Emblem Privacy Vinyl Fence Panel",
+          "style": "privacy",
+          "height_options_in": [48, 60, 72],
+          "width_on_center_in": 99,
+          "color_options": ["White", "Sand", "Gray", "Driftwood", "Clay", "White/Sand"],
+          "texture_finish": null,
+          "material_grade": {
+            "resin": "Vinyl (PVC); virgin vs. regrind content not disclosed in public literature",
+            "uv_inhibitors": "Marketed as containing UV inhibitors to resist discoloration; exact type/loading not disclosed",
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Transferable Limited Lifetime Warranty (single-family residential; transferable one time to a second owner); 30-year limited warranty for commercial/multi-family/institutional properties. Covers peeling, flaking, rotting, chipping, cracking, blistering, and abnormal discoloration/fading beyond Delta E 5. Effective for products purchased after Jan 1, 2017; must register within 30 days."
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "freedom-5x5-line-post",
+              "component_type": "post",
+              "component_name": "5x5 Line Post (pre-routed)",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": "5in x 5in x 108in",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), structural - no internal wood insert required per manufacturer",
+              "compatible_component_ids": ["freedom-emblem-privacy-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-5x5-corner-post",
+              "component_type": "post",
+              "component_name": "5x5 Corner Post (pre-routed, 90-degree)",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": "5in x 5in x 108in",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), structural",
+              "compatible_component_ids": ["freedom-emblem-privacy-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-5x5-end-post",
+              "component_type": "post",
+              "component_name": "5x5 End Post (pre-routed)",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": "5in x 5in x 108in",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), structural",
+              "compatible_component_ids": ["freedom-emblem-privacy-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-5x5-gate-post-insert",
+              "component_type": "post_stiffener_aluminum",
+              "component_name": "5x5 Gate Post Insert",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": "5in x 5in x 106in",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum (on 3 sides, per third-party retail listings, for screw anchoring)",
+              "compatible_component_ids": ["freedom-emblem-privacy-panel", "freedom-emblem-gate-4ft", "freedom-emblem-gate-5ft"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-5x5-post-top",
+              "component_type": "post_cap",
+              "component_name": "5x5 Contemporary Post Top",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), glued with vinyl cement/adhesive",
+              "compatible_component_ids": ["freedom-5x5-line-post", "freedom-5x5-corner-post", "freedom-5x5-end-post"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-emblem-rail",
+              "component_type": "rail",
+              "component_name": "Emblem Top & Bottom Rail (GrippLok barbed rail system)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": "2-1/4in x 7in (7in Designer Rail)",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC) with GrippLok barbed insert to distribute weight and reduce sag",
+              "compatible_component_ids": ["freedom-emblem-privacy-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-emblem-board",
+              "component_type": "picket",
+              "component_name": "Emblem Tongue-and-Groove Board",
+              "nominal_dimensions_in": "1x6",
+              "actual_dimensions_in": "7/8in x 6in",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), tongue-and-groove profile",
+              "compatible_component_ids": ["freedom-emblem-privacy-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-emblem-gate-4ft",
+              "component_type": "gate_kit",
+              "component_name": "Emblem Privacy 4' Gate Kit (Ready-to-Assemble, hinges included)",
+              "nominal_dimensions_in": "48in opening",
+              "actual_dimensions_in": "73.5in H x 46in W (2in under actual opening)",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC); routed uprights with internal gate pockets (StaySquare technology), no cross-brace",
+              "compatible_component_ids": ["freedom-5x5-gate-post-insert"],
+              "fasteners": [
+                {"type": "upright insert screw", "size": "6in", "material": "not specified", "qty_per_assembly": "2 per upright"}
+              ]
+            },
+            {
+              "component_id": "freedom-emblem-gate-5ft",
+              "component_type": "gate_kit",
+              "component_name": "Emblem Privacy 5' Gate Kit (Ready-to-Assemble, hinges included)",
+              "nominal_dimensions_in": "60in opening",
+              "actual_dimensions_in": "73.5in H x 58in W (2in under actual opening)",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC); routed uprights with internal gate pockets (StaySquare technology), no cross-brace",
+              "compatible_component_ids": ["freedom-5x5-gate-post-insert"],
+              "fasteners": [
+                {"type": "upright insert screw", "size": "6in", "material": "not specified", "qty_per_assembly": "2 per upright"}
+              ]
+            },
+            {
+              "component_id": "freedom-barrette-wrap-hinge",
+              "component_type": "hinge",
+              "component_name": "Barrette Outdoor Living Wrap Hinge",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Metal (wrap-style, adjustable), included with gate kits",
+              "compatible_component_ids": ["freedom-emblem-gate-4ft", "freedom-emblem-gate-5ft"],
+              "fasteners": [
+                {"type": "hinge screw", "size": "not specified", "material": "not specified", "qty_per_assembly": "2 hinges per gate (upper/lower)"}
+              ]
+            },
+            {
+              "component_id": "freedom-barrette-gate-latch",
+              "component_type": "latch",
+              "component_name": "Barrette Outdoor Living Latch (latch plate included on gate; full latch mechanism sold separately)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Metal",
+              "compatible_component_ids": ["freedom-emblem-gate-4ft", "freedom-emblem-gate-5ft"],
+              "fasteners": [
+                {"type": "latch screw", "size": "1in Phillips", "material": "not specified", "qty_per_assembly": "4 (post-side) + additional at striker/handle"}
+              ]
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 99,
+            "post_depth_below_grade_in": "Rule of thumb: 1/3 of total post length below grade; worked example in manual: 24in post embedment + 6in gravel below for a 36in frost line (12in gravel shown in Fig.3 example)",
+            "frost_line_note": "Dig post holes down to local frost line depth per local code; example in manual uses 36in frost line",
+            "footing_diameter_in": "10in for 5x5 post; 8in for 4x4 post",
+            "concrete_footing_spec": "6in coarse gravel/filler backfill in bottom of hole, then wet or dry concrete mix to top of hole per manufacturer instructions; panel set approx. 2in above grade; gate post holes dug 6in deeper for extra strength"
+          },
+          "slope_accommodation": {
+            "method": "both",
+            "max_rake_angle_deg": "~8 (approx. 1in rack per foot of panel width; confirmed 8in over 8ft on Emblem spec sheet and FAQ)",
+            "hardware_required": ["Transition brackets (stepped installs, panel-to-panel)", "Post stiffener / aluminum gate post insert (required for racking gates - purchased separately)"],
+            "notes": "Ready-to-Assemble panels rack to follow grade (racks 1in per foot per FAQ/sell sheet). Gates can be racked to a max of 8 degrees (1in/ft of gate width) by cutting the top and bottom gate rails per the Racking Gate installation instructions. Stepped installations use Transition Brackets or a Transition Panel Kit between posts of differing height; stepped installs leave gaps under the panel that may need filling for pet containment."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Wakefield",
+      "assemblies": [
+        {
+          "assembly_id": "freedom-wakefield-opentop-panel",
+          "assembly_type": "panel",
+          "assembly_name": "Wakefield Open-Top (Decorative Picket) Vinyl Fence Panel",
+          "style": "semi-privacy / open picket top",
+          "height_options_in": [72],
+          "width_on_center_in": 99,
+          "color_options": ["White", "Sand"],
+          "texture_finish": null,
+          "material_grade": {
+            "resin": "Vinyl (PVC); virgin vs. regrind content not disclosed",
+            "uv_inhibitors": "Marketed as UV-resistant; exact formulation not disclosed",
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Transferable Limited Lifetime Warranty (residential, 1 transfer); 30-year limited warranty for commercial/multi-family properties"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "freedom-wakefield-line-post",
+              "component_type": "post",
+              "component_name": "5x5 Line Post (pre-routed)",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": "5in x 5in x 108in",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), structural",
+              "compatible_component_ids": ["freedom-wakefield-opentop-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-wakefield-corner-post",
+              "component_type": "post",
+              "component_name": "5x5 Corner Post (pre-routed)",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": "5in x 5in x 108in",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), structural",
+              "compatible_component_ids": ["freedom-wakefield-opentop-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-wakefield-end-post",
+              "component_type": "post",
+              "component_name": "5x5 End Post (pre-routed)",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": "5in x 5in x 108in",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), structural",
+              "compatible_component_ids": ["freedom-wakefield-opentop-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-wakefield-gate-post-insert",
+              "component_type": "post_stiffener_aluminum",
+              "component_name": "5x5 Gate Post Insert",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": "5in x 5in x 106in",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum",
+              "compatible_component_ids": ["freedom-wakefield-opentop-panel", "freedom-wakefield-gate-4ft", "freedom-wakefield-gate-5ft"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-wakefield-post-top",
+              "component_type": "post_cap",
+              "component_name": "5x5 Contemporary Post Top",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), glued with vinyl adhesive",
+              "compatible_component_ids": ["freedom-wakefield-line-post", "freedom-wakefield-corner-post", "freedom-wakefield-end-post"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-wakefield-top-rail",
+              "component_type": "rail",
+              "component_name": "Wakefield Top Rail",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": "2in x 3-1/2in",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["freedom-wakefield-opentop-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-wakefield-mid-bottom-rail",
+              "component_type": "rail",
+              "component_name": "Wakefield Middle & Bottom Rail",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": "1-3/4in x 7in",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["freedom-wakefield-opentop-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-wakefield-board",
+              "component_type": "picket",
+              "component_name": "Wakefield Tongue-and-Groove Board",
+              "nominal_dimensions_in": "1x6",
+              "actual_dimensions_in": "6in wide (T&G)",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), tongue-and-groove profile",
+              "compatible_component_ids": ["freedom-wakefield-opentop-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-wakefield-gate-4ft",
+              "component_type": "gate_kit",
+              "component_name": "Wakefield 4' Gate Kit (hinges included)",
+              "nominal_dimensions_in": "48in opening",
+              "actual_dimensions_in": "73.5in H x 46in W",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["freedom-wakefield-gate-post-insert"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-wakefield-gate-5ft",
+              "component_type": "gate_kit",
+              "component_name": "Wakefield 5' Gate Kit (hinges included)",
+              "nominal_dimensions_in": "60in opening",
+              "actual_dimensions_in": "73.5in H x 58in W",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["freedom-wakefield-gate-post-insert"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 99,
+            "post_depth_below_grade_in": "~1/3 of post length; see Emblem line example (24in embedment for 36in frost line example)",
+            "frost_line_note": "Dig to local frost line depth per local code",
+            "footing_diameter_in": "10in for 5x5 post",
+            "concrete_footing_spec": "6in gravel base, then concrete to top of hole; panel set ~2in above grade"
+          },
+          "slope_accommodation": {
+            "method": "both",
+            "max_rake_angle_deg": "~8 (1in per foot; confirmed 8in over 8ft on Wakefield spec page)",
+            "hardware_required": ["Transition brackets (stepped installs)", "Aluminum gate post insert (racking gates)"],
+            "notes": "Same racking/stepping approach as other Ready-to-Assemble panels; rails and boards follow the general Freedom RTA slope accommodation methodology."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Conway",
+      "assemblies": [
+        {
+          "assembly_id": "freedom-conway-lattice-top-panel",
+          "assembly_type": "panel",
+          "assembly_name": "Conway Lattice-Top Privacy Vinyl Fence Panel",
+          "style": "privacy with decorative lattice top",
+          "height_options_in": [48, 60, 72],
+          "width_on_center_in": null,
+          "color_options": ["White", "Sand"],
+          "texture_finish": null,
+          "material_grade": {
+            "resin": "Vinyl (PVC)",
+            "uv_inhibitors": "SolarGuard fade-resistance technology (does not apply to white)",
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Transferable Limited Lifetime Warranty (residential); 30-year for commercial"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "freedom-conway-bottom-rail",
+              "component_type": "rail",
+              "component_name": "Conway Aluminum-Reinforced Bottom Rail",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC) with aluminum reinforcement insert",
+              "compatible_component_ids": ["freedom-conway-lattice-top-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-conway-post",
+              "component_type": "post",
+              "component_name": "5x5 Pre-Routed Post (line/corner/end)",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), structural",
+              "compatible_component_ids": ["freedom-conway-lattice-top-panel"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": null,
+            "post_depth_below_grade_in": null,
+            "frost_line_note": "Dig to local frost line depth per local code",
+            "footing_diameter_in": "10in for 5x5 post",
+            "concrete_footing_spec": null
+          },
+          "slope_accommodation": {
+            "method": "racking",
+            "max_rake_angle_deg": "~8 (rackable up to 8in in height over 8ft of sloped terrain per product spec)",
+            "hardware_required": [],
+            "notes": "GrippLock barbed rail system; racks 1in per foot per sell sheet."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Freeport",
+      "assemblies": [
+        {
+          "assembly_id": "freedom-freeport-lattice-top-panel",
+          "assembly_type": "panel",
+          "assembly_name": "Freeport Lattice-Top Privacy Vinyl Fence Panel",
+          "style": "privacy with decorative lattice top",
+          "height_options_in": [72],
+          "width_on_center_in": null,
+          "color_options": ["White", "Sand"],
+          "texture_finish": null,
+          "material_grade": {
+            "resin": "Vinyl (PVC)",
+            "uv_inhibitors": "SolarGuard fade-resistance technology (does not apply to white)",
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Transferable Limited Lifetime Warranty (residential); 30-year for commercial"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "freedom-freeport-post",
+              "component_type": "post",
+              "component_name": "5x5 Pre-Routed Post (line/corner/end)",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), structural",
+              "compatible_component_ids": ["freedom-freeport-lattice-top-panel"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": null,
+            "post_depth_below_grade_in": null,
+            "frost_line_note": "Dig to local frost line depth per local code",
+            "footing_diameter_in": "10in for 5x5 post",
+            "concrete_footing_spec": null
+          },
+          "slope_accommodation": {
+            "method": "racking",
+            "max_rake_angle_deg": "~6 (rackable up to 6in in height over 6ft of sloped terrain per product spec, common size 6x6)",
+            "hardware_required": [],
+            "notes": "Common size 6' x 6'; pool code approval applies only to 6x6 size."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Shadowbox",
+      "assemblies": [
+        {
+          "assembly_id": "freedom-shadowbox-semiprivacy-panel",
+          "assembly_type": "panel",
+          "assembly_name": "Shadowbox Semi-Privacy Vinyl Fence Panel (Pre-Assembled)",
+          "style": "shadowbox / semi-privacy",
+          "height_options_in": [72],
+          "width_on_center_in": null,
+          "color_options": null,
+          "texture_finish": null,
+          "material_grade": {
+            "resin": "Vinyl (PVC)",
+            "uv_inhibitors": null,
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Transferable Limited Lifetime Warranty"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "freedom-shadowbox-board",
+              "component_type": "picket",
+              "component_name": "Shadowbox Board",
+              "nominal_dimensions_in": "1x6",
+              "actual_dimensions_in": "1in x 6in, 5/16in spacing between boards (alternating sides for shadowbox effect)",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["freedom-shadowbox-semiprivacy-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-shadowbox-truss-rail",
+              "component_type": "rail",
+              "component_name": "No-Sag Truss Rail (permanently attached to boards)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC) with internal truss reinforcement",
+              "compatible_component_ids": ["freedom-shadowbox-semiprivacy-panel"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": null,
+            "post_depth_below_grade_in": null,
+            "frost_line_note": null,
+            "footing_diameter_in": null,
+            "concrete_footing_spec": null
+          },
+          "slope_accommodation": {
+            "method": "stepping",
+            "max_rake_angle_deg": null,
+            "hardware_required": ["Mounting brackets (panel is pre-assembled and installed to blank posts via brackets, not routed posts)"],
+            "notes": "Panels are pre-assembled with rails permanently attached to boards (no field racking); designed to be installed stepped over terrain rather than racked. To make a gate, a separate gate framing kit must be purchased."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Post & Rail / Diamond Post & Rail",
+      "assemblies": [
+        {
+          "assembly_id": "freedom-post-and-rail-panel",
+          "assembly_type": "panel",
+          "assembly_name": "Post & Rail / Diamond Post & Rail Vinyl Fence (ranch style)",
+          "style": "ranch rail / post-and-rail",
+          "height_options_in": [48],
+          "width_on_center_in": null,
+          "color_options": ["White"],
+          "texture_finish": null,
+          "material_grade": {
+            "resin": "Vinyl (PVC)",
+            "uv_inhibitors": null,
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Transferable Limited Lifetime Warranty"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "freedom-diamond-rail",
+              "component_type": "rail",
+              "component_name": "Diamond Profile Rail (3-rail or 2-rail options)",
+              "nominal_dimensions_in": "3x3",
+              "actual_dimensions_in": "3in x 3in diamond hollow rail",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), hollow diamond-cross-section rail",
+              "compatible_component_ids": ["freedom-post-and-rail-panel"],
+              "fasteners": []
+            },
+            {
+              "component_id": "freedom-postrail-notched-post",
+              "component_type": "post",
+              "component_name": "Notched Post (3-rail or 2-rail compatible; line, corner, end)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), notched (not routed) profile",
+              "compatible_component_ids": ["freedom-post-and-rail-panel"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": null,
+            "post_depth_below_grade_in": null,
+            "frost_line_note": "Dig to local frost line depth per local code",
+            "footing_diameter_in": null,
+            "concrete_footing_spec": null
+          },
+          "slope_accommodation": {
+            "method": "stepping",
+            "max_rake_angle_deg": null,
+            "hardware_required": [],
+            "notes": "Rigid rail (non-routed, notched-post) construction; not documented as rackable. No slope-accommodation specifics published."
+          }
+        }
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "doc_type": "installation_manual",
+      "title": "Ready-to-Assemble Privacy Vinyl Fence Installation Instructions",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/FREEDOM-WEB-PrivacyKit.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/FREEDOM-WEB-PrivacyKit_Ready-to-Assemble-Privacy-Vinyl-Fence-Install.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "Ready-to-Assemble Privacy (Full Privacy, Lattice Top, Shadowbox, Closed Top, Open Top)",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Picket, Closed Top & Semi-Privacy Vinyl Fence Kit Installation Instructions",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/BOM-34111484-FREEDOM-VFPicketClosedSemiPanelKitWEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/FREEDOM-VFPicketClosedSemiPanelKit_Install.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "Picket / Closed Top / Semi-Privacy",
+      "date_or_version": "34111484"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Horizontal Privacy Vinyl Fence Kit Installation Instructions",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/FREEDOM_HorizontalPrivacyFencePanel.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/FREEDOM_HorizontalPrivacyFencePanel_Install.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "Horizontal Privacy",
+      "date_or_version": "WEB REV 2.22"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Louvered Fence Installation Instructions",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/FREEDOM-WEB_LouveredFence.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/FREEDOM-WEB_LouveredFence_Install.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "Louvered",
+      "date_or_version": "REV 3.22"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Ashford 4x8 Decorative Panel Installation Instructions",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/73013029_Ashford4x8DecorativePanel_Instructions.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/73013029_Ashford4x8DecorativePanel_Instructions.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "Ashford",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Brighton 6x6 Privacy Panel Installation Instructions",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/73008781_Brighton6x6PrivacyPanel_Instructions.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/73008781_Brighton6x6PrivacyPanel_Instructions.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "Brighton",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Wellington 6x6 Semi-Privacy Panel Installation Instructions",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/73013822_Wellington6x6Semi-PrivacyPanel_Instructions.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/73013822_Wellington6x6Semi-PrivacyPanel_Instructions.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "Wellington",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Vinyl Privacy Gates Installation Instructions (Hinges, Latch, Post Stiffener)",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VF-Privacy-Gate-Install.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/VF-Privacy-Gate-Install_HingesLatchDropRod.pdf",
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "model_or_line": "Vinyl Privacy Gates (Lattice Top, Full Privacy, Open/Closed Top Picket)",
+      "date_or_version": "34111486"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Racking a Vinyl Gate for Full Privacy Styles",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/BARRETTE-WEB_RackingGate.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/BARRETTE-WEB_RackingGate_Install.pdf",
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "model_or_line": "Full Privacy Gate (Racking)",
+      "date_or_version": "WEB REV 3.21"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Vinyl Post & Rail Gates Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/11/34111487BOMWEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/VinylPostAndRailGates_Instructions.pdf",
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "model_or_line": "Post & Rail Gates",
+      "date_or_version": "34111487"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Vinyl Privacy & Picket Gates (with Gate Post Inserts) Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/11/BOM-34111485-Privacy-Picket_Gates-Inserts_v2WEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/VinylPrivacyPicketGate_Inserts_Instructions.pdf",
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "model_or_line": "Privacy & Picket Gates",
+      "date_or_version": "34111485"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Vinyl Fence Transition Brackets Installation Instructions (Slope/Stepping)",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/BARRETTE-WEB_TransitionBrackets_Install.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/TransitionBrackets_Install_SlopeAccommodation.pdf",
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "model_or_line": "Transition Brackets (slope accommodation)",
+      "date_or_version": "WEB REV 3.21"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Vinyl Fence Transition Panel Kit Installation Instructions (Slope/Stepping)",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VFTransitionPanelKit.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/VFTransitionPanelKit_SlopeAccommodation.pdf",
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "model_or_line": "Transition Panel Kit (slope accommodation)",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "5x5 Post Surface Mount Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/5x5PostSurfaceMountWEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/5x5PostSurfaceMount_Install.pdf",
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "model_or_line": "5x5 Post Surface Mount (concrete/patio install)",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Cameron Privacy Vinyl Fence Panel Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/Cameron-Privacy-Vinyl-Panel-Instructions-WEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/CameronPrivacyVinylFencePanel_Instructions.pdf",
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "model_or_line": "Cameron",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Horizontal Privacy Vinyl Gate Kit Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2022/10/HorizontalPrivacyGateInstructions.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/HorizontalPrivacyGate_Instructions.pdf",
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "model_or_line": "Horizontal Privacy Gate",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Ready-to-Assemble Panel Cut-Down Instructions",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/Freedom_RTA_Cutdown_Instructions.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/Freedom_RTA_Cutdown_Instructions.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "Ready-to-Assemble (panel width cut-down)",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "cut_sheet",
+      "title": "Emblem 6x8 (White) Project Plan / Cut Sheet",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/73014714-6x8Emblem-White-ProjectPlanning-VinylFence-ReadyToAssemble.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/73014714-6x8Emblem-White-ProjectPlanning.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "Emblem 6x8 White",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "cut_sheet",
+      "title": "Wakefield 6x8 (White) Project Plan / Cut Sheet",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/73040126-6x8Wakefield-White-ProjectPlanning-VinylFence-ReadyToAssemble.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/73040126-6x8Wakefield-White-ProjectPlanning.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "Wakefield 6x8 White",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "spec_sheet",
+      "title": "Emblem Privacy Vinyl Fencing Sell Sheet",
+      "url": "https://freedomproduct.com/wp-content/uploads/2024/02/2023_Emblem_Sell-Sheet-_WEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/2023_Emblem_Sell-Sheet.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "Emblem",
+      "date_or_version": "2023"
+    },
+    {
+      "doc_type": "spec_sheet",
+      "title": "Decorative Picket Vinyl Fencing Sell Sheet",
+      "url": "https://freedomproduct.com/wp-content/uploads/2024/02/2023_Decorative-Picket_SellSheet.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/2023_Decorative-Picket_SellSheet.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "Decorative Picket (Wakefield family)",
+      "date_or_version": "2023"
+    },
+    {
+      "doc_type": "spec_sheet",
+      "title": "Vinyl Fencing Special Order Catalog",
+      "url": "https://freedomproduct.com/wp-content/uploads/2024/02/2024-Freedom-VF-Catalog-01-24.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "Full vinyl fencing line (special order catalog)",
+      "date_or_version": "2024-01"
+    },
+    {
+      "doc_type": "spec_sheet",
+      "title": "Vinyl Fence Care & Maintenance",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/FREEDOM-WEB-VFCare.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/FREEDOM-WEB-VFCare_CareAndMaintenance.pdf",
+      "manufacturer": "Freedom Outdoor Living",
+      "model_or_line": "All vinyl fencing",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "warranty",
+      "title": "Vinyl Fence Transferable Limited Lifetime Warranty",
+      "url": "https://freedomproduct.com/wp-content/uploads/2022/10/2017_LWS_VF_Warranty.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/freedom-outdoor-living/2017_LWS_VF_Warranty.pdf",
+      "manufacturer": "Freedom Outdoor Living / Barrette Outdoor Living",
+      "model_or_line": "All vinyl fencing",
+      "date_or_version": "Effective for products purchased after Jan 1, 2017"
+    }
+  ]
+}

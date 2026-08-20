@@ -1,0 +1,410 @@
+{
+  "manufacturer": "Freedom Outdoor Living",
+  "brand": "Freedom",
+  "parent_company": "Barrette Outdoor Living, Inc.",
+  "pass": 2,
+  "focus": "Structural engineering & installation-depth content (engineering letters, wind load tables, HVHZ/NOA, profile dimension gaps, structural reinforcement, CAD details)",
+  "research_date": "2026-08-20",
+
+  "engineering_letters": [
+    {
+      "title": "Engineering Report Prepared for Barrette Outdoor Living - Calculations for Full and Half Privacy Railing with Plated Posts-ScrewBoss (IBC 2018 and IRC 2018)",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/10/Privacy-Railing-2021-report-PE.pdf",
+      "local_file": "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf",
+      "date": "2021-08-25",
+      "engineer_of_record": "Jacek Sluzynski, PE",
+      "codes_referenced": ["IBC 2018", "IRC 2018", "ASCE 7-16"],
+      "product_evaluated": "Aluminum-post 'plated posts / ScrewBoss' privacy railing/fence system (6005-T5 aluminum posts, rails and mounting plates; PVC infill slats, Fty = 6.2 ksi; also references Barrette 'DSP' polypropylene decorative screen panel infill tested to IBC 2018 1607.8.1.2)",
+      "applicability_caveat": "IMPORTANT: This is Barrette Outdoor Living's (Freedom's parent company) publicly hosted PE-stamped report, but its stated scope is a GUARDRAIL/RAILING product (explicitly validated against IRC 2018 36in and IBC 2018 42in guardrail height requirements, aluminum posts, 'privacy railing' terminology) with a mixed-material aluminum-frame + PVC/DSP-infill construction. This matches Barrette/Freedom's 'Alloy Mixed Material' fencing infill system far more closely than it matches Freedom's all-vinyl (PVC post/rail) product lines such as Emblem, Wakefield, Conway, Freeport, or Shadowbox. It is included here as the only publicly downloadable PE-stamped structural document found for the Barrette/Freedom fence family, and its Section V 'WIND DESIGN FOR SOLID FENCES' calculation (ASCE 7-16 Ch. 29.3/29.4 methodology, Kz/Kd/Kzt/G/Cf terms) demonstrates the wind-load methodology Barrette applies to solid privacy panels generally. Do NOT treat the post-spacing table below as certified for pure-PVC Freedom panel lines without separate verification - no equivalent all-vinyl-post engineering letter was found in public search.",
+      "key_content": {
+        "risk_category": "II",
+        "exposure_categories_analyzed": ["B", "C", "D"],
+        "wind_speeds_analyzed_mph": [115, 120, 130, 140],
+        "max_height_above_grade_ft": 15,
+        "panel_heights_analyzed_in": [42, 48, 54, 60, 66, 72],
+        "conclusion": "Resisting moment exceeds flexure moments for evaluated configurations; half-privacy and full-privacy panels require added intermediate posts for certain panel widths at higher wind speeds/exposures per the post-spacing table."
+      }
+    }
+  ],
+
+  "wind_load_tables": [
+    {
+      "source": "Barrette Outdoor Living Engineering Report (Privacy-Railing-2021-report-PE.pdf), pp.20-23 of 18",
+      "source_caveat": "Same applicability caveat as engineering_letters entry above - product tested is the mixed-material aluminum-post/PVC-infill railing system, not confirmed identical to Freedom's all-PVC panel lines. Reproduced verbatim; not extrapolated or recalculated.",
+      "table_type": "Recommended post spacing (on-center) by panel height, wind speed, and ASCE 7-16 exposure category",
+      "governing_load_note": "'50plf on top rail' rows are governed by the 50 lb/ft top-rail point/distributed load requirement (non-wind-governed), not wind pressure; all other rows are wind-pressure-governed (psf).",
+      "footnotes": [
+        "6FT is nominal size of the panel, which is 68in",
+        "3FT (and similar fractional spacings) is a distance measured from center of the line post to the center of an added intermediate post",
+        "Suggestion to use #8 screw to secure slats in the 6FT wide spans"
+      ],
+      "not_exposed_to_wind_table": [
+        {"panel_height_in": 42, "max_spacing": "6FT (68in)", "governing_load": "50plf on top rail"},
+        {"panel_height_in": 48, "max_spacing": "5FT (60in)", "governing_load": "50plf on top rail"},
+        {"panel_height_in": 54, "max_spacing": "4FT (48in)", "governing_load": "50plf on top rail"},
+        {"panel_height_in": 60, "max_spacing": "3.5FT (42in)", "governing_load": "50plf on top rail"},
+        {"panel_height_in": 66, "max_spacing": "3FT (34in)", "governing_load": "50plf on top rail"},
+        {"panel_height_in": 72, "max_spacing": "3FT (34in)", "governing_load": "50plf on top rail"}
+      ],
+      "wind_exposure_tables": [
+        {"wind_speed_mph": 115, "exposure": "B & C", "rows": [
+          {"panel_height_in": 42, "max_spacing": "6FT (68in)", "governing_load": "50plf on top rail"},
+          {"panel_height_in": 48, "max_spacing": "5FT (60in)", "governing_load": "50plf on top rail"},
+          {"panel_height_in": 54, "max_spacing": "4FT (48in)", "governing_load": "50plf on top rail"},
+          {"panel_height_in": 60, "max_spacing": "3.5FT (42in)", "governing_load": "50plf on top rail"},
+          {"panel_height_in": 66, "max_spacing": "3FT (34in)", "governing_load": "30psf wind"},
+          {"panel_height_in": 72, "max_spacing": "3FT (34in)", "governing_load": "30psf wind"}
+        ]},
+        {"wind_speed_mph": 115, "exposure": "D", "rows": [
+          {"panel_height_in": 42, "max_spacing": "6FT (68in)", "governing_load": "50plf on top rail"},
+          {"panel_height_in": 48, "max_spacing": "5FT (60in)", "governing_load": "50plf on top rail"},
+          {"panel_height_in": 54, "max_spacing": "4FT (48in)", "governing_load": "36.5 psf wind"},
+          {"panel_height_in": 60, "max_spacing": "3FT (34in)", "governing_load": "36.5 psf wind"},
+          {"panel_height_in": 66, "max_spacing": "2.5FT (30in)", "governing_load": "36.5 psf wind"},
+          {"panel_height_in": 72, "max_spacing": "2FT (24in)", "governing_load": "36.5 psf wind"}
+        ]},
+        {"wind_speed_mph": 120, "exposure": "B & C", "rows": [
+          {"panel_height_in": 42, "max_spacing": "6FT (68in)", "governing_load": "50plf on top rail"},
+          {"panel_height_in": 48, "max_spacing": "5FT (60in)", "governing_load": "50plf on top rail"},
+          {"panel_height_in": 54, "max_spacing": "4FT (48in)", "governing_load": "50plf on top rail"},
+          {"panel_height_in": 60, "max_spacing": "3.5FT (42in)", "governing_load": "32.8 psf wind"},
+          {"panel_height_in": 66, "max_spacing": "3FT (34in)", "governing_load": "32.8 psf wind"},
+          {"panel_height_in": 72, "max_spacing": "2.5FT (30in)", "governing_load": "32.8 psf wind"}
+        ]},
+        {"wind_speed_mph": 120, "exposure": "D", "rows": [
+          {"panel_height_in": 42, "max_spacing": "6FT (68in)", "governing_load": "50plf on top rail"},
+          {"panel_height_in": 48, "max_spacing": "4.5FT (54in)", "governing_load": "39.8 psf wind"},
+          {"panel_height_in": 54, "max_spacing": "3.5FT (42in)", "governing_load": "39.8 psf wind"},
+          {"panel_height_in": 60, "max_spacing": "3FT (34in)", "governing_load": "39.8 psf wind"},
+          {"panel_height_in": 66, "max_spacing": "2.5FT (30in)", "governing_load": "39.8 psf wind"},
+          {"panel_height_in": 72, "max_spacing": "2FT (24in)", "governing_load": "39.8 psf wind"}
+        ]},
+        {"wind_speed_mph": 130, "exposure": "B & C", "rows": [
+          {"panel_height_in": 42, "max_spacing": "6FT (68in)", "governing_load": "50plf on top rail"},
+          {"panel_height_in": 48, "max_spacing": "4.5FT (54in)", "governing_load": "38.5 psf wind"},
+          {"panel_height_in": 54, "max_spacing": "3.5FT (42in)", "governing_load": "38.5 psf wind"},
+          {"panel_height_in": 60, "max_spacing": "3FT (34in)", "governing_load": "38.5 psf wind"},
+          {"panel_height_in": 66, "max_spacing": "2.5FT (30in)", "governing_load": "38.5 psf wind"},
+          {"panel_height_in": 72, "max_spacing": "2FT (24in)", "governing_load": "38.5 psf wind"}
+        ]},
+        {"wind_speed_mph": 130, "exposure": "D", "rows": [
+          {"panel_height_in": 42, "max_spacing": "5FT (60in)", "governing_load": "46.7 psf wind"},
+          {"panel_height_in": 48, "max_spacing": "4FT (48in)", "governing_load": "46.7 psf wind"},
+          {"panel_height_in": 54, "max_spacing": "3FT (34in)", "governing_load": "46.7 psf wind"},
+          {"panel_height_in": 60, "max_spacing": "2.5FT (30in)", "governing_load": "46.7 psf wind"},
+          {"panel_height_in": 66, "max_spacing": "2FT (24in)", "governing_load": "46.7 psf wind"},
+          {"panel_height_in": 72, "max_spacing": "1.67FT (20in)", "governing_load": "46.7 psf wind"}
+        ]},
+        {"wind_speed_mph": 140, "exposure": "B & C", "rows": [
+          {"panel_height_in": 42, "max_spacing": "5FT (60in)", "governing_load": "44.7 psf wind"},
+          {"panel_height_in": 48, "max_spacing": "4FT (48in)", "governing_load": "44.7 psf wind"},
+          {"panel_height_in": 54, "max_spacing": "3FT (34in)", "governing_load": "44.7 psf wind"},
+          {"panel_height_in": 60, "max_spacing": "2.5FT (30in)", "governing_load": "44.7 psf wind"},
+          {"panel_height_in": 66, "max_spacing": "2FT (24in)", "governing_load": "44.7 psf wind"},
+          {"panel_height_in": 72, "max_spacing": "1.67FT (20in)", "governing_load": "44.7 psf wind"}
+        ]},
+        {"wind_speed_mph": 140, "exposure": "D", "rows": [
+          {"panel_height_in": 42, "max_spacing": "4.5FT (54in)", "governing_load": "54.1 psf wind"},
+          {"panel_height_in": 48, "max_spacing": "3FT (34in)", "governing_load": "54.1 psf wind"},
+          {"panel_height_in": 54, "max_spacing": "2.5FT (30in)", "governing_load": "54.1 psf wind"},
+          {"panel_height_in": 60, "max_spacing": "2FT (24in)", "governing_load": "54.1 psf wind"},
+          {"panel_height_in": 66, "max_spacing": "1.67FT (20in)", "governing_load": "54.1 psf wind"},
+          {"panel_height_in": 72, "max_spacing": "1.5FT (18in)", "governing_load": "54.1 psf wind"}
+        ]}
+      ]
+    },
+    {
+      "source": "Freedom Vinyl Fencing Special Order Catalog 2024 (2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf), 'Wind Code Overview', p.10 of 112",
+      "local_file": "manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf",
+      "table_type": "Prescriptive wind-code hardware requirement (not a load-vs-spacing engineering table; no psf/mph values given)",
+      "content": "Ready-to-Assemble fence styles require post inserts in most post configurations (not needed in corner posts) to pass wind code regulations. 8' Emblem and 6' Everton panels also require rail insert kits inserted into the top and bottom rails for additional strength in high-wind areas. Pre-Assembled fence styles require installation with the Freedom 2-pack Aluminum Bracket Kit AND post inserts in every post to pass wind code regulations.",
+      "note": "This is a prescriptive compliance instruction, not an engineered psf/mph table. No numeric wind-speed or exposure-category design values are given in this catalog section."
+    }
+  ],
+
+  "hvhz_noa_approvals": [
+    {
+      "noa_number": "24-0117.05",
+      "description": "Extruded PVC Vinyl Fence",
+      "applicant": "Barrette Outdoor Living, Inc.",
+      "applicant_address": "740 N. Main Street, Bulls Gap, TN 37711",
+      "issuing_authority": "Miami-Dade County Product Control Section (High Velocity Hurricane Zone)",
+      "expiration_date": "2029-03-13",
+      "file_classification": "High Velocity Hurricane Zone",
+      "category": "Fences / Fences",
+      "material": "PVC",
+      "source_url": "https://www.miamidade.gov/building/pc-result_detail_app.asp?app_alias=101784",
+      "local_file": "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-24-0117.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+      "notes": "Successor/renewal to NOA 22-0217.05 (same description, same applicant). This is the most current active Miami-Dade HVHZ NOA found for Barrette's extruded PVC vinyl fence category, which covers Freedom-brand vinyl fence products since Freedom is a Barrette Outdoor Living brand. Document is a scanned image PDF (no extractable text layer) - dimensional/pressure detail requires visual review of the downloaded PDF (12-17 pages)."
+    },
+    {
+      "noa_number": "22-0217.05",
+      "description": "Extruded PVC Vinyl Fence",
+      "applicant": "Barrette Outdoor Living, Inc.",
+      "issuing_authority": "Miami-Dade County Product Control Section (High Velocity Hurricane Zone)",
+      "expiration_date": "2027-05-25",
+      "file_status": "File Closed (superseded by 24-0117.05)",
+      "file_classification": "High Velocity Hurricane Zone",
+      "category": "Fences / Fences",
+      "material": "PVC",
+      "maximum_design_pressure_positive": 0,
+      "maximum_design_pressure_negative": 0,
+      "source_url": "https://www.miamidade.gov/building/pc-result_app.asp?fldNOA=22-0217.05",
+      "local_file": "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-22-0217.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+      "notes": "Design pressure fields listed as 0/0 in the Miami-Dade database record itself (likely a database display quirk for a fence category rather than an actual 0 psf rating - the design pressure and post-spacing tables are inside the scanned PDF, not extractable as text). Predecessor of 24-0117.05."
+    },
+    {
+      "noa_number": "24-0117.06",
+      "description": "SimTek Fence",
+      "applicant": "Barrette Outdoor Living, Inc.",
+      "expiration_date": "2028-04-04",
+      "notes": "Companion NOA for Barrette's SimTek composite/molded fence brand (not Freedom vinyl fence). Listed for context only; not downloaded since out of scope for Freedom vinyl fence.",
+      "downloaded": false
+    },
+    {
+      "noa_number": "22-0616.10",
+      "description": "Bufftech Orem molded fence (Barrette Outdoor Living brand)",
+      "applicant": "Barrette Outdoor Living, Inc.",
+      "source_url": "https://bufftech.com/wp-content/uploads/sites/2/2023/10/Dade-NOA-22-0616.10-Orem-8-18-22.pdf",
+      "local_file": "manuals/freedom-outdoor-living/structural/Bufftech-MiamiDade-NOA-22-0616.10-Orem.pdf",
+      "notes": "Downloaded for reference as an example of a full, publicly hosted Barrette-brand HVHZ NOA document (8 pages, has text). This is Bufftech's molded/composite fence product, NOT a Freedom vinyl fence product - included only to show the NOA document format used across Barrette's brand family; do not attribute its content to Freedom vinyl fencing.",
+      "relevance": "adjacent_brand_reference_only"
+    }
+  ],
+
+  "florida_product_approval_note": "No standalone statewide Florida Product Approval (FL#) record (separate from the Miami-Dade NOA) was found specifically for Freedom/Barrette extruded PVC vinyl fencing in this pass. The Miami-Dade NOA (24-0117.05 / predecessor 22-0217.05) is Barrette's primary HVHZ compliance document for this category; Miami-Dade NOAs are also commonly accepted for statewide use per Florida Building Code guidance. No further FL Product Approval search was conclusive within this pass's scope.",
+
+  "profile_dimension_supplement": {
+    "note": "Fills known pass-1 gaps for Conway, Freeport, Shadowbox, and Post & Rail / Diamond Post & Rail using the 2024 Freedom Vinyl Fencing Special Order Catalog (112 pages) and product sell sheets. All dimensions below are as printed in the catalog/sell sheet; 'nominal' vs 'actual' distinction follows manufacturer labeling where given.",
+    "product_lines": [
+      {
+        "line_name": "Conway",
+        "style": "Lattice-top / privacy, Ready-to-Assemble",
+        "board_profile": "6in tongue & groove boards",
+        "top_rail": "2in x 3-1/2in",
+        "middle_and_bottom_rail": "1-3/4in x 5-1/2in; bottom rail is aluminum-reinforced",
+        "post_options": "5in x 5in x 102in Line/Corner/End Post (SKUs 73014376/73014377/73014378 for related Freeport 6x6; Conway posts listed separately in catalog by size variant)",
+        "post_insert": "5in x 5in x 100in Post Insert (SKU 73040719) required for gate posts per catalog 'Required support for gate posts and strength for hardware connections' note",
+        "panel_sizes_found": ["6x8 (70in H x 94in W)", "5x8 (58in H x 94in W)", "4x8 (46in H x 94in W)"],
+        "gate_kits": "4' gate 71.5in H x 46in W; 5' gate 71.5in H x 58in W (2 in narrower than nominal opening)",
+        "colors": "White, Sand",
+        "rack_capability": "Racks 1 inch per foot (per sell sheet)",
+        "source": "2024 Freedom VF Special Order Catalog p.66 area (Conway 6x8 section) + 2023 Conway Lattice Top Sell Sheet",
+        "local_files": ["manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf", "manuals/freedom-outdoor-living/structural/2023_Conway-Sell-Sheet.pdf"]
+      },
+      {
+        "line_name": "Freeport",
+        "style": "Lattice-top / privacy, Ready-to-Assemble",
+        "board_profile": "6in tongue & groove boards",
+        "top_rail": "1-3/4in x 2-3/4in",
+        "middle_and_bottom_rail": "1-3/4in x 5-1/2in (not aluminum-reinforced per catalog text, unlike Conway)",
+        "post_options": "5in x 5in x 102in Line Post (SKU 73014376), Corner Post (SKU 73014377), End Post (SKU 73014378) - White (AE)",
+        "post_insert": "5in x 5in x 100in Post Insert (SKU 73040719), for gate posts",
+        "post_top": "5in x 5in New England Top - White (SKU 73045003)",
+        "panel_size_found": "6x6 (70in H x 70in W), SKU 73014375 (White)",
+        "gate_kits": "4' gate 71.5in H x 46in W (SKU 73024929); 5' gate 71.5in H x 58in W (SKU 73024940)",
+        "colors": "White, Sand",
+        "rack_capability": "Rackable up to 6in in height over 6ft of sloped terrain (per product page)",
+        "source": "2024 Freedom VF Special Order Catalog p.66 (6x6 Freeport - White section)",
+        "local_file": "manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf"
+      },
+      {
+        "line_name": "Shadowbox",
+        "note": "Catalog lists TWO distinct Shadowbox constructions under different sub-brand names; both differ from the older 'Shadowbox Semi-Privacy' web product-page spec (1in x 6in boards, 5/16in spacing) found in pass 1 - all three are reproduced here without reconciling which is current, since the catalog and live product page disagree.",
+        "variants": [
+          {
+            "sub_name": "Birchdale / Oakworth Shadowbox (Ready-to-Assemble, routed posts)",
+            "board_profile": "6in boards with 1in spacing",
+            "top_and_bottom_rail": "2in x 6in (aluminum-reinforced per Oakworth spec: '2in x 6in Aluminum reinforced bottom rails')",
+            "middle_rail": "2in x 3-1/2in",
+            "post": "5in x 5in x 102in Line/Corner/End Post",
+            "post_insert": "5in x 5in x 100in Post Insert (SKU 73040719), 'required support for gate posts and strength for hardware connections'",
+            "post_top": "5in x 5in New England Post Top",
+            "panel_sizes": ["6x8 Birchdale (72in H x 94in W)", "6x6 Oakworth (70in H x 70in W)"],
+            "source": "2024 Freedom VF Special Order Catalog, Oakworth/Birchdale Shadowbox sections (~p.63)"
+          },
+          {
+            "sub_name": "Pre-Assembled 6x6 Shadowbox - White",
+            "board_profile": "6in boards with 4-1/2in spacing",
+            "rails": "1-3/4in x 2-3/4in rails",
+            "panel_size": "70in H x 68.25in W (SKU 73048535)",
+            "source": "2024 Freedom VF Special Order Catalog p.98-99 area (Pre-Assembled Shadowbox section)"
+          },
+          {
+            "sub_name": "Shadowbox Semi-Privacy Vinyl Fencing (freedomproduct.com product page, pass-1 + pass-2 confirmed)",
+            "board_profile": "1in x 6in board size, 5/16in spacing between boards",
+            "rail_system": "No-sag truss system with rails permanently attached to boards (pre-assembled)",
+            "source": "https://freedomproduct.com/products/shadowbox-semi-privacy-vinyl-fencing"
+          }
+        ]
+      },
+      {
+        "line_name": "Post & Rail (2-rail and 3-rail)",
+        "style": "Ready-to-Assemble ranch-rail",
+        "rail_profile": "1.5in x 5.5in x 8ft rail - White (SKU 73012399)",
+        "posts": {
+          "2_rail": "5in x 5in x 60in Line Post (SKU 73025455) / Corner Post (SKU 73025456) / End Post (SKU 73025457)",
+          "3_rail": "5in x 5in x 84in Line Post (SKU 73025464) / Corner Post (SKU 73025465) / End Post (SKU 73025466)"
+        },
+        "post_top": "5in x 5in Pyramid Post Top - White (SKU 73003093)",
+        "gate_kits": "2-Rail: 46in wide 4' gate (SKU 73025437), 58in wide 5' gate (SKU 73025438); 3-Rail: 46in wide 4' gate (SKU 73025443), 58in wide 5' gate (SKU 73025444)",
+        "source": "2024 Freedom VF Special Order Catalog p.88 (Post & Rail section)"
+      },
+      {
+        "line_name": "Diamond Post & Rail",
+        "style": "Ready-to-Assemble ranch-rail, diamond-profile rail, 14-day lead time (special order)",
+        "rail_profile": "3.25in x 3.25in x 8ft Diamond Rail - White (SKU 73045013)",
+        "posts": {
+          "2_rail": "5in x 5in x 60in Line/Corner/End Post (SKUs 73045014/73045015/73045016)",
+          "3_rail": "5in x 5in x 84in Line/Corner/End Post (SKUs 73045017/73045018/73045019)"
+        },
+        "post_top": "5in x 5in Pyramid Post Top - White (SKU 73003093, shared with Post & Rail line)",
+        "source": "2024 Freedom VF Special Order Catalog p.89 (Diamond Post & Rail section)"
+      }
+    ]
+  },
+
+  "structural_reinforcement_supplement": {
+    "note": "Consolidated post-insert / rail-insert / bracket reinforcement spec table from the 2024 Freedom Vinyl Fencing Special Order Catalog 'Wind Code Overview' (p.10) and 'Accessories' sections. This directly addresses the pass-1 gap where post reinforcement was only known via third-party Barrette category references.",
+    "compliance_rule": "Ready-to-Assemble fence styles require post inserts in most post configurations (not needed in corner posts) to pass wind code regulations. 8ft Emblem and 6ft Everton panels additionally require rail insert kits in the top and bottom rails for extra strength in high-wind areas. Pre-Assembled fence styles require BOTH the Freedom 2-pack Aluminum Bracket Kit AND post inserts in every post to pass wind code regulations.",
+    "post_inserts": [
+      {"description": "4in x 4in x 58in Post Insert", "model": "73014646", "sos": "472330"},
+      {"description": "5in x 5in x 58in Post Insert", "model": "73012352", "sos": "430374"},
+      {"description": "5in x 5in x 82in Post Insert", "model": "73003718", "sos": "430373"},
+      {"description": "5in x 5in x 94in Post Insert", "model": "73012353", "sos": "430375"},
+      {"description": "5in x 5in x 100in Gate Post Insert", "model": "73040719", "sos": "5106442"},
+      {"description": "5in x 5in x 106in Post Insert", "model": "73003463", "sos": "430372"},
+      {"description": "5in x 5in x 106in Gate Post Insert", "model": "73041348", "sos": "1143443"}
+    ],
+    "post_insert_material": "Metal (aluminum, per third-party install-video description of the Estateline/Barrette-family 'metal insert' - catalog itself does not explicitly print the alloy; sold as 'Aluminum Bracket Kit' for the separate bracket hardware, which IS explicitly labeled aluminum). Not confirmed steel vs aluminum for every insert SKU from the catalog text alone - see caveat below.",
+    "post_insert_material_caveat": "The 2024 catalog text does not explicitly state the metal alloy of the post inserts themselves (it only explicitly calls the separate 2-pack bracket 'Aluminum Bracket Kit'). Pass-1 data already carries 'Aluminum (on 3 sides, per third-party retail listings)' for the 5x5 gate post insert - this pass did not find a manufacturer document that states the post-insert alloy more precisely than that. Flagging as still not fully disclosed rather than guessing.",
+    "rail_inserts": [
+      {"description": "8ft Rail Insert Kit (2-pack), for use with 5-1/2in rails or larger", "model": "73024840", "sos": "779524"},
+      {"description": "6ft Rail Insert Kit (2-pack), for use with 5-1/2in rails or larger", "model": "73024839", "sos": "701346"}
+    ],
+    "brackets": [
+      {"description": "2-pack Aluminum Bracket - White (screws included)", "model": "73013963", "sos": "426056", "material": "Aluminum (explicitly stated)"},
+      {"description": "30-pack Replacement Screws - White", "model": "73024841", "sos": "701348"},
+      {"description": "2-pack Set & Secure (TM) Bracket Kit - White (screws included)", "model": "73004620", "sos": "701345"}
+    ],
+    "aluminum_reinforced_bottom_rails": {
+      "note": "Multiple pure-vinyl privacy panel lines use an 'aluminum reinforced bottom rail' as standard (not an accessory insert) - captured across catalog: Conway, several unnamed 1-3/4in x 5-1/2in privacy lines (catalog pp.~30-33), Oakworth/Birchdale Shadowbox (2in x 6in aluminum reinforced bottom rails), and 3in-picket semi-privacy lines (2in x 3-1/2in aluminum-reinforced bottom rail).",
+      "alloy_disclosed": false
+    },
+    "alloy_mixed_material_line_posts": {
+      "note": "Freedom's 'Alloy' Mixed Material Fencing line (matte black aluminum frame, vinyl/wood/decorative-screen infill options) uses dedicated aluminum posts, distinct from the vinyl-post-insert system above:",
+      "in_ground_posts": [
+        {"description": "3in x 3in x 99in Aluminum Line Post - Matte Black", "model": "73047658", "sos": "2958547"},
+        {"description": "3in x 3in x 99in Aluminum Corner Post - Matte Black", "model": "73047659", "sos": "2958548"},
+        {"description": "3in x 3in x 99in Aluminum End/Gate Post - Matte Black", "model": "73047358", "sos": "2958546"}
+      ],
+      "surface_mount_posts": [
+        {"description": "3in x 3in x 70in Aluminum Line Post - Matte Black", "model": "73047087", "sos": "2958544"},
+        {"description": "3in x 3in x 70in Aluminum Corner Post - Matte Black", "model": "73047356", "sos": "2958545"},
+        {"description": "3in x 3in x 70in Aluminum End/Gate Post - Matte Black", "model": "73047086", "sos": "2958543"}
+      ],
+      "relevance": "This is likely the actual product family that the 'Privacy Railing / ScrewBoss' PE engineering report (see engineering_letters) analyzes, given both use aluminum posts + PVC/mixed infill. Not confirmed as a 1:1 SKU match, but flagged as the most plausible link between the PE report and a current Freedom catalog product."
+    },
+    "drop_rods_and_gate_hardware": {
+      "note": "Closes pass-1 gap where drop rod was only referenced via third-party Barrette category page. Full spec table from 2024 catalog 'Gate Hardware' pages (pp.104-105 of 112).",
+      "drop_rods": [
+        {"description": "48in Standard Drop Rod", "material": "Steel, Stainless Steel", "black_model": "73025499", "black_sos": "1260114", "white_model": "73025500", "white_sos": "1260115"},
+        {"description": "48in Heavy-Duty Stainless Steel Drop Rod", "material": "Stainless Steel", "black_model": "73025503", "black_sos": "1260116", "white_model": "73025504", "white_sos": "1260117"},
+        {"description": "36in Heavy-Duty Drop Rod", "material": "Steel, Stainless Steel", "black_model": "73024430", "black_sos": "673689"},
+        {"description": "36in Heavy-Duty Stainless Steel Drop Rod", "material": "Stainless Steel", "black_model": "73024432", "black_sos": "673691"},
+        {"description": "36in Standard Drop Rod (includes two gate handles)", "material": "Steel", "black_model": "73014303", "black_sos": "586820", "white_model": "73014304", "white_sos": "586842"},
+        {"description": "24in Heavy-Duty Drop Rod", "material": "Steel, Stainless Steel", "black_model": "73014305", "black_sos": "586850", "white_model": "73014306", "white_sos": "586851"},
+        {"description": "24in Heavy-Duty Stainless Steel Drop Rod", "material": "Stainless Steel", "black_model": "73024431", "black_sos": "673690"}
+      ],
+      "hinges_load_ratings": [
+        {"description": "Heavy-Duty Strap Hinge", "material": "Steel", "support_up_to_lbs": 75},
+        {"description": "Standard Strap Hinge", "material": "Steel", "support_up_to_lbs": 35},
+        {"description": "Heavy-Duty Modern Wrap Hinge - Pair", "material": "Steel, Stainless Steel", "support_up_to_lbs": 150},
+        {"description": "Heavy-Duty Contemporary Wrap Hinge - Pair", "material": "Steel, Stainless Steel", "support_up_to_lbs": 150},
+        {"description": "Standard Wrap Hinge - Pair", "material": "Steel, Stainless Steel", "support_up_to_lbs": 75},
+        {"description": "Heavy-Duty Butterfly Hinge - Pair", "material": "Aluminum", "support_up_to_lbs": 100},
+        {"description": "Standard Butterfly Hinge - Pair", "material": "Aluminum", "support_up_to_lbs": 75},
+        {"description": "Compact Butterfly Hinge - Pair", "material": "Aluminum", "support_up_to_lbs": 35},
+        {"description": "Compact Flush Mount Hinge", "material": "Polymer", "support_up_to_lbs": 35},
+        {"description": "Flush Mount Butterfly Hinge", "material": "Aluminum (implied)", "support_up_to_lbs": null}
+      ],
+      "latches": [
+        {"description": "Locking Pool Latch", "material": "Nylon with Steel"},
+        {"description": "Locking Compact Pool Latch", "material": "Nylon with Steel"},
+        {"description": "Locking Gravity Latch with 1-sided key entry", "material": "Nylon with Stainless Steel"},
+        {"description": "Locking Gravity Latch with 2-sided key entry", "material": "Nylon with Stainless Steel"},
+        {"description": "Heavy-Duty Gate Latch", "material": "Steel"},
+        {"description": "2-sided Locking Standard Post Latch (for use with 5x5 posts)", "material": "Steel"},
+        {"description": "Decorative Gravity Latch", "material": "Nylon with Stainless Steel"},
+        {"description": "Flip Latch", "material": "Steel, Stainless Steel"},
+        {"description": "Slide Bar Latch", "material": "Steel, Stainless Steel"},
+        {"description": "Gravity Latch", "material": "Steel, Stainless Steel"}
+      ],
+      "source": "2024 Freedom VF Special Order Catalog pp.104-105 of 112"
+    }
+  },
+
+  "cad_structural_detail_drawings": {
+    "found": false,
+    "search_performed": true,
+    "notes": "No publicly downloadable CAD section-detail drawings, footing-detail drawings, or DWG/DXF files were located for Freedom/Barrette vinyl fencing in this pass. The closest available structural graphics are: (1) the scanned Miami-Dade NOA PDFs (24-0117.05 / 22-0217.05), which per Miami-Dade's product-control convention typically embed an approved 'Drawing No. 001' installation/section detail inside the NOA package itself (not separately extractable as text since these are scanned/image PDFs - would require visual/OCR review of the downloaded PDF pages to confirm), and (2) the PE engineering report's embedded rail/post cross-section diagrams (page 5-13 of the Privacy-Railing-2021-report-PE.pdf), which are raster images within the PDF showing section geometry for TOP RAIL EPN-0559, MID RAIL EPN-0670, END POST EPN-0667, LINE POST EPN-0669 with dimensioned Ix/Iy/section modulus - these are engineering section properties, not full CAD installation drawings.",
+    "gap_remains": true
+  },
+
+  "documents": [
+    {
+      "title": "Barrette Outdoor Living Engineering Report - Full and Half Privacy Railing with Plated Posts-ScrewBoss (PE-stamped)",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/10/Privacy-Railing-2021-report-PE.pdf",
+      "local_file": "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf",
+      "pages": 18,
+      "new_in_pass_2": true
+    },
+    {
+      "title": "Miami-Dade County NOA 24-0117.05 - Barrette Outdoor Living Extruded PVC Vinyl Fence (current, expires 2029-03-13)",
+      "url": "https://www.miamidade.gov/building/library/productcontrol/noa/24011705.pdf",
+      "local_file": "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-24-0117.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+      "pages": 17,
+      "note": "Scanned image PDF, no text layer extracted",
+      "new_in_pass_2": true
+    },
+    {
+      "title": "Miami-Dade County NOA 22-0217.05 - Barrette Outdoor Living Extruded PVC Vinyl Fence (superseded, expires 2027-05-25)",
+      "url": "https://www.miamidade.gov/building/library/productcontrol/noa/22021705.pdf",
+      "local_file": "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-22-0217.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+      "pages": 12,
+      "note": "Scanned image PDF, no text layer extracted",
+      "new_in_pass_2": true
+    },
+    {
+      "title": "Miami-Dade County NOA 22-0616.10 - Bufftech (Barrette brand) Orem molded fence (adjacent brand, reference only)",
+      "url": "https://bufftech.com/wp-content/uploads/sites/2/2023/10/Dade-NOA-22-0616.10-Orem-8-18-22.pdf",
+      "local_file": "manuals/freedom-outdoor-living/structural/Bufftech-MiamiDade-NOA-22-0616.10-Orem.pdf",
+      "pages": 8,
+      "note": "Not a Freedom vinyl fence document - Bufftech is a separate Barrette-family brand; kept for NOA-format reference only",
+      "new_in_pass_2": true
+    },
+    {
+      "title": "Conway Lattice Top Vinyl Fencing Sell Sheet (2023)",
+      "url": "https://freedomproduct.com/wp-content/uploads/2024/02/2023_Conway-Sell-Sheet.pdf",
+      "local_file": "manuals/freedom-outdoor-living/structural/2023_Conway-Sell-Sheet.pdf",
+      "pages": 2,
+      "new_in_pass_2": true
+    },
+    {
+      "title": "Freedom Vinyl Fencing Special Order Catalog 2024 (already present in manuals/ from pass 1; used in pass 2 for structural/profile extraction)",
+      "local_file": "manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf",
+      "pages": 112,
+      "new_in_pass_2": false,
+      "note": "Pre-existing file re-mined via pdftotext for wind-code overview, post/rail insert SKU table, gate hardware material/rating table, and Conway/Freeport/Shadowbox/Post & Rail/Diamond Post & Rail profile dimensions."
+    }
+  ],
+
+  "remaining_gaps": [
+    "Virgin-PVC content percentage, specific UV-inhibitor chemistry/loading, impact-modifier type/loading: still fully undisclosed in all public literature reviewed (unchanged from pass 1).",
+    "No PE-stamped engineering letter was found that is unambiguously scoped to Freedom's all-PVC-post vinyl fence lines (Emblem, Wakefield, Conway, Freeport, Shadowbox, Bolton, etc.) - the only public PE report found (Privacy-Railing-2021-report-PE.pdf) is scoped to an aluminum-post/PVC-infill 'Privacy Railing' / ScrewBoss product, most plausibly Freedom's Alloy Mixed Material line.",
+    "No standalone statewide Florida Product Approval (FL#) number found distinct from the Miami-Dade NOA.",
+    "No downloadable CAD (DWG/DXF) structural/footing detail drawings found; NOA-embedded 'Drawing No. 001' exists inside the scanned NOA PDFs but was not OCR'd/verified in this pass.",
+    "Post-insert alloy (aluminum vs. steel) is still not explicitly stated by Barrette/Freedom's own catalog text for the vinyl-post insert SKUs (only the separate bracket kit is explicitly labeled aluminum); third-party video/listing evidence only.",
+    "Shadowbox profile dimensions are inconsistent across three different manufacturer sources (catalog RTA variant: 6in boards/1in spacing/2x6 rails; catalog Pre-Assembled variant: 6in boards/4.5in spacing/1-3/4x2-3/4 rails; live product page: 1in x 6in boards/5/16in spacing) - not reconciled, reported as-is."
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "scope_note": "Cross-manufacturer engineering rules and standards for vinyl (rigid PVC) fence systems. Compiled from ASTM standard scope pages (full standards are paywalled at store.astm.org; content below is scope/requirement summaries from search snippets and manufacturer ASTM-compliance flyers, NOT the full standard text), CSI MasterFormat / ARCAT specification templates, and generic installation-engineering guidance aggregated across multiple installer/manufacturer sources. Numbers attributed to a single secondary source are flagged as such rather than presented as universal ASTM-mandated thresholds.",
+  "astm_standards": [
+    {
+      "standard_id": "ASTM F964 (current: F964-13(2024); earlier reissue F964-13(2019))",
+      "title": "Standard Specification for Rigid Poly(Vinyl Chloride) (PVC) Exterior Profiles Used for Fencing and Railing",
+      "scope_summary": "Establishes requirements for the material properties and physical properties -- including dimensional tolerances, extrusion quality, and weatherability -- of rigid PVC exterior profiles used for agricultural, commercial, and residential fencing and railing. Material is limited to rigid PVC compounds in a single homogeneous extrusion or a coextrusion of two or more PVC compounds in distinct layers (i.e. cap-stock/substrate coextrusion). Provides methods for testing and identifying compliant exterior-profile extrusions. Explicitly EXCLUDES loadbearing characteristics of fence/railing assemblies (wind load, horizontal or vertical guardrail loading are NOT addressed) -- those must come from the manufacturer's engineering data or applicable building code, not from F964. Accessory components (bolts, fasteners, etc.) are not covered.",
+      "key_requirements": [
+        "Base compound must meet ASTM D4216 cell-classification requirements (F964 references D4216 for material class number, e.g. Class 1-32333-3 as a commonly cited baseline; individual manufacturers publish their own, sometimes higher, cell class).",
+        "Weathering/color-consistency testing: PVC compound must show no peeling, chipping, cracking, flaking, or pitting after outdoor exposure at 6 and 12 months (white) or 6, 12, and 24 months (colors) in three reference climates -- hot/dry (Phoenix AZ), hot/humid (Miami FL), and northern temperate -- per the standard's weathering-requirements table. (Sourced from a manufacturer ASTM-compliance flyer summarizing F964, not the ASTM text itself.)",
+        "Minimum impact resistance of 0.6 in.-lb/mil (2670 J/m) after the above weathering exposure, tested per ASTM D4226 impact-resistance methods. (Same secondary-source caveat as above -- could not verify this figure directly against the paywalled standard text.)",
+        "Cap-stock (outer UV/weathering layer of a coextruded profile) commonly cited as minimum 0.015 in. thick and maximum 20% of overall wall thickness -- this figure is attributed by two independent secondary sources to the older F964-94 edition; NOT independently confirmed against the current F964-13 text, so treat as indicative rather than authoritative for current-edition compliance.",
+        "Installation/assembly guidance is explicitly deferred to ASTM F1999 (Note 1 of F964's scope)."
+      ],
+      "source_url": "https://store.astm.org/f0964-13r19.html ; https://illusionsfence.com/wp-content/uploads/2011/06/Illusions-Vinyl-Fence-ASTM-Info-Flyer.pdf ; https://www.southwestvinylfence.com/faqs.html"
+    },
+    {
+      "standard_id": "ASTM D4216 (current: D4216-22)",
+      "title": "Standard Specification for Rigid Poly(Vinyl Chloride) (PVC) and Related PVC and Chlorinated Poly(Vinyl Chloride) (CPVC) Building Products Compounds",
+      "scope_summary": "Covers rigid plastic PVC and CPVC exterior compounds composed of poly(vinyl chloride), chlorinated poly(vinyl chloride), and vinyl chloride copolymers used in exterior building products (fence and railing profiles among them). Defines a cell-classification system (format similar to '1-32333-3') that rates a compound across properties such as impact resistance, tensile strength, modulus of elasticity, deflection temperature under load, and flame spread, allowing manufacturers to declare/compare material grade.",
+      "key_requirements": [
+        "Establishes the cell-classification numbering system referenced by F964 for fence-grade PVC compound; higher digits in a given cell position indicate a superior rated property versus the baseline acceptable compound.",
+        "Manufacturers commonly publish compliance as 'Class 1-32333-3' or similar and describe exceeding one or more baseline cell values as a marketing differentiator -- exact baseline values are set in the standard's tables, which were not accessible (paywalled); do not fabricate the specific per-digit thresholds.",
+        "Does not itself set fence-specific dimensional or installation requirements -- it is a compound/material-grade specification that F964 and F1999 build on top of."
+      ],
+      "source_url": "https://store.astm.org/d4216-22.html ; https://standards.iteh.ai/catalog/standards/astm/e73d0086-9fc4-49d3-a6e5-826c2aa52035/astm-d4216-22"
+    },
+    {
+      "standard_id": "ASTM F1999 (current: F1999-14(2024))",
+      "title": "Standard Practice for Installation of Rigid Poly(Vinyl Chloride) (PVC) Fence Systems",
+      "scope_summary": "Covers the minimum requirements for, and methods of, installation for rigid PVC fencing systems and fence accessories. This is the ASTM installation-practice companion to the F964 material specification -- F964 itself defers all assembly/installation guidance to this document.",
+      "key_requirements": [
+        "Sets minimum installation practice (post setting, panel/rail assembly, gate installation) at a generic, material-class level rather than manufacturer-specific instructions.",
+        "Full requirement text is paywalled at ASTM/ANSI; only the scope statement was directly confirmed via search snippets. Do not assume specific numeric post-spacing or embedment values originate from F1999 unless independently confirmed -- none were found in accessible sources."
+      ],
+      "source_url": "https://store.astm.org/f1999-14r24.html ; https://webstore.ansi.org/standards/astm/astmf1999142019"
+    },
+    {
+      "standard_id": "ASTM D1784",
+      "title": "Standard Specification for Rigid Poly(Vinyl Chloride) (PVC) Compounds and Chlorinated Poly(Vinyl Chloride) (CPVC) Compounds",
+      "scope_summary": "Covers rigid PVC and CPVC materials in molded and extruded forms (a broader, upstream compound spec than D4216/F964; commonly cross-referenced in vinyl fence CSI specs as the baseline material-compliance citation, e.g. 'PVC formulated to resist impact and for UV stabilization; extruded products meet or exceed ASTM D1784').",
+      "key_requirements": [
+        "Establishes base rigid-PVC/CPVC compound cell classification (distinct from, and a precursor to, D4216's building-products-specific classification).",
+        "Referenced directly in the real-world ARCAT/Superior Outdoor Products CSI 32 31 23 vinyl fence master spec (downloaded, see documents) as the sole material reference standard in Part 1.3 References."
+      ],
+      "source_url": "https://infinitalab.com/services/astm-d1784-rigid-chlorinated-pvc-compound-testing ; ARCAT CSI 32 31 23 spec (downloaded)"
+    },
+    {
+      "standard_id": "ASTM F2064 -- COULD NOT CONFIRM",
+      "title": "Not verified as an existing ASTM vinyl-fence standard",
+      "scope_summary": "Explicitly searched for 'ASTM F2064' as a vinyl fence framework formulation standard (per the assignment brief). No ASTM standard by that number relating to vinyl fencing was found. The only hits for 'F2064' in search results were an unrelated composite-decking fastener/plug SKU code in a building-supply catalog, not an ASTM designation. It is likely this was a mix-up with ASTM F964 (Rigid PVC Exterior Profiles Used for Fencing and Railing), which IS the real, correctly-scoped material standard for vinyl fence framework. Flagging explicitly per instructions rather than fabricating a standard.",
+      "key_requirements": [],
+      "source_url": null
+    },
+    {
+      "standard_id": "Related ASTM fence-family standards (not vinyl-specific, listed for completeness)",
+      "title": "Compilation: ASTM Standards for Fence Materials and Products",
+      "scope_summary": "A trade-association-style compilation PDF (downloaded) listing the full family of ASTM fence standards across materials -- chain link (F567, F900, F934, F1043, F1665, F1908/1910/1911), PVC fence (F964, F1999), and fence-related safety specs (F2000 baseball/softball fields, F2049 play-area barriers, F2200 automated gates, F2408 ornamental steel picket fences, F2409 residential pool fencing). Useful as a cross-reference map of where vinyl fence standards (F964/F1999/D4216) sit relative to the rest of the ASTM fence-standards ecosystem.",
+      "key_requirements": [],
+      "source_url": "https://public-admin-files.s3.us-east-2.amazonaws.com/Compilations/FENCE21.pdf"
+    }
+  ],
+  "csi_masterformat": [
+    {
+      "section": "32 31 00",
+      "title": "Fences and Gates (Division 32 -- Exterior Improvements, top-level section)",
+      "source_url": "https://www.fencetrac.com/fence-guide/what-is-csi-section-32-31-00-for-fencing ; https://crmservice.csinet.org/widgets/masterformat/numbersandtitles.aspx?id=5233eda3-bed5-ea11-80f3-000d3a04ff75",
+      "local_path": null,
+      "key_provisions": "Top-level MasterFormat section covering all materials/fabrication/installation/performance requirements for fence and gate work on a project. Subsections split by material/type, e.g. 32 31 13 (Chain Link), 32 31 19 (Decorative Metal), 32 31 23 (Plastic/Vinyl), 32 31 26 (Wire), 32 31 32 (Composite/Gate Operators depending on publisher version). Note: an older, pre-2004 6-digit MasterFormat numbering scheme (still referenced by some legacy directories like 4specs.com) used '32 3180 - Wood & Vinyl Fences and Gates' instead -- current (2020-era) MasterFormat uses 32 31 23 for vinyl."
+    },
+    {
+      "section": "32 31 23",
+      "title": "Plastic Fences and Gates (subsection title on the real downloaded spec: 'Vinyl Fencing and Gates')",
+      "source_url": "https://www.arcat.com/sdspecs/htm04/32_31_23spp.htm",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx",
+      "key_provisions": "Real, manufacturer-submitted (Superior Outdoor Products) CSI 3-part master spec downloaded in full (.docx). Part 1 General: section includes picket/yard/privacy/post-&-rail fence systems + post caps + pergolas; references ASTM D1784 as the sole material standard; requires 5-yr manufacturer track record, 2-yr installer experience, product data/shop drawing/sample/certificate submittals, delivery/storage/warranty (lifetime limited material, 5-yr prorated labor) clauses typical of Division 01-linked commercial specs. Part 2 Products: 'PVC formulated to resist impact and for UV stabilization... meets or exceeds ASTM D1784'; enumerates dozens of style/height/rail-section/post-size/color options (6ft and 8ft rail sections are the two standard on-center spacing units across every style listed). Part 3 Execution: set posts and gate posts per drawings; 'Center and align posts, place concrete around posts and vibrate or tamp for consolidation. Recheck vertical and top alignment of posts and make necessary corrections'; install gates plumb/level/secure, drop rod for double gates; cleaning includes muriatic-acid mortar removal from posts."
+    },
+    {
+      "section": "32 31 13",
+      "title": "Chain Link Fences and Gates -- downloaded as a cross-material CSI Division 32 template",
+      "source_url": "https://www.chainlinkinfo.org/wp-content/uploads/2015/08/CLFMI-Product-Manual-2-Section-32-31-13.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf",
+      "key_provisions": "Not vinyl-specific (chain link), but downloaded as a real, fully worked CLFMI-published 3-part CSI master spec because it demonstrates the generic Division 32 Fences-and-Gates document architecture (References/Submittals/Quality Assurance/Post-spacing citation to CLFMI WLG2445 wind-load guide/Execution) that any Fences-and-Gates subsection, including 32 31 23, is expected to follow. Useful as a structural template for what a rigorous fence CSI spec's References and Execution articles look like."
+    }
+  ],
+  "post_spacing_engineering_rules": {
+    "on_center_spacing": {
+      "generic_guidance": "Vinyl privacy/picket fence rail sections are manufactured almost universally in 6 ft and 8 ft lengths, which directly sets the standard post on-center spacing to 6 ft or 8 ft for residential vinyl fencing -- confirmed both in the downloaded ARCAT/Superior Outdoor CSI spec (6 ft and 8 ft rail sections offered across every style) and in independent installer guidance citing 6-8 ft on-center as typical, narrowed toward 6 ft in high-wind zones to reduce wind load per post.",
+      "wind_load_caveat": "ASTM F964 explicitly does NOT cover load-bearing/wind-load engineering for vinyl fence assemblies (see astm_standards above) -- there is no vinyl-specific ASTM wind-load spacing table analogous to the chain-link industry's CLFMI WLG2445 Wind Load Guide (downloaded; chain-link only, cites post spacing formulas keyed to pipe OD/wind speed/panel height). For vinyl, actual wind-rated spacing comes from individual manufacturer engineering letters/ICC-ES reports, not a generic cross-brand ASTM number.",
+      "source_url": "https://www.arcat.com/sdspecs/htm04/32_31_23spp.htm ; https://nationalfenceauthority.com/vinyl-fence-systems ; https://fenceinstallationauthority.com/fence-post-installation"
+    },
+    "post_embedment_depth": {
+      "generic_guidance": "Common cross-material rule of thumb: bury at least one-third of the post's total length below grade (e.g., a 6 ft fence commonly uses a 9 ft post with 3 ft/36 in buried). Absolute minimum residential embedment is frequently cited as 24 in regardless of the one-third calculation; vinyl-specific guidance in one aggregator table gives 3 ft (36 in) minimum embedment for reinforced vinyl privacy posts specifically. Vinyl posts are hollow and rely on an internal steel or aluminum reinforcement insert for structural strength; that insert is commonly specified to run from about 6 in above grade down to the bottom of the concrete footing.",
+      "gate_posts": "Gate posts are consistently called out across sources as needing greater embedment than line posts (commonly cited at a 36 in minimum, deeper than a comparable line post) due to cantilevered gate-leaf loading.",
+      "high_wind_adjustment": "For high-wind zones (roughly 40-70 mph sustained, per one installer source), guidance suggests increasing post depth by about 25% and reducing panel spacing from 8 ft to 6 ft on center to cut wind load per post -- this is generic installer practice, not a codified ASTM number.",
+      "source_url": "https://www.fencetrac.com/fence-guide/how-deep-should-fence-posts-be-set ; https://fenceinstallationauthority.com/fence-post-installation ; https://nmifence.com/blog/fence-post-depth ; https://fenceinstallationauthority.com/concrete-footing-for-fence-posts"
+    },
+    "frost_line_depth": {
+      "generic_guidance": "Universal principle across every source checked: the BOTTOM of the concrete footing (not the top, not the post itself) must sit at or below the local frost line -- most commonly stated as a minimum of 6 in below the established frost line, verified against the local Authority Having Jurisdiction (AHJ)/building department, since frost depth is a regional/local-code determination (varies roughly 24-48+ in across US climate zones) rather than a single ASTM or IBC number. No single national frost-depth table was located; sources consistently defer to local code officials or IBC/ASCE regional frost-depth maps rather than stating a universal figure themselves.",
+      "ibc_reference": "IBC Section 1807.3.3 governs fence/pole footing design generally (footing diameter and bearing requirements); §1807.3.3(1) sets minimum post-footing diameter at 4 in larger than the post's diameter (or diagonal, for square/rectangular posts) -- this is an IBC dimensional-clearance rule, distinct from frost-depth requirements which IBC leaves to locally adopted frost-depth data.",
+      "source_url": "https://fencedesign.com/footing-design ; https://meticulous802.com/blog/frost-line-depth-vermont-fencing ; https://www.fencetrac.com/fence-guide/how-deep-should-fence-posts-be-set"
+    },
+    "concrete_footing_sizing": {
+      "generic_guidance": "Most-repeated rule of thumb across independent sources: footing/hole diameter = roughly 2-3x the post width/diameter (some sources round to a flat '3x post width' heuristic). A typical 4x4 or 5x5 vinyl post commonly uses a 10-12 in diameter footing per multiple installer tables. IBC §1807.3.3(1) gives an alternate, code-based minimum: post diameter/diagonal + 4 in. The chain-link-specific ASTM F567 rule (3x pipe OD or 12 in, whichever is greater) is sometimes cross-applied informally to other post materials but is not an ASTM vinyl-fence requirement.",
+      "concrete_volume_rule_of_thumb": "One installer source estimates a standard 5x5 hollow vinyl post needs roughly 1-2 cubic feet (about 2-3 bags) of concrete per hole, comparable to a 4x4 wood post -- cited as a practical estimating heuristic, not a code minimum.",
+      "source_url": "https://fencedesign.com/footing-design ; https://mudmixer.com/blogs/news/calculating-concrete-needed-for-setting-fence-posts ; https://rongtaimetalgroup.com/blog/how-deep-to-set-fence-posts"
+    }
+  },
+  "slope_accommodation_methods": [
+    {
+      "method": "Racking",
+      "description": "Rails (and the whole panel assembly) are installed at an angle so the top and bottom rail lines follow the natural, gradual contour/slope of the ground continuously, while individual pickets remain plumb/vertical within the racked rail (pickets are typically factory-cut with a beveled or clearance-notched top/bottom, or simply have enough slot clearance, to stay vertical inside an angled rail). Produces a smooth, continuous fence line with no gap beneath the panel and is generally the preferred method where the panel style permits it, because it best mimics how the eye reads other sloped-following structures. Best suited to gradual, relatively consistent slopes; not all panel styles can rack.",
+      "hardware_required": "Requires either (a) posts with an open-groove/slotted rail receiver instead of a fixed square routed pocket, allowing the rail to enter at a range of angles, or (b) universal/adjustable/offset rail brackets (surface-mounted U-channel style brackets, e.g. LMT-style vinyl fence fittings) rather than rails inserted through a fixed square hole drilled/routed perpendicular to the post face. Manufacturers that support racking commonly publish a maximum rack angle or rise-per-section limit for a given product line (one Digger Specialties designer-fence product line documented '7 degrees rackable section (12 in per 8 ft)' as its specific tolerance) -- routed/mortised, tongue-and-groove, or interlocking privacy-picket systems frequently cannot rack at all because the pickets bind in fixed-width slots once angled.",
+      "source_url": "https://wambamfence.com/knowledgebase/how-to-deal-with-sloping-ground ; https://purefences.ca/vinyl-fence-slope-installation-guide ; https://diggerspecialties.com/our-company/blog/navigating-the-terrain-how-to-rack-fencing-sections-for-a-seamless-install ; https://northindyfence.com/wp-content/uploads/2024/04/Polyvinyl-Fence-Brochure-NIF.pdf"
+    },
+    {
+      "method": "Stepping",
+      "description": "Each panel section is installed fully level/horizontal (rails perfectly square in the post, same as flat ground), but each successive section down-slope is mounted at a lower elevation than its uphill neighbor, producing a stair-step fence line. This necessarily leaves a triangular (wedge-shaped) gap under each panel, widest at the downhill post and narrowing to zero at the uphill post. Preferred/required for steep or irregular terrain, and mandatory for panel styles that physically cannot rack (routed rail pockets, tongue-and-groove or interlocking privacy pickets, lattice-top panels) since the rails stay perpendicular to the post exactly as on flat ground.",
+      "hardware_required": "Uses the same standard fixed/routed post-and-rail hardware as a level installation (no special angled bracket needed for the rail-to-post joint itself), but requires posts pre-cut/set to a stepped sequence of above-grade heights, and typically calls for supplemental gap treatment beneath each stepped panel on privacy/security applications (grade-follow trim pieces, extra pickets, or accepting the visible gap) since the panel bottom no longer follows the ground.",
+      "source_url": "https://www.contourfence.com/blog/fence-on-sloped-yard-installation-guide ; https://graberoutdoors.com/blog/fencing-a-sloped-yard-what-you-need-to-know ; https://wambamfence.com/knowledgebase/how-to-deal-with-sloping-ground"
+    },
+    {
+      "method": "Universal / adjustable / offset rail brackets (cross-cutting hardware note, applies to both methods above)",
+      "description": "A distinct hardware category from routed/sleeve-mount posts: rather than the rail end being cut to fit and inserted into a fixed square hole routed through the post (the standard flat-ground detail), a surface-mounted bracket (U-channel or slotted bracket) is screwed to the outside face of the post and the rail is captured in the bracket. Because the bracket attaches externally rather than through a fixed perpendicular hole, it tolerates a range of rail entry angles and heights, making it usable for racking, stepping, irregular/undulating terrain, and post-installation retrofits (e.g. surface-mounting to an existing concrete slab or wall) without ordering slope-specific pre-routed posts.",
+      "hardware_required": "Universal flat-mount brackets / fence-post-support brackets / adjustable rail brackets (vendor examples found: Nationwide Industries bracket line; LMT vinyl fence rail-mount brackets sized to standard 1.5x5.5 in and 2x3.5 in rail profiles).",
+      "source_url": "https://nationwideindustries.com/collections/bracket ; https://vinylfencefittings.com/store/fitting-finder/rail-mount-brackets.html"
+    }
+  ],
+  "documents": [
+    {
+      "doc_type": "astm_compliance_summary_flyer",
+      "title": "What is ASTM F964-13? (ASTM Info Flyer -- summarizes F964 scope, D4216 cell classification, D4226 impact test, weathering-table requirements)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2011/06/Illusions-Vinyl-Fence-ASTM-Info-Flyer.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/ASTM-Info-Flyer_Illusions-F964-D4216-Summary.pdf",
+      "date_or_version": "Undated manufacturer flyer (Illusions Fence), references ASTM F964-13"
+    },
+    {
+      "doc_type": "industry_spec_reference_guide",
+      "title": "Fence SpecCheck: ASTM, AASHTO, and Federal Specifications (RR-F-191) -- cross-material index of fence-related ASTM/AASHTO/Federal standards including F1999-14(2024) and F964-13(2024)",
+      "url": "https://www.wheatland.com/wp-content/uploads/2017/12/Fence-SpecCheck-ASTM-AASHTO-and-Federal-Specifications-RR-F-191.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/Wheatland-Fence-SpecCheck_ASTM-AASHTO-Federal-Specs_Jan2025.pdf",
+      "date_or_version": "January 2025 (Wheatland Tube Company)"
+    },
+    {
+      "doc_type": "astm_standards_compilation",
+      "title": "ASTM Standards for Fence Materials and Products (compilation index, all fence materials incl. PVC F964/F1999)",
+      "url": "https://public-admin-files.s3.us-east-2.amazonaws.com/Compilations/FENCE21.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/ASTM-Standards-for-Fence-Materials-and-Products_Compilation-FENCE21.pdf",
+      "date_or_version": "Undated compilation (identifier FENCE21)"
+    },
+    {
+      "doc_type": "association_technical_bulletin",
+      "title": "Chain Link Fence Wind Load Guide for the Selection of Line Post and Line Post Spacing (WLG 2445) -- NOT vinyl-specific, downloaded as the closest real cross-manufacturer 'association engineering rule' precedent for post-spacing-vs-wind-load methodology in the fence industry",
+      "url": "https://chainlinkinfo.org/wp-content/uploads/2023/02/WLG-Final-2.12-23-ml.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+      "date_or_version": "Updated January 2023 (Chain Link Fence Manufacturers Institute)"
+    },
+    {
+      "doc_type": "csi_masterspec_template",
+      "title": "CLFMI Product Manual -- CSI Section 32 31 13 Chain Link Fence and Gates (full 3-part master spec; not vinyl, downloaded as a real worked example of Division 32 Fences-and-Gates document structure)",
+      "url": "https://www.chainlinkinfo.org/wp-content/uploads/2015/08/CLFMI-Product-Manual-2-Section-32-31-13.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf",
+      "date_or_version": "2015 publication (Chain Link Fence Manufacturers Institute)"
+    },
+    {
+      "doc_type": "manufacturer_brochure_with_engineering_data",
+      "title": "Digger Specialties Polyvinyl Fence Brochure -- includes generic-applicable racking tolerance and 8 ft on-center post spacing data across multiple vinyl fence product lines",
+      "url": "https://northindyfence.com/wp-content/uploads/2024/04/Polyvinyl-Fence-Brochure-NIF.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/Digger-Specialties-Polyvinyl-Fence-Brochure_Racking-Post-Spacing.pdf",
+      "date_or_version": "2024 (Digger Specialties, Inc., distributed via North Indy Fence)"
+    },
+    {
+      "doc_type": "csi_masterspec_vinyl",
+      "title": "SECTION 32 31 23 - Plastic/Vinyl Fencing and Gates -- real manufacturer-submitted (Superior Outdoor Products) CSI 3-part master specification, full Part 1/2/3 text",
+      "url": "https://www.arcat.com/sdspecs/docx04/32_31_23spp.docx",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx",
+      "date_or_version": "Copyright 2017-2025 ARCAT, Inc. / MasterFormat 2020 edition"
+    }
+  ]
+}

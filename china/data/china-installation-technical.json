@@ -1,0 +1,145 @@
+{
+  "scope_note": "This file covers PVC/vinyl (and closely-related WPC/塑钢 'plastic-steel') fence INSTALLATION METHODOLOGY and technical/engineering documentation sourced from Chinese-language and China-market web content. It intentionally excludes product catalog data (see china/data/china-manufacturers.json, maintained by a parallel research track). Web search via Tavily; no authenticated/paywalled standards databases were accessible.",
+  "sources_found": {
+    "total_web_sources_reviewed": "approximately 25 distinct Chinese-language or China-market pages/PDFs across 9 search queries",
+    "genuine_installation_pdfs_downloaded": 1,
+    "vendor_blog_installation_writeups_zh": 6,
+    "seo_aggregator_wiki_articles_zh": 4,
+    "quality_assessment": "Sparse. There is no evidence of a single authoritative, publicly-downloadable Chinese national/industry installation standard specific to PVC/vinyl residential fencing (analogous to a US ASTM/AFA installation manual). Most Chinese-language material found is either (a) short vendor marketing/blog posts describing installation in generic terms, (b) SEO 'wiki' articles from a Baidu B2B aggregator (b2bwiki.baidu.com) that cite standard numbers in a templated, formulaic way and could not be independently verified against the actual standard text, or (c) content actually about a DIFFERENT product category (construction-site PVC hoarding/围挡, highway/bridge guardrails/护栏, or WPC composite fencing) rather than residential PVC/vinyl picket fencing per se. Only one genuine installation diagram PDF was recovered (Unifloor, a Shanghai-headquartered WPC/composite fencing manufacturer exporting to China and abroad); it is diagram-only with no printed dimensions or text callouts."
+  },
+  "installation_methodology": [
+    {
+      "topic": "Two primary post-fixing methods cited for PVC/塑钢 (plastic-steel) railings/fencing",
+      "description_en": "A Zhihu article on PVC/plastic-steel guardrail field installation states there are two main methods: (1) expansion-bolt/anchor drilling into a hardened surface (膨胀螺丝打孔安装) and (2) direct burial of the post/steel core into the ground or a concrete footing (直埋式安装). This mirrors the US practice of choosing between surface-mount brackets and in-ground concrete footings, but the source is a short unsourced blog post, not an engineering standard.",
+      "original_term_zh": "膨胀螺丝打孔安装 / 直埋式安装",
+      "source_url": "https://zhuanlan.zhihu.com/p/45515268"
+    },
+    {
+      "topic": "Base-plate / surface-mount installation for garden and lawn PVC railings",
+      "description_en": "Sohu 'technical whitepaper'-style vendor article on PVC 塑钢草坪护栏 (PVC plastic-steel lawn railing) distinguishes 预埋式 (embedded/buried) installation for soft soil, slopes, and riverbank/embankment applications, versus 底盘式 (base-plate) installation for hard paved surfaces (plazas, parking lots) using expansion bolts or ballast weights, described as removable/non-damaging to the substrate -- useful for temporary or rental installations.",
+      "original_term_zh": "预埋式安装 / 底盘式安装",
+      "source_url": "https://www.sohu.com/a/1053966294_122805393"
+    },
+    {
+      "topic": "Downloadable installation diagram set (WPC/composite, not pure PVC)",
+      "description_en": "Unifloor (Shanghai-based WPC/composite fencing manufacturer) publishes an 11-step diagram-only installation guide: set aluminum/composite post on a base plate with what appears to be a threaded-rod/anchor-bolt surface mount (no concrete pour shown in diagrams); attach angled corner brace between posts; slot horizontal composite panel/H-groove infill between two posts from the top down; cap posts. No printed dimensions, torque values, or spacing figures are present in the PDF itself -- the accompanying webpage supplies the numeric figures captured separately below. Note: this is a wood-plastic composite (WPC) product, a distinct but closely related material category to unfilled PVC/vinyl fencing, common in the China export market alongside PVC.",
+      "original_term_zh": "複合圍欄安裝 (composite/WPC fence installation)",
+      "source_url": "https://unifloorwpc.com/wp-content/uploads/2022/04/composite-fencing-installation-guide.pdf"
+    },
+    {
+      "topic": "Concrete footing mix and cure time (SEO wiki article, unverified)",
+      "description_en": "A Baidu b2bwiki SEO article on 'PVC railing installation steps' claims a buried-post method using a 30-40cm deep pit, concrete mixed at cement:sand:gravel = 1:2:3, with 48-hour cure before loading, as an alternative to expansion-bolt flange-plate mounting on hardened ground (M10x100mm bolts, 25-30 N*m torque). These figures read as plausible general Chinese construction-industry conventions but the article itself is templated SEO content from a landscaping company's storefront, not a citable engineering document -- treat as indicative only, not authoritative.",
+      "original_term_zh": "预埋法 (水泥:砂:石子=1:2:3) / 法兰盘固定 (膨胀螺栓 M10×100mm)",
+      "source_url": "https://b2bwiki.baidu.com/article/d1rtacpftjso8p0g1o0g"
+    },
+    {
+      "topic": "Construction-site PVC hoarding (围挡) installation -- ADJACENT product, not residential fence",
+      "description_en": "Multiple sources describe installation of PVC-faced temporary construction-site hoarding/barrier panels (围挡), a different product from residential PVC picket/privacy fencing but sharing PVC post/rail construction. Steps: excavate 30x30cm footing pits >=50cm deep (>=80cm in soft soil), pour C20 concrete with embedded post base, cure 48h; fix posts with expansion bolts, verticality tolerance <=3mm/m; panels slot into post grooves, fixed with self-tapping screws every 50cm, seams overlapped 5-10cm for wind resistance; corner bracing at 45 degrees. Included for context/contrast, not as residential fence practice.",
+      "original_term_zh": "PVC围挡安装",
+      "source_url": "https://b2bwiki.baidu.com/article/d1rif2pftjslmkd8lj40"
+    },
+    {
+      "topic": "Expansion gap for thermal movement between panel and post",
+      "description_en": "Taiwan-market (traditional Chinese) composite fencing installation guide from Unifloor recommends leaving a 4mm expansion gap between the fence panel and the post to accommodate thermal expansion/contraction -- directly analogous to the expansion-gap guidance found in US vinyl fence manuals.",
+      "original_term_zh": "膨脹間隙 4mm",
+      "source_url": "https://www.unifloorwpc.com/zh-TW/%E5%8D%9A%E5%AE%A2/%E8%A4%87%E5%90%88%E5%9C%8D%E6%AC%84%E7%9A%84%E5%AE%89%E8%A3%9D%E6%96%B9%E6%B3%95.html"
+    }
+  ],
+  "post_spacing_conventions": [
+    {
+      "value": "1-2 米 (1-2 m) typical stated spacing for residential PVC wall-top / boundary railing",
+      "source_note": "1688chuchen.com vendor product page (thin marketing content, low confidence)",
+      "source_url": "https://1688chuchen.com/product/49.html"
+    },
+    {
+      "value": "1.5-2 米 (1.5-2 m), tighter at corners -- cites (unverified) 'JGJ 150-2008 建筑护栏技术规范'",
+      "source_note": "b2bwiki SEO article; the cited standard number could not be independently verified and may be inaccurate or fabricated by the content-generation pipeline -- flagged as unverified, do not treat as a real code citation",
+      "source_url": "https://b2bwiki.baidu.com/article/d1rtacpftjso8p0g1o0g"
+    },
+    {
+      "value": "2-2.5 米 (2-2.5 m) for PVC construction-site hoarding (adjacent product, not residential fence)",
+      "source_note": "b2bwiki SEO article",
+      "source_url": "https://b2bwiki.baidu.com/article/d1rif2pftjslmkd8lj40"
+    },
+    {
+      "value": "2500mm panel width x 3000mm post spacing cited for one construction-hoarding spec (120x120mm PVC post w/ 100x100mm steel core; 80x50mm PVC top/bottom rail)",
+      "source_note": "Zhihu article on construction hoarding (围挡) spec, not residential fence -- included for reference to common Chinese PVC-clad-steel profile dimensions",
+      "source_url": "https://zhuanlan.zhihu.com/p/491243898"
+    },
+    {
+      "value": "No consistent, standards-backed post-spacing figure specific to residential PVC/vinyl picket or privacy fencing (the 6-8 ft / ~1.8-2.4m US convention) was found translated or independently corroborated in Chinese-market sources.",
+      "source_note": "Gap -- flagged explicitly rather than inferred",
+      "source_url": null
+    }
+  ],
+  "slope_accommodation_notes": [
+    {
+      "finding": "No Chinese-language source was found describing a distinct regional method or terminology for racking (顺坡/斜装, sloped/raked panels) versus stepping (台阶式, stepped panels) specific to PVC/vinyl residential fence installation. The one directly relevant hit (VEVOR's Chinese-language DIY fence blog, itself a translation of Western content) simply advises building the fence 'stepped' (阶梯状) or 'following the ground contour' (顺着地形轮廓) on sloped yards -- i.e., the same racking/stepping concepts as the US corpus, not a distinctively different Chinese approach.",
+      "original_term_zh": "阶梯状 (stepped) / 顺着地形轮廓 (follow ground contour)",
+      "source_url": "https://www.vevor.com/zh-CN/diy-ideas/how-to-install-a-fence"
+    },
+    {
+      "finding": "A protective fence-netting (护栏网) installation article notes that in low-lying areas where a sudden change in ground profile prevents maintaining the specified clearance height, longer posts should be used with multiple strands of barbed wire strung between them to close the gap -- a highway/security-fence-specific solution, not directly transferable to residential PVC panel fencing, but the only concrete 'ground-profile accommodation' engineering guidance found in Chinese.",
+      "original_term_zh": "护栏网应顺着地形设置",
+      "source_url": "http://m.sz-tysw.com/gongsixinwen/25-6.html"
+    },
+    {
+      "finding": "Overall assessment: slope/grade accommodation is a notable gap in the Chinese-language corpus for PVC/vinyl residential fencing specifically. No manufacturer-published racking-panel or stepped-panel installation diagram (of the type common in US vinyl fence PDFs, e.g. Barrette/Catalyst Fence 'Racking a Vinyl Gate') was located in Chinese.",
+      "source_url": null
+    }
+  ],
+  "wind_load_code_references": [
+    {
+      "code": "GB 50009 (建筑结构荷载规范 / Load Code for the Design of Building Structures, current edition GB 50009-2012)",
+      "applicability_status": "GB 50009 is China's general national structural wind-load code, covering basic wind pressure (基本风压, 50-year recurrence interval), height variation coefficients, and shape/gust coefficients for buildings and general structures. It is a real, current, actively-cited national standard (verified via multiple independent hits including the code's own online annotated text at gb50009.readthedocs.io and jianbiaoku.com).",
+      "fence_specific_evidence": "NO source found in this search applies GB 50009 specifically to PVC/vinyl fence, guardrail, or railing wind-load design. All GB 50009 hits found concern buildings, high-rise structures, and general structures. One WPC fencing vendor page (Unifloor, Chinese manufacturer) makes an unsupported marketing claim that composite fence panels have 'high wind load resistance' (高風荷載) suitable for windy regions, but cites no code or test data. Do not assume GB 50009 is the governing fence wind-load standard for China -- this was not established by any source found; it is reported here only as background on what the code covers, per the task instruction to note applicability honestly rather than assume it.",
+      "source_urls": [
+        "https://gb50009.readthedocs.io/zh/latest/08.html",
+        "http://manual.midasuser.com/building/cn/code/03/htm311tw/t003.2.htm",
+        "https://www.unifloorwpc.com/zh-TW/%E5%8D%9A%E5%AE%A2/%E8%A4%87%E5%90%88%E5%9C%8D%E6%AC%84%E7%9A%84%E5%AE%89%E8%A3%9D%E6%96%B9%E6%B3%95.html"
+      ]
+    },
+    {
+      "code": "GB/T 23451-2021 (建筑施工现场围挡技术规范 / Technical specification for construction site hoarding)",
+      "applicability_status": "Cited (name and number only, not the actual clause text) by a b2bwiki SEO article as governing minimum post/panel thickness for PVC construction-site hoarding (post wall thickness >=2.5mm, panel thickness >=1.2mm). This standard, if it exists as cited, would apply to temporary construction-site barriers, NOT residential/commercial PVC/vinyl picket or privacy fencing. Not independently verified against primary standard text; flagged as unverified citation from a low-authority SEO source.",
+      "fence_specific_evidence": "Not applicable to residential PVC/vinyl fencing scope of this research track even if the citation is accurate.",
+      "source_urls": ["https://b2bwiki.baidu.com/article/d1rif2pftjslmkd8lj40"]
+    }
+  ],
+  "fastener_hardware_conventions": [
+    {
+      "item": "Expansion anchor bolts (膨胀螺丝/膨胀螺栓) for surface-mount post bases on hardened ground -- the dominant fastener convention across nearly every Chinese-language source reviewed, used both for residential PVC railings and construction hoarding.",
+      "source_urls": ["https://zhuanlan.zhihu.com/p/45515268", "https://b2bwiki.baidu.com/article/d1rif2pftjslmkd8lj40", "https://b2bwiki.baidu.com/article/d1rtacpftjso8p0g1o0g"]
+    },
+    {
+      "item": "Self-tapping screws (自攻螺丝) for panel-to-post and rail-to-post fixation, generally specified as >=30mm length with multiple fixing points per rail (e.g., every 50cm along hoarding panel seams).",
+      "source_urls": ["https://b2bwiki.baidu.com/article/d1rif2pftjslmkd8lj40", "https://b2bwiki.baidu.com/article/d1rtacpftjso8p0g1o0g"]
+    },
+    {
+      "item": "Chemical anchor bolts (化学螺栓/化学锚栓) as an alternative to mechanical expansion anchors for fixing base plates, mentioned specifically for PVC landscape/decorative railings needing secure base-plate fixation.",
+      "source_urls": ["https://www.apyingan.com/wenku/21327.html"]
+    },
+    {
+      "item": "Steel-reinforced core inside PVC profile (钢衬/热镀锌钢管) -- a recurring theme distinct from typical unfilled US vinyl fence rail/post construction: Chinese 塑钢 (plastic-steel) product terminology explicitly denotes a hot-dip-galvanized steel tube or rebar core inside the PVC extrusion, sized/spaced to meet wind-load requirements per the vendor's internal design ('内按风载要求加衬型钢'), though no calculation method or code citation for that sizing was found.",
+      "source_urls": ["https://www.apyingan.com/wenku/21327.html", "https://www.sohu.com/a/1053966294_122805393"]
+    }
+  ],
+  "documents": [
+    {
+      "doc_type": "Installation diagram guide (image-only PDF, no dimensions/text)",
+      "title_zh": "統一地板複合圍欄安裝指南 (implied; PDF itself has no Chinese cover text)",
+      "title_en": "Unifloor Composite Fencing Installation Guide",
+      "url": "https://unifloorwpc.com/wp-content/uploads/2022/04/composite-fencing-installation-guide.pdf",
+      "local_path": "china/manuals/installation-technical/unifloor-composite-fencing-installation-guide.pdf",
+      "date_or_version": "Undated; referenced from a Unifloor blog post dated 2022-11-01. Manufacturer: Unifloor / Uniwpc, Shanghai, China. Product category: WPC/composite fencing (not unfilled PVC), included as closest available genuine installation document from a China-based fence manufacturer.",
+      "notes": "4-page vector diagram set: post-on-baseplate assembly (surface-mount with what appears to be threaded rod/anchor bolts, no concrete pour depicted), angled corner-brace bracket install between two posts, horizontal composite infill panel slotted top-down into post grooves, post cap installation. No printed dimensions, spacing, or torque values in the PDF itself."
+    }
+  ],
+  "overall_gaps_and_honesty_notes": [
+    "No authoritative, citable, full-text Chinese national or industry installation standard specific to residential PVC/vinyl fencing was located and downloaded. China's national standards ecosystem (GB/GB-T/JGJ/CJJ codes) is mostly paywalled or requires a licensed standards database (jianbiaoku.com, gongbiaoku.com, samr.gov.cn) that was not accessible via web search/fetch in this session -- confirmed by search results returning only tables-of-contents and paywall landing pages, never full clause text, for the codes that might plausibly govern fence/guardrail design (e.g., JGJ 150 could not even be confirmed to exist under that number/title).",
+    "Most numeric parameters in this file (post spacing, footing depth, bolt torque, concrete mix ratio) come from vendor blogs and Baidu b2bwiki SEO articles, which read as plausible general Chinese construction-industry practice but are NOT verified against a primary engineering standard. They are reported with source attribution and explicit confidence caveats rather than presented as codified requirements.",
+    "The clearest, most substantively documented adjacent standard found was GB 50009 (national building structural wind-load code) and a real 4-page technical-drawing style highway concrete guardrail local standard (DB51/T 2797-2021, Sichuan), neither of which is shown by any source to govern PVC/vinyl residential fence design specifically.",
+    "A meaningful fraction of Chinese-language 'PVC fence installation' search results actually concern adjacent-but-distinct product categories: construction-site temporary hoarding (围挡), highway/bridge crash guardrails (护栏), or WPC/composite fencing (塑木/木塑围栏) rather than unfilled PVC/vinyl residential picket or privacy fencing. This suggests the residential PVC/vinyl fence category, as commonly understood in the US market, is a comparatively smaller and less separately documented product niche within the Chinese domestic market/search ecosystem, where 塑钢 (steel-reinforced PVC) railings for parks, roadside greenery, and transformer/equipment enclosures dominate the visible search results.",
+    "Racking/stepping (slope accommodation) methodology specific to PVC/vinyl fencing is essentially undocumented in the Chinese-language sources found; what little exists is a translation of Western DIY guidance rather than an independent Chinese-market convention."
+  ]
+}

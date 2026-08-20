@@ -1,0 +1,881 @@
+{
+  "region": "China",
+  "note": "Separate track from master-dataset.json (US/Western manufacturers) — kept apart per explicit request. Source language: zh (Chinese) unless noted; unit system: metric (mm) with inch-equivalents noted where the source provided them.",
+  "manufacturers_and_gb_standards": {
+    "$note": "China-sourced PVC/vinyl fence manufacturer & GB standards dataset. Parallel to /schema/bom-schema.json but kept fully separate from the US/Western dataset per task instructions. Researched via Tavily web search (Chinese-language B2B directories, Alibaba/Made-in-China listings, manufacturer export sites) and China's official national standards portal (openstd.samr.gov.cn / std.samr.gov.cn). No manufacturer name, standard number, or dimension in this file was fabricated; entries with thin data say so explicitly rather than being padded.",
+    "research_date": "2026-08-20",
+    "manufacturers": [
+      {
+        "manufacturer": "Hangzhou Fantai Plastic Co., Ltd.",
+        "manufacturer_zh": "杭州凡泰塑业有限公司",
+        "brand": "Fentech / Fentech Fence",
+        "website": "https://www.fentechfence.com",
+        "website_zh": "https://cn.fentechfence.com",
+        "region": "China",
+        "province": "Zhejiang (Lin'an, Hangzhou)",
+        "source_language": "en/zh (bilingual export site)",
+        "unit_system": "imperial (in), export-oriented to US/AU/EU markets; mm equivalents added here by this research where source gave both",
+        "business_type": "Manufacturer, Exporter",
+        "founded": "in operation 10+ years per site claim (exact founding year not stated)",
+        "product_lines": [
+          {
+            "line_name": "Vinyl Horse / Post & Rail Fence",
+            "assemblies": [
+              {
+                "assembly_id": "FT-H01",
+                "assembly_type": "panel",
+                "assembly_name": "2-Rail Vinyl Post and Rail (Horse) Fence",
+                "style": "ranch rail / horse fence",
+                "height_options_mm": [
+                  800,
+                  1200
+                ],
+                "height_options_note": "0.8m to 1.2m above grade per source (\"标准高度为离地0.8m至1.2m\")",
+                "width_on_center_mm": 2400,
+                "color_options": [
+                  "white (only color confirmed)"
+                ],
+                "material_grade": {
+                  "resin": "PVC/vinyl, not specified virgin vs. reprocessed for this line",
+                  "uv_inhibitors": "claimed, not quantified"
+                },
+                "sub_assemblies": [
+                  {
+                    "component_id": "FT-H01-RAIL-LIGHT",
+                    "component_type": "rail",
+                    "component_name": "Light rail",
+                    "nominal_dimensions_mm": "38x140"
+                  },
+                  {
+                    "component_id": "FT-H01-RAIL-HEAVY",
+                    "component_type": "rail",
+                    "component_name": "Heavy rail",
+                    "nominal_dimensions_mm": "51x152"
+                  },
+                  {
+                    "component_id": "FT-H01-POST-CAP",
+                    "component_type": "post_cap",
+                    "component_name": "Flat cap (preferred); English cap and Gothic cap also offered",
+                    "nominal_dimensions_mm": null
+                  }
+                ],
+                "post_spacing_rules": {
+                  "on_center_in": 94.5,
+                  "notes": "standard panel width 2.4m between posts"
+                }
+              },
+              {
+                "assembly_id": "FT-H04",
+                "assembly_type": "panel",
+                "assembly_name": "3-Rail Vinyl Horse Fence (also offered as Black Cross Rail variant)",
+                "style": "horse/ranch fence",
+                "height_options_mm": [
+                  1300
+                ],
+                "height_options_note": "standard height 1.3m (4.5 ft) above grade",
+                "color_options": [
+                  "white",
+                  "black (cross-rail variant)"
+                ],
+                "sub_assemblies": [
+                  {
+                    "component_id": "FT-H04-POST",
+                    "component_type": "post",
+                    "component_name": "Line post",
+                    "nominal_dimensions_in": "5x5",
+                    "nominal_dimensions_mm": "127x127",
+                    "wall_thickness_mm": "2.2 or 2.5 (two options offered)"
+                  },
+                  {
+                    "component_id": "FT-H04-RAIL",
+                    "component_type": "rail",
+                    "component_name": "Rail",
+                    "nominal_dimensions_in": "2x6",
+                    "nominal_dimensions_mm": "51x152",
+                    "wall_thickness_mm": "2.2 or 2.5"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "line_name": "Vinyl Picket Fence",
+            "assemblies": [
+              {
+                "assembly_id": "FT-P01",
+                "assembly_type": "panel",
+                "assembly_name": "Straight-style Good Neighbor Picket Fence",
+                "style": "picket",
+                "height_options_in": [
+                  36,
+                  48,
+                  60,
+                  72
+                ],
+                "height_options_mm": [
+                  914,
+                  1219,
+                  1524,
+                  1829
+                ],
+                "width_on_center_in": 94,
+                "width_on_center_mm": 2388,
+                "color_options": [
+                  "white",
+                  "tan",
+                  "grey"
+                ],
+                "sub_assemblies": [
+                  {
+                    "component_id": "FT-P01-PICKET",
+                    "component_type": "picket",
+                    "component_name": "Picket, dome cap standard; dog-ear and pointed pickets available on request",
+                    "nominal_dimensions_in": "7/8 x 3",
+                    "nominal_dimensions_mm": "22x76"
+                  },
+                  {
+                    "component_id": "FT-P01-RAIL",
+                    "component_type": "rail",
+                    "component_name": "Rail",
+                    "nominal_dimensions_in": "2 x 3-1/2",
+                    "nominal_dimensions_mm": "51x89"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "line_name": "Vinyl Privacy Fence",
+            "assemblies": [
+              {
+                "assembly_id": "FT-F02",
+                "assembly_type": "panel",
+                "assembly_name": "UV-proof Privacy Fence",
+                "style": "solid privacy, pointed-picket top",
+                "height_options_mm": [
+                  1829
+                ],
+                "width_on_center_mm": [
+                  2438
+                ],
+                "height_options_note": "6ft x 8ft standard panel",
+                "color_options": [
+                  "white",
+                  "tan"
+                ]
+              },
+              {
+                "assembly_id": "FT-F03",
+                "assembly_type": "panel",
+                "assembly_name": "Lattice-Top Privacy Fence",
+                "style": "privacy with lattice accent top",
+                "color_options": [
+                  "white",
+                  "tan",
+                  "grey"
+                ]
+              }
+            ]
+          },
+          {
+            "line_name": "Vinyl Fence Caps and Post Accessories",
+            "assemblies": [
+              {
+                "assembly_id": "FT-CAP-5x5",
+                "assembly_type": "panel",
+                "assembly_name": "5x5in Post Caps (Gothic, New England, Federation styles)",
+                "sub_assemblies": [
+                  {
+                    "component_id": "FT-CAP-NE",
+                    "component_type": "post_cap",
+                    "component_name": "New England cap, 100% virgin vinyl",
+                    "nominal_dimensions_in": "5x5",
+                    "notes": "60 pcs/carton, carton 58x38x48cm, 16.8kg"
+                  },
+                  {
+                    "component_id": "FT-CAP-INTERNAL",
+                    "component_type": "post_cap",
+                    "component_name": "Internal post cap for 5x5in post",
+                    "notes": "200 pcs/carton, carton 58x38x48cm, 18kg"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "documents": [],
+        "data_quality_notes": "Good dimensional detail for posts/rails/pickets (inch-native, converted to mm here). No downloadable PDF catalog found on the company's own domain within research time budget; a 2018 catalog exists on Slideshare/Google Drive but was not retrievable as a stable local PDF. Material grade detail (virgin vs. recycled %, TiO2 %) not published; only generic UV-resistance claims found."
+      },
+      {
+        "manufacturer": "Zhejiang Showtech Outdoor Products Co., Ltd.",
+        "manufacturer_zh": "浙江秀创户外用品有限公司 (transliteration uncertain; company publishes under 'Showtech' only, Chinese legal name not confirmed on English-language sources)",
+        "brand": "Showtech / Showtech Fence",
+        "website": "https://www.showtechfence.com",
+        "alt_listing": "https://vinylfencing.en.made-in-china.com",
+        "region": "China",
+        "province": "Zhejiang (Huangyan, Taizhou)",
+        "source_language": "en (export site; no Chinese-language version located)",
+        "unit_system": "imperial (in) primary, kg/ft weight specs; mm equivalents added here by this research",
+        "business_type": "Manufacturer/Factory & Trading Company, Diamond Member since 2017",
+        "founded": "2017-02-27",
+        "employees": 19,
+        "registered_capital_rmb": 10000000,
+        "plant_area_sqm": 269,
+        "certifications": [
+          "RoHS",
+          "audited by TÜV Rheinland"
+        ],
+        "product_lines": [
+          {
+            "line_name": "PVC Privacy Fence",
+            "assemblies": [
+              {
+                "assembly_id": "ST001",
+                "assembly_type": "panel",
+                "assembly_name": "China Factory PVC Privacy Fence Panel",
+                "style": "full privacy, tongue-and-groove",
+                "height_options_in": [
+                  72
+                ],
+                "height_options_mm": [
+                  1829
+                ],
+                "width_on_center_in": [
+                  96
+                ],
+                "width_on_center_mm": [
+                  2438
+                ],
+                "color_options": [
+                  "White",
+                  "Tan",
+                  "Grey",
+                  "custom on request"
+                ],
+                "material_grade": {
+                  "resin": "100% virgin PVC, no recycled content per manufacturer claim",
+                  "uv_inhibitors": "UV-resistant, unquantified",
+                  "standard_claimed": "ASTM F964 and ASTM D1748 (US standards, not GB)"
+                },
+                "sub_assemblies": [
+                  {
+                    "component_id": "ST-LINEPOST",
+                    "component_type": "post",
+                    "component_name": "Line Post",
+                    "actual_dimensions_in": "5x5",
+                    "actual_dimensions_mm": "127x127",
+                    "profile_depth_in": "length 102",
+                    "profile_depth_mm": "length 2591",
+                    "material": "100% virgin PVC",
+                    "fasteners": [],
+                    "notes": "weight 0.87 kg/ft (2.85 kg/m); qty 1 per section"
+                  },
+                  {
+                    "component_id": "ST-POCKETRAIL",
+                    "component_type": "rail",
+                    "component_name": "Pocket Rail",
+                    "actual_dimensions_in": "1-1/2 x 5-1/2",
+                    "actual_dimensions_mm": "38x140",
+                    "profile_depth_in": "length 94",
+                    "profile_depth_mm": "length 2388",
+                    "notes": "weight 0.44 kg/ft (1.44 kg/m); qty 2 per section"
+                  },
+                  {
+                    "component_id": "ST-TGPANEL",
+                    "component_type": "picket",
+                    "component_name": "Tongue & Groove Panel",
+                    "actual_dimensions_in": "7/8 x 11.3",
+                    "actual_dimensions_mm": "22x287",
+                    "profile_depth_in": "length 62",
+                    "profile_depth_mm": "length 1575",
+                    "notes": "weight 0.46 kg/ft (1.5 kg/m); qty 8 per section"
+                  },
+                  {
+                    "component_id": "ST-UCHANNEL",
+                    "component_type": "channel",
+                    "component_name": "U-Channel (post-side rail retainer)",
+                    "profile_depth_in": "length 59",
+                    "profile_depth_mm": "length 1499",
+                    "notes": "weight 0.06 kg/ft; qty 2 per section"
+                  },
+                  {
+                    "component_id": "ST-ALINSERT",
+                    "component_type": "post_stiffener_aluminum",
+                    "component_name": "Aluminum insert for bottom rail",
+                    "profile_depth_in": "length 94",
+                    "profile_depth_mm": "length 2388",
+                    "notes": "weight 0.14 kg/ft; qty 1 per section, used as bottom-rail stiffener"
+                  },
+                  {
+                    "component_id": "ST-FLATCAP",
+                    "component_type": "post_cap",
+                    "component_name": "Flat Cap",
+                    "notes": "qty 1 per post"
+                  }
+                ],
+                "post_types_catalog": [
+                  "Line Post - routed both sides, spaced every 6ft or 8ft",
+                  "Corner Post - adjacent faces routed for corner angle",
+                  "End Post - routed one side only, terminates at wall/pillar",
+                  "End Gate Post - reinforced, routed one side, holds gate hardware",
+                  "Blank Post / Blank Gate Post - not routed, used wall-to-gate transitions"
+                ],
+                "post_spacing_rules": {
+                  "on_center_ft": [
+                    6,
+                    8
+                  ],
+                  "notes": "line posts set every 6ft or 8ft depending on section length used"
+                }
+              }
+            ]
+          },
+          {
+            "line_name": "WPC (Wood-Plastic Composite) Fence & Decking",
+            "assemblies": [
+              {
+                "assembly_id": "ST-WPC-01",
+                "assembly_type": "panel",
+                "assembly_name": "WPC Fence & Decking system",
+                "notes": "Distinct material line from the PVC/vinyl fence line above -- catalog PDF downloaded but not dimensionally parsed in this pass; flagged for follow-up if WPC scope is later added to this dataset."
+              }
+            ]
+          }
+        ],
+        "documents": [
+          {
+            "doc_type": "cut_sheet",
+            "title": "PVC fence catalog 2024",
+            "title_zh": null,
+            "title_en": "PVC Fence Catalog 2024",
+            "url": "https://www.showtechfence.com/uploads/25227/files/PVC-fence-catalog-2024.pdf",
+            "local_path": "china/manuals/showtech/PVC-fence-catalog-2024.pdf",
+            "manufacturer": "Zhejiang Showtech Outdoor Products Co., Ltd.",
+            "model_or_line": "PVC / Vinyl Fence",
+            "date_or_version": "2024"
+          },
+          {
+            "doc_type": "cut_sheet",
+            "title": "PVC fence catalog 2022",
+            "title_en": "PVC Fence Catalog 2022",
+            "url": "https://www.showtechfence.com/uploads/25227/files/PVC-fence-catalog-2022.pdf",
+            "local_path": "china/manuals/showtech/PVC-fence-catalog-2022.pdf",
+            "manufacturer": "Zhejiang Showtech Outdoor Products Co., Ltd.",
+            "model_or_line": "PVC / Vinyl Fence",
+            "date_or_version": "2022"
+          },
+          {
+            "doc_type": "cut_sheet",
+            "title": "Showtech WPC fence & decking catalog 2024",
+            "title_en": "Showtech WPC Fence & Decking Catalog 2024",
+            "url": "https://www.showtechfence.com/uploads/25227/files/Showtech-WPC-fence-decking-catalog-2024.pdf",
+            "local_path": "china/manuals/showtech/Showtech-WPC-fence-decking-catalog-2024.pdf",
+            "manufacturer": "Zhejiang Showtech Outdoor Products Co., Ltd.",
+            "model_or_line": "WPC Fence & Decking (separate material line from PVC)",
+            "date_or_version": "2024"
+          }
+        ],
+        "data_quality_notes": "Best-documented manufacturer in this dataset: has a full priced bill-of-materials for one panel assembly (post/rail/picket/channel/insert/cap with per-component weight) plus 3 real PDF catalogs successfully downloaded. Company's Chinese legal name could not be confirmed (site is English-only export-facing; no .cn domain located)."
+      },
+      {
+        "manufacturer": "Anhui Fencemaster Outdoor Products Co., Ltd.",
+        "manufacturer_zh": "not located (English-only export presence found)",
+        "brand": "FenceMaster",
+        "website": "https://www.vinylfencemaster.com",
+        "alt_listing": "https://fencemaster.en.made-in-china.com",
+        "region": "China",
+        "province": "Anhui (Hefei)",
+        "source_language": "en (export site)",
+        "unit_system": "meter-priced profile stock (FOB $/meter); panel dimensions not published in inches or mm",
+        "business_type": "Gold Member since 2014, Manufacturer/Supplier",
+        "main_markets": [
+          "North America",
+          "South America",
+          "Eastern Europe",
+          "Oceania",
+          "Middle East",
+          "Western Europe"
+        ],
+        "product_lines": [
+          {
+            "line_name": "Garden Fences",
+            "assemblies": [
+              {
+                "assembly_id": "FM-401",
+                "assembly_type": "panel",
+                "assembly_name": "Cape Cod",
+                "style": "garden fence"
+              },
+              {
+                "assembly_id": "FM-402",
+                "assembly_type": "panel",
+                "assembly_name": "Cape Cod Scallop",
+                "style": "garden fence, scalloped top"
+              },
+              {
+                "assembly_id": "FM-403",
+                "assembly_type": "panel",
+                "assembly_name": "Cape Cod Flat",
+                "style": "garden fence, flat top"
+              },
+              {
+                "assembly_id": "FM-404",
+                "assembly_type": "panel",
+                "assembly_name": "Chestnut Hill",
+                "style": "garden fence"
+              },
+              {
+                "assembly_id": "FM-405",
+                "assembly_type": "panel",
+                "assembly_name": "Chestnut Hill Scallop",
+                "style": "garden fence"
+              },
+              {
+                "assembly_id": "FM-406",
+                "assembly_type": "panel",
+                "assembly_name": "Chestnut Hill Stepped",
+                "style": "garden fence, stepped for slope"
+              }
+            ]
+          },
+          {
+            "line_name": "Picket Fences",
+            "assemblies": [
+              {
+                "assembly_id": "FM-407",
+                "assembly_type": "panel",
+                "assembly_name": "Chestnut Hill Flat",
+                "style": "picket"
+              },
+              {
+                "assembly_id": "FM-408",
+                "assembly_type": "panel",
+                "assembly_name": "Beacon Hill",
+                "style": "picket"
+              },
+              {
+                "assembly_id": "FM-409",
+                "assembly_type": "panel",
+                "assembly_name": "Bunker Hill",
+                "style": "picket"
+              },
+              {
+                "assembly_id": "FM-410",
+                "assembly_type": "panel",
+                "assembly_name": "Guilford",
+                "style": "picket"
+              },
+              {
+                "assembly_id": "FM-411",
+                "assembly_type": "panel",
+                "assembly_name": "Chesapeake Flat",
+                "style": "picket"
+              },
+              {
+                "assembly_id": "FM-412",
+                "assembly_type": "panel",
+                "assembly_name": "Chesapeake",
+                "style": "picket"
+              }
+            ]
+          },
+          {
+            "line_name": "Ranch (Horse) Fences",
+            "assemblies": [
+              {
+                "assembly_id": "FM-301",
+                "assembly_type": "panel",
+                "assembly_name": "Two Rails",
+                "style": "ranch rail"
+              },
+              {
+                "assembly_id": "FM-303",
+                "assembly_type": "panel",
+                "assembly_name": "Three Rails",
+                "style": "ranch rail"
+              },
+              {
+                "assembly_id": "FM-305",
+                "assembly_type": "panel",
+                "assembly_name": "Four Rails",
+                "style": "ranch rail"
+              }
+            ]
+          },
+          {
+            "line_name": "Railings",
+            "assemblies": [
+              {
+                "assembly_id": "FM-601",
+                "assembly_type": "panel",
+                "assembly_name": "Railing style 601",
+                "style": "deck/porch railing"
+              },
+              {
+                "assembly_id": "FM-602",
+                "assembly_type": "panel",
+                "assembly_name": "Railing style 602",
+                "style": "deck/porch railing"
+              }
+            ],
+            "notes": "9 railing styles (601-609) listed by number only; individual style names/dimensions not published."
+          },
+          {
+            "line_name": "Slat & Lattice Fences",
+            "assemblies": [
+              {
+                "assembly_id": "FM-501",
+                "assembly_type": "panel",
+                "assembly_name": "Shadow Board",
+                "style": "shadowbox"
+              },
+              {
+                "assembly_id": "FM-502",
+                "assembly_type": "panel",
+                "assembly_name": "Slat Fence",
+                "style": "horizontal slat"
+              },
+              {
+                "assembly_id": "FM-701",
+                "assembly_type": "panel",
+                "assembly_name": "Greenwich",
+                "style": "lattice"
+              },
+              {
+                "assembly_id": "FM-702",
+                "assembly_type": "panel",
+                "assembly_name": "Essex",
+                "style": "lattice"
+              }
+            ]
+          },
+          {
+            "line_name": "PVC Fence Profile Stock (raw extrusion, sold by the meter)",
+            "assemblies": [
+              {
+                "assembly_id": "FM-PROFILE-STOCK",
+                "assembly_type": "panel",
+                "assembly_name": "PVC Fence Post / Rail / Picket Profile Material",
+                "material_grade": {
+                  "resin": "PVC, extruded; \"ASTM Standards\" claimed on multiple listings (US standard, not GB)",
+                  "warranty": "Limited Lifetime Warranty"
+                },
+                "sub_assemblies": [
+                  {
+                    "component_id": "FM-PROFILE",
+                    "component_type": "post",
+                    "component_name": "Generic PVC fence post/rail profile stock",
+                    "material": "PVC, extrusion-formed",
+                    "notes": "FOB US$0.95-2.35/meter; MIN order 500 meters; sold as raw structural-component profile, not assembled panels"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "documents": [],
+        "data_quality_notes": "Style names and a full pricing tier (FOB $/meter) were found, but NO panel/post/rail dimensions in inches or mm were published anywhere located for this manufacturer -- their catalog pages list product names and photos only. This is a genuine data gap, not an omission. No downloadable PDF catalog located."
+      },
+      {
+        "manufacturer": "Hebei Renyang Metal Wire Mesh Products Co., Ltd",
+        "manufacturer_zh": "河北仁阳金属丝网制品有限公司 (transliteration reconstructed from pinyin \"Renyang\"; not independently confirmed against a Chinese-language source)",
+        "brand": "not stated (sells under generic product names, e.g. \"Farmtuff Horsesafe Duravinyl\")",
+        "website": "https://hbrenyang.en.made-in-china.com",
+        "region": "China",
+        "province": "Hebei (Anping County, Hengshui)",
+        "source_language": "en (Made-in-China listing; no standalone company site located)",
+        "unit_system": "imperial (in), export-oriented",
+        "business_type": "Manufacturer/Factory & Trading Company, Diamond Member since 2024",
+        "founded": "2016-04-11",
+        "employees": 75,
+        "certifications": [
+          "ISO9001:2015",
+          "ISO45001:2018",
+          "ISO14001"
+        ],
+        "primary_business_note": "This is primarily a metal/wire-mesh fence manufacturer (3D fence, chain link, farm fence) headquartered in Anping County -- China's \"hometown of wire mesh\" -- with PVC/vinyl as a secondary product line, not its core business.",
+        "product_lines": [
+          {
+            "line_name": "PVC Fence (secondary line)",
+            "assemblies": [
+              {
+                "assembly_id": "RY-HORSE-34RAIL",
+                "assembly_type": "panel",
+                "assembly_name": "Farmtuff Horsesafe Duravinyl PVC 3/4-Rail Horse Fence",
+                "style": "ranch rail / horse fence"
+              },
+              {
+                "assembly_id": "RY-PRIVACY-6x8",
+                "assembly_type": "panel",
+                "assembly_name": "100% Virgin Material 6x8ft White Vinyl Plastic Privacy Fence Panel",
+                "style": "privacy",
+                "height_options_in": [
+                  72
+                ],
+                "height_options_mm": [
+                  1829
+                ],
+                "width_on_center_in": [
+                  96
+                ],
+                "width_on_center_mm": [
+                  2438
+                ],
+                "color_options": [
+                  "white"
+                ],
+                "material_grade": {
+                  "resin": "100% virgin material claimed, not independently detailed"
+                }
+              }
+            ]
+          }
+        ],
+        "documents": [],
+        "data_quality_notes": "Only product names and a 6x8ft nominal panel size were found; no post/rail/picket dimensions, wall thickness, or spec sheet located. Included because it is a genuine, verifiable PVC-fence-selling entity in the Hebei/Anping export cluster, but data is thin -- typical of this cluster, whose core competency and documentation is wire mesh, not PVC extrusion."
+      },
+      {
+        "manufacturer": "Anping Tuopeng Wire Mesh Products Co., Ltd.",
+        "manufacturer_zh": "安平拓鹏丝网制品有限公司 (transliteration reconstructed from pinyin; not independently confirmed)",
+        "brand": "not stated",
+        "website": "https://m.made-in-china.com (listing only; no standalone company site located)",
+        "region": "China",
+        "province": "Hebei (Anping County)",
+        "source_language": "en (Made-in-China listing)",
+        "unit_system": "imperial (in), single data point only",
+        "business_type": "Manufacturer/Factory",
+        "certifications": [
+          "audited by CTI, report ID QIP-ASI246500"
+        ],
+        "primary_business_note": "Core business is welded steel wire mesh (machine guard fence, 3D fence, 358 fence, airport fence, chain link, cattle fence). PVC vinyl fence is a single incidental listing, not a developed product line.",
+        "product_lines": [
+          {
+            "line_name": "PVC Privacy Fence (single listing, not a developed line)",
+            "assemblies": [
+              {
+                "assembly_id": "TP-PVC-LATTICE-6x8",
+                "assembly_type": "panel",
+                "assembly_name": "Vinyl PVC Privacy Fence with Lattice Top, includes posts",
+                "style": "privacy with lattice top",
+                "height_options_in": [
+                  72
+                ],
+                "height_options_mm": [
+                  1829
+                ],
+                "width_on_center_in": [
+                  96
+                ],
+                "width_on_center_mm": [
+                  2438
+                ],
+                "color_options": [
+                  "white"
+                ]
+              }
+            ]
+          }
+        ],
+        "documents": [],
+        "data_quality_notes": "Weakest entry in the dataset: exactly one product listing found, no dimensional or material detail beyond nominal 6x8ft panel size and 'white'. Included for completeness/transparency about the shallow end of the Hebei wire-mesh-cluster PVC offering, not because it is a strong data source."
+      }
+    ],
+    "gb_standards": [
+      {
+        "standard_id": "GB/T 29419-2023",
+        "title_zh": "塑木复合材料铺板、护栏和围栏体系性能",
+        "title_en": "Performance for wood-plastic composite deck boards, guardrail and fence system",
+        "standard_type": "GB/T (recommended/voluntary national standard)",
+        "issued": "2023-11-27",
+        "effective": "2024-06-01",
+        "administering_body": "China Building Materials Federation (中国建筑材料联合会)",
+        "scope_summary": "Specifies performance requirements and test methods for wood-plastic composite (WPC) decking boards, guardrail/handrail systems, and fence systems of any shape or size. This is the closest GB/T standard found that explicitly covers 'fence systems' (围栏体系) performance, but its material scope is wood-plastic composite (wood fiber + recycled plastic), not pure rigid PVC-U. Full text is paywalled on the official portal (standard preview text is not offered online per site notice); scope description above is drawn from the official standard record and secondary summaries (Baidu Baike, Intertek China), not the full standard text.",
+        "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=66283CBBC1D377A8BEE891F11681128C",
+        "confirmed": true
+      },
+      {
+        "standard_id": "GB/T 8814-2017",
+        "title_zh": "门、窗用未增塑聚氯乙烯（PVC-U）型材",
+        "title_en": "Unplasticized poly(vinyl chloride) (PVC-U) profiles for the doors and windows",
+        "standard_type": "GB/T (recommended/voluntary national standard)",
+        "issued": "2017-11-01",
+        "effective": "2018-05-01",
+        "supersedes": "GB/T 8814-2004",
+        "revision_in_pipeline": "GB/T 8814-2026 issued 2026-07-30, effective 2027-02-01 (same title; text not yet reviewed)",
+        "scope_summary": "Specifies base material, classification/grading and marking, requirements, test methods, inspection rules, marking, packaging, transport and storage for unplasticized PVC (PVC-U) profiles used in doors and windows. This is NOT a fence-specific standard -- its formal scope is doors/windows -- but it is the standard most likely to be cited informally by Chinese PVC fence manufacturers as a material-quality baseline for rigid PVC-U extrusion profiles generally, since no fence-specific rigid-PVC profile GB standard was located. No manufacturer page found in this research actually cited GB/T 8814 by number; this inference is the researcher's own, flagged as such rather than presented as a manufacturer claim.",
+        "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=DA700A3FD650E291B353BA4131E64886",
+        "confirmed": true
+      },
+      {
+        "standard_id": "JGJ/T 470-2019",
+        "title_zh": "建筑防护栏杆技术标准",
+        "title_en": "Technical standard for architectural protective guardrails/railings",
+        "standard_type": "JGJ/T -- industry standard (行业标准) issued by the Ministry of Housing and Urban-Rural Development, NOT a GB/GB-T national standard",
+        "effective": "2020-06-01",
+        "scope_summary": "Covers design, material requirements and installation of architectural (building) protective guardrails across multiple materials: fiber-reinforced composite, wood, point-supported glass, cable/wire-rope, aluminum alloy, rubber/gasket components. Included here despite being outside the strict GB/GB-T scope the user asked for because it is the one standard actually found to regulate rigid pultruded/composite guardrail profiles in China with real technical content (e.g. references GB/T 31539 for fiber-reinforced composite profiles, GB/T 5237 series for aluminum). It does NOT appear to separately address PVC-U fence profiles as a material class.",
+        "source_url": "https://29229836.s21i.faiusr.com/61/ABUIABA9GAAgmtL30QYo9oODVg.pdf",
+        "confirmed": true
+      }
+    ],
+    "gb_standards_search_gap_note": "No GB or GB/T standard was found whose title or confirmed scope is specifically and exclusively 'PVC fence' / 'PVC围栏' / '塑钢护栏'. Chinese standardization in this space is split between (a) WPC decking/guardrail/fence performance (GB/T 29419, found), (b) generic rigid PVC-U profile material standards written for doors/windows (GB/T 8814, found) and pipe (GB/T 5836 series, GB/T 10002 series -- not fence-relevant, omitted), and (c) industry-level (not GB) guardrail design standards (JGJ/T 470). This mirrors a real market pattern seen across every manufacturer researched: every Chinese PVC/vinyl fence exporter that cited a compliance standard at all cited a US ASTM standard (ASTM F964, D1748) rather than a GB standard, because their PVC fence products are built for export to the US/AU/EU markets, not domestic Chinese use -- domestic Chinese fencing in this material category is dominated by 塑钢护栏 (PVC-clad steel-core 'plastic-steel' guardrail) sold through municipal/landscape B2B channels, which cite GB standards for the underlying steel and hot-dip galvanizing (e.g. GB/T 13912-2002) rather than for the PVC shell itself."
+  },
+  "installation_and_technical": {
+    "scope_note": "This file covers PVC/vinyl (and closely-related WPC/塑钢 'plastic-steel') fence INSTALLATION METHODOLOGY and technical/engineering documentation sourced from Chinese-language and China-market web content. It intentionally excludes product catalog data (see china/data/china-manufacturers.json, maintained by a parallel research track). Web search via Tavily; no authenticated/paywalled standards databases were accessible.",
+    "sources_found": {
+      "total_web_sources_reviewed": "approximately 25 distinct Chinese-language or China-market pages/PDFs across 9 search queries",
+      "genuine_installation_pdfs_downloaded": 1,
+      "vendor_blog_installation_writeups_zh": 6,
+      "seo_aggregator_wiki_articles_zh": 4,
+      "quality_assessment": "Sparse. There is no evidence of a single authoritative, publicly-downloadable Chinese national/industry installation standard specific to PVC/vinyl residential fencing (analogous to a US ASTM/AFA installation manual). Most Chinese-language material found is either (a) short vendor marketing/blog posts describing installation in generic terms, (b) SEO 'wiki' articles from a Baidu B2B aggregator (b2bwiki.baidu.com) that cite standard numbers in a templated, formulaic way and could not be independently verified against the actual standard text, or (c) content actually about a DIFFERENT product category (construction-site PVC hoarding/围挡, highway/bridge guardrails/护栏, or WPC composite fencing) rather than residential PVC/vinyl picket fencing per se. Only one genuine installation diagram PDF was recovered (Unifloor, a Shanghai-headquartered WPC/composite fencing manufacturer exporting to China and abroad); it is diagram-only with no printed dimensions or text callouts."
+    },
+    "installation_methodology": [
+      {
+        "topic": "Two primary post-fixing methods cited for PVC/塑钢 (plastic-steel) railings/fencing",
+        "description_en": "A Zhihu article on PVC/plastic-steel guardrail field installation states there are two main methods: (1) expansion-bolt/anchor drilling into a hardened surface (膨胀螺丝打孔安装) and (2) direct burial of the post/steel core into the ground or a concrete footing (直埋式安装). This mirrors the US practice of choosing between surface-mount brackets and in-ground concrete footings, but the source is a short unsourced blog post, not an engineering standard.",
+        "original_term_zh": "膨胀螺丝打孔安装 / 直埋式安装",
+        "source_url": "https://zhuanlan.zhihu.com/p/45515268"
+      },
+      {
+        "topic": "Base-plate / surface-mount installation for garden and lawn PVC railings",
+        "description_en": "Sohu 'technical whitepaper'-style vendor article on PVC 塑钢草坪护栏 (PVC plastic-steel lawn railing) distinguishes 预埋式 (embedded/buried) installation for soft soil, slopes, and riverbank/embankment applications, versus 底盘式 (base-plate) installation for hard paved surfaces (plazas, parking lots) using expansion bolts or ballast weights, described as removable/non-damaging to the substrate -- useful for temporary or rental installations.",
+        "original_term_zh": "预埋式安装 / 底盘式安装",
+        "source_url": "https://www.sohu.com/a/1053966294_122805393"
+      },
+      {
+        "topic": "Downloadable installation diagram set (WPC/composite, not pure PVC)",
+        "description_en": "Unifloor (Shanghai-based WPC/composite fencing manufacturer) publishes an 11-step diagram-only installation guide: set aluminum/composite post on a base plate with what appears to be a threaded-rod/anchor-bolt surface mount (no concrete pour shown in diagrams); attach angled corner brace between posts; slot horizontal composite panel/H-groove infill between two posts from the top down; cap posts. No printed dimensions, torque values, or spacing figures are present in the PDF itself -- the accompanying webpage supplies the numeric figures captured separately below. Note: this is a wood-plastic composite (WPC) product, a distinct but closely related material category to unfilled PVC/vinyl fencing, common in the China export market alongside PVC.",
+        "original_term_zh": "複合圍欄安裝 (composite/WPC fence installation)",
+        "source_url": "https://unifloorwpc.com/wp-content/uploads/2022/04/composite-fencing-installation-guide.pdf"
+      },
+      {
+        "topic": "Concrete footing mix and cure time (SEO wiki article, unverified)",
+        "description_en": "A Baidu b2bwiki SEO article on 'PVC railing installation steps' claims a buried-post method using a 30-40cm deep pit, concrete mixed at cement:sand:gravel = 1:2:3, with 48-hour cure before loading, as an alternative to expansion-bolt flange-plate mounting on hardened ground (M10x100mm bolts, 25-30 N*m torque). These figures read as plausible general Chinese construction-industry conventions but the article itself is templated SEO content from a landscaping company's storefront, not a citable engineering document -- treat as indicative only, not authoritative.",
+        "original_term_zh": "预埋法 (水泥:砂:石子=1:2:3) / 法兰盘固定 (膨胀螺栓 M10×100mm)",
+        "source_url": "https://b2bwiki.baidu.com/article/d1rtacpftjso8p0g1o0g"
+      },
+      {
+        "topic": "Construction-site PVC hoarding (围挡) installation -- ADJACENT product, not residential fence",
+        "description_en": "Multiple sources describe installation of PVC-faced temporary construction-site hoarding/barrier panels (围挡), a different product from residential PVC picket/privacy fencing but sharing PVC post/rail construction. Steps: excavate 30x30cm footing pits >=50cm deep (>=80cm in soft soil), pour C20 concrete with embedded post base, cure 48h; fix posts with expansion bolts, verticality tolerance <=3mm/m; panels slot into post grooves, fixed with self-tapping screws every 50cm, seams overlapped 5-10cm for wind resistance; corner bracing at 45 degrees. Included for context/contrast, not as residential fence practice.",
+        "original_term_zh": "PVC围挡安装",
+        "source_url": "https://b2bwiki.baidu.com/article/d1rif2pftjslmkd8lj40"
+      },
+      {
+        "topic": "Expansion gap for thermal movement between panel and post",
+        "description_en": "Taiwan-market (traditional Chinese) composite fencing installation guide from Unifloor recommends leaving a 4mm expansion gap between the fence panel and the post to accommodate thermal expansion/contraction -- directly analogous to the expansion-gap guidance found in US vinyl fence manuals.",
+        "original_term_zh": "膨脹間隙 4mm",
+        "source_url": "https://www.unifloorwpc.com/zh-TW/%E5%8D%9A%E5%AE%A2/%E8%A4%87%E5%90%88%E5%9C%8D%E6%AC%84%E7%9A%84%E5%AE%89%E8%A3%9D%E6%96%B9%E6%B3%95.html"
+      }
+    ],
+    "post_spacing_conventions": [
+      {
+        "value": "1-2 米 (1-2 m) typical stated spacing for residential PVC wall-top / boundary railing",
+        "source_note": "1688chuchen.com vendor product page (thin marketing content, low confidence)",
+        "source_url": "https://1688chuchen.com/product/49.html"
+      },
+      {
+        "value": "1.5-2 米 (1.5-2 m), tighter at corners -- cites (unverified) 'JGJ 150-2008 建筑护栏技术规范'",
+        "source_note": "b2bwiki SEO article; the cited standard number could not be independently verified and may be inaccurate or fabricated by the content-generation pipeline -- flagged as unverified, do not treat as a real code citation",
+        "source_url": "https://b2bwiki.baidu.com/article/d1rtacpftjso8p0g1o0g"
+      },
+      {
+        "value": "2-2.5 米 (2-2.5 m) for PVC construction-site hoarding (adjacent product, not residential fence)",
+        "source_note": "b2bwiki SEO article",
+        "source_url": "https://b2bwiki.baidu.com/article/d1rif2pftjslmkd8lj40"
+      },
+      {
+        "value": "2500mm panel width x 3000mm post spacing cited for one construction-hoarding spec (120x120mm PVC post w/ 100x100mm steel core; 80x50mm PVC top/bottom rail)",
+        "source_note": "Zhihu article on construction hoarding (围挡) spec, not residential fence -- included for reference to common Chinese PVC-clad-steel profile dimensions",
+        "source_url": "https://zhuanlan.zhihu.com/p/491243898"
+      },
+      {
+        "value": "No consistent, standards-backed post-spacing figure specific to residential PVC/vinyl picket or privacy fencing (the 6-8 ft / ~1.8-2.4m US convention) was found translated or independently corroborated in Chinese-market sources.",
+        "source_note": "Gap -- flagged explicitly rather than inferred",
+        "source_url": null
+      }
+    ],
+    "slope_accommodation_notes": [
+      {
+        "finding": "No Chinese-language source was found describing a distinct regional method or terminology for racking (顺坡/斜装, sloped/raked panels) versus stepping (台阶式, stepped panels) specific to PVC/vinyl residential fence installation. The one directly relevant hit (VEVOR's Chinese-language DIY fence blog, itself a translation of Western content) simply advises building the fence 'stepped' (阶梯状) or 'following the ground contour' (顺着地形轮廓) on sloped yards -- i.e., the same racking/stepping concepts as the US corpus, not a distinctively different Chinese approach.",
+        "original_term_zh": "阶梯状 (stepped) / 顺着地形轮廓 (follow ground contour)",
+        "source_url": "https://www.vevor.com/zh-CN/diy-ideas/how-to-install-a-fence"
+      },
+      {
+        "finding": "A protective fence-netting (护栏网) installation article notes that in low-lying areas where a sudden change in ground profile prevents maintaining the specified clearance height, longer posts should be used with multiple strands of barbed wire strung between them to close the gap -- a highway/security-fence-specific solution, not directly transferable to residential PVC panel fencing, but the only concrete 'ground-profile accommodation' engineering guidance found in Chinese.",
+        "original_term_zh": "护栏网应顺着地形设置",
+        "source_url": "http://m.sz-tysw.com/gongsixinwen/25-6.html"
+      },
+      {
+        "finding": "Overall assessment: slope/grade accommodation is a notable gap in the Chinese-language corpus for PVC/vinyl residential fencing specifically. No manufacturer-published racking-panel or stepped-panel installation diagram (of the type common in US vinyl fence PDFs, e.g. Barrette/Catalyst Fence 'Racking a Vinyl Gate') was located in Chinese.",
+        "source_url": null
+      }
+    ],
+    "wind_load_code_references": [
+      {
+        "code": "GB 50009 (建筑结构荷载规范 / Load Code for the Design of Building Structures, current edition GB 50009-2012)",
+        "applicability_status": "GB 50009 is China's general national structural wind-load code, covering basic wind pressure (基本风压, 50-year recurrence interval), height variation coefficients, and shape/gust coefficients for buildings and general structures. It is a real, current, actively-cited national standard (verified via multiple independent hits including the code's own online annotated text at gb50009.readthedocs.io and jianbiaoku.com).",
+        "fence_specific_evidence": "NO source found in this search applies GB 50009 specifically to PVC/vinyl fence, guardrail, or railing wind-load design. All GB 50009 hits found concern buildings, high-rise structures, and general structures. One WPC fencing vendor page (Unifloor, Chinese manufacturer) makes an unsupported marketing claim that composite fence panels have 'high wind load resistance' (高風荷載) suitable for windy regions, but cites no code or test data. Do not assume GB 50009 is the governing fence wind-load standard for China -- this was not established by any source found; it is reported here only as background on what the code covers, per the task instruction to note applicability honestly rather than assume it.",
+        "source_urls": [
+          "https://gb50009.readthedocs.io/zh/latest/08.html",
+          "http://manual.midasuser.com/building/cn/code/03/htm311tw/t003.2.htm",
+          "https://www.unifloorwpc.com/zh-TW/%E5%8D%9A%E5%AE%A2/%E8%A4%87%E5%90%88%E5%9C%8D%E6%AC%84%E7%9A%84%E5%AE%89%E8%A3%9D%E6%96%B9%E6%B3%95.html"
+        ]
+      },
+      {
+        "code": "GB/T 23451-2021 (建筑施工现场围挡技术规范 / Technical specification for construction site hoarding)",
+        "applicability_status": "Cited (name and number only, not the actual clause text) by a b2bwiki SEO article as governing minimum post/panel thickness for PVC construction-site hoarding (post wall thickness >=2.5mm, panel thickness >=1.2mm). This standard, if it exists as cited, would apply to temporary construction-site barriers, NOT residential/commercial PVC/vinyl picket or privacy fencing. Not independently verified against primary standard text; flagged as unverified citation from a low-authority SEO source.",
+        "fence_specific_evidence": "Not applicable to residential PVC/vinyl fencing scope of this research track even if the citation is accurate.",
+        "source_urls": [
+          "https://b2bwiki.baidu.com/article/d1rif2pftjslmkd8lj40"
+        ]
+      }
+    ],
+    "fastener_hardware_conventions": [
+      {
+        "item": "Expansion anchor bolts (膨胀螺丝/膨胀螺栓) for surface-mount post bases on hardened ground -- the dominant fastener convention across nearly every Chinese-language source reviewed, used both for residential PVC railings and construction hoarding.",
+        "source_urls": [
+          "https://zhuanlan.zhihu.com/p/45515268",
+          "https://b2bwiki.baidu.com/article/d1rif2pftjslmkd8lj40",
+          "https://b2bwiki.baidu.com/article/d1rtacpftjso8p0g1o0g"
+        ]
+      },
+      {
+        "item": "Self-tapping screws (自攻螺丝) for panel-to-post and rail-to-post fixation, generally specified as >=30mm length with multiple fixing points per rail (e.g., every 50cm along hoarding panel seams).",
+        "source_urls": [
+          "https://b2bwiki.baidu.com/article/d1rif2pftjslmkd8lj40",
+          "https://b2bwiki.baidu.com/article/d1rtacpftjso8p0g1o0g"
+        ]
+      },
+      {
+        "item": "Chemical anchor bolts (化学螺栓/化学锚栓) as an alternative to mechanical expansion anchors for fixing base plates, mentioned specifically for PVC landscape/decorative railings needing secure base-plate fixation.",
+        "source_urls": [
+          "https://www.apyingan.com/wenku/21327.html"
+        ]
+      },
+      {
+        "item": "Steel-reinforced core inside PVC profile (钢衬/热镀锌钢管) -- a recurring theme distinct from typical unfilled US vinyl fence rail/post construction: Chinese 塑钢 (plastic-steel) product terminology explicitly denotes a hot-dip-galvanized steel tube or rebar core inside the PVC extrusion, sized/spaced to meet wind-load requirements per the vendor's internal design ('内按风载要求加衬型钢'), though no calculation method or code citation for that sizing was found.",
+        "source_urls": [
+          "https://www.apyingan.com/wenku/21327.html",
+          "https://www.sohu.com/a/1053966294_122805393"
+        ]
+      }
+    ],
+    "documents": [
+      {
+        "doc_type": "Installation diagram guide (image-only PDF, no dimensions/text)",
+        "title_zh": "統一地板複合圍欄安裝指南 (implied; PDF itself has no Chinese cover text)",
+        "title_en": "Unifloor Composite Fencing Installation Guide",
+        "url": "https://unifloorwpc.com/wp-content/uploads/2022/04/composite-fencing-installation-guide.pdf",
+        "local_path": "china/manuals/installation-technical/unifloor-composite-fencing-installation-guide.pdf",
+        "date_or_version": "Undated; referenced from a Unifloor blog post dated 2022-11-01. Manufacturer: Unifloor / Uniwpc, Shanghai, China. Product category: WPC/composite fencing (not unfilled PVC), included as closest available genuine installation document from a China-based fence manufacturer.",
+        "notes": "4-page vector diagram set: post-on-baseplate assembly (surface-mount with what appears to be threaded rod/anchor bolts, no concrete pour depicted), angled corner-brace bracket install between two posts, horizontal composite infill panel slotted top-down into post grooves, post cap installation. No printed dimensions, spacing, or torque values in the PDF itself."
+      }
+    ],
+    "overall_gaps_and_honesty_notes": [
+      "No authoritative, citable, full-text Chinese national or industry installation standard specific to residential PVC/vinyl fencing was located and downloaded. China's national standards ecosystem (GB/GB-T/JGJ/CJJ codes) is mostly paywalled or requires a licensed standards database (jianbiaoku.com, gongbiaoku.com, samr.gov.cn) that was not accessible via web search/fetch in this session -- confirmed by search results returning only tables-of-contents and paywall landing pages, never full clause text, for the codes that might plausibly govern fence/guardrail design (e.g., JGJ 150 could not even be confirmed to exist under that number/title).",
+      "Most numeric parameters in this file (post spacing, footing depth, bolt torque, concrete mix ratio) come from vendor blogs and Baidu b2bwiki SEO articles, which read as plausible general Chinese construction-industry practice but are NOT verified against a primary engineering standard. They are reported with source attribution and explicit confidence caveats rather than presented as codified requirements.",
+      "The clearest, most substantively documented adjacent standard found was GB 50009 (national building structural wind-load code) and a real 4-page technical-drawing style highway concrete guardrail local standard (DB51/T 2797-2021, Sichuan), neither of which is shown by any source to govern PVC/vinyl residential fence design specifically.",
+      "A meaningful fraction of Chinese-language 'PVC fence installation' search results actually concern adjacent-but-distinct product categories: construction-site temporary hoarding (围挡), highway/bridge crash guardrails (护栏), or WPC/composite fencing (塑木/木塑围栏) rather than unfilled PVC/vinyl residential picket or privacy fencing. This suggests the residential PVC/vinyl fence category, as commonly understood in the US market, is a comparatively smaller and less separately documented product niche within the Chinese domestic market/search ecosystem, where 塑钢 (steel-reinforced PVC) railings for parks, roadside greenery, and transformer/equipment enclosures dominate the visible search results.",
+      "Racking/stepping (slope accommodation) methodology specific to PVC/vinyl fencing is essentially undocumented in the Chinese-language sources found; what little exists is a translation of Western DIY guidance rather than an independent Chinese-market convention."
+    ]
+  }
+}

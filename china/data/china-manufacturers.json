@@ -1,0 +1,426 @@
+{
+  "$note": "China-sourced PVC/vinyl fence manufacturer & GB standards dataset. Parallel to /schema/bom-schema.json but kept fully separate from the US/Western dataset per task instructions. Researched via Tavily web search (Chinese-language B2B directories, Alibaba/Made-in-China listings, manufacturer export sites) and China's official national standards portal (openstd.samr.gov.cn / std.samr.gov.cn). No manufacturer name, standard number, or dimension in this file was fabricated; entries with thin data say so explicitly rather than being padded.",
+  "research_date": "2026-08-20",
+  "manufacturers": [
+    {
+      "manufacturer": "Hangzhou Fantai Plastic Co., Ltd.",
+      "manufacturer_zh": "杭州凡泰塑业有限公司",
+      "brand": "Fentech / Fentech Fence",
+      "website": "https://www.fentechfence.com",
+      "website_zh": "https://cn.fentechfence.com",
+      "region": "China",
+      "province": "Zhejiang (Lin'an, Hangzhou)",
+      "source_language": "en/zh (bilingual export site)",
+      "unit_system": "imperial (in), export-oriented to US/AU/EU markets; mm equivalents added here by this research where source gave both",
+      "business_type": "Manufacturer, Exporter",
+      "founded": "in operation 10+ years per site claim (exact founding year not stated)",
+      "product_lines": [
+        {
+          "line_name": "Vinyl Horse / Post & Rail Fence",
+          "assemblies": [
+            {
+              "assembly_id": "FT-H01",
+              "assembly_type": "panel",
+              "assembly_name": "2-Rail Vinyl Post and Rail (Horse) Fence",
+              "style": "ranch rail / horse fence",
+              "height_options_mm": [800, 1200],
+              "height_options_note": "0.8m to 1.2m above grade per source (\"标准高度为离地0.8m至1.2m\")",
+              "width_on_center_mm": 2400,
+              "color_options": ["white (only color confirmed)"],
+              "material_grade": {
+                "resin": "PVC/vinyl, not specified virgin vs. reprocessed for this line",
+                "uv_inhibitors": "claimed, not quantified"
+              },
+              "sub_assemblies": [
+                { "component_id": "FT-H01-RAIL-LIGHT", "component_type": "rail", "component_name": "Light rail", "nominal_dimensions_mm": "38x140" },
+                { "component_id": "FT-H01-RAIL-HEAVY", "component_type": "rail", "component_name": "Heavy rail", "nominal_dimensions_mm": "51x152" },
+                { "component_id": "FT-H01-POST-CAP", "component_type": "post_cap", "component_name": "Flat cap (preferred); English cap and Gothic cap also offered", "nominal_dimensions_mm": null }
+              ],
+              "post_spacing_rules": { "on_center_in": 94.5, "notes": "standard panel width 2.4m between posts" }
+            },
+            {
+              "assembly_id": "FT-H04",
+              "assembly_type": "panel",
+              "assembly_name": "3-Rail Vinyl Horse Fence (also offered as Black Cross Rail variant)",
+              "style": "horse/ranch fence",
+              "height_options_mm": [1300],
+              "height_options_note": "standard height 1.3m (4.5 ft) above grade",
+              "color_options": ["white", "black (cross-rail variant)"],
+              "sub_assemblies": [
+                {
+                  "component_id": "FT-H04-POST",
+                  "component_type": "post",
+                  "component_name": "Line post",
+                  "nominal_dimensions_in": "5x5",
+                  "nominal_dimensions_mm": "127x127",
+                  "wall_thickness_mm": "2.2 or 2.5 (two options offered)"
+                },
+                {
+                  "component_id": "FT-H04-RAIL",
+                  "component_type": "rail",
+                  "component_name": "Rail",
+                  "nominal_dimensions_in": "2x6",
+                  "nominal_dimensions_mm": "51x152",
+                  "wall_thickness_mm": "2.2 or 2.5"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "line_name": "Vinyl Picket Fence",
+          "assemblies": [
+            {
+              "assembly_id": "FT-P01",
+              "assembly_type": "panel",
+              "assembly_name": "Straight-style Good Neighbor Picket Fence",
+              "style": "picket",
+              "height_options_in": [36, 48, 60, 72],
+              "height_options_mm": [914, 1219, 1524, 1829],
+              "width_on_center_in": 94,
+              "width_on_center_mm": 2388,
+              "color_options": ["white", "tan", "grey"],
+              "sub_assemblies": [
+                { "component_id": "FT-P01-PICKET", "component_type": "picket", "component_name": "Picket, dome cap standard; dog-ear and pointed pickets available on request", "nominal_dimensions_in": "7/8 x 3", "nominal_dimensions_mm": "22x76" },
+                { "component_id": "FT-P01-RAIL", "component_type": "rail", "component_name": "Rail", "nominal_dimensions_in": "2 x 3-1/2", "nominal_dimensions_mm": "51x89" }
+              ]
+            }
+          ]
+        },
+        {
+          "line_name": "Vinyl Privacy Fence",
+          "assemblies": [
+            {
+              "assembly_id": "FT-F02",
+              "assembly_type": "panel",
+              "assembly_name": "UV-proof Privacy Fence",
+              "style": "solid privacy, pointed-picket top",
+              "height_options_mm": [1829],
+              "width_on_center_mm": [2438],
+              "height_options_note": "6ft x 8ft standard panel",
+              "color_options": ["white", "tan"]
+            },
+            {
+              "assembly_id": "FT-F03",
+              "assembly_type": "panel",
+              "assembly_name": "Lattice-Top Privacy Fence",
+              "style": "privacy with lattice accent top",
+              "color_options": ["white", "tan", "grey"]
+            }
+          ]
+        },
+        {
+          "line_name": "Vinyl Fence Caps and Post Accessories",
+          "assemblies": [
+            {
+              "assembly_id": "FT-CAP-5x5",
+              "assembly_type": "panel",
+              "assembly_name": "5x5in Post Caps (Gothic, New England, Federation styles)",
+              "sub_assemblies": [
+                { "component_id": "FT-CAP-NE", "component_type": "post_cap", "component_name": "New England cap, 100% virgin vinyl", "nominal_dimensions_in": "5x5", "notes": "60 pcs/carton, carton 58x38x48cm, 16.8kg" },
+                { "component_id": "FT-CAP-INTERNAL", "component_type": "post_cap", "component_name": "Internal post cap for 5x5in post", "notes": "200 pcs/carton, carton 58x38x48cm, 18kg" }
+              ]
+            }
+          ]
+        }
+      ],
+      "documents": [],
+      "data_quality_notes": "Good dimensional detail for posts/rails/pickets (inch-native, converted to mm here). No downloadable PDF catalog found on the company's own domain within research time budget; a 2018 catalog exists on Slideshare/Google Drive but was not retrievable as a stable local PDF. Material grade detail (virgin vs. recycled %, TiO2 %) not published; only generic UV-resistance claims found."
+    },
+    {
+      "manufacturer": "Zhejiang Showtech Outdoor Products Co., Ltd.",
+      "manufacturer_zh": "浙江秀创户外用品有限公司 (transliteration uncertain; company publishes under 'Showtech' only, Chinese legal name not confirmed on English-language sources)",
+      "brand": "Showtech / Showtech Fence",
+      "website": "https://www.showtechfence.com",
+      "alt_listing": "https://vinylfencing.en.made-in-china.com",
+      "region": "China",
+      "province": "Zhejiang (Huangyan, Taizhou)",
+      "source_language": "en (export site; no Chinese-language version located)",
+      "unit_system": "imperial (in) primary, kg/ft weight specs; mm equivalents added here by this research",
+      "business_type": "Manufacturer/Factory & Trading Company, Diamond Member since 2017",
+      "founded": "2017-02-27",
+      "employees": 19,
+      "registered_capital_rmb": 10000000,
+      "plant_area_sqm": 269,
+      "certifications": ["RoHS", "audited by TÜV Rheinland"],
+      "product_lines": [
+        {
+          "line_name": "PVC Privacy Fence",
+          "assemblies": [
+            {
+              "assembly_id": "ST001",
+              "assembly_type": "panel",
+              "assembly_name": "China Factory PVC Privacy Fence Panel",
+              "style": "full privacy, tongue-and-groove",
+              "height_options_in": [72],
+              "height_options_mm": [1829],
+              "width_on_center_in": [96],
+              "width_on_center_mm": [2438],
+              "color_options": ["White", "Tan", "Grey", "custom on request"],
+              "material_grade": {
+                "resin": "100% virgin PVC, no recycled content per manufacturer claim",
+                "uv_inhibitors": "UV-resistant, unquantified",
+                "standard_claimed": "ASTM F964 and ASTM D1748 (US standards, not GB)"
+              },
+              "sub_assemblies": [
+                { "component_id": "ST-LINEPOST", "component_type": "post", "component_name": "Line Post", "actual_dimensions_in": "5x5", "actual_dimensions_mm": "127x127", "profile_depth_in": "length 102", "profile_depth_mm": "length 2591", "material": "100% virgin PVC", "fasteners": [], "notes": "weight 0.87 kg/ft (2.85 kg/m); qty 1 per section" },
+                { "component_id": "ST-POCKETRAIL", "component_type": "rail", "component_name": "Pocket Rail", "actual_dimensions_in": "1-1/2 x 5-1/2", "actual_dimensions_mm": "38x140", "profile_depth_in": "length 94", "profile_depth_mm": "length 2388", "notes": "weight 0.44 kg/ft (1.44 kg/m); qty 2 per section" },
+                { "component_id": "ST-TGPANEL", "component_type": "picket", "component_name": "Tongue & Groove Panel", "actual_dimensions_in": "7/8 x 11.3", "actual_dimensions_mm": "22x287", "profile_depth_in": "length 62", "profile_depth_mm": "length 1575", "notes": "weight 0.46 kg/ft (1.5 kg/m); qty 8 per section" },
+                { "component_id": "ST-UCHANNEL", "component_type": "channel", "component_name": "U-Channel (post-side rail retainer)", "profile_depth_in": "length 59", "profile_depth_mm": "length 1499", "notes": "weight 0.06 kg/ft; qty 2 per section" },
+                { "component_id": "ST-ALINSERT", "component_type": "post_stiffener_aluminum", "component_name": "Aluminum insert for bottom rail", "profile_depth_in": "length 94", "profile_depth_mm": "length 2388", "notes": "weight 0.14 kg/ft; qty 1 per section, used as bottom-rail stiffener" },
+                { "component_id": "ST-FLATCAP", "component_type": "post_cap", "component_name": "Flat Cap", "notes": "qty 1 per post" }
+              ],
+              "post_types_catalog": [
+                "Line Post - routed both sides, spaced every 6ft or 8ft",
+                "Corner Post - adjacent faces routed for corner angle",
+                "End Post - routed one side only, terminates at wall/pillar",
+                "End Gate Post - reinforced, routed one side, holds gate hardware",
+                "Blank Post / Blank Gate Post - not routed, used wall-to-gate transitions"
+              ],
+              "post_spacing_rules": { "on_center_ft": [6, 8], "notes": "line posts set every 6ft or 8ft depending on section length used" }
+            }
+          ]
+        },
+        {
+          "line_name": "WPC (Wood-Plastic Composite) Fence & Decking",
+          "assemblies": [
+            {
+              "assembly_id": "ST-WPC-01",
+              "assembly_type": "panel",
+              "assembly_name": "WPC Fence & Decking system",
+              "notes": "Distinct material line from the PVC/vinyl fence line above -- catalog PDF downloaded but not dimensionally parsed in this pass; flagged for follow-up if WPC scope is later added to this dataset."
+            }
+          ]
+        }
+      ],
+      "documents": [
+        {
+          "doc_type": "cut_sheet",
+          "title": "PVC fence catalog 2024",
+          "title_zh": null,
+          "title_en": "PVC Fence Catalog 2024",
+          "url": "https://www.showtechfence.com/uploads/25227/files/PVC-fence-catalog-2024.pdf",
+          "local_path": "china/manuals/showtech/PVC-fence-catalog-2024.pdf",
+          "manufacturer": "Zhejiang Showtech Outdoor Products Co., Ltd.",
+          "model_or_line": "PVC / Vinyl Fence",
+          "date_or_version": "2024"
+        },
+        {
+          "doc_type": "cut_sheet",
+          "title": "PVC fence catalog 2022",
+          "title_en": "PVC Fence Catalog 2022",
+          "url": "https://www.showtechfence.com/uploads/25227/files/PVC-fence-catalog-2022.pdf",
+          "local_path": "china/manuals/showtech/PVC-fence-catalog-2022.pdf",
+          "manufacturer": "Zhejiang Showtech Outdoor Products Co., Ltd.",
+          "model_or_line": "PVC / Vinyl Fence",
+          "date_or_version": "2022"
+        },
+        {
+          "doc_type": "cut_sheet",
+          "title": "Showtech WPC fence & decking catalog 2024",
+          "title_en": "Showtech WPC Fence & Decking Catalog 2024",
+          "url": "https://www.showtechfence.com/uploads/25227/files/Showtech-WPC-fence-decking-catalog-2024.pdf",
+          "local_path": "china/manuals/showtech/Showtech-WPC-fence-decking-catalog-2024.pdf",
+          "manufacturer": "Zhejiang Showtech Outdoor Products Co., Ltd.",
+          "model_or_line": "WPC Fence & Decking (separate material line from PVC)",
+          "date_or_version": "2024"
+        }
+      ],
+      "data_quality_notes": "Best-documented manufacturer in this dataset: has a full priced bill-of-materials for one panel assembly (post/rail/picket/channel/insert/cap with per-component weight) plus 3 real PDF catalogs successfully downloaded. Company's Chinese legal name could not be confirmed (site is English-only export-facing; no .cn domain located)."
+    },
+    {
+      "manufacturer": "Anhui Fencemaster Outdoor Products Co., Ltd.",
+      "manufacturer_zh": "not located (English-only export presence found)",
+      "brand": "FenceMaster",
+      "website": "https://www.vinylfencemaster.com",
+      "alt_listing": "https://fencemaster.en.made-in-china.com",
+      "region": "China",
+      "province": "Anhui (Hefei)",
+      "source_language": "en (export site)",
+      "unit_system": "meter-priced profile stock (FOB $/meter); panel dimensions not published in inches or mm",
+      "business_type": "Gold Member since 2014, Manufacturer/Supplier",
+      "main_markets": ["North America", "South America", "Eastern Europe", "Oceania", "Middle East", "Western Europe"],
+      "product_lines": [
+        {
+          "line_name": "Garden Fences",
+          "assemblies": [
+            { "assembly_id": "FM-401", "assembly_type": "panel", "assembly_name": "Cape Cod", "style": "garden fence" },
+            { "assembly_id": "FM-402", "assembly_type": "panel", "assembly_name": "Cape Cod Scallop", "style": "garden fence, scalloped top" },
+            { "assembly_id": "FM-403", "assembly_type": "panel", "assembly_name": "Cape Cod Flat", "style": "garden fence, flat top" },
+            { "assembly_id": "FM-404", "assembly_type": "panel", "assembly_name": "Chestnut Hill", "style": "garden fence" },
+            { "assembly_id": "FM-405", "assembly_type": "panel", "assembly_name": "Chestnut Hill Scallop", "style": "garden fence" },
+            { "assembly_id": "FM-406", "assembly_type": "panel", "assembly_name": "Chestnut Hill Stepped", "style": "garden fence, stepped for slope" }
+          ]
+        },
+        {
+          "line_name": "Picket Fences",
+          "assemblies": [
+            { "assembly_id": "FM-407", "assembly_type": "panel", "assembly_name": "Chestnut Hill Flat", "style": "picket" },
+            { "assembly_id": "FM-408", "assembly_type": "panel", "assembly_name": "Beacon Hill", "style": "picket" },
+            { "assembly_id": "FM-409", "assembly_type": "panel", "assembly_name": "Bunker Hill", "style": "picket" },
+            { "assembly_id": "FM-410", "assembly_type": "panel", "assembly_name": "Guilford", "style": "picket" },
+            { "assembly_id": "FM-411", "assembly_type": "panel", "assembly_name": "Chesapeake Flat", "style": "picket" },
+            { "assembly_id": "FM-412", "assembly_type": "panel", "assembly_name": "Chesapeake", "style": "picket" }
+          ]
+        },
+        {
+          "line_name": "Ranch (Horse) Fences",
+          "assemblies": [
+            { "assembly_id": "FM-301", "assembly_type": "panel", "assembly_name": "Two Rails", "style": "ranch rail" },
+            { "assembly_id": "FM-303", "assembly_type": "panel", "assembly_name": "Three Rails", "style": "ranch rail" },
+            { "assembly_id": "FM-305", "assembly_type": "panel", "assembly_name": "Four Rails", "style": "ranch rail" }
+          ]
+        },
+        {
+          "line_name": "Railings",
+          "assemblies": [
+            { "assembly_id": "FM-601", "assembly_type": "panel", "assembly_name": "Railing style 601", "style": "deck/porch railing" },
+            { "assembly_id": "FM-602", "assembly_type": "panel", "assembly_name": "Railing style 602", "style": "deck/porch railing" }
+          ],
+          "notes": "9 railing styles (601-609) listed by number only; individual style names/dimensions not published."
+        },
+        {
+          "line_name": "Slat & Lattice Fences",
+          "assemblies": [
+            { "assembly_id": "FM-501", "assembly_type": "panel", "assembly_name": "Shadow Board", "style": "shadowbox" },
+            { "assembly_id": "FM-502", "assembly_type": "panel", "assembly_name": "Slat Fence", "style": "horizontal slat" },
+            { "assembly_id": "FM-701", "assembly_type": "panel", "assembly_name": "Greenwich", "style": "lattice" },
+            { "assembly_id": "FM-702", "assembly_type": "panel", "assembly_name": "Essex", "style": "lattice" }
+          ]
+        },
+        {
+          "line_name": "PVC Fence Profile Stock (raw extrusion, sold by the meter)",
+          "assemblies": [
+            {
+              "assembly_id": "FM-PROFILE-STOCK",
+              "assembly_type": "panel",
+              "assembly_name": "PVC Fence Post / Rail / Picket Profile Material",
+              "material_grade": {
+                "resin": "PVC, extruded; \"ASTM Standards\" claimed on multiple listings (US standard, not GB)",
+                "warranty": "Limited Lifetime Warranty"
+              },
+              "sub_assemblies": [
+                { "component_id": "FM-PROFILE", "component_type": "post", "component_name": "Generic PVC fence post/rail profile stock", "material": "PVC, extrusion-formed", "notes": "FOB US$0.95-2.35/meter; MIN order 500 meters; sold as raw structural-component profile, not assembled panels" }
+              ]
+            }
+          ]
+        }
+      ],
+      "documents": [],
+      "data_quality_notes": "Style names and a full pricing tier (FOB $/meter) were found, but NO panel/post/rail dimensions in inches or mm were published anywhere located for this manufacturer -- their catalog pages list product names and photos only. This is a genuine data gap, not an omission. No downloadable PDF catalog located."
+    },
+    {
+      "manufacturer": "Hebei Renyang Metal Wire Mesh Products Co., Ltd",
+      "manufacturer_zh": "河北仁阳金属丝网制品有限公司 (transliteration reconstructed from pinyin \"Renyang\"; not independently confirmed against a Chinese-language source)",
+      "brand": "not stated (sells under generic product names, e.g. \"Farmtuff Horsesafe Duravinyl\")",
+      "website": "https://hbrenyang.en.made-in-china.com",
+      "region": "China",
+      "province": "Hebei (Anping County, Hengshui)",
+      "source_language": "en (Made-in-China listing; no standalone company site located)",
+      "unit_system": "imperial (in), export-oriented",
+      "business_type": "Manufacturer/Factory & Trading Company, Diamond Member since 2024",
+      "founded": "2016-04-11",
+      "employees": 75,
+      "certifications": ["ISO9001:2015", "ISO45001:2018", "ISO14001"],
+      "primary_business_note": "This is primarily a metal/wire-mesh fence manufacturer (3D fence, chain link, farm fence) headquartered in Anping County -- China's \"hometown of wire mesh\" -- with PVC/vinyl as a secondary product line, not its core business.",
+      "product_lines": [
+        {
+          "line_name": "PVC Fence (secondary line)",
+          "assemblies": [
+            {
+              "assembly_id": "RY-HORSE-34RAIL",
+              "assembly_type": "panel",
+              "assembly_name": "Farmtuff Horsesafe Duravinyl PVC 3/4-Rail Horse Fence",
+              "style": "ranch rail / horse fence"
+            },
+            {
+              "assembly_id": "RY-PRIVACY-6x8",
+              "assembly_type": "panel",
+              "assembly_name": "100% Virgin Material 6x8ft White Vinyl Plastic Privacy Fence Panel",
+              "style": "privacy",
+              "height_options_in": [72],
+              "height_options_mm": [1829],
+              "width_on_center_in": [96],
+              "width_on_center_mm": [2438],
+              "color_options": ["white"],
+              "material_grade": { "resin": "100% virgin material claimed, not independently detailed" }
+            }
+          ]
+        }
+      ],
+      "documents": [],
+      "data_quality_notes": "Only product names and a 6x8ft nominal panel size were found; no post/rail/picket dimensions, wall thickness, or spec sheet located. Included because it is a genuine, verifiable PVC-fence-selling entity in the Hebei/Anping export cluster, but data is thin -- typical of this cluster, whose core competency and documentation is wire mesh, not PVC extrusion."
+    },
+    {
+      "manufacturer": "Anping Tuopeng Wire Mesh Products Co., Ltd.",
+      "manufacturer_zh": "安平拓鹏丝网制品有限公司 (transliteration reconstructed from pinyin; not independently confirmed)",
+      "brand": "not stated",
+      "website": "https://m.made-in-china.com (listing only; no standalone company site located)",
+      "region": "China",
+      "province": "Hebei (Anping County)",
+      "source_language": "en (Made-in-China listing)",
+      "unit_system": "imperial (in), single data point only",
+      "business_type": "Manufacturer/Factory",
+      "certifications": ["audited by CTI, report ID QIP-ASI246500"],
+      "primary_business_note": "Core business is welded steel wire mesh (machine guard fence, 3D fence, 358 fence, airport fence, chain link, cattle fence). PVC vinyl fence is a single incidental listing, not a developed product line.",
+      "product_lines": [
+        {
+          "line_name": "PVC Privacy Fence (single listing, not a developed line)",
+          "assemblies": [
+            {
+              "assembly_id": "TP-PVC-LATTICE-6x8",
+              "assembly_type": "panel",
+              "assembly_name": "Vinyl PVC Privacy Fence with Lattice Top, includes posts",
+              "style": "privacy with lattice top",
+              "height_options_in": [72],
+              "height_options_mm": [1829],
+              "width_on_center_in": [96],
+              "width_on_center_mm": [2438],
+              "color_options": ["white"]
+            }
+          ]
+        }
+      ],
+      "documents": [],
+      "data_quality_notes": "Weakest entry in the dataset: exactly one product listing found, no dimensional or material detail beyond nominal 6x8ft panel size and 'white'. Included for completeness/transparency about the shallow end of the Hebei wire-mesh-cluster PVC offering, not because it is a strong data source."
+    }
+  ],
+  "gb_standards": [
+    {
+      "standard_id": "GB/T 29419-2023",
+      "title_zh": "塑木复合材料铺板、护栏和围栏体系性能",
+      "title_en": "Performance for wood-plastic composite deck boards, guardrail and fence system",
+      "standard_type": "GB/T (recommended/voluntary national standard)",
+      "issued": "2023-11-27",
+      "effective": "2024-06-01",
+      "administering_body": "China Building Materials Federation (中国建筑材料联合会)",
+      "scope_summary": "Specifies performance requirements and test methods for wood-plastic composite (WPC) decking boards, guardrail/handrail systems, and fence systems of any shape or size. This is the closest GB/T standard found that explicitly covers 'fence systems' (围栏体系) performance, but its material scope is wood-plastic composite (wood fiber + recycled plastic), not pure rigid PVC-U. Full text is paywalled on the official portal (standard preview text is not offered online per site notice); scope description above is drawn from the official standard record and secondary summaries (Baidu Baike, Intertek China), not the full standard text.",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=66283CBBC1D377A8BEE891F11681128C",
+      "confirmed": true
+    },
+    {
+      "standard_id": "GB/T 8814-2017",
+      "title_zh": "门、窗用未增塑聚氯乙烯（PVC-U）型材",
+      "title_en": "Unplasticized poly(vinyl chloride) (PVC-U) profiles for the doors and windows",
+      "standard_type": "GB/T (recommended/voluntary national standard)",
+      "issued": "2017-11-01",
+      "effective": "2018-05-01",
+      "supersedes": "GB/T 8814-2004",
+      "revision_in_pipeline": "GB/T 8814-2026 issued 2026-07-30, effective 2027-02-01 (same title; text not yet reviewed)",
+      "scope_summary": "Specifies base material, classification/grading and marking, requirements, test methods, inspection rules, marking, packaging, transport and storage for unplasticized PVC (PVC-U) profiles used in doors and windows. This is NOT a fence-specific standard -- its formal scope is doors/windows -- but it is the standard most likely to be cited informally by Chinese PVC fence manufacturers as a material-quality baseline for rigid PVC-U extrusion profiles generally, since no fence-specific rigid-PVC profile GB standard was located. No manufacturer page found in this research actually cited GB/T 8814 by number; this inference is the researcher's own, flagged as such rather than presented as a manufacturer claim.",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=DA700A3FD650E291B353BA4131E64886",
+      "confirmed": true
+    },
+    {
+      "standard_id": "JGJ/T 470-2019",
+      "title_zh": "建筑防护栏杆技术标准",
+      "title_en": "Technical standard for architectural protective guardrails/railings",
+      "standard_type": "JGJ/T -- industry standard (行业标准) issued by the Ministry of Housing and Urban-Rural Development, NOT a GB/GB-T national standard",
+      "effective": "2020-06-01",
+      "scope_summary": "Covers design, material requirements and installation of architectural (building) protective guardrails across multiple materials: fiber-reinforced composite, wood, point-supported glass, cable/wire-rope, aluminum alloy, rubber/gasket components. Included here despite being outside the strict GB/GB-T scope the user asked for because it is the one standard actually found to regulate rigid pultruded/composite guardrail profiles in China with real technical content (e.g. references GB/T 31539 for fiber-reinforced composite profiles, GB/T 5237 series for aluminum). It does NOT appear to separately address PVC-U fence profiles as a material class.",
+      "source_url": "https://29229836.s21i.faiusr.com/61/ABUIABA9GAAgmtL30QYo9oODVg.pdf",
+      "confirmed": true
+    }
+  ],
+  "gb_standards_search_gap_note": "No GB or GB/T standard was found whose title or confirmed scope is specifically and exclusively 'PVC fence' / 'PVC围栏' / '塑钢护栏'. Chinese standardization in this space is split between (a) WPC decking/guardrail/fence performance (GB/T 29419, found), (b) generic rigid PVC-U profile material standards written for doors/windows (GB/T 8814, found) and pipe (GB/T 5836 series, GB/T 10002 series -- not fence-relevant, omitted), and (c) industry-level (not GB) guardrail design standards (JGJ/T 470). This mirrors a real market pattern seen across every manufacturer researched: every Chinese PVC/vinyl fence exporter that cited a compliance standard at all cited a US ASTM standard (ASTM F964, D1748) rather than a GB standard, because their PVC fence products are built for export to the US/AU/EU markets, not domestic Chinese use -- domestic Chinese fencing in this material category is dominated by 塑钢护栏 (PVC-clad steel-core 'plastic-steel' guardrail) sold through municipal/landscape B2B channels, which cite GB standards for the underlying steel and hot-dip galvanizing (e.g. GB/T 13912-2002) rather than for the PVC shell itself."
+}

@@ -1,0 +1,852 @@
+{
+  "manufacturer": "CertainTeed",
+  "brand": "Bufftech",
+  "website": "https://bufftech.com",
+  "source_urls": [
+    "https://bufftech.com",
+    "https://bufftech.com/b-doc-type/installation",
+    "https://bufftech.com/wp-content/uploads/sites/2/2024/07/BOL-Bufftech-and-Simtek-Instructions-4-24.pdf",
+    "https://bufftech.com/wp-content/uploads/sites/2/2023/10/bufftech-install-guide-e-2201cts.pdf",
+    "https://www.fenc-co.com/bufftech_brochure.pdf",
+    "https://www.metropolitanfence.com/wp-content/uploads/files/pdfs/bufftech-catalog.pdf",
+    "https://www.afence.com/mm5/graphics/pdf/Bufftech%20Installation.pdf",
+    "https://www.deltafenceman.com/wp-content/uploads/2018/07/FRD_Bufftech_Installation_Guide_40-40-70743.pdf",
+    "https://www.avinylfence.com/wp-content/uploads/2020/11/INSTALL-bufftech-semiprivate.pdf",
+    "http://www.standardfencing.com/catalogs/vinyl.pdf",
+    "https://www.torrancefence.com/bufftech-fence-by-certain-teed",
+    "https://www.signetfence.com/fences/vinyl-fences/bufftech-vinyl-fences",
+    "https://www.hooverfence.com/mas_assets/theme/hooverfence/pdfs/bufftech-vinyl-fences-not-equal.pdf",
+    "https://www.catalystfence.com/resources/installation-instructions",
+    "https://www.catalystfence.com/resources/literature-technical-documents"
+  ],
+  "product_lines": [
+    {
+      "line_name": "Privacy Fence",
+      "assemblies": [
+        {
+          "assembly_id": "BT-CHESTERFIELD-CERTAGRAIN",
+          "assembly_type": "panel",
+          "assembly_name": "Chesterfield with CertaGrain Texture",
+          "style": "privacy, tongue & groove, woodgrain texture",
+          "height_options_in": [48, 60, 72],
+          "width_on_center_in": 96,
+          "color_options": ["Colonial White", "Natural Clay", "Autumn Brown", "Timber Blend", "Canyon Blend", "Frontier Blend", "Arbor Blend", "Arctic Blend", "Brazilian Blend", "Sierra Blend", "Honey Blend", "Weathered Blend"],
+          "texture_finish": ["CertaGrain woodgrain (co-extruded)"],
+          "material_grade": {
+            "resin": "Vinyl (PVC) compound; exact virgin-vs-regrind ratio not publicly disclosed. Marketing materials state 'high-quality raw materials' and GreenCircle Certified manufacturing.",
+            "uv_inhibitors": "High percentage of titanium dioxide per manufacturer marketing (exact % not published); co-extrusion cap layer for UV protection",
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Lifetime limited transferable warranty (original homeowner); SureStart protection covers parts/labor for 5 years after installation; ColorLast acrylic dark-color fade protection warranted on Natural Clay/Arbor/Arctic/Brazilian/Frontier/Honey/Sierra/Weathered Blend"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "BT-POST-5X5",
+              "component_type": "post",
+              "component_name": "5x5 Routed Fence Post",
+              "nominal_dimensions_in": "5 x 5",
+              "actual_dimensions_in": "5 x 5",
+              "wall_thickness_in": null,
+              "profile_depth_in": "routed picket/rail channel, depth not published",
+              "material": "Vinyl (PVC), routed/pre-drilled for rail insertion (bracket-free)",
+              "compatible_component_ids": ["BT-RAIL-CHESTERFIELD", "BT-PICKET-7-7-TG"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-RAIL-CHESTERFIELD",
+              "component_type": "rail",
+              "component_name": "Chesterfield Bottom Rail (steel reinforced, channeled)",
+              "nominal_dimensions_in": "2 x 6 x 94",
+              "actual_dimensions_in": "2 x 6 x 94",
+              "wall_thickness_in": null,
+              "profile_depth_in": "channeled rail, depth not published",
+              "material": "Vinyl (PVC) with internal steel reinforcement (bottom rail standard; top rail steel-reinforced on Clay/Autumn Brown/Sierra Blend and other ColorLast dark blends)",
+              "compatible_component_ids": ["BT-POST-5X5", "BT-PICKET-7-7-TG"],
+              "fasteners": [
+                { "type": "lock ring (rail-to-post retention clip)", "size": null, "material": "vinyl/plastic", "qty_per_assembly": "2 per rail (one each end)" }
+              ]
+            },
+            {
+              "component_id": "BT-PICKET-7-7-TG",
+              "component_type": "picket",
+              "component_name": "Chesterfield Tongue & Groove Picket",
+              "nominal_dimensions_in": "7/8 x 7",
+              "actual_dimensions_in": "7/8 x 7",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), heavyweight profile, tongue & groove interlocking edges, concealed fastening (no glue/screws)",
+              "compatible_component_ids": ["BT-RAIL-CHESTERFIELD"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-POSTCAP-VARIOUS",
+              "component_type": "post_cap",
+              "component_name": "Post Cap (External Flat, Internal Flat, Gothic, New England, or Ball)",
+              "nominal_dimensions_in": "fits 5x5 (also offered for 4x4)",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "PVC; decorative caps available in stainless-steel-top / powder-coat finish; solar LED post caps also offered",
+              "compatible_component_ids": ["BT-POST-5X5"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-STIFFENER-ALUM",
+              "component_type": "post_stiffener_aluminum",
+              "component_name": "Aluminum Gate/Line Post Stiffener Insert",
+              "nominal_dimensions_in": "sized to post interior; extends from near bottom of hole to within ~4 in of post cap",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum",
+              "compatible_component_ids": ["BT-POST-5X5"],
+              "fasteners": [
+                { "type": "screw (secures stiffener to post at base)", "size": "#8", "material": "steel", "qty_per_assembly": "1" }
+              ]
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 97,
+            "post_depth_below_grade_in": "30 in or to frost line",
+            "frost_line_note": "Dig below local frost line; check local codes/regulations for exact depth and diameter",
+            "footing_diameter_in": "12 (5x5 posts); 10 (4x4 posts)",
+            "concrete_footing_spec": "3000 PSI minimum concrete. Wind-exposure/footing table (non-hurricane and HVHZ per ASCE 7-10): Exposure B non-HVHZ 30in depth/97in max post spacing; Exposure B HVHZ 24in/66in; Exposure C non-HVHZ 30in/68in; Exposure C HVHZ 36in/88in; Exposure D non-HVHZ 30in/56in; Exposure D HVHZ 36in/75in. Concrete usage guidance: ~100-285 lbs per post depending on post size/height/location (line vs. end/corner vs. gate post); avoid 'soupy' concrete mix."
+          },
+          "slope_accommodation": {
+            "method": "both",
+            "max_rake_angle_deg": "5 (accents reduce amount of rack); pickets factory/field cut at 5-deg angle to accommodate up to 1 ft of slope per section on T&G privacy styles",
+            "hardware_required": ["steel-reinforced bottom rail", "line post stiffener (aluminum insert) required in HVHZ wind zones"],
+            "notes": "Installation guide diagrams for Chesterfield/Galveston-style privacy panels recommend 'stepping' (offsetting panel height at each post) over racking on sloped terrain due to the tongue-and-groove picket profile; racking is limited (~5 deg) with mitered picket cuts. Lattice/Victorian/Huntington/Westminster accent tops further reduce achievable rack."
+          }
+        },
+        {
+          "assembly_id": "BT-CHESTERFIELD-GATE",
+          "assembly_type": "gate",
+          "assembly_name": "Chesterfield Gate (Straight, Concave, Convex)",
+          "style": "privacy gate, matches Chesterfield panel",
+          "height_options_in": [48, 60, 72],
+          "width_on_center_in": null,
+          "color_options": ["White", "Clay", "Tan", "Almond"],
+          "texture_finish": ["Smooth", "CertaGrain"],
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "BT-GATE-FRAME-ALUM",
+              "component_type": "gate_kit",
+              "component_name": "Heavy-Duty Internal Aluminum Gate Frame Kit",
+              "nominal_dimensions_in": "pre-assembled 36-1/2, 50-1/2, 64-3/4 in wide (straight); custom via gate kit for other widths",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum internal frame with vinyl cladding; stainless steel fasteners",
+              "compatible_component_ids": ["BT-POST-5X5", "BT-HINGE-SS", "BT-LATCH-SS"],
+              "fasteners": [
+                { "type": "stainless steel fastener (frame-to-vinyl)", "size": null, "material": "stainless steel", "qty_per_assembly": null }
+              ]
+            },
+            {
+              "component_id": "BT-HINGE-SS",
+              "component_type": "hinge",
+              "component_name": "Stainless Steel Gate Hinge (Black Pebble / Bronze Pebble finish)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Stainless steel, powder-coat finish",
+              "compatible_component_ids": ["BT-GATE-FRAME-ALUM"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-LATCH-SS",
+              "component_type": "latch",
+              "component_name": "Stainless Steel Strike and Latch (Black Pebble / Bronze Pebble finish)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Stainless steel, powder-coat finish",
+              "compatible_component_ids": ["BT-GATE-FRAME-ALUM"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-NYLON-HW-KIT",
+              "component_type": "gate_kit",
+              "component_name": "High Performance Nylon Gate Hardware Kit (D&D Technologies: Lokk-Latch Deluxe, Tru-Close self-closing hinges, Gate-Handle)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Nylon/composite, key-lockable latch, adjustable self-closing hinges",
+              "compatible_component_ids": ["BT-GATE-FRAME-ALUM"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-DROP-ROD-48",
+              "component_type": "drop_rod",
+              "component_name": "Heavy-Duty Drop Rod (double-gate hold, one rod per panel)",
+              "nominal_dimensions_in": "48 length, approx 5/8 diameter",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Steel/aluminum, powder-coated",
+              "compatible_component_ids": ["BT-GATE-FRAME-ALUM"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": null,
+          "slope_accommodation": {
+            "method": "racking",
+            "max_rake_angle_deg": null,
+            "hardware_required": [],
+            "notes": "Gate requires ~1-1/2 in gap between gate and gate post and ~1 in gap on hinge side / 3/4 in on latch side of hardware; gate requires 2 in clearance under bottom rail for swing."
+          }
+        },
+        {
+          "assembly_id": "BT-NEW-LEXINGTON",
+          "assembly_type": "panel",
+          "assembly_name": "New Lexington",
+          "style": "privacy, tongue & groove, 'v' groove picket, Classic Curve rail",
+          "height_options_in": [48, 72],
+          "width_on_center_in": 96,
+          "color_options": ["White", "Tan", "Almond"],
+          "texture_finish": ["Smooth"],
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "BT-RAIL-NEWLEX",
+              "component_type": "rail",
+              "component_name": "New Lexington Deco Rail (ribbed, bottom steel reinforced)",
+              "nominal_dimensions_in": "1-1/2 x 5-1/2 x 94-95",
+              "actual_dimensions_in": "1-1/2 x 5-1/2",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC) with steel-reinforced bottom rail",
+              "compatible_component_ids": ["BT-PICKET-NEWLEX"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-PICKET-NEWLEX",
+              "component_type": "picket",
+              "component_name": "New Lexington Tongue & Groove 'v'-groove Picket",
+              "nominal_dimensions_in": "5/8 x 11-3/8",
+              "actual_dimensions_in": "5/8 x 11-3/8",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BT-RAIL-NEWLEX"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 96,
+            "post_depth_below_grade_in": "30 in or to frost line",
+            "frost_line_note": "Check local codes for frost line depth and regulations",
+            "footing_diameter_in": "10 (4x4) / 12 (5x5)",
+            "concrete_footing_spec": "3000 PSI minimum concrete"
+          },
+          "slope_accommodation": {
+            "method": "racking",
+            "max_rake_angle_deg": "7",
+            "hardware_required": [],
+            "notes": "Accents (Lattice/Victorian) reduce amount of achievable rack. Pre-assembled gate widths: 42-1/2, 50-1/2, 65-1/4 in."
+          }
+        },
+        {
+          "assembly_id": "BT-GALVESTON",
+          "assembly_type": "panel",
+          "assembly_name": "Galveston (commercial-height privacy)",
+          "style": "privacy, tongue & groove, tallest privacy line",
+          "height_options_in": [84, 96],
+          "width_on_center_in": 96,
+          "color_options": ["White", "Tan", "Natural Clay", "Sierra Blend", "Weathered Blend", "Frontier Blend", "Arbor Blend", "Arctic Blend", "Brazilian Blend", "Honey Blend"],
+          "texture_finish": ["Smooth", "CertaGrain"],
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "BT-RAIL-GALVESTON",
+              "component_type": "rail",
+              "component_name": "Galveston Top/Bottom/Mid Rail (all three rails steel reinforced)",
+              "nominal_dimensions_in": "2 x 6 x 94-95",
+              "actual_dimensions_in": "2 x 6",
+              "wall_thickness_in": null,
+              "profile_depth_in": "channeled/ribbed rail",
+              "material": "Vinyl (PVC) with steel reinforcement in top, middle, and bottom rails",
+              "compatible_component_ids": ["BT-PICKET-7-7-TG"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 96,
+            "post_depth_below_grade_in": "30 in or to frost line",
+            "frost_line_note": "Check local codes for frost line depth and regulations",
+            "footing_diameter_in": "12 (5x5 posts)",
+            "concrete_footing_spec": "3000 PSI minimum concrete"
+          },
+          "slope_accommodation": {
+            "method": "stepping",
+            "max_rake_angle_deg": "5",
+            "hardware_required": ["steel-reinforced top/mid/bottom rails"],
+            "notes": "Rated suitable for commercial applications; recommended installation is stepping on sloped terrain given full-height T&G panel."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Semi-Private Fence",
+      "assemblies": [
+        {
+          "assembly_id": "BT-IMPERIAL",
+          "assembly_type": "panel",
+          "assembly_name": "Imperial / Imperial with Midrail",
+          "style": "semi-private, thru-picket 'good neighbor' design",
+          "height_options_in": [36, 48, 60, 72],
+          "width_on_center_in": 96,
+          "color_options": ["White", "Tan", "Clay", "Almond", "Natural Clay", "Weathered Blend", "Arbor Blend", "Arctic Blend", "Sierra Blend"],
+          "texture_finish": ["Smooth", "Select Cedar"],
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "BT-RAIL-IMPERIAL",
+              "component_type": "rail",
+              "component_name": "Imperial Rail (bottom steel reinforced; ColorLast colors also top-reinforced)",
+              "nominal_dimensions_in": "1-3/4 x 3-1/2 x 96",
+              "actual_dimensions_in": "1-3/4 x 3-1/2",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC) with steel reinforcement",
+              "compatible_component_ids": ["BT-PICKET-IMPERIAL"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-PICKET-IMPERIAL",
+              "component_type": "picket",
+              "component_name": "Imperial Picket (thru-picket, both sides identical)",
+              "nominal_dimensions_in": "7/8 x 3",
+              "actual_dimensions_in": "7/8 x 3",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BT-RAIL-IMPERIAL"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 96,
+            "post_depth_below_grade_in": "30 in or to frost line",
+            "frost_line_note": "Check local codes for frost line depth and regulations",
+            "footing_diameter_in": "10 (4x4) / 12 (5x5)",
+            "concrete_footing_spec": "3000 PSI minimum concrete"
+          },
+          "slope_accommodation": {
+            "method": "racking",
+            "max_rake_angle_deg": "10 (3-4 ft heights); 5 (5-6 ft heights)",
+            "hardware_required": [],
+            "notes": "Picket spacing 7/16 in. 6 ft height only features WindZone (Miami-Dade NOA) performance rating."
+          }
+        },
+        {
+          "assembly_id": "BT-MILLBROOK",
+          "assembly_type": "panel",
+          "assembly_name": "Millbrook",
+          "style": "semi-private, ribbed picket with midrail",
+          "height_options_in": [60, 72],
+          "width_on_center_in": 96,
+          "color_options": ["White", "Tan", "Almond"],
+          "texture_finish": ["Ribbed"],
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "BT-RAIL-MILLBROOK-TB",
+              "component_type": "rail",
+              "component_name": "Millbrook Top/Bottom Rail (bottom steel reinforced)",
+              "nominal_dimensions_in": "2 x 6 x 94",
+              "actual_dimensions_in": "2 x 6",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), bottom rail steel reinforced",
+              "compatible_component_ids": ["BT-PICKET-MILLBROOK"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-RAIL-MILLBROOK-MID",
+              "component_type": "rail",
+              "component_name": "Millbrook Midrail",
+              "nominal_dimensions_in": "1-3/4 x 3-1/2 x 94",
+              "actual_dimensions_in": "1-3/4 x 3-1/2",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BT-PICKET-MILLBROOK"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-PICKET-MILLBROOK",
+              "component_type": "picket",
+              "component_name": "Millbrook Ribbed Picket",
+              "nominal_dimensions_in": "7/8 x 6",
+              "actual_dimensions_in": "7/8 x 6",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), ribbed profile",
+              "compatible_component_ids": ["BT-RAIL-MILLBROOK-TB", "BT-RAIL-MILLBROOK-MID"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 96,
+            "post_depth_below_grade_in": "30 in or to frost line",
+            "frost_line_note": "Check local codes for frost line depth and regulations",
+            "footing_diameter_in": "12 (5x5 posts)",
+            "concrete_footing_spec": "3000 PSI minimum concrete"
+          },
+          "slope_accommodation": {
+            "method": "racking",
+            "max_rake_angle_deg": "5",
+            "hardware_required": [],
+            "notes": "Picket spacing 13/16 in."
+          }
+        },
+        {
+          "assembly_id": "BT-COLUMBIA",
+          "assembly_type": "panel",
+          "assembly_name": "Columbia / Columbia with Lattice",
+          "style": "semi-private, ribbed picket, aluminum-reinforced bottom rail",
+          "height_options_in": [60, 72],
+          "width_on_center_in": 96,
+          "color_options": ["White"],
+          "texture_finish": ["Ribbed"],
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "BT-RAIL-COLUMBIA",
+              "component_type": "rail",
+              "component_name": "Columbia Bottom Rail (aluminum reinforced)",
+              "nominal_dimensions_in": "3-1/2 x 3-1/2 x 94",
+              "actual_dimensions_in": "3-1/2 x 3-1/2",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC) with internal aluminum reinforcement",
+              "compatible_component_ids": ["BT-PICKET-COLUMBIA"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-PICKET-COLUMBIA",
+              "component_type": "picket",
+              "component_name": "Columbia Ribbed Picket",
+              "nominal_dimensions_in": "7/8 x 6",
+              "actual_dimensions_in": "7/8 x 6",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), ribbed profile",
+              "compatible_component_ids": ["BT-RAIL-COLUMBIA"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 96,
+            "post_depth_below_grade_in": "30 in or to frost line",
+            "frost_line_note": "Check local codes for frost line depth and regulations",
+            "footing_diameter_in": "12 (5x5 posts)",
+            "concrete_footing_spec": "3000 PSI minimum concrete"
+          },
+          "slope_accommodation": {
+            "method": "racking",
+            "max_rake_angle_deg": "10 (3-4 ft); 5 (5-6 ft)",
+            "hardware_required": [],
+            "notes": "Picket spacing 4-9/16 in; optional Lattice accent top."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Classic & Contemporary Fence",
+      "assemblies": [
+        {
+          "assembly_id": "BT-MANCHESTER",
+          "assembly_type": "panel",
+          "assembly_name": "Manchester / Manchester Concave",
+          "style": "classic picket, thru-picket good-neighbor design",
+          "height_options_in": [36, 48],
+          "width_on_center_in": 96,
+          "color_options": ["White", "Tan"],
+          "texture_finish": ["Smooth"],
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "BT-POST-5X5-MANCHESTER",
+              "component_type": "post",
+              "component_name": "5x5 Post (Manchester requires 5x5 even at 3-4 ft heights)",
+              "nominal_dimensions_in": "5 x 5",
+              "actual_dimensions_in": "5 x 5",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BT-RAIL-MANCHESTER-BOT", "BT-RAIL-MANCHESTER-TOP"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-RAIL-MANCHESTER-BOT",
+              "component_type": "rail",
+              "component_name": "Manchester Bottom Rail (ribbed, steel reinforced)",
+              "nominal_dimensions_in": "2 x 6 x 94",
+              "actual_dimensions_in": "2 x 6",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), steel reinforced",
+              "compatible_component_ids": ["BT-PICKET-MANCHESTER"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-RAIL-MANCHESTER-TOP",
+              "component_type": "rail",
+              "component_name": "Manchester Top Rail",
+              "nominal_dimensions_in": "2 x 3-1/2 x 94",
+              "actual_dimensions_in": "2 x 3-1/2",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BT-PICKET-MANCHESTER"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-PICKET-MANCHESTER",
+              "component_type": "picket",
+              "component_name": "Manchester Square Picket",
+              "nominal_dimensions_in": "1-1/2 x 1-1/2",
+              "actual_dimensions_in": "1-1/2 x 1-1/2",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BT-RAIL-MANCHESTER-BOT", "BT-RAIL-MANCHESTER-TOP"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 96,
+            "post_depth_below_grade_in": "30 in or to frost line",
+            "frost_line_note": "Check local codes for frost line depth and regulations",
+            "footing_diameter_in": "12 (5x5 posts)",
+            "concrete_footing_spec": "3000 PSI minimum concrete"
+          },
+          "slope_accommodation": {
+            "method": "racking",
+            "max_rake_angle_deg": "5",
+            "hardware_required": [],
+            "notes": "Picket spacing 1-9/16 in. Optional Classic Impressions (recessed or fluted) decorative posts available for 3 & 4 ft heights, White only."
+          }
+        },
+        {
+          "assembly_id": "BT-BARON",
+          "assembly_type": "panel",
+          "assembly_name": "Baron / Baron with Midrail",
+          "style": "contemporary picket",
+          "height_options_in": [36, 48, 60, 72],
+          "width_on_center_in": 96,
+          "color_options": ["White", "Tan", "Almond", "Weathered Blend", "Arbor Blend", "Arctic Blend", "Sierra Blend"],
+          "texture_finish": ["Smooth", "Select Cedar"],
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "BT-RAIL-BARON",
+              "component_type": "rail",
+              "component_name": "Baron Rail (bottom steel reinforced)",
+              "nominal_dimensions_in": "1-3/4 x 3-1/2 x 96",
+              "actual_dimensions_in": "1-3/4 x 3-1/2",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), steel reinforced",
+              "compatible_component_ids": ["BT-PICKET-BARON"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-PICKET-BARON",
+              "component_type": "picket",
+              "component_name": "Baron Picket",
+              "nominal_dimensions_in": "7/8 x 3",
+              "actual_dimensions_in": "7/8 x 3",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BT-RAIL-BARON"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 96,
+            "post_depth_below_grade_in": "30 in or to frost line",
+            "frost_line_note": "Check local codes for frost line depth and regulations",
+            "footing_diameter_in": "10 (4x4) / 12 (5x5)",
+            "concrete_footing_spec": "3000 PSI minimum concrete"
+          },
+          "slope_accommodation": {
+            "method": "racking",
+            "max_rake_angle_deg": "10 (3-4 ft heights); 5 (5-6 ft heights)",
+            "hardware_required": [],
+            "notes": "Picket spacing 2-15/16 in."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Traditional Fence",
+      "assemblies": [
+        {
+          "assembly_id": "BT-CAPECOD",
+          "assembly_type": "panel",
+          "assembly_name": "Cape Cod (Pointed Cap)",
+          "style": "traditional picket, 12-picket panel, no steel reinforcement",
+          "height_options_in": [36, 48, 60],
+          "width_on_center_in": 72,
+          "color_options": ["White"],
+          "texture_finish": ["Smooth"],
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "BT-RAIL-CAPECOD",
+              "component_type": "rail",
+              "component_name": "Cape Cod Rail (no steel reinforcement)",
+              "nominal_dimensions_in": "1-3/4 x 3-1/2 x 72",
+              "actual_dimensions_in": "1-3/4 x 3-1/2",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BT-PICKET-CAPECOD"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-PICKET-CAPECOD",
+              "component_type": "picket",
+              "component_name": "Cape Cod Pointed Picket",
+              "nominal_dimensions_in": "7/8 x 3",
+              "actual_dimensions_in": "7/8 x 3",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BT-RAIL-CAPECOD"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 72,
+            "post_depth_below_grade_in": "30 in or to frost line",
+            "frost_line_note": "Check local codes for frost line depth and regulations",
+            "footing_diameter_in": "10 (4x4 posts)",
+            "concrete_footing_spec": "3000 PSI minimum concrete"
+          },
+          "slope_accommodation": {
+            "method": "racking",
+            "max_rake_angle_deg": "15",
+            "hardware_required": [],
+            "notes": "12-picket panel; highest rack tolerance in the line (up to 15 deg) since panel is low and unreinforced. Picket spacing 2-7/16 in."
+          }
+        },
+        {
+          "assembly_id": "BT-DANBURY",
+          "assembly_type": "panel",
+          "assembly_name": "Danbury (Straight / Concave)",
+          "style": "traditional picket, thru-rail, 15-picket panel, reinforced bottom rail",
+          "height_options_in": [48],
+          "width_on_center_in": 96,
+          "color_options": ["White", "Almond", "Natural Clay"],
+          "texture_finish": ["Smooth", "Select Cedar"],
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "BT-RAIL-DANBURY",
+              "component_type": "rail",
+              "component_name": "Danbury Rail (bottom steel reinforced)",
+              "nominal_dimensions_in": "1-3/4 x 3-1/2 x 96",
+              "actual_dimensions_in": "1-3/4 x 3-1/2",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), steel reinforced",
+              "compatible_component_ids": ["BT-PICKET-DANBURY"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-PICKET-DANBURY",
+              "component_type": "picket",
+              "component_name": "Danbury Pointed Picket (thru-picket, good-neighbor)",
+              "nominal_dimensions_in": "7/8 x 3",
+              "actual_dimensions_in": "7/8 x 3",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BT-RAIL-DANBURY"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 96,
+            "post_depth_below_grade_in": "30 in or to frost line",
+            "frost_line_note": "Check local codes for frost line depth and regulations",
+            "footing_diameter_in": "10 (4x4 posts)",
+            "concrete_footing_spec": "3000 PSI minimum concrete"
+          },
+          "slope_accommodation": {
+            "method": "racking",
+            "max_rake_angle_deg": "5",
+            "hardware_required": [],
+            "notes": "15-picket thru-rail panel. Picket spacing 2-15/16 in."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Post & Rail Fence",
+      "assemblies": [
+        {
+          "assembly_id": "BT-POSTRAIL-3RAIL",
+          "assembly_type": "panel",
+          "assembly_name": "3-Rail Post & Rail (Smooth or CertaGrain)",
+          "style": "ranch/agricultural rail fence",
+          "height_options_in": null,
+          "width_on_center_in": 96,
+          "color_options": ["White", "Tan", "Colonial White", "Sierra Blend"],
+          "texture_finish": ["Smooth", "CertaGrain"],
+          "material_grade": {
+            "resin": "Vinyl (PVC), not quantified",
+            "uv_inhibitors": "Co-extruded cap layer; ColorLast formulation on Sierra Blend",
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Lifetime limited transferable warranty (see general Bufftech warranty). CertaGrain Post & Rail in Sierra Blend subject to manufacturer's installation guidelines in climates exceeding 100F."
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "BT-POST-5X5-PR",
+              "component_type": "post",
+              "component_name": "5x5 Post & Rail Post",
+              "nominal_dimensions_in": "5 x 5",
+              "actual_dimensions_in": "5 x 5",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC)",
+              "compatible_component_ids": ["BT-RAIL-PR-3RAIL-WHITE", "BT-RAIL-PR-3RAIL-COLOR"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-RAIL-PR-3RAIL-WHITE",
+              "component_type": "rail",
+              "component_name": "3-Rail Ribbed Rail (White)",
+              "nominal_dimensions_in": "1-1/2 x 5-1/2",
+              "actual_dimensions_in": "1-1/2 x 5-1/2",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), ribbed",
+              "compatible_component_ids": ["BT-POST-5X5-PR"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BT-RAIL-PR-3RAIL-COLOR",
+              "component_type": "rail",
+              "component_name": "3-Rail Ribbed Rail (Sierra Blend / CertaGrain colors)",
+              "nominal_dimensions_in": "2 x 6",
+              "actual_dimensions_in": "2 x 6",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl (PVC), ribbed, CertaGrain texture",
+              "compatible_component_ids": ["BT-POST-5X5-PR"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 96,
+            "post_depth_below_grade_in": "30 in or to frost line",
+            "frost_line_note": "Check local codes for frost line depth and regulations",
+            "footing_diameter_in": "12 (5x5 posts)",
+            "concrete_footing_spec": "3000 PSI minimum concrete; ~140 lbs per line post, ~230-260 lbs per end/corner post, ~260 lbs per gate post (3-rail, 5x5)"
+          },
+          "slope_accommodation": {
+            "method": "racking",
+            "max_rake_angle_deg": null,
+            "hardware_required": [],
+            "notes": "Gate widths: 8 ft single (16 ft double drive) for 3 and 4-rail; 6 ft single (12 ft double drive) for 2-rail and Crossbuck. 2-Rail and Crossbuck styles recommended for decorative purposes only (not livestock containment)."
+          }
+        }
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "doc_type": "installation_manual",
+      "title": "Bufftech Fence Installation Guide (incl. SimTek) - 2024 Edition",
+      "url": "https://bufftech.com/wp-content/uploads/sites/2/2024/07/BOL-Bufftech-and-Simtek-Instructions-4-24.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-fence-installation-guide-2024.pdf",
+      "manufacturer": "CertainTeed / Barrette Outdoor Living",
+      "model_or_line": "All Bufftech fence styles (Post & Rail, Privacy, Semi-Private, HV-Post system, SimTek)",
+      "date_or_version": "2024-07 (BOL-Bufftech-and-Simtek-Instructions-4-24)"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Bufftech Gate Installation Guide",
+      "url": "https://bufftech.com/wp-content/uploads/sites/2/2023/10/bufftech-install-guide-e-2201cts.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf",
+      "manufacturer": "CertainTeed / Barrette Outdoor Living",
+      "model_or_line": "All Bufftech gate styles",
+      "date_or_version": "2023-10 (bufftech-install-guide-e-2201cts)"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Bufftech Installation Guide (American Fence & Supply reseller copy)",
+      "url": "https://www.afence.com/mm5/graphics/pdf/Bufftech%20Installation.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+      "manufacturer": "CertainTeed",
+      "model_or_line": "General Bufftech fence installation (posts, rails, racking/stepping)",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Vinyl Fence Installation Guideline (CertainTeed doc code 40-40-70743)",
+      "url": "https://www.deltafenceman.com/wp-content/uploads/2018/07/FRD_Bufftech_Installation_Guide_40-40-70743.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-installation-guide-40-40-70743.pdf",
+      "manufacturer": "CertainTeed",
+      "model_or_line": "General Bufftech fence and gate installation, incl. Florida HVHZ line post stiffener detail",
+      "date_or_version": "40-40-70743"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Bufftech Semi-Private Fence Installation Instructions",
+      "url": "https://www.avinylfence.com/wp-content/uploads/2020/11/INSTALL-bufftech-semiprivate.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-install-semiprivate.pdf",
+      "manufacturer": "CertainTeed",
+      "model_or_line": "Semi-Private Fence (Imperial, Columbia, Millbrook)",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "cut_sheet",
+      "title": "CertainTeed Bufftech Vinyl Fence Products Brochure/Catalog (2009-10 edition)",
+      "url": "https://www.fenc-co.com/bufftech_brochure.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-catalog-brochure-2009.pdf",
+      "manufacturer": "CertainTeed",
+      "model_or_line": "Full Bufftech product line (all styles, colors, specifications table)",
+      "date_or_version": "Code No. 40-40-70610, (c) 10/09"
+    },
+    {
+      "doc_type": "cut_sheet",
+      "title": "CertainTeed Bufftech Vinyl Fence Products Catalog (2014 edition)",
+      "url": "https://www.metropolitanfence.com/wp-content/uploads/files/pdfs/bufftech-catalog.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-catalog-2014.pdf",
+      "manufacturer": "CertainTeed",
+      "model_or_line": "Full Bufftech product line (all styles, colors, specifications table, WindZone/racking degrees)",
+      "date_or_version": "Code No. 40-40-70610, (c) 01/14"
+    },
+    {
+      "doc_type": "cut_sheet",
+      "title": "Bufftech Vinyl Fence Catalog (reseller copy, StandardFencing)",
+      "url": "http://www.standardfencing.com/catalogs/vinyl.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-vinyl-catalog-standardfencing.pdf",
+      "manufacturer": "CertainTeed",
+      "model_or_line": "Full Bufftech product line (scanned/image-based, text not machine-extractable)",
+      "date_or_version": null
+    },
+    {
+      "doc_type": "spec_sheet",
+      "title": "All Vinyl Fences Are Not Created Equal (Bufftech FAQ/spec comparison sheet)",
+      "url": "https://www.hooverfence.com/mas_assets/theme/hooverfence/pdfs/bufftech-vinyl-fences-not-equal.pdf",
+      "local_path": null,
+      "manufacturer": "CertainTeed",
+      "model_or_line": "General Bufftech material/warranty FAQ",
+      "date_or_version": null
+    }
+  ]
+}

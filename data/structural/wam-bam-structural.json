@@ -1,0 +1,181 @@
+{
+  "manufacturer": "Wam Bam Fence Co",
+  "pass": 2,
+  "focus": "Structural engineering and installation-depth content for the no-dig pipe-anchor system",
+  "pipe_anchor_structural_data": {
+    "material": "Galvanized steel pipe (round tube)",
+    "diameter_in": "1 5/8 (1.625)",
+    "wall_thickness": "3mm (~0.118 in) — stated on 'Large Pipe Anchoring System (4-pack)' product page (item PA41004): 'Galvanized steel pipe 1-5/8in diameter 3mm thick'",
+    "product_sku_large_pipe_4pack": "PA41004, $110.00, box size 91in x 6.25in x 5.5in, weight 62.6 lb (4 anchors)",
+    "components": [
+      "Patented Leveling Donut (compensates for a crooked driven anchor, adjustable 360 degrees from the Anchor Positioner)",
+      "Anchor/Pipe Positioner (holds anchor location, 2 in clearance from vertical surfaces recommended)",
+      "Tek self-drilling screws",
+      "Lower gear/stop (visual/tactile depth indicator — driving stops when lower gear touches ground)"
+    ],
+    "observed_pipe_lengths_by_assembly_in": {
+      "ZP19084 (42in picket fence)": "44 7/8 (44.875)",
+      "BL19103 Sturbridge (48in yard/pool)": "58 1/2 (58.5)",
+      "BL19110 Cambridge (72in privacy)": "78 1/2 (78.5)",
+      "BL19107 Windsor (60in semi-privacy)": "78 3/4 (78.75)",
+      "4ft finishing post kit (Premium Collection, standalone)": "measured as: 42in below ground + 48in above ground to leveling point = 90in installed height; 77.5in vinyl post height; 119.5in total post+anchor combined length"
+    },
+    "drive_depth_guidance": {
+      "large_anchor": "Drive 42in into the ground, leaving 42in above ground (per knowledgebase FAQ 'How far do I drive my large anchor into the ground?'). One product-dimension diagram instead shows 48in above ground to the leveling point for a 90in installed post height — depth appears to vary slightly by post height/style; always defer to the style-specific installation guide.",
+      "small_anchor": "Drive 36in into the ground, leaving 24in above ground.",
+      "general_range": "Per the 'No-Dig Fence and Frost Heave' knowledge base article, anchors are generally driven 24 to 40 inches into the ground depending on fence style and post size."
+    },
+    "wind_load_testing": {
+      "rating": "75 mph sustained wind load (Category 1 hurricane threshold starts at 74 mph)",
+      "test_type": "Real field test (not a simulated fixture test): two Steady Freddy privacy-fence panels and three posts installed into actual ground. Posts were NOT filled with concrete or otherwise reinforced to maximize wind-load potential.",
+      "testing_lab": "ATL Testing Laboratories, 1656 Calvert Rd., Brevard, NC 28712, (828) 884-3700",
+      "scope_caveat": "Certification applies to the vinyl privacy fence (Steady Freddy) system; WamBam states 'All other fence styles will perform' but the formal lab test was run on the privacy panel/post/anchor system specifically.",
+      "hurricane_zone_caveat": "WamBam explicitly advises against installing its privacy fence in high-velocity/hurricane-prone wind zones.",
+      "south_florida_exclusion": "Wind test certification does NOT satisfy Miami-Dade, Broward, or Monroe County (FL) permitting requirements — WamBam states those counties require 'special certifications we do not have.'",
+      "marketing_claims": "50,000+ installations cited; system described as in field use for ~20 years (invented in Canada for frost conditions); customer video comparison vs. a large industrial ('Big Ass') fan and unsolicited customer testimonials of surviving tornado-strength winds (Lyons, NE and Nebraska, Dec. 2021) are used as informal evidence, not lab data."
+    },
+    "comparison_to_concrete_footings": {
+      "manufacturer_claim": "'In field tests, provided this fence is installed properly in normal ground conditions, this fence is just as strong — if not stronger — than traditionally installed fence with concrete footings' (per WamBam Amazon/product FAQ, citing their wind testing certification).",
+      "frost_mechanism_argument": "Concrete footings have large surface area, giving frost more area to grip and heave; a narrow steel pipe anchor has far less surface area for frost to leverage against, so WamBam argues it heaves less readily than a concrete footing.",
+      "repairability_argument": "If a pipe anchor does heave, the stated fix is to remove the panel/post fasteners, lift the post off, reset the pipe with a few sledgehammer strikes, and reassemble — contrasted against replacing a heaved concrete footer.",
+      "caveat": "This is manufacturer marketing language, not independent third-party comparative engineering data. No independent study comparing pipe-anchor vs. concrete-footing load capacity was found."
+    },
+    "soil_condition_requirements": {
+      "unsuitable_soils": "Not recommended in soil that is rocky, swampy, or sandy deep down.",
+      "suitable_soils": "Works well in hard dirt or clay soil.",
+      "loose_soil_caveat": "'Your pipe anchors, even when driven to the recommended depths of 36 inches or 48 inches, will have a wind load resistance problem if the ground around them is unstable' — applies to loose/extremely loamy conditions.",
+      "obstruction_pre-check": "WamBam recommends probing planned anchor locations with a 1/4in to 1/2in round steel rebar (with a pounding cap), 36-42in length, before ordering, to check for underground obstructions (source: 'Murphy's Vinyl Fence Laws' guide)."
+    },
+    "crooked_anchor_correction_options": [
+      "Option 1: Drive the anchor deeper than recommended — the leveling donut's corrective range increases the closer it sits to the anchor positioner.",
+      "Option 2: Bend the anchor — slip the pounder ~3-4in down over the anchor and use pounder leverage to bend it straight; this 'slightly compromises' the anchor's integrity but is said to still perform acceptably. Explicitly warned NOT to use on back-to-back anchors, or wind-load resistance of that panel run may be compromised.",
+      "Option 3: Remove the leveling donut and screw the post directly into the top of the anchor.",
+      "Option 4: Straighten by moistening soil on the offending side and compacting with an inverted post pounder or spud bar, repeating until level.",
+      "Option 5: Remove and replace the crooked anchor entirely."
+    ],
+    "installation_tooling_constraints": {
+      "post_pounder_barrel": "Barrel diameter must be 2in or greater; barrel length must not exceed 24in.",
+      "manual_pounder_strike_count": "In typical ground, driving an anchor with the WamBam manual pounder takes approximately 15 to 30 strikes ('WamBams').",
+      "leveling_check_interval": "Check for level approximately every 6in of penetration, pounding equally from all four sides to maintain plumb."
+    },
+    "cad_dimensioned_drawings_found": [
+      "'V-3.0 Pipe Anchor Detail' dimensioned drawing appears on manufacturer spec sheets hosted by Home Depot (thdstatic.com) and Lowe's (pdf.lowes.com) for Nantucket and Sturbridge kits — shows 1 5/8in galvanized pipe, .090in wall thickness callout (vinyl post/rail context), ground line, ground-to-gear and ground-to-donut offsets, and full panel elevation dimensions. These are the closest thing to CAD/dimensioned structural drawings found; they are retailer-hosted product spec sheets, not standalone engineering CAD files or PE-stamped drawings.",
+      "A 'V-3.0' revision label recurs across multiple retailer PDF spec sheets, suggesting an internal drawing/version numbering system for these spec sheets, but no public CAD (DWG/DXF) or full structural drawing set was located."
+    ]
+  },
+  "engineering_letters": [],
+  "engineering_letters_note": "No PE-stamped engineering letters, stamped structural drawings, or site-specific engineering certifications were found for WamBam's no-dig pipe-anchor system in this pass. The only third-party structural documentation located is the ATL Testing Laboratories wind-load test (75 mph, real field test of the Steady Freddy privacy panel system) — this is a lab test report/certification, not a PE-stamped engineering letter. WamBam explicitly states it lacks the 'special certifications' required by Miami-Dade, Broward, and Monroe Counties (FL), which is further evidence no formal PE engineering package exists for high-wind jurisdictions. Confirming absence rather than guessing, per task instructions.",
+  "racking_stepping_supplement": {
+    "racking_eligible_styles": ["Steady Freddy", "Nervous Nelly", "Plain Jane", "Jiminy Picket", "Curious George"],
+    "racking_ineligible_stepping_only_styles": ["Cambridge", "Windsor", "Sturbridge", "Nantucket", "Westport", "All-American", "Newport"],
+    "racking_mechanism": "Racking-eligible styles use an open-groove (bracketless) post channel instead of a bracket, letting the rail angle follow the ground slope.",
+    "angle_thresholds_refined": {
+      "0_to_10_deg": "Racks naturally with no modification to rails, boards, or posts.",
+      "10_to_15_deg": "Requires angle-cutting the rails and (on certain styles) the top/bottom of the fence boards. For Plain Jane and Nervous Nelly specifically, the holes in the bottom of the top rail must also be enlarged (rat-tail file, Dremel router, or fine-tooth jigsaw) so pickets stay vertical while the rail angles.",
+      "over_15_deg": "WamBam directs customers to call before ordering — stated limitations at steep angles require case-by-case guidance."
+    },
+    "source": "https://wambamfence.com/knowledgebase/how-to-deal-with-sloping-ground (refines/confirms pass-1's ~10-15 deg estimate with the exact 10 deg and 15 deg breakpoints and the picket-hole-enlargement detail for Plain Jane/Nervous Nelly)",
+    "gates_not_rackable": "WamBam states plainly: gates are not rackable and must be installed on a relatively flat surface, regardless of fence style.",
+    "slope_vs_step_post_size_cheat_sheet": {
+      "source": "https://wambamfence.com/page/how-to-handle-sloping-ground-41.html",
+      "Jiminy Picket": { "slope_post_ft": 4, "step_post_ft": 5 },
+      "Plain Jane": { "slope_post_ft": 4, "step_post_ft": 5 },
+      "Nervous Nelly": { "slope_post_ft": 5, "step_post_ft": 6 },
+      "Steady Freddy": { "slope_post_ft": 6, "step_post_ft": 7 },
+      "Curious George": { "slope_post_ft": 6, "step_post_ft": 7 },
+      "note": "Stepping requires a taller post than sloping for the same nominal panel height, since the post must extend further to create the step offset."
+    },
+    "stepping_only_max_step_per_panel_confirmed": {
+      "generic_bundled_post_limit": "'WamBam panels that are bundled with a post allow for a maximum of 3-4in step using the included post' (per knowledgebase sloping-ground article).",
+      "All-American (ZP19084)": "3-4 in per 6ft run (per install guide: 'If slope exceeds 3-4 in per 6 ft, split panels and purchase an extra post & brackets').",
+      "Windsor (BL19107)": "4-5 in per 6ft run.",
+      "Cambridge (BL19110)": "Diagrammed threshold at 5 in per 6ft panel ('Determine slope, under 5in per 6ft panel' vs. 'over 5in per 6ft panel' in the install guide).",
+      "Nantucket/Sturbridge bracket style (Lowe's-hosted spec PDF)": "'If your yard has a severe slope or elevation change greater than approximately 7 to 8 inches over one panel of fence, you will not be able to install this fence. Your post will not be long enough to accommodate.' — this is the hard ceiling before a taller/custom post or manufacturer consultation is required."
+    }
+  },
+  "structural_reinforcement_supplement": {
+    "metal_post_stabilizers": {
+      "purpose": "Addresses isolated loose/loamy soil spots along an otherwise stable fence line where a driven pipe anchor (even at full recommended depth) would have a wind-load resistance problem.",
+      "product": "Metal Pipe Anchor Stabilizers for Vinyl, approx. 4.5in x 4.5in",
+      "compatibility_restriction": "Only compatible with the pipe anchors used for these styles: Jiminy Picket, Plain Jane, Nervous Nelly, Curious George, Steady Freddy — i.e., only the open-groove/rackable post family, not the bracket-style (Cambridge/Windsor/Sturbridge/etc.) pipe anchors.",
+      "source": "https://wambamfence.com/knowledgebase/when-do-i-need-metal-post-stabilizers"
+    },
+    "gate_post_reinforcement": {
+      "issue": "6ft x 6ft privacy gate hinge screws benefit from more material to bite into; a gate wheel is recommended for this gate to offload stress from the post and hinges.",
+      "solution": "WamBam knowledge base describes an affordable method to add supplemental material to the gate post so hinge screws have more purchase (article: 'How To Add Supplemental Material To Your WamBam Gate Post')."
+    },
+    "surface_mount_option": {
+      "concrete": "Requires concrete at least 4in thick; mount at least 2in from the slab edge. Drill a 1-5/8in diameter hole through the concrete (vinyl pipe anchors) or 1in diameter (aluminum pipe anchors), pound the pipe anchor through into the subgrade below, trim the anchor-positioner prongs, then install the post as normal.",
+      "thin_concrete_(<4in)": "True surface mount is not reliable; instead, chain-drill through the thin slab and drive the pipe anchor through into native soil beneath.",
+      "wood_deck": "Drill through deck surface and blocking underneath; secure surface mount from underneath with 3/8in x 4in bolts, washers, and nuts (wood screws/lag bolts explicitly disallowed).",
+      "source": "https://wambamfence.com/knowledgebase/all-about-surface-mounts"
+    }
+  },
+  "double_gate_kit_with_drop_rod": {
+    "status": "Successfully extracted on retry via the installation-guide URL variant (the box-contents page itself remains JS-rendered/unextractable, but the assembly-instructions page returned full content).",
+    "item_code": "MS29998",
+    "product_name": "Double Gate Kit with Drop Rod",
+    "product_dimensions": "9.25ft H x 4in W x 4in L (box-contents page); detailed spec drawing shows 110 1/2in and 103 1/2in overall reference dimensions and a 2in/2in/11in/4in surface detail",
+    "assembly_time_estimate": "60 min",
+    "parts_list": [
+      { "part": "Drop Rod", "qty": 1, "label": "1" },
+      { "part": "Drop Rod Bracket", "qty": 2, "label": "2" },
+      { "part": "Gate Jig Part 1", "dimensions_in": "4 x 4 x 57", "qty": 1, "label": "A" },
+      { "part": "Gate Jig Part 2", "dimensions_in": "4 x 4 x 54", "qty": 1, "label": "B" },
+      { "part": "1 1/2in Stainless Steel Self-Drilling Screws", "qty": 8, "label": "D" },
+      { "part": "1 1/4in Black Stainless Steel Screws", "qty": 4, "label": "E" }
+    ],
+    "installation_notes": {
+      "drop_rod_bracket_height": "Top of the (C) bracket positioned 13in from the ground, or 11in from the bottom of the gate.",
+      "bracket_spacing": "4in measured between the top and bottom drop-rod brackets, fastened with 1/2in black hex head screws.",
+      "ground_socket_concrete": "Drill a 1in diameter hole, 2.5in deep, for the drop rod to seat into on a concrete surface.",
+      "ground_socket_dirt": "Create a 1in diameter, 6in deep hole and insert a 1in diameter x 6in long PVC or steel pipe sleeve to keep debris out.",
+      "gate_jig_assembly": "Gate Jig Part 1 inserts into Gate Jig Part 2 and is secured with all 8 of the 1 1/2in stainless self-drilling screws — the jig is used to hold the two gate leaves at correct spacing during assembly.",
+      "lock_operation": "Rod is locked in the up (open) position by raising it, aligning its stop through the notch in the top bracket, resting the stop on top of the bracket, and turning 90 degrees. Reverse (turn 90 degrees, align stop with notch) to drop the rod into the ground socket for the down (locked) position."
+    },
+    "source_url": "https://wambamfence.com/installation-guide/drop-rod-for-double-gate-54.html",
+    "related_product": {
+      "name": "Drop Rod for Double Gate",
+      "item_code": "MS29999",
+      "price_usd": 20.00,
+      "dimensions": "23in H x 2in W x .25in L",
+      "box_size": "24in x 4in x 2in",
+      "weight_lb": 3.0,
+      "note": "For applications where two single gates are combined into a double gate opening."
+    }
+  },
+  "documents": [
+    {
+      "file": "manuals/wam-bam/structural/nantucket-spec-sheet-v3.pdf",
+      "source_url": "https://images.thdstatic.com/catalog/pdfImages/c3/c3664aaa-e439-4694-9513-ca2d2d7d4b6f.pdf",
+      "description": "Home Depot-hosted WamBam Nantucket Vinyl Picket Fence w/Post and No-Dig Steel Pipe Anchor Kit (4ftH x 6ftW) spec sheet — includes 'V-3.0 Pipe Anchor Detail' dimensioned drawing, .090in wall thickness callout, box contents, and full panel elevation dimensions."
+    },
+    {
+      "file": "manuals/wam-bam/structural/nantucket-spec-sheet-v3-alt.pdf",
+      "source_url": "https://images.thdstatic.com/catalog/pdfImages/b5/b5ed3b2b-0e93-4ce3-98a9-45f203d48b70.pdf",
+      "description": "Alternate/fuller Home Depot-hosted Nantucket spec sheet (filename tag 'WB-Nantucket-VinylPicketFence-NoDigSPAK-4H-OUT-V3.0-1114') — includes stair-step slope diagram, string-line/leveling-donut instructions, and repeated V-3.0 Pipe Anchor Detail."
+    },
+    {
+      "file": "manuals/wam-bam/structural/sturbridge-spec-sheet-lowes.pdf",
+      "source_url": "https://pdf.lowes.com/productdocuments/a47e4819-68b7-4901-aaad-073cb7bdbe3a/44386113.pdf",
+      "description": "Lowe's-hosted WamBam Sturbridge Vinyl Picket Fence w/Post and No-Dig Steel Pipe Anchor Kit (4ftH x 6ftW) spec sheet — 'CONFORMS TO BOCA POOL CODE' callout, .090in wall thickness, V-3.0 Pipe Anchor Detail, full dimension set."
+    },
+    {
+      "file": "manuals/wam-bam/structural/generic-vinyl-fence-spec-lowes.pdf",
+      "source_url": "https://pdf.lowes.com/productdocuments/d7c6659e-31c6-4ba6-990f-f3ab7fac3fbf/40968511.pdf",
+      "description": "Lowe's-hosted spec sheet for a 48in x 4in x 4in WamBam vinyl fence w/post and no-dig steel pipe anchor kit (V-3.0) — Pipe Anchor Detail with 27.5in/31in/53in dimension set for a shorter (4ft-class) post/anchor combination."
+    },
+    {
+      "file": "manuals/wam-bam/structural/important-install-info-thdstatic.pdf",
+      "source_url": "https://images.thdstatic.com/catalog/pdfImages/85/85249408-8856-4015-afbd-0a9b98082027.pdf",
+      "description": "'Important stuff to know about installing your WamBam fence' — full Steady Freddy installation walkthrough including anchor positioner placement, leveling-donut mechanics, level-check-every-6in guidance, and post-pounder technique. This is the most structurally detailed installation document found in this pass."
+    }
+  ],
+  "remaining_gaps": [
+    "No published virgin-PVC%, UV-inhibitor, or impact-modifier specs (unchanged from pass 1 — not found again in this pass either).",
+    "No PE-stamped engineering letters or site-specific stamped structural drawings exist publicly for WamBam's system (confirmed absent, not just unfound).",
+    "No independent (non-WamBam) third-party load-rating data for the pipe anchor itself (e.g., pull-out resistance in lbf, bending moment capacity) — only the pipe's physical gauge (3mm wall, 1-5/8in diameter) and the finished-fence-system wind test (75 mph) were found; no anchor-only engineering load table exists publicly.",
+    "The double-gate-kit box-contents page (wambamfence.com/box-contents/double-gate-kit-with-drop-rod-57.html) still cannot be extracted directly — it appears to be client-side rendered. The equivalent installation-guide URL (drop-rod-for-double-gate-54.html) was found instead and yielded full parts/assembly content, which substitutes for the missing box-contents page.",
+    "No standalone CAD files (DWG/DXF) were found; the closest artifacts are retailer-hosted 'V-3.0' dimensioned PDF spec sheets, which are product-spec drawings rather than full structural/CAD drawing sets."
+  ]
+}

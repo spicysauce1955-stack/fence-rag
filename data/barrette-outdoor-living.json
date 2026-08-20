@@ -1,0 +1,836 @@
+{
+  "manufacturer": "Barrette Outdoor Living",
+  "brand": "Barrette Outdoor Living / Bufftech (rebranding to Catalyst Fence Solutions as of 2025-2026)",
+  "website": "https://www.barretteoutdoorliving.com",
+  "_research_note": "No evidence was found that 'Regalia' or 'Xceltrim' are real Barrette Outdoor Living brand/product-line names (checked barretteoutdoorliving.com, barretteoutdoorliving.ca, bufftech.com/catalystfence.com, ARCAT, and Home Depot listings). Barrette's actual vinyl fence brand family is: 'Barrette Outdoor Living' (flagship, sold at Home Depot/Lowe's under model names like Roosevelt, Washington, Bryce, Linden, Cameron), 'Bufftech' and 'SimTek' (premium fencing lines), and 'RDI' (railing). As of 2025-2026 the whole fencing business is actively rebranding to 'Catalyst Fence Solutions' (catalystfence.com), which now hosts the newest SKU/spec sheets. This dataset covers the Barrette/Bufftech/Catalyst vinyl fence family since the named brands could not be substantiated.",
+  "source_urls": [
+    "https://www.barretteoutdoorliving.com/resource/vinyl-fence-installation-instructions",
+    "https://www.barretteoutdoorliving.com/resources/professionals/fencing-gates-professionals/installation-fencing-professional",
+    "https://barretteoutdoorliving.ca/frc/product/solid-privacy-fencing-vinyl-fence-panels",
+    "https://www.barretteoutdoorliving.com/premium-fencing",
+    "https://www.barretteoutdoorliving.com/news/horizontal-vinyl-fencing-debuts-with-barrette-outdoor-living-in-2022",
+    "https://bufftech.com/product-type/fences-gates",
+    "https://bufftech.com/product/manchester-base/",
+    "https://www.catalystfence.com/wp-content/uploads/Cape-Cod_Catalyst-VF-MF-Sku-Pages_CAT25-D-514650_12-25.pdf",
+    "https://www.catalystfence.com/wp-content/uploads/Catalyst-Sku_Fence-Accents_CAT25-D-532100_WEB.pdf",
+    "https://www.arcat.com/company/barrette-outdoor-living-51566",
+    "https://images.thdstatic.com/catalog/pdfImages/a9/a9ed344a-a27c-41b8-9626-2af85c17ba83.pdf",
+    "https://images.thdstatic.com/catalog/pdfImages/b0/b084e14f-53d6-40a4-8453-25df6442bc2f.pdf",
+    "https://www.homedepot.com/p/Barrette-Outdoor-Living-Roosevelt-6-ft-H-x-8-ft-W-Two-Toned-White-and-Sand-Privacy-Vinyl-Fence-Panel-Unassembled-73024519/206020603"
+  ],
+  "product_lines": [
+    {
+      "line_name": "Solid Privacy Vinyl Fencing (Classic / Premium / LX)",
+      "assemblies": [
+        {
+          "assembly_id": "BOL-SPF-175x55",
+          "assembly_type": "panel",
+          "assembly_name": "Solid Privacy Fence Panel - 1 3/4\" x 5 1/2\" Rail",
+          "style": "privacy",
+          "height_options_in": [48, 72, 96],
+          "width_on_center_in": 96,
+          "color_options": ["White", "Sand", "Clay", "Gray", "Cypress", "Weathered Aspen", "Mesquite", "Coastal Cedar", "Weathered Blend", "Sierra Blend", "Brazilian Blend", "Arctic Blend"],
+          "texture_finish": ["Standard smooth solid color", "TimberGrain textured woodgrain (Premium/LX)"],
+          "material_grade": {
+            "resin": "Vinyl (PVC) compound; marketing copy states \"highest quality vinyl PVC\" and \"Made in the USA\" but exact virgin-vs-regrind resin ratio is not publicly disclosed",
+            "uv_inhibitors": "SolarGuard® proprietary UV-stabilized formulation for fade resistance",
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Transferable Limited Lifetime Warranty for single-family residential (original purchaser + 1 transferee); 30-year limited warranty for commercial/other property types. Covers peeling, flaking, rotting, chipping, cracking, blistering, abnormal discoloration/fading under normal conditions (fading tolerance up to Delta E 5). Warranty effective for products purchased after Jan 1, 2017; registration required within 30 days of purchase."
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "BOL-POST-5x5-135",
+              "component_type": "post",
+              "component_name": "5\" x 5\" Blank Line/Corner/End Post (Classic, .135 wall)",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": "5x5",
+              "wall_thickness_in": "0.135",
+              "profile_depth_in": null,
+              "material": "Cellular/solid vinyl PVC",
+              "compatible_component_ids": ["BOL-SPF-175x55"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-POST-5x5-170",
+              "component_type": "post",
+              "component_name": "5\" x 5\" Blank Line/Corner/End Post (Premium/LX TimberGrain, .170 wall)",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": "5x5",
+              "wall_thickness_in": "0.170",
+              "profile_depth_in": null,
+              "material": "Cellular/solid vinyl PVC with TimberGrain texture",
+              "compatible_component_ids": ["BOL-SPF-175x55"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-POST-4x4",
+              "component_type": "post",
+              "component_name": "4\" x 4\" Post (smaller panel styles)",
+              "nominal_dimensions_in": "4x4",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-RAIL-175x55",
+              "component_type": "rail",
+              "component_name": "1 3/4\" x 5 1/2\" Deco Rail",
+              "nominal_dimensions_in": "1 3/4 x 5 1/2",
+              "actual_dimensions_in": "1 3/4 x 5 1/2",
+              "wall_thickness_in": null,
+              "profile_depth_in": "3 1/16 (rib removal depth for racking cut)",
+              "material": "Vinyl PVC with StayStraight® internal composition (decreases long-term bowing/sagging); internal metal (aluminum or galvanized steel) stiffener insert used in bottom rail on many panel styles",
+              "compatible_component_ids": ["BOL-SPF-175x55"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-TG-PICKET",
+              "component_type": "picket",
+              "component_name": "Tongue & Groove Privacy Board (Fill Kit)",
+              "nominal_dimensions_in": "7 wide (T&G board)",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC, tongue-and-groove profile; sold in fill kits e.g. 35 7/8\", 39 1/4\", 41 7/8\", 50 3/4\", 62 3/4\" tall x 7\" boards, 13 T&G boards per 8' section",
+              "compatible_component_ids": ["BOL-SPF-175x55"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-POSTCAP",
+              "component_type": "post_cap",
+              "component_name": "Post Cap (Pyramid, New England, Gothic, Ball, Federation, Contemporary, Solar, Internal)",
+              "nominal_dimensions_in": "5x5 (also 6x6 available)",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC (or aluminum for aluminum-post lines)",
+              "compatible_component_ids": ["BOL-POST-5x5-135", "BOL-POST-5x5-170"],
+              "fasteners": [
+                { "type": "adhesive", "size": "N/A", "material": "PVC cement / vinyl bonding compound", "qty_per_assembly": "1 bead inside rim" }
+              ]
+            },
+            {
+              "component_id": "BOL-TRANS-BRACKET",
+              "component_type": "bracket",
+              "component_name": "Vinyl Fence Transition Bracket",
+              "nominal_dimensions_in": "1 3/4x5 1/2, 1 3/4x7, 2x3 1/2, 2x6, 2x7 (matches rail profile)",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC / plastic bracket, style varies by rail profile",
+              "compatible_component_ids": ["BOL-RAIL-175x55"],
+              "fasteners": [
+                { "type": "panhead screw", "size": "#10 x 3/4\"", "material": "not specified (screws not included)", "qty_per_assembly": "per pre-drilled hole (1/8\" pilot)" }
+              ]
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 96,
+            "post_depth_below_grade_in": "If frost line < 30\": dig hole minimum 30\" deep. If frost line ≥ 30\": dig to frost line depth, add 6\" gravel for drainage, then set post so ~24\" of embedment remains for concrete footing.",
+            "frost_line_note": "Post embedment sized to local frost line; installer must verify local code. Panel must sit min. 2\" above grade (or per local code).",
+            "footing_diameter_in": "10\" diameter hole for 5\"x5\" posts; 8\" diameter hole for 4\"x4\" posts",
+            "concrete_footing_spec": "High-strength concrete mix, approx. 1 to 1.5 (80 lb) bags per hole average, 6\" coarse gravel base for drainage; posts installed sequentially post-panel-post (do not pre-dig all holes)"
+          },
+          "slope_accommodation": {
+            "method": "both",
+            "max_rake_angle_deg": "8",
+            "hardware_required": [
+              "Transition brackets (rail-profile specific)",
+              "Transition panel kit",
+              "PVC/vinyl chemical bonding compound (for gate rail racking cuts)"
+            ],
+            "notes": "Standard T&G privacy fence PANELS are not racked/raked in the field (routed post system is fixed); slope is handled by STEPPING panels between posts of differing height using transition brackets/transition panel kits at each grade change. GATES for full-privacy styles CAN be racked up to a maximum of 8°, or 1\" of rise per foot of gate width, by trimming a wedge from the top and bottom rail ends per the rail-profile-specific cut template before assembly."
+          }
+        },
+        {
+          "assembly_id": "BOL-GATE-PRIVACY",
+          "assembly_type": "gate",
+          "assembly_name": "Privacy Gate (incl. Racking Gate configuration)",
+          "style": "privacy",
+          "height_options_in": [48, 60, 72],
+          "width_on_center_in": null,
+          "color_options": ["White", "Sand", "Clay", "Gray"],
+          "texture_finish": null,
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "BOL-HINGE-STD-BFLY",
+              "component_type": "hinge",
+              "component_name": "Standard Butterfly Hinge",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum/steel (black, white, bronze finishes)",
+              "compatible_component_ids": ["BOL-GATE-PRIVACY"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-HINGE-HD-BFLY",
+              "component_type": "hinge",
+              "component_name": "Heavy-Duty Butterfly Hinge",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum/steel",
+              "compatible_component_ids": ["BOL-GATE-PRIVACY"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-HINGE-HD-WRAP",
+              "component_type": "hinge",
+              "component_name": "Heavy-Duty Contemporary Wrap Hinge / Heavy-Duty Modern Hinge",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum/steel, black finish",
+              "compatible_component_ids": ["BOL-GATE-PRIVACY"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-LATCH-GRAVITY",
+              "component_type": "latch",
+              "component_name": "Gravity Latch / Locking Gravity Latch (1- or 2-Sided Key Entry)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum/steel, black finish",
+              "compatible_component_ids": ["BOL-GATE-PRIVACY"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-LATCH-POOL",
+              "component_type": "latch",
+              "component_name": "Locking Pool Safety Latch / Compact Locking Pool Safety Latch",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum/steel, black finish; pool-code compliant self-latching",
+              "compatible_component_ids": ["BOL-GATE-PRIVACY"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-LATCH-POST-5x5",
+              "component_type": "latch",
+              "component_name": "5\" x 5\" Standard Post Latch (Vinyl, Stainless Steel hardware)",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl body with stainless steel hardware",
+              "compatible_component_ids": ["BOL-POST-5x5-135", "BOL-POST-5x5-170"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-DROPROD-HD",
+              "component_type": "drop_rod",
+              "component_name": "Heavy-Duty Drop Rod (24\", 36\", 48\")",
+              "nominal_dimensions_in": "24 / 36 / 48",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum/steel, black finish",
+              "compatible_component_ids": ["BOL-GATE-PRIVACY"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-GATEKIT-HW",
+              "component_type": "gate_kit",
+              "component_name": "Hardware Gate Kit (5'-6' or 7'-8'; Standard / Key / Magnetic variants)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Mixed aluminum/steel hardware (hinges + latch + fasteners bundled)",
+              "compatible_component_ids": ["BOL-GATE-PRIVACY"],
+              "fasteners": [
+                { "type": "self-drilling screw / torx screw", "size": "#12 x 3/4\" (post-mount hardware); T-40 torx drive typical", "material": "steel", "qty_per_assembly": "varies by kit" }
+              ]
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": null,
+            "post_depth_below_grade_in": "Gate posts require larger/reinforced footing than line posts; not separately quantified in available documents",
+            "frost_line_note": null,
+            "footing_diameter_in": null,
+            "concrete_footing_spec": null
+          },
+          "slope_accommodation": {
+            "method": "racking",
+            "max_rake_angle_deg": "8",
+            "hardware_required": ["PVC/vinyl chemical bonding (cement) compound", "Gate upright, top rail, bottom rail cut per rail-profile template"],
+            "notes": "Racking gate instructions (WEB REV 3.21) give per-rail-profile cut templates for 1 3/4x5 1/2, 1 3/4x7, 2 1/4x7, 2x6, and 2x7 rails: remove a wedge from the rib on each rail end (depth 3\"-3 1/4\" typical) to allow up to 8° of rack (1\" rise per foot of gate width), then assemble uprights/infill/rails with chemical bonding compound before the compound cures and screw together."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Semi-Privacy Vinyl Fencing",
+      "assemblies": [
+        {
+          "assembly_id": "BOL-SEMI-SPACED",
+          "assembly_type": "panel",
+          "assembly_name": "Semi-Privacy Panel (Spaced Board / Board-on-Board / Dogear / Scallop variants)",
+          "style": "semi-privacy",
+          "height_options_in": [48, 72],
+          "width_on_center_in": 96,
+          "color_options": ["White", "Sand", "Clay", "Gray"],
+          "texture_finish": ["Straight Dogear", "Scallop Dogear", "Board on Board", "Spaced Board", "Alternating"],
+          "material_grade": {
+            "resin": "Vinyl (PVC) compound; virgin/regrind ratio not publicly disclosed",
+            "uv_inhibitors": "SolarGuard® fade-resistance technology",
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Transferable Limited Lifetime Warranty (residential) / 30-year (commercial); same terms as Solid Privacy line"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "BOL-SEMI-POST",
+              "component_type": "post",
+              "component_name": "5\" x 5\" or 4\" x 4\" Post",
+              "nominal_dimensions_in": "5x5 / 4x4",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": "0.135 (Classic) / 0.170 (Premium/LX)",
+              "profile_depth_in": null,
+              "material": "Vinyl PVC",
+              "compatible_component_ids": ["BOL-SEMI-SPACED"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-SEMI-RAIL",
+              "component_type": "rail",
+              "component_name": "Top/Bottom Rail with routed post channel",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC with StayStraight®; metal stiffener insert in some styles",
+              "compatible_component_ids": ["BOL-SEMI-SPACED"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-SEMI-METAL-STIFFENER",
+              "component_type": "post_stiffener_steel",
+              "component_name": "Purchased Metal Stiffener (owner-supplied, cut to size)",
+              "nominal_dimensions_in": "1x6x8' cut to 4-5/8\"; 1x4x8' cut to 3-1/8\"",
+              "actual_dimensions_in": "3/4\" actual thickness fence panel stock referenced for stiffener sizing",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Wood or metal stiffener (owner-supplied per Owner's Manual V3 diagram; screwed/nailed to panel as shown)",
+              "compatible_component_ids": ["BOL-SEMI-RAIL"],
+              "fasteners": [
+                { "type": "screw or nail", "size": "not specified", "material": "not specified", "qty_per_assembly": "not specified" }
+              ]
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 96,
+            "post_depth_below_grade_in": "Same rule as Solid Privacy: min 30\" if frost line <30\"; frost-line depth + 6\" gravel otherwise",
+            "frost_line_note": "Verify local frost depth/building code before setting post depth",
+            "footing_diameter_in": "10\" (5x5 post) / 8\" (4x4 post)",
+            "concrete_footing_spec": "High-strength concrete, ~1-1.5 bags/hole, 6\" gravel base"
+          },
+          "slope_accommodation": {
+            "method": "stepping",
+            "max_rake_angle_deg": null,
+            "hardware_required": ["Transition brackets", "Transition panel kit"],
+            "notes": "Semi-privacy panels documented as stepped between posts using transition hardware; no rack/rake spec found for this style (contrast with full-privacy gates which do have a documented racking procedure)."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Cape Cod Classic Picket Vinyl Fence (Bufftech / Catalyst)",
+      "assemblies": [
+        {
+          "assembly_id": "CAT-CAPECOD-STRAIGHT",
+          "assembly_type": "panel",
+          "assembly_name": "Cape Cod Classic Picket Panel - Straight (4'x8')",
+          "style": "picket",
+          "height_options_in": [48],
+          "width_on_center_in": 96,
+          "color_options": ["White"],
+          "texture_finish": ["Standard smooth solid"],
+          "material_grade": {
+            "resin": "Vinyl (PVC), Classic Vinyl Construction",
+            "uv_inhibitors": "SolarGuard®",
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Vinyl, Molded & Composite Fence Warranty (Transferable Limited Lifetime, see downloaded PDF)"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "CAT-CC-TOPRAIL",
+              "component_type": "rail",
+              "component_name": "Top Rail",
+              "nominal_dimensions_in": "2 x 3 1/2",
+              "actual_dimensions_in": "2 x 3 1/2 x 94",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC, StayStraight®",
+              "compatible_component_ids": ["CAT-CAPECOD-STRAIGHT"],
+              "fasteners": []
+            },
+            {
+              "component_id": "CAT-CC-BOTRAIL",
+              "component_type": "rail",
+              "component_name": "Bottom Rail",
+              "nominal_dimensions_in": "2 x 6",
+              "actual_dimensions_in": "2 x 6 x 94",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC, StayStraight®",
+              "compatible_component_ids": ["CAT-CAPECOD-STRAIGHT"],
+              "fasteners": []
+            },
+            {
+              "component_id": "CAT-CC-PICKET",
+              "component_type": "picket",
+              "component_name": "Picket (25 per panel)",
+              "nominal_dimensions_in": "1 1/2 x 1 1/2",
+              "actual_dimensions_in": "1 1/2 x 1 1/2 x 44 (straight) / 43 3/16 (scallop)",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC, pyramid-topped",
+              "compatible_component_ids": ["CAT-CAPECOD-STRAIGHT"],
+              "fasteners": []
+            },
+            {
+              "component_id": "CAT-CC-PICKETCAP",
+              "component_type": "post_cap",
+              "component_name": "Picket Cap (25 per panel)",
+              "nominal_dimensions_in": "1 1/2 x 1 1/2",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC",
+              "compatible_component_ids": ["CAT-CC-PICKET"],
+              "fasteners": []
+            },
+            {
+              "component_id": "CAT-CC-POST",
+              "component_type": "post",
+              "component_name": "5\" x 5\" x 84\" Line / Corner / End / Gate Post",
+              "nominal_dimensions_in": "5 x 5",
+              "actual_dimensions_in": "5 x 5 x 84",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC",
+              "compatible_component_ids": ["CAT-CAPECOD-STRAIGHT"],
+              "fasteners": []
+            },
+            {
+              "component_id": "CAT-CC-GATEPOSTINSERT",
+              "component_type": "post_stiffener_aluminum",
+              "component_name": "5\" x 5\" x 82\" Gate Post Insert",
+              "nominal_dimensions_in": "5 x 5",
+              "actual_dimensions_in": "5 x 5 x 82",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum insert for gate post reinforcement (material inferred from category; not explicitly confirmed as aluminum vs. steel in source)",
+              "compatible_component_ids": ["CAT-CC-POST"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 96,
+            "post_depth_below_grade_in": null,
+            "frost_line_note": null,
+            "footing_diameter_in": "10\" (5x5 post, per general Barrette install standard)",
+            "concrete_footing_spec": null
+          },
+          "slope_accommodation": {
+            "method": null,
+            "max_rake_angle_deg": null,
+            "hardware_required": [],
+            "notes": "Not documented specifically for this style in sources reviewed; product marketing shows this fence installed on sloped yards (stepped) but no numeric spec was found."
+          }
+        },
+        {
+          "assembly_id": "CAT-CAPECOD-WALKGATE",
+          "assembly_type": "single_gate",
+          "assembly_name": "Cape Cod Classic Picket Straight Walk Gate (4' x 46\")",
+          "style": "picket",
+          "height_options_in": [46],
+          "width_on_center_in": 48,
+          "color_options": ["White"],
+          "texture_finish": null,
+          "material_grade": null,
+          "sub_assemblies": [],
+          "post_spacing_rules": { "on_center_in": null, "post_depth_below_grade_in": null, "frost_line_note": null, "footing_diameter_in": null, "concrete_footing_spec": null },
+          "slope_accommodation": { "method": null, "max_rake_angle_deg": null, "hardware_required": [], "notes": null }
+        },
+        {
+          "assembly_id": "CAT-CAPECOD-DRIVEGATE",
+          "assembly_type": "single_gate",
+          "assembly_name": "Cape Cod Classic Picket Straight Drive Gate (4' x 58\")",
+          "style": "picket",
+          "height_options_in": [58],
+          "width_on_center_in": 48,
+          "color_options": ["White"],
+          "texture_finish": null,
+          "material_grade": null,
+          "sub_assemblies": [],
+          "post_spacing_rules": { "on_center_in": null, "post_depth_below_grade_in": null, "frost_line_note": null, "footing_diameter_in": null, "concrete_footing_spec": null },
+          "slope_accommodation": { "method": null, "max_rake_angle_deg": null, "hardware_required": [], "notes": null }
+        }
+      ]
+    },
+    {
+      "line_name": "Cameron Privacy Vinyl Fence (Bracket-Mounted System)",
+      "assemblies": [
+        {
+          "assembly_id": "BOL-CAMERON-PANEL",
+          "assembly_type": "panel",
+          "assembly_name": "Cameron Privacy Vinyl Fence Panel (3-rail bracket-mount)",
+          "style": "privacy",
+          "height_options_in": null,
+          "width_on_center_in": null,
+          "color_options": null,
+          "texture_finish": null,
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "BOL-CAMERON-BRACKET",
+              "component_type": "bracket",
+              "component_name": "Rail Bracket (top, mid, lower horizontal)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Not specified (screw-mounted to post face, panel screwed into bracket center slots)",
+              "compatible_component_ids": ["BOL-CAMERON-PANEL"],
+              "fasteners": [
+                { "type": "screw", "size": "not specified (center bracket slots)", "material": "not specified", "qty_per_assembly": "all screw holes used" }
+              ]
+            },
+            {
+              "component_id": "BOL-CAMERON-POST",
+              "component_type": "post",
+              "component_name": "5\" x 5\" Post",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC",
+              "compatible_component_ids": ["BOL-CAMERON-PANEL"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": null,
+            "post_depth_below_grade_in": "Example given: 36\" frost line → 12\" gravel/filler + 24\" post embedded in concrete",
+            "frost_line_note": "Post hole depth set to local frost line per example in install guide",
+            "footing_diameter_in": "10\" for 5\"x5\" post",
+            "concrete_footing_spec": "Wet or dry concrete mix per manufacturer instructions"
+          },
+          "slope_accommodation": {
+            "method": null,
+            "max_rake_angle_deg": null,
+            "hardware_required": [],
+            "notes": "On-center post spacing formula given: panel width (X) + 1/2\" (for brackets) + post width (Y) = on-center hole spacing. No rack/step slope guidance found specific to Cameron; it is a bracket-mounted (not routed) system so likely accommodates minor grade change via bracket height adjustment, but this is inferred, not documented."
+          }
+        }
+      ]
+    },
+    {
+      "line_name": "Horizontal Privacy Vinyl Fence",
+      "assemblies": [
+        {
+          "assembly_id": "BOL-HORIZ-PRIVACY",
+          "assembly_type": "panel",
+          "assembly_name": "Horizontal Privacy Vinyl Fence Panel",
+          "style": "privacy",
+          "height_options_in": [24],
+          "width_on_center_in": 96,
+          "color_options": ["Solid Gray", "Woodgrain pattern 1", "Woodgrain pattern 2 (2 unique wood grain patterns per launch press release)"],
+          "texture_finish": ["Solid", "Wood grain"],
+          "material_grade": {
+            "resin": "Vinyl (PVC)",
+            "uv_inhibitors": "SolarGuard®",
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": null,
+            "warranty": "Transferable Limited Lifetime Warranty (same corporate warranty program)"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "BOL-HORIZ-CHANNEL",
+              "component_type": "channel",
+              "component_name": "Post-Integrated Slide Channel for Horizontal Infill Boards",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC, proprietary locking channel design (per 2022 product launch press release)",
+              "compatible_component_ids": ["BOL-HORIZ-PRIVACY"],
+              "fasteners": []
+            },
+            {
+              "component_id": "BOL-HORIZ-POST",
+              "component_type": "post",
+              "component_name": "Post (per launch: 1 post with cap + 2 rails per 2ft x 8ft section)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC",
+              "compatible_component_ids": ["BOL-HORIZ-PRIVACY"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": { "on_center_in": 96, "post_depth_below_grade_in": null, "frost_line_note": null, "footing_diameter_in": null, "concrete_footing_spec": null },
+          "slope_accommodation": { "method": null, "max_rake_angle_deg": null, "hardware_required": [], "notes": "Not documented in sources reviewed; installation PDF (install-horizontal-privacy-fence-panel.pdf) downloaded but not fully parsed for slope guidance." }
+        }
+      ]
+    },
+    {
+      "line_name": "Vinyl Post & Rail / Ranch Rail Fencing",
+      "assemblies": [
+        {
+          "assembly_id": "BOL-RANCHRAIL",
+          "assembly_type": "panel",
+          "assembly_name": "Post & Rail / Ranch Rail Panel (2, 3, or 4 rail)",
+          "style": "ranch rail",
+          "height_options_in": null,
+          "width_on_center_in": null,
+          "color_options": ["White"],
+          "texture_finish": ["Smooth finish"],
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "BOL-RANCHRAIL-RAIL",
+              "component_type": "rail",
+              "component_name": "Ranch Rail (2/3/4-rail configurations)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl PVC",
+              "compatible_component_ids": ["BOL-RANCHRAIL"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": { "on_center_in": null, "post_depth_below_grade_in": null, "frost_line_note": null, "footing_diameter_in": null, "concrete_footing_spec": null },
+          "slope_accommodation": { "method": null, "max_rake_angle_deg": null, "hardware_required": [], "notes": "Dedicated install PDF downloaded (install-post-rail-ranch-rail.pdf) but detailed dimensions/slope method were not extracted in this pass; product only confirmed to exist in 2, 3, and 4-rail smooth-finish configurations via Bufftech/Catalyst product listing." }
+        }
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "doc_type": "installation_manual",
+      "title": "Vinyl Fence Assembly and Installation Instructions - Owner's Manual V3.0 (Picket, Closed Top & Semi-Privacy)",
+      "url": "https://images.thdstatic.com/catalog/pdfImages/a9/a9ed344a-a27c-41b8-9626-2af85c17ba83.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/owners-manual-vinyl-fence-v3.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Picket / Closed Top / Semi-Privacy",
+      "date_or_version": "34106379BOM V3, 1/14 (copyright 2014)"
+    },
+    {
+      "doc_type": "warranty",
+      "title": "Vinyl Fence Transferable Limited Lifetime / 30-Year Warranty",
+      "url": "https://images.thdstatic.com/catalog/pdfImages/b0/b084e14f-53d6-40a4-8453-25df6442bc2f.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/warranty-vinyl-fence-30yr.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Vinyl Fence (general)",
+      "date_or_version": "Effective for purchases after Jan 1, 2017"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Picket, Closed Top and Semi-Privacy Panel Kit Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VFPicketClosedSemiPanelKitWEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-picket-closedtop-semiprivacy-panel-kit.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Picket / Closed Top / Semi-Privacy",
+      "date_or_version": "WEB 7/21"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Semi-Privacy Enclosure Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/SemiPrivacyEnclosureWEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-semiprivacy-enclosure.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Semi-Privacy",
+      "date_or_version": "2021/07"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Privacy Gate Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VF-Privacy-Gate-Install.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-privacy-gate.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Privacy Gate",
+      "date_or_version": "2021/07"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Vinyl Fence Transition Brackets Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/BARRETTE-WEB_TransitionBrackets_Install.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-transition-brackets.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Transition Brackets (slope/step hardware)",
+      "date_or_version": "WEB REV 3.21"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Transition Panel Kit Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VFTransitionPanelKit.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-transition-panel-kit.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Transition Panel Kit (slope/step hardware)",
+      "date_or_version": "2021/07"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "5x5 Vinyl Fence Post Surface Mount Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/5x5PostSurfaceMountWEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-5x5-post-surface-mount.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "5x5 Post Surface Mount (34111488)",
+      "date_or_version": "REV 2.21"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Racking a Vinyl Gate for Full Privacy Styles",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/BARRETTE-WEB_RackingGate.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-racking-gate.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Full Privacy Gate (racking / slope accommodation)",
+      "date_or_version": "WEB REV 3.21"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Cameron Privacy Vinyl Fence Panel Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/Cameron-Privacy-Vinyl-Panel-Instructions-WEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-cameron-privacy-vinyl-panel.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Cameron",
+      "date_or_version": "WEB-REV 7.21"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Post & Rail Gates Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/Vinyl-post-Rail-Gates-Install-Instructions.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-post-rail-gates.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Post & Rail Gates",
+      "date_or_version": "2021/07"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Privacy & Picket Gates Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/06/BOM-34111485-Privacy-Picket_Gates-Inserts_v2WEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-privacy-picket-gates.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Privacy & Picket Gates (34111485)",
+      "date_or_version": "v2 WEB, 2021/06"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Horizontal Privacy Vinyl Gate Kit Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2022/10/HorizontalPrivacyGateInstructions.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-horizontal-privacy-gate-kit.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Horizontal Privacy Vinyl Gate Kit",
+      "date_or_version": "2022/10"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Horizontal Privacy Vinyl Fence Kit Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/12/BOM-34111282_HorizontalPrivacyFencePanel.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-horizontal-privacy-fence-panel.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Horizontal Privacy Vinyl Fence (34111282)",
+      "date_or_version": "2021/12"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Vinyl Post/Rail & Ranch Rail Installation Instructions",
+      "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/Vinyl-Ppost-and-Ranch-Rail-Install.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-post-rail-ranch-rail.pdf",
+      "manufacturer": "Barrette Outdoor Living",
+      "model_or_line": "Post/Rail & Ranch Rail",
+      "date_or_version": "2021/07"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Bufftech and SimTek Fence Installation Guide",
+      "url": "https://bufftech.com/wp-content/uploads/sites/2/2024/07/BOL-Bufftech-and-Simtek-Instructions-4-24.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+      "manufacturer": "Barrette Outdoor Living (Bufftech / SimTek)",
+      "model_or_line": "Bufftech / SimTek (premium vinyl and molded fence lines)",
+      "date_or_version": "4/24"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Bufftech Gate Installation Guide",
+      "url": "https://bufftech.com/wp-content/uploads/sites/2/2023/10/bufftech-install-guide-e-2201cts.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
+      "manufacturer": "Barrette Outdoor Living (Bufftech)",
+      "model_or_line": "Bufftech Gates",
+      "date_or_version": "e-2201cts"
+    },
+    {
+      "doc_type": "warranty",
+      "title": "Bufftech Fence Limited Lifetime Warranty",
+      "url": "https://bufftech.com/wp-content/uploads/sites/2/2023/10/2024_BOL_VF_Warranty-2-24.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/bufftech-fence-limited-lifetime-warranty.pdf",
+      "manufacturer": "Barrette Outdoor Living (Bufftech)",
+      "model_or_line": "Bufftech Vinyl Fence",
+      "date_or_version": "2/24"
+    },
+    {
+      "doc_type": "warranty",
+      "title": "Vinyl, Molded & Composite Fence Warranty (Catalyst Fence Solutions)",
+      "url": "https://www.catalystfence.com/wp-content/uploads/Vinyl-Molded-Composite-Fence-Warranty_CAT26-D-634250_WEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/catalyst-vinyl-molded-composite-fence-warranty.pdf",
+      "manufacturer": "Catalyst Fence Solutions (Barrette Outdoor Living / Bufftech successor brand)",
+      "model_or_line": "Vinyl / Molded / Composite Fence",
+      "date_or_version": "CAT26-D-634250"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Vinyl Privacy & Picket Gates Installation Instructions (Catalyst)",
+      "url": "https://www.catalystfence.com/wp-content/uploads/CAT-Vinyl_Privacy_Picket-Gates-Rev-1-25_WEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/catalyst-vinyl-privacy-picket-gates.pdf",
+      "manufacturer": "Catalyst Fence Solutions",
+      "model_or_line": "Vinyl Privacy & Picket Gates",
+      "date_or_version": "Rev 1/25"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Picket, Closed Top & Semi-Privacy Vinyl Fence Kit Installation Instructions (Catalyst)",
+      "url": "https://www.catalystfence.com/wp-content/uploads/CAT-VFPicketClosedSemiPanelKit-WEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/catalyst-install-picket-closedtop-semiprivacy-kit.pdf",
+      "manufacturer": "Catalyst Fence Solutions",
+      "model_or_line": "Picket / Closed Top / Semi-Privacy",
+      "date_or_version": "current (catalystfence.com)"
+    },
+    {
+      "doc_type": "cut_sheet",
+      "title": "Cape Cod - Catalyst Vinyl/Molded Fence SKU Pages (dimensions, SKUs, post/rail/picket sizes)",
+      "url": "https://www.catalystfence.com/wp-content/uploads/Cape-Cod_Catalyst-VF-MF-Sku-Pages_CAT25-D-514650_12-25.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/catalyst-capecod-sku-sheet.pdf",
+      "manufacturer": "Catalyst Fence Solutions",
+      "model_or_line": "Cape Cod Classic Picket",
+      "date_or_version": "CAT25-D-514650, Rev 12/25"
+    },
+    {
+      "doc_type": "cut_sheet",
+      "title": "Fence Accents - Catalyst SKU Sheet (post caps, blank posts, transition brackets, gate kits, hinges, latches, drop rods)",
+      "url": "https://www.catalystfence.com/wp-content/uploads/Catalyst-Sku_Fence-Accents_CAT25-D-532100_WEB.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/catalyst-fence-accents-hardware-sku-sheet.pdf",
+      "manufacturer": "Catalyst Fence Solutions",
+      "model_or_line": "Fence Accents / Hardware (cross-line: vinyl + aluminum)",
+      "date_or_version": "CAT25-D-532100, Rev 1/26"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "total_indexed_documents": 4,
+  "documents_with_verified_local_file": 4,
+  "documents_missing_local_file": 0,
+  "documents_url_only_no_download": 0,
+  "files_on_disk_not_in_index": [],
+  "documents": [
+    {
+      "manufacturer": "Zhejiang Showtech Outdoor Products Co., Ltd.",
+      "doc_type": "cut_sheet",
+      "title": "PVC fence catalog 2024",
+      "title_zh": null,
+      "model_or_line": "PVC / Vinyl Fence",
+      "date_or_version": "2024",
+      "url": "https://www.showtechfence.com/uploads/25227/files/PVC-fence-catalog-2024.pdf",
+      "local_path": "china/manuals/showtech/PVC-fence-catalog-2024.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Zhejiang Showtech Outdoor Products Co., Ltd.",
+      "doc_type": "cut_sheet",
+      "title": "PVC fence catalog 2022",
+      "title_zh": null,
+      "model_or_line": "PVC / Vinyl Fence",
+      "date_or_version": "2022",
+      "url": "https://www.showtechfence.com/uploads/25227/files/PVC-fence-catalog-2022.pdf",
+      "local_path": "china/manuals/showtech/PVC-fence-catalog-2022.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Zhejiang Showtech Outdoor Products Co., Ltd.",
+      "doc_type": "cut_sheet",
+      "title": "Showtech WPC fence & decking catalog 2024",
+      "title_zh": null,
+      "model_or_line": "WPC Fence & Decking (separate material line from PVC)",
+      "date_or_version": "2024",
+      "url": "https://www.showtechfence.com/uploads/25227/files/Showtech-WPC-fence-decking-catalog-2024.pdf",
+      "local_path": "china/manuals/showtech/Showtech-WPC-fence-decking-catalog-2024.pdf",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Cross-manufacturer / installation-technical",
+      "doc_type": "Installation diagram guide (image-only PDF, no dimensions/text)",
+      "title": "Unifloor Composite Fencing Installation Guide",
+      "title_zh": "統一地板複合圍欄安裝指南 (implied; PDF itself has no Chinese cover text)",
+      "model_or_line": null,
+      "date_or_version": "Undated; referenced from a Unifloor blog post dated 2022-11-01. Manufacturer: Unifloor / Uniwpc, Shanghai, China. Product category: WPC/composite fencing (not unfilled PVC), included as closest available genuine installation document from a China-based fence manufacturer.",
+      "url": "https://unifloorwpc.com/wp-content/uploads/2022/04/composite-fencing-installation-guide.pdf",
+      "local_path": "china/manuals/installation-technical/unifloor-composite-fencing-installation-guide.pdf",
+      "file_exists": true
+    }
+  ]
+}

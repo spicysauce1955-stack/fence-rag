@@ -1,0 +1,574 @@
+{
+  "manufacturer": "Illusions Fence",
+  "brand": "Illusions Vinyl Fence",
+  "website": "https://illusionsfence.com",
+  "source_urls": [
+    "https://illusionsfence.com",
+    "https://illusionsfence.com/specs-instructions",
+    "https://illusionsfence.com/literature",
+    "https://illusionsfence.com/faqs",
+    "https://illusionsfence.com/fence_styles/vinyl-privacy-fence-with-scalloped-picket-top",
+    "https://illusionsfence.com/grand-illusions-vinyl-woodbond",
+    "https://illusionsfence.com/grand-illusions-color-spectrum",
+    "https://illusionsfence.com/fence-styles/gate-hardware",
+    "https://illusionsfence.com/fence_styles/aluminum-post-inserts",
+    "https://illusionsfence.com/fence_styles/post-inserts",
+    "https://illusionsfence.com/wp-content/uploads/2024/02/Illusions-Vinyl-Fence-Installation-Instructions_0224.pdf",
+    "https://illusionsfence.com/wp-content/uploads/2011/06/Illusions-Vinyl-Fence-GATES-Instructions.pdf",
+    "https://illusionsfence.com/wp-content/uploads/2012/04/Illusions-75MPH-Instructions_120426.pdf",
+    "https://illusionsfence.com/wp-content/uploads/2015/07/NOA-14-1209.01.pdf",
+    "https://illusionsfence.com/wp-content/uploads/2026/06/Illusions-Vinyl-Fence-Warranty-0626.pdf",
+    "https://illusionsfence.com/wp-content/uploads/2011/06/Illusions-Vinyl-Fence-ASTM-Info-Flyer.pdf",
+    "https://illusionsfence.com/wp-content/uploads/2020/04/EWF-Product-Catalog-04-20-20-ILLUSIONS-FENCE-NO-PRICING.pdf",
+    "https://illusionsfence.com/wp-content/uploads/2026/01/Illusions-Fence-Classic-Product-Brochure-0126.pdf",
+    "https://illusionsfence.com/wp-content/uploads/2026/05/Grand-Illusions-Advantage-Tri-Fold-0426.pdf"
+  ],
+  "product_lines": [
+    {
+      "line_name": "Illusions Vinyl Fence Classic (V300/V3215/V3700/V350/V401/V700/VO100 Series)",
+      "assemblies": [
+        {
+          "assembly_id": "V3707-6",
+          "assembly_type": "panel",
+          "assembly_name": "Illusions V3707 Tongue & Groove Privacy Fence with Scalloped Classic Victorian Picket Top, 6ft",
+          "style": "privacy",
+          "height_options_in": [48, 60, 72],
+          "width_on_center_in": null,
+          "color_options": ["White", "Beige", "Gray", "Clay", "and additional Grand Illusions Color Spectrum colors (35 total colors across all lines per manufacturer)"],
+          "texture_finish": ["Smooth (Classic Series)", "available in all colors and woodgrains per manufacturer product page"],
+          "material_grade": {
+            "resin": "100% Pure Virgin Vinyl (Rigid PVC), no regrind stated",
+            "uv_inhibitors": "Tin-stabilized, acrylate-modified formulation; titanium dioxide used as UV light screener",
+            "impact_modifiers": "Custom blended mix of stabilizers, impact modifiers, and processing aids (proprietary formulation, exact modifier chemistry not disclosed)",
+            "titanium_dioxide_pct": "10 parts per hundred resin (PHR) TiO2 - stated as 'industry leading standard'",
+            "warranty": "Classic Illusions Fence: comprehensive limited lifetime warranty (residential); 20 years from install date, prorated, for commercial/non-single-family properties"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "V3707-BOARD",
+              "component_type": "picket",
+              "component_name": "T&G Privacy Board",
+              "nominal_dimensions_in": "7/8\" x 6\"",
+              "actual_dimensions_in": "7/8\" x 6\"",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Rigid PVC, tongue-and-groove profile",
+              "compatible_component_ids": ["V3707-TOPRAIL", "V3707-MIDBOTRAIL"],
+              "fasteners": []
+            },
+            {
+              "component_id": "V3707-TOPRAIL",
+              "component_type": "rail",
+              "component_name": "Top Rail",
+              "nominal_dimensions_in": "2\" x 3-1/2\"",
+              "actual_dimensions_in": "2\" x 3-1/2\"",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Rigid PVC",
+              "compatible_component_ids": ["V44xx", "V55xx", "V88xx"],
+              "fasteners": [
+                { "type": "self-tapping screw", "size": "1\"", "material": "steel, zinc/galvanized", "qty_per_assembly": "1 per post-to-rail connection" }
+              ]
+            },
+            {
+              "component_id": "V3707-MIDBOTRAIL",
+              "component_type": "rail",
+              "component_name": "Middle and Bottom Horizontal Rail",
+              "nominal_dimensions_in": "2\" x 6\"",
+              "actual_dimensions_in": "2\" x 6\"",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Rigid PVC; bottom rail contains metal reinforcement channel",
+              "compatible_component_ids": ["V44xx", "V55xx", "V88xx"],
+              "fasteners": [
+                { "type": "self-tapping screw", "size": "3/4\"", "material": "steel", "qty_per_assembly": "varies by style; see Bill of Materials on install sheet" },
+                { "type": "self-tapping screw", "size": "3\"", "material": "steel", "qty_per_assembly": "through center U-channel, per 75MPH kit spec: 4 per section" }
+              ]
+            },
+            {
+              "component_id": "V3707-PICKETTOP",
+              "component_type": "picket",
+              "component_name": "Classic Victorian Scalloped Picket Top",
+              "nominal_dimensions_in": "1-1/2\" x 1-1/2\"",
+              "actual_dimensions_in": "1-1/2\" x 1-1/2\"",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Rigid PVC",
+              "compatible_component_ids": ["V3707-BOARD"],
+              "fasteners": []
+            },
+            {
+              "component_id": "V7816U",
+              "component_type": "channel",
+              "component_name": "U-Channel edging (vinyl), for field-cut panel sections",
+              "nominal_dimensions_in": "7/8\" x 1\"",
+              "actual_dimensions_in": "7/8\" x 1\"",
+              "wall_thickness_in": null,
+              "profile_depth_in": "2\" (50.88mm) MIN insertion depth",
+              "material": "Rigid PVC (vinyl U-channel) with metal U-channel found inside rail (galvanized steel)",
+              "compatible_component_ids": ["V3707-BOARD"],
+              "fasteners": []
+            },
+            {
+              "component_id": "V557L-E-B-C-3706-6",
+              "component_type": "post",
+              "component_name": "5\" x 5\" Line/End/Blank/Corner Post for V3707-6",
+              "nominal_dimensions_in": "5\" x 5\" x 9'",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Rigid PVC, routed for panel insertion (no exposed fasteners/brackets)",
+              "compatible_component_ids": ["V3707-BOARD", "V3707-TOPRAIL", "V3707-MIDBOTRAIL"],
+              "fasteners": []
+            },
+            {
+              "component_id": "VH557L-E-B-C-3706-6",
+              "component_type": "post",
+              "component_name": "5\" x 5\" Heavy Duty Line/End/Blank/Corner Post for V3707-6",
+              "nominal_dimensions_in": "5\" x 5\" x 9'",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": "0.250\" average wall thickness",
+              "profile_depth_in": null,
+              "material": "Rigid PVC, heavy wall - used for high wind locations and gate posts",
+              "compatible_component_ids": ["V3707-BOARD"],
+              "fasteners": []
+            },
+            {
+              "component_id": "V889L-E-B-C-3706-6",
+              "component_type": "post",
+              "component_name": "8\" x 8\" Majestic Line/End/Blank/Corner Post for V3707-6",
+              "nominal_dimensions_in": "8\" x 8\" x 9'",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": "0.250\" average wall thickness (VH88 heavy duty variant)",
+              "profile_depth_in": null,
+              "material": "Rigid PVC heavy wall, recommended for high wind areas and Majestic Entranceways",
+              "compatible_component_ids": ["V3707-BOARD"],
+              "fasteners": []
+            },
+            {
+              "component_id": "API9",
+              "component_type": "post_stiffener_aluminum",
+              "component_name": "Aluminum Post Insert",
+              "nominal_dimensions_in": "4.5\" x 4.5\" x 9'",
+              "actual_dimensions_in": "4.5\" x 4.5\" x 9'",
+              "wall_thickness_in": "1/2\" (per search result for related product line)",
+              "profile_depth_in": null,
+              "material": "Aluminum",
+              "compatible_component_ids": ["V557L-E-B-C-3706-6", "VH557L-E-B-C-3706-6"],
+              "fasteners": []
+            },
+            {
+              "component_id": "VPS5",
+              "component_type": "post_cap",
+              "component_name": "Post Supporter \"Donut\" for 5\" posts",
+              "nominal_dimensions_in": "5\"",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Rigid PVC",
+              "compatible_component_ids": ["V557L-E-B-C-3706-6", "VH557L-E-B-C-3706-6"],
+              "fasteners": []
+            },
+            {
+              "component_id": "VPS8",
+              "component_type": "post_cap",
+              "component_name": "Post Supporter \"Donut\" for 8\" posts",
+              "nominal_dimensions_in": "8\"",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Rigid PVC",
+              "compatible_component_ids": ["V889L-E-B-C-3706-6"],
+              "fasteners": []
+            },
+            {
+              "component_id": "VWG3707-46",
+              "component_type": "gate_kit",
+              "component_name": "4'W x 6'H Matching Welded Walk Gate for V3707-6",
+              "nominal_dimensions_in": "48\" x 72\"",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Rigid PVC welded frame (Uni-Weld construction), internal aluminum/steel reinforcement per gate hardware guidance",
+              "compatible_component_ids": ["VH557L-E-B-C-3706-6", "V889L-E-B-C-3706-6"],
+              "fasteners": []
+            },
+            {
+              "component_id": "VDG3707-56",
+              "component_type": "gate_kit",
+              "component_name": "5'W x 6'H Matching Welded Drive Gate for V3707-6",
+              "nominal_dimensions_in": "60\" x 72\"",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Rigid PVC welded frame (Uni-Weld construction)",
+              "compatible_component_ids": ["VH557L-E-B-C-3706-6", "V889L-E-B-C-3706-6"],
+              "fasteners": []
+            },
+            {
+              "component_id": "VAWG3707-46",
+              "component_type": "gate_kit",
+              "component_name": "4'W x 6'H Matching Assembled Walk Gate for V3707-6",
+              "nominal_dimensions_in": "48\" x 72\"",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Rigid PVC assembled (screwed/mechanically fastened) frame construction",
+              "compatible_component_ids": ["VH557L-E-B-C-3706-6", "V889L-E-B-C-3706-6"],
+              "fasteners": []
+            },
+            {
+              "component_id": "VADG3707-56",
+              "component_type": "gate_kit",
+              "component_name": "5'W x 6'H Matching Assembled Drive Gate for V3707-6",
+              "nominal_dimensions_in": "60\" x 72\"",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Rigid PVC assembled frame construction",
+              "compatible_component_ids": ["VH557L-E-B-C-3706-6", "V889L-E-B-C-3706-6"],
+              "fasteners": []
+            },
+            {
+              "component_id": "CPH55",
+              "component_type": "hinge",
+              "component_name": "Corner Plate Hinge",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Stainless steel; available in black, white, bronze",
+              "compatible_component_ids": ["VWG3707-46", "VDG3707-56", "VAWG3707-46", "VADG3707-56"],
+              "fasteners": [
+                { "type": "self-drilling screw", "size": null, "material": "steel", "qty_per_assembly": "mounted 6\" from top and 6\" from bottom of gate frame" }
+              ]
+            },
+            {
+              "component_id": "IESH",
+              "component_type": "hinge",
+              "component_name": "X-Tra Strong Hinge (Extra Strong Hinge for larger/heavier Uni-Weld gates)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Steel; available in black",
+              "compatible_component_ids": ["VDG3707-56", "VADG3707-56"],
+              "fasteners": []
+            },
+            {
+              "component_id": "V21SS",
+              "component_type": "latch",
+              "component_name": "Gravity Latch with Plate",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Stainless steel",
+              "compatible_component_ids": ["VWG3707-46", "VDG3707-56", "VAWG3707-46", "VADG3707-56"],
+              "fasteners": []
+            },
+            {
+              "component_id": "HLSS",
+              "component_type": "latch",
+              "component_name": "Hatchet Latch",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Stainless steel",
+              "compatible_component_ids": ["VWG3707-46", "VDG3707-56"],
+              "fasteners": []
+            },
+            {
+              "component_id": "MLDD",
+              "component_type": "latch",
+              "component_name": "Magnetic Gate Latch (D&D)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Not specified; available in black finish",
+              "compatible_component_ids": ["VWG3707-46", "VDG3707-56"],
+              "fasteners": []
+            },
+            {
+              "component_id": "DRAS",
+              "component_type": "drop_rod",
+              "component_name": "Drop Rod Assembly",
+              "nominal_dimensions_in": "24\" and 48\" lengths",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Stainless steel; available in black/white",
+              "compatible_component_ids": ["VDG3707-56", "VADG3707-56"],
+              "fasteners": []
+            },
+            {
+              "component_id": "VGSH",
+              "component_type": "bracket",
+              "component_name": "Vinyl Gate Stop / Handle Combo",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Rigid PVC / metal handle hardware",
+              "compatible_component_ids": ["VWG3707-46", "VDG3707-56", "VAWG3707-46", "VADG3707-56"],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": null,
+            "post_depth_below_grade_in": "30\" minimum for 5\"x5\" posts; 32\"-42\" for 8\"x8\" posts (varies by document: general install guide states 32\" min, 75MPH wind kit guide states 42\" min for 8x8); hole depth generally 36\"-42\" depending on local frost depth",
+            "frost_line_note": "Dig post holes 36\" to 42\" deep depending on local ordinance or expected frost depth in winter; installer must consult local code officials",
+            "footing_diameter_in": "10\"-12\" diameter for 5\"x5\" posts; 12\"-15\" diameter for 8\"x8\" posts (gate posts: 12\"-16\" diameter)",
+            "concrete_footing_spec": "Premium wet or dry concrete mix, 3000 PSI minimum per 75MPH wind kit spec; 6\" gravel fill below concrete recommended per install diagram"
+          },
+          "slope_accommodation": {
+            "method": null,
+            "max_rake_angle_deg": null,
+            "hardware_required": [],
+            "notes": "Manufacturer's installation literature reviewed (general install instructions, gate instructions, 75MPH wind kit instructions) does not explicitly document a racking or stepping procedure or maximum rake angle for sloped terrain. Not found in available manufacturer documents; industry-general racking (up to ~10-30 deg depending on style, per third-party sources) and stepping methods are common practice for routed-post PVC panel systems but are not confirmed as Illusions-specific published specs."
+          }
+        },
+        {
+          "assembly_id": "V300-46-GATE",
+          "assembly_type": "single_gate",
+          "assembly_name": "V300-46 Privacy Gate",
+          "style": "privacy",
+          "height_options_in": [46],
+          "width_on_center_in": null,
+          "color_options": null,
+          "texture_finish": null,
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "V300-46-HINGE-SET",
+              "component_type": "hinge",
+              "component_name": "Gate hinge set",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": null,
+              "compatible_component_ids": [],
+              "fasteners": [
+                { "type": "screw (provided with hinge)", "size": null, "material": null, "qty_per_assembly": "hinges mounted 6\" from top and 6\" from bottom of gate frame" }
+              ]
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": null,
+            "post_depth_below_grade_in": "36\"-42\" hole depth (single gate posts)",
+            "frost_line_note": "Depending on local ordinance or expected frost depth in winter",
+            "footing_diameter_in": "12\"-16\"",
+            "concrete_footing_spec": "Standard concrete mix per bag directions"
+          },
+          "slope_accommodation": null
+        }
+      ]
+    },
+    {
+      "line_name": "Grand Illusions Vinyl WoodBond",
+      "assemblies": [
+        {
+          "assembly_id": "WOODBOND-GENERIC",
+          "assembly_type": "panel",
+          "assembly_name": "Grand Illusions Vinyl WoodBond wood-grain panel (style-specific dimensions not itemized in sources reviewed; applies wood-grain finish across Classic Series panel styles, e.g. V300, V3700 series)",
+          "style": "privacy / semi-privacy (wood-grain finish available across multiple Classic Series styles)",
+          "height_options_in": null,
+          "width_on_center_in": null,
+          "color_options": ["Mahogany", "Walnut", "Rosewood", "Eastern White Cedar", "Driftwood"],
+          "texture_finish": ["Wood grain (5 authentic wood grain textures); low gloss finish"],
+          "material_grade": {
+            "resin": "100% Pure Virgin Vinyl (Rigid PVC)",
+            "uv_inhibitors": "Tin-stabilized, acrylate-modified formulation with titanium dioxide as UV screener",
+            "impact_modifiers": "Custom blended mix of stabilizers, impact modifiers, and processing aids (proprietary; exact chemistry not disclosed)",
+            "titanium_dioxide_pct": "10 PHR (parts per hundred resin)",
+            "warranty": "20-year pro-rated limited warranty (residential); 10 years from install date for commercial/non-single-family properties, prorated"
+          },
+          "sub_assemblies": [],
+          "post_spacing_rules": null,
+          "slope_accommodation": null
+        }
+      ]
+    },
+    {
+      "line_name": "Grand Illusions Advantage (2026 line - Deco Rail)",
+      "assemblies": [
+        {
+          "assembly_id": "ADVANTAGE-GENERIC",
+          "assembly_type": "panel",
+          "assembly_name": "Grand Illusions Advantage panel with 2\" x 7\" Deco Rail (KD/knock-down panels)",
+          "style": "privacy (6' height per brochure)",
+          "height_options_in": [72],
+          "width_on_center_in": null,
+          "color_options": ["Mahogany", "Walnut", "Rosewood", "Driftwood", "Aspen", "Sahara", "Black"],
+          "texture_finish": ["6 woodgrain options plus solid Black"],
+          "material_grade": null,
+          "sub_assemblies": [
+            {
+              "component_id": "ADVANTAGE-DECO-RAIL",
+              "component_type": "rail",
+              "component_name": "Deco Rail",
+              "nominal_dimensions_in": "2\" x 7\"",
+              "actual_dimensions_in": "2\" x 7\"",
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Rigid PVC",
+              "compatible_component_ids": [],
+              "fasteners": []
+            }
+          ],
+          "post_spacing_rules": null,
+          "slope_accommodation": null
+        }
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "doc_type": "installation_manual",
+      "title": "Assembled Vinyl Fence Panel Installation Instructions",
+      "url": "https://illusionsfence.com/wp-content/uploads/2024/02/Illusions-Vinyl-Fence-Installation-Instructions_0224.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/installation-instructions-assembled-panel.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "V44xx / V55xx / V88xx posts, all Classic Series panel styles",
+      "date_or_version": "0224 (Feb 2024)"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Illusions Vinyl Fence Gate Installation Instructions",
+      "url": "https://illusionsfence.com/wp-content/uploads/2011/06/Illusions-Vinyl-Fence-GATES-Instructions.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/gate-installation-instructions.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "V300-46, V300-48, VBG2-46, VBG4-46 gate styles",
+      "date_or_version": "0912 (2012)"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "75 MPH Wind Kit Installation Instructions",
+      "url": "https://illusionsfence.com/wp-content/uploads/2012/04/Illusions-75MPH-Instructions_120426.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "VH55xx / VH88xx Heavy Duty posts, V300/V3215/V3700/V350/V401/V700/VO100 series",
+      "date_or_version": "0412 (April 2012)"
+    },
+    {
+      "doc_type": "csi_spec",
+      "title": "75MPH Miami-Dade County Notice of Acceptance (NOA)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2015/07/NOA-14-1209.01.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/75mph-wind-kit-noa-miami-dade.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "75 MPH Wind Kit certified installations",
+      "date_or_version": "NOA-14-1209.01 (2015)"
+    },
+    {
+      "doc_type": "warranty",
+      "title": "Illusions Vinyl Fence Warranty (Classic Illusions Fence Limited Warranty & Grand Illusions Fence Limited Warranty)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2026/06/Illusions-Vinyl-Fence-Warranty-0626.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/product-warranty.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "Edge/Advantage/Classic Illusions Fence and Grand Illusions Fence",
+      "date_or_version": "0626 (June 2026)"
+    },
+    {
+      "doc_type": "spec_sheet",
+      "title": "Illusions Vinyl Fence ASTM Info Flyer (ASTM F964-13 compliance)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2011/06/Illusions-Vinyl-Fence-ASTM-Info-Flyer.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/astm-info-flyer.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "All Illusions Vinyl Fence products / EverStrong Profiles",
+      "date_or_version": "2011"
+    },
+    {
+      "doc_type": "installation_manual",
+      "title": "Illusions Vinyl Fence Pergola Kit Installation Instructions",
+      "url": "https://illusionsfence.com/wp-content/uploads/2025/07/Illusions-Vinyl-Pergola-Kit-Instructions-0425.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/pergola-kit-installation-instructions.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "Vinyl Fence Pergola Kits",
+      "date_or_version": "0425 (2025)"
+    },
+    {
+      "doc_type": "cut_sheet",
+      "title": "Illusions Vinyl Fence Product and Price Guide (item-by-item product code catalog, no pricing)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2020/04/EWF-Product-Catalog-04-20-20-ILLUSIONS-FENCE-NO-PRICING.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/product-price-catalog-186pg.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "All product lines - panels, gates, posts, hardware, accessories",
+      "date_or_version": "04-20-20 (April 2020), 186 pages"
+    },
+    {
+      "doc_type": "spec_sheet",
+      "title": "Illusions Vinyl Fence Classic Product Brochure",
+      "url": "https://illusionsfence.com/wp-content/uploads/2026/01/Illusions-Fence-Classic-Product-Brochure-0126.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/classic-product-brochure.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "Classic White/Beige/Gray/Clay colors",
+      "date_or_version": "0126 (Jan 2026), 24 pages"
+    },
+    {
+      "doc_type": "spec_sheet",
+      "title": "Grand Illusions Advantage Product Brochure",
+      "url": "https://illusionsfence.com/wp-content/uploads/2026/05/Grand-Illusions-Advantage-Tri-Fold-0426.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/grand-illusions-advantage-brochure.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "Grand Illusions Advantage (Mahogany, Walnut, Rosewood, Driftwood, Aspen, Sahara, Black)",
+      "date_or_version": "0426 (April 2026), 6 pages"
+    },
+    {
+      "doc_type": "spec_sheet",
+      "title": "Illusions Vinyl Gates Flyer (Uni-Weld vs Assembled Gate comparison)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2023/06/Illusions-Uni-Weld-and-Assembled-Gate-Flyer-0623.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/gate-types-flyer-uniweld-vs-assembled.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "All gate styles",
+      "date_or_version": "0623 (June 2023)"
+    },
+    {
+      "doc_type": "spec_sheet",
+      "title": "Illusions Vinyl PVC Fence Extra Strong Hinge Brochure",
+      "url": "https://illusionsfence.com/wp-content/uploads/2011/07/Illusions_Extra_Strong_Hinge.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/extra-strong-hinge-brochure.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "X-Tra Strong Hinge (IESH), for larger/heavier Uni-Weld gates",
+      "date_or_version": "2011"
+    },
+    {
+      "doc_type": "spec_sheet",
+      "title": "Traverse Gravity Latch Flyer",
+      "url": "https://illusionsfence.com/wp-content/uploads/2022/09/Traverse-Gravity-Latch-Flyer-0822-1.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/traverse-gravity-latch-flyer.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "Traverse Lockable Gravity Latch (compatible with Illusions Vinyl Fence and Eastern Ornamental Aluminum)",
+      "date_or_version": "0822 (Aug 2022)"
+    },
+    {
+      "doc_type": "cut_sheet",
+      "title": "Gate Hardware catalog page (Magnetic Gate Latch, Drop Rods, Hinges)",
+      "url": "https://illusionsfence.com/wp-content/uploads/2014/05/EWF_CATALOG_ILLUSIONS_FENCE_I-38.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/gate-hardware-catalog-page.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "Gate hardware - hinges, latches, drop rods",
+      "date_or_version": "050414 (May 2014)"
+    },
+    {
+      "doc_type": "spec_sheet",
+      "title": "Illusions Majestic Entranceway 8\" x 8\" PVC Vinyl Posts Tri-Fold Brochure",
+      "url": "https://illusionsfence.com/wp-content/uploads/2012/03/Illusions_Majestic_Entranceway.pdf",
+      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/majestic-entranceway-8x8-posts-brochure.pdf",
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "V88xx / VH88xx 8\"x8\" Majestic posts",
+      "date_or_version": "2012"
+    },
+    {
+      "doc_type": "csi_spec",
+      "title": "CAD Details and specification files for Illusions Vinyl Fence (third-party hosted, membership required)",
+      "url": "https://microsite.caddetails.com/3708",
+      "local_path": null,
+      "manufacturer": "Illusions Fence",
+      "model_or_line": "All styles - CAD and PDF spec files",
+      "date_or_version": null
+    }
+  ]
+}

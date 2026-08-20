@@ -1,0 +1,370 @@
+{
+  "manufacturer": "Weatherables",
+  "pass": 2,
+  "focus": "Structural engineering and installation-depth content: engineering/wind-load letters, per-style rake/slope quantification, HVHZ/NOA status, semi-privacy/picket/pool/gate-kit profile dimensions, post reinforcement specs, and CAD structural detail drawings.",
+  "legal_entity_note": "Weatherables is a brand of USA Vinyl, LLC (formerly Columbus Custom Vinyl, then USA Vinyl Fence Company), Groveport, Ohio. Warranty documents are issued as 'Weatherables by USAVinyl, LLC.' All Florida/Miami-Dade and ICC-ES registry lookups in this pass were cross-checked under both the 'Weatherables' and 'USA Vinyl, LLC' names because manufacturer-name mismatches are a common cause of false negatives in those registries. Source: https://weatherables.com/pages/about-us",
+  "engineering_letters": {
+    "publicly_downloadable_pe_stamped_letter": "NOT FOUND. No PDF of a PE-stamped wind-load certification letter is linked or hosted anywhere on weatherables.com, its CDN (cdn.shopify.com/s/files/1/0942/4470/0531/files/...), or third-party retailer PDF mirrors (Home Depot thdstatic.com, Lowe's, superarbor.io) that were checked in this pass.",
+    "manufacturer_claim_of_existence": "Weatherables' FAQ page states verbatim: 'Based on the results of the tests, Intertek/Architectural Testing Inc. determined that all of our vinyl fence panels, 6 ft. tall and less can be installed to withstand 110 M.P.H. sustained winds and wind gusts up to 130 M.P.H. ... and we have the engineer stamped documents to prove it!' (https://weatherables.com/pages/faqs). This confirms a PE-stamped document exists but it is not published for public/installer download -- only the marketing claim and video narration are public-facing.",
+    "test_partner_and_methodology": {
+      "lab": "Intertek / Architectural Testing, Inc. (ATI) -- third-party accredited testing lab (intertek.com/building/deck-fence-rail confirms Intertek is 'the premier choice for manufacturers seeking Miami-Dade County NOA' using proprietary WOLF dynamic wind load testing equipment; not confirmed that Weatherables used the WOLF method specifically, only that Intertek/ATI is the named test partner in Weatherables' own materials).",
+      "rig": "Two 7-foot-tall airplane propellers, each driven by a high-powered V8 engine, positioned ~4 ft from the fence panel to generate a concentrated wind load (some tests used an 8 ft wide x 4 ft tall metal wind tunnel instead of open propellers).",
+      "test_panel_size": "6 ft (H) x 8 ft (W) tongue-and-groove privacy panel, installed per the high-wind installation instructions (aluminum/concrete post reinforcement to 22 in above grade + extra self-tapping screws at pickets and top rail).",
+      "ramp_protocol": "Wind speed started at 60-70 mph and was increased in ~10 mph increments until the target/failure threshold was reached; panels showed no visible damage at the reported thresholds.",
+      "3rd_party_attribution": "Video narration for each style repeats the phrase 'the [3rd party] engineers determined that...' -- i.e., Weatherables attributes the pass/fail determination to Intertek/ATI's engineers, not an in-house engineer."
+    },
+    "per_style_wind_ratings_found": {
+      "source_conflict_note": "Two different Weatherables sources give inconsistent per-style numbers; both are reproduced below verbatim rather than reconciled, since neither source is a downloadable stamped document.",
+      "blog_table_source": {
+        "url": "https://weatherables.com/blogs/articles/how-to-guide-high-wind-installation",
+        "Largo Privacy Fencing": "120 mph sustained / gusts up to 137 mph",
+        "Clearwater Privacy Fencing": "110 mph sustained / gusts up to 130 mph",
+        "T&G Privacy Fencing (blanket bucket covering Savannah, Pembroke, Glenshire, Ashton, Mason, Bradford, Halifax, Scottsdale)": "110 mph sustained / gusts up to 130 mph"
+      },
+      "per_style_youtube_test_videos": {
+        "Savannah Privacy Fence Wind Test": "110 mph sustained / gusts up to 130 mph (6 ft and less) -- consistent with the blog's T&G bucket",
+        "Ashton Privacy Fence Wind Test": "115 mph sustained / gusts up to 131 mph (6 ft and less) -- INCONSISTENT with the blog's blanket 110/130 T&G figure; started test at 70 mph rather than 60 mph",
+        "Mason, Bradford, Halifax, Scottsdale (combined video)": "Narration only confirms the generic 'up to 110 mph sustained / 130 mph gusts' claim; no distinct per-style numeric breakout was recoverable from the transcript in this pass",
+        "Pembroke and Glenshire / Clearwater / Largo": "Listed on the wind-test-videos page (https://weatherables.com/pages/wind-test-videos) as having dedicated test videos, but exact numeric results for Pembroke/Glenshire specifically were not recoverable from search snippets in this pass -- only the blog table's Largo/Clearwater figures above are confirmed"
+      }
+    },
+    "explicit_scope_exclusions": "Weatherables' own high-wind-installation article states verbatim: 'Although picket, pool, and semi-privacy fencing were not part of the wind test, they are considered to be strong enough for high winds because they allow wind to pass through the pickets.' This is an engineering judgment call by the manufacturer, not a lab-verified rating -- picket, pool, and semi-privacy lines carry NO tested wind-load number, tested or stamped, anywhere found in this pass (confirms/sharpens the pass-1 gap rather than closing it for these three lines).",
+    "height_ceiling_caveat": "All wind-test claims (110/130, 115/131, 120/137 mph) apply ONLY to panels 6 ft tall or less. No wind rating of any kind (tested or claimed) was found for the 7 ft or 8 ft privacy-fence height options that Weatherables otherwise sells (e.g., Ashton is offered up to 96 in / 8 ft per the pass-1 data file)."
+  },
+  "hvhz_noa_approvals": {
+    "miami_dade_noa": [],
+    "miami_dade_noa_note": "No Miami-Dade County Notice of Acceptance (NOA) exists for Weatherables or USA Vinyl, LLC fencing. Searched the Miami-Dade Product Control 'Fences' + 'High Velocity Hurricane Zone' category directly (https://www.miamidade.gov/building/pc-result_app.asp?...Classification=1,High+velocity+hurricane+zone...&categorylist=5) -- it returns exactly 7 active NOAs for the entire Fences category: Deacero USA (Design Master Fence), Barrette Outdoor Living (2 listings: extruded PVC vinyl fencing + SimTek fence), VEKA Inc. (PVC privacy fence panels), UFP Industries (prefabricated wood fence panels), All Season Fencing Ltd. (PVC fencing system), and PlyGem Residential Solutions (6x6 Performance Privacy PVC Fence Systems). Weatherables / USA Vinyl does not appear under either name.",
+    "florida_product_approval_fl_number": [],
+    "florida_product_approval_note": "No statewide Florida Product Approval (FL#) for fencing was located for Weatherables or USA Vinyl, LLC on floridabuilding.org.",
+    "related_but_different_national_listing_found": {
+      "finding": "USA Vinyl, LLC (weatherables.com) has exactly ONE listing in the national ICC-ES / Miami-Dade product-approval aggregator engineeringplans.com: report ESR-4954, titled 'USA VINYL WXR AND CXR SERIES GUARDRAILS.'",
+      "scope": "ESR-4954 is an ICC Evaluation Service (ICC-ES) Evaluation Report under Division 06 (Wood, Plastics and Composites), covering IBC/IRC code editions 2000-2024. It evaluates USA Vinyl's WXR and CXR series vinyl GUARDRAILS/RAILING products (deck/porch railing), NOT fencing, and is not a Florida/HVHZ-specific supplement. This is the same ESR-4954 referenced on the Jefferson Vinyl Railing product page ('is being tested in accordance with ICC-ES AC174 standards as evaluated by ICC Evaluation Service ESR-4954').",
+      "implication": "This confirms USA Vinyl/Weatherables pursues formal third-party code-compliance documentation for its RAILING line (AC174 guardrail load criteria) but has NO equivalent registered evaluation report, NOA, or FL# covering its FENCE products' structural/wind performance. The only fence-specific engineering evidence found anywhere is the unpublished 'engineer stamped documents' referenced in the FAQ and the Intertek/ATI wind-test video series above.",
+      "sources": [
+        "https://www.engineeringplans.com/product-manufacturers/usa-vinyl-llc",
+        "https://www.engineeringplans.com/product-approvals/esr-4954"
+      ]
+    },
+    "market_context": "Third-party South Florida fence installers (pvcfences.com, fencewithstyle.com) confirm Miami-Dade/Broward HVHZ permitting requires a manufacturer with its own NOA (they cite VEKA's NOA as an example) or a site-specific PE-sealed drawing package. Because Weatherables holds neither, a Weatherables fence could not be permitted in Miami-Dade or Broward County HVHZ jurisdictions without a separately commissioned, site-specific PE evaluation -- this is a material, previously-unconfirmed limitation for coastal-Florida BOM/permitting use cases."
+  },
+  "racking_stepping_supplement": {
+    "quantified_values_found_this_pass": [
+      {
+        "style": "Savannah (Premium Privacy, 6 ft height)",
+        "rack_capacity": "up to 3.75 in of grade drop over a 6 ft (72 in) panel run",
+        "computed_angle_deg": 2.98,
+        "source": "https://superarbor.io/products/weatherables-savannah-6-ft-h-x-6-ft-w-gray-vinyl-privacy-fence-panel-kit (retailer-hosted spec page reproducing Weatherables' own panel spec)"
+      },
+      {
+        "style": "Pembroke (11.3\" wide-board T&G privacy, 6 ft height)",
+        "rack_capacity": "accommodates a slope (grade change) of 4 in over 8 ft (96 in) panel run using the racking method",
+        "computed_angle_deg": 2.39,
+        "source": "Home Depot product page PWPR-T-G11-3-6X8, https://www.homedepot.com/p/Weatherables-Pembroke-6-ft-H-x-8-ft-W-White-Vinyl-Privacy-Fence-Panel-Kit-PWPR-T-G11-3-6X8/309617036"
+      },
+      {
+        "style": "Davenport (semi-privacy, 6 ft height)",
+        "rack_capacity": "can rack up to 2.25 in over 6 ft (72 in) panel run",
+        "computed_angle_deg": 1.79,
+        "source": "https://superarbor.io/products/weatherables-davenport-6-ft-h-x-6-ft-w-tan-vinyl-semi-privacy-fence-panel-kit"
+      }
+    ],
+    "interpretation": "These are the first quantified, style-specific rake/slope numbers located for Weatherables across both research passes. They are expressed by Weatherables/retailers as inches-of-drop-over-run (not degrees natively); degrees above are this pass's own trigonometric conversion (atan(drop/run)) for cross-manufacturer comparability and are NOT manufacturer-published figures. All three confirmed values cluster in a narrow ~1.8-3.0 degree range, meaningfully tighter than some competitors (e.g., WamBam's 10-15 deg racking envelope, see wam-bam-structural.json) -- consistent with Weatherables' routed-post rail-socket design (rails seat in fixed routed slots rather than a pivoting bracket) being lower-tolerance for slope than bracket-based systems.",
+    "true_per_style_master_spec_diagram_still_not_located": "The pass-1 gap (a single company-wide or per-style master document listing every style's rated slope tolerance) remains unresolved as a single document -- no such consolidated table exists on weatherables.com. However, the individual 'Master CAD' pages discovered this pass (see structural_reinforcement_supplement and documents below) are the closest thing to genuine per-style structural spec sheets, and future passes could derive slope capacity indirectly from panel/rail dimensions in those CAD pages if retailer-quoted rack values (as found here) are unavailable for a given style.",
+    "stepping_method_confirmed_unchanged_from_pass_1": "Blank posts (routed on-site) or U-mount rail brackets on end posts remain the documented workaround once a style's rack tolerance is exceeded; no new detail on stepping mechanics was found this pass."
+  },
+  "profile_dimension_supplement": {
+    "semi_privacy": {
+      "collection_note": "6 named semi-privacy styles are sold (https://weatherables.com/collections/semi-privacy-fencing); most have ~7/8 in of open space between pickets, though exact picket width/spacing varies by style.",
+      "styles_found": [
+        {
+          "style": "Huntington",
+          "picket_size": "3\" pickets",
+          "spacing": "7/8\" spacing"
+        },
+        {
+          "style": "Everglade",
+          "picket_size": "7/8\" x 3\" wide horizontal pickets",
+          "spacing": "approx. 7/8\" apart",
+          "height_offered": "6 ft"
+        },
+        {
+          "style": "Glendale",
+          "picket_size": "6\" pickets",
+          "spacing": "7/8\" spacing"
+        },
+        {
+          "style": "Davenport",
+          "picket_size": "not itemized in source",
+          "spacing": "7/8\" spacing (generic collection figure)",
+          "panel_actual_size": "72 in H x 72 in W x 1.75 in thick (for the 6x6 panel)",
+          "rack_capacity": "up to 2.25 in over 6 ft (see racking_stepping_supplement)"
+        }
+      ],
+      "generic_catalog_spec_sheet": {
+        "source": "https://images.thdstatic.com/catalog/pdfImages/7f/7ff3997d-c392-463f-8182-6876f5805a99.pdf (already in pass-1 source list, re-examined this pass for semi-privacy line item)",
+        "height_options": "5 ft & 6 ft",
+        "width_options": "6 ft & 8 ft",
+        "picket_style": "7/8\" x 3\" & 7/8\" x 1.5\" alternating (8\" x 6\" repeat pattern), 7/8\" picket spacing",
+        "bottom_rail": "2\" x 3.5\""
+      },
+      "panel_weight": "6x8 ft semi-privacy panels weigh approx. 60-66 lb before posts/hardware (per weatherables.com/collections/semi-privacy-fencing FAQ)"
+    },
+    "picket": {
+      "styles_found": [
+        {
+          "style": "Monterey",
+          "picket_size": "1.5\" x 1.5\" square pickets, straight top",
+          "bottom_rail": "2\" x 6\"",
+          "widths_offered": "3 ft or 4 ft height",
+          "cad_pages": [
+            "https://weatherables.com/pages/monterey-3ft-cad",
+            "https://weatherables.com/pages/monterey-4ft-cad"
+          ]
+        },
+        {
+          "style": "Chelsea (Dogear)",
+          "picket_size": "3\" pickets",
+          "spacing": "3\" spacing"
+        },
+        {
+          "style": "Plymouth (Spade)",
+          "picket_size": "3\" pickets",
+          "spacing": "3\" spacing"
+        }
+      ],
+      "additional_picket_lines_named_but_not_dimensioned_this_pass": [
+        "Hampshire",
+        "Ellington",
+        "Richmond",
+        "Provincetown",
+        "Abbington",
+        "Stratford",
+        "Hartford",
+        "Barrington"
+      ]
+    },
+    "pool": {
+      "collection_note": "All 7 named pool-fence styles keep picket spacing under 4 in for child-safety code compliance; Weatherables states its pool fences are 'designed to meet national BOCA code' but final approval depends on local jurisdiction (height, latch height, gate swing, setbacks). Source: https://weatherables.com/collections/pool-fencing",
+      "styles_found": [
+        {
+          "style": "Atlantis",
+          "picket_size": "alternating 7/8\" x 1.5\" and 7/8\" x 3\"",
+          "spacing": "3.7\" (widely spaced)"
+        },
+        {
+          "style": "Sarasota",
+          "picket_size": "alternating 7/8\" x 1.5\" and 7/8\" x 3\"",
+          "spacing": "1.7\" (moderately spaced)"
+        },
+        {
+          "style": "Captiva",
+          "picket_size": "7/8\" x 3\" pickets (confirmed via CAD: 0.875\" x 3\" x 47\" picket length)",
+          "spacing": "3.7\" (wide)",
+          "heights_offered": "4 ft / 5 ft"
+        },
+        {
+          "style": "Crestview",
+          "picket_size": "7/8\" x 3\" pickets",
+          "spacing": "1.7\" (moderate)"
+        },
+        {
+          "style": "Neptune",
+          "picket_size": "7/8\" x 1.5\" narrow pickets",
+          "spacing": "3.7\" (wide)"
+        },
+        {
+          "style": "Williamsport",
+          "picket_size": "7/8\" x 1.5\" narrow pickets",
+          "spacing": "1.7\" (moderate)"
+        },
+        {
+          "style": "Hanover",
+          "picket_size": "not dimensioned in sources reviewed this pass",
+          "spacing": "not dimensioned in sources reviewed this pass"
+        }
+      ],
+      "captiva_cad_confirmed_dims": {
+        "4x6_panel": {
+          "rails": "2 pcs, 2\" x 3.5\" x 71.5\"",
+          "aluminum_insert": "1 pc, 1.5\" x 3.25\" x 71.5\" (single insert, in bottom rail)",
+          "pickets": "10 pcs, 0.875\" x 3\" x 47\""
+        },
+        "4x8_panel": {
+          "rails": "2 pcs, 2\" x 3.5\" x 95.75\"",
+          "aluminum_insert": "1 pc, 1.5\" x 3.25\" x 95.5\"",
+          "pickets": "13 pcs, 0.875\" x 3\" x 47\""
+        },
+        "source": "https://weatherables.com/pages/captiva-4ft-cad"
+      },
+      "posts_not_included": "Confirmed: pool fence panel kits and gate kits do NOT include posts, post caps, or the Fast2K concrete alternative -- these must be ordered separately per BOM (a pass-1-relevant clarification for kit-based BOM assembly)."
+    },
+    "gate_kit_widths": {
+      "single_gate_widths_confirmed_across_lines": [
+        "44.5 in (3.7 ft)",
+        "48 in (4 ft)",
+        "60 in (5 ft)",
+        "62.5 in (5.2 ft)",
+        "65 in (5.4 ft)"
+      ],
+      "double_gate_examples": [
+        {
+          "style": "Gideon (privacy)",
+          "opening": "7 ft W x 6 ft H"
+        },
+        {
+          "style": "Pembroke (11.3\" T&G privacy)",
+          "opening": "10.8 ft W x 5 ft H",
+          "sku": "DWPR-T-G11-3-5X65"
+        }
+      ],
+      "per_style_cad_confirmed_gate_dimensions": {
+        "Augusta_8ft_privacy": [
+          "8' x 38.5\" gate (socket posts 4\"x4\"x99.5\")",
+          "8' x 44.5\" gate",
+          "8' x 62.5\" gate"
+        ],
+        "Pembroke_6ft_privacy": [
+          "6' x 42\" gate (socket posts 4\"x4\"x76\")",
+          "6' x 65\" gate"
+        ],
+        "Captiva_4ft_pool": [
+          "4' x 48\" gate (socket posts 4\"x4\"x52.5\")",
+          "4' x 60\" gate"
+        ]
+      },
+      "socket_post_length_pattern": "Gate socket post length observed = panel height + ~4-27.5 in depending on style/height (e.g., Captiva 4 ft panel uses a 52.5 in socket post = +4.5 in; Pembroke 6 ft panel uses a 76 in socket post = +4 in; Augusta 8 ft panel uses a 99.5 in socket post = +27.5 in, reflecting deeper embedment guidance at taller/higher-wind-rated heights)."
+    }
+  },
+  "structural_reinforcement_supplement": {
+    "aluminum_post_insert": {
+      "product_page": "https://weatherables.com/products/aluminum-post-insert",
+      "sizes_in": [
+        "4 in",
+        "5 in"
+      ],
+      "lengths_offered_in": [
+        78,
+        84,
+        96,
+        105,
+        120
+      ],
+      "material": "Aluminum",
+      "install_depth_rule": "Must be installed with the post at set time; top of insert must sit at least 22 in above finished grade for high-wind-rated installations (repeats/confirms pass-1 figure, now tied to a distinct SKU with explicit length options)."
+    },
+    "galvanized_steel_post_insert": {
+      "product_page": "https://weatherables.com/products/galvanized-post-insert",
+      "sizes_in": [
+        "4 in",
+        "5 in"
+      ],
+      "lengths_offered_in": [
+        78,
+        84,
+        96,
+        105,
+        120
+      ],
+      "material": "Galvanized steel",
+      "note": "Offered as a like-for-like alternative to the aluminum insert at identical sizes/lengths -- gate and corner posts get a choice of aluminum or galvanized-steel reinforcement, not a fixed material per pass-1's component list (which had listed both aluminum and steel gate-post inserts without confirming they are interchangeable SKUs at matching lengths)."
+    },
+    "recommendation_strength": "Home Depot Q&A confirms post inserts are NOT strictly 'required' for standard Weatherables fencing, but are 'highly recommended' at minimum on gate posts, and the aluminum/concrete backfill combination is mandatory (not optional) for the 130 mph high-wind installation method regardless of post role (line, end, corner, or gate).",
+    "per_style_cad_rail_insert_dimensions": {
+      "note": "Every 'Master CAD' page's material list includes a 'Metal' line item -- this is the aluminum rail-reinforcement channel/insert that runs inside the vinyl rail extrusion (distinct from the post insert above). Confirmed dimensions by style:",
+      "Augusta_privacy_8x6_panel": "3 metal inserts (1 per rail: top, mid, bottom), each 1.25\" x 1.75\" x 71.5\"",
+      "Augusta_privacy_8x8_panel": "3 metal inserts, each 1.25\" x 1.75\" x 95.5\"",
+      "Pembroke_privacy_6ft_panel": "1 metal insert (bottom rail only), 1.25\" x 1.75\" x 71.5\" (6x8 panel size)",
+      "Captiva_pool_4x6_panel": "1 metal insert (single rail), 1.5\" x 3.25\" x 71.5\"",
+      "pattern": "3-rail privacy styles (Augusta) reinforce all three rails; 1- or 2-rail styles (Pembroke privacy, Captiva pool) reinforce only one rail -- consistent with pass-1's general note that the bottom rail is the primary reinforced member, but this pass confirms multi-rail privacy panels reinforce every rail, not just the bottom one."
+    },
+    "gate_cross_brace_hardware": "Confirmed consistent across CAD pages: gate kits include a 'Cross Brace' component plus 'Vinyl Fence Glue' (for rail-to-post socket bonding) and 'Cross Brace Screws and Caps' -- matches and slightly extends pass-1's gate fastener notes with the glue/cross-brace pairing shown explicitly as bundled BOM line items per gate width."
+  },
+  "documents": [
+    {
+      "doc_type": "cad_detail",
+      "title": "augusta 8x6 privacy",
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Augusta8x6.png",
+      "local_path": "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png",
+      "model_or_line": null,
+      "date_or_version": null,
+      "note": null
+    },
+    {
+      "doc_type": "cad_detail",
+      "title": "augusta 8x8 privacy",
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Augusta8x8.png",
+      "local_path": "manuals/weatherables/structural/weatherables-cad-augusta-8x8-privacy.png",
+      "model_or_line": null,
+      "date_or_version": null,
+      "note": null
+    },
+    {
+      "doc_type": "cad_detail",
+      "title": "augusta gate 44.5in",
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Augusta8x44.5.png",
+      "local_path": "manuals/weatherables/structural/weatherables-cad-augusta-gate-44.5in.png",
+      "model_or_line": null,
+      "date_or_version": null,
+      "note": null
+    },
+    {
+      "doc_type": "cad_detail",
+      "title": "pembroke 6ft privacy",
+      "url": "https://weatherables.com/pages/pembroke-6ft-cad",
+      "local_path": "manuals/weatherables/structural/weatherables-cad-pembroke-6ft-privacy.png",
+      "model_or_line": null,
+      "date_or_version": null,
+      "note": "Downloaded opportunistically; filename guessed from the Augusta naming pattern and confirmed valid on retrieval"
+    },
+    {
+      "doc_type": "cad_detail",
+      "title": "captiva 4x6 pool",
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Captiva4x6.png",
+      "local_path": "manuals/weatherables/structural/weatherables-cad-captiva-4x6-pool.png",
+      "model_or_line": null,
+      "date_or_version": null,
+      "note": null
+    },
+    {
+      "doc_type": "cad_detail",
+      "title": "captiva gate 48in",
+      "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Captiva4x48.png",
+      "local_path": "manuals/weatherables/structural/weatherables-cad-captiva-gate-48in.png",
+      "model_or_line": null,
+      "date_or_version": null,
+      "note": null
+    }
+  ],
+  "remaining_gaps_after_this_pass": [
+    "No publicly downloadable PE-stamped wind-load certification letter or lab test report PDF -- existence confirmed via FAQ text, content still not accessible for citation/attachment to a BOM package.",
+    "No Miami-Dade NOA or Florida Product Approval exists for Weatherables/USA Vinyl fencing at all (upgraded from pass-1's 'not found' to a confirmed, evidenced absence) -- any HVHZ/coastal-Florida deployment would require a separately commissioned site-specific PE package.",
+    "Picket, pool, and semi-privacy lines have NO tested wind rating of any kind (only an informal manufacturer engineering judgment that open pickets reduce load) -- this is now explicit rather than inferred.",
+    "No wind rating found for privacy-fence heights above 6 ft (7 ft and 8 ft options are sold but untested/uncertified for wind per all sources reviewed).",
+    "Hanover pool-fence style picket dimensions still undimensioned.",
+    "A single, consolidated company-wide or per-style slope/rake table still does not exist as one document; only 3 individual style rack values (Savannah, Pembroke, Davenport) were recovered this pass via retailer product pages, not a master spec sheet.",
+    "Not all discovered Master CAD pages were downloaded/extracted in full (see additional_master_cad_pages_located_but_not_downloaded) -- future passes can pull these directly for more per-style structural dimension coverage."
+  ],
+  "_documents_pass2_note": "No new standalone PDF documents (engineering letters, NOA, FL approvals) were found to download -- the searches in this pass affirmatively established that no such public PDFs exist for Weatherables fencing (see hvhz_noa_approvals and engineering_letters above). The genuinely new structural artifacts found were per-style CAD raster diagrams (PNG) embedded in 'Master CAD' web pages rather than PDFs.",
+  "_additional_cad_pages_not_downloaded": {
+    "note": "These are confirmed-live 'Master CAD' pages (URL pattern /pages/<style>-<height>-cad) discovered via site search this pass, each containing full material-list tables plus embedded CAD diagram PNGs, covering privacy, pool, picket, and railing lines. Not all were extracted/downloaded due to time budget; listed here so a future pass can pull them directly by URL without re-discovery.",
+    "fence_style_cad_pages": [
+      "https://weatherables.com/pages/augusta-8ft-cad",
+      "https://weatherables.com/pages/pembroke-6ft-cad",
+      "https://weatherables.com/pages/captiva-4ft-cad",
+      "https://weatherables.com/pages/monterey-3ft-cad",
+      "https://weatherables.com/pages/monterey-4ft-cad"
+    ],
+    "railing_cad_pages_found_incidentally_not_fence_scope": [
+      "https://weatherables.com/pages/burlington-42in-cad",
+      "https://weatherables.com/pages/washington-36in-cad",
+      "https://weatherables.com/pages/bristol-36in-cad",
+      "https://weatherables.com/pages/yorkshire-36in-cad",
+      "https://weatherables.com/pages/wiltshire-42in-cad",
+      "https://weatherables.com/pages/addison-36in-cad",
+      "https://weatherables.com/pages/addison-42in-cad",
+      "https://weatherables.com/pages/derby-36in-cad",
+      "https://weatherables.com/pages/jefferson-42in-cad",
+      "https://weatherables.com/pages/dora-6ft-cad"
+    ]
+  }
+}
