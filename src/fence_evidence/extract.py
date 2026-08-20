@@ -28,6 +28,12 @@ from .tools import ToolError, ocr_hocr, render_page, run, tool_versions
 
 PAGE_DPI = 200          # evidence page images
 OCR_DPI = 300           # OCR renders; discarded after use
+ALT_OCR_DPI = 400       # second pass for low-confidence pages
+OCR_SUPPLEMENT_BELOW = 80.0   # mean word confidence that triggers the second pass
+# Some catalog pages in this corpus are physically enormous (one Showtech page
+# renders to 134 megapixels at 300 dpi).  A second pass at a higher resolution
+# on those costs minutes per page for little gain, so it is skipped and recorded.
+MAX_SUPPLEMENT_PIXELS = 90_000_000
 OCR_TEXT_THRESHOLD = 100   # chars of source text below which a page is OCR'd
 DRAWING_WORD_MAX = 120     # a scanned page with fewer words reads as a drawing sheet
 CAPTION_GAP = 40.0         # points below a figure to look for its caption
@@ -45,21 +51,13 @@ def _page_rotations(pdf: Path, n_pages: int) -> dict[int, int]:
     return rots
 
 
-def _rotate_word(word, rot: int, w: float, h: float):
-    """Map an unrotated text bbox into rendered (display) coordinates."""
-    x0, y0, x1, y1 = word.bbox
-    if rot == 90:
-        pts = [(h - y0, x0), (h - y1, x1)]
-    elif rot == 180:
-        pts = [(w - x0, h - y0), (w - x1, h - y1)]
-    elif rot == 270:
-        pts = [(y0, w - x0), (y1, w - x1)]
-    else:
-        return word
-    xs = [p[0] for p in pts]
-    ys = [p[1] for p in pts]
-    word.bbox = (round(min(xs), 2), round(min(ys), 2), round(max(xs), 2), round(max(ys), 2))
-    return word
+# NOTE on rotation.  `pdftotext -bbox-layout` emits word boxes already in
+# display space — verified by rendering synthetic /Rotate 0/90/180/270 pages at
+# 72 dpi and comparing the reported boxes against the rendered ink, which match
+# to within a point.  Only the `<page width/height>` attributes stay unrotated.
+# So no coordinate transform is applied to words; the page rectangle is swapped
+# for 90/270 so that boxes, page size and the rendered image share one space.
+# An earlier version rotated the boxes as well, which moved them off the page.
 
 
 _TABLE_HINT_WORDS = ("table", "exposure", "spacing", "footing", "embedment",
@@ -70,6 +68,36 @@ def _mentions_table(words) -> bool:
     """Does this page's OCR text name conditional/tabular engineering data?"""
     blob = " ".join(w.text.lower() for w in words)
     return sum(1 for k in _TABLE_HINT_WORDS if k in blob) >= 3
+
+
+def _ocr_supplement(pdf: Path, page_no: int, tmpdir: Path, primary_words,
+                    doc, page_width: float = 612.0, page_height: float = 792.0) -> list[str]:
+    """Tokens a second-resolution OCR pass finds that the first pass missed."""
+    px = (page_width * ALT_OCR_DPI / 72.0) * (page_height * ALT_OCR_DPI / 72.0)
+    if px > MAX_SUPPLEMENT_PIXELS:
+        doc.issue("info", "ocr_supplement_skipped",
+                  f"page would render to {px / 1e6:.0f} megapixels at {ALT_OCR_DPI} dpi, "
+                  f"above the {MAX_SUPPLEMENT_PIXELS / 1e6:.0f} MP budget; "
+                  "only the primary OCR pass was run", page_no)
+        return []
+    seen = {w.text.strip().lower() for w in primary_words if w.text.strip()}
+    try:
+        alt_img = render_page(pdf, page_no, tmpdir / f"alt{page_no:04d}", dpi=ALT_OCR_DPI)
+        alt_words, _ = parse_hocr(ocr_hocr(alt_img), scale=ALT_OCR_DPI / 72)
+        alt_img.unlink(missing_ok=True)
+    except ToolError as e:
+        doc.issue("info", "ocr_supplement_failed", str(e)[:200], page_no)
+        return []
+    extra: list[str] = []
+    for w in alt_words:
+        t = w.text.strip()
+        if not t or t.lower() in seen:
+            continue
+        if w.confidence is not None and w.confidence < 60:
+            continue      # noise the primary pass was right to omit
+        seen.add(t.lower())
+        extra.append(t)
+    return extra
 
 
 def derived_dir(doc_id: str) -> Path:
@@ -201,10 +229,9 @@ def extract_pdf(path: Path, *, doc_id: str | None = None,
                     (meta.get("Page size") or "612 x 792").split()[0] or 612)
                 raw_h = float(src["height"]) if src else 792.0
                 rot = rotations.get(pno, 0)
-                # pdftoppm applies /Rotate; pdftotext reports unrotated geometry.
-                # The rendered image defines the coordinate space everything else
-                # (region crops, OCR boxes) lives in, so text boxes are rotated
-                # into it and the page size is swapped for 90/270.
+                # pdftoppm applies /Rotate, and pdftotext reports word boxes in
+                # that same display space but the page attributes unrotated, so
+                # only the page rectangle needs swapping (see the note above).
                 width, height = ((raw_h, raw_w) if rot in (90, 270) else (raw_w, raw_h))
                 page = Page(page_no=pno, width=width, height=height,
                             extraction_method="pdftotext-bbox")
@@ -229,9 +256,6 @@ def extract_pdf(path: Path, *, doc_id: str | None = None,
                               f"source text layer rejected (control_ratio="
                               f"{tq['control_ratio']}, ascii_token_ratio="
                               f"{tq['ascii_token_ratio']}); page routed to OCR", pno)
-                if rot and blocks:
-                    blocks = [[[_rotate_word(w, rot, raw_w, raw_h) for w in ln]
-                               for ln in blk] for blk in blocks]
                 page_text_len = sum(len(line_text(ln)) for blk in blocks for ln in blk)
                 page.extra_text_quality = tq
                 page.text_char_count = page_text_len
@@ -294,6 +318,31 @@ def extract_pdf(path: Path, *, doc_id: str | None = None,
                                          table_regions=[t.bbox for t in tables if t.bbox])
                     page.elements.extend(els)
                     ordinal = (els[-1].ordinal + 1) if els else ordinal
+                    # OCR on these scans is resolution-unstable: individual
+                    # numbers and dimension callouts appear at one render
+                    # resolution and vanish at another. A second pass at a
+                    # different resolution recovers some of them. It is stored
+                    # as an additive supplement with its own provenance, never
+                    # merged into or over the primary pass.
+                    if ocr_words and page.ocr_mean_confidence is not None \
+                            and page.ocr_mean_confidence < OCR_SUPPLEMENT_BELOW:
+                        extra_words = _ocr_supplement(path, pno, tmpdir, ocr_words, doc,
+                                                      page_width=width, page_height=height)
+                        if extra_words:
+                            page.elements.append(Element(
+                                element_type="ocr_supplement", text="",
+                                ocr_text=" ".join(extra_words), text_source="ocr",
+                                bbox=(0.0, 0.0, width, height),
+                                heading_path=list(stack.path), ordinal=ordinal,
+                                ocr_confidence=page.ocr_mean_confidence,
+                                extra={"dpi": ALT_OCR_DPI, "primary_dpi": OCR_DPI,
+                                       "reason": "terms recovered only at the alternate "
+                                                 "OCR resolution",
+                                       "word_count": len(extra_words)}))
+                            ordinal += 1
+                            page.notes.append(
+                                f"{len(extra_words)} token(s) recovered only at "
+                                f"{ALT_OCR_DPI} dpi")
                     if ocr_words and (len(ocr_words) < DRAWING_WORD_MAX or drawing_sheet):
                         page.elements.append(Element(
                             element_type="drawing", text="",

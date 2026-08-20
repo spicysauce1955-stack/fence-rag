@@ -1,8 +1,8 @@
 """Phase 3 gate: the retrieval response contract from the spec (§8)."""
-import json
+import shutil
 import unittest
 
-from context import ROOT, requires_store
+from context import ROOT, requires_store, store_snapshot
 from fence_evidence.retrieval import (get_document, get_element_context, get_page,
                                       get_region, resolve_document_version,
                                       search_evidence)
@@ -96,12 +96,15 @@ class TestSearchContract(unittest.TestCase):
 class TestAccessors(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.conn = connect()
+        # get_region caches an on-demand crop, which is a write: use a copy
+        cls.snapshot = store_snapshot()
+        cls.conn = connect(cls.snapshot)
         cls.hit = search_evidence("footing depth", limit=1, conn=cls.conn)[0]
 
     @classmethod
     def tearDownClass(cls):
         cls.conn.close()
+        shutil.rmtree(cls.snapshot.parent, ignore_errors=True)
 
     def test_get_document_by_id_and_path(self):
         by_id = get_document(self.hit.document_id, conn=self.conn)

@@ -4,3 +4,4 @@ __pycache__/
 workspace/pylibs/
 workspace/derived/
 workspace/indexes/
+workspace/tests/snapshots/

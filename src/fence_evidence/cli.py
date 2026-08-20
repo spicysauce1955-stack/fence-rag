@@ -122,7 +122,18 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "facts":
         from .facts import extract_facts, query_facts
         if args.extract:
-            _print(extract_facts())
+            result = extract_facts()
+            from .reports import facts_report
+            from .store import connect
+            from .paths import REPORTS_DIR, open_write
+            conn = connect()
+            try:
+                body = facts_report(conn)
+            finally:
+                conn.close()
+            with open_write(REPORTS_DIR / "facts-report.md") as f:
+                f.write(body)
+            _print(result)
         else:
             _print(query_facts(args.type, manufacturer=args.manufacturer, limit=args.limit))
     elif args.cmd == "evaluate":

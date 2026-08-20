@@ -75,7 +75,10 @@ PILOT: list[dict] = [
         "class": "docx_spec",
         "reason": "The only DOCX. CSI MasterSpec hierarchy (PART/2.1/A/1) is real "
                   "section structure that must become a heading path.",
-        "expect": ["headings", "tables", "bboxes_exempt"],
+        # measured: this document contains no <w:tbl> at all, so a table
+        # assertion here would test the extractor against something the source
+        # does not have. Table extraction from DOCX is unit-tested separately.
+        "expect": ["headings", "bboxes_exempt"],
     },
 ]
 

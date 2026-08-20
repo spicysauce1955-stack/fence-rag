@@ -1,8 +1,8 @@
 """Ingestion is idempotent and the retrieval projection is rebuildable."""
-import json
+import shutil
 import unittest
 
-from context import requires_store
+from context import requires_store, store_snapshot
 from fence_evidence.store import (build_retrieval_units, connect, stats,
                                   tool_fingerprint, version_exists)
 from fence_evidence.tools import tool_versions
@@ -12,11 +12,14 @@ from fence_evidence.tools import tool_versions
 class TestIdempotency(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.conn = connect()
+        # this class rebuilds the retrieval projection, so it works on a copy
+        cls.snapshot = store_snapshot()
+        cls.conn = connect(cls.snapshot)
 
     @classmethod
     def tearDownClass(cls):
         cls.conn.close()
+        shutil.rmtree(cls.snapshot.parent, ignore_errors=True)
 
     def test_ingested_versions_are_recognised_as_current(self):
         fp = tool_fingerprint(tool_versions())

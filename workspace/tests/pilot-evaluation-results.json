@@ -1,0 +1,1428 @@
+{
+  "summary": {
+    "k": 10,
+    "questions": 18,
+    "answerable": 15,
+    "no_answer": 3,
+    "recall_at_k": 0.8,
+    "page_recall_at_k": 0.6,
+    "mrr": 0.628,
+    "evidence_support": 0.723,
+    "page_evidence_support": 0.867,
+    "no_answer_precision": 1.0,
+    "passed": 14,
+    "by_category": {
+      "comparison": {
+        "n": 2,
+        "doc_hits": 2,
+        "passed": 1,
+        "failures": [
+          "gq-017"
+        ],
+        "mean_support": 0.5
+      },
+      "conditional_table_lookup": {
+        "n": 3,
+        "doc_hits": 2,
+        "passed": 2,
+        "failures": [
+          "gq-004"
+        ],
+        "mean_support": 0.756
+      },
+      "exact_identifier": {
+        "n": 2,
+        "doc_hits": 2,
+        "passed": 2,
+        "failures": [],
+        "mean_support": 0.75
+      },
+      "exact_product": {
+        "n": 1,
+        "doc_hits": 1,
+        "passed": 1,
+        "failures": [],
+        "mean_support": 0.667
+      },
+      "historical_version": {
+        "n": 1,
+        "doc_hits": 1,
+        "passed": 1,
+        "failures": [],
+        "mean_support": 1.0
+      },
+      "no_answer": {
+        "n": 3,
+        "doc_hits": 0,
+        "passed": 3,
+        "failures": [],
+        "mean_support": null
+      },
+      "paraphrase": {
+        "n": 1,
+        "doc_hits": 1,
+        "passed": 1,
+        "failures": [],
+        "mean_support": 1.0
+      },
+      "source_verification": {
+        "n": 1,
+        "doc_hits": 1,
+        "passed": 1,
+        "failures": [],
+        "mean_support": 0.667
+      },
+      "table_retrieval": {
+        "n": 1,
+        "doc_hits": 0,
+        "passed": 0,
+        "failures": [
+          "gq-009"
+        ],
+        "mean_support": 0.75
+      },
+      "visual_evidence": {
+        "n": 3,
+        "doc_hits": 2,
+        "passed": 2,
+        "failures": [
+          "gq-019"
+        ],
+        "mean_support": 0.667
+      }
+    },
+    "skipped_not_ingested": [
+      "gq-102",
+      "gq-103",
+      "gq-104",
+      "gq-105",
+      "gq-106",
+      "gq-108",
+      "gq-109",
+      "gq-110",
+      "gq-111",
+      "gq-113",
+      "gq-114",
+      "gq-119",
+      "gq-120",
+      "gq-121",
+      "gq-003",
+      "gq-006",
+      "gq-007",
+      "gq-008",
+      "gq-010",
+      "gq-011",
+      "gq-012",
+      "gq-013",
+      "gq-015",
+      "gq-016",
+      "gq-021",
+      "gq-022"
+    ],
+    "acceptance": {
+      "A3_recall_at_10_ge_0.80": true,
+      "A3_evidence_support_ge_0.70": true,
+      "A4_no_answer_precision_ge_0.66": true
+    }
+  },
+  "results": [
+    {
+      "id": "gq-101",
+      "category": "exact_product",
+      "set": "general",
+      "question": "Which Wam Bam manual covers assembling the Cambridge 6 ft vinyl privacy fence, and what product number is on it?",
+      "query": "Cambridge privacy fence install manual Wam Bam Cambridge BL19110 Cambridge 6 ft vinyl fence instructions",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": 1,
+      "page_rank": 1,
+      "expected_documents": [
+        "manuals/wam-bam/cambridge-BL19110-install-guide.pdf"
+      ],
+      "equivalent_documents": [],
+      "support": 0.667,
+      "page_support": 1.0,
+      "found_terms": [
+        "CAMBRIDGE",
+        "BL19110"
+      ],
+      "missing_terms": [
+        "NO-DIG STEEL PIPE ANCHOR KIT"
+      ],
+      "element_type_ok": false,
+      "image_evidence_ok": null,
+      "top_score": 26.943,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/wam-bam/cambridge-BL19110-install-guide.pdf",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 26.9433,
+          "matched_terms": [
+            "BL19110",
+            "BL19110"
+          ],
+          "snippet": "BL19110"
+        },
+        {
+          "source_path": "manuals/wam-bam/cambridge-BL19110-install-guide.pdf",
+          "page": 4,
+          "element_type": "paragraph",
+          "score": 26.8047,
+          "matched_terms": [
+            "BL19110",
+            "Cambridge",
+            "privacy",
+            "fence",
+            "Cambridge",
+            "BL19110",
+            "Cambridge",
+            "ft",
+            "vinyl"
+          ],
+          "snippet": "Cambridge\n6ft Privacy Vinyl Gate\nBL19111\nBL19110\nCambridge\n6ft Privacy Vinyl Fence\nBL19112\nFinishing\nPost\nFinishing\nPost\nBL19112\nBL19110\nCambridge\n6ft Privacy Vinyl Fence"
+        },
+        {
+          "source_path": "manuals/wam-bam/cambridge-BL19110-install-guide.pdf",
+          "page": 6,
+          "element_type": "paragraph",
+          "score": 23.508,
+          "matched_terms": [
+            "BL19110",
+            "BL19110"
+          ],
+          "snippet": "BL19110"
+        }
+      ]
+    },
+    {
+      "id": "gq-107",
+      "category": "paraphrase",
+      "set": "general",
+      "question": "The concrete guys splashed the posts while setting the footings. What does the master spec say to clean that off with?",
+      "query": "remove concrete stains vinyl fence post cleaning mortar off vinyl fence CSI vinyl fence cleaning spec",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": 1,
+      "page_rank": 1,
+      "expected_documents": [
+        "manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx"
+      ],
+      "equivalent_documents": [],
+      "support": 1.0,
+      "page_support": 1.0,
+      "found_terms": [
+        "muriatic acid",
+        "10 percent",
+        "mild household detergent"
+      ],
+      "missing_terms": [],
+      "element_type_ok": true,
+      "image_evidence_ok": null,
+      "top_score": 17.483,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 17.4835,
+          "matched_terms": [
+            "remove",
+            "fence",
+            "post",
+            "mortar"
+          ],
+          "snippet": " \u2026 instructions. Post hole excavations shall be scattered uniformly away from the posts. Clean fence with mild household detergent and rinse well with clean water. Remove mortar from exposed \u2026 "
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 7,
+          "element_type": "paragraph",
+          "score": 14.9663,
+          "matched_terms": [
+            "remove",
+            "concrete",
+            "stains",
+            "fence",
+            "post",
+            "cleaning",
+            "off"
+          ],
+          "snippet": " \u2026 For more stubborn stains, use a cleanser such as\nSoft Scrub \u00ae or cleaning solution listed on warranty\n\u2022\u2002Concrete is easily washed off when wet, but can also be \u2026 "
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 45,
+          "element_type": "paragraph",
+          "score": 9.7536,
+          "matched_terms": [
+            "concrete",
+            "fence",
+            "post",
+            "off"
+          ],
+          "snippet": " \u2026 Be sure concrete is structurally\nsound for installation of fence.\n1. Cutting down post\na. Measure height from top of post\nb. Cut off bottom of post with \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-112",
+      "category": "conditional_table_lookup",
+      "set": "general",
+      "question": "Local code says design for 130 mph wind. For a 6 ft chain link fence with 2 3/8\" Schedule 40 regular-grade posts, what maximum line post spacing does the CLFMI guide give before correction factors?",
+      "query": "line post spacing 130 mph 6 foot fence CLFMI wind load table post spacing max post spacing chain link wind",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": 1,
+      "page_rank": 10,
+      "expected_documents": [
+        "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf"
+      ],
+      "equivalent_documents": [],
+      "support": 0.667,
+      "page_support": 1.0,
+      "found_terms": [
+        "130 MPH",
+        "3.3"
+      ],
+      "missing_terms": [
+        "TABLE 4"
+      ],
+      "element_type_ok": true,
+      "image_evidence_ok": null,
+      "top_score": 25.695,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 4,
+          "element_type": "table",
+          "score": 25.6951,
+          "matched_terms": [
+            "line",
+            "post",
+            "130",
+            "mph",
+            "wind",
+            "table"
+          ],
+          "snippet": " \u2026 110 | MPH | Wind\n\n\u2022 | Table | 3; L | ine | Post | Selection | Guide for 120 | MPH | Wind\n\n\u2022 | Table | 4; L | ine | Post | Selection | Guide for 130 | MPH | Wind\n\n\u2022 | Table | 5; L \u2026 "
+        },
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 5,
+          "element_type": "paragraph",
+          "score": 24.8721,
+          "matched_terms": [
+            "line",
+            "post",
+            "spacing",
+            "mph",
+            "fence",
+            "CLFMI",
+            "wind",
+            "load",
+            "table",
+            "chain",
+            "link"
+          ],
+          "snippet": "The Chain Link Fence Manufacturers Institute (CLFMI) would like to acknowledge\nPagnotta Engineering, Inc. for the technical analysis of this Guide, as well as members of\nthe CLFMI \u2026 "
+        },
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 13,
+          "element_type": "paragraph",
+          "score": 21.8677,
+          "matched_terms": [
+            "line",
+            "post",
+            "spacing",
+            "mph",
+            "fence",
+            "wind",
+            "table",
+            "max",
+            "chain",
+            "link"
+          ],
+          "snippet": " \u2026 effect = 0.85\nFrom Table 2, for a 110 MPH wind and a 16' high fence, select a trial line post size spacing\nfactor \"S\" = 2.6\u2019 for \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-115",
+      "category": "visual_evidence",
+      "set": "general",
+      "question": "On the Weatherables Augusta 8 ft privacy CAD detail, what is the overall panel height and what reinforces the rails?",
+      "query": "Augusta 8 ft privacy panel dimensions Weatherables Augusta CAD detail U channel rail reinforcement vinyl privacy panel",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": 3,
+      "page_rank": 3,
+      "expected_documents": [
+        "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png"
+      ],
+      "equivalent_documents": [],
+      "support": 1.0,
+      "page_support": 1.0,
+      "found_terms": [
+        "95.5",
+        "U-Channels",
+        "39.5"
+      ],
+      "missing_terms": [],
+      "element_type_ok": true,
+      "image_evidence_ok": true,
+      "top_score": 12.689,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+          "page": 12,
+          "element_type": "paragraph",
+          "score": 12.689,
+          "matched_terms": [
+            "panel",
+            "detail",
+            "channel",
+            "rail",
+            "reinforcement"
+          ],
+          "snippet": " \u2026 ACCENT RAIL PVC + are\n\u201c i I - a>\nee U-SHAPPED G-60 STEEL CHANNEL X $e GALVANIZED STEEL 5) 2 x\na | (] {43 x 9075 LATTICE PANEL PY \u2026 "
+        },
+        {
+          "source_path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
+          "page": 5,
+          "element_type": "paragraph",
+          "score": 12.4339,
+          "matched_terms": [
+            "Augusta",
+            "Augusta",
+            "rail",
+            "vinyl"
+          ],
+          "snippet": "Savannah, Augusta, Bradford, 2-Rail, 3-Rail &\n4-Rail Horse Fence, Bedford Railing\nSavannah, Bradford, 2-Rail, 3-Rail & 4-Rail Horse\nFence, Bedford Railing\nVinyl available in \u2026 "
+        },
+        {
+          "source_path": "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png",
+          "page": 1,
+          "element_type": "drawing_label",
+          "score": 11.7385,
+          "matched_terms": [
+            "channel"
+          ],
+          "snippet": "12\"\n5'x 5.5\" x 71.5\"\nH\nH\n35\"\n39.5\"\n95.5\"\na\nTo\nTo\nTo\na\na\na\na\na\n5\nU-Channels\n39 \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-116",
+      "category": "no_answer",
+      "set": "general",
+      "question": "What torque should the gate hinge fasteners be tightened to on a vinyl fence gate, in inch-pounds?",
+      "query": "gate hinge screw torque spec vinyl fence fastener torque inch pounds how tight to tighten gate hinge bolts",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 11.234,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 22,
+          "element_type": "list",
+          "score": 11.2342,
+          "matched_terms": [
+            "gate",
+            "hinge",
+            "screw",
+            "fence",
+            "tight",
+            "tighten"
+          ],
+          "snippet": " \u2026 height for gate and block up gate\nsquare with fence\n\u2022\u2002Attach hinges to gate post with 2\u00bd\" self-tapping\nscrews provided (do not over tighten screws as this \u2026 "
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 26,
+          "element_type": "list",
+          "score": 11.1246,
+          "matched_terms": [
+            "gate",
+            "hinge",
+            "screw",
+            "fence",
+            "tight",
+            "tighten"
+          ],
+          "snippet": " \u2026 height for gate and block up gate\nsquare with fence\n\u2022\u2002Attach hinges to gate post with 2\u00bd\" self-tapping\nscrews provided (do not over tighten screws as this \u2026 "
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 20,
+          "element_type": "paragraph",
+          "score": 11.0658,
+          "matched_terms": [
+            "gate",
+            "hinge",
+            "screw",
+            "fence",
+            "fastener",
+            "tight",
+            "tighten"
+          ],
+          "snippet": " \u2026 Secure Fence Panels\n\u2022\u2002Panels must be attached to end, gate, and corner post\nwith one fastener per panel\n\u2022\u2002To prevent unauthorized panel removal, you can attach\none end \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-117",
+      "category": "no_answer",
+      "set": "general",
+      "question": "What is the list price per section of an Illusions V300 6 ft privacy fence?",
+      "query": "Illusions V300 price per section vinyl privacy fence cost per foot Illusions fence price list",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 13.751,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 48,
+          "element_type": "paragraph",
+          "score": 13.7507,
+          "matched_terms": [
+            "per",
+            "section",
+            "foot"
+          ],
+          "snippet": " \u2026 Foundation walls shall be supported by foundations\ndesigned in accordance with Section 1808.\nFor SI : 1 pound per square foot = 0.0479 kPa, 1 pound per square foot \u2026 "
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 42,
+          "element_type": "paragraph",
+          "score": 12.0062,
+          "matched_terms": [
+            "per",
+            "section",
+            "fence",
+            "foot"
+          ],
+          "snippet": " \u2026 rise in inches\n\u2022 Divide rise by section length to get rise per inch\n\u2022 Multiply by 12 to determine rise per foot\nRacking Method \u2014 10\u02da or Less\nWith the \u2026 "
+        },
+        {
+          "source_path": "manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 8.8533,
+          "matched_terms": [
+            "section",
+            "foot"
+          ],
+          "snippet": " \u2026 Rail Section: 8 foot (2436 mm).\n** NOTE TO SPECIFIER ** Delete rails and height options not required.\nRails: Top and Bottom Horizontals: 1-1/2 by 5-1/2 \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-118",
+      "category": "no_answer",
+      "set": "general",
+      "question": "What Miami-Dade County NOA number and mph wind rating do Wam Bam vinyl fence panels carry?",
+      "query": "Wam Bam fence wind rating mph Wam Bam Miami Dade NOA no-dig vinyl fence hurricane approval",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 14.924,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+          "page": 7,
+          "element_type": "drawing",
+          "score": 14.9241,
+          "matched_terms": [
+            "fence",
+            "wind",
+            "rating",
+            "mph",
+            "Miami",
+            "Dade",
+            "NOA",
+            "vinyl",
+            "hurricane",
+            "approval"
+          ],
+          "snippet": " \u2026 FENCE-AND IT'S SUPPORTS ARE DESIGNED FOR 75 MPH FASTEST MILE WIND SPEED OR 115 MPH (ULTIMATE 3 SEC. GUST). *CERTAINTEED LLC BUFFALO - NEW YORK MIAMI-DADE \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+          "page": 7,
+          "element_type": "paragraph",
+          "score": 13.5312,
+          "matched_terms": [
+            "fence",
+            "wind",
+            "mph",
+            "hurricane"
+          ],
+          "snippet": " \u2026 THE\nHIGH VELOCITY HURRICANE ZONES (HVHZ),\nDEFINITION: THIS FENCE-AND IT'S SUPPORTS ARE DESIGNED FOR 75 MPH\nFASTEST MILE WIND SPEED OR 115 MPH (ULTIMATE 3 SEC \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+          "page": 8,
+          "element_type": "paragraph",
+          "score": 12.2728,
+          "matched_terms": [
+            "wind",
+            "rating",
+            "mph",
+            "Miami",
+            "Dade"
+          ],
+          "snippet": " \u2026 RATING: j 5 | mea <5\n\u2014 os)\n75 MPH FASTED MILE WIND SPEED a o2\u00a7\n-\u00a2\nOR 115 MPH wrnwate 3 sec. cust) \u2014|29%\n. |-SigZ\u00a2\nau au MIAMI-DADE BCCO \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-122",
+      "category": "source_verification",
+      "set": "general",
+      "question": "For the current CertainTeed Miami-Dade approval covering Chesterfield, Columbia, Imperial and Breezewood vinyl fencing, what is the NOA number, its expiration date, and its missile impact rating? Back it with the approval page itself.",
+      "query": "CertainTeed Miami Dade NOA Chesterfield vinyl fence NOA expiration date Chesterfield HVHZ approval number",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": 4,
+      "page_rank": 8,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "equivalent_documents": [],
+      "support": 0.667,
+      "page_support": 1.0,
+      "found_terms": [
+        "23-0314.05",
+        "03/13/2029"
+      ],
+      "missing_terms": [
+        "MISSILE IMPACT RATING: None"
+      ],
+      "element_type_ok": true,
+      "image_evidence_ok": true,
+      "top_score": 19.206,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+          "page": 5,
+          "element_type": "paragraph",
+          "score": 19.2059,
+          "matched_terms": [
+            "NOA",
+            "NOA",
+            "expiration",
+            "date",
+            "approval"
+          ],
+          "snippet": "Helmy A. Makar, P.E., MLS.\nProduct Control Section Supervisor\nNOA No. 21-0125.07\nExpiration Date: 03/13/2024\nApproval Date: 03/18/2021"
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+          "page": 4,
+          "element_type": "paragraph",
+          "score": 19.0858,
+          "matched_terms": [
+            "NOA",
+            "NOA",
+            "expiration",
+            "date",
+            "approval"
+          ],
+          "snippet": "elmy A. Makar, P.E., MLS.\nProduct Control Section Supervisor\nNOA No. 21-0125.07\nExpiration Date: 03/13/2024\nApproval Date: 03/18/2021"
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 18.5348,
+          "matched_terms": [
+            "Miami",
+            "Dade",
+            "NOA",
+            "NOA",
+            "expiration",
+            "date",
+            "approval",
+            "number"
+          ],
+          "snippet": " \u2026 MIAMI-DADE COUNTY Lb f wWAa-~ ; NOA No. 21-0125.07\nAPPROVED 2 Expiration Date: 03/13/2024\n3 / } / 2021) Approval Date: 03/18/2021\n8 Page 1"
+        }
+      ]
+    },
+    {
+      "id": "gq-001",
+      "category": "exact_identifier",
+      "set": "structural",
+      "question": "Find Miami-Dade NOA 23-0314.05 - who is the applicant on it and when does it expire?",
+      "query": "NOA 23-0314.05 Miami-Dade NOA 23-0314.05 expiration date CertainTeed vinyl fence NOA applicant",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": 1,
+      "page_rank": null,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "equivalent_documents": [],
+      "support": 1.0,
+      "page_support": 1.0,
+      "found_terms": [
+        "23-0314.05",
+        "CertainTeed LLC",
+        "03/13/2029",
+        "05/04/2023"
+      ],
+      "missing_terms": [],
+      "element_type_ok": true,
+      "image_evidence_ok": null,
+      "top_score": 14.581,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+          "page": 4,
+          "element_type": "paragraph",
+          "score": 14.5813,
+          "matched_terms": [
+            "23-0314.05",
+            "NOA",
+            "NOA",
+            "expiration",
+            "date",
+            "NOA"
+          ],
+          "snippet": "Helmy A. Makar, P.E., MLS.\nProduct Control Section Supervisor\nNOA No. 23-0314.05\nExpiration Date: 03/13/2029\nApproval Date: 05/04/2023"
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+          "page": 2,
+          "element_type": "list",
+          "score": 14.2239,
+          "matched_terms": [
+            "23-0314.05",
+            "NOA",
+            "NOA",
+            "expiration",
+            "date",
+            "NOA"
+          ],
+          "snippet": " \u2026 Product Control Section Supervisor\nNOA No. 23-0314.05\nExpiration Date: 03/13/2029\nApproval Date: 05/04/2023"
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+          "page": 5,
+          "element_type": "paragraph",
+          "score": 13.0602,
+          "matched_terms": [
+            "NOA",
+            "NOA",
+            "expiration",
+            "date",
+            "NOA"
+          ],
+          "snippet": "Helmy A. Makar, P.E., MLS.\nProduct Control Section Supervisor\nNOA No. 21-0125.07\nExpiration Date: 03/13/2024\nApproval Date: 03/18/2021"
+        }
+      ]
+    },
+    {
+      "id": "gq-002",
+      "category": "exact_identifier",
+      "set": "structural",
+      "question": "Whose Florida P.E. seal - license number 52609 - is on the Extruded PVC Vinyl Fencing drawings inside Miami-Dade NOA 23-0314.05?",
+      "query": "Florida PE license 52609 who sealed drawing 20-178 engineer of record CertainTeed vinyl fence NOA",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": 1,
+      "page_rank": 1,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "equivalent_documents": [],
+      "support": 0.5,
+      "page_support": 1.0,
+      "found_terms": [
+        "52609"
+      ],
+      "missing_terms": [
+        "Pedro De Figueiredo"
+      ],
+      "element_type_ok": true,
+      "image_evidence_ok": null,
+      "top_score": 13.731,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+          "page": 9,
+          "element_type": "paragraph",
+          "score": 13.7314,
+          "matched_terms": [
+            "52609",
+            "Florida",
+            "PE"
+          ],
+          "snippet": "PE 52609\nLOTTI is\nGENERAL NOTES: Gucececececece: Z \u00a72cax\n| - CODE: THIS PRODUCT HAS BEEN TESTED AND DESIGNED IN ACCORDANCE Y UAAUAAAGd g SSSR S\nWITH THE FLORIDA BUILDING \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+          "page": 7,
+          "element_type": "paragraph",
+          "score": 13.728,
+          "matched_terms": [
+            "PE"
+          ],
+          "snippet": "5.1- THE SITE SPECIFIC PROJECT CRITERIA, SUCH AS BUT NOT LIMITED\nTO, LOCAL CODE REQUIREMENTS, PRODUCT RATING ETC.\n5.2- THAT THIS APPROVAL IS ADEQUATE TO THE \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+          "page": 14,
+          "element_type": "paragraph",
+          "score": 11.7452,
+          "matched_terms": [
+            "52609",
+            "PE"
+          ],
+          "snippet": " \u2026 aaa\n\u00a7 \u00a7 No. 52609 5% 3 Hu\ny 8 HORIZONTAL SECTION 3 3k: * ?%i 8 Bo*\n4 iy 3 : 3 : 2. He\n\\ \u2014| }+ L \u2014 E OR D4 Pe fas TRS \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-004",
+      "category": "conditional_table_lookup",
+      "set": "structural",
+      "question": "I'm installing Bufftech Chesterfield fence in Miami-Dade in Exposure C. If I pour a 36 inch deep footing, what is the maximum post spacing the NOA allows?",
+      "query": "Exposure C 36 inch footing maximum post spacing vinyl fence NOA Bufftech post spacing footing depth table HVHZ max post spacing exposure C",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "equivalent_documents": [],
+      "support": 1.0,
+      "page_support": 1.0,
+      "found_terms": [
+        "88",
+        "POST SPACING AND FOOTING DIMENSIONS",
+        "HVHZ: MIAMI-DADE AND BROWARD COUNTIES",
+        "ASCE 7-10"
+      ],
+      "missing_terms": [],
+      "element_type_ok": false,
+      "image_evidence_ok": false,
+      "top_score": 30.915,
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 17,
+          "element_type": "table",
+          "score": 30.9146,
+          "matched_terms": [
+            "Exposure",
+            "36",
+            "footing",
+            "post",
+            "spacing",
+            "depth",
+            "HVHZ",
+            "max",
+            "exposure"
+          ],
+          "snippet": "Wind Exposure | Footing Depth | Max. Post Spacing\nB | 30\" | 97\" | NON HVHZ\nB | 24\" | 66\"\nC | 36\" | 88\" | HVHZ and NON HVHZ\nC | 30\" | 68\"\nD | 36\" | 75 \u2026 "
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 31,
+          "element_type": "table",
+          "score": 30.2062,
+          "matched_terms": [
+            "36",
+            "footing",
+            "post",
+            "spacing",
+            "depth",
+            "max"
+          ],
+          "snippet": "Footing Depth | Max. Post Spacing\n30\" | 97\"\n24\" | 66\"\n36\" | 88\"\n30\" | 68\"\n36\" | 75\"\n30\" | 56\""
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 19,
+          "element_type": "table",
+          "score": 29.2598,
+          "matched_terms": [
+            "36",
+            "footing",
+            "post",
+            "spacing",
+            "depth",
+            "max"
+          ],
+          "snippet": "d Footing ure Depth | Max. Post Spacing\n30\" | 97\"\n24\" | 66\"\n36\" | 88\"\n30\" | 68\"\n36\" | 75\"\n30\" | 56\""
+        }
+      ]
+    },
+    {
+      "id": "gq-005",
+      "category": "conditional_table_lookup",
+      "set": "structural",
+      "question": "For a 6 ft high chain link fence in a 130 mph wind zone, what maximum line post spacing does the CLFMI guide give for a 2 3/8 inch Schedule 40 regular grade steel line post?",
+      "query": "chain link 130 mph 6 ft fence 2 3/8 line post spacing CLFMI table 130 mph line post selection line post maximum spacing wind speed table",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": 1,
+      "page_rank": null,
+      "expected_documents": [
+        "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf"
+      ],
+      "equivalent_documents": [],
+      "support": 0.6,
+      "page_support": 0.6,
+      "found_terms": [
+        "130 MPH",
+        "3.3",
+        "EXPOSURE CATEGORY"
+      ],
+      "missing_terms": [
+        "TABLE 4",
+        "2 3/8"
+      ],
+      "element_type_ok": true,
+      "image_evidence_ok": null,
+      "top_score": 28.89,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 4,
+          "element_type": "table",
+          "score": 28.8902,
+          "matched_terms": [
+            "130",
+            "mph",
+            "line",
+            "post",
+            "table",
+            "selection",
+            "wind"
+          ],
+          "snippet": " \u2026 Post | Selection | Guide for 110 | MPH | Wind\n\n\u2022 | Table | 3; L | ine | Post | Selection | Guide for 120 | MPH | Wind\n\n\u2022 | Table | 4; L | ine | Post | Selection | Guide for 130 | MPH \u2026 "
+        },
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 13,
+          "element_type": "paragraph",
+          "score": 27.7475,
+          "matched_terms": [
+            "chain",
+            "link",
+            "mph",
+            "fence",
+            "line",
+            "post",
+            "spacing",
+            "table",
+            "maximum",
+            "wind",
+            "speed"
+          ],
+          "snippet": " \u2026 effect = 0.85\nFrom Table 2, for a 110 MPH wind and a 16' high fence, select a trial line post size spacing\nfactor \"S\" = 2.6\u2019 for \u2026 "
+        },
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 12,
+          "element_type": "paragraph",
+          "score": 26.3881,
+          "matched_terms": [
+            "chain",
+            "link",
+            "mph",
+            "fence",
+            "line",
+            "post",
+            "spacing",
+            "table",
+            "maximum",
+            "wind",
+            "speed"
+          ],
+          "snippet": "Select a line post spacing for a 10\u2019 high Chain Link fence constructed of #9-gage wire and a mesh size\npattern of 1-3/4\u201d. The installation \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-009",
+      "category": "table_retrieval",
+      "set": "structural",
+      "question": "Show me the maximum post spacing and footing dimensions table from the current CertainTeed / Bufftech extruded PVC vinyl fence NOA.",
+      "query": "maximum post spacing and footing dimensions table vinyl fence NOA Table 1 footing depth post spacing wind exposure Bufftech footing table",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "equivalent_documents": [],
+      "support": 0.75,
+      "page_support": 1.0,
+      "found_terms": [
+        "POST SPACING AND FOOTING DIMENSIONS",
+        "HVHZ: MIAMI-DADE AND BROWARD COUNTIES",
+        "ASCE 7-10"
+      ],
+      "missing_terms": [
+        "FOOTING TABLE"
+      ],
+      "element_type_ok": false,
+      "image_evidence_ok": false,
+      "top_score": 22.242,
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 14,
+          "element_type": "paragraph",
+          "score": 22.2422,
+          "matched_terms": [
+            "maximum",
+            "post",
+            "spacing",
+            "footing",
+            "table",
+            "fence",
+            "depth",
+            "wind",
+            "exposure"
+          ],
+          "snippet": "For a site location with a high wind condition and the design selection of an\nappropriate footing size and depth:\nSelect a line post size, its spacing and \u2026 "
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 17,
+          "element_type": "table",
+          "score": 20.8565,
+          "matched_terms": [
+            "post",
+            "spacing",
+            "footing",
+            "depth",
+            "wind",
+            "exposure"
+          ],
+          "snippet": "Wind Exposure | Footing Depth | Max. Post Spacing\nB | 30\" | 97\" | NON HVHZ\nB | 24\" | 66\"\nC | 36\" | 88\" | HVHZ and NON HVHZ\nC | 30\" | 68\"\nD | 36\" | 75 \u2026 "
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 29,
+          "element_type": "table",
+          "score": 20.2523,
+          "matched_terms": [
+            "footing",
+            "depth",
+            "wind",
+            "exposure"
+          ],
+          "snippet": "Wind Exposure | Footing Depth\nB | 30\" | 97\" 66\"\nB | 24\"\nC | 36\" | 88\" 68\"\nC | 30\"\nD | 36\" | 75\" 56\"\nD | 30\""
+        }
+      ]
+    },
+    {
+      "id": "gq-014",
+      "category": "historical_version",
+      "set": "structural",
+      "question": "The superseded 2021 CertainTeed NOA 21-0125.07 - when did it expire and which NOA did it revise?",
+      "query": "NOA 21-0125.07 expiration which NOA did 21-0125.07 revise superseded CertainTeed vinyl fence NOA 2021",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": 1,
+      "page_rank": 6,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf"
+      ],
+      "equivalent_documents": [],
+      "support": 1.0,
+      "page_support": 1.0,
+      "found_terms": [
+        "21-0125.07",
+        "revises NOA #20-0303.02",
+        "03/18/2021",
+        "20-178"
+      ],
+      "missing_terms": [],
+      "element_type_ok": true,
+      "image_evidence_ok": null,
+      "top_score": 18.546,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+          "page": 5,
+          "element_type": "paragraph",
+          "score": 18.546,
+          "matched_terms": [
+            "21-0125.07",
+            "2021",
+            "NOA",
+            "expiration",
+            "NOA",
+            "NOA"
+          ],
+          "snippet": "Helmy A. Makar, P.E., MLS.\nProduct Control Section Supervisor\nNOA No. 21-0125.07\nExpiration Date: 03/13/2024\nApproval Date: 03/18/2021"
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+          "page": 4,
+          "element_type": "paragraph",
+          "score": 18.4234,
+          "matched_terms": [
+            "21-0125.07",
+            "2021",
+            "NOA",
+            "expiration",
+            "NOA",
+            "NOA"
+          ],
+          "snippet": "elmy A. Makar, P.E., MLS.\nProduct Control Section Supervisor\nNOA No. 21-0125.07\nExpiration Date: 03/13/2024\nApproval Date: 03/18/2021"
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+          "page": 2,
+          "element_type": "paragraph",
+          "score": 17.7221,
+          "matched_terms": [
+            "21-0125.07",
+            "2021",
+            "NOA",
+            "expiration",
+            "NOA",
+            "NOA"
+          ],
+          "snippet": " \u2026 Product Control Section Supervisor\nNOA No. 21-0125.07\nExpiration Date: 03/13/2024\nApproval Date: 03/18/2021"
+        }
+      ]
+    },
+    {
+      "id": "gq-017",
+      "category": "comparison",
+      "set": "structural",
+      "question": "When the Columbia/Imperial/Chesterfield fence approval moved from CertainTeed to Barrette, did the allowable post spacing change - and did the engineer of record change?",
+      "query": "did post spacing change CertainTeed to Barrette vinyl fence NOA compare NOA 23-0314.05 and 24-0117.05 post spacing table engineer of record change Barrette CertainTeed fence",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": 2,
+      "page_rank": null,
+      "expected_documents": [
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "equivalent_documents": [],
+      "support": 0.2,
+      "page_support": 0.4,
+      "found_terms": [
+        "TABLE 1"
+      ],
+      "missing_terms": [
+        "Pedro De Figueiredo",
+        "Robert Nieminen",
+        "POST SPACING AND FOOTING DIMENSIONS",
+        "ASCE 7-10"
+      ],
+      "element_type_ok": false,
+      "image_evidence_ok": true,
+      "top_score": 19.16,
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+          "page": 8,
+          "element_type": "paragraph",
+          "score": 19.1602,
+          "matched_terms": [
+            "post",
+            "spacing",
+            "table",
+            "engineer",
+            "record"
+          ],
+          "snippet": " \u2026 INTO SAI SE RS SFECIED SEE TABLE 1 ON SHEET 9 SEE TABLE 1 ON SHEET 9 =z 2\nMAXIMUM POST SPACING MAXIMUM PLIST SPACING + his\nG- USE \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+          "page": 9,
+          "element_type": "paragraph",
+          "score": 14.4826,
+          "matched_terms": [
+            "post",
+            "spacing",
+            "table",
+            "engineer",
+            "record"
+          ],
+          "snippet": " \u2026 Ot SBEF SG SFE TABLE 1 ON SHEET 9 > 9\nIN THIS CURRENT SET OF DRAWINGS. MAXIMUM POST SPACING MAXIMUM POST SPACING \u2014| Lis\nG- USE: IT SHALL BE \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+          "page": 7,
+          "element_type": "paragraph",
+          "score": 10.9046,
+          "matched_terms": [],
+          "snippet": "5.1- THE SITE SPECIFIC PROJECT CRITERIA, SUCH AS BUT NOT LIMITED\nTO, LOCAL CODE REQUIREMENTS, PRODUCT RATING ETC.\n5.2- THAT THIS APPROVAL IS ADEQUATE TO THE \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-018",
+      "category": "comparison",
+      "set": "structural",
+      "question": "Compare the Weatherables Augusta privacy panel CAD details for the 6 ft wide and the 8 ft wide panel - what changes?",
+      "query": "Weatherables Augusta privacy panel dimensions 6 ft vs 8 ft Augusta 8x8 privacy rail length Weatherables CAD detail privacy panel U-channel",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": 3,
+      "page_rank": 3,
+      "expected_documents": [
+        "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png",
+        "manuals/weatherables/structural/weatherables-cad-augusta-8x8-privacy.png"
+      ],
+      "equivalent_documents": [],
+      "support": 0.8,
+      "page_support": 1.0,
+      "found_terms": [
+        "72",
+        "U-Channels",
+        "39.5",
+        "5.5"
+      ],
+      "missing_terms": [
+        "96"
+      ],
+      "element_type_ok": true,
+      "image_evidence_ok": true,
+      "top_score": 12.434,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
+          "page": 5,
+          "element_type": "paragraph",
+          "score": 12.4339,
+          "matched_terms": [
+            "Augusta",
+            "Augusta",
+            "rail"
+          ],
+          "snippet": "Savannah, Augusta, Bradford, 2-Rail, 3-Rail &\n4-Rail Horse Fence, Bedford Railing\nSavannah, Bradford, 2-Rail, 3-Rail & 4-Rail Horse\nFence, Bedford Railing\nVinyl available in \u2026 "
+        },
+        {
+          "source_path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
+          "page": 13,
+          "element_type": "paragraph",
+          "score": 11.9737,
+          "matched_terms": [
+            "rail",
+            "length"
+          ],
+          "snippet": " \u2026 5\u201d x 5\u201d square post\nPost Length: 5\u2019 & 6\u2019\nRail Spacing: 11\u201d\nRail Size: 1.5\u201d x 5.5\u201d\nColor:\nPost: 5\u201d x 5\u201d square post\nPost Length \u2026 "
+        },
+        {
+          "source_path": "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png",
+          "page": 1,
+          "element_type": "drawing_label",
+          "score": 11.7385,
+          "matched_terms": [
+            "U-channel"
+          ],
+          "snippet": "12\"\n5'x 5.5\" x 71.5\"\nH\nH\n35\"\n39.5\"\n95.5\"\na\nTo\nTo\nTo\na\na\na\na\na\n5\nU-Channels\n39 \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-019",
+      "category": "visual_evidence",
+      "set": "structural",
+      "question": "Show me the post and footing cross-section from the current Bufftech vinyl fence NOA - what footing diameter, concrete strength and post reinforcement does it detail?",
+      "query": "vinyl fence post footing cross section 12 inch diameter 3000 psi aluminum post reinforcement footing detail Bufftech NOA post and footing design detail vinyl fence",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "equivalent_documents": [],
+      "support": 0.0,
+      "page_support": 0.0,
+      "found_terms": [],
+      "missing_terms": [
+        "POST AND FOOTING DESIGN",
+        "3000 PSI CONCRETE",
+        "EXISTING SOIL",
+        "FOOTING TABLE"
+      ],
+      "element_type_ok": false,
+      "image_evidence_ok": false,
+      "top_score": 17.312,
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 14,
+          "element_type": "paragraph",
+          "score": 17.3125,
+          "matched_terms": [
+            "fence",
+            "post",
+            "footing",
+            "12",
+            "diameter",
+            "design"
+          ],
+          "snippet": " \u2026 the design selection of an\nappropriate footing size and depth:\nSelect a line post size, its spacing and footing for a 12' high chain link fence that will \u2026 "
+        },
+        {
+          "source_path": "manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 12.9694,
+          "matched_terms": [
+            "fence",
+            "post",
+            "section",
+            "12",
+            "inch"
+          ],
+          "snippet": " \u2026 Baron Yard Fence.\n** NOTE TO SPECIFIER ** Delete height and section width options not required.\nHeight: 36 inch (914 mm).\nHeight: 48 inch (1219 mm). Pool.\nHeight: 60 inch \u2026 "
+        },
+        {
+          "source_path": "manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 12.6901,
+          "matched_terms": [
+            "fence",
+            "post",
+            "section",
+            "12",
+            "inch"
+          ],
+          "snippet": " \u2026 Rail Section: 6 foot (1829 mm).\nRail Section: 8 foot (2436 mm).\nPosts: 4 inch (101 mm).\n** NOTE TO SPECIFIER ** Delete post caps option not required. Contact manufacturer \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-020",
+      "category": "visual_evidence",
+      "set": "structural",
+      "question": "On the Illusions Vinyl Fence PE-stamped drawings, what does the concrete foundation detail for the 4 ft tongue-and-groove solid panel show?",
+      "query": "Illusions vinyl fence concrete foundation depth 4 ft panel Illusions NOA drawing post underground depth V300-4 tongue and groove solid panel foundation detail",
+      "answerable": true,
+      "n_results": 10,
+      "doc_rank": 1,
+      "page_rank": 1,
+      "expected_documents": [
+        "manuals/illusions-vinyl-fence/75mph-wind-kit-noa-miami-dade.pdf",
+        "manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf"
+      ],
+      "equivalent_documents": [],
+      "support": 1.0,
+      "page_support": 1.0,
+      "found_terms": [
+        "CONCRETE FOUNDATION",
+        "32",
+        "42",
+        "GROUND LEVEL"
+      ],
+      "missing_terms": [],
+      "element_type_ok": true,
+      "image_evidence_ok": true,
+      "top_score": 20.944,
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf",
+          "page": 3,
+          "element_type": "paragraph",
+          "score": 20.9442,
+          "matched_terms": [
+            "vinyl",
+            "panel",
+            "tongue",
+            "groove",
+            "solid"
+          ],
+          "snippet": "Vinyl 4 High Tongue &\nGroove Solid Panel"
+        },
+        {
+          "source_path": "manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf",
+          "page": 6,
+          "element_type": "paragraph",
+          "score": 20.9442,
+          "matched_terms": [
+            "vinyl",
+            "panel",
+            "tongue",
+            "groove",
+            "solid"
+          ],
+          "snippet": "Vinyl 8\u00b0 High Tongue &\nGroove Solid Panel"
+        },
+        {
+          "source_path": "manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf",
+          "page": 4,
+          "element_type": "paragraph",
+          "score": 20.4979,
+          "matched_terms": [
+            "vinyl",
+            "panel",
+            "tongue",
+            "groove",
+            "solid"
+          ],
+          "snippet": "Vinyl 5\" High Tongue &\nGroove Solid Panel"
+        }
+      ]
+    }
+  ]
+}

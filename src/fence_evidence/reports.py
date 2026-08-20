@@ -428,6 +428,73 @@ def coverage_report(conn: sqlite3.Connection) -> str:
     return "\n".join(lines) + "\n"
 
 
+# ------------------------------------------------------------------ Phase 6
+def facts_report(conn: sqlite3.Connection) -> str:
+    total = conn.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+    if total == 0:
+        return "# Structured technical facts\n\nNo facts extracted yet.\n"
+    by_type = conn.execute("""SELECT fact_type, COUNT(*) n,
+            SUM(review_status='flagged') flagged, SUM(ocr_derived) ocr
+            FROM facts GROUP BY fact_type ORDER BY n DESC""").fetchall()
+    by_status = conn.execute("""SELECT review_status, COUNT(*) n FROM facts
+            GROUP BY review_status ORDER BY n DESC""").fetchall()
+    conditioned = conn.execute("""SELECT COUNT(*) FROM facts
+            WHERE conditions != '{}'""").fetchone()[0]
+    no_prov = conn.execute("""SELECT COUNT(*) FROM facts f
+            LEFT JOIN elements e ON e.element_id=f.element_id
+            WHERE e.element_id IS NULL""").fetchone()[0]
+    samples = conn.execute("""SELECT f.fact_type, f.value_original, f.value_normalized,
+            f.unit_normalized, f.conditions, f.review_status, d.source_path, f.page_no,
+            f.element_id FROM facts f JOIN documents d ON d.document_id=f.document_id
+            WHERE f.fact_type IN ('footing_depth_in','post_spacing_in','wind_speed_mph',
+                                  'racking_degrees','approval_id')
+              AND f.conditions != '{}'
+            ORDER BY f.fact_type LIMIT 25""").fetchall()
+    lines = [
+        "# Structured technical facts (Phase 6)",
+        "",
+        "Facts are *derived from* canonical elements and never replace them. Every row",
+        "carries the element, page and document it came from, the original wording, the",
+        "normalised value beside it, and a review status. A value read from OCR text on a",
+        "page whose mean word confidence is below 80 is created as `flagged`, not",
+        "`extracted`: a misread digit in a footing depth is a structural error, not a typo.",
+        "",
+        _table(["Measure", "Value"], [
+            ["facts", total],
+            ["with conditions attached", conditioned],
+            ["facts without a source element", f"**{no_prov}**" if no_prov else 0],
+        ]),
+        "",
+        "## By review status",
+        "",
+        _table(["Status", "Count"], [[r["review_status"], r["n"]] for r in by_status]),
+        "",
+        "## By type",
+        "",
+        _table(["Fact type", "Count", "Flagged for review", "OCR-derived"],
+               [[r["fact_type"], r["n"], r["flagged"], r["ocr"]] for r in by_type]),
+        "",
+        "## Sample, with provenance",
+        "",
+        _table(["Type", "Original", "Normalised", "Conditions", "Status", "Source", "Page"],
+               [[r["fact_type"], f"`{r['value_original'][:40]}`",
+                 f"{r['value_normalized']} {r['unit_normalized'] or ''}".strip(),
+                 f"`{r['conditions']}`", r["review_status"],
+                 f"`{Path(r['source_path']).name[:40]}`", r["page_no"]]
+                for r in samples]),
+        "",
+        "## What this layer is not",
+        "",
+        "The extractor is a documented set of regular expressions (`extractor='regex-v1'`),",
+        "not a model. It finds values that are stated in a sentence or a recovered table",
+        "cell. It does **not** read values out of scanned drawing tables, because those",
+        "cells were never recovered (see the corpus audit). Any fact whose conditions",
+        "matter for a structural decision should be confirmed against the page image",
+        "before use; that is what the review status is for.",
+    ]
+    return "\n".join(lines) + "\n"
+
+
 def write_all_reports() -> dict:
     written = {}
     for name, body in (("environment-report.md", environment_report()),
@@ -447,4 +514,12 @@ def write_all_reports() -> dict:
         with open_write(REPORTS_DIR / "coverage-report.md") as f:
             f.write(body)
         written["coverage-report.md"] = len(body.splitlines())
+        conn = connect()
+        try:
+            body = facts_report(conn)
+        finally:
+            conn.close()
+        with open_write(REPORTS_DIR / "facts-report.md") as f:
+            f.write(body)
+        written["facts-report.md"] = len(body.splitlines())
     return written

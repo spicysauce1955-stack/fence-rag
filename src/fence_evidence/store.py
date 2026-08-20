@@ -286,14 +286,26 @@ def upsert_document(conn: sqlite3.Connection, manifest_row: dict) -> str:
 
 def version_exists(conn: sqlite3.Connection, doc_id: str, sha256: str,
                    fingerprint: str) -> bool:
-    """True when this exact content was already extracted by these exact tools."""
+    """True when this exact content was already extracted by these exact tools.
+
+    Completion is judged from the *version row*, which is written in the same
+    transaction as the document's pages and elements, not from the run's
+    ``finished_at``.  Keying on the run would make every document of an
+    interrupted run look stale and force a full re-extraction on resume.
+    """
     row = conn.execute("""
-        SELECT r.tool_fingerprint AS fp, r.finished_at AS fin
-          FROM document_versions v LEFT JOIN extraction_runs r
+        SELECT r.tool_fingerprint AS fp
+          FROM document_versions v JOIN extraction_runs r
             ON r.run_id = v.extraction_run_id
          WHERE v.document_id=? AND v.sha256=?
     """, (doc_id, sha256)).fetchone()
-    return bool(row and row["fp"] == fingerprint and row["fin"])
+    if not row or row["fp"] != fingerprint:
+        return False
+    # and the version must actually carry content
+    n = conn.execute("""SELECT COUNT(*) FROM pages p
+        JOIN document_versions v ON v.version_id = p.version_id
+        WHERE v.document_id=? AND v.sha256=?""", (doc_id, sha256)).fetchone()[0]
+    return n > 0
 
 
 def _asset_row(conn, doc_id, version_id, page_no, element_id, asset_type, path_str):
@@ -408,6 +420,13 @@ def add_relation(conn: sqlite3.Connection, from_doc: str, to_doc: str, rtype: st
 MERGE_MAX_CHARS = 1400
 MERGE_TYPES = {"paragraph", "list", "caption", "table_text", "drawing_label"}
 
+# Heading elements are deliberately *not* projected as standalone units.  They
+# remain canonical elements, and their text already reaches the index through
+# the heading_path column of every unit beneath them.  Indexing them separately
+# gave one- and two-word units whose BM25 length normalisation outranked the
+# tables and OCR paragraphs that actually hold the answer.
+UNIT_EXCLUDED_TYPES = {"heading"}
+
 
 def _unit_text(row: sqlite3.Row) -> str:
     return (row["text"] or "").strip() or (row["ocr_text"] or "").strip()
@@ -438,7 +457,8 @@ def build_retrieval_units(conn: sqlite3.Connection, *, document_id: str | None =
         meta = conn.execute("SELECT title, manufacturer, doc_type FROM documents "
                             "WHERE document_id=?", (doc_id,)).fetchone()
         rows = conn.execute("""SELECT * FROM elements WHERE document_id=?
-                               ORDER BY page_no, ordinal""", (doc_id,)).fetchall()
+                               ORDER BY version_id, page_no, ordinal""",
+                            (doc_id,)).fetchall()
         buffer: list[sqlite3.Row] = []
 
         def flush():
@@ -472,6 +492,8 @@ def build_retrieval_units(conn: sqlite3.Connection, *, document_id: str | None =
             buffer = []
 
         for row in rows:
+            if row["element_type"] in UNIT_EXCLUDED_TYPES:
+                continue
             if not _unit_text(row) and row["element_type"] not in ("figure", "drawing"):
                 continue
             if row["element_type"] not in MERGE_TYPES:
@@ -482,8 +504,11 @@ def build_retrieval_units(conn: sqlite3.Connection, *, document_id: str | None =
             if buffer:
                 same_page = buffer[0]["page_no"] == row["page_no"]
                 same_head = buffer[0]["heading_path"] == row["heading_path"]
+                # a unit must never straddle two versions of the same document
+                same_version = buffer[0]["version_id"] == row["version_id"]
                 size = sum(len(_unit_text(r)) for r in buffer)
-                if not (same_page and same_head) or size > MERGE_MAX_CHARS:
+                if not (same_page and same_head and same_version) \
+                        or size > MERGE_MAX_CHARS:
                     flush()
             buffer.append(row)
         flush()

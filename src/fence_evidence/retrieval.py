@@ -249,9 +249,12 @@ def get_page(document_id: str, page_no: int, *,
     own = conn is None
     conn = conn or connect()
     try:
+        # newest version wins when a document has been re-ingested
         row = conn.execute("""SELECT p.* FROM pages p
             JOIN document_versions v ON v.version_id = p.version_id
-            WHERE v.document_id=? AND p.page_no=?""", (document_id, page_no)).fetchone()
+            WHERE v.document_id=? AND p.page_no=?
+            ORDER BY v.ingested_at DESC LIMIT 1""",
+            (document_id, page_no)).fetchone()
         if not row:
             return None
         page = dict(row)
@@ -315,11 +318,11 @@ def get_element_context(element_id: str, *, before: int = 1, after: int = 1,
             return None
         neighbours = conn.execute("""SELECT element_id, element_type, ordinal, page_no,
                 text, ocr_text, heading_path FROM elements
-                WHERE document_id=? AND (
+                WHERE document_id=? AND version_id=? AND (
                     (page_no = ? AND ordinal BETWEEN ? AND ?)
                     OR (page_no BETWEEN ? AND ? AND page_no != ?))
                 ORDER BY page_no, ordinal""",
-            (row["document_id"], row["page_no"], row["ordinal"] - before,
+            (row["document_id"], row["version_id"], row["page_no"], row["ordinal"] - before,
              row["ordinal"] + after, row["page_no"] - (1 if before else 0),
              row["page_no"] + (1 if after else 0), row["page_no"])).fetchall()
         return {

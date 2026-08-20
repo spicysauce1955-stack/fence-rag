@@ -69,38 +69,52 @@ def ingest(source_paths: list[str] | None = None, *, workers: int = 6,
                               "targets": len(targets), "to_extract": len(todo),
                               "already_current": len(skipped),
                               "tool_versions": tv}) + "\n")
-        if todo:
-            with ProcessPoolExecutor(max_workers=workers) as pool:
-                futures = {pool.submit(_extract_one, t): t[0] for t in todo}
-                for i, fut in enumerate(as_completed(futures), 1):
-                    sp, doc, err = fut.result()
-                    if err:
-                        results["failed"].append({"source_path": sp, "error": err})
-                        conn.execute("""INSERT INTO quality_issues(document_id, severity,
-                            kind, detail, detected_at) VALUES (?,?,?,?,?)""",
-                                     (manifest[sp]["doc_id"], "error", "extraction_failed",
-                                      err[-800:], now()))
-                        conn.commit()
-                        log.write(json.dumps({"event": "extract_failed", "source_path": sp,
-                                              "error": err[-800:]}) + "\n")
-                        print(f"[{i}/{len(todo)}] FAILED {sp}", file=sys.stderr)
-                        continue
-                    version_id = write_extracted(conn, doc, manifest[sp], run_id)
-                    n_el = sum(len(p.elements) for p in doc.pages)
-                    results["ingested"].append(sp)
-                    log.write(json.dumps({"event": "ingested", "source_path": sp,
-                                          "version_id": version_id,
-                                          "pages": len(doc.pages), "elements": n_el,
-                                          "issues": len(doc.quality_issues)}) + "\n")
-                    log.flush()
-                    print(f"[{i}/{len(todo)}] {sp}  {len(doc.pages)}p {n_el}el "
-                          f"{len(doc.quality_issues)}iss", file=sys.stderr)
+        pool_error = None
+        try:
+            if todo:
+                with ProcessPoolExecutor(max_workers=workers) as pool:
+                    futures = {pool.submit(_extract_one, t): t[0] for t in todo}
+                    for i, fut in enumerate(as_completed(futures), 1):
+                        sp, doc, err = fut.result()
+                        if err:
+                            results["failed"].append({"source_path": sp, "error": err})
+                            conn.execute("""INSERT INTO quality_issues(document_id, severity,
+                                kind, detail, detected_at) VALUES (?,?,?,?,?)""",
+                                         (manifest[sp]["doc_id"], "error", "extraction_failed",
+                                          err[-800:], now()))
+                            conn.commit()
+                            log.write(json.dumps({"event": "extract_failed", "source_path": sp,
+                                                  "error": err[-800:]}) + "\n")
+                            print(f"[{i}/{len(todo)}] FAILED {sp}", file=sys.stderr)
+                            continue
+                        version_id = write_extracted(conn, doc, manifest[sp], run_id)
+                        # Project this document immediately: an interrupted run
+                        # then leaves everything ingested so far searchable
+                        # instead of leaving the whole store unindexed.
+                        build_retrieval_units(conn, document_id=manifest[sp]["doc_id"])
+                        n_el = sum(len(p.elements) for p in doc.pages)
+                        results["ingested"].append(sp)
+                        log.write(json.dumps({"event": "ingested", "source_path": sp,
+                                              "version_id": version_id,
+                                              "pages": len(doc.pages), "elements": n_el,
+                                              "issues": len(doc.quality_issues)}) + "\n")
+                        log.flush()
+                        print(f"[{i}/{len(todo)}] {sp}  {len(doc.pages)}p {n_el}el "
+                              f"{len(doc.quality_issues)}iss", file=sys.stderr)
+        except Exception as e:
+            # A worker dying (OOM, BrokenProcessPool) must not skip the
+            # bookkeeping below, or the run stays open and unindexed.
+            pool_error = f"{e.__class__.__name__}: {e}"
+            results["failed"].append({"source_path": "<pool>", "error": pool_error})
+            log.write(json.dumps({"event": "pool_error", "error": pool_error}) + "\n")
+            print(f"POOL ERROR: {pool_error}", file=sys.stderr)
 
         rel_counts = derive_relations(conn)
         n_units = build_retrieval_units(conn)
         finish_run(conn, run_id)
         elapsed = (datetime.now(timezone.utc) - started).total_seconds()
         summary = {"event": "run_end", "run_id": run_id, "at": now(),
+                   "pool_error": pool_error,
                    "elapsed_s": round(elapsed, 1), "relations": rel_counts,
                    "retrieval_units": n_units, "store": stats(conn),
                    "ingested": len(results["ingested"]), "skipped": len(skipped),

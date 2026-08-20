@@ -18,7 +18,9 @@ from .store import connect, now
 
 OCR_REVIEW_CONFIDENCE = 80.0
 
-_NUM = r"(\d+(?:[.½¾/]\d+)?)"
+# The negative lookbehind stops the number half of a fraction being captured on
+# its own: "40 1/2\" On Center" must not yield a 2-inch spacing.
+_NUM = r"(?<![\d/\u2044.])(\d+(?:[.½¾¼/\u2044]\d+)?)"
 _IN = r"(?:in\.?|inch(?:es)?|\")"
 _FT = r"(?:ft\.?|feet|foot|')"
 
@@ -26,9 +28,16 @@ PATTERNS: list[tuple[str, re.Pattern, str]] = [
     ("wind_speed_mph", re.compile(rf"{_NUM}\s*mph", re.I), "mph"),
     ("exposure_category", re.compile(r"exposure\s*(?:category|categories)?\s*[:\-]?\s*([BCD])\b", re.I), ""),
     ("footing_depth_in", re.compile(
-        rf"(?:depth|embedment|embed(?:ded)?|below\s+grade)\D{{0,24}}{_NUM}\s*(?:{_IN}|{_FT})", re.I), "in"),
+        rf"(?:depth|embedment|embed(?:ded)?)\D{{0,24}}{_NUM}\s*(?:{_IN}|{_FT})", re.I), "in"),
     ("footing_depth_in", re.compile(
-        rf"{_NUM}\s*(?:{_IN}|{_FT})\s*(?:deep|depth|embedment|below\s+grade)", re.I), "in"),
+        rf"{_NUM}\s*(?:{_IN}|{_FT})\s*(?:deep|depth|embedment)", re.I), "in"),
+    # "below grade" is kept as its own type: in these manuals it more often
+    # describes where the concrete stops than how deep the footing goes, and
+    # conflating the two would put a wrong number under footing depth.
+    ("depth_below_grade_in", re.compile(
+        rf"{_NUM}\s*(?:{_IN}|{_FT})\s*below\s+grade", re.I), "in"),
+    ("depth_below_grade_in", re.compile(
+        rf"below\s+grade\D{{0,16}}{_NUM}\s*(?:{_IN}|{_FT})", re.I), "in"),
     ("footing_diameter_in", re.compile(
         rf"(?:diam(?:eter)?\.?|dia\.?)\D{{0,16}}{_NUM}\s*(?:{_IN}|{_FT})", re.I), "in"),
     ("footing_diameter_in", re.compile(
@@ -46,6 +55,22 @@ PATTERNS: list[tuple[str, re.Pattern, str]] = [
 ]
 
 _FRACTIONS = {"½": 0.5, "¾": 0.75, "¼": 0.25}
+
+# Values outside these ranges are not credible for the quantity named, so they
+# are dropped rather than stored as facts a reviewer would have to refute.
+PLAUSIBLE: dict[str, tuple[float, float]] = {
+    "footing_depth_in": (6.0, 120.0),
+    "depth_below_grade_in": (0.5, 120.0),
+    "footing_diameter_in": (4.0, 60.0),
+    "post_spacing_in": (12.0, 240.0),
+    "wind_speed_mph": (30.0, 250.0),
+    "racking_degrees": (0.5, 45.0),
+}
+
+# For these types the value *is* the condition, so re-deriving it as a condition
+# from surrounding text can contradict the fact itself.
+SELF_CONDITION = {"wind_speed_mph": "wind_speed_mph",
+                  "exposure_category": "exposure_category"}
 
 
 def _to_float(raw: str) -> float | None:
@@ -111,9 +136,16 @@ def _conditions(text: str, heading_path: list[str]) -> dict:
 
 
 def _iter_candidates(conn: sqlite3.Connection, document_id: str | None) -> Iterator[sqlite3.Row]:
+    # Only the newest version of each document contributes facts; an older
+    # version's values stay in the store but are not re-asserted as current.
     sql = """SELECT e.element_id, e.document_id, e.version_id, e.page_no, e.element_type,
                     e.text, e.ocr_text, e.text_source, e.ocr_confidence, e.heading_path
-               FROM elements e"""
+               FROM elements e
+               JOIN (SELECT document_id, version_id,
+                            ROW_NUMBER() OVER (PARTITION BY document_id
+                                               ORDER BY ingested_at DESC) rn
+                       FROM document_versions) latest
+                 ON latest.version_id = e.version_id AND latest.rn = 1"""
     params: tuple = ()
     if document_id:
         sql += " WHERE e.document_id = ?"
@@ -150,10 +182,13 @@ def extract_facts(*, document_id: str | None = None,
                         continue
                     seen.add(key)
                     norm, norm_unit = _normalise(fact_type, raw, m.group(0))
-                    if fact_type.endswith("_in") and norm is not None and not (1 <= norm <= 400):
-                        continue   # implausible as an inch dimension
-                    if fact_type == "wind_speed_mph" and norm is not None and not (30 <= norm <= 250):
-                        continue
+                    lo_hi = PLAUSIBLE.get(fact_type)
+                    if lo_hi and norm is not None and not (lo_hi[0] <= norm <= lo_hi[1]):
+                        continue   # not credible for this quantity
+                    fact_conditions = dict(conditions)
+                    self_key = SELF_CONDITION.get(fact_type)
+                    if self_key:
+                        fact_conditions.pop(self_key, None)
                     review = "extracted"
                     if from_ocr and (conf is None or conf < OCR_REVIEW_CONFIDENCE):
                         review = "flagged"
@@ -167,7 +202,7 @@ def extract_facts(*, document_id: str | None = None,
                          row["element_id"], fact_type,
                          " > ".join(heading_path[-2:]) or None,
                          m.group(0).strip(), norm, unit or None, norm_unit,
-                         json.dumps(conditions), text[start:m.end() + 90].strip(),
+                         json.dumps(fact_conditions), text[start:m.end() + 90].strip(),
                          "regex-v1", int(from_ocr), review, now()))
                     counts[fact_type] = counts.get(fact_type, 0) + 1
                     total += 1

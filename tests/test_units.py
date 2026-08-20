@@ -8,7 +8,7 @@ from fence_evidence.layout import (HeadingClassifier, HeadingStack, build_elemen
                                    parse_bbox_layout, union)
 from fence_evidence.manifest import _version_status
 from fence_evidence.model import Word
-from fence_evidence.extract import _docx_level_from_style, _rotate_word
+from fence_evidence.extract import _docx_level_from_style, _page_rotations
 from fence_evidence.tables import looks_tabular
 from fence_evidence.retrieval import build_match_expression
 
@@ -99,21 +99,25 @@ class TestHeadings(unittest.TestCase):
 
 
 class TestRotation(unittest.TestCase):
-    def test_90_degrees(self):
-        w = Word(text="x", bbox=(0.0, 0.0, 10.0, 20.0))
-        _rotate_word(w, 90, 612.0, 792.0)
-        self.assertEqual(w.bbox, (772.0, 0.0, 792.0, 10.0))
+    """Rotation is handled by swapping the page rectangle, not by moving boxes.
 
-    def test_180_degrees_keeps_size(self):
-        w = Word(text="x", bbox=(10.0, 20.0, 30.0, 50.0))
-        _rotate_word(w, 180, 612.0, 792.0)
-        self.assertAlmostEqual(w.bbox[2] - w.bbox[0], 20.0)
-        self.assertAlmostEqual(w.bbox[3] - w.bbox[1], 30.0)
+    `pdftotext -bbox-layout` emits word boxes in display space already — this was
+    verified against synthetic /Rotate 0/90/180/270 PDFs by comparing reported
+    boxes with rendered ink — while the page attributes stay unrotated. An
+    earlier implementation also rotated the boxes, which moved them off the page.
+    """
 
-    def test_zero_is_identity(self):
-        w = Word(text="x", bbox=(1.0, 2.0, 3.0, 4.0))
-        _rotate_word(w, 0, 612.0, 792.0)
-        self.assertEqual(w.bbox, (1.0, 2.0, 3.0, 4.0))
+    def test_no_word_transform_is_exported(self):
+        import fence_evidence.extract as ex
+        self.assertFalse(hasattr(ex, "_rotate_word"),
+                         "the word rotation transform was proven wrong and removed")
+
+    def test_page_rotations_parses_pdfinfo_output(self):
+        pdf = ROOT / "manuals" / "wam-bam" / "cambridge-BL19110-install-guide.pdf"
+        rots = _page_rotations(pdf, 3)
+        self.assertEqual(set(rots), {1, 2, 3})
+        for v in rots.values():
+            self.assertIn(v, (0, 90, 180, 270))
 
 
 class TestTableValidator(unittest.TestCase):
