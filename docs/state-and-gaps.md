@@ -273,6 +273,34 @@ picket line-work. On one page it clipped the real table off the bottom of the
 crop, so the preserved crop is always the full page and the band is recorded only
 as a hint.
 
+### G14 — The benchmark only grades one of the six interfaces
+
+Every gold question is issued to `search_evidence` and graded on the returned
+units, including questions whose natural interface is a different function. The
+clearest case is `gq-011`, "which Miami-Dade NOA is currently in force for the
+Columbia / Imperial / Chesterfield family?". It is scored as a failure —
+`doc_rank=None`, support 0.2 — while `resolve_document_version("23-0314.05")`
+answers it correctly and completely:
+
+```text
+active: Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf
+chain:  expired  eff 2008-03-13  exp 2013-03-13   NOA-06-1019.01
+        expired  eff 2013-04-04  exp 2018-03-13   NOA-12-1106.11
+        in_force eff 2023-05-04  exp 2029-03-13   NOA-23-0314.05
+        in_force eff 2025-04-24  exp 2029-03-13   NOA-24-0117.05
+```
+
+So the system answers a question the benchmark records as unanswered, and the
+`current_version` and `historical_version` categories understate what the
+version work delivered.
+
+**Not closed because** deciding which interface grades which question changes
+what every published number means, and the current figures were reported against
+the search-only harness. It should be an explicit change with the before/after
+recorded, not a quiet adjustment. The shape of the fix: add an `interface` field
+to the gold schema (`search` | `resolve` | `facts`), default `search`, and route
+each question accordingly.
+
 ### G10 — Not built at all (deliberate)
 
 Dense/semantic retrieval · visual page retrieval · reranking · a served HTTP API
