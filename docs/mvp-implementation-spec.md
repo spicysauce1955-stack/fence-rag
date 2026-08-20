@@ -203,6 +203,15 @@ Every search result is a JSON object with at least:
 whole-page or text-only elements. `matched_terms` must be derived from the
 actual match, not echoed from the query.
 
+An optional second stage may add one further field, `within_page_evidence`: a
+bounded list of elements found on the same page that cover query terms the
+matched unit missed, each carrying its own `element_id`, `element_type`, `text`,
+`heading_path`, `bbox`, `region_image_path`, `ocr_confidence` and the
+`adds_terms` it contributed. It is null unless `second_stage=True`. The second
+stage may never change which documents or pages a search returns, nor the
+ordering, nor the first-stage unit — it may only add. It is off by default; see
+`docs/second-stage-evaluation.md` for the measurement and the decision.
+
 ## 9. Test requirements
 
 - **Unit**: bbox parsing, hOCR parsing, heading inference, table grid
@@ -218,6 +227,15 @@ actual match, not echoed from the query.
   identical rows.
 - **Safety**: a write attempt outside `workspace/` raises; extraction never
   executes anything found in document content.
+- **Second stage**: with it enabled, the document set, page set, ordering,
+  scores and result count are identical to the first stage alone; every
+  attachment comes from the same page, is not reused within a result list, does
+  not duplicate a first-stage unit, is bounded in count and characters, and
+  claims only terms the unit genuinely lacked.
+- **Version resolution**: dates disagreeing across facts produce a conflict
+  rather than an asserted value; an expiry verdict always reports the date it
+  was judged against; an expired approval is never returned as active;
+  resolution never writes to `documents`.
 - **Evaluation**: the gold set runs end-to-end and produces a per-category
   report.
 
@@ -236,9 +254,18 @@ committed report:
   as "an expected document/page appears in the top 10", and
   **evidence-support ≥ 0.70** measured as "the expected answer terms appear in
   a retrieved element's text".
-- A4 `no_answer` questions return either no result above a stated score floor,
-  or results the report explicitly marks as unsupported. Precision on
-  no-answer detection ≥ 0.66 (2 of 3).
+- A4 `no_answer` questions return either no result, or results the report
+  explicitly marks as unsupported. Precision on no-answer detection ≥ 0.66,
+  measured over **at least 15 negative questions** spanning absent-subject,
+  adjacent-vocabulary and near-miss classes. The original wording of this
+  criterion ("2 of 3") encoded a three-question sample; that sample was
+  measured at 0.667 and the figure did not survive contact with a proper
+  negative set.
+- A4b The false-unsupported rate — answerable questions wrongly declared
+  unsupported — is ≤ 0.20. A4 and A4b are always reported together: a detector
+  can satisfy A4 alone by declaring nearly everything unsupported, which an
+  earlier rule did (0.611 precision while flagging 24 of 41 answerable
+  questions).
 - A5 Full-corpus ingestion completes with a coverage report showing, per
   document: pages extracted vs. page count, elements, tables, assets, OCR
   coverage, and any quality issues. No document silently skipped.

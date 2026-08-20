@@ -17,9 +17,17 @@ class TestGoldSet(unittest.TestCase):
     def setUpClass(cls):
         cls.questions = load_gold()
 
-    def test_size_is_in_the_range_the_guide_asks_for(self):
+    def test_size_is_at_least_what_the_guide_asks_for(self):
+        # guide.md asks for 30-50; the negative set was later expanded past that
+        # deliberately, so only the floor is enforced.
         self.assertGreaterEqual(len(self.questions), 30)
-        self.assertLessEqual(len(self.questions), 60)
+
+    def test_negative_set_is_large_enough_to_calibrate_on(self):
+        negatives = [q for q in self.questions if not q.get("answerable")]
+        self.assertGreaterEqual(
+            len(negatives), 15,
+            "no-answer precision moves in steps of 1/n; a small negative set "
+            "produced a 0.667 figure that did not survive expansion")
 
     def test_ids_unique(self):
         ids = [q["id"] for q in self.questions]

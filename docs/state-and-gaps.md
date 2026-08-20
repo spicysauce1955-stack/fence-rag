@@ -1,8 +1,8 @@
 # State and gaps
 
 A current snapshot of what exists, what is measured, and what is missing.
-Written 2026-08-20 against commit `c4c7f1d` plus the corrections listed at the
-end. Every number here comes from the store, the reports, or a test run — not
+Written 2026-08-20, current as of the post-MVP work recorded in
+`docs/phase-checkpoints.md`. Every number here comes from the store, the reports, or a test run — not
 from the design documents.
 
 Companion documents: `docs/phase-checkpoints.md` (the per-phase record and

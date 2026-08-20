@@ -35,6 +35,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--version-status")
     p.add_argument("--element-type")
     p.add_argument("--full", action="store_true", help="print full element text")
+    p.add_argument("--second-stage", action="store_true",
+                   help="also search within each retrieved page for elements covering "
+                        "query terms the matched unit missed (opt-in: measured at 0.672 "
+                        "unit support against a 0.70 acceptance target, see "
+                        "docs/second-stage-evaluation.md)")
 
     p = sub.add_parser("document", help="document record with versions and relations")
     p.add_argument("identifier")
@@ -64,6 +69,8 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("evaluate", help="Phase 4: run the gold evaluation set")
     p.add_argument("-k", type=int, default=10)
+    p.add_argument("--second-stage", action="store_true")
+    p.add_argument("--name", default="evaluation")
 
     p = sub.add_parser("audit", help="relevance audit of the retrieval projection (read-only)")
     p.add_argument("-k", type=int, default=10)
@@ -103,7 +110,8 @@ def main(argv: list[str] | None = None) -> int:
                          ("element_type", args.element_type)):
             if val:
                 filters[key] = val
-        results = search_evidence(args.query, limit=args.limit, filters=filters or None)
+        results = search_evidence(args.query, limit=args.limit, filters=filters or None,
+                                  second_stage=args.second_stage)
         out = []
         for r in results:
             d = r.to_dict()
@@ -145,7 +153,8 @@ def main(argv: list[str] | None = None) -> int:
             _print(query_facts(args.type, manufacturer=args.manufacturer, limit=args.limit))
     elif args.cmd == "evaluate":
         from .evaluate import run_evaluation
-        _print(run_evaluation(k=args.k)["summary"])
+        _print(run_evaluation(k=args.k, second_stage=args.second_stage,
+                              report_name=args.name)["summary"])
     elif args.cmd == "audit":
         from .audit import run_audit
         _print(run_audit(k=args.k))

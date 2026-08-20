@@ -152,7 +152,7 @@ outside the pilot).**
 | document recall@10 | 0.800 | A3 ≥ 0.80 — pass |
 | evidence support (terms in the retrieved unit) | 0.723 | A3 ≥ 0.70 — pass |
 | page evidence support (terms anywhere on a retrieved page) | 0.867 | reported |
-| no-answer precision | 1.000 | A4 ≥ 0.66 — pass |
+| no-answer precision | 1.000 | A4 ≥ 0.66 — pass *(superseded, see below)* |
 | MRR | 0.628 | reported |
 
 **Defect found and fixed by the gate.** The first run scored evidence support
@@ -167,6 +167,16 @@ intended.
 **Caveat stated rather than hidden.** Three no-answer questions is a thin basis
 for a threshold. The floor is a reported, tunable number, re-checked against the
 full corpus.
+
+> **Superseded.** The caveat was justified. The negative set was later expanded to
+> 18 questions and the no-answer figures here — 1.000 on the pilot and 0.667 on
+> the full corpus — did not survive. No lexical feature separates answerable from
+> unanswerable questions on a properly built negative set, and the rule that
+> produced 0.667 was declaring 24 of 41 *answerable* questions unsupported. The
+> detector was rewritten and now scores 0.333 precision at a 0.146
+> false-unsupported rate. See the recalibration entry below and G7 in
+> `docs/state-and-gaps.md`. Nothing else in this Phase 4 record is affected:
+> recall, evidence support and the extraction defects the gate found stand.
 
 ---
 
@@ -230,7 +240,7 @@ the run logs.
 | document recall@10 | 0.805 | A3 ≥ 0.80 — **pass** |
 | evidence support (terms in the retrieved unit) | 0.623 | A3 ≥ 0.70 — **fail** |
 | page evidence support (terms anywhere on a retrieved page) | 0.769 | reported |
-| no-answer precision | 0.667 | A4 ≥ 0.66 — **pass** |
+| no-answer precision | 0.667 | A4 ≥ 0.66 — **pass** *(superseded: 0.333 on 18 negatives)* |
 | MRR | 0.552 | reported |
 
 **A3's support criterion is not met, and this is the honest number.** The gap
@@ -426,3 +436,78 @@ only there are stored as an additive `ocr_supplement` element with its own
 provenance — never merged into or over the primary pass. On the current
 CertainTeed NOA this recovered, among others, the post-stiffener specification
 text and the PE licence number `52609`, neither of which the 300 dpi pass found.
+
+---
+
+## Post-MVP work
+
+### Relevance audit of the retrieval projection
+
+**Implemented.** `fence_evidence.audit` and
+`workspace/reports/projection-relevance-audit.md`, re-runnable with
+`python3 -m fence_evidence.cli audit` (read-only, opens the store `mode=ro`).
+
+**Findings, ten, all measured.** The two with consequences: heading elements are
+excluded from the projection and 7,097 of them (33.9%) are reachable through no
+unit's `heading_path` either, leaving 27 pages absent from the index entirely;
+and 46.5% of units duplicate another unit's text, which spends 29.5% of top-10
+slots on duplicated text and 20.2% on pages already in the list, so a 10-result
+list averages 7.98 distinct pages.
+
+**Not applied.** Nine recommendations are recorded with the risk that argues
+against each, and none has been acted on: classification and indexing are held
+pending review of the audit.
+
+### Second-stage within-page element retrieval — rejected
+
+**Implemented** at retrieval time only, so it touches no indexing. **Measured**
+at unit support 0.672 against a 0.70 acceptance target, with document recall
+(0.805), page support (0.769), no-answer precision (0.333) and the
+false-unsupported rate (0.146) all unchanged to three decimals. **Rejected** as
+default and retained behind `second_stage=False`; `--second-stage` opts in on
+`cli search` and `cli evaluate`. Full trail, including the replacement design
+that scored 0.540 and the information-floor trade-off, in
+`docs/second-stage-evaluation.md`.
+
+### No-answer category expanded, then recalibrated
+
+**Implemented.** `eval/gold-questions-no-answer.json`: 15 new negatives in three
+classes — absent-subject, adjacent-vocabulary and near-miss — each with proven
+absence, taking the negative set from 3 to 18 and the benchmark to 59 questions.
+
+**Measured.** No lexical feature separates the classes. Answerable vs
+unanswerable means: rarest query term present in the best result 0.244 vs 0.444
+(the wrong direction), term coverage 0.733 vs 0.747, score margin 0.248 vs
+0.294, top relevance 22.3 vs 20.5 on a 9–50 range.
+
+**Changed.** The score floor and rarest-term heuristics were removed as
+measurably non-discriminative. What remains fires only for a checkable reason.
+A4b was added to the spec so the two sides are always reported together.
+
+### Date-aware conservative version resolution
+
+**Implemented.** `fence_evidence.versions`, read at query time from the Phase 6
+`effective_date` and `expiration_date` facts, which cover all 17 NOA documents.
+Disagreeing facts yield a conflict rather than a value; every date carries its
+element, page and review status; an expiry verdict always echoes the date it was
+judged against; an expired member is never offered as active; stored
+classification is never written from resolution.
+
+**Bug found and fixed.** The status update marked the `to` side of a
+`superseded_by` edge, which is the *newer* approval. Every current NOA was
+therefore labelled superseded and the CertainTeed→Barrette chain resolved with no
+active member at all. After the fix, NOA 24-0117.05 and its three duplicate
+filings are no longer superseded and the 2006 approval 06-1019.01 correctly is.
+`tests/test_versions.py` asserts the direction in both directions.
+
+### Scanned NOA table reading — designed, not run
+
+**Designed.** `docs/experiment-noa-table-reading.md`: four stages, per-cell OCR
+with abstention on disagreement, a `table_read_candidates` table, and a review
+gate that forbids promoting any numeric fact without a human accepting that
+specific cell against its crop. One confidently-wrong numeric cell fails the
+experiment outright.
+
+**Input built.** `cli noa-table-crops` writes 44 full-page crops with SHA-256s
+and a manifest; the 73 flagged pages deduplicate to 44 distinct contents. No
+values are read.
