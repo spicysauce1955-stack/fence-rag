@@ -86,6 +86,9 @@ def main(argv: list[str] | None = None) -> int:
                    help="how many reader-visible values the pipeline's OCR actually has")
     p.add_argument("--reader")
 
+    sub.add_parser("worklist",
+                   help="split unresolved material into machine / review / human piles")
+
     sub.add_parser("noa-table-crops",
                    help="export source crops for the pages whose tables OCR could not rebuild")
 
@@ -186,6 +189,9 @@ def main(argv: list[str] | None = None) -> int:
         out["summary"] = tr.summary(conn)
         conn.close()
         _print(out)
+    elif args.cmd == "worklist":
+        from .worklist import build
+        _print(build())
     elif args.cmd == "noa-table-crops":
         from .noa_tables import export_crops
         _print(export_crops())
