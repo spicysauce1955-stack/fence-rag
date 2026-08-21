@@ -28,7 +28,9 @@ HUMAN_JUDGEMENT = [
      "page_no": None, "json_path": "wind_load_tables[0].table[1]",
      "detail": "Exposure B / 24in footing / 66in spacing row is labelled 'HVHZ and "
                "Non-HVHZ'; NOA 23-0314.05 sheet 9 brackets it 'NON HVHZ' only. "
-               "Confirmed by two agents, a cross-family reader and direct inspection.",
+               "Confirmed by two agents, a cross-family reader and direct inspection. "
+               "Critical because the applicability scope is wrong, so a query "
+               "filtered on HVHZ returns a row the source excludes.",
      "why_human": "amending your research dataset is your call; data/ is read-only to me",
      "action": "correct the row, or record that it stands"},
     {"kind": "curated_dataset_error", "severity": "major",

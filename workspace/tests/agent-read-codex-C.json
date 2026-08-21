@@ -1,0 +1,236 @@
+[
+  {
+    "crop_path": "workspace/derived/doc-c267c4cd071f/table-candidates/p0017.png",
+    "source_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
+    "page_no": 17,
+    "reader": "codex-C",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "A structural drawing page showing parts and components, post and footing design, and Table 1 maximum post spacing and footing dimensions for extruded PVC vinyl fencing.",
+    "grid": {
+      "headers": ["WIND EXPOSURE", "FOOTING DEPTH", "MAX. POST SPACING"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": ["12\" DIAMETER FOOTING", "12\" DIAM. X DEPTH", "3000 PSI CONCRETE", "HVHZ: MIAMI-DADE AND BROWARD COUNTIES", "WIND EXPOSURES AS DEFINED IN THE ASCE 7-10"],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Right-side grouping labels: NON HVHZ spans the two B rows; HVHZ AND NON HVHZ spans the two C rows; HVHZ AND NON HVHZ spans the two D rows."
+  },
+  {
+    "crop_path": "workspace/derived/doc-32e36a07ab44/table-candidates/p0011.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf",
+    "page_no": 11,
+    "reader": "codex-C",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "A structural drawing page showing parts and components, post and footing design, and Table 1 maximum post spacing and footing dimensions for CertainTeed fence models.",
+    "grid": {
+      "headers": ["WIND EXPOSURE", "FOOTING DEPTH", "MAX. POST SPACING"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": ["12\" DIAMETER FOOTING", "12\" DIAM. X DEPTH", "3000 PSI CONCRETE", "HVHZ: MIAMI-DADE AND BROWARD COUNTIES", "WIND EXPOSURES AS DEFINED IN THE ASCE 7-10"],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "No right-side bracket labels are visible in the table; the footnote below the table defines HVHZ."
+  },
+  {
+    "crop_path": "workspace/derived/doc-7a08132799a1/table-candidates/p0016.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+    "page_no": 16,
+    "reader": "codex-C",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "A structural drawing page showing parts and components, post and footing design, and Table 1 maximum post spacing and footing dimensions for extruded PVC vinyl fencing.",
+    "grid": {
+      "headers": ["WIND EXPOSURE", "FOOTING DEPTH", "MAX. POST SPACING"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": ["12\" DIAMETER FOOTING", "12\" DIAM. X DEPTH", "3000 PSI CONCRETE", "HVHZ: MIAMI-DADE AND BROWARD COUNTIES", "WIND EXPOSURES AS DEFINED IN THE ASCE 7-10"],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Right-side grouping labels: NON HVHZ spans the two B rows; HVHZ AND NON HVHZ spans the two C rows; HVHZ AND NON HVHZ spans the two D rows."
+  },
+  {
+    "crop_path": "workspace/derived/doc-3c8ab51045c7/table-candidates/p0017.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+    "page_no": 17,
+    "reader": "codex-C",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "A structural drawing page showing parts and components, post and footing design, and Table 1 maximum post spacing and footing dimensions for extruded PVC vinyl fencing.",
+    "grid": {
+      "headers": ["WIND EXPOSURE", "FOOTING DEPTH", "MAX. POST SPACING"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": ["12\" DIAMETER FOOTING", "12\" DIAM. X DEPTH", "3000 PSI CONCRETE", "HVHZ: MIAMI-DADE AND BROWARD COUNTIES", "WIND EXPOSURES AS DEFINED IN THE ASCE 7-10"],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Right-side grouping labels: NON HVHZ spans the two B rows; HVHZ AND NON HVHZ spans the two C rows; HVHZ AND NON HVHZ spans the two D rows."
+  },
+  {
+    "crop_path": "workspace/derived/doc-88dcd8a73079/table-candidates/p0006.png",
+    "source_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.06-simtek-fence.pdf",
+    "page_no": 6,
+    "reader": "codex-C",
+    "is_table": true,
+    "table_kind": "fence_height_exposure_footing",
+    "what_the_page_is": "A structural drawing page for an Allegheny/EcoStone six foot fence panel with a minimum footing required table.",
+    "grid": {
+      "headers": ["Fence Height", "Exposure", "Min. Footing Req'd Depth", "Min. Footing Req'd Diameter"],
+      "rows": [
+        {"cells": ["Up to 48\"", "B", "24\"", "12\""], "illegible": []},
+        {"cells": ["", "C", "30\"", "12\""], "illegible": []},
+        {"cells": ["49\" to 76\"", "B", "34\"", "12\""], "illegible": []},
+        {"cells": ["", "C", "36\"", "12\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": ["71.25\" max", "75.25\" max.", "72\" panel", "102\" post", "27.5\"", "12\" dia.", "6\" min.", "2500 psi concrete minimum", "gravel fill"],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "The Fence Height cells are printed as grouped labels spanning B and C exposure rows."
+  },
+  {
+    "crop_path": "workspace/derived/doc-88dcd8a73079/table-candidates/p0008.png",
+    "source_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.06-simtek-fence.pdf",
+    "page_no": 8,
+    "reader": "codex-C",
+    "is_table": true,
+    "table_kind": "fence_height_exposure_footing",
+    "what_the_page_is": "A structural drawing page for a Sherwood/Ashland six foot fence panel with a minimum footing required table.",
+    "grid": {
+      "headers": ["Fence Height", "Exposure", "Min. Footing Req'd Depth", "Min. Footing Req'd Diameter"],
+      "rows": [
+        {"cells": ["Up to 48\"", "B", "24\"", "12\""], "illegible": []},
+        {"cells": ["", "C", "30\"", "12\""], "illegible": []},
+        {"cells": ["49\" to 76\"", "B", "34\"", "12\""], "illegible": []},
+        {"cells": ["", "C", "36\"", "12\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": ["71.25\" max", "75.25\" max.", "72\" panel", "102\" post", "27.5\"", "12\" dia.", "6\" min.", "2500 psi concrete minimum", "gravel fill"],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "The Fence Height cells are printed as grouped labels spanning B and C exposure rows."
+  },
+  {
+    "crop_path": "workspace/derived/doc-3a8071e73dba/table-candidates/p0017.png",
+    "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+    "page_no": 17,
+    "reader": "codex-C",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "An installation guide page for Semi-Private Fence models with a maximum post spacing and footing dimensions table.",
+    "grid": {
+      "headers": ["Wind Exposure", "Footing Depth", "Max. Post Spacing"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": ["POST CENTERS 4 X 4 POSTS = 96\" 5 X 5 POSTS = 97\"", "DIG HOLES 30\" DEEP OR TO FROST LINE", "4 X 4 POSTS = 10\"", "5 X 5 POSTS = 12\"", "CONCRETE 3000 P.S.I. MINIMUM", "GRAVEL FILL", "HVHZ: Miami-Dade and Broward counties wind exposures as defined in the ASCE 7-10"],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Right-side grouping labels: NON HVHZ spans the two B rows; HVHZ and NON HVHZ spans the two C rows; HVHZ and NON HVHZ spans the two D rows."
+  },
+  {
+    "crop_path": "workspace/derived/doc-3a8071e73dba/table-candidates/p0019.png",
+    "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+    "page_no": 19,
+    "reader": "codex-C",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "An installation guide page for Semi-Private Fence Breezewood with Select Cedar Texture with a maximum post spacing and footing dimensions table.",
+    "grid": {
+      "headers": ["Wind Exposure", "Footing Depth", "Max. Post Spacing"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": ["POST CENTERS 5 x 5 Posts = 97\"", "DIG HOLES 30\" DEEP OR TO FROST LINE", "5 X 5 POSTS = 12\"", "CONCRETE 3000 P.S.I. MINIMUM", "GRAVEL FILL", "HVHZ: Miami-Dade and Broward counties wind exposures as defined in the ASCE 7-10"],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Right-side grouping labels: NON HVHZ spans the two B rows; HVHZ and NON HVHZ spans the two C rows; HVHZ and NON HVHZ spans the two D rows."
+  },
+  {
+    "crop_path": "workspace/derived/doc-3a8071e73dba/table-candidates/p0029.png",
+    "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+    "page_no": 29,
+    "reader": "codex-C",
+    "is_table": true,
+    "table_kind": "wind_exposure_footing",
+    "what_the_page_is": "An installation guide page for Privacy Fence Brookline models with a maximum post spacing and footing dimensions table.",
+    "grid": {
+      "headers": ["Wind Exposure", "Footing Depth", "Max. Post Spacing"],
+      "rows": [
+        {"cells": ["B", "30\"", "97\""], "illegible": []},
+        {"cells": ["B", "24\"", "66\""], "illegible": []},
+        {"cells": ["C", "36\"", "88\""], "illegible": []},
+        {"cells": ["C", "30\"", "68\""], "illegible": []},
+        {"cells": ["D", "36\"", "75\""], "illegible": []},
+        {"cells": ["D", "30\"", "56\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": ["POST CENTERS 5 X 5 POSTS = 72\"", "DIG HOLES 30\" DEEP OR TO FROST LINE", "POST HOLES 5 X 5 POSTS = 12\"", "CONCRETE 3000 P.S.I. MINIMUM", "GRAVEL FILL", "HVHZ: Miami-Dade and Broward counties wind exposures as defined in the ASCE 7-10"],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "Right-side grouping labels: NON HVHZ spans the two B rows; HVHZ and NON HVHZ spans the two C rows; HVHZ and NON HVHZ spans the two D rows."
+  },
+  {
+    "crop_path": "workspace/derived/doc-2b81f4c2925e/table-candidates/p0006.png",
+    "source_path": "manuals/certainteed-bufftech/structural/NOA-22-0616.10-CertainTeed-SimTek-molded-fence-2022-2028-superseded.pdf",
+    "page_no": 6,
+    "reader": "codex-C",
+    "is_table": true,
+    "table_kind": "fence_height_exposure_footing",
+    "what_the_page_is": "A structural drawing page for an Allegheny/EcoStone six foot fence panel with a minimum footing required table.",
+    "grid": {
+      "headers": ["Fence Height", "Exposure", "Min. Footing Req'd Depth", "Min. Footing Req'd Diameter"],
+      "rows": [
+        {"cells": ["Up to 48\"", "B", "24\"", "12\""], "illegible": []},
+        {"cells": ["", "C", "30\"", "12\""], "illegible": []},
+        {"cells": ["49\" to 76\"", "B", "34\"", "12\""], "illegible": []},
+        {"cells": ["", "C", "36\"", "12\""], "illegible": []}
+      ]
+    },
+    "other_values_on_page": ["71.25\" max", "75.25\" max", "72\" panel", "102\" post", "27.5\"", "12\" dia.", "6\" min.", "2500 psi concrete minimum", "gravel fill"],
+    "reading_confidence": "high",
+    "illegible": [],
+    "notes": "The Fence Height cells are printed as grouped labels spanning B and C exposure rows."
+  }
+]

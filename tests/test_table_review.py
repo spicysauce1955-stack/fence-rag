@@ -4,9 +4,10 @@ import unittest
 
 from context import requires_store, store_snapshot
 from fence_evidence.store import connect
-from fence_evidence.table_review import (PROMOTABLE, ReviewRequired, agreement,
-                                         mark_agent_verified, normalise, promote,
-                                         summary)
+from fence_evidence.table_review import (PROMOTABLE, READER_FAMILY, ReviewRequired,
+                                         agreement, mark_agent_verified,
+                                         mark_cross_family_verified, normalise,
+                                         promote, reader_family, summary)
 
 
 class TestNormalisation(unittest.TestCase):
@@ -40,7 +41,8 @@ class TestPromotionGate(unittest.TestCase):
                 WHERE p.page_image_path IS NOT NULL LIMIT 1""").fetchone()
         cls.doc = row
         from fence_evidence.store import now
-        for status in ("unreviewed", "agent_verified", "rejected", "accepted"):
+        for status in ("unreviewed", "agent_verified", "rejected", "accepted",
+                       "cross_family_verified"):
             cls.conn.execute("""INSERT INTO table_read_candidates(document_id, version_id,
                 page_no, crop_path, reader, reader_kind, is_table, row_index, col_index,
                 row_label, col_label, value, review_status, created_at)
@@ -61,10 +63,30 @@ class TestPromotionGate(unittest.TestCase):
         with self.assertRaises(ReviewRequired):
             promote(self.conn, self.ids["unreviewed"], fact_type="footing_depth_in")
 
-    def test_agent_agreement_alone_is_refused(self):
+    def test_same_family_agreement_alone_is_refused(self):
+        """Two readers that can fail the same way are not independent evidence."""
         with self.assertRaises(ReviewRequired) as ctx:
             promote(self.conn, self.ids["agent_verified"], fact_type="footing_depth_in")
-        self.assertIn("accountable review", str(ctx.exception))
+        self.assertIn("correlated", str(ctx.exception))
+
+    def test_cross_family_agreement_promotes(self):
+        fact_id = promote(self.conn, self.ids["cross_family_verified"],
+                          fact_type="footing_depth_in")
+        fact = self.conn.execute("SELECT * FROM facts WHERE fact_id=?",
+                                 (fact_id,)).fetchone()
+        self.assertEqual(fact["review_status"], "cross_family_verified")
+        self.assertIn("cross_family_verified", fact["extractor"])
+
+    def test_cross_family_marking_needs_two_families(self):
+        out = mark_cross_family_verified(self.conn, ["calibration-A", "calibration-B"])
+        self.assertIn("error", out)
+        self.assertIn("two model families", out["error"])
+
+    def test_reader_families_are_declared(self):
+        self.assertEqual(reader_family("calibration-A"), "claude-sonnet")
+        self.assertEqual(reader_family("codex-C"), "openai-codex")
+        self.assertEqual(reader_family("nobody"), "unknown")
+        self.assertGreaterEqual(len(set(READER_FAMILY.values())), 2)
 
     def test_rejected_is_refused(self):
         with self.assertRaises(ReviewRequired):
@@ -103,8 +125,9 @@ class TestPromotionGate(unittest.TestCase):
         with self.assertRaises(ReviewRequired):
             promote(self.conn, 10**9, fact_type="footing_depth_in")
 
-    def test_promotable_statuses_exclude_agent_verified(self):
+    def test_promotable_statuses_exclude_same_family_agreement(self):
         self.assertNotIn("agent_verified", PROMOTABLE)
+        self.assertIn("cross_family_verified", PROMOTABLE)
 
 
 if __name__ == "__main__":

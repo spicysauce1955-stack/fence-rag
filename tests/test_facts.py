@@ -60,7 +60,8 @@ class TestFactProvenance(unittest.TestCase):
             self.skipTest("facts not extracted yet")
         bad = self.conn.execute("""SELECT COUNT(*) FROM facts
             WHERE page_no IS NULL OR evidence_text = '' OR value_original = ''
-               OR review_status NOT IN ('extracted','flagged','reviewed','rejected')
+               OR review_status NOT IN ('extracted','flagged','reviewed','rejected',
+                                        'cross_family_verified')
             """).fetchone()[0]
         self.assertEqual(bad, 0)
 

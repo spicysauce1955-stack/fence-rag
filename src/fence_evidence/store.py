@@ -242,7 +242,12 @@ CREATE TABLE IF NOT EXISTS facts (
     evidence_text   TEXT NOT NULL,
     extractor       TEXT NOT NULL,
     ocr_derived     INTEGER NOT NULL DEFAULT 0,
-    review_status   TEXT NOT NULL DEFAULT 'extracted',   -- extracted|flagged|reviewed|rejected
+    -- extracted        : found by the regex extractor, unchecked
+    -- flagged          : read from low-confidence OCR; needs checking
+    -- cross_family_verified : readers from two model families read it identically
+    -- reviewed         : a person accepted or corrected it
+    -- rejected         : checked and wrong
+    review_status   TEXT NOT NULL DEFAULT 'extracted',
     created_at      TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS ix_facts_doc ON facts(document_id, fact_type);

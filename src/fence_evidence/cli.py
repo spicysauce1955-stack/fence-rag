@@ -86,6 +86,10 @@ def main(argv: list[str] | None = None) -> int:
                    help="how many reader-visible values the pipeline's OCR actually has")
     p.add_argument("--reader")
 
+    p = sub.add_parser("promote-tables",
+                       help="turn cross-family-verified table readings into conditioned facts")
+    p.add_argument("--apply", action="store_true", help="write them (default is a dry run)")
+
     sub.add_parser("worklist",
                    help="split unresolved material into machine / review / human piles")
 
@@ -189,6 +193,9 @@ def main(argv: list[str] | None = None) -> int:
         out["summary"] = tr.summary(conn)
         conn.close()
         _print(out)
+    elif args.cmd == "promote-tables":
+        from .promote_tables import promote_verified
+        _print(promote_verified(dry_run=not args.apply))
     elif args.cmd == "worklist":
         from .worklist import build
         _print(build())

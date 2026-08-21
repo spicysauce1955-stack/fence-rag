@@ -4,11 +4,19 @@ A *reading* is what some reader saw on a page image: an agent, a future per-cell
 OCR pass, or a person. Readings are stored, compared, and surfaced as candidates.
 They are never facts.
 
-The gate is enforced here rather than described in a document:
-:func:`promote` writes a fact only from a candidate whose `review_status` is
-`accepted` or `corrected`. `agent_verified` — two independent agents reading the
-same cell the same way — is deliberately *not* sufficient. It means the reading
-is probably right, which is not the same as someone being answerable for it.
+The gate is enforced here rather than described in a document, and it keys on
+evidence rather than on who produced the reading. What makes a reading
+promotable is that independent readers agree, where *independent* means they can
+fail differently:
+
+* ``cross_family_verified`` — readers from at least two different model families
+  produced the identical value. Promotable.
+* ``agent_verified`` — two readers from the *same* family agreed. Not
+  promotable on its own: their errors may be correlated, and nothing here
+  measures that.
+* ``accepted`` / ``corrected`` — a person signed off. Promotable.
+
+The distinction that matters is independence, not human versus machine.
 """
 from __future__ import annotations
 
@@ -21,8 +29,22 @@ from pathlib import Path
 from .paths import REPO_ROOT
 from .store import connect, now
 
-PROMOTABLE = ("accepted", "corrected")
-READ_STATUSES = ("unreviewed", "agent_verified", "accepted", "corrected", "rejected")
+PROMOTABLE = ("accepted", "corrected", "cross_family_verified")
+READ_STATUSES = ("unreviewed", "agent_verified", "cross_family_verified",
+                 "accepted", "corrected", "rejected")
+
+# Which model family produced a reading. Readers in the same family may fail the
+# same way, so agreement between them is weaker evidence than agreement across.
+READER_FAMILY = {
+    "calibration-A": "claude-sonnet", "calibration-B": "claude-sonnet",
+    "coverage-1": "claude-sonnet", "coverage-2": "claude-sonnet",
+    "coverage-3": "claude-sonnet", "coverage-4": "claude-sonnet",
+    "codex-C": "openai-codex",
+}
+
+
+def reader_family(reader: str) -> str:
+    return READER_FAMILY.get(reader, "unknown")
 
 _QUOTES = {"“": '"', "”": '"', "″": '"', "‘": "'",
            "’": "'", "′": "'", "–": "-", "—": "-"}
@@ -145,10 +167,54 @@ def agreement(conn: sqlite3.Connection, readers: tuple[str, str]) -> dict:
             "conflicts": conflicts}
 
 
-def mark_agent_verified(conn: sqlite3.Connection, readers: tuple[str, str]) -> int:
-    """Flag cells two independent agents read identically.
+def mark_cross_family_verified(conn: sqlite3.Connection, readers: list[str]) -> dict:
+    """Flag cells that readers from two or more model families read identically.
 
-    This is a *reading* status, not a review status: `promote` still refuses it.
+    Agreement across families is the evidence that makes a reading promotable:
+    two systems that fail differently producing the same string is a much
+    stronger signal than two instances of one system agreeing.
+    """
+    families = {r: reader_family(r) for r in readers}
+    if len({f for f in families.values() if f != "unknown"}) < 2:
+        return {"error": "need readers from at least two model families",
+                "families": families}
+    placeholders = ",".join("?" * len(readers))
+    rows = conn.execute(f"""
+        SELECT document_id, page_no, row_index, col_index,
+               COUNT(DISTINCT value) distinct_values,
+               COUNT(*) n, GROUP_CONCAT(reader) readers, MIN(value) value
+          FROM table_read_candidates
+         WHERE reader IN ({placeholders}) AND row_index >= 0 AND illegible = 0
+         GROUP BY document_id, page_no, row_index, col_index""", readers).fetchall()
+    verified = skipped = 0
+    for r in rows:
+        present = {x for x in (r["readers"] or "").split(",")}
+        if len({families.get(x, "unknown") for x in present}) < 2:
+            skipped += 1
+            continue
+        values = {normalise(x["value"]) for x in conn.execute(f"""
+            SELECT value FROM table_read_candidates
+             WHERE document_id=? AND page_no=? AND row_index=? AND col_index=?
+               AND reader IN ({placeholders})""",
+            (r["document_id"], r["page_no"], r["row_index"], r["col_index"], *readers))}
+        if len(values) != 1:
+            skipped += 1
+            continue
+        conn.execute(f"""UPDATE table_read_candidates SET review_status='cross_family_verified'
+             WHERE document_id=? AND page_no=? AND row_index=? AND col_index=?
+               AND reader IN ({placeholders})""",
+            (r["document_id"], r["page_no"], r["row_index"], r["col_index"], *readers))
+        verified += 1
+    conn.commit()
+    return {"cells_verified": verified, "cells_not_verified": skipped,
+            "families": sorted(set(families.values()))}
+
+
+def mark_agent_verified(conn: sqlite3.Connection, readers: tuple[str, str]) -> int:
+    """Flag cells two same-family agents read identically.
+
+    A reading status, not a promotion status: `promote` still refuses it,
+    because same-family errors may be correlated.
     """
     a, b = readers
     rows = conn.execute("""
@@ -185,8 +251,9 @@ def promote(conn: sqlite3.Connection, candidate_id: int, *, fact_type: str,
     if row["review_status"] not in PROMOTABLE:
         raise ReviewRequired(
             f"candidate {candidate_id} is '{row['review_status']}'; only "
-            f"{' or '.join(PROMOTABLE)} may become a fact. Two agents agreeing "
-            f"('agent_verified') is a better reading, not an accountable review.")
+            f"{', '.join(PROMOTABLE)} may become a fact. Agreement between readers "
+            f"of the same model family ('agent_verified') is not enough on its own, "
+            f"because their errors may be correlated.")
     if not row["crop_path"] or not (REPO_ROOT / row["crop_path"]).is_file():
         raise ReviewRequired(
             f"candidate {candidate_id} has no source crop on disk; a number that "
@@ -206,7 +273,9 @@ def promote(conn: sqlite3.Connection, candidate_id: int, *, fact_type: str,
          fact_type, row["row_label"], value, None, None, None,
          json.dumps({"col_label": row["col_label"], "row_label": row["row_label"]}),
          f"read from {row['crop_path']} row {row['row_index']} col {row['col_index']}",
-         f"table-review:{row['reader']}", 0, "reviewed", now()))
+         f"table-review:{row['review_status']}:{row['reader']}", 0,
+         "reviewed" if row["review_status"] in ("accepted", "corrected")
+         else "cross_family_verified", now()))
     conn.execute("""UPDATE table_read_candidates SET promoted_fact_id=?, reviewer=?,
                     reviewed_at=? WHERE candidate_id=?""",
                  (cur.lastrowid, reviewer or row["reviewer"], now(), candidate_id))
