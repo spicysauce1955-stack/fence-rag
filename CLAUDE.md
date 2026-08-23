@@ -21,6 +21,14 @@ audit). `docs/state-and-gaps.md` is the current snapshot — measured state and 
 it first; `docs/phase-checkpoints.md` records what was built, tested and deliberately left undone,
 phase by phase. Read the spec's prohibition list before touching extraction or ingestion.
 
+`docs/curation/` proposes a domain-curation phase between the canonical store and the retrieval
+projection: a capability matrix, a `cur_*` schema of claims-not-facts, a single-family vertical
+slice, a staged plan, and acceptance criteria. It is **a proposal under review** — nothing in it is
+implemented, no corpus-wide curation has run, and the projection has not been regenerated. Read
+`docs/curation/README.md` first. Note that it proposes one change to existing behaviour: removing
+`cross_family_verified` from `table_review.PROMOTABLE`, which today lets two agent readings promote
+a fact with no human review.
+
 ## Commands
 
 ```bash
