@@ -107,6 +107,10 @@ def main(argv: list[str] | None = None) -> int:
                    help="override the distribution manifest URL")
     p.add_argument("--workers", type=int, default=4)
 
+    p = sub.add_parser("publish", help="upload the corpus to public object storage (maintainer)")
+    p.add_argument("--apply", action="store_true", help="actually upload; default is a dry run")
+    p.add_argument("--manifest-only", action="store_true")
+
     args = ap.parse_args(argv)
     init_workspace()
 
@@ -227,6 +231,21 @@ def main(argv: list[str] | None = None) -> int:
         from .paths import REPO_ROOT
         manifest = load_remote_manifest(args.manifest_url)
         _print(fetch_subset(manifest, args.subset, REPO_ROOT, workers=args.workers))
+    elif args.cmd == "publish":
+        from .config import load_env, R2Config
+        from .distribution import build_manifest, load_corpus_manifest
+        from .publish import publish_objects, publish_manifest
+        from datetime import datetime, timezone
+        cfg = R2Config.from_env(load_env())
+        rows = load_corpus_manifest()
+        manifest = build_manifest(
+            rows, cfg.public_base_url,
+            datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+        out = {"config": cfg.redacted(),
+               "manifest": publish_manifest(cfg, manifest, dry_run=not args.apply)}
+        if not args.manifest_only:
+            out["objects"] = publish_objects(cfg, rows, dry_run=not args.apply)
+        _print(out)
     return 0
 
 
