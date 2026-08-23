@@ -34,31 +34,80 @@ projection that can be dropped and rebuilt without re-reading a single PDF.
 
 ## Cloning — read this before you clone
 
-The 137 corpus PDFs are stored in **Git LFS**: 431 MB of files, 361 MB of unique
-objects after LFS dedupes the 14 byte-identical groups. On GitHub's free tier
-that is 36% of the 1 GB storage allowance and, more importantly, **1 GB of
-bandwidth per month — about 2.3 full clones.** Exhaust it and LFS reads are
-blocked until the month rolls over or you buy a data pack.
-
-So do not clone the corpus unless you need the bytes.
+The corpus is published to public object storage: **128 content-addressed
+objects, 376.5 MB**, at `https://pub-3731f1c7bf1e4e1db0d1ad0db83f2b9f.r2.dev/`.
+`cli fetch` pulls it from there, anonymously — no account, no token, no SDK,
+just an HTTPS GET per object. **That is the documented path, and it is the one
+to use.** R2 charges no egress fee, so fetching costs the maintainer nothing:
+there is no allowance to exhaust, no shared budget to be sparing with, and
+nothing you can do here that makes reads fail for anyone else.
 
 ```bash
-# Code, docs and datasets only — ~1 MB, no LFS bandwidth spent.
-# PDFs arrive as pointer files; everything except extraction still works.
+# 1. Code, docs and datasets only — ~1 MB, no LFS bandwidth spent.
+#    The PDFs arrive as pointer files; step 3 replaces them with real bytes.
 GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/spicysauce1955-stack/fence-rag.git
+cd fence-rag
 
-# Then pull only the part of the corpus you actually need:
+# 2. Prerequisites: poppler, tesseract, and pdfplumber into workspace/pylibs/.
+scripts/bootstrap.sh
+
+# 3. The corpus — all of it, or just the part you need.
+python3 -m fence_evidence.cli fetch --subset structural   #  32 files,  73.5 MB
+python3 -m fence_evidence.cli fetch --subset bufftech     #  14 files,  78.5 MB
+python3 -m fence_evidence.cli fetch --subset china        #   4 files,  35.4 MB
+python3 -m fence_evidence.cli fetch --subset all          # 144 files, 376.5 MB
+```
+
+| subset | what it is | files | objects | bytes |
+|---|---|---:|---:|---:|
+| `structural` | every NOA, PE letter and CAD detail sheet | 32 | 28 | 73.5 MB |
+| `bufftech` | the CertainTeed Bufftech vertical slice | 14 | 14 | 78.5 MB |
+| `china` | the China track, in full | 4 | 4 | 35.4 MB |
+| `all` | the whole corpus | 144 | 128 | 376.5 MB |
+
+Files exceed objects because 14 groups of byte-identical files are filed under
+different manufacturers. Objects are keyed by content hash, so each is
+transferred once and copied to its siblings — `--subset all` moves 376.5 MB
+over the wire, not the 432 MB the paths add up to.
+
+Every object is verified against the SHA-256 that is also its key before it
+lands; a mismatch fails the run rather than writing a bad file. `fetch` is
+idempotent — a second run transfers nothing — so it is also the repair path for
+a corrupted or half-fetched checkout. `--workers N` sets the download pool, and
+`--manifest-url` points at a different manifest. Sizes and hashes come from
+`workspace/catalog/distribution-manifest.json`, which is generated from
+`corpus-manifest.jsonl` and committed.
+
+`workspace/catalog/slice-bufftech-extruded-pvc.jsonl` lists exactly which files
+the Bufftech slice is, if you want to see before you fetch.
+
+### Fallback: Git LFS
+
+The PDFs are still in Git LFS and `git lfs pull` still works. Nothing here
+depends on it, and **you should not use it unless `cli fetch` is unavailable to
+you** — a proxy that blocks the R2 host, an air-gapped mirror of the git
+repository, or a bucket outage.
+
+The reason is a budget that `cli fetch` does not touch. The corpus is 431 MB of
+files, 361 MB of unique objects after LFS dedupes the 14 byte-identical groups.
+On GitHub's free tier that is 36% of the 1 GB storage allowance and, more
+importantly, **1 GB of bandwidth per month — about 2.3 full clones.** The
+allowance is shared by everyone who clones, the repository is public, and when
+it is exhausted LFS reads are blocked for everyone including the owner until
+the month rolls over or someone buys a data pack.
+
+```bash
 git lfs pull --include="manuals/certainteed-bufftech/**"   # ~79 MB
 git lfs pull --include="**/structural/**"                  # ~109 MB, every NOA and PE letter
 git lfs pull --include="china/**"                          #  ~35 MB
 git lfs pull                                               # ~432 MB, everything
 ```
 
-Fetching only the Bufftech vertical slice costs **111 MB — nine clones a month
-instead of two.** `workspace/catalog/slice-bufftech-extruded-pvc.jsonl` lists
-exactly which files that is.
+Those globs are not the same sets as the `fetch` subsets — `**/structural/**`
+matches a wider set of paths than the manifest's `structural` predicate, which
+is why the sizes differ.
 
-Rules of thumb that keep the allowance intact:
+If you do end up on this path:
 
 - **Never let CI or an agent do a full clone.** `GIT_LFS_SKIP_SMUDGE=1` plus a
   targeted `git lfs pull` is always the right shape. A job that clones the
@@ -67,15 +116,12 @@ Rules of thumb that keep the allowance intact:
   objects, and the corpus is read-only, so it never changes.
 - **Adding a PDF spends quota twice** — once on storage forever, once on
   bandwidth for everyone who fetches it. Check whether the document is actually
-  needed before committing it.
+  needed before committing it, and re-run `cli publish` so R2 mirrors it.
 - `du -sh .git/lfs` shows what your checkout is holding;
   `git lfs prune` reclaims objects no longer referenced by a recent commit.
 
-The corpus is immutable input, so nothing here is versioned in a way that
-benefits from git. If the allowance ever becomes a real constraint, the exit is
-to publish the corpus as a GitHub Release asset — release downloads are not
-metered like LFS — and fetch it against the SHA-256 already recorded for every
-file in `workspace/catalog/corpus-manifest.jsonl`.
+`docs/distribution-design.md` records why the corpus is hosted this way and
+what the arrangement still does not solve.
 
 ## Quick start
 
@@ -84,6 +130,7 @@ poppler and tesseract. `pdfplumber` is optional and, when present, is loaded
 from `workspace/pylibs/`.
 
 ```bash
+python3 -m fence_evidence.cli fetch --subset all  # the corpus, if you skipped it above
 python3 -m fence_evidence.cli manifest          # Phase 0: inspect the corpus
 python3 -m fence_evidence.cli ingest --pilot    # Phase 1: 10-document pilot
 python3 tests/run_tests.py                      # preservation + contract gates

@@ -142,12 +142,17 @@ if [ "$pdfs" -gt 0 ] && [ "$ptrs" -eq 0 ]; then
     grn "  ok        $pdfs PDFs present"
 elif [ "$ptrs" -gt 0 ]; then
     ylw "  partial   $pdfs PDFs present, $ptrs still unsmudged LFS pointers"
-    echo "            Fetch only what you need -- a full clone costs ~432 MB of a"
-    echo "            1 GB/month allowance shared by everyone. See README.md:"
-    echo "            git lfs pull --include='**/structural/**'   # ~109 MB"
+    echo "            Fetch from public object storage -- free, no account, no"
+    echo "            LFS bandwidth spent:"
+    echo "              python3 -m fence_evidence.cli fetch --subset structural  #  73.5 MB"
+    echo "              python3 -m fence_evidence.cli fetch --subset all         # 376.5 MB"
+    echo "            Fallback, only if that host is unreachable from here --"
+    echo "            it spends a 1 GB/month allowance shared by everyone:"
+    echo "              git lfs pull --include='**/structural/**'   # ~109 MB"
 else
     ylw "  absent    no corpus PDFs. Extraction will do nothing."
-    echo "            GIT_LFS_SKIP_SMUDGE=1 clone? Then: git lfs pull --include=<subset>"
+    echo "            python3 -m fence_evidence.cli fetch --subset all"
+    echo "            (fallback: git lfs pull --include=<subset>; see README.md)"
 fi
 echo
 
@@ -161,7 +166,8 @@ else
 fi
 echo
 echo "Next:"
-echo "  python3 tests/run_tests.py                            # 164 tests, no corpus needed"
+echo "  python3 -m fence_evidence.cli fetch --subset all      # the corpus, from public storage"
+echo "  python3 tests/run_tests.py                            # 225 tests, no corpus needed"
 echo "  python3 -m fence_evidence.cli manifest                # inspect the corpus"
 echo "  python3 -m fence_evidence.cli ingest --pilot          # 10-document smoke test"
 echo "  python3 -m fence_evidence.cli ingest --all            # full corpus, ~33 min"

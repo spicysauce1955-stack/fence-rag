@@ -41,7 +41,7 @@ python3 -m fence_evidence.cli evaluate        # gold question set
 python3 -m fence_evidence.cli facts --extract
 python3 -m fence_evidence.cli report          # regenerate workspace/reports/
 python3 -m fence_evidence.cli audit           # relevance audit of the retrieval projection
-python3 tests/run_tests.py                    # 164 tests, stdlib only
+python3 tests/run_tests.py                    # 225 tests, stdlib only
 
 # the pre-existing dataset builders (they own their outputs; see below)
 python3 scripts/build_master.py   # data/*.json + data/structural/*.json -> master-dataset.json + data/documents-index.json
@@ -63,10 +63,15 @@ two `*documents-index.json` files are generated artifacts, never hand-edited. Re
 change the curated metadata the evidence system reads, which is why every manifest row records the
 SHA-256 it was built from.
 
-The 137 corpus PDFs are in **Git LFS** — 431 MB, against a 1 GB/month free bandwidth allowance
-(~2.3 full clones). Clone with `GIT_LFS_SKIP_SMUDGE=1` and then `git lfs pull --include=<subset>`;
-never do a full clone in CI or from an agent. `README.md` has the per-subset sizes. Adding a PDF
-spends quota permanently, so check that a document is needed before committing it.
+The corpus is obtained with `cli fetch`, not Git LFS. It is published as 128 content-addressed
+objects (376.5 MB) in public Cloudflare R2; clone with `GIT_LFS_SKIP_SMUDGE=1` and then
+`python3 -m fence_evidence.cli fetch --subset <all|structural|bufftech|china>`. R2 has no egress
+fee, so fetching costs nothing and there is no allowance to protect. The PDFs are *also* still in
+Git LFS — 431 MB against a 1 GB/month bandwidth allowance, ~2.3 full clones, shared by everyone —
+and that path is now a fallback for when R2 is unreachable. **Never `git lfs pull` from CI or from
+an agent**; that budget is the one thing here that a careless job can exhaust for everybody.
+`README.md` has the per-subset sizes for both. Adding a PDF spends LFS quota permanently, so check
+that a document is needed before committing it, and re-run `cli publish` so R2 mirrors it.
 
 The pipeline runs on the standard library plus poppler (`pdftotext`, `pdftoppm`, `pdfinfo`) and
 `tesseract`. There is no install step and no `requirements.txt` on purpose: every third-party
