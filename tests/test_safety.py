@@ -69,16 +69,22 @@ class TestFetchTargetGuard(unittest.TestCase):
     def test_refuses_a_symlinked_component(self):
         # The symlink must not live inside manuals/ -- creating one there
         # would itself be a write into the read-only corpus. Instead we
-        # place the link under workspace/ pointing at a scratch directory;
-        # fetch_target checks for symlinked components before it checks
-        # corpus membership, so this exercises the identical code branch.
-        import tempfile
+        # place the link under workspace/, but point it INTO the corpus
+        # (manuals/example) so the resolved path satisfies conditions 1
+        # (inside CORPUS_ROOTS) and 2 (listed in allowed) -- the symlink
+        # check is then the ONLY thing that can make fetch_target refuse.
+        # (Pointing at an unrelated scratch dir, as an earlier version of
+        # this test did, lets it pass for the wrong reason: it would also
+        # fail condition 1, so a fetch_target with the symlink check moved
+        # to *after* .resolve() -- the exact vulnerability this test exists
+        # to catch -- would still raise CorpusWriteError, just for "outside
+        # the corpus" instead of "symlink". assertRaisesRegex pins the
+        # reason so that regression cannot hide again.)
         link = paths.WORKSPACE / "_test_fetch_link"
-        target = Path(tempfile.mkdtemp())
         try:
-            os.symlink(target, link)
-            with self.assertRaises(CorpusWriteError):
-                fetch_target(link / "doc.pdf", {"workspace/_test_fetch_link/doc.pdf"})
+            os.symlink(REPO_ROOT / "manuals" / "example", link)
+            with self.assertRaisesRegex(CorpusWriteError, "symlink"):
+                fetch_target(link / "doc.pdf", {"manuals/example/doc.pdf"})
         finally:
             if link.is_symlink():
                 link.unlink()
