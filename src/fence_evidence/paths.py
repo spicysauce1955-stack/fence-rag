@@ -60,6 +60,44 @@ def ensure_writable(path: os.PathLike | str) -> Path:
     return p
 
 
+def fetch_target(path: os.PathLike | str, allowed: set[str]) -> Path:
+    """Return ``path`` if it is a corpus file the distribution manifest names.
+
+    This is the ONE exception to the read-only corpus rule, and it exists only
+    so `cli fetch` can populate a checkout the way `git lfs pull` does. It is
+    not pipeline code: `tests/test_safety.py` asserts that no module other than
+    fetch.py and cli.py references it.
+
+    Three conditions, all required:
+      1. the path resolves inside a corpus root;
+      2. its repo-relative form appears in ``allowed`` (the manifest);
+      3. no component is a symlink.
+    """
+    p = Path(path)
+    for parent in (p, *p.parents):
+        if parent.is_symlink():
+            raise CorpusWriteError(f"refusing to write through a symlink: {parent}")
+    resolved = p.resolve()
+    try:
+        relative = resolved.relative_to(REPO_ROOT.resolve()).as_posix()
+    except ValueError:
+        raise CorpusWriteError(f"refusing to write outside the repository: {resolved}") from None
+    if not any(_is_within(resolved, root) for root in CORPUS_ROOTS):
+        raise CorpusWriteError(f"not a corpus path: {relative}")
+    if relative not in allowed:
+        raise CorpusWriteError(
+            f"{relative} is not listed in the distribution manifest; refusing to write")
+    return resolved
+
+
+def _is_within(child: Path, root: Path) -> bool:
+    try:
+        child.relative_to(Path(root).resolve())
+        return True
+    except ValueError:
+        return False
+
+
 def open_write(path: os.PathLike | str, mode: str = "w", **kw):
     """open() for writing, guarded by :func:`ensure_writable`."""
     if "r" in mode and "+" not in mode:

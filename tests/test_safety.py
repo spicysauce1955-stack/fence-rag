@@ -1,9 +1,11 @@
 """The corpus is read-only and document content is never executed."""
+import os
 import unittest
 from pathlib import Path
 
 from context import ROOT
 from fence_evidence import paths, tools
+from fence_evidence.paths import fetch_target, CorpusWriteError, REPO_ROOT
 
 
 class TestWriteGuard(unittest.TestCase):
@@ -42,6 +44,61 @@ class TestNoShell(unittest.TestCase):
     def test_run_rejects_non_string_items(self):
         with self.assertRaises(TypeError):
             tools.run(["pdftotext", 3])
+
+
+class TestFetchTargetGuard(unittest.TestCase):
+    ALLOWED = {"manuals/example/doc.pdf"}
+
+    def test_allows_a_listed_corpus_path(self):
+        p = fetch_target(REPO_ROOT / "manuals/example/doc.pdf", self.ALLOWED)
+        self.assertEqual(p, (REPO_ROOT / "manuals/example/doc.pdf").resolve())
+
+    def test_refuses_a_corpus_path_not_in_the_manifest(self):
+        with self.assertRaises(CorpusWriteError):
+            fetch_target(REPO_ROOT / "manuals/example/other.pdf", self.ALLOWED)
+
+    def test_refuses_a_path_outside_the_corpus_even_if_listed(self):
+        with self.assertRaises(CorpusWriteError):
+            fetch_target(REPO_ROOT / "src/fence_evidence/cli.py",
+                         {"src/fence_evidence/cli.py"})
+
+    def test_refuses_traversal_out_of_the_corpus(self):
+        with self.assertRaises(CorpusWriteError):
+            fetch_target(REPO_ROOT / "manuals/../src/x.py", {"manuals/../src/x.py"})
+
+    def test_refuses_a_symlinked_component(self):
+        # The symlink must not live inside manuals/ -- creating one there
+        # would itself be a write into the read-only corpus. Instead we
+        # place the link under workspace/ pointing at a scratch directory;
+        # fetch_target checks for symlinked components before it checks
+        # corpus membership, so this exercises the identical code branch.
+        import tempfile
+        link = paths.WORKSPACE / "_test_fetch_link"
+        target = Path(tempfile.mkdtemp())
+        try:
+            os.symlink(target, link)
+            with self.assertRaises(CorpusWriteError):
+                fetch_target(link / "doc.pdf", {"workspace/_test_fetch_link/doc.pdf"})
+        finally:
+            if link.is_symlink():
+                link.unlink()
+
+
+class TestFetchTargetIsNotReachableFromPipelineCode(unittest.TestCase):
+    """fetch_target is the one hole in the read-only guard. Keep it contained."""
+
+    PERMITTED = {"paths.py", "fetch.py", "cli.py"}
+
+    def test_only_fetch_and_cli_reference_fetch_target(self):
+        src = REPO_ROOT / "src" / "fence_evidence"
+        offenders = []
+        for py in sorted(src.glob("*.py")):
+            if py.name in self.PERMITTED:
+                continue
+            if "fetch_target" in py.read_text(encoding="utf-8"):
+                offenders.append(py.name)
+        self.assertEqual(offenders, [],
+                         f"fetch_target must not be reachable from pipeline code: {offenders}")
 
 
 if __name__ == "__main__":
