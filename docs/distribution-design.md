@@ -1,12 +1,14 @@
 # Distribution design — public object storage for the corpus
 
 ```text
-Status: Design. Not implemented.
-Scope:  how a checkout obtains the corpus and the built store.
+Status: Implemented. Tasks 1-8 built, tested, and the corpus is published.
+Scope:  how a checkout obtains the corpus.
         Not a change to extraction, retrieval, ranking or the fact layer.
-Gate:   nothing here is built until this document is reviewed. The one
-        exception already shipped is scripts/bootstrap.sh, which is useful
-        regardless of which store is chosen.
+Built:  128 content-addressed objects / 376,489,773 bytes live in public
+        R2; `cli fetch` is verified end-to-end against that bucket and is
+        the documented way to obtain the corpus (README, bootstrap.sh).
+Cut:    hosting a prebuilt evidence.db, and the `--build`/`--verify` flags
+        this document once advertised. Descoped 2026-08-23; see §8.
 ```
 
 ## 1. Problem, measured
@@ -40,23 +42,25 @@ Four consequences, in order of how quietly they fail:
    on poppler 24.02.0. Every published measurement — evidence support 0.623,
    OCR mean confidence 77.0% — was produced on that toolchain.
 
-`README.md` already names the exit: *"publish the corpus … and fetch it against
+`README.md` already named the exit: *"publish the corpus … and fetch it against
 the SHA-256 already recorded for every file in
-`workspace/catalog/corpus-manifest.jsonl`."* This document adopts that plan and
-chooses the store.
+`workspace/catalog/corpus-manifest.jsonl`."* This document adopted that plan and
+chose the store; that passage has since been replaced by the `cli fetch`
+instructions it was anticipating.
 
 ## 2. What is stored, and what is never stored
 
 | Artifact | Size | Hosted? | Why |
 |---|---|---|---|
 | corpus files (137 PDFs, 6 PNGs, 1 DOCX) | 144 rows, **128 unique objects, 376.5 MB** | **yes** | the only irreplaceable bytes |
-| `evidence.db` | 60 MB (~18 MB compressed) | **yes** | removes the 33-minute build and the toolchain-divergence problem for consumers |
+| `evidence.db` | 60 MB | **no** | considered, descoped; see §8 |
 | `workspace/derived/` | 4.5 GB | **never** | deterministic renders of PDF pages; see §6 |
 | `workspace/pylibs/` | 57 MB | **never** | vendored from PyPI by `bootstrap.sh` |
 
-**Hosted total ≈ 395 MB**, against Cloudflare R2's 10 GB free tier. The 4.5 GB —
-the number that makes hosting sound infeasible — is the one thing that must not
-be hosted.
+**Hosted total: 376,489,773 bytes**, against Cloudflare R2's 10 GB free tier.
+The 4.5 GB — the number that makes hosting sound infeasible — is the one thing
+that must not be hosted. The corpus is the only thing that *is*: everything
+else in the table is either reconstructible from it or fetched from PyPI.
 
 The gap between 144 rows and 128 objects is the point of §3: the corpus contains
 **14 groups of byte-identical files filed under different manufacturers** (30
@@ -74,11 +78,11 @@ is self-verifying:
 ```text
 r2://fence-rag/
   objects/<sha256>                    137 PDFs + 6 PNGs + 1 DOCX, deduped to 128 objects
-  builds/<extraction_run_id>/
-    evidence.db.zst                   ~18 MB compressed from 60 MB
-    manifest.json                     toolchain versions, row counts, checksums
   distribution-manifest.json          the index; see §4
 ```
+
+That is the whole bucket. Two objects and nothing else: the content-addressed
+corpus, and the manifest that indexes it.
 
 Access model: **public-read, anonymous.** A consumer needs no account, no token
 and no SDK — a plain HTTPS `GET` per object, which the standard library can
@@ -136,27 +140,47 @@ manifest predicate, and the two are not interchangeable.
 ## 5. Client — `cli fetch`
 
 ```bash
-python3 -m fence_evidence.cli fetch --subset structural   # 109 MB
-python3 -m fence_evidence.cli fetch --subset all          # 412 MB
-python3 -m fence_evidence.cli fetch --build latest        # evidence.db only, 18 MB
-python3 -m fence_evidence.cli fetch --verify              # re-check hashes, download nothing
+python3 -m fence_evidence.cli fetch --subset structural   #  32 files,  73.5 MB
+python3 -m fence_evidence.cli fetch --subset bufftech     #  14 files,  78.5 MB
+python3 -m fence_evidence.cli fetch --subset china        #   4 files,  35.4 MB
+python3 -m fence_evidence.cli fetch --subset all          # 144 files, 376.5 MB
 ```
+
+Three flags, and no others: `--subset` (default `all`), `--manifest-url` (a
+manifest other than the committed one, also settable as `FENCE_RAG_MANIFEST_URL`)
+and `--workers` (download pool size, default 4).
 
 Behaviour:
 
-- **Writes only into the corpus paths the manifest names**, and refuses to
-  overwrite a file whose SHA-256 already matches. `paths.ensure_writable` guards
-  the workspace, not the corpus, so `fetch` needs its own explicit guard: it may
-  write only to paths listed in the manifest, and only when the local file is
-  absent or hash-mismatched.
+- **Writes only into the corpus paths the manifest names.**
+  `paths.ensure_writable` guards the workspace, not the corpus, so `fetch` has
+  its own explicit guard, `paths.fetch_target`: a target must resolve inside a
+  corpus root, appear in the manifest, and contain no symlinked component.
+  Every target is resolved through it *before the first byte transfers*, so a
+  manifest naming a path outside the corpus fails the run rather than being
+  reported as one object's failure. `tests/test_safety.py` asserts no module
+  other than `paths.py`, `fetch.py` and `cli.py` can even reach that function.
 - **Verifies every object against its key** before moving it into place.
-  Download to a temp file, hash, compare to the key, then rename. A mismatch is
-  an error, never a warning.
-- **Resumable and idempotent.** Re-running fetches nothing already present.
+  Download to a temp file under `workspace/`, hash, compare to the key, then
+  rename. A mismatch is an error, never a warning.
+- **Transfers each object once, not each path.** Targets are grouped by
+  `sha256`; the first path in a group is downloaded and the rest are copied
+  from it, re-hashed on the way. This is the same saving §3's key scheme takes
+  on the way up. Iterating paths instead cost 55.5 MB on `--subset all` and 48%
+  on `--subset structural`.
+- **Resumable and idempotent.** Re-running fetches nothing already present —
+  and since it hashes every target it finds on disk, a plain re-run *is* the
+  verification pass: it reports `already_present` for each path whose bytes
+  match the manifest, and repairs any that do not.
 - **Standard library only** — `urllib.request`. No boto3, no SDK. Consistent
   with the existing rule that every third-party package stays optional.
 - **Parallel with a small pool** (4), because 128 objects at 3 MB average over
   one connection is needlessly slow.
+
+The returned counts distinguish paths from objects, because they now differ:
+`requested`, `already_present`, `copied` and `failed` count paths and partition
+`requested`; `objects` counts distinct hashes, and `downloaded` and `bytes`
+count what actually crossed the wire.
 
 ## 6. Page images on demand — `derived/` becomes a cache
 
@@ -188,10 +212,11 @@ render. `None` is a legitimate outcome for the remaining page, the DOCX, which
 has no image at all; `evaluate.py:213` and the retrieval contract test already
 tolerate that.
 
-Consequence worth stating plainly: a consumer who fetched only `evidence.db` and
-no PDFs gets text evidence with no page image. That is a real reduction in what
-this system promises, and it is why `--subset structural` exists — the documents
-where the image *is* the evidence are exactly the scanned NOA sheets.
+Consequence worth stating plainly: a consumer who fetches a subset gets page
+images only for the documents in that subset. Outside it there is text evidence
+and no picture. That is a real reduction in what this system promises, and it is
+why `--subset structural` exists — the documents where the image *is* the
+evidence are exactly the scanned NOA sheets.
 
 ## 7. Migration — LFS stays
 
@@ -202,21 +227,55 @@ the *bandwidth* allowance is.
 
 Instead:
 
-1. Publish to R2 and generate the distribution manifest.
+1. Publish to R2 and generate the distribution manifest. **Done** — 128
+   objects, 376,489,773 bytes.
 2. Change `README.md` so the documented path is `bootstrap.sh` + `cli fetch`.
-   LFS becomes an unexercised fallback.
+   LFS becomes an unexercised fallback. **Done** — `README.md`, `CLAUDE.md`
+   and `scripts/bootstrap.sh` all lead with `cli fetch` and keep the LFS
+   instructions, labelled as a fallback with the bandwidth warning intact.
 3. Leave `.gitattributes` untouched. A future PDF still lands in LFS; `cli
-   publish` mirrors it.
+   publish` mirrors it. **Done** — untouched.
 
 Bandwidth stops being spent because nobody follows the LFS path any more, not
-because the LFS path was removed.
+because the LFS path was removed. Step 2 is the step that actually saves the
+bandwidth: without it the objects sit in R2 and the allowance is spent at
+exactly the old rate.
 
 ## 8. What this does not solve
 
-- **Reproducibility of extraction.** Hosting a prebuilt `evidence.db` lets a
-  consumer *avoid* the divergence; it does not fix it. The honest mitigation is
-  §3's `builds/…/manifest.json` recording poppler and tesseract versions, and a
-  loud warning when a local rebuild runs on a different toolchain.
+- **Hosting the built `evidence.db`. Considered, and descoped on 2026-08-23.**
+  §2, §3 and §5 of this document originally carried a
+  `builds/<extraction_run_id>/evidence.db.zst` object (~18 MB from 60 MB), a
+  sibling `manifest.json` recording toolchain versions and row counts, and the
+  flags `cli fetch --build latest` and `cli fetch --verify`. None of it was
+  built and none of it should be, for two reasons.
+
+  It is a second feature, not part of this one. Everything above is about
+  obtaining *source bytes* the consumer cannot otherwise get; a prebuilt store
+  is a convenience over bytes they can already derive themselves, with its own
+  staleness, versioning and trust questions — a store you did not build is a
+  store you are trusting the maintainer about, which is the opposite of what a
+  content-addressed corpus buys.
+
+  And compression: zstd reached the standard library only in Python 3.14, as
+  `compression.zstd`. On the interpreters this project targets it needs a
+  vendored third-party package — against the first constraint in `guide.md`,
+  that every third-party dependency stays optional. Shipping the store
+  uncompressed at 60 MB, or falling back to `lzma`, would be trading the
+  project's cleanest rule for a convenience.
+
+  `--verify` needs no replacement: `cli fetch` hashes every target it finds on
+  disk, so re-running it verifies the checkout and repairs it in one pass.
+
+  Recorded here rather than deleted, so the option can be re-opened
+  deliberately — most plausibly once 3.14 is a safe floor.
+
+- **Reproducibility of extraction.** Unchanged by this design, and no longer
+  even mitigated: hosting a prebuilt `evidence.db` would have let a consumer
+  *avoid* the divergence without fixing it, and that is now descoped. What
+  remains is `bootstrap.sh`, which reports the local poppler and tesseract
+  versions and warns when they differ from the reference toolchain (poppler
+  24.02.0, tesseract 5.3.4) that produced every published measurement.
 - **Preservation.** R2 is a second copy, which is strictly better than one, but
   two copies under one owner's control is not an archive. Unchanged by this
   design and deferred by the user on 2026-08-23.
@@ -230,12 +289,18 @@ because the LFS path was removed.
 | # | Criterion |
 |---|---|
 | D1 | On a machine with no checkout, `bootstrap.sh` reports every missing prerequisite by name and exits non-zero rather than degrading silently |
-| D2 | `GIT_LFS_SKIP_SMUDGE=1` clone + `cli fetch --subset structural` + `cli fetch --build latest` yields a working `search` with page-image evidence for every structural result, spending **zero** LFS bandwidth |
+| D2 | `GIT_LFS_SKIP_SMUDGE=1` clone + `cli fetch --subset structural` + `ingest` yields a working `search` with page-image evidence for every structural result, spending **zero** LFS bandwidth |
 | D3 | Every fetched object's SHA-256 matches its key; a corrupted download fails the run rather than landing on disk |
 | D4 | `cli fetch` is idempotent — a second run transfers zero bytes |
 | D5 | `resolve_asset` returns byte-identical images to those `ingest` writes, asserted against the existing derived store for a sample of 20 pages |
 | D6 | Deleting `workspace/derived/` entirely does not change any evaluation number |
 | D7 | `cli fetch` writes only to paths named in the distribution manifest; an attempt to write elsewhere raises |
+
+D2 was restated on 2026-08-23. It named `cli fetch --build latest`, which was
+descoped (§8) and can therefore never be satisfied as written. The consumer
+still has to build the store — that is what `ingest` is doing in the criterion
+— and the point being tested is unchanged and is met: source bytes and page
+images both arrive without touching LFS.
 
 D6 is the criterion that proves `derived/` is a cache rather than a data source.
 It is also the cheapest to run and should be run first.
