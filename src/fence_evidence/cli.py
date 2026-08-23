@@ -100,6 +100,13 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("stats", help="store statistics")
     sub.add_parser("report", help="regenerate the workspace reports")
 
+    p = sub.add_parser("fetch", help="download corpus objects from public storage")
+    p.add_argument("--subset", default="all",
+                   help="all, structural, bufftech, china")
+    p.add_argument("--manifest-url", default=None,
+                   help="override the distribution manifest URL")
+    p.add_argument("--workers", type=int, default=4)
+
     args = ap.parse_args(argv)
     init_workspace()
 
@@ -215,6 +222,11 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "report":
         from .reports import write_all_reports
         _print(write_all_reports())
+    elif args.cmd == "fetch":
+        from .fetch import fetch_subset, load_remote_manifest
+        from .paths import REPO_ROOT
+        manifest = load_remote_manifest(args.manifest_url)
+        _print(fetch_subset(manifest, args.subset, REPO_ROOT, workers=args.workers))
     return 0
 
 
