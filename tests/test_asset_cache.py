@@ -110,3 +110,31 @@ class TestResolveAsset(unittest.TestCase):
                 break
         if checked == 0:
             self.skipTest("no CAD-sourced page images available to re-render")
+
+    @requires_store
+    def test_a_render_leaves_no_scratch_directory_behind(self):
+        """The render goes to a scratch dir beside the destination and is moved
+        in with os.replace, so a half-written PNG can never occupy the cache
+        path -- pdftoppm and Image.save both truncate-then-stream, and
+        resolve_asset trusts any file that exists, permanently. Assert the
+        scratch dir is cleaned up and the destination is complete."""
+        import sqlite3
+        from fence_evidence.paths import EVIDENCE_DB
+        conn = sqlite3.connect(f"file:{EVIDENCE_DB}?mode=ro", uri=True)
+        rows = conn.execute(
+            "SELECT page_image_path FROM pages WHERE page_image_path IS NOT NULL LIMIT 20"
+        ).fetchall()
+        conn.close()
+        for (rel,) in rows:
+            src = REPO_ROOT / rel
+            if not src.is_file():
+                continue
+            with _evicted(src) as original:
+                produced = resolve_asset(rel)
+                if produced is None:
+                    self.skipTest("source PDF absent; cannot re-render")
+                self.assertEqual(hashlib.sha256(produced.read_bytes()).hexdigest(), original)
+                leftovers = sorted(p.name for p in src.parent.glob(".tmp-render-*"))
+                self.assertEqual(leftovers, [])
+            return
+        self.skipTest("no page images available to re-render")
