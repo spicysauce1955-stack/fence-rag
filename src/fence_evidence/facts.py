@@ -14,6 +14,7 @@ import re
 import sqlite3
 from typing import Iterator
 
+from .paths import rel, resolve_asset
 from .store import connect, now
 
 OCR_REVIEW_CONFIDENCE = 80.0
@@ -242,6 +243,8 @@ def query_facts(fact_type: str | None = None, *, conditions: dict | None = None,
         rows = [dict(r) for r in conn.execute(sql, params)]
         for r in rows:
             r["conditions"] = json.loads(r["conditions"] or "{}")
+            resolved_page_image = resolve_asset(r.get("page_image_path"))
+            r["page_image_path"] = rel(resolved_page_image) if resolved_page_image else None
         if conditions:
             rows = [r for r in rows
                     if all(str(r["conditions"].get(k)) == str(v) for k, v in conditions.items())]

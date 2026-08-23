@@ -112,6 +112,26 @@ def rel(path: os.PathLike | str) -> str:
     return os.path.relpath(Path(path).resolve(), REPO_ROOT)
 
 
+def resolve_asset(rel_path: "str | None") -> "Path | None":
+    """Return a local path for a derived asset, materialising it if absent.
+
+    workspace/derived/ is a cache, not a data source: every page image is a
+    deterministic render of a source PDF page. Resolution order is
+    cache hit -> render from the PDF -> None. None is a legitimate result and
+    callers must handle it; the DOCX has no page image at all.
+    """
+    if not rel_path:
+        return None
+    target = (REPO_ROOT / rel_path).resolve()
+    if target.is_file():
+        return target
+    from .assets import render_page_image   # local import keeps paths.py dependency-free
+    try:
+        return render_page_image(rel_path)
+    except Exception:
+        return None
+
+
 def init_workspace() -> None:
     for d in (CATALOG_DIR, DERIVED_DIR, INDEX_DIR, REPORTS_DIR, TESTS_DIR):
         d.mkdir(parents=True, exist_ok=True)
