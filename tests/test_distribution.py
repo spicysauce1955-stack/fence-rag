@@ -77,3 +77,80 @@ class TestR2Config(unittest.TestCase):
     def test_repr_never_exposes_the_secret(self):
         cfg = R2Config.from_env(self.FULL)
         self.assertNotIn("SECRET", repr(cfg))
+
+
+from fence_evidence.distribution import (SUBSETS, build_manifest, object_key,
+                                         files_for_subset, load_corpus_manifest)
+
+
+def _row(path, sha, size, structural=False):
+    return {"source_path": path, "sha256": sha, "file_size_bytes": size,
+            "structural_subdir": structural}
+
+
+class TestSubsetPredicates(unittest.TestCase):
+    def test_structural_uses_structural_subdir_not_structural(self):
+        self.assertTrue(SUBSETS["structural"](_row("manuals/x/structural/a.pdf", "a", 1, True)))
+        self.assertFalse(SUBSETS["structural"](_row("manuals/x/a.pdf", "a", 1, False)))
+
+    def test_china_matches_the_china_track_only(self):
+        self.assertTrue(SUBSETS["china"](_row("china/manuals/a.pdf", "a", 1)))
+        self.assertFalse(SUBSETS["china"](_row("manuals/a.pdf", "a", 1)))
+
+    def test_all_matches_everything(self):
+        self.assertTrue(SUBSETS["all"](_row("anything", "a", 1)))
+
+
+class TestBuildManifest(unittest.TestCase):
+    ROWS = [
+        _row("manuals/certainteed-bufftech/a.pdf", "aaa", 100, False),
+        _row("manuals/certainteed-bufftech/structural/b.pdf", "bbb", 200, True),
+        _row("manuals/freedom-outdoor-living/b-copy.pdf", "bbb", 200, False),
+        _row("china/manuals/c.pdf", "ccc", 300, False),
+    ]
+
+    def setUp(self):
+        self.m = build_manifest(self.ROWS, "https://pub.example.com/", "2026-01-01T00:00:00Z")
+
+    def test_duplicate_sha256_is_counted_once_in_bytes(self):
+        # 4 files, 3 unique objects, 100+200+300 = 600 bytes
+        self.assertEqual(self.m["subsets"]["all"]["files"], 4)
+        self.assertEqual(self.m["subsets"]["all"]["unique"], 3)
+        self.assertEqual(self.m["subsets"]["all"]["bytes"], 600)
+
+    def test_every_file_lists_the_subsets_it_belongs_to(self):
+        by_path = {f["source_path"]: f for f in self.m["files"]}
+        self.assertIn("structural", by_path["manuals/certainteed-bufftech/structural/b.pdf"]["subsets"])
+        self.assertIn("bufftech", by_path["manuals/certainteed-bufftech/a.pdf"]["subsets"])
+        self.assertIn("china", by_path["china/manuals/c.pdf"]["subsets"])
+
+    def test_base_url_is_recorded_and_no_secret_is_present(self):
+        self.assertEqual(self.m["base_url"], "https://pub.example.com/")
+        blob = repr(self.m)
+        self.assertNotIn("SECRET", blob)
+        self.assertNotIn("R2_SECRET_ACCESS_KEY", blob)
+
+    def test_files_for_subset_returns_both_paths_of_a_duplicate(self):
+        got = {f["source_path"] for f in files_for_subset(self.m, "all")}
+        self.assertEqual(len(got), 4)
+
+    def test_unknown_subset_raises(self):
+        with self.assertRaises(KeyError):
+            files_for_subset(self.m, "nope")
+
+
+class TestObjectKey(unittest.TestCase):
+    def test_key_is_content_addressed(self):
+        self.assertEqual(object_key("abc123"), "objects/abc123")
+
+
+class TestAgainstTheRealCorpusManifest(unittest.TestCase):
+    def test_real_manifest_projects_to_128_unique_objects(self):
+        rows = load_corpus_manifest()
+        if not rows:
+            self.skipTest("corpus manifest not built")
+        m = build_manifest(rows, "https://pub.example.com/", "2026-01-01T00:00:00Z")
+        self.assertEqual(m["subsets"]["all"]["files"], 144)
+        self.assertEqual(m["subsets"]["all"]["unique"], 128)
+        self.assertEqual(m["subsets"]["structural"]["files"], 32)
+        self.assertEqual(m["subsets"]["china"]["files"], 4)
