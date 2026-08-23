@@ -49,9 +49,11 @@ not modified.
 
 One deliberate exception: `table_review.PROMOTABLE` currently contains
 `cross_family_verified`, so two agent readings from different model families
-already promote without a person. Curation revokes that in C0, and the 324 rows
-written that way are grandfathered and re-enter as candidates. It is a narrowing
-of what the frozen layer may assert, not a rebuild of it.
+already promote without a person — 324 facts entered `facts` that way, taking it
+from 1,664 to 1,988. Curation revokes that in C0 and re-enters those rows as
+candidates. It is a narrowing of what the frozen layer may assert, not a rebuild
+of it. `docs/state-and-gaps.md` G17 now records the same thing; it previously
+claimed zero facts had been promoted, which had stopped being true.
 
 Curation writes only to new tables in a new namespace and to `workspace/`.
 

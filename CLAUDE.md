@@ -41,7 +41,7 @@ python3 -m fence_evidence.cli evaluate        # gold question set
 python3 -m fence_evidence.cli facts --extract
 python3 -m fence_evidence.cli report          # regenerate workspace/reports/
 python3 -m fence_evidence.cli audit           # relevance audit of the retrieval projection
-python3 tests/run_tests.py                    # 101 tests, stdlib only
+python3 tests/run_tests.py                    # 164 tests, stdlib only
 
 # the pre-existing dataset builders (they own their outputs; see below)
 python3 scripts/build_master.py   # data/*.json + data/structural/*.json -> master-dataset.json + data/documents-index.json
