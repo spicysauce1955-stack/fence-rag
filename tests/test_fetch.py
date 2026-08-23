@@ -18,8 +18,10 @@ SHA = hashlib.sha256(PAYLOAD).hexdigest()
 
 class _Handler(http.server.BaseHTTPRequestHandler):
     corrupt = False
+    last_user_agent = None
 
     def do_GET(self):
+        _Handler.last_user_agent = self.headers.get("User-Agent")
         body = b"tampered" if self.corrupt else PAYLOAD
         self.send_response(200)
         self.send_header("Content-Length", str(len(body)))
@@ -33,6 +35,7 @@ class _Handler(http.server.BaseHTTPRequestHandler):
 class ServerCase(unittest.TestCase):
     def setUp(self):
         _Handler.corrupt = False
+        _Handler.last_user_agent = None
         self.srv = http.server.HTTPServer(("127.0.0.1", 0), _Handler)
         self.base = f"http://127.0.0.1:{self.srv.server_port}/"
         threading.Thread(target=self.srv.serve_forever, daemon=True).start()
@@ -73,6 +76,15 @@ class TestDownloadObject(ServerCase):
         dest.mkdir()
         with self.assertRaises(IsADirectoryError):
             download_object(self.base + "objects/" + SHA, SHA, dest, self.tmp)
+
+    def test_sends_an_explicit_user_agent(self):
+        # Cloudflare's r2.dev public host returns 403 to the default
+        # Python-urllib User-Agent; regression guard for that fix.
+        dest = self.tmp / "a.pdf"
+        download_object(self.base + "objects/" + SHA, SHA, dest, self.tmp)
+        ua = _Handler.last_user_agent
+        self.assertIsNotNone(ua)
+        self.assertFalse(ua.startswith("Python-urllib"))
 
 
 class TestFetchSubsetRefusesUnlistedPaths(ServerCase):

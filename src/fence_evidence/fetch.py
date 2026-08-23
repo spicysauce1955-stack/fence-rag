@@ -22,6 +22,12 @@ CHUNK = 1 << 20
 
 DEFAULT_MANIFEST_URL_ENV = "FENCE_RAG_MANIFEST_URL"
 
+# Cloudflare's r2.dev public host returns 403 Forbidden to the default
+# Python-urllib User-Agent; an explicit one is required on every outbound
+# request or the entire consumer path is non-functional against the real
+# published bucket.
+USER_AGENT = "fence-rag/1.0 (+https://github.com/spicysauce1955-stack/fence-rag)"
+
 
 def _sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -52,7 +58,8 @@ def download_object(url: str, expected_sha256: str, dest: Path, tmp_dir: Path) -
     tmp = Path(tmp_name)
     try:
         h = hashlib.sha256()
-        with os.fdopen(fd, "wb") as out, urllib.request.urlopen(url, timeout=60) as resp:
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        with os.fdopen(fd, "wb") as out, urllib.request.urlopen(req, timeout=60) as resp:
             for block in iter(lambda: resp.read(CHUNK), b""):
                 h.update(block)
                 out.write(block)
@@ -120,5 +127,6 @@ def load_remote_manifest(url: str | None = None) -> dict:
                 "no manifest URL given and workspace/catalog/distribution-manifest.json "
                 "is absent; pass --manifest-url or run `cli publish --manifest`")
         return json.loads(local.read_text(encoding="utf-8"))
-    with urllib.request.urlopen(url, timeout=30) as resp:
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(req, timeout=30) as resp:
         return json.loads(resp.read().decode("utf-8"))
