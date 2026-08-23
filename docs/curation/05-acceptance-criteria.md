@@ -29,7 +29,7 @@ costs.
 | P4 | Projection not regenerated | `retrieval_units` and `retrieval_fts` row counts, and `retrieval_units.built_at` | unchanged, 10,886 |
 | P5 | Write guard enforced | attempted write to each canonical table name and to `facts`, through the authorizer | every attempt rejected |
 | P6 | Extraction code untouched | git diff over `extract.py`, `layout.py`, `hocr.py`, `tables.py`, `quality.py`, `ingest.py`, `manifest.py` | empty |
-| P7 | Existing tests still pass | `python3 tests/run_tests.py` | 101/101, plus the new curation tests |
+| P7 | Existing tests still pass | `python3 tests/run_tests.py` | 164/164, plus the new curation tests. (`CLAUDE.md` and `docs/state-and-gaps.md` both still say 101, written before the table-review and promotion-gate work landed; 164 is the measured count) |
 
 P1 is scoped to the manifest's 144 rows because the manifest covers only
 `manuals/` and `china/`; `data/` — including the authority-20

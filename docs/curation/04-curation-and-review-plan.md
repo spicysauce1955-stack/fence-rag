@@ -124,7 +124,7 @@ cli curate audit    --slice bufftech   # C8
 tables and `facts` byte-identical (row count and an ordered-row hash). A test
 asserts the `set_authorizer` guard rejects a write to every canonical table
 name. A test asserts `retrieval_units` and `retrieval_fts` are untouched. The
-existing 101 tests still pass.
+existing 164 tests still pass.
 
 ---
 
