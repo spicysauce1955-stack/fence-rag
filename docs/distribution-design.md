@@ -179,11 +179,14 @@ def resolve_asset(rel_path: str) -> Path | None:
     """Return a local path for a derived asset, materialising it if absent."""
 ```
 
-Resolution order: local cache hit → render from the source PDF if present →
-`None`. Rendering is `pdftoppm` at the DPI recorded on the `pages` row, so the
-result is the same bytes the ingest would have written. `None` is a legitimate
-outcome — `evaluate.py:213` and the retrieval contract test already tolerate a
-missing image for the DOCX, so the contract for "no image available" exists.
+Resolution order: local cache hit → render from the source → `None`. The
+source is a PDF for 2,140 of 2,147 pages, rendered with `pdftoppm` at the DPI
+recorded on the `pages` row, giving the same bytes the ingest would have
+written. Six pages — the CAD sheets under `manuals/*/structural/` whose source
+is a `.png` — are materialised from that PNG instead, since there is no PDF to
+render. `None` is a legitimate outcome for the remaining page, the DOCX, which
+has no image at all; `evaluate.py:213` and the retrieval contract test already
+tolerate that.
 
 Consequence worth stating plainly: a consumer who fetched only `evidence.db` and
 no PDFs gets text evidence with no page image. That is a real reduction in what
@@ -236,3 +239,29 @@ because the LFS path was removed.
 
 D6 is the criterion that proves `derived/` is a cache rather than a data source.
 It is also the cheapest to run and should be run first.
+
+**D6: measured 2026-08-23. Pass.** `cli evaluate` was run with `workspace/derived/`
+intact, then again with the directory moved aside (not deleted, so the run could
+be restored rather than rebuilt) so every page image the evaluation touched had
+to be rendered on demand through `resolve_asset`. The two pretty-printed JSON
+outputs were diffed field for field, including the per-category breakdown and
+`false_unsupported_ids`: **zero differences.**
+
+```
+recall_at_k              0.805
+page_recall_at_k         0.659
+mrr                      0.552
+evidence_support         0.623
+page_evidence_support    0.769
+no_answer_precision      0.333
+false_unsupported_rate   0.146
+passed                   27 of 59 (41 answerable, 18 no-answer)
+```
+
+These match the figures already published in `docs/state-and-gaps.md` exactly,
+which independently confirms the baseline run was trustworthy.
+
+With `derived/` absent, the on-demand renders regenerated 462 MB of the 4.5 GB
+store — roughly 10% of the cache is what an evaluation run actually touches,
+which bounds the real cost of a cold cache for a consumer who never fetches a
+page image.
