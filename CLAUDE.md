@@ -63,6 +63,11 @@ two `*documents-index.json` files are generated artifacts, never hand-edited. Re
 change the curated metadata the evidence system reads, which is why every manifest row records the
 SHA-256 it was built from.
 
+The 137 corpus PDFs are in **Git LFS** — 431 MB, against a 1 GB/month free bandwidth allowance
+(~2.3 full clones). Clone with `GIT_LFS_SKIP_SMUDGE=1` and then `git lfs pull --include=<subset>`;
+never do a full clone in CI or from an agent. `README.md` has the per-subset sizes. Adding a PDF
+spends quota permanently, so check that a document is needed before committing it.
+
 The pipeline runs on the standard library plus poppler (`pdftotext`, `pdftoppm`, `pdfinfo`) and
 `tesseract`. There is no install step and no `requirements.txt` on purpose: every third-party
 package must be optional. The one in use, `pdfplumber`, lives in `workspace/pylibs/` (git-ignored)

@@ -32,6 +32,51 @@ manuals/  china/manuals/  data/    catalog/    corpus-manifest.jsonl
 Canonical rows record what the source actually contained. Retrieval units are a
 projection that can be dropped and rebuilt without re-reading a single PDF.
 
+## Cloning — read this before you clone
+
+The 137 corpus PDFs are stored in **Git LFS**: 431 MB of files, 361 MB of unique
+objects after LFS dedupes the 14 byte-identical groups. On GitHub's free tier
+that is 36% of the 1 GB storage allowance and, more importantly, **1 GB of
+bandwidth per month — about 2.3 full clones.** Exhaust it and LFS reads are
+blocked until the month rolls over or you buy a data pack.
+
+So do not clone the corpus unless you need the bytes.
+
+```bash
+# Code, docs and datasets only — ~1 MB, no LFS bandwidth spent.
+# PDFs arrive as pointer files; everything except extraction still works.
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/spicysauce1955-stack/fence-rag.git
+
+# Then pull only the part of the corpus you actually need:
+git lfs pull --include="manuals/certainteed-bufftech/**"   # ~79 MB
+git lfs pull --include="**/structural/**"                  # ~109 MB, every NOA and PE letter
+git lfs pull --include="china/**"                          #  ~35 MB
+git lfs pull                                               # ~432 MB, everything
+```
+
+Fetching only the Bufftech vertical slice costs **111 MB — nine clones a month
+instead of two.** `workspace/catalog/slice-bufftech-extruded-pvc.jsonl` lists
+exactly which files that is.
+
+Rules of thumb that keep the allowance intact:
+
+- **Never let CI or an agent do a full clone.** `GIT_LFS_SKIP_SMUDGE=1` plus a
+  targeted `git lfs pull` is always the right shape. A job that clones the
+  corpus on every run burns the monthly budget in a day.
+- **Re-clone rarely.** `git pull` on an existing checkout transfers only changed
+  objects, and the corpus is read-only, so it never changes.
+- **Adding a PDF spends quota twice** — once on storage forever, once on
+  bandwidth for everyone who fetches it. Check whether the document is actually
+  needed before committing it.
+- `du -sh .git/lfs` shows what your checkout is holding;
+  `git lfs prune` reclaims objects no longer referenced by a recent commit.
+
+The corpus is immutable input, so nothing here is versioned in a way that
+benefits from git. If the allowance ever becomes a real constraint, the exit is
+to publish the corpus as a GitHub Release asset — release downloads are not
+metered like LFS — and fetch it against the SHA-256 already recorded for every
+file in `workspace/catalog/corpus-manifest.jsonl`.
+
 ## Quick start
 
 No installation is required; the pipeline runs on the standard library plus
