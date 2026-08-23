@@ -1,7 +1,7 @@
 """Unit tests for parsing, layout inference and id stability."""
 import unittest
 
-from context import ROOT
+from context import ROOT, requires_corpus
 from fence_evidence.hocr import mean_confidence, parse_hocr
 from fence_evidence.ids import doc_id_for, element_id_for, page_id_for, version_id_for
 from fence_evidence.layout import (HeadingClassifier, HeadingStack, build_elements,
@@ -112,6 +112,7 @@ class TestRotation(unittest.TestCase):
         self.assertFalse(hasattr(ex, "_rotate_word"),
                          "the word rotation transform was proven wrong and removed")
 
+    @requires_corpus
     def test_page_rotations_parses_pdfinfo_output(self):
         pdf = ROOT / "manuals" / "wam-bam" / "cambridge-BL19110-install-guide.pdf"
         rots = _page_rotations(pdf, 3)

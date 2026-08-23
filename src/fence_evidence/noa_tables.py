@@ -18,7 +18,7 @@ import sqlite3
 from collections import defaultdict
 from pathlib import Path
 
-from .paths import CATALOG_DIR, DERIVED_DIR, REPO_ROOT, open_write, rel
+from .paths import CATALOG_DIR, DERIVED_DIR, open_write, rel, resolve_asset
 from .store import connect
 
 MANIFEST = CATALOG_DIR / "noa-table-candidates.jsonl"
@@ -117,8 +117,8 @@ def export_crops(conn: sqlite3.Connection | None = None) -> dict:
         for p in primaries:
             if not p["page_image_path"]:
                 continue
-            src = REPO_ROOT / p["page_image_path"]
-            if not src.is_file():
+            src = resolve_asset(p["page_image_path"])
+            if src is None:
                 continue
             out = (DERIVED_DIR / p["document_id"] / "table-candidates"
                    / f"p{p['page_no']:04d}.png")

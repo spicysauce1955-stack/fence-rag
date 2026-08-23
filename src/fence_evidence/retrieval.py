@@ -13,7 +13,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
-from .paths import REPO_ROOT
+from .paths import rel, resolve_asset
 from .relations import APPROVAL_RE, supersession_chain
 from .versions import (document_dates, effective_at, enrich_chain, expiry_status)
 from .store import connect
@@ -390,6 +390,7 @@ def search_evidence(query: str, *, limit: int = 10, filters: dict | None = None,
             region = conn.execute(
                 "SELECT region_image_path FROM elements WHERE element_id=?",
                 (r["element_id"],)).fetchone()
+            resolved_page_image = resolve_asset(r["page_image_path"])
             results.append(SearchResult(
                 document_id=r["document_id"], title=r["title"],
                 source_path=r["source_path"], status=r["version_status"],
@@ -398,7 +399,7 @@ def search_evidence(query: str, *, limit: int = 10, filters: dict | None = None,
                 element_type=r["element_type"],
                 heading_path=json.loads(r["heading_path"] or "[]"),
                 text=r["text"], snippet=r["snip"], text_source=r["text_source"],
-                page_image_path=r["page_image_path"],
+                page_image_path=rel(resolved_page_image) if resolved_page_image else None,
                 region_image_path=region["region_image_path"] if region else None,
                 bbox=json.loads(r["bbox"]) if r["bbox"] else None,
                 score=score,
@@ -482,12 +483,12 @@ def get_region(element_id: str, *, conn: sqlite3.Connection | None = None) -> di
             return None
         bbox = json.loads(row["bbox"]) if row["bbox"] else None
         region = row["region_image_path"]
-        if not region and bbox and row["page_image_path"]:
+        resolved_page_image = resolve_asset(row["page_image_path"])
+        if not region and bbox and resolved_page_image:
             from .extract import _crop_region, derived_dir
             out = (derived_dir(row["document_id"]) / "regions" /
                    f"p{row['page_no']:04d}-{row['ordinal']:04d}-ondemand.png")
-            if _crop_region(REPO_ROOT / row["page_image_path"], row["width"], bbox, out):
-                from .paths import rel
+            if _crop_region(resolved_page_image, row["width"], bbox, out):
                 region = rel(out)
                 conn.execute("UPDATE elements SET region_image_path=? WHERE element_id=?",
                              (region, element_id))
@@ -495,7 +496,7 @@ def get_region(element_id: str, *, conn: sqlite3.Connection | None = None) -> di
         return {
             "element_id": element_id, "document_id": row["document_id"],
             "page": row["page_no"], "bbox": bbox,
-            "page_image_path": row["page_image_path"],
+            "page_image_path": rel(resolved_page_image) if resolved_page_image else None,
             "region_image_path": region,
             "element_type": row["element_type"],
             "text": row["text"] or row["ocr_text"] or "",

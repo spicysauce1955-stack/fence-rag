@@ -60,6 +60,44 @@ def ensure_writable(path: os.PathLike | str) -> Path:
     return p
 
 
+def fetch_target(path: os.PathLike | str, allowed: set[str]) -> Path:
+    """Return ``path`` if it is a corpus file the distribution manifest names.
+
+    This is the ONE exception to the read-only corpus rule, and it exists only
+    so `cli fetch` can populate a checkout the way `git lfs pull` does. It is
+    not pipeline code: `tests/test_safety.py` asserts that no module other than
+    fetch.py and cli.py references it.
+
+    Three conditions, all required:
+      1. the path resolves inside a corpus root;
+      2. its repo-relative form appears in ``allowed`` (the manifest);
+      3. no component is a symlink.
+    """
+    p = Path(path)
+    for parent in (p, *p.parents):
+        if parent.is_symlink():
+            raise CorpusWriteError(f"refusing to write through a symlink: {parent}")
+    resolved = p.resolve()
+    try:
+        relative = resolved.relative_to(REPO_ROOT.resolve()).as_posix()
+    except ValueError:
+        raise CorpusWriteError(f"refusing to write outside the repository: {resolved}") from None
+    if not any(_is_within(resolved, root) for root in CORPUS_ROOTS):
+        raise CorpusWriteError(f"not a corpus path: {relative}")
+    if relative not in allowed:
+        raise CorpusWriteError(
+            f"{relative} is not listed in the distribution manifest; refusing to write")
+    return resolved
+
+
+def _is_within(child: Path, root: Path) -> bool:
+    try:
+        child.relative_to(Path(root).resolve())
+        return True
+    except ValueError:
+        return False
+
+
 def open_write(path: os.PathLike | str, mode: str = "w", **kw):
     """open() for writing, guarded by :func:`ensure_writable`."""
     if "r" in mode and "+" not in mode:
@@ -72,6 +110,26 @@ def open_write(path: os.PathLike | str, mode: str = "w", **kw):
 def rel(path: os.PathLike | str) -> str:
     """Path relative to the repository root, for provenance records."""
     return os.path.relpath(Path(path).resolve(), REPO_ROOT)
+
+
+def resolve_asset(rel_path: "str | None") -> "Path | None":
+    """Return a local path for a derived asset, materialising it if absent.
+
+    workspace/derived/ is a cache, not a data source: every page image is a
+    deterministic render of a source PDF page. Resolution order is
+    cache hit -> render from the PDF -> None. None is a legitimate result and
+    callers must handle it; the DOCX has no page image at all.
+    """
+    if not rel_path:
+        return None
+    target = (REPO_ROOT / rel_path).resolve()
+    if target.is_file():
+        return target
+    from .assets import render_page_image   # local import keeps paths.py dependency-free
+    try:
+        return render_page_image(rel_path)
+    except Exception:
+        return None
 
 
 def init_workspace() -> None:

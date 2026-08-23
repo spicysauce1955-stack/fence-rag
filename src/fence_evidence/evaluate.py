@@ -14,7 +14,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from .paths import REPO_ROOT, REPORTS_DIR, TESTS_DIR, open_write
+from .paths import REPO_ROOT, REPORTS_DIR, TESTS_DIR, open_write, resolve_asset
 from .retrieval import (STOPWORDS, UNIT_WORDS, build_match_expression,
                         search_evidence)
 from .store import connect
@@ -210,7 +210,7 @@ def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
 
     image_ok = None
     if q.get("expects_image_evidence"):
-        image_ok = any((r.page_image_path and (REPO_ROOT / r.page_image_path).is_file())
+        image_ok = any((r.page_image_path and resolve_asset(r.page_image_path) is not None)
                        for r in results if r.source_path in expected_docs)
 
     top_score = results[0].score if results else 0.0
