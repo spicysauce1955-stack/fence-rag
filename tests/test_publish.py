@@ -12,7 +12,7 @@ import unittest
 import urllib.error
 from unittest import mock
 
-from context import ROOT  # noqa: F401
+from context import ROOT, requires_corpus  # noqa: F401
 from fence_evidence import publish
 from fence_evidence.config import R2Config
 from fence_evidence.distribution import load_corpus_manifest
@@ -44,6 +44,7 @@ class _Recorder:
 class TestDryRun(unittest.TestCase):
     """A dry run must be exactly that: no request, no upload, real counts."""
 
+    @requires_corpus
     def test_a_dry_run_issues_no_request_at_all(self):
         rows = load_corpus_manifest()
         if not rows:
@@ -55,6 +56,7 @@ class TestDryRun(unittest.TestCase):
         self.assertTrue(out["dry_run"])
         self.assertEqual(out["uploaded"], 0)
 
+    @requires_corpus
     def test_a_dry_run_counts_the_real_corpus_objects_and_duplicates(self):
         """144 corpus paths hold 128 distinct objects; the 16 redundant
         paths are skipped rather than uploaded twice."""

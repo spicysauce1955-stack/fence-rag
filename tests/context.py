@@ -17,6 +17,41 @@ def requires_store(test):
                                "evidence store not built; run ingestion first")(test)
 
 
+def _corpus_is_fetched() -> bool:
+    """True when every corpus PDF is real bytes, not an unsmudged LFS pointer.
+
+    Checks all of them rather than probing one: the publish dry-run tests hash
+    every row in the manifest, so a partial fetch would let them run and then
+    fail on the first file still held as a pointer.
+    """
+    roots = (ROOT / "manuals", ROOT / "china" / "manuals")
+    found = False
+    for root in roots:
+        for pdf in root.rglob("*.pdf"):
+            found = True
+            try:
+                with open(pdf, "rb") as fh:
+                    if fh.read(42).startswith(b"version https://git-lfs"):
+                        return False
+            except OSError:
+                return False
+    return found
+
+
+def requires_corpus(test):
+    """Skip a test that needs corpus bytes on disk.
+
+    A `GIT_LFS_SKIP_SMUDGE=1` clone leaves every PDF as a ~131-byte pointer, so
+    anything that shells out to poppler or hashes a source file has to skip
+    rather than fail -- otherwise a new user's first `run_tests.py` reports
+    failures for a corpus they simply have not fetched yet. Populate with
+    `python3 -m fence_evidence.cli fetch --subset all`.
+    """
+    return unittest.skipUnless(
+        _corpus_is_fetched(),
+        "corpus not fetched; run `cli fetch --subset all`")(test)
+
+
 def store_snapshot() -> Path:
     """Copy the evidence store to a temp file for tests that write to it.
 
