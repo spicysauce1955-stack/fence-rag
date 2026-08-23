@@ -5,3 +5,8 @@ workspace/pylibs/
 workspace/derived/
 workspace/indexes/
 workspace/tests/snapshots/
+
+# Secrets — never commit. This repository is public.
+.env
+.env.*
+!.env.example
