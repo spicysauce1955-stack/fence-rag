@@ -136,8 +136,19 @@ echo
 
 # ---------------------------------------------------------------- corpus ----
 bold "Corpus"
-pdfs="$(find manuals china/manuals -name '*.pdf' -size +1k 2>/dev/null | wc -l)"
-ptrs="$(find manuals china/manuals -name '*.pdf' -size -1k 2>/dev/null | wc -l)"
+# Detect unsmudged LFS pointers by their signature, not by file size. A pointer
+# is ~131 bytes, but `find -size -1k` rounds UP to whole blocks, so a pointer
+# matches neither -1k nor +1k, both counts come back zero, and the script reports
+# "no corpus PDFs" in exactly the situation this check exists to diagnose.
+pdfs=0
+ptrs=0
+while IFS= read -r f; do
+    if head -c 42 "$f" 2>/dev/null | grep -q '^version https://git-lfs'; then
+        ptrs=$((ptrs + 1))
+    else
+        pdfs=$((pdfs + 1))
+    fi
+done < <(find manuals china/manuals -name '*.pdf' 2>/dev/null)
 if [ "$pdfs" -gt 0 ] && [ "$ptrs" -eq 0 ]; then
     grn "  ok        $pdfs PDFs present"
 elif [ "$ptrs" -gt 0 ]; then
