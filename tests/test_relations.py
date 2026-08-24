@@ -90,6 +90,25 @@ class TestRelations(unittest.TestCase):
                 (docs[0],)).fetchone()[0]
             self.assertGreater(linked, 0, "identical files are not linked")
 
+    def test_content_identical_files_with_different_bytes_are_linked(self):
+        # These two differ by ~2,105 bytes of PDF container metadata (so their
+        # sha256 differs and the byte-identical pass never links them) but are
+        # 100% identical in extracted content: 20 pages, 766 elements, 5-gram
+        # Jaccard 1.00. A same_content_as edge must exist between them.
+        a = self.conn.execute("SELECT document_id FROM documents WHERE source_path=?",
+            ("manuals/barrette-outdoor-living/install-privacy-picket-gates.pdf",)).fetchone()
+        b = self.conn.execute("SELECT document_id FROM documents WHERE source_path=?",
+            ("manuals/freedom-outdoor-living/VinylPrivacyPicketGate_Inserts_Instructions.pdf",)
+            ).fetchone()
+        self.assertIsNotNone(a, "barrette install-privacy-picket-gates.pdf not in store")
+        self.assertIsNotNone(b, "freedom VinylPrivacyPicketGate_Inserts_Instructions.pdf not in store")
+        linked = self.conn.execute("""SELECT COUNT(*) FROM relations
+            WHERE relation_type='same_content_as'
+              AND from_document_id=? AND to_document_id=?""",
+            (a["document_id"], b["document_id"])).fetchone()[0]
+        self.assertGreater(linked, 0,
+                           "content-identical documents with different bytes are not linked")
+
 
 if __name__ == "__main__":
     unittest.main()

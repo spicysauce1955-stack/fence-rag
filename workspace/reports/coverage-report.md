@@ -10,9 +10,9 @@
 | elements | 81794 |
 | tables / cells | 603 / 18472 |
 | assets (page + region images) | 9624 |
-| relations | 100 |
+| relations | 102 |
 | retrieval units | 10886 |
-| facts | 1664 |
+| facts | 1976 |
 | quality issues | 374 |
 
 Every ingestable file in the manifest is present in the store.

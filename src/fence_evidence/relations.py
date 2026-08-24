@@ -9,6 +9,7 @@ deduplicated (prohibition 1).
 """
 from __future__ import annotations
 
+import hashlib
 import re
 import sqlite3
 from collections import defaultdict
@@ -24,6 +25,34 @@ RENEWAL_RE = re.compile(
 
 def _norm_approval(s: str) -> str:
     return re.sub(r"\s+", "", s)
+
+
+def _content_digest(conn: sqlite3.Connection, document_id: str) -> str | None:
+    """A stable digest over one document's own extracted text.
+
+    sha256 on the source bytes only catches byte-for-byte duplicates. A PDF
+    that has been re-exported or re-saved (different producer string,
+    timestamps, a few KB of container metadata) gets a different sha256 while
+    extracting to identical text. This hashes the *extracted* text instead —
+    every element's text (falling back to OCR text), in page/ordinal order,
+    with runs of whitespace collapsed so line-wrap and spacing differences
+    introduced by extraction don't change the digest. Only the latest version
+    of the document contributes, matching how facts.py picks candidates.
+    """
+    rows = conn.execute("""
+        SELECT e.text, e.ocr_text FROM elements e
+        JOIN (SELECT document_id, version_id,
+                     ROW_NUMBER() OVER (PARTITION BY document_id
+                                        ORDER BY ingested_at DESC) rn
+                FROM document_versions) latest
+          ON latest.version_id = e.version_id AND latest.rn = 1
+        WHERE e.document_id = ?
+        ORDER BY e.page_no, e.ordinal""", (document_id,)).fetchall()
+    text = "\n".join((r["text"] or r["ocr_text"] or "") for r in rows)
+    normalised = re.sub(r"\s+", " ", text).strip()
+    if not normalised:
+        return None
+    return hashlib.sha256(normalised.encode("utf-8")).hexdigest()
 
 
 def primary_approval_id(source_path: str, title: str | None) -> str | None:
@@ -45,6 +74,7 @@ def derive_relations(conn: sqlite3.Connection) -> dict[str, int]:
     by_sha: dict[str, list[str]] = defaultdict(list)
     for r in conn.execute("SELECT document_id, sha256 FROM document_versions"):
         by_sha[r["sha256"]].append(r["document_id"])
+    by_sha_pair: set[tuple[str, str]] = set()
     for sha, docs in by_sha.items():
         if len(docs) < 2:
             continue
@@ -54,6 +84,30 @@ def derive_relations(conn: sqlite3.Connection) -> dict[str, int]:
                     add_relation(conn, a, b, "same_content_as",
                                  basis=f"identical sha256 {sha[:12]}", confidence=1.0)
                     counts["same_content_as"] += 1
+                    by_sha_pair.add((a, b))
+
+    # --- content-identical files whose bytes differ -------------------------
+    # A second, independent derivation of the same relation type: documents
+    # that extract to identical text but were never linked above because
+    # their source bytes (and so their sha256) differ. Grouped by
+    # _content_digest instead; a pair already linked by sha256 is skipped so
+    # the same edge is never asserted twice under two different bases.
+    all_doc_ids = [r["document_id"] for r in conn.execute("SELECT document_id FROM documents")]
+    by_digest: dict[str, list[str]] = defaultdict(list)
+    for doc_id in all_doc_ids:
+        digest = _content_digest(conn, doc_id)
+        if digest:
+            by_digest[digest].append(doc_id)
+    for digest, docs_with_digest in by_digest.items():
+        if len(docs_with_digest) < 2:
+            continue
+        for a in docs_with_digest:
+            for b in docs_with_digest:
+                if a == b or (a, b) in by_sha_pair:
+                    continue
+                add_relation(conn, a, b, "same_content_as",
+                             basis=f"identical extracted text {digest[:12]}", confidence=1.0)
+                counts["same_content_as"] += 1
 
     # --- approval id -> document -------------------------------------------
     docs = conn.execute("SELECT document_id, source_path, title FROM documents").fetchall()
