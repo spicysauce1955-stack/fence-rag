@@ -2,7 +2,7 @@
 
 ```text
 Status:    Informative. Orientation, not obligation.
-Binding:   Nothing in this document. See contract-v0.1.md.
+Binding:   Nothing in this document. See contract-v0.2.md.
 ```
 
 ## 1. What the whole system does
@@ -78,9 +78,12 @@ accepts reaches a snapshot.
 
 ## 4. What crosses, concretely
 
-**Knowledge → Planning**, once per run, fetched beforehand: role definitions, product
-definitions, catalog items, assembly definitions, parameter tables, rules, and gaps —
-all inside one hashed snapshot.
+**Knowledge → Planning**, once per run, fetched beforehand: part types, parts, panel
+models with their assembly steps, procedures that belong to no panel, warnings with what
+each attaches to, parameter tables, certified combinations, the source documents behind
+them, rules and gaps — all inside one hashed snapshot, which declares the standards regime
+it was built in. **Not** the catalog: what a company can buy at what price is commercial
+and per-tenant, and stays on the Planning side.
 
 **Planning → Knowledge**, asynchronously, never during a run: gap reports, and expert
 corrections captured verbatim from the field and forwarded as proposals.
