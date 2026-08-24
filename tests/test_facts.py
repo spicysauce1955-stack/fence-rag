@@ -2,8 +2,9 @@
 import json
 import unittest
 
-from context import requires_store
-from fence_evidence.facts import _conditions, _normalise, _scan_text, _to_float, query_facts
+from context import requires_store, store_snapshot
+from fence_evidence.facts import (_conditions, _normalise, _scan_text, _to_float,
+                                  extract_facts, query_facts)
 from fence_evidence.store import connect
 
 
@@ -95,6 +96,64 @@ class TestFootingDiameterAdjacency(unittest.TestCase):
         self.assertEqual(self._diameters('8"X12" DIAGONAL LATTICE 2.75" OP'), [])
         self.assertEqual(self._diameters(
             "Intermediate Rails: All 5', 6', 7' and 8' heights"), [])
+
+
+@requires_store
+class TestReextractionPreservesPromotedFacts(unittest.TestCase):
+    """extract_facts() must only touch its own regex-derived rows.
+
+    Facts promoted from verified table readings (extractor starting
+    'table-read:') are gated by a human/agent review process this module
+    knows nothing about, and promote_tables.py can never re-create one once
+    its source candidate's promoted_fact_id is set -- so a full re-extraction
+    that deletes every fact row would destroy them permanently.
+
+    Each test gets its own snapshot (rather than a shared class-level one):
+    extract_facts() is destructive by design to regex rows, so tests that
+    call it must not contaminate each other.
+    """
+
+    def setUp(self):
+        self.snapshot = store_snapshot()
+        self.conn = connect(self.snapshot)
+
+    def tearDown(self):
+        self.conn.close()
+        import shutil
+        shutil.rmtree(self.snapshot.parent, ignore_errors=True)
+
+    def test_promoted_facts_survive_a_full_reextraction(self):
+        before = self.conn.execute(
+            "SELECT COUNT(*) FROM facts WHERE extractor LIKE 'table-read:%'").fetchone()[0]
+        if before == 0:
+            self.skipTest("no table readings promoted yet")
+        extract_facts(conn=self.conn)
+        after = self.conn.execute(
+            "SELECT COUNT(*) FROM facts WHERE extractor LIKE 'table-read:%'").fetchone()[0]
+        self.assertEqual(before, after,
+                         "a full re-extraction deleted table-promoted facts")
+
+    def test_no_dangling_promoted_fact_id_after_reextraction(self):
+        n_candidates = self.conn.execute(
+            "SELECT COUNT(*) FROM table_read_candidates "
+            "WHERE promoted_fact_id IS NOT NULL").fetchone()[0]
+        if n_candidates == 0:
+            self.skipTest("no promoted table candidates yet")
+        extract_facts(conn=self.conn)
+        dangling = self.conn.execute("""SELECT COUNT(*) FROM table_read_candidates t
+            LEFT JOIN facts f ON f.fact_id = t.promoted_fact_id
+            WHERE t.promoted_fact_id IS NOT NULL AND f.fact_id IS NULL""").fetchone()[0]
+        self.assertEqual(dangling, 0,
+                         "re-extraction left promoted_fact_id pointing at a deleted fact")
+
+    def test_regex_facts_are_still_regenerated(self):
+        before = self.conn.execute(
+            "SELECT COUNT(*) FROM facts WHERE extractor LIKE 'regex-%'").fetchone()[0]
+        self.assertGreater(before, 0)
+        extract_facts(conn=self.conn)
+        after = self.conn.execute(
+            "SELECT COUNT(*) FROM facts WHERE extractor LIKE 'regex-%'").fetchone()[0]
+        self.assertGreater(after, 0, "regex facts were not regenerated")
 
 
 @requires_store

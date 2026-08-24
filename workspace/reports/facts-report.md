@@ -52,26 +52,19 @@ page whose mean word confidence is below 80 is created as `flagged`, not
 | approval_id | `09-0826.07` | None | `{"wind_speed_mph": 75.0}` | flagged | `75mph-wind-kit-noa-miami-dade.pdf` | 4 |
 | approval_id | `09-0826.07` | None | `{"wind_speed_mph": 75.0}` | flagged | `noa-14-1209.01-PE-stamped-structural-dra` | 4 |
 | approval_id | `24-0117.05` | None | `{"wind_speed_mph": 75.0, "hvhz": true}` | extracted | `Miami-Dade-NOA_Barrette-Outdoor-Living_E` | 7 |
-| footing_depth_in | `Depth | Max. Post Spacing
-B
-30"` | 30.0 in | `{"hvhz": true}` | extracted | `bufftech-gate-install-guide.pdf` | 31 |
-| footing_depth_in | `Depth | Max. Post Spacing
-B
-30"` | 30.0 in | `{"hvhz": true}` | extracted | `bufftech-installation-guide-40-40-70743.` | 25 |
-| footing_depth_in | `Depth | Max. Post Spacing
-B
-30"` | 30.0 in | `{"hvhz": true}` | extracted | `bufftech-gate-installation-guide.pdf` | 31 |
-| footing_depth_in | `depth of holes is
-30"` | 30.0 in | `{"fence_height_ft": 8.0}` | extracted | `weatherables-fencing-master-installation` | 3 |
-| footing_depth_in | `Depth Diameter B - 24"` | 24.0 in | `{"wind_speed_mph": 75.0}` | flagged | `noa-24-0117.06-simtek-fence.pdf` | 8 |
-| footing_depth_in | `DEPTH SPACING -__B : 30"` | 30.0 in | `{"hvhz": true}` | flagged | `NOA-12-1106.11-extruded-pvc-vinyl-fencin` | 11 |
-| footing_depth_in | `30" deep` | 30.0 in | `{"hvhz": true}` | extracted | `bufftech-installation-guide-afence.pdf` | 18 |
-| footing_depth_in | `30" deep` | 30.0 in | `{"hvhz": true}` | extracted | `bufftech-installation-guide-afence.pdf` | 20 |
-| footing_depth_in | `Depth Spacing A B 30"` | 30.0 in | `{"hvhz": true}` | extracted | `bufftech-installation-guide-afence.pdf` | 29 |
-| footing_depth_in | `12" EMBEDMENT` | 12.0 in | `{"hvhz": true}` | extracted | `bufftech-installation-guide-afence.pdf` | 29 |
 | footing_depth_in | `24"` | 24.0 in | `{"fence_height": "Up to 48\"", "exposure_category": "B", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
 | footing_depth_in | `24"` | 24.0 in | `{"fence_height": "Up to 48\"", "exposure_category": "B", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
 | footing_depth_in | `24"` | 24.0 in | `{"fence_height": "Up to 48\"", "exposure_category": "B", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
+| footing_depth_in | `30"` | 30.0 in | `{"exposure_category": "C", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
+| footing_depth_in | `30"` | 30.0 in | `{"exposure_category": "C", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
+| footing_depth_in | `30"` | 30.0 in | `{"exposure_category": "C", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
+| footing_depth_in | `34"` | 34.0 in | `{"fence_height": "49\" to 76\"", "exposure_category": "B", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
+| footing_depth_in | `34"` | 34.0 in | `{"fence_height": "49\" to 76\"", "exposure_category": "B", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
+| footing_depth_in | `34"` | 34.0 in | `{"fence_height": "49\" to 76\"", "exposure_category": "B", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
+| footing_depth_in | `36"` | 36.0 in | `{"exposure_category": "C", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
+| footing_depth_in | `36"` | 36.0 in | `{"exposure_category": "C", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
+| footing_depth_in | `36"` | 36.0 in | `{"exposure_category": "C", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
+| footing_depth_in | `30"` | 30.0 in | `{"exposure_category": "B", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-12-1106.11-extruded-pvc-vinyl-fencin` | 11 |
 
 ## What this layer is not
 
