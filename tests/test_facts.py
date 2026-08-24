@@ -3,7 +3,7 @@ import json
 import unittest
 
 from context import requires_store
-from fence_evidence.facts import _conditions, _normalise, _to_float, query_facts
+from fence_evidence.facts import _conditions, _normalise, _scan_text, _to_float, query_facts
 from fence_evidence.store import connect
 
 
@@ -29,6 +29,72 @@ class TestNormalisation(unittest.TestCase):
         self.assertEqual(cond["wind_speed_mph"], 130.0)
         self.assertEqual(cond["fence_height_ft"], 6.0)
         self.assertTrue(cond["hvhz"])
+
+
+class TestFootingDiameterAdjacency(unittest.TestCase):
+    """Regression cases for the \\D{0,16} bridging bug in footing_diameter_in.
+
+    Each string is verbatim `evidence_text` from a fact in the live store that
+    the old patterns got wrong: the diameter pattern's gap was wide enough to
+    bridge over an unrelated number (usually the hole *depth*, sometimes a
+    different post's size, sometimes an auger bit's size) instead of binding
+    to the number that actually sits next to the word "diameter"/"dia".
+    """
+
+    def _diameters(self, text):
+        return [r["value_normalized"] for r in _scan_text(text)
+                if r["fact_type"] == "footing_diameter_in"]
+
+    def test_diameter_before_an_unrelated_depth_introduced_by_by(self):
+        # "Dig hole 8 inches in diameter by 30 inches deep." -> 8, not 30.
+        self.assertEqual(self._diameters(
+            "Dig hole 8 inches in diameter by 30 inches deep."), [8.0])
+
+    def test_diameter_before_an_unrelated_depth_introduced_by_and(self):
+        # 'Dig post holes 8" in diameter and 18" deep' -> 8, not 18.
+        self.assertEqual(self._diameters(
+            'a.) Dig post holes 8" in diameter and 18" deep (Fig. 2).'), [8.0])
+
+    def test_diameter_hole_that_is_bridges_to_the_depth_range(self):
+        # '5" posts require a 12" diameter hole that is 30" to 36" deep' -> 12.
+        self.assertEqual(self._diameters(
+            '5" posts require a 12" diameter hole that is 30" to 36" deep. '
+            'Use two 80lb. bags of concrete'), [12.0])
+
+    def test_diameter_hole_that_is_bridges_to_the_depth_range_second_post(self):
+        # '4" posts require a 10" diameter hole that is 30" to 36" deep' -> 10.
+        self.assertEqual(self._diameters(
+            '4" posts require a 10" diameter hole that is 30" to 36" deep. '
+            'Use two 60lb. bags of concrete'), [10.0])
+
+    def test_diameter_hole_period_bridges_to_the_next_posts_size(self):
+        # '5" posts will need a 12" diameter ho[le]' -> 12, not the "4" that
+        # introduces the *next* sentence about 4" posts.
+        self.assertEqual(self._diameters(
+            'the stakes and dig the post holes. If installing with concrete, '
+            '5" posts will need a 12" diameter ho'), [12.0])
+
+    def test_auger_bit_is_not_a_footing(self):
+        # A drill bit's diameter is not a footing diameter at all.
+        self.assertEqual(self._diameters(
+            'Use a 1in. or 1 1/2in. diameter x 18in. auger bit with an 18in. '
+            'extension (both available at most ha'), [])
+
+    def test_diameter_of_phrasing_still_matches(self):
+        # Guidance example: trivial "of" filler must still be accepted.
+        self.assertEqual(self._diameters("footing diameter of 8 inches"), [8.0])
+
+    def test_bare_dia_abbreviation_still_matches(self):
+        self.assertEqual(self._diameters('12"dia.'), [12.0])
+
+    def test_diam_does_not_match_inside_diamond(self):
+        # "Diamond rails" must not be read as a 4-inch diameter footing.
+        self.assertEqual(self._diameters("3- 1 / 4 in. Diamond rails"), [])
+
+    def test_dia_does_not_match_inside_diagonal_or_intermediate(self):
+        self.assertEqual(self._diameters('8"X12" DIAGONAL LATTICE 2.75" OP'), [])
+        self.assertEqual(self._diameters(
+            "Intermediate Rails: All 5', 6', 7' and 8' heights"), [])
 
 
 @requires_store

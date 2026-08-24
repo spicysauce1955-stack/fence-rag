@@ -25,6 +25,10 @@ _NUM = r"(?<![\d/\u2044.])(\d+(?:[.½¾¼/\u2044]\d+)?)"
 _IN = r"(?:in\.?|inch(?:es)?|\")"
 _FT = r"(?:ft\.?|feet|foot|')"
 
+# \b right after the word (before the optional trailing period) so this
+# never matches inside "Diamond", "diagram" or "intermediate".
+_DIAM_WORD = r"(?:diam(?:eter)?\b\.?|dia\b\.?)"
+
 PATTERNS: list[tuple[str, re.Pattern, str]] = [
     ("wind_speed_mph", re.compile(rf"{_NUM}\s*mph", re.I), "mph"),
     ("exposure_category", re.compile(r"exposure\s*(?:category|categories)?\s*[:\-]?\s*([BCD])\b", re.I), ""),
@@ -39,10 +43,18 @@ PATTERNS: list[tuple[str, re.Pattern, str]] = [
         rf"{_NUM}\s*(?:{_IN}|{_FT})\s*below\s+grade", re.I), "in"),
     ("depth_below_grade_in", re.compile(
         rf"below\s+grade\D{{0,16}}{_NUM}\s*(?:{_IN}|{_FT})", re.I), "in"),
+    # The number must bind *adjacently* to "diameter"/"dia" — either just
+    # before it (with an optional connecting "in", as in "8 inches in
+    # diameter"), or immediately after it with only trivial filler ("of",
+    # or a colon/dash/comma). An arbitrary-width gap (the old \D{0,16}) lets
+    # the match bridge across words like "by", "and" or "hole that is" to a
+    # number describing something else entirely (usually the hole *depth*).
+    # \b after the diam/dia word stops it matching inside an unrelated word
+    # such as "Diamond", "diagram" or "intermediate".
     ("footing_diameter_in", re.compile(
-        rf"(?:diam(?:eter)?\.?|dia\.?)\D{{0,16}}{_NUM}\s*(?:{_IN}|{_FT})", re.I), "in"),
+        rf"{_DIAM_WORD}\s*(?:of\s*)?[:\-,]?\s*{_NUM}\s*(?:{_IN}|{_FT})", re.I), "in"),
     ("footing_diameter_in", re.compile(
-        rf"{_NUM}\s*(?:{_IN}|{_FT})\s*(?:diam(?:eter)?\.?|dia\.?)", re.I), "in"),
+        rf"{_NUM}\s*(?:{_IN}|{_FT})\s*(?:in\s+)?{_DIAM_WORD}", re.I), "in"),
     ("post_spacing_in", re.compile(
         rf"{_NUM}\s*(?:{_IN}|{_FT})?\s*(?:on\s*cent(?:er|re)|o\.?\s?c\.?)\b", re.I), "in"),
     ("racking_degrees", re.compile(rf"rack(?:s|ing|able)?\D{{0,24}}{_NUM}\s*(?:degrees?|deg\.?|°)", re.I), "deg"),
@@ -72,6 +84,14 @@ PLAUSIBLE: dict[str, tuple[float, float]] = {
 # from surrounding text can contradict the fact itself.
 SELF_CONDITION = {"wind_speed_mph": "wind_speed_mph",
                   "exposure_category": "exposure_category"}
+
+# A diameter phrase near "auger"/"drill"/"bit" is describing a boring tool,
+# not a footing hole (e.g. "1 1/2in. diameter x 18in. auger bit") — a
+# footing_diameter_in fact should never be produced from it. Checked as a
+# small window of context around the match rather than folded into the regex
+# itself, since the tool words can appear on either side of the number.
+_DIAM_TOOL_CONTEXT = re.compile(r"\b(?:auger|drill|bit)\b", re.I)
+_DIAM_TOOL_CONTEXT_WINDOW = 50
 
 
 def _to_float(raw: str) -> float | None:
@@ -136,6 +156,38 @@ def _conditions(text: str, heading_path: list[str]) -> dict:
     return cond
 
 
+def _scan_text(text: str) -> list[dict]:
+    """Run PATTERNS against raw element text; one dict per accepted match.
+
+    Pure function, no database involved — this is what `extract_facts` calls
+    per element, and what tests exercise directly against fixed evidence
+    strings without needing a built store.
+    """
+    results: list[dict] = []
+    seen: set[tuple] = set()
+    for fact_type, rx, unit in PATTERNS:
+        for m in rx.finditer(text):
+            raw = m.group(1)
+            key = (fact_type, raw.strip().lower())
+            if key in seen:
+                continue
+            seen.add(key)
+            if fact_type == "footing_diameter_in":
+                w = _DIAM_TOOL_CONTEXT_WINDOW
+                window = text[max(0, m.start() - w):m.end() + w]
+                if _DIAM_TOOL_CONTEXT.search(window):
+                    continue   # a boring tool's diameter, not a footing's
+            norm, norm_unit = _normalise(fact_type, raw, m.group(0))
+            lo_hi = PLAUSIBLE.get(fact_type)
+            if lo_hi and norm is not None and not (lo_hi[0] <= norm <= lo_hi[1]):
+                continue   # not credible for this quantity
+            results.append({"fact_type": fact_type, "unit_original": unit,
+                            "match_text": m.group(0).strip(), "raw": raw,
+                            "value_normalized": norm, "unit_normalized": norm_unit,
+                            "start": m.start(), "end": m.end()})
+    return results
+
+
 def _iter_candidates(conn: sqlite3.Connection, document_id: str | None) -> Iterator[sqlite3.Row]:
     # Only the newest version of each document contributes facts; an older
     # version's values stay in the store but are not re-asserted as current.
@@ -174,40 +226,31 @@ def extract_facts(*, document_id: str | None = None,
             conf = row["ocr_confidence"]
             heading_path = json.loads(row["heading_path"] or "[]")
             conditions = _conditions(text, heading_path)
-            seen: set[tuple] = set()
-            for fact_type, rx, unit in PATTERNS:
-                for m in rx.finditer(text):
-                    raw = m.group(1)
-                    key = (fact_type, raw.strip().lower())
-                    if key in seen:
-                        continue
-                    seen.add(key)
-                    norm, norm_unit = _normalise(fact_type, raw, m.group(0))
-                    lo_hi = PLAUSIBLE.get(fact_type)
-                    if lo_hi and norm is not None and not (lo_hi[0] <= norm <= lo_hi[1]):
-                        continue   # not credible for this quantity
-                    fact_conditions = dict(conditions)
-                    self_key = SELF_CONDITION.get(fact_type)
-                    if self_key:
-                        fact_conditions.pop(self_key, None)
-                    review = "extracted"
-                    if from_ocr and (conf is None or conf < OCR_REVIEW_CONFIDENCE):
-                        review = "flagged"
-                    start = max(0, m.start() - 90)
-                    conn.execute("""INSERT INTO facts(document_id, version_id, page_no,
-                        element_id, fact_type, subject, value_original, value_normalized,
-                        unit_original, unit_normalized, conditions, evidence_text,
-                        extractor, ocr_derived, review_status, created_at)
-                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                        (row["document_id"], row["version_id"], row["page_no"],
-                         row["element_id"], fact_type,
-                         " > ".join(heading_path[-2:]) or None,
-                         m.group(0).strip(), norm, unit or None, norm_unit,
-                         json.dumps(fact_conditions), text[start:m.end() + 90].strip(),
-                         "regex-v1", int(from_ocr), review, now()))
-                    counts[fact_type] = counts.get(fact_type, 0) + 1
-                    total += 1
-                    flagged += 1 if review == "flagged" else 0
+            for match in _scan_text(text):
+                fact_type = match["fact_type"]
+                fact_conditions = dict(conditions)
+                self_key = SELF_CONDITION.get(fact_type)
+                if self_key:
+                    fact_conditions.pop(self_key, None)
+                review = "extracted"
+                if from_ocr and (conf is None or conf < OCR_REVIEW_CONFIDENCE):
+                    review = "flagged"
+                start = max(0, match["start"] - 90)
+                conn.execute("""INSERT INTO facts(document_id, version_id, page_no,
+                    element_id, fact_type, subject, value_original, value_normalized,
+                    unit_original, unit_normalized, conditions, evidence_text,
+                    extractor, ocr_derived, review_status, created_at)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (row["document_id"], row["version_id"], row["page_no"],
+                     row["element_id"], fact_type,
+                     " > ".join(heading_path[-2:]) or None,
+                     match["match_text"], match["value_normalized"],
+                     match["unit_original"] or None, match["unit_normalized"],
+                     json.dumps(fact_conditions), text[start:match["end"] + 90].strip(),
+                     "regex-v1", int(from_ocr), review, now()))
+                counts[fact_type] = counts.get(fact_type, 0) + 1
+                total += 1
+                flagged += 1 if review == "flagged" else 0
         conn.commit()
         return {"facts": total, "flagged_for_review": flagged, "by_type": counts}
     finally:

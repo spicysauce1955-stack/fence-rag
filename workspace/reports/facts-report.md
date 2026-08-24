@@ -8,32 +8,33 @@ page whose mean word confidence is below 80 is created as `flagged`, not
 
 | Measure | Value |
 |---|---|
-| facts | 1664 |
-| with conditions attached | 122 |
+| facts | 1976 |
+| with conditions attached | 441 |
 | facts without a source element | 0 |
 
 ## By review status
 
 | Status | Count |
 |---|---|
-| extracted | 1393 |
-| flagged | 271 |
+| extracted | 1386 |
+| cross_family_verified | 324 |
+| flagged | 266 |
 
 ## By type
 
 | Fact type | Count | Flagged for review | OCR-derived |
 |---|---|---|---|
 | reinforcement | 656 | 91 | 210 |
+| footing_depth_in | 311 | 4 | 24 |
 | approval_id | 271 | 78 | 265 |
 | wind_speed_mph | 269 | 55 | 160 |
-| footing_depth_in | 149 | 4 | 24 |
+| post_spacing_in | 129 | 1 | 2 |
 | depth_below_grade_in | 100 | 0 | 16 |
 | effective_date | 84 | 20 | 84 |
 | expiration_date | 75 | 10 | 75 |
-| footing_diameter_in | 37 | 10 | 21 |
+| footing_diameter_in | 61 | 5 | 11 |
 | exposure_category | 15 | 0 | 0 |
 | racking_degrees | 5 | 2 | 5 |
-| post_spacing_in | 3 | 1 | 2 |
 
 ## Sample, with provenance
 
@@ -68,9 +69,9 @@ B
 | footing_depth_in | `30" deep` | 30.0 in | `{"hvhz": true}` | extracted | `bufftech-installation-guide-afence.pdf` | 20 |
 | footing_depth_in | `Depth Spacing A B 30"` | 30.0 in | `{"hvhz": true}` | extracted | `bufftech-installation-guide-afence.pdf` | 29 |
 | footing_depth_in | `12" EMBEDMENT` | 12.0 in | `{"hvhz": true}` | extracted | `bufftech-installation-guide-afence.pdf` | 29 |
-| post_spacing_in | `68in o.c` | 68.0 in | `{"fence_height_ft": 3.5}` | extracted | `Barrette-Privacy-Railing-2021-Engineerin` | 17 |
-| racking_degrees | `Racks | up to 5 degrees` | 5.0 deg | `{"fence_height_ft": 4.0}` | flagged | `bufftech-catalog-2014.pdf` | 28 |
-| racking_degrees | `Racks up | 10 degrees` | 10.0 deg | `{"fence_height_ft": 4.0}` | flagged | `bufftech-catalog-2014.pdf` | 28 |
+| footing_depth_in | `24"` | 24.0 in | `{"fence_height": "Up to 48\"", "exposure_category": "B", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
+| footing_depth_in | `24"` | 24.0 in | `{"fence_height": "Up to 48\"", "exposure_category": "B", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
+| footing_depth_in | `24"` | 24.0 in | `{"fence_height": "Up to 48\"", "exposure_category": "B", "hvhz_applicability": "unresolved", "_applicability_basis": "readers did not independently agree on the applicability bracket; see the page crop"}` | cross_family_verified | `NOA-22-0616.10-CertainTeed-SimTek-molded` | 6 |
 
 ## What this layer is not
 
