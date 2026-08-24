@@ -1,8 +1,10 @@
 # Contract v0.2 — what crosses the boundary
 
 ```text
-Status:    v0.2.1. Revised after the §7 audit, then again after
-           review-of-v0.2.md, which found six defects in the first revision.
+Status:    v0.3. Revised after the §7 audit; again after review-of-v0.2.md,
+           which found six defects; and again after Planning audited the design
+           against its own codebase and found seven more, two of them in code
+           already published to this team.
 Authority: Binding at the boundary only. Items marked BINDING are promises a
            consumer relies on. Everything else is this team's decision.
 Change:    Registry additions are NOT breaking changes and need no negotiation.
@@ -49,6 +51,13 @@ UnitCode     mm | mm2 | mm3 | each | gram_milli | cent
 Provenance   { cites: [SourceRef], source_class, curation_level, admitted_by }
 PostRole     end | corner | line | gate | junction | transition
 ```
+
+> **BINDING.** Conversion from thousandths happens at **one named point**, and it
+> **rounds** — it does not truncate. A floor of one millimetre is not harmless: a span
+> limit passes through `n = ceil(run_length / max_span)`, so `2463.8 mm` floored to
+> 2463 rather than rounded to 2464 buys **an extra post, footing and pour** on a
+> 9.8 m run. Any arithmetic that MULTIPLIES a published value — a count, a pitch, a
+> span limit — consumes the thousandths and rounds only its output.
 
 > **BINDING.** No floating-point number crosses this boundary in either direction.
 > Quantities are integers in thousandths of the named unit. Where a value came from a
@@ -372,7 +381,7 @@ Either way, plans still generate in the meantime, with a warned line.
 
 ### 3.1 What Planning relies on this platform for
 
-> **BINDING — all fourteen.** v0.2 left these unmarked while stating that everything
+> **BINDING — all sixteen.** v0.2 left these unmarked while stating that everything
 > not marked BINDING is this platform's decision, which made N10, N11, N17 and N24's
 > obligations formally non-binding. They were always meant to be promises; the marker
 > was missing, not the intent.
@@ -434,7 +443,17 @@ This is the complete list. Satisfy these and every internal decision is yours.
     about the points it lands on. 66% of the structural facts in the class §1.4 now
     admits are of exactly this shape, and publishing them into a declared domain would
     assert six brackets the source never stated.
-14. **A gate is published as a `Gap`, never as a `FenceModel`.** `PanelSpec` models no
+14. **Lapsed authority is judged against a pinned `as_of`, never a clock.** Planning
+    pins `as_of` on the run alongside the topology and snapshot hashes, and warns when
+    a line's backing `valid_until` precedes it. Generation is a pure function: a clock
+    read inside it would make the same project against the same snapshot warn
+    differently on different days. This corrects our own earlier wording, which said
+    *"relative to the run date"* and named no input.
+15. **`Combination` is pinned but not yet consumed.** Nothing in the engine reads one
+    today. The shape is agreed and the seam is named — a `certify()` step raising
+    `warning.combination_uncertified` — but until it exists, curating combinations
+    buys nothing and this platform should spend the effort elsewhere.
+16. **A gate is published as a `Gap`, never as a `FenceModel`.** `PanelSpec` models no
     gate: no handedness, no swing direction, no fixed leaf, no `gate.*` namespace for
     hinge selection by leaf weight. A gate filed as a fence model validates clean and
     silently loses all of it — including swing direction and latch height, which are what

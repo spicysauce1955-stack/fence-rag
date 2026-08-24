@@ -180,6 +180,57 @@ correctness problem wearing a performance problem's clothes.
 
 ---
 
+## 6b. What changed on our side after a self-audit
+
+You audited your proposal against the corpus you hold. We had not run the same
+check against the codebase we hold — so we did, against the design as agreed. Seven
+defects, and **two were in code we had already published to you**. The full findings
+are in the Planning repo (`docs/reviews/planning-self-audit-2026-08-24.md`); these
+are the four that touch you.
+
+| | What was wrong | What it means for you |
+|---|---|---|
+| **The expansion we gave you truncated** | `amount_milli // 1000` — floor, not round. One millimetre through `ceil(run / max_span)` buys an extra post on two of three sample runs | Nothing to change on your side. Keep publishing thousandths and the lexeme; **do not pre-round to be helpful**, which matters more now than when we first asked |
+| **The fallback row would have won silently** | Every row of one table shared an `object_id` and differed by `version = row_index`; our resolver breaks that tie by higher version. An always-true row would have beaten every conditioned row by sitting lower in the table | **Publish rows in any order.** Order now carries no meaning, which is what we told you it did. Your early publish on this is unblocked |
+| **Nothing consumes `Combination`** | Zero occurrences in the engine. We accepted it as binding and asked you to curate data a run ignores | **Deprioritise it.** Spend the effort on parameter tables and definitions |
+| **Lapsed authority had no date to judge against** | We promised a warning *"relative to the run date"*; generation is pure and has no clock, and must not | Nothing changes in what you publish. `as_of` becomes a pinned run input on our side. Your original `as_of_date` instinct was right; our rejection was right for its stated reason and left the input problem unsolved |
+
+Three more are ours alone and change nothing you author: a resolver that *raises*
+rather than warns when two published rows tie and disagree (which gets **more**
+likely as your coverage grows, so it is being fixed first); the thousandths rule
+extending to layout as well as the fitter; and containment having no traced path
+into demand.
+
+**The method is the part worth copying.** Two rounds of careful document review had
+produced a design that was internally consistent and that our engine could not run.
+Nothing found in this pass was visible from the documents. Coherence is not the test.
+
+## 6c. One gap we owe you, found while arguing about posts
+
+A question about why `PostSlot` hangs off `FenceModel` produced a rule we had not
+stated: **a slot may be panel-scoped iff no other bay can produce the same physical
+object.** Not *iff its count is fixed* — slat counts vary with width and rail counts
+with height, and both live happily inside a panel, because each belongs to exactly
+one bay.
+
+That rule immediately catches something in **your** §2.4 evidence that neither of us
+classified correctly:
+
+> `Standard rails are supplied in 16 foot lengths` … `If bottom rail is 16' long,
+> slide rail through second post and then insert post in ground` … `The starting
+> point for rails should be staggered from post to post`
+
+That rail runs **continuously through** an intermediate post — one physical object,
+two bays. Rails are panel-scoped in our model, so that product is mis-modelled. We
+filed it as a *step-scoping* problem (it is why `scope: run` exists); it is also a
+**structural** one, and we missed that.
+
+**Publish those products as a `Gap`** rather than as a `FenceModel` with per-bay
+rails, until we have the machinery. Same reasoning as gates: a mis-modelled panel
+validates clean and loses the fact silently.
+
+---
+
 ## 7. What we explicitly do not need
 
 Stated so nobody spends on it.

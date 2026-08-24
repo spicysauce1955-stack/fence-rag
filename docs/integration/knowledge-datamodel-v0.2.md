@@ -178,11 +178,44 @@ no "small enough not to matter" — that judgement is what produced the twenty-t
 
 **One thing we must be straight with you about, because it is ours and it is not
 fixed by this edit.** Planning stores **integer millimetres at rest** (ADR-0002).
-So the boundary now carries 22225 and the engine rounds once, in `adapt.py`, and the
-rounding is declared and inspectable instead of being distributed across
-twenty-three field definitions. That is a real improvement and it is *not* a
-complete answer: rounding a **pitch** and then multiplying it by thirteen
-reintroduces exactly the loss you measured, one layer further in.
+So the boundary now carries 22225 and the engine rounds once, and the rounding is
+declared and inspectable instead of being distributed across twenty-three field
+definitions.
+
+**Correction, and it is ours.** v0.2.1 of this section claimed the engine "rounds
+once, in `adapt.py`". We then audited the engine against this design rather than
+against the documents, and that claim was false in two ways. There was no rounding
+in `adapt.py`; the conversion happened inside the rule expansion we published as
+reference — and it used **floor division**, not rounding:
+
+```python
+value=row.value.amount_milli // 1000      # 177800 → 177, never 178
+```
+
+Sub-millimetre, and it is not harmless, because the value passes through a
+ceiling. Your `97" / Exposure B` row is 2463.8 mm — floored **2463**, rounded
+**2464** — and `n = ceil(run_length / max_span)`:
+
+| Run | posts at 2463 | posts at 2464 |
+|---|---|---|
+| 9 855 mm | **6** | 5 |
+| 12 320 mm | **7** | 6 |
+
+**One millimetre of truncation buys an extra post**, with its footing and its
+concrete, on two of three sample runs — systematically in the expensive direction.
+Fixed: `round()`, at one named point.
+
+**And the deeper half, which this audit is what surfaced.** Rounding a limit and
+*then* multiplying it is the same accumulation you measured, one layer up. So the
+rule is not only about the infill fitter: **count-producing arithmetic consumes
+thousandths and rounds only its outputs**, in the layout as well as the fit. A
+`SetParam` now carries the exact `value_milli` beside the millimetre value and the
+layout reads the exact one. Nothing is *stored* in thousandths, so our two-tolerance
+rule stands unamended.
+
+Rounding a **pitch** and then multiplying it by thirteen was the case you found;
+rounding a **span limit** and then dividing a run by it is the same defect, and we
+had it in the code we handed you.
 
 So two things follow, and only the first is in this round:
 
@@ -829,6 +862,17 @@ This is the shape that reaches your §2.4 shared-line-post case and your §2.11
 gate-post case as well, and it is why `PostRole` has six values rather than four
 (§2.8).
 
+**One thing we owe you before you author containment, because we had not traced
+it.** A published `ContainedSlot` reaches a bill of materials only if panel
+resolution **flattens it into the panel's slot list** under a path key
+(`bottom_rail/channel`) — demand derivation is a single loop over that list and knows
+nothing else. Our design never said it does. Worse, the crediting rule we specified
+(*if the host's SKU is a kit already listing the contained part, credit it rather
+than buying it twice*) has nowhere to live: a demand line has no notion of one line
+covering another. That is a new concept in demand derivation, not an adjustment to
+it. **The shapes below are safe to author against** — none of them changes — but the
+consumption path is ours to build, and we had not checked it existed.
+
 **N9.2 — `host.cavity_width_mm` is never published, and you are right.** The only
 "Inside Dimensions" in 2,147 pages belong to storage sheds; every profile publishes
 an outside dimension and a wall thickness (`5X5 POST` is `4.940` OD, `0.170` wall)
@@ -1087,6 +1131,23 @@ condition_basis: assumed   a curator supplied them; the source did not
 from a source that stated one. G16 was a reader recording an inference as a reading;
 this makes that difference publishable rather than lost.
 
+**The mechanism is now settled on our side, and it very nearly was not.** When we
+accepted this we had no way to express a fallback tier, and the expansion we
+published would have produced a *silent wrong answer* rather than a missing feature:
+every row of one table shared a single `object_id` and differed only by
+`version = row_index`, and our resolver breaks a same-id tie by **higher version**.
+An unconditioned row compiles to an always-true condition, so it fires alongside
+every conditioned row of its own table — and would have won on all of them, on every
+site, purely by sitting lower in the table. No conflict raised, nothing warned, and
+the decision graph attributing the answer to a real source.
+
+Fixed by two changes, both ours: each row now mints its **own `object_id`**, so row
+position can never decide anything; and a `stated` row with empty conditions is
+published at a **weaker authority** than its conditioned siblings, so any conditioned
+row beats it and a tie between two fallbacks lands outside our hard-failure band.
+**Publish the rows in whatever order suits you** — order now carries no meaning,
+which is what we told you it did.
+
 ### 3.8.2 Why the value type sits on the table
 
 **N2 — MODIFIED.** You asked that a row's value admit an enum, so `stepped_only`,
@@ -1155,6 +1216,20 @@ Combination {
 Borrowed from how matched HVAC systems are certified: the rating applies to the
 combination, not to the members, and swapping one **invalidates** it rather than
 inheriting it.
+
+**Deprioritise curating these, and the reason is embarrassing.** `grep -rn
+"Combination" src/` in the engine returns **nothing**. We accepted this type as
+binding, put it in the snapshot payload, argued for it from the AHRI precedent, and
+asked you to curate certified assemblies that a run would **silently ignore**. A
+swapped member would invalidate nothing, because there is no checker.
+
+The type stays and the shape is right. The seam is named: a `certify()` step in
+fulfilment comparing a run's resolved parts against each pinned `Combination`,
+raising `warning.combination_uncertified` when a member differs — a warning rather
+than a constraint, so it stays inside the never-block rule. Until that exists a
+`Combination` is **pinned but inert**, and your effort is better spent on parameter
+tables and definitions. We would rather say this than keep accepting data nothing
+reads.
 
 **N29 — MODIFIED, and answered with a design rather than a choice.** You raised the
 `us` / `china` tracks as a question: two deliberately separate corpora, Chinese
