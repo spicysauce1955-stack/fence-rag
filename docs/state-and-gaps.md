@@ -1,8 +1,8 @@
 # State and gaps
 
 A current snapshot of what exists, what is measured, and what is missing.
-Written 2026-08-20, current as of the post-MVP work recorded in
-`docs/phase-checkpoints.md`. Every number here comes from the store, the reports, or a test run — not
+Written 2026-08-20; **updated 2026-08-24** with the distribution work, the
+correctness fixes, and four measured-and-rejected changes (G18-G24). Every number here comes from the store, the reports, or a test run — not
 from the design documents.
 
 Companion documents: `docs/phase-checkpoints.md` (the per-phase record and
@@ -419,6 +419,144 @@ sample of NOA and Showtech scans. Across the full corpus it accepted **9** grids
 in 6 documents. The claim is now generated from the store rather than asserted,
 and the narrower true statement is the one in G2: none of those grids is a
 wind/exposure/footing table from an NOA drawing sheet.
+
+---
+
+## 3a. Update, 2026-08-24
+
+Store now: 144 documents / 2,147 pages / 81,794 elements / 10,886 retrieval units /
+**1,976 facts** (1,652 `regex-v1` + 324 `table-read:cross_family_verified`) /
+**102 relations** / 1,225 table read candidates / 374 quality issues. **239 tests.**
+
+### G18 — `cli facts --extract` silently destroyed every promoted fact — FIXED
+
+`facts.py` deleted the whole `facts` table before re-extracting, wiping the 324
+human-gated `table-read:cross_family_verified` rows. Worse, they could not be
+recovered: `promote_tables.py` only promotes candidates `WHERE promoted_fact_id
+IS NULL`, and the candidates still recorded the now-deleted fact ids. Anyone
+running `cli facts --extract` lost 324 reviewed facts permanently and silently.
+
+Fixed: the delete is now scoped to `extractor LIKE 'regex-%'` — the rows the run
+is about to regenerate — leaving promoted facts and their linkage untouched. A
+test asserts promoted facts survive a full re-extraction with no dangling id.
+
+### G19 — `footing_diameter_in` recorded the hole depth — FIXED
+
+The pattern `(?:diam(?:eter)?)\D{0,16}NUM(IN|FT)` let a match bridge a
+connective to a number describing a different dimension, so *"Dig hole 8 inches
+in diameter by 30 inches deep"* stored **30**. Six facts were wrong in the store,
+none flagged. Also, a diameter fact was produced from *"1 1/2in. diameter x 18in.
+auger bit"* — a boring tool, not a footing.
+
+Fixed by binding the number adjacently to the word and adding a tool-context
+guard. Net effect on `footing_diameter_in`: 73 → 61, being **19 removed** (all
+confirmed false positives: the auger bit, bridged matches, and matches inside
+"Diamond"/"diagram"/"DIAGONAL"/"Intermediate") and **7 added** (legitimate
+"X in diameter" phrasing the old pattern never caught).
+
+**Still wrong, knowingly:** `doc-a0aeec19ffaa` records 24 where the source says 6.
+Fixing it would drop the corpus's only two legitimate uses of that pattern shape.
+
+### G20 — `same_content_as` missed content-identical files — FIXED
+
+The relation was derived from `document_versions.sha256` alone, so it caught the
+14 byte-identical groups but missed `barrette/install-privacy-picket-gates.pdf`
+and `freedom/VinylPrivacyPicketGate_Inserts_Instructions.pdf` — identical in all
+20 pages of extracted content, differing only by ~2,105 bytes of PDF container
+metadata. A second pass now links documents sharing a normalised text digest but
+not a sha256, distinguished by `basis`. Relations 100 → 102. No other pair in the
+corpus qualifies, so there are no false positives.
+
+### G21 — `--psm 11` as a global OCR default: measured and REJECTED
+
+`tools.ocr_hocr` defaults to `psm=1` and the main scanned-page path
+(`extract.py:292`) takes that default, while the CAD path (`:607`) passes
+`psm=11`. A corpus-wide switch to 11 was recommended on the strength of the 44
+NOA table crops, where it nearly doubles numeric accuracy (114 → 189 of 416 cells
+correct).
+
+Measured across 14 randomly sampled scanned pages — the change would rewrite
+**25,150 OCR elements across 68 documents**, not just the table pages:
+
+| | `--psm 1` | `--psm 11` |
+|---|---|---|
+| mean word confidence | **87.7** | 79.2 |
+| characters recovered | **19,152** | 18,528 |
+
+Sorted by page kind the split is clean: NOA drawing sheets improve slightly
+(90.5→91.5, 94.2→94.6), while prose pages degrade badly (91.1→69.8, 94.0→78.2,
+**94.1→61.3**). The existing `psm=1`/`psm=11` split therefore looks deliberate,
+not an oversight. **Rejected as a global default.** If the table-page gain is
+wanted it belongs behind a per-page condition — the `table_not_reconstructed`
+flag already identifies exactly those pages.
+
+Caveat: confidence and character yield are proxies for accuracy, not accuracy
+itself. The direction is unambiguous but the magnitude is not calibrated.
+
+### G22 — reader prose is trustworthy: two claims CONFIRMED by a person
+
+Two maximum-post-spacing figures — `96 1/8"` and `75 1/2"` — existed only in
+round-1 reader prose, in no structured cell and in no extracted text anywhere in
+the store, produced by a single reader with no cross-check, one carrying the
+phrase *"verified by zoomed crop, not a guess."* A human checked both source
+sheets on 2026-08-24: **both are real.**
+
+Two consequences. Single-reader prose is usable evidence, so clearing the 296
+single-read numeric cells is cheaper than assumed. And these fractions are
+readable by a vision reader but by **no OCR engine tested** (tesseract, RapidOCR
+and PaddleOCR all return `964`/`968` for `96⅛"`, 0 of 19, at every scale) — so
+the stacked-fraction problem is an OCR gap, not a reading gap.
+
+### G23 — status-aware ranking: measured and REJECTED
+
+448 of 1,976 facts (22.7%) come from documents marked `superseded`, and 96 of 590
+gold top-10 slots (16.3%) are from such documents, with 9 questions returning one
+at rank 1. That was previously characterised as a correctness risk. **It is
+mostly not one.** Of the 9:
+
+- six ask for a historical edition in so many words — *"Back in the 2013
+  CertainTeed acceptance NOA 12-1106.11"*, *"The **superseded** 2021 NOA
+  21-0125.07"*, *"The **legacy** Barrette Active Yards NOA"*;
+- `gq-001` names NOA 23-0314.05 explicitly and receives exactly that document,
+  which carries `superseded` only because a later edition exists;
+- `gq-202` asks a material property (notched Izod, ASTM D256) that does not vary
+  between editions;
+- only `gq-118` looks genuinely stale-wrong.
+
+A blanket status penalty would break far more than it fixes. Retrieval already
+exposes `version_status` on every result and accepts it as a filter
+(`retrieval.py:334,370,396`), so the plumbing exists. What remains is not a
+ranking defect but **G3**: `version_status` is `unknown` for 132 of 144
+documents, including every current NOA, which is what makes the signal weak.
+
+### G24 — the relevance audit's filter plan remains unapplied
+
+A six-axis redundancy audit measured that ~30% of the retrieval projection and
+~1.9 GB of the derived image store could be removed without losing evidence, and
+that a guarded subset of topic rules holds recall@10 and page_recall exactly at
+baseline while lifting evidence support 0.623 → 0.641. Four filters were measured
+and rejected outright, including the audit's own `<12-char` rule, which deletes
+`BL19110` and `12"` — each its question's only evidence.
+
+None of it is applied. The corpus's measured problem remains under-retrieval, not
+over-retrieval, so the audit's own recommendation was to spend any reclaimed
+budget on the recall deficit rather than bank it.
+
+### G25 — distribution: what was deliberately not built
+
+`cli fetch --build latest`, `--verify`, and a hosted
+`builds/<run_id>/evidence.db.zst` appear in early drafts of
+`docs/distribution-design.md` and were **descoped**: zstd is not in the standard
+library before Python 3.14, so hosting a compressed build would require a
+vendored dependency. `publish_manifest` remains untested — testing it would
+rewrite the committed manifest as a side effect, so it needs an injectable output
+path first.
+
+Probe artifacts retained deliberately on disk, git-ignored: `workspace/pylibs/_ocr_probe`
+(383 MB, RapidOCR) and `~/.paddlex` (133 MB, PaddleOCR models), kept because
+PaddleOCR scored 84/84 with zero wrong values on the NOA table cells and is the
+strongest candidate for the 73 flagged pages.
+
 
 ---
 
