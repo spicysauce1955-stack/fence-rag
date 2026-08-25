@@ -1,8 +1,9 @@
 # Integration — the boundary with Planning & BOM
 
 ```text
-Status:    v0.4. Three review rounds done. Four items await this team's
-           agreement; everything else is settled or internal to Planning.
+Status:    v0.4.1. Four review rounds done and closed. The four delta items are
+           answered in audit/06 and dispositioned in audit/07 — all four accepted,
+           including the one whose premise this team measured and falsified.
 Authority: Binding ONLY at the boundary. Silent on everything inside it.
 Origin:    Proposed by Planning & BOM; audited by Knowledge; revised by both.
 ```
@@ -17,7 +18,7 @@ the boundary: what crosses it, in what shape, and what each side promises the ot
 
 | If you are… | Read |
 |---|---|
-| **Deciding whether to approve v0.4** | [`boundary-delta-v0.4.md`](boundary-delta-v0.4.md) — four items, one page, nothing else in it |
+| **Deciding whether to approve v0.4** | [`boundary-delta-v0.4.md`](boundary-delta-v0.4.md) — four items, one page — then [`audit/06-review-of-v0.4.md`](audit/06-review-of-v0.4.md), the reply |
 | **New to this** | [`system-overview.md`](system-overview.md), then [`knowledge-datamodel.md`](knowledge-datamodel.md) §0–§3 |
 | **Checking a promise** | [`contract.md`](contract.md) — eighteen BINDING obligations; nothing else binds |
 | **Planning your sprint** | [`planning-asks.md`](planning-asks.md) — what Planning needs, ordered by cost if late |
@@ -50,6 +51,8 @@ Kept in order, because a later disagreement is usually a re-run of an earlier on
 | [`03-review-of-v0.2.md`](audit/03-review-of-v0.2.md) | **Knowledge's review** of the revision: six defects that blocked authoring |
 | [`04-review-disposition.md`](audit/04-review-disposition.md) | **Planning's response.** All six fixed; one of its questions found a bug in the engine |
 | [`05-acceptance-open-questions.md`](audit/05-acceptance-open-questions.md) | Knowledge's working list — everything needing a decision, and what "done" means |
+| [`06-review-of-v0.4.md`](audit/06-review-of-v0.4.md) | **Knowledge's reply to the v0.4 delta.** Two items agreed with additions, one agreed in substance and wrong in shape, one premise that does not hold |
+| [`07-delta-disposition.md`](audit/07-delta-disposition.md) | **Planning's decision.** All four accepted; the falsified premise was worse than measured — height varies *along* a run, not merely between runs |
 
 ---
 
@@ -63,6 +66,7 @@ previous could not:
 | 1 · audit | this platform's **corpus** — 144 documents, 81,794 elements | 29 items. Seven of ten §7 questions surfaced a change; one invariant was falsified |
 | 2 · review | the revision, read by a **second party** taking §8 literally | 6 defects that blocked authoring — including a mechanism argued for and then omitted |
 | 3 · self-audit | Planning's own **codebase** | 7 more, two in code already published here. Then 6 more, every one in something Planning had *added* rather than accepted |
+| 4 · delta | the four surviving items, **re-measured against the corpus** | 2 missing `Gap` kinds; supersession on none of the policy's axes; `continuity` more than binary; and obligation 13's *"already true"* falsified by two keys in the store. All four accepted |
 
 **The lesson, worth keeping.** After round two the design was internally consistent and
 the engine could not implement it. Coherence is not the test — a design has to be checked

@@ -234,6 +234,30 @@ validates clean and loses the fact silently.
 
 ---
 
+## 6d. One new ask, from your continuity finding
+
+**The stagger constraint needs publishing, and it needs a different home than you
+suggested.** *"The starting point for rails should be staggered from post to post for
+bottom/mid/top rail for maximum strength"* — 77 instances, with its own figure, stated as
+a strength requirement rather than a preference.
+
+You pointed at obligation 11's `requires` edge with `exclusive_with`. We think that shelf
+is wrong and would quietly not work: `requires` orders **assembly steps** — *fit this
+before that* — while stagger constrains **where cuts fall**. It survives into the cut plan,
+and it binds two members that have no ordering relationship at all.
+
+The right home is where joints are decided, which on our side is cut planning. So it is a
+constraint on the cut plan, expressed the way a spacing limit is: *joint positions of
+members sharing a bay must differ by at least X*. That gives it a number, an authority and
+a citation, and it fails as a warned line when it cannot be met rather than silently
+producing three aligned joints.
+
+**What we need from you is the constraint, not the mechanism.** Publish it with whatever
+minimum offset the guides state, or as `unquantified` where they only say *"staggered …
+for maximum strength"* — which on your evidence is most of the 77.
+
+---
+
 ## 7. What we explicitly do not need
 
 Stated so nobody spends on it.

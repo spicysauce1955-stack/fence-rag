@@ -1,7 +1,10 @@
 # Knowledge data model v0.2 — entities, relationships, invariants
 
 ```text
-Status:     v0.4. Revised after 03-review-of-v0.2.md (six defects, all fixed) and
+Status:     v0.4.1. The four delta items are answered (06) and dispositioned (07):
+            all four accepted, including obligation 13, whose premise this team
+            measured and falsified. Continuity is now DERIVED, not authored.
+Was:        v0.4. Revised after 03-review-of-v0.2.md (six defects, all fixed) and
             then after Planning audited this design against its own engine and its
             own additions. Four items in v0.4 need this team's agreement — they are
             collected in boundary-delta-v0.4.md; everything else changed on the
@@ -556,7 +559,8 @@ Member {                        one repeat of the infill pattern
   base_engagement · top_engagement    Quantity
   gap_after        Quantity     MAY BE NEGATIVE — that is an overlap
   face_offset      Quantity     + front face, − back face (shadowbox)
-  continuity       per_bay | continuous     default per_bay             ← NEW v0.4
+  continuity       per_bay | continuous     AUTHORED OVERRIDE only — v0.4.1
+                   normally DERIVED from Part.stock_length vs resolved spacing
   profile_edges  { start, end }  tongue | groove | square | ship_lap | none  ← NEW
   requirement · contains
 }
@@ -584,7 +588,16 @@ infill members by frame members, which is a real crossing only when the two run 
 right angles. Get the orientations wrong and the arithmetic still produces a
 number, and the number is a fiction.
 
-**`continuity` — new in v0.4, and it comes from your own evidence.** `Standard rails
+**`stock_length` rather than `continuity` — corrected in v0.4.1, and this team is why.**
+Publishing continuity as a boolean flattened a derived property into a fact. The same rail
+is continuous in White (16 ft) and per-bay in Blend (12 ft) against a 97″ maximum spacing;
+a rail cut to 95½″ for rolling terrain is per-bay on the graded bays only. So a `Part`
+publishes `stock_length` where a document states one, Planning derives continuity against
+the resolved spacing, and `continuity` survives only as an authored override where a guide
+states the behaviour outright and gives no length. `stock_length_mm` is already a
+first-class product capability in the engine, so this costs less than the field it replaces.
+
+**The original note, kept because the evidence still stands.** `Standard rails
 are supplied in 16 foot lengths` … `slide rail through second post` … `staggered from
 post to post`. That rail is **one physical object in two bays**, and published as
 `per_bay` — which is what the model forced until now — it is counted twice and cut to

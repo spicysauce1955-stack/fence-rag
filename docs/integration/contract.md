@@ -1,7 +1,10 @@
 # Contract v0.2 — what crosses the boundary
 
 ```text
-Status:    v0.4. Revised after the §7 audit; after 03-review-of-v0.2.md, which
+Status:    v0.4.1. All four v0.4 delta items answered in 06-review-of-v0.4.md and
+           dispositioned in 07-delta-disposition.md — all four accepted, including
+           obligation 13, whose premise this team measured and falsified.
+Was:       v0.4. Revised after the §7 audit; after 03-review-of-v0.2.md, which
            found six defects; after Planning audited the design against its own
            codebase and found seven more; and after Planning audited its own
            ADDITIONS, which found six it had specified with no implementation.
@@ -50,7 +53,8 @@ Quantity     { amount_milli: int, unit: UnitCode, value_raw: [str] }
 UnitCode     mm | mm2 | mm3 | each | gram_milli | cent
              | deg_milli | mph_milli | pa_milli | second_milli
 
-Provenance   { cites: [SourceRef], source_class, curation_level }
+Provenance   { cites: [SourceRef], source_class, curation_level,
+               version_status: active | superseded | unknown }
              # admitted_by is NOT here — it is an output of a RUN, see §1.4
 PostRole     end | corner | line | gate | junction | transition
 ```
@@ -148,11 +152,14 @@ Gap {
              | unquantified               stated in prose, never given a number
              | missing_value              a field that should exist and does not
              | unmapped_part_kind         a part-kind no counting rule can produce
+             | disputed{ on: value | conditions }   two admissible readings disagree
+             | illegible_source           the source states it; we cannot read it
 
   subject      EntityRef | SlotRef | ParamRef     WHAT is missing, addressably
   because      code + params                      renders in both locales
   cites        [SourceRef]                        evidence, where there is any
   would_close  str      one sentence: what would resolve this
+  closes_by    knowledge | planning     WHO can close it
   severity     warns_line | informational
 }
 ```
@@ -161,6 +168,25 @@ Gap {
 > A gap that only says something is missing sends a curator hunting; one that says
 > *"a footing row for exposure C, non-HVHZ, at 6 ft"* is a work item. That field is what
 > makes a gap report worth receiving rather than worth filing.
+
+> **BINDING.** A `Gap` declares `closes_by`. Two of the eight kinds —
+> `unmodellable_entity` and `unmapped_part_kind` — close by a **schema change in the
+> Planning repo**, not by anything a curator can do. A review queue that shows a curator
+> work only an engineer can perform is a queue whose items are not actionable, which is
+> the one property it has to have.
+
+**`disputed` is not the decision graph's `Conflict`.** That one is produced at *resolution*
+time when two rules tie and disagree. This one is known at *publish* time, before any run
+exists: two admissible readings of the same subject. **33.3% of this platform's
+human-gated facts** carry a note that readers did not agree on the applicability bracket —
+the value is certain and the conditions are not — and none of the other seven kinds fits
+that honestly.
+
+**`illegible_source` is separated from `missing_value` on a work-item argument**, not a
+taxonomic one. *"Nobody wrote it down"* sends a curator to find another document; *"we could
+not read what they wrote"* sends them to open a crop. Different cost, different success
+rate, and 73 pages of unreconstructable tables plus 172 of low OCR confidence make it the
+commoner of the two.
 
 **Why `unquantified` earns a place.** Your audit found four statements that *"Accents
 will reduce the amount of rack"* and zero that quantify it. That is neither a missing
@@ -261,6 +287,7 @@ configurable table:
 SourcePolicy {
   task           TaskCode         what is being decided
   source_class   SourceClass      what kind of source it is
+  version_status active | superseded | unknown | null    null = any
   role           RoleCode | null  who is asking; null = any
   admissible     bool             may this source back an accepted value here?
   rank           int              ordering among admissible sources; lower wins
@@ -286,6 +313,14 @@ rows are configurable by the operator.
 > older document. Without this, two implementations could both honour the policy, stamp
 > different `admitted_by.rank`, and hash differently. `ai_proposal` is proposal-only on every task and is
 omitted from the table for width.
+
+> **BINDING.** `version_status` is a policy axis. A superseded approval and its
+> replacement are otherwise the *same* source class, the same role and the same task —
+> the policy would rank them identically, and **40.7% of this platform's human-gated
+> facts come from a superseded document.** `unknown` is a real value ranking below
+> `active`, never coerced to it: 132 of 144 documents are unknown, so coercion in either
+> direction is a fiction, and the honest ranking is what lets an operator decide how much
+> unproven provenance a given task will tolerate.
 
 **Two classes were added, and the reason is the sharpest finding in the audit.** The
 shipped v0.1 default had no name for an installation manual — 69 documents, 1,129 pages,
@@ -484,17 +519,33 @@ This is the complete list. Satisfy these and every internal decision is yours.
     through an intermediate post belongs to no bay at all. Publish all five from the start;
     Planning renders `run` and `site` as present-and-unrendered until phase two, rather
     than dropping them.
-13. **A published `ParameterTable` reads only whole-project facts.** Its conditions may
-    name site facts (exposure, hurricane zone, jurisdiction, code edition, material) and
-    other parameters — never a run, a station, a bay or a panel. This is already true of
-    everything this platform publishes; stating it bindingly is what lets every table be
-    expanded **once, up front**, before any geometry exists. A table conditioned on a bay
-    could not be, because the bay does not exist yet when parameters resolve.
-14. **A member states whether it is continuous across bays.** `Member.continuity` is
-    `per_bay` (the default, and true of almost everything) or `continuous` — a rail
-    supplied in 16 ft lengths, threaded *through* an intermediate post and staggered from
-    post to post, is one physical object in two bays. Published as `per_bay` it is counted
-    twice and cut wrong. Author it only where a guide actually says so.
+13. **A published condition key declares its scope**, and what is banned is an *instance
+    reference*, not a narrow scope.
+
+    ```text
+    condition_scope   site | param | run | post | bay | panel
+    ```
+
+    Keys that are all `site` or `param` resolve at snapshot expansion. Narrower keys
+    **expand up front and bind at their own scope** — one row per post role, per height
+    bracket — so the table is still fully expanded before any geometry exists and only
+    *selection* moves later. **Banned:** a condition naming station 7, bay 3, or a
+    specific run. *(Restated in v0.4.1. The previous wording allowed only site facts and
+    asserted this was "already true of everything this platform publishes." It was not:
+    the largest structural grid in the store is conditioned on fence height, which in this
+    engine is an interval payload varying **along** a run, and 68 elements across six
+    documents condition on post role. Five of the six scopes above are obligation 12's
+    exactly; `param` is the addition, and it is the scope a table conditioned on another
+    table's value — `max_rack` on `slope_method` — already has.)*
+14. **A part publishes its manufactured `stock_length` where a document states one.**
+    Whether a member runs continuously through an intermediate post is **derived** from
+    stock length against the resolved spacing, not authored: the same rail is continuous
+    in one colour and per-bay in another (16 ft White against 12 ft Blend, at a 97″
+    maximum spacing), and a rail cut for rolling terrain is per-bay on the graded bays
+    only. `Member.continuity` survives as an **authored override** for the case where a
+    guide states the behaviour outright and gives no length. *(v0.4 made continuity an
+    authored boolean. That flattened a derived property into a fact — the same error the
+    first audit corrected on `max_span_mm`.)*
 15. **A row states whether its conditions came from the source.** `condition_basis:
     stated` with empty conditions means the document gave none — such a row is a
     fallback, is excluded from the `unique` overlap check, and never asserts anything
