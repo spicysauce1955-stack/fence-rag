@@ -107,7 +107,9 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
         rows = conn.execute(f"""
             SELECT * FROM table_read_candidates
              WHERE review_status IN ({','.join('?' * len(PROMOTABLE))})
-               AND row_index >= 0 AND promoted_fact_id IS NULL
+               AND row_index >= 0
+               AND candidate_id NOT IN (SELECT from_candidate_id FROM facts
+                                         WHERE from_candidate_id IS NOT NULL)
              ORDER BY document_id, page_no, row_index, col_index""",
             PROMOTABLE).fetchall()
         groups: dict[tuple, list[sqlite3.Row]] = defaultdict(list)
@@ -145,10 +147,10 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
                     element_id, fact_type, subject, value_original, value_normalized,
                     unit_original, unit_normalized, conditions, condition_basis,
                     condition_basis_note, evidence_text, extractor,
-                    ocr_derived, review_status, created_at)
+                    ocr_derived, review_status, created_at, from_candidate_id)
                     SELECT ?,?,?,(SELECT element_id FROM elements WHERE document_id=?
                                    AND page_no=? ORDER BY ordinal LIMIT 1),
-                           ?,?,?,?,?,?,?,?,?,?,?,0,?,?""",
+                           ?,?,?,?,?,?,?,?,?,?,?,0,?,?,?""",
                     (cell["document_id"], cell["version_id"], cell["page_no"],
                      cell["document_id"], cell["page_no"], fact_type,
                      cell["col_label"], cell["value"], _inches(cell["value"]),
@@ -162,9 +164,7 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
                      f"table row {row_i} of {cell['crop_path']}; read by "
                      f"{cell['reader']} ({reader_family(cell['reader'])})",
                      f"table-read:{cell['review_status']}",
-                     cell["review_status"], now()))
-                conn.execute("UPDATE table_read_candidates SET promoted_fact_id=? "
-                             "WHERE candidate_id=?", (cur.lastrowid, cell["candidate_id"]))
+                     cell["review_status"], now(), cell["candidate_id"]))
                 created += 1
                 by_type[fact_type] += 1
         if not dry_run:
@@ -199,10 +199,10 @@ def revoke_machine_promotions(conn: sqlite3.Connection | None = None, *,
     conn = conn or connect()
     try:
         rows = conn.execute(f"""
-            SELECT candidate_id, promoted_fact_id, review_status
-              FROM table_read_candidates
-             WHERE promoted_fact_id IS NOT NULL
-               AND review_status NOT IN ({','.join('?' * len(PROMOTABLE))})""",
+            SELECT f.fact_id, c.candidate_id, c.review_status
+              FROM facts f
+              JOIN table_read_candidates c ON c.candidate_id = f.from_candidate_id
+             WHERE c.review_status NOT IN ({','.join('?' * len(PROMOTABLE))})""",
             PROMOTABLE).fetchall()
         by_status: dict[str, int] = defaultdict(int)
         for r in rows:
@@ -213,11 +213,12 @@ def revoke_machine_promotions(conn: sqlite3.Connection | None = None, *,
 
         deleted = 0
         for r in rows:
-            cur = conn.execute("DELETE FROM facts WHERE fact_id=?",
-                               (r["promoted_fact_id"],))
+            # Deleting the fact removes the link with it: the pointer lives on
+            # the fact and points down. Nothing to clean up, nothing to dangle.
+            cur = conn.execute("DELETE FROM facts WHERE fact_id=?", (r["fact_id"],))
             deleted += cur.rowcount
             conn.execute("""UPDATE table_read_candidates
-                               SET promoted_fact_id=NULL, reviewer=NULL, reviewed_at=NULL
+                               SET reviewer=NULL, reviewed_at=NULL
                              WHERE candidate_id=?""", (r["candidate_id"],))
         conn.commit()
         return {"facts_deleted": deleted, "candidates_reset": len(rows),

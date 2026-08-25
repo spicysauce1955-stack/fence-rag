@@ -19,7 +19,7 @@ from .model import ExtractedDocument
 from .lang import detect_lang
 from .paths import EVIDENCE_DB, ensure_writable
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 SCHEMA = """
 PRAGMA journal_mode=WAL;
@@ -226,7 +226,6 @@ CREATE TABLE IF NOT EXISTS table_read_candidates (
     reviewed_value  TEXT,
     reviewer        TEXT,
     reviewed_at     TEXT,
-    promoted_fact_id INTEGER,
     created_at      TEXT NOT NULL,
     UNIQUE(document_id, page_no, reader, row_index, col_index)
 );
@@ -260,6 +259,11 @@ CREATE TABLE IF NOT EXISTS facts (
     -- both. JSON [{value_original, unit_original, value_normalized,
     -- unit_normalized}]. The primary pair above stays the primary pair.
     value_alternates TEXT,
+    -- The reading this fact was promoted from, where it came from one. Points
+    -- DOWN, at the evidence -- never the reverse. `table_read_candidates` used
+    -- to carry `promoted_fact_id` instead, which had to be NULLed by hand on
+    -- every delete and could dangle; a real foreign key cannot.
+    from_candidate_id INTEGER REFERENCES table_read_candidates(candidate_id),
     evidence_text   TEXT NOT NULL,
     extractor       TEXT NOT NULL,
     ocr_derived     INTEGER NOT NULL DEFAULT 0,
@@ -298,6 +302,21 @@ ADDED_COLUMNS = [
     ("facts", "condition_basis", "TEXT NOT NULL DEFAULT 'unexamined'"),
     ("facts", "condition_basis_note", "TEXT"),
     ("facts", "value_alternates", "TEXT"),
+    # schema_version 3 -- pointer direction: a fact names its reading, not the
+    # reverse. The REFERENCES clause is carried here too, so a migrated store
+    # gets the same declared foreign key as a fresh one rather than a soft link
+    # (SQLite accepts it on ADD COLUMN as long as the default is NULL).
+    ("facts", "from_candidate_id",
+     "INTEGER REFERENCES table_read_candidates(candidate_id)"),
+]
+
+# Columns that have been retired. Dropping is destructive and these tables are
+# not all rebuildable, so `retire_columns` refuses to drop a column that still
+# holds data -- it reports instead, and a human decides. Symmetric with
+# ADDED_COLUMNS so the two directions are declared in one place.
+RETIRED_COLUMNS = [
+    ("table_read_candidates", "promoted_fact_id",
+     "pointed UP at a derived row; superseded by facts.from_candidate_id"),
 ]
 
 
@@ -363,9 +382,36 @@ def connect(db_path: Path | None = None, *, read_only: bool = False) -> sqlite3.
     return conn
 
 
+def retire_columns(conn: sqlite3.Connection, spec=None) -> dict:
+    """Drop retired columns, but only where they hold nothing.
+
+    A drop cannot be undone by re-running anything -- `table_read_candidates` is
+    not regenerable -- so a column with data in it is reported and left alone
+    rather than quietly destroyed.
+    """
+    spec = RETIRED_COLUMNS if spec is None else spec
+    dropped, kept = [], {}
+    for table, column, why in spec:
+        info = conn.execute(f"PRAGMA table_info({table})").fetchall()
+        if not info or column not in {r[1] for r in info}:
+            continue
+        n = conn.execute(
+            f"SELECT COUNT(*) FROM {table} WHERE {column} IS NOT NULL").fetchone()[0]
+        if n:
+            kept[f"{table}.{column}"] = (
+                f"{n} rows still carry a value; refusing to drop ({why})")
+            continue
+        conn.execute(f"ALTER TABLE {table} DROP COLUMN {column}")
+        dropped.append(f"{table}.{column}")
+    if dropped:
+        conn.commit()
+    return {"dropped": dropped, "refused": kept}
+
+
 def migrate(conn: sqlite3.Connection) -> list[str]:
     conn.executescript(SCHEMA)
     added = ensure_columns(conn)
+    retire_columns(conn)
     conn.execute("INSERT OR REPLACE INTO schema_meta(key, value) VALUES ('schema_version', ?)",
                  (str(SCHEMA_VERSION),))
     conn.commit()

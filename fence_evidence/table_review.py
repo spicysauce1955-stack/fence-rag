@@ -271,8 +271,9 @@ def promote(conn: sqlite3.Connection, candidate_id: int, *, fact_type: str,
     cur = conn.execute("""INSERT INTO facts(document_id, version_id, page_no, element_id,
         fact_type, subject, value_original, value_normalized, unit_original,
         unit_normalized, conditions, condition_basis, condition_basis_note,
-        evidence_text, extractor, ocr_derived, review_status, created_at)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        evidence_text, extractor, ocr_derived, review_status, created_at,
+        from_candidate_id)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
         (row["document_id"], row["version_id"], row["page_no"], element["element_id"],
          fact_type, row["row_label"], value, None, None, None,
          json.dumps({"col_label": row["col_label"], "row_label": row["row_label"]}),
@@ -283,10 +284,12 @@ def promote(conn: sqlite3.Connection, candidate_id: int, *, fact_type: str,
          f"reviewed by {reviewer or row['reviewer'] or 'unknown'}",
          f"read from {row['crop_path']} row {row['row_index']} col {row['col_index']}",
          f"table-review:{row['review_status']}:{row['reader']}", 0,
-         "reviewed", now()))
-    conn.execute("""UPDATE table_read_candidates SET promoted_fact_id=?, reviewer=?,
-                    reviewed_at=? WHERE candidate_id=?""",
-                 (cur.lastrowid, reviewer or row["reviewer"], now(), candidate_id))
+         "reviewed", now(), candidate_id))
+    # The candidate records only that a person handled it. The link to the fact
+    # lives on the fact, pointing down -- see tests/test_pointer_direction.py.
+    conn.execute("""UPDATE table_read_candidates SET reviewer=?, reviewed_at=?
+                    WHERE candidate_id=?""",
+                 (reviewer or row["reviewer"], now(), candidate_id))
     conn.commit()
     return cur.lastrowid
 
@@ -304,8 +307,8 @@ def summary(conn: sqlite3.Connection) -> dict:
             "by_reader": by_reader, "pages_read": pages,
             "pages_reported_as_tables": tables,
             "promoted_facts": conn.execute(
-                "SELECT COUNT(*) FROM table_read_candidates "
-                "WHERE promoted_fact_id IS NOT NULL").fetchone()[0]}
+                "SELECT COUNT(*) FROM facts "
+                "WHERE from_candidate_id IS NOT NULL").fetchone()[0]}
 
 
 # ------------------------------------------- what the pipeline's OCR missed

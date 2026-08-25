@@ -25,6 +25,13 @@ contract it implements, including 12 numbered prohibitions), `docs/target-archit
 (informative future direction), `rag-pipeline-plan.md` (historical, superseded, kept only because
 the spec and the guide cite it).
 
+`docs/layering.md` is a **proposal** naming five layers (raw → canonical → assertions →
+entities → published) and one rule: *every reference points down a layer, never up*. The rule
+already landed once — it inverted `table_read_candidates.promoted_fact_id` into
+`facts.from_candidate_id` at `SCHEMA_VERSION = 3`, deleting a cleanup statement and a test that
+policed a bug the schema now forbids. §5 of that document names where it **disagrees with this
+file** about where the hand-researched dataset belongs; that disagreement is open.
+
 Read in this order when picking the work up cold: `docs/state-and-gaps.md` (measured state and
 every known gap), `docs/build-plan.md` (what to build next and in what order), then
 `docs/integration/README.md`. `docs/phase-checkpoints.md` records what was built, tested and

@@ -60,12 +60,23 @@ class TestSchemaDeclaration(unittest.TestCase):
     def test_schema_version_moved_for_this_change(self):
         self.assertGreaterEqual(SCHEMA_VERSION, 2)
 
-    def test_the_five_new_columns_are_declared(self):
+    def test_every_added_column_is_declared(self):
+        """Pinned so a column cannot be added to SCHEMA without being migrated
+        onto existing stores too -- the silent-no-op failure this list exists for."""
         declared = {f"{t}.{c}" for t, c, _ in ADDED_COLUMNS}
         self.assertEqual(declared, {
+            # schema_version 2 -- A2/A3/A4
             "elements.lang", "elements.lang_basis",
             "facts.condition_basis", "facts.condition_basis_note",
-            "facts.value_alternates"})
+            "facts.value_alternates",
+            # schema_version 3 -- pointer direction
+            "facts.from_candidate_id"})
+
+    def test_the_inverted_pointer_carries_its_foreign_key(self):
+        """A migrated store must get the same declared FK as a fresh one, or the
+        two diverge in the one property the inversion was made for."""
+        ddl = {c: d for t, c, d in ADDED_COLUMNS}["from_candidate_id"]
+        self.assertIn("REFERENCES table_read_candidates(candidate_id)", ddl)
 
     def test_migrate_applies_them_to_a_fresh_store(self):
         conn = sqlite3.connect(":memory:")

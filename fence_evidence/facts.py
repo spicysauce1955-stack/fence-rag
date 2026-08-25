@@ -268,9 +268,9 @@ def extract_facts(*, document_id: str | None = None,
         # verified table readings (extractor='table-read:...', see
         # promote_tables.py) must survive a re-extraction: promote_verified()
         # only ever promotes a table_read_candidates row once
-        # (`promoted_fact_id IS NULL`), so deleting those facts here would
+        # (`from_candidate_id IS NULL`), so deleting those facts here would
         # both destroy 300+ human/agent-gated readings and leave
-        # table_read_candidates.promoted_fact_id pointing at rows that no
+        # facts.from_candidate_id pointing at rows that no
         # longer exist -- with no way to re-promote them, since the
         # candidate no longer looks unpromoted.
         if document_id:

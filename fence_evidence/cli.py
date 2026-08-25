@@ -253,11 +253,13 @@ def main(argv: list[str] | None = None) -> int:
             from .promote_tables import promote_verified
             _print(promote_verified(dry_run=not args.apply))
     elif args.cmd == "migrate":
-        from .store import backfill_lang, connect as _c, migrate as _m, SCHEMA_VERSION
+        from .store import (backfill_lang, connect as _c, migrate as _m,
+                            retire_columns, SCHEMA_VERSION)
         conn = _c()
         try:
             added = _m(conn)
             _print({"schema_version": SCHEMA_VERSION, "columns_added": added,
+                    "columns_retired": retire_columns(conn),
                     "lang": backfill_lang(conn)})
         finally:
             conn.close()

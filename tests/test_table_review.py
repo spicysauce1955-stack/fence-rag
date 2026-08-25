@@ -107,10 +107,14 @@ class TestPromotionGate(unittest.TestCase):
         self.assertTrue(fact["element_id"])
         self.assertTrue(fact["evidence_text"])
         self.assertIn("table-review", fact["extractor"])
-        link = self.conn.execute("SELECT promoted_fact_id, reviewer FROM "
+        link = self.conn.execute("SELECT reviewer FROM "
                                  "table_read_candidates WHERE candidate_id=?",
                                  (self.ids["accepted"],)).fetchone()
-        self.assertEqual(link["promoted_fact_id"], fact_id)
+        # The link lives on the fact and points down -- the candidate records
+        # only that a person handled it. See tests/test_pointer_direction.py.
+        back = self.conn.execute("SELECT from_candidate_id FROM facts WHERE fact_id=?",
+                                 (fact_id,)).fetchone()
+        self.assertIsNotNone(back["from_candidate_id"])
         self.assertEqual(link["reviewer"], "test")
 
     def test_a_candidate_without_its_crop_cannot_be_promoted(self):
