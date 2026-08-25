@@ -1,9 +1,8 @@
 # Integration — the boundary with Planning & BOM
 
 ```text
-Status:    v0.4.1. Four review rounds done and closed. The four delta items are
-           answered in audit/06 and dispositioned in audit/07 — all four accepted,
-           including the one whose premise this team measured and falsified.
+Status:    v0.4.1. Agreed. Four review rounds, every item dispositioned, no open
+           disagreement on what crosses. where-we-stand.md is the one-page state.
 Authority: Binding ONLY at the boundary. Silent on everything inside it.
 Origin:    Proposed by Planning & BOM; audited by Knowledge; revised by both.
 ```
@@ -18,7 +17,7 @@ the boundary: what crosses it, in what shape, and what each side promises the ot
 
 | If you are… | Read |
 |---|---|
-| **Deciding whether to approve v0.4** | [`boundary-delta-v0.4.md`](boundary-delta-v0.4.md) — four items, one page — then [`audit/06-review-of-v0.4.md`](audit/06-review-of-v0.4.md), the reply |
+| **Picking this up cold** | [`where-we-stand.md`](where-we-stand.md) — one page: what is settled, what is parked, what each side does next |
 | **New to this** | [`system-overview.md`](system-overview.md), then [`knowledge-datamodel.md`](knowledge-datamodel.md) §0–§3 |
 | **Checking a promise** | [`contract.md`](contract.md) — eighteen BINDING obligations; nothing else binds |
 | **Planning your sprint** | [`planning-asks.md`](planning-asks.md) — what Planning needs, ordered by cost if late |
@@ -30,7 +29,8 @@ the boundary: what crosses it, in what shape, and what each side promises the ot
 
 | Document | Answers |
 |---|---|
-| [`boundary-delta-v0.4.md`](boundary-delta-v0.4.md) | **The open ask.** The four v0.4 items needing agreement, and what to check on each |
+| [`where-we-stand.md`](where-we-stand.md) | **Start here.** The state of the boundary in one page — settled, parked, and next on each side |
+| [`boundary-delta-v0.4.md`](boundary-delta-v0.4.md) | The four v0.4 items that needed agreement. All four accepted — see `audit/07` |
 | [`contract.md`](contract.md) | What crosses the boundary, and the promises each side makes |
 | [`knowledge-datamodel.md`](knowledge-datamodel.md) | Every entity, field, relationship and invariant, with a traceability map from each audit finding |
 | [`planning-asks.md`](planning-asks.md) | What Planning needs from this platform, ordered by impact |
