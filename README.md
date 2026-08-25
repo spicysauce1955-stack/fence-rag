@@ -226,9 +226,12 @@ for hit in search_evidence("racking degrees Chesterfield", limit=5):
 
 | File | Status |
 |---|---|
+| `docs/integration/contract.md` | **FROZEN v1.1, ratified by both teams** — what crosses the boundary to Planning & BOM. Verify with `sha256sum -c contract.sha256` |
+| `docs/integration/` | the boundary: the contract, the amendment procedure, the data model, and `audit/` — every round with its evidence |
+| `docs/build-plan.md` | **what to build next**, in order, against the ratified contract |
 | `guide.md` | the contract this implements |
-| `rag-pipeline-plan.md` | original corpus audit and proposal (historical) |
 | `docs/mvp-implementation-spec.md` | **authoritative** specification |
+| `rag-pipeline-plan.md` | historical, superseded; kept only because the spec and guide cite it |
 | `docs/target-architecture.md` | informative future direction |
 | `docs/phase-checkpoints.md` | per-phase record: implemented, tested, incomplete |
 | `docs/state-and-gaps.md` | current snapshot: measured state, and every known gap |

@@ -14,20 +14,55 @@ Two things that must not be confused:
    applies to CertainTeed Chesterfield at Exposure C?"* with the document, page, bounding box and
    page image the answer came from.
 
-Governing documents, in order of authority: `docs/mvp-implementation-spec.md` (authoritative),
-`guide.md` (the contract it implements, including 12 numbered prohibitions),
-`docs/target-architecture.md` (informative future direction), `rag-pipeline-plan.md` (historical
-audit). `docs/state-and-gaps.md` is the current snapshot — measured state and every known gap, read
-it first; `docs/phase-checkpoints.md` records what was built, tested and deliberately left undone,
-phase by phase. Read the spec's prohibition list before touching extraction or ingestion.
+There is also a **third thing, which is not in this repository**: a separate system,
+**Planning & BOM**, that turns a customer's map into a plan and a bill of materials and consumes
+what this platform publishes. The boundary between them is settled — see below.
+
+Governing documents, in order of authority: `docs/integration/contract.md` (**FROZEN and RATIFIED
+at v1.1** — binding at the boundary, silent on everything inside it),
+`docs/mvp-implementation-spec.md` (authoritative for how this platform works), `guide.md` (the
+contract it implements, including 12 numbered prohibitions), `docs/target-architecture.md`
+(informative future direction), `rag-pipeline-plan.md` (historical, superseded, kept only because
+the spec and the guide cite it).
+
+Read in this order when picking the work up cold: `docs/state-and-gaps.md` (measured state and
+every known gap), `docs/build-plan.md` (what to build next and in what order), then
+`docs/integration/README.md`. `docs/phase-checkpoints.md` records what was built, tested and
+deliberately left undone, phase by phase. Read the spec's prohibition list before touching
+extraction or ingestion.
+
+### The boundary — `docs/integration/`
+
+`contract.md` is frozen at v1.1 and signed by both teams. **Eighteen BINDING obligations; nothing
+outside that list binds.** Verify your copy before relying on it:
+
+```bash
+cd docs/integration && sha256sum -c contract.sha256   # both lines must print OK
+```
+
+Do not edit `contract.md` or `AMENDING.md`. A change to a BINDING item goes through
+`AMENDING.md` — four triggers, five steps, and `amendments/001` is the worked example of one
+found and accepted. Registry additions (a new part type, warning code, condition dimension,
+source class) are **not** amendments and need no negotiation. If you are changing a binding item
+and there is no file in `amendments/`, stop.
+
+The API surfaces that must not move are in `contract.md` §1.5; transport, framework, auth and
+pagination are deliberately unspecified. `audit/` is the reasoning behind every decision, kept in
+order, and `audit/10-ratification-v1.0.md` §3.2 is the non-compliance this platform declared at
+signature — still in force, and Phase A of the build plan is closing it.
+
+Nothing in `docs/integration/` displaces the documents above. Those govern how this platform
+works; the contract governs only what it exposes.
 
 `docs/curation/` proposes a domain-curation phase between the canonical store and the retrieval
 projection: a capability matrix, a `cur_*` schema of claims-not-facts, a single-family vertical
-slice, a staged plan, and acceptance criteria. It is **a proposal under review** — nothing in it is
-implemented, no corpus-wide curation has run, and the projection has not been regenerated. Read
-`docs/curation/README.md` first. Note that it proposes one change to existing behaviour: removing
+slice, a staged plan, and acceptance criteria. It sits in **tier 3 — this team's internals**, and
+the contract is silent on it. It remains **a proposal under review**: nothing in it is implemented,
+no corpus-wide curation has run, and the projection has not been regenerated. Read
+`docs/curation/README.md` first. One exception to "proposal": its C0 — removing
 `cross_family_verified` from `table_review.PROMOTABLE`, which today lets two agent readings promote
-a fact with no human review.
+a fact with no human review — is now a **commitment** made in writing at ratification, and is item
+A1 of `docs/build-plan.md`.
 
 ## Commands
 
@@ -92,7 +127,8 @@ package must be optional. The one in use, `pdfplumber`, lives in `workspace/pyli
 and is loaded by `fence_evidence/__init__.py`; without it the pipeline still runs and records
 `fallback-whitespace` as the table backend. There is no `sudo`, no `apt`, and no system `pip` on this
 machine — see `workspace/reports/dependency-options.md` for how that shaped every choice. Note that
-`rag-pipeline-plan.md` says tesseract is not installed; that is stale.
+`rag-pipeline-plan.md` says tesseract is not installed; that is stale, and so is the rest of it —
+it carries a banner saying so.
 
 ## Data model
 

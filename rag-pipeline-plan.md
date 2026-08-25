@@ -1,6 +1,16 @@
 # RAG Pipeline Plan — Vinyl Fence BOM Corpus
 
-Status: **proposed, not yet built**. Two decisions below are blocking before implementation starts.
+```text
+Status:    HISTORICAL. Kept because `guide.md`, `docs/mvp-implementation-spec.md`
+           and `fence_evidence/reports.py` cite it as the audit that motivated the
+           build. It is not a plan any more and nothing here is authoritative.
+Superseded by: docs/mvp-implementation-spec.md (authoritative) and
+           docs/state-and-gaps.md (what is actually true, measured).
+Known stale: it says tesseract is not installed. It is.
+```
+
+Status when written: **proposed, not yet built**. Two decisions below were blocking
+before implementation started; both were since decided and built.
 
 ## Goal
 
