@@ -12,13 +12,7 @@ from fence_evidence.paths import (EVIDENCE_DB, TESTS_DIR,  # noqa: E402
                                   is_lfs_pointer)
 
 
-def requires_store(test):
-    """Skip a test when the evidence store has not been built yet."""
-    return unittest.skipUnless(EVIDENCE_DB.is_file(),
-                               "evidence store not built; run ingestion first")(test)
-
-
-def _corpus_is_fetched() -> bool:
+def _scan_corpus() -> bool:
     """True when every corpus PDF is real bytes, not an unsmudged LFS pointer.
 
     Checks all of them rather than probing one: the publish dry-run tests hash
@@ -33,6 +27,33 @@ def _corpus_is_fetched() -> bool:
             if is_lfs_pointer(pdf):
                 return False
     return found
+
+
+_CORPUS_FETCHED: "bool | None" = None
+
+
+def _corpus_is_fetched() -> bool:
+    """Cached: the decorators below run at import, once per test module."""
+    global _CORPUS_FETCHED
+    if _CORPUS_FETCHED is None:
+        _CORPUS_FETCHED = _scan_corpus()
+    return _CORPUS_FETCHED
+
+
+def requires_store(test):
+    """Skip a test when there is no evidence store worth asserting against.
+
+    The store file existing is not enough. An ingest attempted on an unfetched
+    checkout leaves a real database holding only the DOCX and the CAD PNGs --
+    the two file types Git LFS does not track -- and every test that asks it
+    about a PDF then fails, pointing at the pipeline rather than at the missing
+    corpus. Require both, so the diagnosis stays "you have not fetched the
+    corpus" instead of nineteen failures and ten errors.
+    """
+    return unittest.skipUnless(
+        EVIDENCE_DB.is_file() and _corpus_is_fetched(),
+        "evidence store not built over a fetched corpus; run "
+        "`cli fetch --subset all` then `cli ingest --pilot`")(test)
 
 
 def requires_corpus(test):

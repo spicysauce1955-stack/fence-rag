@@ -43,7 +43,7 @@ there is no allowance to exhaust, no shared budget to be sparing with, and
 nothing you can do here that makes reads fail for anyone else.
 
 ```bash
-# 1. Code, docs and datasets only — ~7 MB, no LFS bandwidth spent.
+# 1. Code, docs and datasets only — ~8 MB, no LFS bandwidth spent.
 #    The PDFs arrive as pointer files; step 3 replaces them with real bytes.
 GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/spicysauce1955-stack/fence-rag.git
 cd fence-rag
