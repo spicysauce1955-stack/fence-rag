@@ -145,6 +145,35 @@ fi
 echo
 
 # ---------------------------------------------------------------- corpus ----
+# ------------------------------------------------------------- git lfs ------
+# Having the binary is not the same as having the filters. `git lfs install`
+# is what writes filter.lfs.* into the git config, and without it git does not
+# know what `filter=lfs` in .gitattributes means: it skips the clean filter,
+# so `git add --renormalize .` -- the documented way to settle `git status`
+# after a fetch -- would stage 376 MB of raw PDF as ordinary blobs instead of
+# pointers. That is committable, and unrecoverable once pushed.
+bold "Git LFS"
+if ! git rev-parse --git-dir >/dev/null 2>&1; then
+    ylw "  skipped   not a git checkout"
+elif ! command -v git-lfs >/dev/null 2>&1; then
+    ylw "  absent    git-lfs is not installed"
+    echo "            Not required: 'cli fetch' does not use it. But do NOT run"
+    echo "            'git add --renormalize .' without it -- see README.md."
+    warnings=$((warnings + 1))
+elif [ -n "$(git config --get filter.lfs.clean || true)" ]; then
+    grn "  ok        LFS filters configured"
+else
+    ylw "  absent    git-lfs is installed but 'git lfs install' has never run"
+    echo "            Filters are unconfigured, so git treats the corpus PDFs as"
+    echo "            ordinary files. Fix before touching the index:"
+    echo "              git lfs install           # per machine"
+    echo "              git lfs install --local   # or just this repository"
+    echo "            Until then do NOT run 'git add --renormalize .' -- it"
+    echo "            would stage 376 MB of PDF into git history outside LFS."
+    warnings=$((warnings + 1))
+fi
+echo
+
 bold "Corpus"
 # Detect unsmudged LFS pointers by their signature, not by file size. A pointer
 # is ~131 bytes, but `find -size -1k` rounds UP to whole blocks, so a pointer
@@ -161,10 +190,14 @@ while IFS= read -r f; do
 done < <(find manuals china/manuals -name '*.pdf' 2>/dev/null)
 if [ "$pdfs" -gt 0 ] && [ "$ptrs" -eq 0 ]; then
     grn "  ok        $pdfs PDFs present"
-    echo "            If git reports them as modified after a fetch, run"
-    echo "            'git add --renormalize .' -- the content is correct and"
-    echo "            'git diff' is empty; the index still holds the pointers'"
-    echo "            stat data. Do NOT 'git checkout' them."
+    if [ -n "$(git config --get filter.lfs.clean || true)" ] \
+       && [ -n "$(git status --porcelain -- manuals china/manuals 2>/dev/null)" ]; then
+        ylw "  note      git reports corpus files as modified after a fetch."
+        echo "            Their content is correct and 'git diff' is empty; the"
+        echo "            index still holds the pointers' stat data. Settle it:"
+        echo "              git add --renormalize ."
+        echo "            Do NOT 'git checkout' them -- that restores pointers."
+    fi
 elif [ "$ptrs" -gt 0 ]; then
     ylw "  partial   $pdfs PDFs present, $ptrs still unsmudged LFS pointers"
     echo "            Until they are fetched they are recorded as 'not-fetched',"

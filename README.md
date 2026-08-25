@@ -43,21 +43,28 @@ there is no allowance to exhaust, no shared budget to be sparing with, and
 nothing you can do here that makes reads fail for anyone else.
 
 ```bash
-# 1. Code, docs and datasets only — ~8 MB, no LFS bandwidth spent.
+# 1. Configure Git LFS once per machine. Installing the binary is not enough —
+#    `git lfs install` is what registers the filters, and step 4 is unsafe
+#    without them. Skip only if you have run it before on this machine.
+git lfs install
+
+# 2. Code, docs and datasets only — ~8 MB, no LFS bandwidth spent.
 #    The PDFs arrive as pointer files; step 3 replaces them with real bytes.
 GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/spicysauce1955-stack/fence-rag.git
 cd fence-rag
 
-# 2. Prerequisites: poppler, tesseract, and pdfplumber into workspace/pylibs/.
+# 3. Prerequisites: poppler, tesseract, and pdfplumber into workspace/pylibs/.
 scripts/bootstrap.sh
 
-# 3. The corpus — all of it, or just the part you need.
+# 4. The corpus — all of it, or just the part you need.
 python3 -m fence_evidence.cli fetch --subset structural   #  32 files,  73.5 MB
 python3 -m fence_evidence.cli fetch --subset bufftech     #  14 files,  78.5 MB
 python3 -m fence_evidence.cli fetch --subset china        #   4 files,  35.4 MB
 python3 -m fence_evidence.cli fetch --subset all          # 144 files, 376.5 MB
 
-# 4. Tell git the fetched bytes are what the pointers stood for.
+# 5. Tell git the fetched bytes are what the pointers stood for.
+#    Requires step 1. Check first: `git config filter.lfs.clean` must print
+#    something. If it prints nothing, STOP and read the warning below.
 git add --renormalize .
 ```
 
@@ -65,13 +72,24 @@ Run every command from the repository root. `fence_evidence/` sits there and is
 not installed, so `python3 -m fence_evidence.cli …` resolves through the working
 directory — from any other directory it will not import.
 
-Step 4 is not optional bookkeeping. `git status` records each file's size and
+Step 5 is not optional bookkeeping. `git status` records each file's size and
 mtime when it is checked out, and at clone time every PDF was a 131-byte
 pointer, so after fetching, git lists all 137 of them as modified even though
 `git diff` is empty and the content is byte-for-byte correct. `--renormalize`
-re-reads them and settles the index. Without it the obvious tidy-up —
-`git checkout .` or "discard changes" in an editor — silently reverts the whole
-corpus back to pointers.
+re-reads them through the LFS clean filter, which turns each one back into the
+pointer already in the index, and `git status` goes quiet. Without it the
+obvious tidy-up — `git checkout .` or "discard changes" in an editor — silently
+reverts the whole corpus to pointers.
+
+> **Do not run step 5 if `git config filter.lfs.clean` prints nothing.** That
+> means `git lfs install` has never been run on this machine, so git does not
+> know what `filter=lfs` in `.gitattributes` means and skips the clean filter
+> entirely. `--renormalize` would then stage 376 MB of raw PDF as ordinary git
+> blobs, and committing that pushes the whole corpus into git history outside
+> LFS — permanently. Run `git lfs install` first (or `git lfs install --local`
+> to confine it to this repository), then step 5. If the `git-lfs` binary is not
+> available at all, skip step 5 and live with the noisy `git status`; the
+> fetched files are correct either way.
 
 | subset | what it is | files | objects | bytes |
 |---|---|---:|---:|---:|
