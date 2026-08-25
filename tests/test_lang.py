@@ -48,6 +48,31 @@ class TestScriptDetection(unittest.TestCase):
         for sample in ("hello world", "围栏", "", "123"):
             self.assertNotEqual(detect_lang(sample)[1], "measured")
 
+    def test_french_is_not_reported_as_english(self):
+        """26 AVERTISSEMENT warnings in this corpus were tagged `en`. Obligation
+        10 exempts source warnings from translation on the strength of the lang
+        tag, so a wrong tag defeats the mechanism the exemption relies on."""
+        lang, basis = detect_lang(
+            "AVERTISSEMENT: Une mauvaise installation du produit peut causer des "
+            "blessures. Toujours porter des lunettes de securite lors de la coupe.")
+        self.assertEqual(lang, "fr")
+        self.assertEqual(basis, "assumed")
+
+    def test_spanish_is_not_reported_as_english(self):
+        lang, _ = detect_lang(
+            "ADVERTENCIA: La instalacion incorrecta de este producto puede resultar "
+            "en lesiones corporales. Utilice siempre gafas de seguridad.")
+        self.assertEqual(lang, "es")
+
+    def test_a_stray_foreign_word_does_not_flip_english(self):
+        """One borrowed word is not a language. The signal has to be a pattern."""
+        self.assertEqual(detect_lang("Install the panel de force bracket first")[0],
+                         "en")
+
+    def test_english_with_an_accent_stays_english(self):
+        self.assertEqual(detect_lang("Attach the CertaGrain\u00ae rail to the post "
+                                     "using the supplied screws")[0], "en")
+
     def test_the_showtech_catalogue_reads_as_english(self):
         """The real text that falsified the corpus_track shortcut."""
         self.assertEqual(detect_lang("PREFACE 05 OUR ADVANTAGES")[0], "en")

@@ -34,14 +34,38 @@ _CJK = re.compile(r"[㐀-䶿一-鿿豈-﫿]")
 # adjacent ones are the cheapest thing that behaves like a word.
 _LETTER_RUN = re.compile(r"[^\W\d_]{2,}", re.UNICODE)
 
+# Function words, not content words. A borrowed noun proves nothing -- "panel de
+# force" is English -- but a text that reaches for `des`, `une` and `pour` is
+# reaching for French grammar, and grammar is not borrowed one word at a time.
+# Two independent hits are required, so a single stray cannot flip a language.
+#
+# This exists because the corpus measurably needs it: the Barrette install guides
+# print English on pages 2-13 and French or Spanish on 14-22 of the SAME PDF, so
+# 137 warning units were tagged `en` on nothing but "it uses the Latin alphabet".
+# Obligation 10 exempts source warnings from translation on the strength of this
+# tag; a wrong tag defeats the mechanism the exemption relies on.
+_MARKERS = {
+    "fr": (r"avertissement", r"\bdes\b", r"\bune\b", r"\bpour\b", r"\bvous\b",
+           r"\bles\b", r"\best\b", r"\bdu\b", r"\bsur\b", r"\bavec\b",
+           r"\bpeut\b", r"\blors\b", r"\btoujours\b", r"\bproduit\b",
+           r"\bcauser\b", r"\bmauvaise\b", r"\bs\u00e9curit\u00e9\b", r"\bl'"),
+    "es": (r"advertencia", r"\blos\b", r"\blas\b", r"\bpara\b", r"\buna\b",
+           r"\bdel\b", r"\bcon\b", r"\bpuede\b", r"\bsiempre\b",
+           r"\bproducto\b", r"\bincorrecta\b", r"\butilice\b", r"\bseguridad\b",
+           r"\besta\b", r"\bque\b"),
+}
+_MARKER_RE = {lang: [re.compile(p, re.IGNORECASE) for p in pats]
+              for lang, pats in _MARKERS.items()}
+MIN_MARKERS = 2
+
 UNDETERMINED = ("und", "unknown")
 
 
 def detect_lang(text: str | None) -> tuple[str, str]:
     """Return ``(lang, basis)`` for a piece of source text.
 
-    ``lang`` is a BCP-47 tag: ``en``, ``zh``, or ``und`` when there is nothing
-    to go on. ``basis`` is ``measured | assumed | unknown`` and is never
+    ``lang`` is a BCP-47 tag: ``en``, ``fr``, ``es``, ``zh``, or ``und`` when
+    there is nothing to go on. ``basis`` is ``measured | assumed | unknown`` and is never
     ``measured`` here -- see the module docstring.
     """
     if not text or not text.strip():
@@ -51,6 +75,15 @@ def detect_lang(text: str | None) -> tuple[str, str]:
         # number. The CJK is the signal; the Latin is a product code.
         return ("zh", "assumed")
     if _LETTER_RUN.search(text):
+        # Score every candidate, then require a clear winner. Scoring all of them
+        # rather than returning on the first hit stops ordering from deciding a
+        # close call -- `que` and `con` appear in both Spanish and French text.
+        scores = {lang: sum(1 for r in pats if r.search(text))
+                  for lang, pats in _MARKER_RE.items()}
+        best = max(scores, key=lambda k: scores[k])
+        if scores[best] >= MIN_MARKERS and scores[best] > max(
+                [v for k, v in scores.items() if k != best] or [0]):
+            return (best, "assumed")
         return ("en", "assumed")
     # Digits, punctuation, and OCR noise with no word-like run in it. `30" 1-1/2`
     # is a real measurement and has no language; saying `en` would invent one.

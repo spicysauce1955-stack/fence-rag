@@ -30,6 +30,7 @@ from dataclasses import asdict, dataclass
 from datetime import date, timedelta
 
 from .canonical import canonical_bytes, content_hash
+from .lang import detect_lang
 from .store import connect
 
 CONTRACT_VERSION = "1.1.0"
@@ -83,12 +84,56 @@ SOURCE_CLASS = {
 }
 UNCLASSIFIED = {"unspecified"}
 
-_SEVERITY = re.compile(r"^\s*(WARNING|CAUTION|DANGER|NOTICE|IMPORTANT|NOTE)\b[\s:!.-]",
-                       re.IGNORECASE)
-# A severity word alone is not a warning. A table-of-contents line, a heading, or
-# a caption that merely contains "NOTE" carries no instruction, and publishing it
-# would put noise in front of an installer.
-MIN_WARNING_CHARS = 40
+# The publisher's own word, in the publisher's own language. ADVERTENCIA and
+# AVERTISSEMENT are real lexemes in this corpus and are NOT in the datamodel's
+# enumerated list -- the field is explicitly "not normalised", so they pass
+# through as printed. DANGER has zero instances here; it stays for completeness.
+_LEXEMES = (r"WARNING|CAUTION|DANGER|NOTICE|IMPORTANT|NOTES?|ATTENTION"
+            r"|ADVERTENCIA|AVERTISSEMENT")
+# A lexeme ALONE, as the whole element. 30% of warnings in this corpus print the
+# word as a heading and the body as the next element; a per-element rule
+# publishes 275 warnings whose entire text is "NOTE:".
+# A leading bullet or a page-number bleed from the footer must not defeat the
+# anchor: the freeze-thaw caution -- 83 instances, the most repeated warning in
+# this corpus -- prints as "* Caution -", and "30 * Caution ..." where the page
+# number bled into the text layer.
+_LEAD = r"[\s*\u2022\u00b7]{0,4}(?:\d{1,3}[A-Z]?\.?\s*[*\u2022]?\s*)?"
+_LEXEME_ONLY = re.compile(rf"^{_LEAD}({_LEXEMES})\s*[:!.\u2013-]?\s*$", re.IGNORECASE)
+# A lexeme followed by a real delimiter and a body.
+_LEXEME_LED = re.compile(rf"^{_LEAD}({_LEXEMES})\s*[:!.\u2013\u2014-]\s*(?=\S)",
+                         re.IGNORECASE)
+
+# A warning with no lexeme, recognised by stating a consequence. Kept narrow on
+# purpose: bare prohibitions ("do not", "never") were measured at 248 hits and
+# are dominated by ordinary instructions that merely contain a negation --
+# "dry-assemble all parts. Do not use glue." is a step, not a warning.
+_HAZARD = re.compile(
+    r"personal injury|bodily injury|serious injury|can result in|may result in"
+    r"|failure to comply|void the warranty|not be covered by the warranty"
+    r"|underground utilit|call before you dig|always wear|eye protection"
+    r"|limitation of liability", re.IGNORECASE)
+
+# Measured false positives, each one checked by hand.
+_NOT_A_WARNING = re.compile(
+    r"NOTICE OF ACCEPTANCE"                 # 76 hits: a Miami-Dade form header
+    r"|never fades|never blisters|never peels"   # marketing copy
+    r"|^\s*(safety glasses|safety goggles)\s*$",  # a line in a tool inventory
+    re.IGNORECASE)
+
+# A body that stops mid-clause. Publishing it as "verbatim" is technically true
+# and practically a lie: a truncated safety instruction is worse than none.
+_DANGLING = re.compile(
+    r"(?:\b(?:to|the|a|an|and|or|of|in|on|at|as|is|are|be|with|for|from|by|your"
+    r"|you|it|this|that|will|may|can|need|needs|into|onto|over|under)\b|-)\s*$",
+    re.IGNORECASE)
+MIN_BODY_CHARS = 12
+OCR_TRUST_FLOOR = 80.0
+
+# A numbered installation step, for attaches_to. Checklist headings such as
+# "1. Getting Started" and "2. Tools" are front matter, not steps.
+_STEP_HEADING = re.compile(r"^(?:STEP\s+)?\d{1,2}[.)]\s+[A-Za-z]")
+_NOT_A_STEP = re.compile(r"getting started|tools|materials|before you begin"
+                         r"|table of contents|parts list", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -188,6 +233,28 @@ class SnapshotBuilder:
         return sorted(self._gaps, key=lambda g: g.id)
 
     # -- warnings -----------------------------------------------------------
+    def _attaches_to(self, row, step_heading: str | None) -> dict:
+        """Where a warning belongs. Conservative on purpose.
+
+        A measured ladder over this corpus put 19.2% of warnings on a step,
+        independently reproducing the contract audit's 19.9% -- but 63% of those
+        came from *proximity*: a warning printed after step 3 was assumed to
+        belong to step 3. That is a page-layout accident as often as a fact.
+
+        So only an explicit step heading in the element's own `heading_path`
+        earns `step`. Everything else is `document`, which is both the corpus's
+        actual shape and the honest default -- Planning renders it once in the
+        annexe rather than against a line it may not govern.
+
+        `procedure` and `model` are unreachable: this store has no procedure
+        entity and no model linkage. Reported as such rather than approximated.
+        """
+        if row["doc_type"] == "warranty":
+            return {"kind": "warranty", "ref": row["sha256"]}
+        if step_heading:
+            return {"kind": "step", "ref": step_heading}
+        return {"kind": "document", "ref": row["sha256"]}
+
     def warnings(self) -> list[dict]:
         """Safety text from the manuals, republished verbatim.
 
@@ -197,58 +264,103 @@ class SnapshotBuilder:
         reader needs.
         """
         rows = self.conn.execute("""
-            SELECT e.element_id, e.page_no, e.text, e.ocr_text, e.text_source,
-                   e.ocr_confidence, e.lang, e.lang_basis, v.sha256
+            SELECT e.element_id, e.page_no, e.ordinal, e.text, e.ocr_text,
+                   e.text_source, e.ocr_confidence, e.lang, e.heading_path,
+                   e.document_id, v.sha256, d.doc_type
               FROM elements e
               JOIN document_versions v ON v.document_id = e.document_id
-             ORDER BY e.element_id""").fetchall()
+              JOIN documents d         ON d.document_id = e.document_id
+             ORDER BY e.document_id, e.page_no, e.ordinal""").fetchall()
 
-        out, seen = [], {}
-        for r in rows:
-            text = (r["text"] or "").strip() or (r["ocr_text"] or "").strip()
-            m = _SEVERITY.match(text) if text else None
-            if not m:
+        def body_of(r):
+            return ((r["text"] or "").strip() or (r["ocr_text"] or "").strip())
+
+        seen: dict[str, dict] = {}
+        out: list[dict] = []
+        for i, r in enumerate(rows):
+            text = body_of(r)
+            if not text or _NOT_A_WARNING.search(text):
                 continue
-            if len(text) < MIN_WARNING_CHARS:
-                # a heading or a contents line: the word without the instruction
+
+            lexeme, body, anchor = None, None, r
+            if _LEXEME_ONLY.match(text):
+                # the word is a heading; the body is the next element on the page
+                lexeme = _LEXEME_ONLY.match(text).group(1).upper()
+                nxt = rows[i + 1] if i + 1 < len(rows) else None
+                if (nxt and nxt["document_id"] == r["document_id"]
+                        and nxt["page_no"] == r["page_no"] and body_of(nxt)
+                        and not _LEXEME_ONLY.match(body_of(nxt))):
+                    body = body_of(nxt)
+                    text = f"{text}\n{body}"
+                else:
+                    self.gap(kind="unquantified", subject=r["element_id"],
+                             would_close=f"the page prints {lexeme!r} with no "
+                                         f"instruction after it; a person should "
+                                         f"read the page image and record what it says",
+                             closes_by="knowledge", severity="informational")
+                    continue
+            elif m := _LEXEME_LED.match(text):
+                lexeme = m.group(1).upper()
+                body = text[m.end():].strip()
+            elif _HAZARD.search(text):
+                lexeme, body = None, text          # a warning without the word
+            else:
                 continue
-            if not r["lang"]:
+
+            if len(body) < MIN_BODY_CHARS:
+                self.gap(kind="unquantified", subject=r["element_id"],
+                         would_close="a severity word with no usable instruction "
+                                     "after it; read the page image",
+                         closes_by="knowledge", severity="informational")
+                continue
+            if _DANGLING.search(body) or body[:1].islower():
+                # ends on a function word or starts mid-sentence: the column or
+                # the page cut it. Verbatim-but-truncated is worse than absent.
+                self.gap(kind="illegible_source", subject=r["element_id"],
+                         would_close="this warning is cut off mid-clause; a person "
+                                     "should read the page image and record it whole",
+                         closes_by="knowledge", severity="warns_line")
+                continue
+            if (r["text_source"] in ("ocr", "image_ocr")
+                    and (r["ocr_confidence"] or 0) < OCR_TRUST_FLOOR):
+                self.gap(kind="illegible_source", subject=r["element_id"],
+                         would_close="OCR read this warning below the confidence "
+                                     "floor; a person should read the page image",
+                         closes_by="knowledge", severity="warns_line")
+                continue
+            # Detect on the text actually being published, not on the anchor
+            # element's stored tag. Where the lexeme is a heading and the body is
+            # the next element, the heading alone is one word -- "AVERTISSEMENT:"
+            # -- and carries no grammar to detect. Reading the pair gives the
+            # honest answer; obligation 10's lang is a claim about `text_raw`.
+            lang, lang_basis = detect_lang(text)
+            if lang == "und":
                 self.gap(kind="missing_value", subject=r["element_id"],
-                         would_close="tag this element's language; obligation 10 "
-                                     "requires lang on published text",
+                         would_close="this text has no determinable language; "
+                                     "obligation 10 requires lang on published text",
                          closes_by="knowledge", severity="informational")
                 continue
 
-            key = " ".join(text.split())          # dedup on content, not on whitespace
-            ref = self.source_ref(r["element_id"])
+            import json as _json
+            path = _json.loads(r["heading_path"] or "[]")
+            step = next((h for h in reversed(path)
+                         if _STEP_HEADING.match(h) and not _NOT_A_STEP.search(h)), None)
+
+            key = " ".join(text.split())       # identity on content, not whitespace
+            ref = self.source_ref(anchor["element_id"])
             if key in seen:
                 # The same text printed in several documents is one warning with
-                # several citations, not several warnings. 14 groups of files in
-                # this corpus are byte-identical under different manufacturers.
+                # several citations. 14 groups of files here are byte-identical
+                # under different manufacturers.
                 if ref.belongs_to not in {c["belongs_to"] for c in seen[key]["cites"]}:
                     seen[key]["cites"].append(asdict(ref))
                 continue
 
-            w = {
-                "text_raw": text,                       # verbatim, never normalised
-                "lang": r["lang"],
-                "severity_lexeme": m.group(1).upper(),
-                # Document scope is the honest default here. The contract's own
-                # census found 68% of warning instances are document-scoped and
-                # only 19.9% sit inside a step that does something -- and this
-                # store has no step model at all, so claiming a step would be an
-                # assertion nothing backs.
-                "attaches_to": {"kind": "document", "ref": r["sha256"]},
-                "cites": [asdict(ref)],
-            }
-            if r["text_source"] in ("ocr", "image_ocr"):
-                conf = r["ocr_confidence"]
-                if conf is None or conf < 80.0:
-                    self.gap(kind="illegible_source", subject=r["element_id"],
-                             would_close="a person should read this warning against "
-                                         "the page image; it was OCR'd below the "
-                                         "confidence threshold",
-                             closes_by="knowledge", severity="informational")
+            w = {"text_raw": text,                  # verbatim, never normalised
+                 "lang": lang,
+                 "severity_lexeme": lexeme,
+                 "attaches_to": self._attaches_to(r, step),
+                 "cites": [asdict(ref)]}
             seen[key] = w
             out.append(w)
 
@@ -303,7 +415,7 @@ def verify(snapshot: dict) -> None:
     held = set()
     for d in snapshot.get("source_docs", []):
         if d["content_hash"] in held:
-            fail.append(f"duplicate source_doc {d['content_hash'][:12]}…")
+            fail.append(f"duplicate source_doc {d['content_hash'][:12]}...")
         held.add(d["content_hash"])
         if d.get("source_class") not in SOURCE_CLASSES:
             fail.append(f"source_class {d.get('source_class')!r} is outside the "
@@ -312,13 +424,11 @@ def verify(snapshot: dict) -> None:
             fail.append(f"version_status {d.get('version_status')!r} is not "
                         f"active|superseded|unknown")
 
-    # obligation 3 + the closure rule, walked over the whole object so a cite
-    # buried in a shape added later is still caught
     def walk(node, path="$"):
         if isinstance(node, dict):
             if "belongs_to" in node and "id" in node and node["belongs_to"] not in held:
-                fail.append(f"{path}: closure — SourceRef {node['id']} belongs_to "
-                            f"{node['belongs_to'][:12]}…, which is not in source_docs")
+                fail.append(f"{path}: closure - SourceRef {node['id']} belongs_to "
+                            f"{node['belongs_to'][:12]}..., not in source_docs")
             for k, v in node.items():
                 if isinstance(v, float):
                     fail.append(f"{path}.{k}: a float ({v!r}) cannot cross")
@@ -331,22 +441,22 @@ def verify(snapshot: dict) -> None:
     for i, w in enumerate(snapshot.get("warnings", [])):
         at = f"warnings[{i}]"
         if not w.get("cites"):
-            fail.append(f"{at}: obligation 3 — every published value carries at "
+            fail.append(f"{at}: obligation 3 - every published value carries at "
                         f"least one resolvable SourceRef")
         if not w.get("text_raw") or not w.get("lang"):
-            fail.append(f"{at}: obligation 10 — text_raw and lang are required")
+            fail.append(f"{at}: obligation 10 - text_raw and lang are required")
         kind = (w.get("attaches_to") or {}).get("kind")
         if not w.get("attaches_to"):
-            fail.append(f"{at}: obligation 10 — a warning declares what it attaches to")
+            fail.append(f"{at}: obligation 10 - a warning declares what it attaches to")
         elif kind not in ATTACHES_TO_KINDS:
             fail.append(f"{at}: attaches_to.kind {kind!r} is not one of the seven")
 
     for i, g in enumerate(snapshot.get("gaps", [])):
         at = f"gaps[{i}]"
         if not g.get("would_close"):
-            fail.append(f"{at}: obligation 8 — a gap says what would close it")
+            fail.append(f"{at}: obligation 8 - a gap says what would close it")
         if g.get("closes_by") not in ("knowledge", "planning"):
-            fail.append(f"{at}: obligation 8 — a gap declares who can close it")
+            fail.append(f"{at}: obligation 8 - a gap declares who can close it")
         if g.get("kind") not in GAP_KINDS:
             fail.append(f"{at}: gap kind {g.get('kind')!r} is not one of the eight")
 
