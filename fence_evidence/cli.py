@@ -110,6 +110,16 @@ def main(argv: list[str] | None = None) -> int:
                    help="un-promote facts no person reviewed (build-plan A1); "
                         "keeps every reading and its crop")
 
+    p = sub.add_parser("snapshot",
+                       help="build, store and inspect published snapshots")
+    p.add_argument("--build", action="store_true", help="build one and store it")
+    p.add_argument("--tenant", default="default")
+    p.add_argument("--regime", default="us_astm", choices=["us_astm", "cn_gb"])
+    p.add_argument("--list", action="store_true", help="what is held")
+    p.add_argument("--get", metavar="ID", help="fetch one by hash")
+    p.add_argument("--dry-run", action="store_true",
+                   help="build and report without storing")
+
     sub.add_parser("migrate",
                    help="bring an existing store up to the current schema: add any "
                         "missing columns and backfill what they need")
@@ -252,6 +262,28 @@ def main(argv: list[str] | None = None) -> int:
         else:
             from .promote_tables import promote_verified
             _print(promote_verified(dry_run=not args.apply))
+    elif args.cmd == "snapshot":
+        from .snapshot import build_snapshot
+        from .snapshot_store import get_snapshot, list_snapshots, put_snapshot
+        if args.get:
+            _print(get_snapshot(args.get))
+        elif args.list:
+            _print(list_snapshots())
+        elif args.build or args.dry_run:
+            snap = build_snapshot(tenant=args.tenant, regime=args.regime)
+            summary = {"snapshot_id": snap["snapshot_id"],
+                       "tenant": snap["tenant"], "regime": snap["regime"],
+                       "retain_until": snap["retain_until"],
+                       "source_docs": len(snap["source_docs"]),
+                       "warnings": len(snap["warnings"]),
+                       "gaps": len(snap["gaps"]),
+                       "stored": False}
+            if args.build:
+                put_snapshot(snap)
+                summary["stored"] = True
+            _print(summary)
+        else:
+            _print({"error": "choose one of --build, --dry-run, --list, --get"})
     elif args.cmd == "migrate":
         from .store import (backfill_lang, connect as _c, migrate as _m,
                             retire_columns, SCHEMA_VERSION)
