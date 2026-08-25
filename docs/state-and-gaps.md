@@ -45,8 +45,9 @@ review responses), `docs/mvp-implementation-spec.md` (the contract),
 | relations: supersedes / superseded_by / same_content_as / same_product_as | 24 / 24 / 38 / 14 |
 | version status: active / superseded / unknown | 3 / 9 / 132 |
 | retrieval units | 10,886 |
-| facts: extracted / flagged / cross_family_verified | 1,393 / 271 / 324 — **1,988 total** |
-| table read candidates: unreviewed / agent_verified / cross_family_verified | 709 / 12 / 504 |
+| facts: extracted / flagged | 1,386 / 266 — **1,652 total** (measured 2026-08-25, after A1) |
+| facts promoted from table readings | **0** — see G17; the level-2 population is zero by design |
+| table read candidates: unreviewed / agent_verified / cross_family_verified | 709 / 12 / 504 — all 1,225 retained with crops |
 | quality issues | 374 |
 | derived image data on disk | 4.5 GB (git-ignored, reproducible) |
 
@@ -353,39 +354,63 @@ quoted source text in
 roughly 111 list entries — a sample; two files carry no PDF-backed numeric claims
 this method can check.
 
-### G17 — 324 facts were promoted with no person in the loop
+### G17 — 324 facts were promoted with no person in the loop — FIXED
 
-**This entry previously said the opposite and was wrong.** It read *"Zero facts
-promoted; the facts table is unchanged at 1,664."* That has not been true since
-the cross-family reading pass landed.
+**This entry has now been wrong in both directions.** It first read *"Zero facts
+promoted; the facts table is unchanged at 1,664"*, which stopped being true when
+the cross-family reading pass landed. It then recorded 324 facts promoted with no
+human review, which was true until build-plan A1 closed it on 2026-08-25.
 
-1,225 candidate readings are stored in `table_read_candidates`, each with its
-source crop and crop SHA-256: 709 `unreviewed`, 12 `agent_verified`, and 504
-`cross_family_verified`. 324 of them carry a `promoted_fact_id`, and `facts` has
-grown from 1,664 to **1,988** accordingly — 324 rows with
-`extractor='table-read:cross_family_verified'`, comprising 162 `footing_depth_in`,
-126 `post_spacing_in` and 36 `footing_diameter_in`.
+**What was wrong.** `table_review.PROMOTABLE` was `("accepted", "corrected",
+"cross_family_verified")`. The first two mean a person signed off; the third means
+two readers from *different* model families produced the same value. `promote()`
+additionally required only that the crop still existed on disk. So 504 readings
+were promotable and 324 became facts, carrying `extractor =
+'table-read:cross_family_verified'` and a curation level no person had conferred —
+162 `footing_depth_in`, 126 `post_spacing_in`, 36 `footing_diameter_in`. `reviewer`
+was NULL on all 1,225 readings and still is.
 
-The gate is narrower than this document claimed. `table_review.PROMOTABLE` is
-`("accepted", "corrected", "cross_family_verified")`. `agent_verified` — two
-readers of the *same* model family — is correctly refused. But
-`cross_family_verified` — two readers of *different* families — promotes, and
-`promote` only additionally requires that the crop still exists on disk. No human
-review is involved at any point.
+That is defensible as *evidence* and indefensible as a *promotion rule*, for exactly
+the values G15 and G16 are about: footing depths and maximum post spacings, where a
+confidently wrong number is the failure mode. G16 found four documented errors in
+the same class of value. Some promoted rows even carried
+`"_applicability_basis": "readers did not independently agree on the applicability
+bracket"` — the readers agreed on the number, disagreed about which case it applied
+to, and it promoted anyway.
 
-That is defensible as evidence (cross-family agreement is stronger than
-same-family agreement, and the round-1 pass measured 174/174 cell agreement) and
-indefensible as a promotion rule for exactly the values G15 and G16 are about:
-footing depths and maximum post spacings, where a confidently wrong number is the
-failure mode. The 324 rows are the same class of value that G16 found four
-documented errors in.
+**Fixed.** `PROMOTABLE` is now `("accepted", "corrected")`. Nothing reaches a fact
+without a person having compared it to the source crop, which is the whole of
+contract obligation 6. Measured after the change:
 
-**Not closed because** the fix belongs to the curation phase, not to a patch
-here. `docs/curation/` C0 removes `cross_family_verified` from `PROMOTABLE` and
-re-enters the 324 rows as candidates requiring human review, and doing that ahead
-of the review gate would mean the first act of a review-gated phase is to skip its
-own gate. Until that lands, treat any `table-read:cross_family_verified` fact as
-unreviewed regardless of its status column.
+| | Before | After |
+|---|---:|---:|
+| facts | 1,976 | **1,652** |
+| promoted from table readings | 324 | **0** |
+| candidates carrying `promoted_fact_id` | 324 | **0** |
+| readings retained, with crop and `crop_sha256` | 1,225 | **1,225** |
+
+**It un-promotes; it does not delete.** `promote_tables.revoke_machine_promotions()`
+removes the fact and clears the promotion link, and leaves the reading, its crop and
+its `crop_sha256` exactly as they were. Cross-family agreement is still the right
+thing to *order a review queue by* — it just never clears it. The 504
+`cross_family_verified` readings are now the front of that queue rather than facts.
+
+**The signal is preserved across the boundary, without touching the scale.** These
+rows publish at an honest `curation_level` 1 and are rejected by Planning's source
+policy for structural tasks — crossing anyway and visible in the decision graph as
+rejected rather than silently absent, which is the arrangement
+`docs/integration/where-we-stand.md` already anticipated. The new platform warning
+code `CURATION_MACHINE_CONSENSUS` (`planning-asks.md` §3.3) carries the evidence —
+168 distinct cells, 3 readers each, families `claude-sonnet` + `openai-codex` — so a
+level-1 row that two families agreed on is distinguishable from one nobody checked.
+A registry addition, not an amendment; `AMENDING.md` §2 lists warning codes as
+explicitly not amendable.
+
+**Guarded by** `tests/test_promote_tables.py`:
+`test_no_fact_was_promoted_without_a_person` and
+`test_no_fact_carries_a_machine_only_review_status` assert it against the live
+store, and `test_table_review.py::test_only_human_review_is_promotable` pins
+`PROMOTABLE` to exactly `{accepted, corrected}`.
 
 ### G10 — Not built at all (deliberate)
 

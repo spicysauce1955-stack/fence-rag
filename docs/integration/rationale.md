@@ -115,9 +115,12 @@ the interface.
 
 ## 4. Why a review gate, and why it is not absolute
 
-The store's current position: **1,988 facts, none reviewed by a person.** 324 were
-promoted automatically on cross-family agreement — the mechanism `state-and-gaps.md` G17
-records and `docs/curation/` C0 proposes revoking.
+The store's current position: **1,652 facts, none reviewed by a person.** Until
+2026-08-25 it was 1,988, of which 324 had been promoted automatically on cross-family
+agreement. That mechanism is gone — `table_review.PROMOTABLE` is now `("accepted",
+"corrected")`, `state-and-gaps.md` G17 records the change, and what `docs/curation/` C0
+proposed landed on its own as build-plan A1. **The level-2 population is zero**, which is
+the honest number until human review begins.
 
 That justifies a gate. But an absolute gate would make the whole system unusable before
 curation has run, and would couple the two teams' schedules together — a consumer that

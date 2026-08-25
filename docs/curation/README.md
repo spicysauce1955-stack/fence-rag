@@ -13,11 +13,23 @@ The system built in Phases 0–6 is good at preserving what a page *contained* a
 bad at answering what a product *requires*. That is not a retrieval bug. It is a
 missing layer.
 
+> **Baseline note, 2026-08-25.** This proposal was written against a store holding
+> **1,988 facts**. Build-plan A1 has since un-promoted the 324 that no person reviewed,
+> so the store holds **1,652** and the level-2 population is zero. Fact counts throughout
+> these five documents — including `05-acceptance-criteria.md` P3 ("identical, 1,988
+> rows") and C-C3's `cross_family_verified` slice — are stated as of authoring and have
+> **not** been rewritten: they are the premises the proposal was reasoned from, and
+> silently restating them would hide that the ground moved. Re-measure before accepting
+> any acceptance criterion that names a row count.
+
 Two measurements make the case, both from `docs/state-and-gaps.md`:
 
-- **G6/G15.** `facts` holds 1,988 rows — 1,664 from `extractor='regex-v1'` and
-324 from an unreviewed table-reading pass marked
-`table-read:cross_family_verified`, none of which a person ever accepted. A
+- **G6/G15.** `facts` holds **1,652 rows**, all from `extractor='regex-v1'`.
+(It held 1,988 when this was written: 1,664 regex rows plus 324 from an
+unreviewed table-reading pass marked `table-read:cross_family_verified`, none of
+which a person ever accepted. Those 324 were un-promoted on 2026-08-25 — C0 below
+landed as build-plan A1 — but the case this section makes is unchanged, and the
+regex rows it turns on were always the larger half.) A
 typical regex row reads `footing_depth_in = 30"`, `subject = "FENCING
 INSTRUCTIONS > POST"`, `conditions = {}`. The subject is a heading path, not a
 product. The condition set is empty because the regex never looked for one. The
@@ -47,13 +59,15 @@ copies each row forward into a candidate claim and leaves the original in place.
 - `fence_evidence/{extract,layout,hocr,tables,quality,ingest,manifest}.py` —
 not modified.
 
-One deliberate exception: `table_review.PROMOTABLE` currently contains
-`cross_family_verified`, so two agent readings from different model families
-already promote without a person — 324 facts entered `facts` that way, taking it
-from 1,664 to 1,988. Curation revokes that in C0 and re-enters those rows as
-candidates. It is a narrowing of what the frozen layer may assert, not a rebuild
-of it. `docs/state-and-gaps.md` G17 now records the same thing; it previously
-claimed zero facts had been promoted, which had stopped being true.
+One deliberate exception, **now closed ahead of this phase**: `PROMOTABLE`
+contained `cross_family_verified`, so two agent readings from different model
+families promoted without a person — 324 facts entered `facts` that way. **C0 was
+taken out of this proposal and landed on its own as build-plan A1, 2026-08-25**,
+because it was a ratification commitment rather than a proposal and should not
+have waited on a phase still under review. `PROMOTABLE` is now `("accepted",
+"corrected")`, the 324 rows are back to being candidates with their crops intact,
+and `facts` is 1,652. It was a narrowing of what the frozen layer may assert, not
+a rebuild of it. See `docs/state-and-gaps.md` G17.
 
 Curation writes only to new tables in a new namespace and to `workspace/`.
 

@@ -104,8 +104,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--reader")
 
     p = sub.add_parser("promote-tables",
-                       help="turn cross-family-verified table readings into conditioned facts")
+                       help="turn human-reviewed table readings into conditioned facts")
     p.add_argument("--apply", action="store_true", help="write them (default is a dry run)")
+    p.add_argument("--revoke", action="store_true",
+                   help="un-promote facts no person reviewed (build-plan A1); "
+                        "keeps every reading and its crop")
 
     sub.add_parser("worklist",
                    help="split unresolved material into machine / review / human piles")
@@ -239,8 +242,12 @@ def main(argv: list[str] | None = None) -> int:
         conn.close()
         _print(out)
     elif args.cmd == "promote-tables":
-        from .promote_tables import promote_verified
-        _print(promote_verified(dry_run=not args.apply))
+        if args.revoke:
+            from .promote_tables import revoke_machine_promotions
+            _print(revoke_machine_promotions(dry_run=not args.apply))
+        else:
+            from .promote_tables import promote_verified
+            _print(promote_verified(dry_run=not args.apply))
     elif args.cmd == "worklist":
         from .worklist import build
         _print(build())

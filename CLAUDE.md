@@ -60,9 +60,11 @@ slice, a staged plan, and acceptance criteria. It sits in **tier 3 — this team
 the contract is silent on it. It remains **a proposal under review**: nothing in it is implemented,
 no corpus-wide curation has run, and the projection has not been regenerated. Read
 `docs/curation/README.md` first. One exception to "proposal": its C0 — removing
-`cross_family_verified` from `table_review.PROMOTABLE`, which today lets two agent readings promote
-a fact with no human review — is now a **commitment** made in writing at ratification, and is item
-A1 of `docs/build-plan.md`.
+`cross_family_verified` from `table_review.PROMOTABLE`, which let two agent readings promote a fact
+with no human review — was a **commitment** made in writing at ratification, and **landed
+2026-08-25** as item A1 of `docs/build-plan.md`. `PROMOTABLE` is now `("accepted", "corrected")`,
+the 324 machine-promoted facts are un-promoted, and all 1,225 readings are retained with their
+crops as a review queue. See `docs/state-and-gaps.md` G17.
 
 ## Commands
 

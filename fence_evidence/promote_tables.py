@@ -171,3 +171,48 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
 
 if __name__ == "__main__":
     print(json.dumps(promote_verified(dry_run=True), indent=2))
+
+
+def revoke_machine_promotions(conn: sqlite3.Connection | None = None, *,
+                              dry_run: bool = False) -> dict:
+    """Un-promote facts that reached the store without a person in the loop.
+
+    Build-plan A1. `PROMOTABLE` once contained ``cross_family_verified``, so two
+    agents agreeing wrote a fact carrying a curation level no human conferred.
+    Closing the gate stops new ones; this removes the ones already written.
+
+    It **un-promotes**, it does not delete. The reading, its crop and its
+    crop_sha256 stay exactly as they are — that is the evidence a reviewer needs,
+    and cross-family agreement remains the right thing to order their queue by.
+    Only the fact and the promotion link go.
+    """
+    own = conn is None
+    conn = conn or connect()
+    try:
+        rows = conn.execute(f"""
+            SELECT candidate_id, promoted_fact_id, review_status
+              FROM table_read_candidates
+             WHERE promoted_fact_id IS NOT NULL
+               AND review_status NOT IN ({','.join('?' * len(PROMOTABLE))})""",
+            PROMOTABLE).fetchall()
+        by_status: dict[str, int] = defaultdict(int)
+        for r in rows:
+            by_status[r["review_status"]] += 1
+        if dry_run:
+            return {"facts_deleted": 0, "candidates_reset": 0,
+                    "would_revoke": len(rows), "by_status": dict(by_status)}
+
+        deleted = 0
+        for r in rows:
+            cur = conn.execute("DELETE FROM facts WHERE fact_id=?",
+                               (r["promoted_fact_id"],))
+            deleted += cur.rowcount
+            conn.execute("""UPDATE table_read_candidates
+                               SET promoted_fact_id=NULL, reviewer=NULL, reviewed_at=NULL
+                             WHERE candidate_id=?""", (r["candidate_id"],))
+        conn.commit()
+        return {"facts_deleted": deleted, "candidates_reset": len(rows),
+                "by_status": dict(by_status)}
+    finally:
+        if own:
+            conn.close()

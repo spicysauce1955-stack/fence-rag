@@ -4,19 +4,20 @@ A *reading* is what some reader saw on a page image: an agent, a future per-cell
 OCR pass, or a person. Readings are stored, compared, and surfaced as candidates.
 They are never facts.
 
-The gate is enforced here rather than described in a document, and it keys on
-evidence rather than on who produced the reading. What makes a reading
-promotable is that independent readers agree, where *independent* means they can
-fail differently:
+The gate is enforced here rather than described in a document. What makes a
+reading promotable is that a person compared it to the source crop:
 
-* ``cross_family_verified`` — readers from at least two different model families
-  produced the identical value. Promotable.
-* ``agent_verified`` — two readers from the *same* family agreed. Not
-  promotable on its own: their errors may be correlated, and nothing here
-  measures that.
 * ``accepted`` / ``corrected`` — a person signed off. Promotable.
+* ``cross_family_verified`` — readers from at least two different model families
+  produced the identical value. **Not promotable.** Strong evidence, and the
+  right thing to order a review queue by, but no person has looked.
+* ``agent_verified`` — two readers from the *same* family agreed. Not
+  promotable: their errors may be correlated, and nothing here measures that.
 
-The distinction that matters is independence, not human versus machine.
+Independence between readers is what makes agreement worth ranking on. It is not
+what makes a reading a fact. This gate once treated ``cross_family_verified`` as
+promotable, which published 324 facts at a curation level no person had checked;
+see ``docs/build-plan.md`` A1.
 """
 from __future__ import annotations
 
@@ -29,7 +30,7 @@ from pathlib import Path
 from .paths import REPO_ROOT
 from .store import connect, now
 
-PROMOTABLE = ("accepted", "corrected", "cross_family_verified")
+PROMOTABLE = ("accepted", "corrected")
 READ_STATUSES = ("unreviewed", "agent_verified", "cross_family_verified",
                  "accepted", "corrected", "rejected")
 
@@ -251,9 +252,12 @@ def promote(conn: sqlite3.Connection, candidate_id: int, *, fact_type: str,
     if row["review_status"] not in PROMOTABLE:
         raise ReviewRequired(
             f"candidate {candidate_id} is '{row['review_status']}'; only "
-            f"{', '.join(PROMOTABLE)} may become a fact. Agreement between readers "
-            f"of the same model family ('agent_verified') is not enough on its own, "
-            f"because their errors may be correlated.")
+            f"{', '.join(PROMOTABLE)} may become a fact — each of which means a "
+            f"person compared the reading to its source crop. Agreement between "
+            f"readers is evidence for that person, never a substitute for them: "
+            f"'cross_family_verified' ranks the queue, it does not clear it, and "
+            f"'agent_verified' is weaker still because same-family errors may be "
+            f"correlated.")
     if not row["crop_path"] or not (REPO_ROOT / row["crop_path"]).is_file():
         raise ReviewRequired(
             f"candidate {candidate_id} has no source crop on disk; a number that "
@@ -274,8 +278,7 @@ def promote(conn: sqlite3.Connection, candidate_id: int, *, fact_type: str,
          json.dumps({"col_label": row["col_label"], "row_label": row["row_label"]}),
          f"read from {row['crop_path']} row {row['row_index']} col {row['col_index']}",
          f"table-review:{row['review_status']}:{row['reader']}", 0,
-         "reviewed" if row["review_status"] in ("accepted", "corrected")
-         else "cross_family_verified", now()))
+         "reviewed", now()))
     conn.execute("""UPDATE table_read_candidates SET promoted_fact_id=?, reviewer=?,
                     reviewed_at=? WHERE candidate_id=?""",
                  (cur.lastrowid, reviewer or row["reviewer"], now(), candidate_id))

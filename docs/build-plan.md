@@ -26,9 +26,11 @@ boundary yet — there is no snapshot, no `ParameterTable`, no `Gap`, no part-ty
 API surface at all. Twelve of the eighteen obligations describe that layer, and we declared
 all twelve unbuilt at signature.
 
-**The one live violation**, also declared: `cross_family_verified` sits in
-`table_review.PROMOTABLE`, so two agent readings promote a fact with no person involved.
-324 facts are promoted that way, and `reviewer` is NULL on all 1,225 readings.
+**The one live violation**, also declared, is **closed** — A1 landed 2026-08-25.
+`cross_family_verified` is out of `table_review.PROMOTABLE`, the 324 facts it promoted are
+un-promoted, and the level-2 population is zero. `reviewer` is still NULL on all 1,225
+readings, which is now the honest state rather than a contradiction: the readings are
+retained with their crops as the front of the review queue. See `state-and-gaps.md` G17.
 
 ## 1. What must not move
 
@@ -65,8 +67,8 @@ Small, mechanical, and every one of them is a promise already made in writing.
 
 | | Obligation | What |
 |---|---|---|
-| A1 | 6 | **Revoke `cross_family_verified` from `table_review.PROMOTABLE`** (K1). Takes the level-2 population to zero, which is the honest number until a person reviews something. Do not soften it. |
-| A2 | 15 | Move `_applicability_basis` **out of** `conditions` — 324 facts carry it as an underscore-prefixed free-text key inside a field that publishes as condition dimensions. Add `condition_basis: stated \| assumed`. |
+| A1 | 6 | ~~**Revoke `cross_family_verified` from `table_review.PROMOTABLE`** (K1).~~ **DONE 2026-08-25.** Level-2 population is zero. Facts 1,976 → 1,652; all 1,225 readings retained with crops via `revoke_machine_promotions()`. The signal survives as the new platform warning code `CURATION_MACHINE_CONSENSUS` (`integration/planning-asks.md` §3.3) — a registry addition, no amendment. |
+| A2 | 15 | Move `_applicability_basis` **out of** `conditions` — an underscore-prefixed free-text key inside a field that publishes as condition dimensions. Add `condition_basis: stated \| assumed`. **Note: A1 changed this item's premise.** The 324 facts that carried the key were the machine-promoted ones, so the store now holds **0**. The defect is *latent, not gone* — `promote_tables.promote_verified()` still writes `conditions["_applicability_basis"]`, so it returns the moment human review starts promoting. Fix the writer, not the rows. |
 | A3 | 4 | Represent a **disagreeing second unit**. 48 distinct dual-unit statements across 12 documents (`4 inch (101 mm)`, where 4″ is 101.600 mm). The schema holds one `value_original`/`unit_original` pair and cannot express them. |
 | A4 | 10 | Record `lang` on text. No language field exists anywhere in the store; publishing `en` by assertion is an assumption, and obligation 10 exists to keep those visible. |
 | A5 | 14 | Extract `stock_length`. *"Standard rails are supplied in 16 foot lengths"* is text, not a fact. Note it varies by colour — 12 ft for Blend — so it is conditional, not a scalar. |
