@@ -4,9 +4,12 @@
 Purpose:  The countersigned record that closes v1.0. Until BOTH blocks below are
           signed, the contract is FROZEN but NOT RATIFIED — and AMENDING.md §5
           is explicit that "they did not object" is not acceptance.
-Status:   Planning & BOM signed 2026-08-25. Knowledge Platform: NOT SIGNED —
-          obligation 6 reads wrong on the cold pass, filed as amendment 001.
-Action:   Planning — disposition amendment 001. §3 signs on that and nothing else.
+Status:   SUPERSEDED. v1.0 was never ratified. Amendment 001 was accepted and
+          applied; contract.md is v1.1 and ratification moved to audit/11.
+Kept:     Unedited. §3.2 is the Knowledge team's declared non-compliance and is
+          referenced by audit/11 rather than restated. §1's hash table carries a
+          stale AMENDING.md value and the correction that caught it — both left in
+          place, because the correction is the useful half.
 ```
 
 ## 0. Why this file exists

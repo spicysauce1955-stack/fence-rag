@@ -36,6 +36,7 @@ the boundary: what crosses it, in what shape, and what each side promises the ot
 | [`boundary-delta-v0.4.md`](boundary-delta-v0.4.md) | The four v0.4 items that needed agreement. All four accepted — see `audit/07` |
 | [`contract.md`](contract.md) | **FROZEN v1.0.** What crosses the boundary, and the promises each side makes. Verify with `sha256sum -c contract.sha256` |
 | [`AMENDING.md`](AMENDING.md) | How and when the frozen contract may change — four triggers, five steps, and what is *not* an amendment |
+| [`amendments/`](amendments/) | Filed amendments. **001** — obligation 6's superseded clause, accepted, cut as v1.1 |
 | [`amendments/`](amendments/) | Filed amendments. **001** — obligation 6 carries a clause §1.4 marks superseded (trigger D) |
 | [`knowledge-datamodel.md`](knowledge-datamodel.md) | Every entity, field, relationship and invariant, with a traceability map from each audit finding |
 | [`planning-asks.md`](planning-asks.md) | What Planning needs from this platform, ordered by impact |

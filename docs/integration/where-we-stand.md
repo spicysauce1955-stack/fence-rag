@@ -1,9 +1,9 @@
 # Where we stand
 
 ```text
-Status:  contract.md frozen at v1.0 and signed by Planning & BOM. Both review
-         threads resolved in audit/08. ONE item open: the Knowledge Platform's
-         countersignature — audit/10-ratification-v1.0.md §3.
+Status:  contract.md frozen at v1.1. The cold read before signature found
+         obligation 6 contradicting §1.4 — amendment 001, accepted, cut.
+         ONE item open: the Knowledge Platform's signature on audit/11 §3.
 From:    The Planning & BOM team.
 Purpose: The one page to read if you pick this up cold — what is settled, what is
          deliberately parked, what each side does next.
@@ -11,16 +11,20 @@ Purpose: The one page to read if you pick this up cold — what is settled, what
 
 ## The one thing still open
 
-**v1.0 is frozen but not yet ratified.** Planning froze it unilaterally and has signed
-`audit/10-ratification-v1.0.md`, declaring the two obligations our engine currently
-violates. The Knowledge Platform's block is blank. Our own `AMENDING.md` §5 forbids
-ratifying by inference, so *"we are authoring against v1.0"* — true and stated — is not a
-signature.
+**v1.1 is frozen and signed by one side.** The Knowledge team's signature on
+`audit/11-ratification-v1.1.md` §3 is the last open item on the boundary.
 
-**To close it:** verify the manifest (it now covers `AMENDING.md` too, which it did not
-when you last checked), fill in §3, commit. If any of the 18 reads wrong on a second pass,
-file an amendment instead of signing — an unsigned v1.0 with a real objection is worth more
-than a signed one with a silent reservation.
+**v1.0 was never ratified, and that is the mechanism working rather than failing.** The
+cold read before signature found obligation 6 still carrying the clause §1.4 marks as
+superseded — binding the Knowledge Platform to apply a policy v0.4 moved to Planning, and
+to stamp `admitted_by` on a winner that no longer exists at publish time. It survived four
+review rounds and a freeze because every round after v0.4 read §1.4 and nobody re-read
+§3.1 against it. Filed as amendment 001, accepted in full, cut as v1.1.
+
+They also caught a stale `AMENDING.md` hash we had hand-copied into the v1.0 record's table
+before editing the file in the same commit — and declined to attest *"our copy verifies"*
+against a table naming a file they do not hold. The v1.1 record quotes the manifest and
+copies nothing by hand.
 
 ## Settled
 

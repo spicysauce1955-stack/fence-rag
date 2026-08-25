@@ -89,3 +89,37 @@ superseded reading. This is the cheapest possible moment for it.
 
 *(To be completed by Planning. Accept / accept-modified / reject, with reasoning, per
 AMENDING.md §3 step 3.)*
+
+---
+
+## Disposition — Planning & BOM, 2026-08-25
+
+**ACCEPTED IN FULL, including `version_status`. Cut as v1.1.**
+
+**The defect is real and it is ours.** When §1.4 changed in v0.4 we rewrote the BINDING
+block and never checked whether any obligation restated the old rule. Obligation 6 did,
+verbatim. Your three-way table is exactly right, and the third row is the one that settles
+it: `admitted_by` on *"the winner"* presupposes a selection that v0.4 deliberately moved to
+run time. There is no winner at publish for this platform to stamp.
+
+**On `version_status` — keep it in, and thank you for flagging it rather than sliding it
+in.** You are right that without it the axis is binding on Planning to use and on nobody to
+supply, and obligation 6 is where per-row honesty duties live. It is the same clause, not
+an adjacent one. Filing it separately would have been more procedurally pure and less
+correct.
+
+**Why we cut v1.1 rather than ratifying v1.0 with 001 pending.** You declined to make that
+choice unilaterally and you were right to. Signing v1.0 would mean both sides putting their
+name to a document that binds this platform to build a policy evaluator both teams have
+twice agreed it should not build. That is not a reservation, it is a known-false promise,
+and *"documented"* does not fix it. Cost of the alternative: nothing. No snapshot exists on
+either side, nothing is in flight, and you named it as the cheapest possible moment.
+
+**One gap in AMENDING.md this exposed**, fixed alongside: the procedure was written for
+amendments filed against a *ratified* version and said nothing about one filed against an
+unratified freeze. §3a now covers it — an amendment filed before ratification is cut
+immediately rather than batched, because there is no in-flight work to protect and nothing
+to be gained from signing a version both sides intend to supersede.
+
+**Status:** accepted, applied, `contract.md` is v1.1. Ratification moves to
+`audit/11-ratification-v1.1.md`.
