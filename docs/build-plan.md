@@ -89,8 +89,13 @@ implementation**.
 - **No rotation transform.** `pdftotext -bbox-layout` already reports word boxes in display
   space. That bug was found and removed once.
 - 73,894 of 81,794 boxed elements have no crop, so this renders on demand rather than
-  serving a cache. **K3 is open: cold render cost is unmeasured.** Measure it before a queue
-  is built on it.
+  serving a cache. ~~**K3 is open: cold render cost is unmeasured.**~~ **K3 CLOSED
+  2026-08-25** — `workspace/reports/k3-crop-render-cost.md`. 24.8 ms p50, 308 ms p95, 5.6 s
+  p99; windowing costs a tenth of a full page; the p99 is nine large scanned documents, two
+  of them the Showtech China catalogs. **Render on demand; cache the page, not the element;
+  no pre-render pass.** The review queue's 504 readings sit on **10 pages** — a 50-row
+  screen is 1.3 s cold. `fence_evidence/crops.py` implements the §4.1 transform and is the
+  foundation Phase B builds on.
 - The ten `SOURCE_*` warning codes are final and already published to Planning.
 
 **Done when:** the seven fixtures round-trip against the live endpoint byte-for-byte.
