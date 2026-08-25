@@ -44,12 +44,12 @@ nothing you can do here that makes reads fail for anyone else.
 
 ```bash
 # 1. Configure Git LFS once per machine. Installing the binary is not enough —
-#    `git lfs install` is what registers the filters, and step 4 is unsafe
+#    `git lfs install` is what registers the filters, and step 5 is unsafe
 #    without them. Skip only if you have run it before on this machine.
 git lfs install
 
-# 2. Code, docs and datasets only — ~8 MB, no LFS bandwidth spent.
-#    The PDFs arrive as pointer files; step 3 replaces them with real bytes.
+# 2. Code, docs and datasets only — ~9 MB, no LFS bandwidth spent.
+#    The PDFs arrive as pointer files; step 4 replaces them with real bytes.
 GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/spicysauce1955-stack/fence-rag.git
 cd fence-rag
 
