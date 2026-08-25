@@ -1,9 +1,10 @@
 # Integration — the boundary with Planning & BOM
 
 ```text
-Status:    contract.md FROZEN at v1.0 (2026-08-25) and signed by Planning & BOM.
-           ONE THING OPEN: the Knowledge Platform's countersignature —
-           audit/10-ratification-v1.0.md §3. Verify, sign, and v1.0 is closed.
+Status:    contract.md FROZEN at v1.0 (2026-08-25), signed by Planning & BOM and
+           NOT signed by Knowledge — obligation 6 carries a clause §1.4 supersedes,
+           filed as amendments/001. v1.0 still governs while it sits.
+           ONE THING OPEN: a disposition on 001, and §3 signs on that alone.
            Changing a BINDING item requires a ratified amendment — AMENDING.md.
 Authority: Binding ONLY at the boundary. Silent on everything inside it.
 Origin:    Proposed by Planning & BOM; audited by Knowledge; revised by both.
@@ -35,6 +36,7 @@ the boundary: what crosses it, in what shape, and what each side promises the ot
 | [`boundary-delta-v0.4.md`](boundary-delta-v0.4.md) | The four v0.4 items that needed agreement. All four accepted — see `audit/07` |
 | [`contract.md`](contract.md) | **FROZEN v1.0.** What crosses the boundary, and the promises each side makes. Verify with `sha256sum -c contract.sha256` |
 | [`AMENDING.md`](AMENDING.md) | How and when the frozen contract may change — four triggers, five steps, and what is *not* an amendment |
+| [`amendments/`](amendments/) | Filed amendments. **001** — obligation 6 carries a clause §1.4 marks superseded (trigger D) |
 | [`knowledge-datamodel.md`](knowledge-datamodel.md) | Every entity, field, relationship and invariant, with a traceability map from each audit finding |
 | [`planning-asks.md`](planning-asks.md) | What Planning needs from this platform, ordered by impact |
 | [`source-refs-design.md`](source-refs-design.md) | `GET /source-refs/{id}` — the design, with [`fixtures/`](fixtures/) |
@@ -57,7 +59,7 @@ Kept in order, because a later disagreement is usually a re-run of an earlier on
 | [`06-review-of-v0.4.md`](audit/06-review-of-v0.4.md) | **Knowledge's reply to the v0.4 delta.** Two items agreed with additions, one agreed in substance and wrong in shape, one premise that does not hold |
 | [`07-delta-disposition.md`](audit/07-delta-disposition.md) | **Planning's decision.** All four accepted; the falsified premise was worse than measured — height varies *along* a run, not merely between runs |
 | [`08-close-of-round.md`](audit/08-close-of-round.md) | **Knowledge closes both threads** — `disputed` accepted, stagger conceded — corrects its own 77→20 count, and re-ranks K4 with the cell-coverage numbers |
-| [`10-ratification-v1.0.md`](audit/10-ratification-v1.0.md) | **The countersigned record.** Planning signed, declaring the two obligations it currently violates. Knowledge's block awaits — that is the last open item on the boundary |
+| [`10-ratification-v1.0.md`](audit/10-ratification-v1.0.md) | **The countersigned record.** Planning signed, declaring the two obligations it violates. Knowledge did **not** sign: obligation 6 reads wrong cold, and §3 carries the drafted attestation and the declared non-compliance behind it |
 | [`09-round-closed.md`](audit/09-round-closed.md) | **Planning acknowledges.** Correction propagated, K4 re-ranked, and Knowledge's account of the boundary-addition problem adopted over ours |
 | [`08-close-of-round.md`](audit/08-close-of-round.md) | **Knowledge closes the round.** `disputed` accepted, stagger conceded to cut planning, the level-2 risk confirmed and defused — and one of Knowledge's own figures corrected |
 
