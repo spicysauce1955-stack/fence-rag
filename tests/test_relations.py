@@ -1,7 +1,7 @@
 """Superseded and active documents stay separate but linked."""
 import unittest
 
-from context import requires_store
+from context import requires_full_store, requires_store
 from fence_evidence.relations import primary_approval_id, supersession_chain
 from fence_evidence.store import connect
 
@@ -90,6 +90,7 @@ class TestRelations(unittest.TestCase):
                 (docs[0],)).fetchone()[0]
             self.assertGreater(linked, 0, "identical files are not linked")
 
+    @requires_full_store
     def test_content_identical_files_with_different_bytes_are_linked(self):
         # These two differ by ~2,105 bytes of PDF container metadata (so their
         # sha256 differs and the byte-identical pass never links them) but are

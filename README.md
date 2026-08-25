@@ -182,12 +182,19 @@ from `workspace/pylibs/`. Run these from the repository root.
 python3 -m fence_evidence.cli fetch --subset all  # the corpus, if you skipped it above
 python3 -m fence_evidence.cli manifest          # Phase 0: inspect the corpus
 python3 -m fence_evidence.cli ingest --pilot    # Phase 1: 10-document pilot
-python3 tests/run_tests.py                      # preservation + contract gates
+python3 tests/run_tests.py                      # preservation + contract gates (a)
 python3 -m fence_evidence.cli evaluate          # Phase 4: gold question set
 python3 -m fence_evidence.cli ingest --all      # Phase 5: full corpus
 python3 -m fence_evidence.cli facts --extract   # Phase 6: structured facts
 python3 -m fence_evidence.cli report            # regenerate workspace reports
 ```
+
+(a) Run in this order, `run_tests.py` reports `OK` with about 22 skips: those
+tests assert about documents outside the 10-document pilot, or about facts
+Phase 6 has not extracted yet. Each skip names the command that unlocks it, and
+they all run once `ingest --all` and `facts --extract` have. Use
+`tests/run_tests.py` rather than a bare `python3 -m unittest` from `tests/` —
+only the runner reports those as skips instead of failures.
 
 Searching:
 

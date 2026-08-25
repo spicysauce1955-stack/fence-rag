@@ -56,6 +56,54 @@ def requires_store(test):
         "`cli fetch --subset all` then `cli ingest --pilot`")(test)
 
 
+def _store_counts() -> "tuple[int, int]":
+    """(documents, facts) in the store, or (0, 0) if there is no store."""
+    if not EVIDENCE_DB.is_file():
+        return (0, 0)
+    import sqlite3
+    try:
+        conn = sqlite3.connect(f"file:{EVIDENCE_DB}?mode=ro", uri=True)
+    except sqlite3.Error:
+        return (0, 0)
+    try:
+        def count(table):
+            try:
+                return conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+            except sqlite3.Error:
+                return 0
+        return (count("documents"), count("facts"))
+    finally:
+        conn.close()
+
+
+# The pilot is 10 documents; the corpus is 144. Anything materially above the
+# pilot means `ingest --all` has run.
+_PILOT_DOCUMENTS = 10
+
+
+def requires_full_store(test):
+    """Skip a test that asserts about a document outside the 10-document pilot.
+
+    README order is `ingest --pilot` then `run_tests.py`, so this is the normal
+    state for someone setting the project up, not an edge case. Without this
+    the suite reported failures naming documents the user had been told not to
+    ingest yet.
+    """
+    docs, _ = _store_counts()
+    return unittest.skipUnless(
+        docs > _PILOT_DOCUMENTS and _corpus_is_fetched(),
+        f"store holds {docs} documents (pilot or less); run `cli ingest --all`")(test)
+
+
+def requires_facts(test):
+    """Skip a test that needs Phase 6 output; `cli facts --extract` builds it."""
+    docs, facts = _store_counts()
+    return unittest.skipUnless(
+        facts > 0 and docs > _PILOT_DOCUMENTS and _corpus_is_fetched(),
+        f"store holds {facts} facts; run `cli ingest --all` then "
+        f"`cli facts --extract`")(test)
+
+
 def requires_corpus(test):
     """Skip a test that needs corpus bytes on disk.
 
