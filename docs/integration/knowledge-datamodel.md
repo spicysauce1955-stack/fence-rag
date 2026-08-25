@@ -1,9 +1,10 @@
 # Knowledge data model v0.2 — entities, relationships, invariants
 
 ```text
-Status:     v0.4.1. The four delta items are answered (06) and dispositioned (07):
-            all four accepted, including obligation 13, whose premise this team
-            measured and falsified. Continuity is now DERIVED, not authored.
+Status:     Current, against contract v1.1 (ratified by both teams 2026-08-25).
+            The four delta items were answered (06) and dispositioned (07) — all
+            accepted, including obligation 13, whose premise this team measured
+            and falsified. Continuity is DERIVED, not authored.
 Was:        v0.4. Revised after 03-review-of-v0.2.md (six defects, all fixed) and
             then after Planning audited this design against its own engine and its
             own additions. Four items in v0.4 need this team's agreement — they are
