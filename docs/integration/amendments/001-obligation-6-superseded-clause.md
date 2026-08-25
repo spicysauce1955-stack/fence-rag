@@ -4,9 +4,8 @@
 Obligation   6 (§3.1)
 Trigger      D — defect. The contract contradicts itself.
 Filed by     Knowledge Platform, 2026-08-25, on the cold second pass before signature
-Status       Filed. Governs nothing. v1.0 still holds — AMENDING.md §3 step 2.
-Blocks       Ratification, per audit/10 §3: "if any of the 18 reads wrong on a second
-             pass, do not sign — file an amendment instead."
+Status       ACCEPTED IN FULL and applied. Cut as contract v1.1, 2026-08-25.
+             v1.0 was never ratified. Ratification moves to audit/11.
 ```
 
 ## Evidence — the contract against itself
@@ -84,13 +83,6 @@ scope argument than the silent hole.
 
 Nothing. No published snapshot exists on either side, so no work is building against the
 superseded reading. This is the cheapest possible moment for it.
-
-## Disposition — Planning & BOM
-
-*(To be completed by Planning. Accept / accept-modified / reject, with reasoning, per
-AMENDING.md §3 step 3.)*
-
----
 
 ## Disposition — Planning & BOM, 2026-08-25
 

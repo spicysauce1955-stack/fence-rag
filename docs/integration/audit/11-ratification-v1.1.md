@@ -4,9 +4,9 @@
 Purpose:  The countersigned record that closes v1.1. Supersedes audit/10, where
           v1.0 was frozen, signed by one side, and correctly NOT signed by the
           other — see §0.
-Status:   Planning & BOM signed 2026-08-25. Knowledge Platform: awaiting.
-Action:   Knowledge team — verify, sign §3. Amendment 001 is accepted and applied,
-          which is the only thing that was blocking you.
+Status:   RATIFIED. Both sides signed 2026-08-25. v1.1 is the version both teams
+          build against, and the amendment clock starts here.
+Action:   None on the boundary. What each side owes the other is work — §4.
 ```
 
 ## 0. Why there is a v1.1 before anyone signed v1.0
@@ -87,30 +87,61 @@ Ratified for Planning & BOM — 2026-08-25, contract v1.1
 Copies verified: contract.md OK · AMENDING.md OK  (via contract.sha256)
 ```
 
-## 3. Knowledge Platform — awaiting
+## 3. Knowledge Platform — SIGNED
 
-**Amendment 001 is accepted and applied.** Your own §3.3 said you sign on a disposition of
-001 and nothing else, so this should be short.
+**We attest:**
 
-**What changed since you drafted your attestation:** obligation 6's final clause, exactly as
-you proposed including `version_status`; `AMENDING.md` gained §3a covering amendments filed
-before ratification; and the hash table is gone in favour of quoting the manifest.
+1. Our copy verifies against `contract.sha256` — `contract.md: OK`, `AMENDING.md: OK` —
+   and the two values §1 quotes are the manifest's own, checked by recomputing both
+   digests independently rather than by reading the table.
+2. We have read all 18 obligations, and we accept all 18 as promises a consumer relies on.
+3. We will not edit `contract.md`. A change to a BINDING item goes through `AMENDING.md`;
+   registry additions and internal design do not.
+4. We are ratifying a contract we do not yet satisfy, and we have declared where.
 
-**Your declared non-compliance carries over as filed** — `audit/10` §3.2, which we are not
-asking you to restate: one live violation (obligation 6's level-2 clause, with
-`cross_family_verified` still in `PROMOTABLE` and K1 committed to revoking it), twelve
-obligations unbuilt, three representational gaps, one extractor missing. It is the most
-useful thing either side has written at a signature, and re-typing it would only risk
-changing it.
+**How obligation 6 was verified, since a second cold read of unchanged text proves
+nothing.** We diffed v1.0 against v1.1 rather than re-reading it:
 
 ```text
-Ratified for the Knowledge Platform — [date], contract v1.1
-Copies verified: [ ] contract.md   [ ] AMENDING.md   (via contract.sha256)
-Declared non-compliance: as filed in audit/10 §3.2
+git diff 7b22de3 9011f6f -- contract.md   → the version header, and obligation 6. Nothing else.
+git diff 7b22de3 9011f6f -- AMENDING.md   → §3a only.
 ```
 
-If anything still reads wrong, the instruction has not changed: file an amendment rather
-than sign. It has already earned its keep once.
+The replacement text is amendment 001's proposal verbatim, `version_status` included, plus
+a parenthetical recording the change. The cold read behind our v1.0 block therefore still
+stands for the other 17, and obligation 6 is now the clause we proposed. Nothing else in
+the document moved under us, which is the property the freeze exists to give and the
+first time it has been used to check one.
+
+**On `version_status` being kept in** — noted, and your reasoning is the better version of
+ours. It is the same clause rather than an adjacent one, and filing it separately would
+have been more procedurally pure and less correct.
+
+**Our declared non-compliance stands as filed in `audit/10` §3.2**, unchanged and not
+restated: one live violation (obligation 6's level-2 clause — `reviewer` NULL on all 1,225
+readings, 504 promoted on two agents agreeing, `cross_family_verified` still in
+`PROMOTABLE`, K1 committed to revoking it), twelve obligations unbuilt, three
+representational gaps (obligation 4's dual-unit clause, obligation 15's `condition_basis`
+with 324 facts carrying an underscore-prefixed key inside `conditions`, obligation 10's
+absent `lang`), and one extractor missing for obligation 14's `stock_length`.
+
+Obligation 6's new text does not change any of it. It removes work — no policy evaluator
+on this side — and adds one honest field, `version_status`, which we already hold on every
+document and will publish as `unknown` for 132 of 144 of them.
+
+```text
+Ratified for the Knowledge Platform — 2026-08-25, contract v1.1
+Copies verified: [x] contract.md OK   [x] AMENDING.md OK   (via contract.sha256,
+                     both digests recomputed independently)
+Declared non-compliance: as filed in audit/10 §3.2 — one live violation, twelve
+                     obligations unbuilt, three representational gaps, one
+                     extractor missing
+Amendments open:     none
+```
+
+**Nothing reads wrong on this pass.** v1.1 is the version we are building against, and the
+next thing from this side should be the cell box, the eleven-warning starter list, the two
+early publishes and `also_filed_as` — work, not a document.
 
 ## 4. What ratification does and does not do
 

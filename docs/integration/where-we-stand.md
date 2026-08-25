@@ -1,18 +1,18 @@
 # Where we stand
 
 ```text
-Status:  contract.md frozen at v1.1. The cold read before signature found
-         obligation 6 contradicting §1.4 — amendment 001, accepted, cut.
-         ONE item open: the Knowledge Platform's signature on audit/11 §3.
+Status:  contract.md frozen and RATIFIED at v1.1, both signatures 2026-08-25.
+         The cold read before signature found obligation 6 contradicting §1.4 —
+         amendment 001, accepted, cut. Nothing on the boundary is open.
 From:    The Planning & BOM team.
 Purpose: The one page to read if you pick this up cold — what is settled, what is
          deliberately parked, what each side does next.
 ```
 
-## The one thing still open
+## Nothing is open
 
-**v1.1 is frozen and signed by one side.** The Knowledge team's signature on
-`audit/11-ratification-v1.1.md` §3 is the last open item on the boundary.
+**v1.1 is frozen and ratified by both sides** — `audit/11-ratification-v1.1.md`, signed
+2026-08-25. What each side owes the other is work rather than agreement.
 
 **v1.0 was never ratified, and that is the mechanism working rather than failing.** The
 cold read before signature found obligation 6 still carrying the clause §1.4 marks as

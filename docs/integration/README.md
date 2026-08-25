@@ -1,10 +1,10 @@
 # Integration — the boundary with Planning & BOM
 
 ```text
-Status:    contract.md FROZEN at v1.0 (2026-08-25), signed by Planning & BOM and
-           NOT signed by Knowledge — obligation 6 carries a clause §1.4 supersedes,
-           filed as amendments/001. v1.0 still governs while it sits.
-           ONE THING OPEN: a disposition on 001, and §3 signs on that alone.
+Status:    contract.md FROZEN and RATIFIED at v1.1 (2026-08-25), signed by both
+           teams — audit/11-ratification-v1.1.md. Nothing on the boundary is open.
+           v1.0 was never ratified: the cold read before signature found
+           obligation 6 contradicting §1.4, filed as amendments/001 and cut.
            Changing a BINDING item requires a ratified amendment — AMENDING.md.
 Authority: Binding ONLY at the boundary. Silent on everything inside it.
 Origin:    Proposed by Planning & BOM; audited by Knowledge; revised by both.
@@ -34,7 +34,7 @@ the boundary: what crosses it, in what shape, and what each side promises the ot
 |---|---|
 | [`where-we-stand.md`](where-we-stand.md) | **Start here.** The state of the boundary in one page — settled, parked, and next on each side |
 | [`boundary-delta-v0.4.md`](boundary-delta-v0.4.md) | The four v0.4 items that needed agreement. All four accepted — see `audit/07` |
-| [`contract.md`](contract.md) | **FROZEN v1.0.** What crosses the boundary, and the promises each side makes. Verify with `sha256sum -c contract.sha256` |
+| [`contract.md`](contract.md) | **FROZEN v1.1, ratified.** What crosses the boundary, and the promises each side makes. Verify with `sha256sum -c contract.sha256` |
 | [`AMENDING.md`](AMENDING.md) | How and when the frozen contract may change — four triggers, five steps, and what is *not* an amendment |
 | [`amendments/`](amendments/) | Filed amendments. **001** — obligation 6's superseded clause, accepted, cut as v1.1 |
 | [`amendments/`](amendments/) | Filed amendments. **001** — obligation 6 carries a clause §1.4 marks superseded (trigger D) |
@@ -59,10 +59,10 @@ Kept in order, because a later disagreement is usually a re-run of an earlier on
 | [`05-acceptance-open-questions.md`](audit/05-acceptance-open-questions.md) | Knowledge's working list — everything needing a decision, and what "done" means |
 | [`06-review-of-v0.4.md`](audit/06-review-of-v0.4.md) | **Knowledge's reply to the v0.4 delta.** Two items agreed with additions, one agreed in substance and wrong in shape, one premise that does not hold |
 | [`07-delta-disposition.md`](audit/07-delta-disposition.md) | **Planning's decision.** All four accepted; the falsified premise was worse than measured — height varies *along* a run, not merely between runs |
-| [`08-close-of-round.md`](audit/08-close-of-round.md) | **Knowledge closes both threads** — `disputed` accepted, stagger conceded — corrects its own 77→20 count, and re-ranks K4 with the cell-coverage numbers |
-| [`10-ratification-v1.0.md`](audit/10-ratification-v1.0.md) | **The countersigned record.** Planning signed, declaring the two obligations it violates. Knowledge did **not** sign: obligation 6 reads wrong cold, and §3 carries the drafted attestation and the declared non-compliance behind it |
-| [`09-round-closed.md`](audit/09-round-closed.md) | **Planning acknowledges.** Correction propagated, K4 re-ranked, and Knowledge's account of the boundary-addition problem adopted over ours |
-| [`08-close-of-round.md`](audit/08-close-of-round.md) | **Knowledge closes the round.** `disputed` accepted, stagger conceded to cut planning, the level-2 risk confirmed and defused — and one of Knowledge's own figures corrected |
+| [`08-close-of-round.md`](audit/08-close-of-round.md) | **Knowledge closes both threads** — `disputed` accepted, stagger conceded to cut planning, the level-2 risk confirmed and defused. Corrects its own 77→20 count and re-ranks K4 on the cell-coverage numbers |
+| [`09-round-closed.md`](audit/09-round-closed.md) | **Planning acknowledges.** Correction propagated, K4 re-ranked, and Knowledge's account of the boundary-addition problem adopted over Planning's own |
+| [`10-ratification-v1.0.md`](audit/10-ratification-v1.0.md) | **The v1.0 record — never ratified.** Planning signed; Knowledge did not, because obligation 6 read wrong cold. Its §3.2 is the declared non-compliance, still in force |
+| [`11-ratification-v1.1.md`](audit/11-ratification-v1.1.md) | **RATIFIED.** Both sides signed v1.1. The last document on the boundary until an amendment or a release |
 
 ---
 
