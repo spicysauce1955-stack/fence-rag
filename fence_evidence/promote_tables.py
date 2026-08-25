@@ -127,7 +127,10 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
             if applicability == "unresolved":
                 unresolved += 1
             conditions["hvhz_applicability"] = applicability
-            conditions["_applicability_basis"] = basis
+            # A2. This note used to live in `conditions` under an underscore key,
+            # where §1.3 publishes it as a condition dimension -- a sentence about
+            # readers disagreeing, dressed as something Planning can bind a plan
+            # against. It belongs beside the conditions, not inside them.
 
             for cell in cells:
                 fact_type = _match(cell["col_label"], VALUE_COLUMNS)
@@ -140,16 +143,22 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
                     continue
                 cur = conn.execute("""INSERT INTO facts(document_id, version_id, page_no,
                     element_id, fact_type, subject, value_original, value_normalized,
-                    unit_original, unit_normalized, conditions, evidence_text, extractor,
+                    unit_original, unit_normalized, conditions, condition_basis,
+                    condition_basis_note, evidence_text, extractor,
                     ocr_derived, review_status, created_at)
                     SELECT ?,?,?,(SELECT element_id FROM elements WHERE document_id=?
                                    AND page_no=? ORDER BY ordinal LIMIT 1),
-                           ?,?,?,?,?,?,?,?,?,0,?,?""",
+                           ?,?,?,?,?,?,?,?,?,?,?,0,?,?""",
                     (cell["document_id"], cell["version_id"], cell["page_no"],
                      cell["document_id"], cell["page_no"], fact_type,
                      cell["col_label"], cell["value"], _inches(cell["value"]),
                      'in' if '"' in (cell["value"] or "") else None, "in",
                      json.dumps(conditions),
+                     # `stated`: these conditions are the table's own row and
+                     # column labels. The document printed them in a grid, which
+                     # is as stated as a condition gets -- and this is the one
+                     # path in the codebase where that is true.
+                     "stated", basis,
                      f"table row {row_i} of {cell['crop_path']}; read by "
                      f"{cell['reader']} ({reader_family(cell['reader'])})",
                      f"table-read:{cell['review_status']}",

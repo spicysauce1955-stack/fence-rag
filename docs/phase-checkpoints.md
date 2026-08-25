@@ -282,10 +282,10 @@ a metric pass would destroy its value. It costs roughly 0.02 of unit support.
 ## Phase 6 — Structured technical facts
 
 **Implemented.** `facts.py`: a documented regex extractor (`extractor='regex-v1'`)
-over canonical elements, producing 1,664 facts with mandatory provenance —
+over canonical elements, producing 1,652 facts with mandatory provenance —
 document, version, page, element, evidence text — the original wording, the
 normalised value beside it, the conditions it holds under, and a review status.
-271 are `flagged` rather than `extracted` because they were read from OCR text on
+266 are `flagged` rather than `extracted` because they were read from OCR text on
 a page below 80% mean word confidence.
 
 | Fact type | Count |

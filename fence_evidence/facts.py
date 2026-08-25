@@ -206,6 +206,59 @@ def _iter_candidates(conn: sqlite3.Connection, document_id: str | None) -> Itera
     yield from conn.execute(sql, params)
 
 
+# Obligation 15's vocabulary. `unexamined` is ours, not the contract's: the
+# regex matches a number and never asks what scoped it, and calling that
+# `assumed` claims an inference nobody performed. It collapses on publish.
+CONDITION_BASIS = ("stated", "assumed", "unexamined")
+
+
+def publish_condition_basis(basis: str) -> str:
+    """Collapse the internal vocabulary to the contract's `stated | assumed`."""
+    return "stated" if basis == "stated" else "assumed"
+
+
+# `4 inch (101 mm)` -- a parenthesised metric restatement of the value just
+# given. 4" is 101.600 mm, so the document disagrees with itself by 0.6 mm, and
+# obligation 4 says publish both rather than pick one. The unit alternatives are
+# spelled out so `(see detail A)` and `(typical)` cannot match.
+_DUAL_UNIT = re.compile(
+    r"""(?P<num>\d+(?:\.\d+)?)\s*
+        (?P<unit>mm|millimet(?:er|re)s?|cm|centimet(?:er|re)s?|m\b|met(?:er|re)s?)
+        \s*\)""",
+    re.IGNORECASE | re.VERBOSE)
+
+_UNIT_NORMAL = {"mm": "mm", "millimeter": "mm", "millimetre": "mm",
+                "millimeters": "mm", "millimetres": "mm",
+                "cm": "cm", "centimeter": "cm", "centimetre": "cm",
+                "centimeters": "cm", "centimetres": "cm",
+                "m": "m", "meter": "m", "metre": "m", "meters": "m", "metres": "m"}
+
+
+def dual_units(text: str | None) -> dict | None:
+    """The second unit a source states for a value it has just given.
+
+    Returns the alternate as its own verbatim lexeme plus a normalised value, or
+    None where the source states only one unit. Obligation 4 wants **every**
+    verbatim source lexeme, so this preserves the document's own digits rather
+    than recomputing them -- `83 mm` stays `83 mm` even though 3-1/4" is 82.550.
+    """
+    if not text:
+        return None
+    # An opening paren must precede, or `4 inch 101 mm)` would match on noise.
+    for m in _DUAL_UNIT.finditer(text):
+        open_paren = text.rfind("(", 0, m.start())
+        if open_paren == -1 or ")" in text[open_paren:m.start()]:
+            continue
+        unit = _UNIT_NORMAL.get(m.group("unit").lower())
+        if not unit:
+            continue
+        return {"value_original": f"{m.group('num')} {unit}",
+                "unit_original": unit,
+                "value_normalized": float(m.group("num")),
+                "unit_normalized": unit}
+    return None
+
+
 def extract_facts(*, document_id: str | None = None,
                   conn: sqlite3.Connection | None = None) -> dict:
     own = conn is None
@@ -246,18 +299,34 @@ def extract_facts(*, document_id: str | None = None,
                 if from_ocr and (conf is None or conf < OCR_REVIEW_CONFIDENCE):
                     review = "flagged"
                 start = max(0, match["start"] - 90)
+                evidence = text[start:match["end"] + 90].strip()
+                # A2. The regex captures conditions by *proximity* -- it matches
+                # `exposure_category` near a number without establishing the
+                # document attached them to it (G15 records that failure). So a
+                # captured condition is `assumed`, and no conditions at all is
+                # `unexamined`: nobody looked. Neither is `stated`, which would
+                # require the document to have said so.
+                basis = "assumed" if fact_conditions else "unexamined"
+                # A3. Look for the second unit inside the value's own window,
+                # not the whole element, or a `(mm)` elsewhere on the page binds
+                # to the wrong number.
+                alt = dual_units(text[match["start"]:match["end"] + 40])
                 conn.execute("""INSERT INTO facts(document_id, version_id, page_no,
                     element_id, fact_type, subject, value_original, value_normalized,
-                    unit_original, unit_normalized, conditions, evidence_text,
+                    unit_original, unit_normalized, conditions, condition_basis,
+                    condition_basis_note, value_alternates, evidence_text,
                     extractor, ocr_derived, review_status, created_at)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                     (row["document_id"], row["version_id"], row["page_no"],
                      row["element_id"], fact_type,
                      " > ".join(heading_path[-2:]) or None,
                      match["match_text"], match["value_normalized"],
                      match["unit_original"] or None, match["unit_normalized"],
-                     json.dumps(fact_conditions), text[start:match["end"] + 90].strip(),
-                     "regex-v1", int(from_ocr), review, now()))
+                     json.dumps(fact_conditions), basis,
+                     "conditions captured by regex proximity, not asserted by the "
+                     "document" if fact_conditions else None,
+                     json.dumps([alt]) if alt else None,
+                     evidence, "regex-v1", int(from_ocr), review, now()))
                 counts[fact_type] = counts.get(fact_type, 0) + 1
                 total += 1
                 flagged += 1 if review == "flagged" else 0
@@ -296,6 +365,10 @@ def query_facts(fact_type: str | None = None, *, conditions: dict | None = None,
         rows = [dict(r) for r in conn.execute(sql, params)]
         for r in rows:
             r["conditions"] = json.loads(r["conditions"] or "{}")
+            # Same treatment as `conditions`, for the same reason: a caller
+            # reading one row should not get a dict for one JSON column and a
+            # raw string for the one beside it.
+            r["value_alternates"] = json.loads(r["value_alternates"] or "[]")
             resolved_page_image = resolve_asset(r.get("page_image_path"))
             r["page_image_path"] = rel(resolved_page_image) if resolved_page_image else None
         if conditions:

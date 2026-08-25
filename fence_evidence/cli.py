@@ -110,6 +110,10 @@ def main(argv: list[str] | None = None) -> int:
                    help="un-promote facts no person reviewed (build-plan A1); "
                         "keeps every reading and its crop")
 
+    sub.add_parser("migrate",
+                   help="bring an existing store up to the current schema: add any "
+                        "missing columns and backfill what they need")
+
     sub.add_parser("worklist",
                    help="split unresolved material into machine / review / human piles")
 
@@ -248,6 +252,15 @@ def main(argv: list[str] | None = None) -> int:
         else:
             from .promote_tables import promote_verified
             _print(promote_verified(dry_run=not args.apply))
+    elif args.cmd == "migrate":
+        from .store import backfill_lang, connect as _c, migrate as _m, SCHEMA_VERSION
+        conn = _c()
+        try:
+            added = _m(conn)
+            _print({"schema_version": SCHEMA_VERSION, "columns_added": added,
+                    "lang": backfill_lang(conn)})
+        finally:
+            conn.close()
     elif args.cmd == "worklist":
         from .worklist import build
         _print(build())

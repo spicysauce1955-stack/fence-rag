@@ -25,7 +25,7 @@ missing layer.
 Two measurements make the case, both from `docs/state-and-gaps.md`:
 
 - **G6/G15.** `facts` holds **1,652 rows**, all from `extractor='regex-v1'`.
-(It held 1,988 when this was written: 1,664 regex rows plus 324 from an
+(It held 1,976 when this was written: 1,652 regex rows plus 324 from an
 unreviewed table-reading pass marked `table-read:cross_family_verified`, none of
 which a person ever accepted. Those 324 were un-promoted on 2026-08-25 — C0 below
 landed as build-plan A1 — but the case this section makes is unchanged, and the

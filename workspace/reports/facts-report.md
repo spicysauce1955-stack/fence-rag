@@ -35,6 +35,61 @@ page whose mean word confidence is below 80 is created as `flagged`, not
 | racking_degrees | 5 | 2 | 5 |
 | post_spacing_in | 3 | 1 | 2 |
 
+## Where the conditions came from
+
+Obligation 15: a row states whether its conditions came from the source.
+`stated` means the document gave them -- including giving none, which makes the
+row an explicit fallback. `assumed` means we inferred them. `unexamined` means
+nobody looked: the regex matched a number and never asked what scoped it. That
+third value is internal and publishes as `assumed`; it exists so the store does
+not assert an inference it never made.
+
+| condition basis | Count | Means |
+|---|---|---|
+| unexamined | 1535 | no conditions, and nothing looked for any |
+| assumed | 117 | captured by regex proximity, not asserted by the document |
+
+## Second units, where a source states one
+
+Obligation 4: where a source states two units and they disagree, publish both.
+**3** of 1652 facts carry an alternate lexeme in `value_alternates`,
+of which **0 disagree** with the primary value.
+
+**Read that second number carefully.** The schema can now represent a disagreeing
+second unit -- that is the gap obligation 4 declared, and it is closed. But the
+corpus's disagreeing statements are not reaching it. Measured: 64 real disagreeing
+statements across 201 occurrences in 15 unique-content documents, and **none of
+them is reachable by this extractor**. Two causes, the second much larger:
+
+1. An adjacency defect worth 3 statements. The parenthetical sits between the
+   number and the keyword a pattern needs -- `6 inches (152 mm) below grade`
+   never matches `depth_below_grade_in`.
+2. Missing fact types, worth the other 61. Every dual-unit disagreement in this
+   corpus is about *product geometry* -- fence height, mesh opening, picket gap,
+   member section, stock length -- and this extractor covers footing, spacing,
+   wind and approval metadata. The two populations barely intersect: of the
+   elements carrying a paired dual-unit statement, only 6 produce any fact at all.
+
+Closing obligation 4's disagreement clause is a fact-type expansion, not a
+dual-unit-parsing problem. See `docs/state-and-gaps.md` G34.
+
+## Language, and the fact that none of it was measured
+
+Obligation 10 requires `lang` and forbids normalising it. Script is measured by
+Unicode range; **language is not.** Telling English from another Latin-script
+language is not something this pipeline can do, and tesseract here has only
+`eng` installed. So every tag below is `assumed` or `unknown`, and `measured`
+stays reserved for a real language identifier that does not exist yet.
+
+Language is **not** derived from `corpus_track`. That axis is a standards regime
+-- GB rather than ASTM -- not a language, and the China-track documents here are
+English-language export catalogues. Measured: zero CJK-bearing elements corpus-wide.
+
+| lang | basis | Elements |
+|---|---|---|
+| en | assumed | 59341 |
+| und | unknown | 22453 |
+
 ## Sample, with provenance
 
 | Type | Original | Normalised | Conditions | Status | Source | Page |

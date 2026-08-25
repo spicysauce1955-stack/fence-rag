@@ -15,7 +15,10 @@ records which, so the asks can be argued with on the evidence rather than on tas
 
 ## 1. Why conditions must ride with the value, and why `unknown` must block
 
-`facts` holds a row that is, today, promoted:
+Until 2026-08-25 `facts` held this row, promoted, with no person in the loop. Build-plan
+A1 un-promoted it and A2 moved the note out of `conditions`; it is preserved verbatim here
+because the argument it makes is why both changes happened, and a sanitised example would
+make the case look easier than it was:
 
 ```text
 fact_type    footing_depth_in
@@ -37,6 +40,13 @@ product family is molded composite, explicitly distinct from the extruded-PVC li
 the hurricane-zone bracket is unresolved — which the reader recorded honestly and the
 promotion rule then ignored.
 
+**What changed.** `cross_family_verified` is out of `table_review.PROMOTABLE`, so this row
+is a candidate awaiting review rather than a fact (A1). `_applicability_basis` is out of
+`conditions` and into `condition_basis_note`, so it can no longer publish as a condition
+dimension under §1.3 (A2). The row's *other* two disqualifiers — superseded approval,
+wrong product family — are untouched by either change, and are exactly what the source
+policy and `version_status` exist to catch at run time.
+
 A consumer reading `facts` directly would pour a SimTek footing under a Bufftech fence on
 the authority of an expired document.
 
@@ -54,7 +64,10 @@ contract simply depends on it.
 
 ## 2. Why `hit_policy` and `domain` are required
 
-Both of these are in `facts` now, for the same parameter under the same conditions:
+Both of these sat in `facts` until 2026-08-25, for the same parameter under the same
+conditions. They are readings again rather than facts — A1 un-promoted every row that
+reached `facts` on machine agreement alone — but the argument is unaffected: the conflict
+is in the *corpus*, and it is still there, waiting for a reviewer:
 
 | Spacing | Exposure | HVHZ applicability |
 |---|---|---|
@@ -116,7 +129,7 @@ the interface.
 ## 4. Why a review gate, and why it is not absolute
 
 The store's current position: **1,652 facts, none reviewed by a person.** Until
-2026-08-25 it was 1,988, of which 324 had been promoted automatically on cross-family
+2026-08-25 it was 1,976, of which 324 had been promoted automatically on cross-family
 agreement. That mechanism is gone — `table_review.PROMOTABLE` is now `("accepted",
 "corrected")`, `state-and-gaps.md` G17 records the change, and what `docs/curation/` C0
 proposed landed on its own as build-plan A1. **The level-2 population is zero**, which is

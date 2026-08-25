@@ -495,6 +495,26 @@ def facts_report(conn: sqlite3.Connection) -> str:
     by_type = conn.execute("""SELECT fact_type, COUNT(*) n,
             SUM(review_status='flagged') flagged, SUM(ocr_derived) ocr
             FROM facts GROUP BY fact_type ORDER BY n DESC""").fetchall()
+    by_basis = conn.execute("""SELECT condition_basis, COUNT(*) n FROM facts
+        GROUP BY 1 ORDER BY n DESC""").fetchall()
+    with_alts = conn.execute(
+        "SELECT COUNT(*) FROM facts WHERE value_alternates IS NOT NULL").fetchone()[0]
+    # Whether the two lexemes actually DISAGREE is the whole point of obligation
+    # 4, so count it rather than let `with_alts` quietly imply it.
+    disagreeing = 0
+    for _r in conn.execute("""SELECT value_normalized, unit_normalized, value_alternates
+                                FROM facts WHERE value_alternates IS NOT NULL"""):
+        if _r["value_normalized"] is None or _r["unit_normalized"] != "in":
+            continue
+        for _a in json.loads(_r["value_alternates"] or "[]"):
+            if _a.get("unit_normalized") != "mm":
+                continue
+            if abs(_r["value_normalized"] * 25.4 - (_a.get("value_normalized") or 0)) > 0.05:
+                disagreeing += 1
+                break
+    by_lang = conn.execute("""SELECT COALESCE(lang,'(untagged)') lang,
+        COALESCE(lang_basis,'(untagged)') lang_basis, COUNT(*) n
+        FROM elements GROUP BY 1,2 ORDER BY n DESC""").fetchall()
     by_status = conn.execute("""SELECT review_status, COUNT(*) n FROM facts
             GROUP BY review_status ORDER BY n DESC""").fetchall()
     conditioned = conn.execute("""SELECT COUNT(*) FROM facts
@@ -532,6 +552,61 @@ def facts_report(conn: sqlite3.Connection) -> str:
         "",
         _table(["Fact type", "Count", "Flagged for review", "OCR-derived"],
                [[r["fact_type"], r["n"], r["flagged"], r["ocr"]] for r in by_type]),
+        "",
+        "## Where the conditions came from",
+        "",
+        "Obligation 15: a row states whether its conditions came from the source.",
+        "`stated` means the document gave them -- including giving none, which makes the",
+        "row an explicit fallback. `assumed` means we inferred them. `unexamined` means",
+        "nobody looked: the regex matched a number and never asked what scoped it. That",
+        "third value is internal and publishes as `assumed`; it exists so the store does",
+        "not assert an inference it never made.",
+        "",
+        _table(["condition basis", "Count", "Means"],
+               [[r["condition_basis"], r["n"], {
+                   "stated": "the document said so",
+                   "assumed": "captured by regex proximity, not asserted by the document",
+                   "unexamined": "no conditions, and nothing looked for any",
+               }.get(r["condition_basis"], "")] for r in by_basis]),
+        "",
+        "## Second units, where a source states one",
+        "",
+        "Obligation 4: where a source states two units and they disagree, publish both.",
+        f"**{with_alts}** of {total} facts carry an alternate lexeme in `value_alternates`,",
+        f"of which **{disagreeing} disagree** with the primary value.",
+        "",
+        "**Read that second number carefully.** The schema can now represent a disagreeing",
+        "second unit -- that is the gap obligation 4 declared, and it is closed. But the",
+        "corpus's disagreeing statements are not reaching it. Measured: 64 real disagreeing",
+        "statements across 201 occurrences in 15 unique-content documents, and **none of",
+        "them is reachable by this extractor**. Two causes, the second much larger:",
+        "",
+        "1. An adjacency defect worth 3 statements. The parenthetical sits between the",
+        "   number and the keyword a pattern needs -- `6 inches (152 mm) below grade`",
+        "   never matches `depth_below_grade_in`.",
+        "2. Missing fact types, worth the other 61. Every dual-unit disagreement in this",
+        "   corpus is about *product geometry* -- fence height, mesh opening, picket gap,",
+        "   member section, stock length -- and this extractor covers footing, spacing,",
+        "   wind and approval metadata. The two populations barely intersect: of the",
+        "   elements carrying a paired dual-unit statement, only 6 produce any fact at all.",
+        "",
+        "Closing obligation 4's disagreement clause is a fact-type expansion, not a",
+        "dual-unit-parsing problem. See `docs/state-and-gaps.md` G34.",
+        "",
+        "## Language, and the fact that none of it was measured",
+        "",
+        "Obligation 10 requires `lang` and forbids normalising it. Script is measured by",
+        "Unicode range; **language is not.** Telling English from another Latin-script",
+        "language is not something this pipeline can do, and tesseract here has only",
+        "`eng` installed. So every tag below is `assumed` or `unknown`, and `measured`",
+        "stays reserved for a real language identifier that does not exist yet.",
+        "",
+        "Language is **not** derived from `corpus_track`. That axis is a standards regime",
+        "-- GB rather than ASTM -- not a language, and the China-track documents here are",
+        "English-language export catalogues. Measured: zero CJK-bearing elements corpus-wide.",
+        "",
+        _table(["lang", "basis", "Elements"],
+               [[r["lang"], r["lang_basis"], r["n"]] for r in by_lang]),
         "",
         "## Sample, with provenance",
         "",

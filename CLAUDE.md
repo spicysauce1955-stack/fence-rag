@@ -49,7 +49,10 @@ and there is no file in `amendments/`, stop.
 The API surfaces that must not move are in `contract.md` §1.5; transport, framework, auth and
 pagination are deliberately unspecified. `audit/` is the reasoning behind every decision, kept in
 order, and `audit/10-ratification-v1.0.md` §3.2 is the non-compliance this platform declared at
-signature — still in force, and Phase A of the build plan is closing it.
+signature — **partly closed as of 2026-08-25**. Its live violation (obligation 6) and its
+three representational gaps (obligations 4, 15, 10) closed with build-plan A1-A4. Still in
+force: obligation 14's missing `stock_length` extractor (A5) and the twelve unbuilt
+publishing-layer obligations.
 
 Nothing in `docs/integration/` displaces the documents above. Those govern how this platform
 works; the contract governs only what it exposes.

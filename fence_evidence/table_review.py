@@ -270,12 +270,17 @@ def promote(conn: sqlite3.Connection, candidate_id: int, *, fact_type: str,
         raise ReviewRequired("no canonical element on that page to anchor the fact to")
     cur = conn.execute("""INSERT INTO facts(document_id, version_id, page_no, element_id,
         fact_type, subject, value_original, value_normalized, unit_original,
-        unit_normalized, conditions, evidence_text, extractor, ocr_derived,
-        review_status, created_at)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        unit_normalized, conditions, condition_basis, condition_basis_note,
+        evidence_text, extractor, ocr_derived, review_status, created_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
         (row["document_id"], row["version_id"], row["page_no"], element["element_id"],
          fact_type, row["row_label"], value, None, None, None,
          json.dumps({"col_label": row["col_label"], "row_label": row["row_label"]}),
+         # `stated` -- the labels came off the document's own printed grid, and a
+         # person compared them to the crop before this row could exist at all.
+         "stated",
+         f"row and column labels read from {row['crop_path']}, "
+         f"reviewed by {reviewer or row['reviewer'] or 'unknown'}",
          f"read from {row['crop_path']} row {row['row_index']} col {row['col_index']}",
          f"table-review:{row['review_status']}:{row['reader']}", 0,
          "reviewed", now()))

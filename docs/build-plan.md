@@ -19,7 +19,7 @@ open items are work items, not agreements.
 
 **What exists:** a source-preserving evidence store over 144 documents / 2,147 pages /
 81,794 elements, with FTS5 retrieval, a fact layer, supersession relations and a
-regenerable projection. 256 tests pass.
+regenerable projection. 316 tests pass.
 
 **What does not exist:** the publishing layer. Nothing this platform holds crosses the
 boundary yet — there is no snapshot, no `ParameterTable`, no `Gap`, no part-type spine, no
@@ -68,13 +68,18 @@ Small, mechanical, and every one of them is a promise already made in writing.
 | | Obligation | What |
 |---|---|---|
 | A1 | 6 | ~~**Revoke `cross_family_verified` from `table_review.PROMOTABLE`** (K1).~~ **DONE 2026-08-25.** Level-2 population is zero. Facts 1,976 → 1,652; all 1,225 readings retained with crops via `revoke_machine_promotions()`. The signal survives as the new platform warning code `CURATION_MACHINE_CONSENSUS` (`integration/planning-asks.md` §3.3) — a registry addition, no amendment. |
-| A2 | 15 | Move `_applicability_basis` **out of** `conditions` — an underscore-prefixed free-text key inside a field that publishes as condition dimensions. Add `condition_basis: stated \| assumed`. **Note: A1 changed this item's premise.** The 324 facts that carried the key were the machine-promoted ones, so the store now holds **0**. The defect is *latent, not gone* — `promote_tables.promote_verified()` still writes `conditions["_applicability_basis"]`, so it returns the moment human review starts promoting. Fix the writer, not the rows. |
-| A3 | 4 | Represent a **disagreeing second unit**. 48 distinct dual-unit statements across 12 documents (`4 inch (101 mm)`, where 4″ is 101.600 mm). The schema holds one `value_original`/`unit_original` pair and cannot express them. |
-| A4 | 10 | Record `lang` on text. No language field exists anywhere in the store; publishing `en` by assertion is an assumption, and obligation 10 exists to keep those visible. |
+| A2 | 15 | ~~Move `_applicability_basis` **out of** `conditions`~~ **DONE 2026-08-25.** `facts.condition_basis` + `condition_basis_note`; the writers in `promote_tables.py` and `table_review.py` were fixed too, not just the rows. The enum has a **third** internal value, `unexamined` (nobody looked), publishing as `assumed`. Today: 117 assumed / 1,535 unexamined / 0 stated. Original item text: — an underscore-prefixed free-text key inside a field that publishes as condition dimensions. Add `condition_basis: stated \| assumed`. **Note: A1 changed this item's premise.** The 324 facts that carried the key were the machine-promoted ones, so the store now holds **0**. The defect is *latent, not gone* — `promote_tables.promote_verified()` still writes `conditions["_applicability_basis"]`, so it returns the moment human review starts promoting. Fix the writer, not the rows. |
+| A3 | 4 | ~~Represent a **disagreeing second unit**.~~ **DONE 2026-08-25** — `facts.value_alternates`, JSON, beside the primary pair. The declared gap is closed: the schema can now express a disagreeing second unit. **Only 3 facts carry one**, because coverage is bounded by what the extractor extracts — 431 elements across 34 documents contain a dual-unit statement and only 6 of them produce any fact at all. Populating it broadly needs component-dimension extraction, which does not exist. Original item text: 48 distinct dual-unit statements across 12 documents (`4 inch (101 mm)`, where 4″ is 101.600 mm). The schema holds one `value_original`/`unit_original` pair and cannot express them. |
+| A4 | 10 | ~~Record `lang` on text.~~ **DONE 2026-08-25** — `elements.lang` + `elements.lang_basis`, all 81,794 tagged: 59,341 `en`/`assumed`, 22,453 `und`/`unknown`, **zero `zh`**. Language is *not* derived from `corpus_track`: that shortcut would have been wrong on every row, because the China-track documents are English-language export catalogues and the corpus has zero CJK. Nothing claims `measured`. Original item text: No language field exists anywhere in the store; publishing `en` by assertion is an assumption, and obligation 10 exists to keep those visible. |
 | A5 | 14 | Extract `stock_length`. *"Standard rails are supplied in 16 foot lengths"* is text, not a fact. Note it varies by colour — 12 ft for Blend — so it is conditional, not a scalar. |
 
 **Done when:** every item above is measurable in the store and `docs/state-and-gaps.md`
 records the new numbers.
+
+**A1-A4 are done** (2026-08-25); **A5 remains.** `schema_version` moved 1 → 2, and
+`store.ensure_columns()` now applies additive migrations so an existing store no longer
+meets a new column as `no such column`. The new state is visible in
+`workspace/reports/facts-report.md` and recorded as G32-G34 in `state-and-gaps.md`.
 
 ### Phase B — `GET /source-refs/{id}`
 

@@ -109,7 +109,7 @@ policy, and **visible in the decision graph as rejected** rather than silently a
 is the difference between *"the snapshot is thin"* and *"the snapshot is thin and nobody can
 see why."*
 
-So the ranking stands. Expect the first structural snapshot to be thin: 882 facts — 44.6%
+So the ranking stands. Expect the first structural snapshot to be thin: 774 facts — 46.9%
 of the store — come from installation manuals and none clears level 2 on day one.
 
 ## An honest note on what is not done
