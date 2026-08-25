@@ -44,7 +44,7 @@ written by it.
 - `facts` — read as *input material*, never updated, never deleted. Curation
 copies each row forward into a candidate claim and leaves the original in place.
 - `retrieval_units`, `retrieval_fts` — not regenerated during this phase.
-- `src/fence_evidence/{extract,layout,hocr,tables,quality,ingest,manifest}.py` —
+- `fence_evidence/{extract,layout,hocr,tables,quality,ingest,manifest}.py` —
 not modified.
 
 One deliberate exception: `table_review.PROMOTABLE` currently contains

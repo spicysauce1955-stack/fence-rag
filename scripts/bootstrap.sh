@@ -94,8 +94,18 @@ if [ ${#missing[@]} -gt 0 ]; then
     red "Cannot continue. Missing prerequisites:"
     for m in "${missing[@]}"; do echo "  - $m"; done
     echo
-    echo "This machine has no sudo, apt or system pip by design; see"
-    echo "workspace/reports/dependency-options.md for how that shaped these choices."
+    echo "On Debian/Ubuntu:"
+    echo "  sudo apt install poppler-utils tesseract-ocr tesseract-ocr-eng python3"
+    echo "On macOS:"
+    echo "  brew install poppler tesseract"
+    echo "On Fedora:"
+    echo "  sudo dnf install poppler-utils tesseract tesseract-langpack-eng"
+    echo
+    echo "These are external binaries, not Python packages -- there is no pip"
+    echo "route to them. The machine this pipeline was built on had no sudo, apt"
+    echo "or system pip at all, which is why the only Python dependency is"
+    echo "vendored into workspace/pylibs/ rather than installed; see"
+    echo "workspace/reports/dependency-options.md."
     exit 1
 fi
 
@@ -151,8 +161,14 @@ while IFS= read -r f; do
 done < <(find manuals china/manuals -name '*.pdf' 2>/dev/null)
 if [ "$pdfs" -gt 0 ] && [ "$ptrs" -eq 0 ]; then
     grn "  ok        $pdfs PDFs present"
+    echo "            If git reports them as modified after a fetch, run"
+    echo "            'git add --renormalize .' -- the content is correct and"
+    echo "            'git diff' is empty; the index still holds the pointers'"
+    echo "            stat data. Do NOT 'git checkout' them."
 elif [ "$ptrs" -gt 0 ]; then
     ylw "  partial   $pdfs PDFs present, $ptrs still unsmudged LFS pointers"
+    echo "            Until they are fetched they are recorded as 'not-fetched',"
+    echo "            and ingestion refuses them rather than extracting a stub."
     echo "            Fetch from public object storage -- free, no account, no"
     echo "            LFS bandwidth spent:"
     echo "              python3 -m fence_evidence.cli fetch --subset structural  #  73.5 MB"
@@ -178,7 +194,7 @@ fi
 echo
 echo "Next:"
 echo "  python3 -m fence_evidence.cli fetch --subset all      # the corpus, from public storage"
-echo "  python3 tests/run_tests.py                            # 225 tests, no corpus needed"
+echo "  python3 tests/run_tests.py                            # runs without a corpus; corpus tests skip"
 echo "  python3 -m fence_evidence.cli manifest                # inspect the corpus"
 echo "  python3 -m fence_evidence.cli ingest --pilot          # 10-document smoke test"
 echo "  python3 -m fence_evidence.cli ingest --all            # full corpus, ~33 min"

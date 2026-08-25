@@ -61,7 +61,7 @@ API or MCP server, any LLM-generated answer text, any external service.
 |---|---|
 | `manuals/`, `china/manuals/`, `data/`, `schema/`, `*.md`, `master-dataset.json` | read-only |
 | `workspace/**` | read-write; all generated output |
-| `src/fence_evidence/**`, `scripts/**`, `docs/**`, `eval/**`, `tests/**` | read-write; project code and deliverables |
+| `fence_evidence/**`, `scripts/**`, `docs/**`, `eval/**`, `tests/**` | read-write; project code and deliverables |
 | System packages (`apt`, `sudo`) | unavailable in this environment; not used |
 | Python packages | permitted, installed into `workspace/pylibs/` (git-ignored). Every third-party package must be **optional**, with a stdlib/poppler fallback, so the pipeline runs on a clean checkout |
 | Network | used only to fetch Python packages. The pipeline itself performs no network I/O at runtime |

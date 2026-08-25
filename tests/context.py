@@ -6,9 +6,10 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT))
 
-from fence_evidence.paths import EVIDENCE_DB, TESTS_DIR  # noqa: E402
+from fence_evidence.paths import (EVIDENCE_DB, TESTS_DIR,  # noqa: E402
+                                  is_lfs_pointer)
 
 
 def requires_store(test):
@@ -29,11 +30,7 @@ def _corpus_is_fetched() -> bool:
     for root in roots:
         for pdf in root.rglob("*.pdf"):
             found = True
-            try:
-                with open(pdf, "rb") as fh:
-                    if fh.read(42).startswith(b"version https://git-lfs"):
-                        return False
-            except OSError:
+            if is_lfs_pointer(pdf):
                 return False
     return found
 

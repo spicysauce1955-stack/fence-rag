@@ -135,7 +135,7 @@ flowchart TD
 The MVP needs a subset. The target shape is:
 
 - **documents** — one row per source path. Identity is the path, so a document keeps its id across
-  re-ingestion (`doc_id_for()` in `src/fence_evidence/ids.py`). Carries manufacturer, product family,
+  re-ingestion (`doc_id_for()` in `fence_evidence/ids.py`). Carries manufacturer, product family,
   `doc_type`, corpus track (`us` / `china` — these stay separate; the China sources are
   Chinese-language, metric, and reference GB rather than ASTM), and whether it sits under a
   `structural/` subdirectory.
@@ -368,7 +368,7 @@ documented range (the 130 mph case in R3); and not documented.
 
 Three surfaces, one contract.
 
-- **Python API** — `src/fence_evidence/` as the library. The Phase 3 verbs (`search_evidence`,
+- **Python API** — `fence_evidence/` as the library. The Phase 3 verbs (`search_evidence`,
   `get_document`, `get_page`, `get_region`, `get_element_context`, `resolve_document_version`) plus,
   later, `lookup_facts`, `compare_facts`, `resolve_supersession_chain`, `get_table`. Stable
   signatures; additive change only.
@@ -438,7 +438,7 @@ expected tables, and expected images, per document, and the run's exit status de
 
 ### 7.5 Read-only corpus boundary
 
-Enforced in code, not by convention — `ensure_writable()` in `src/fence_evidence/paths.py` refuses any
+Enforced in code, not by convention — `ensure_writable()` in `fence_evidence/paths.py` refuses any
 write outside `workspace/`. Every writing path routes through it. Corpus content is data: no path,
 URL, macro, or embedded action extracted from a document is ever executed, opened, or resolved.
 Document text never becomes an instruction. This applies with particular force to the facts layer,

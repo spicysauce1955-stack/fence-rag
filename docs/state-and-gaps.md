@@ -165,7 +165,7 @@ and its three duplicate filings are no longer superseded, and the 2006 approval
 
 **What was added.** `resolve_document_version` now reads the Phase 6
 `effective_date` and `expiration_date` facts at query time (see
-`src/fence_evidence/versions.py`). They cover all 17 NOA documents. Every date
+`fence_evidence/versions.py`). They cover all 17 NOA documents. Every date
 carries its element, page and review status; disagreeing facts produce a
 `conflict` and no asserted value rather than a guess; an expiry verdict always
 echoes the date it was judged against; and a member whose approval has expired is

@@ -59,12 +59,13 @@ class TestFetchTargetGuard(unittest.TestCase):
 
     def test_refuses_a_path_outside_the_corpus_even_if_listed(self):
         with self.assertRaises(CorpusWriteError):
-            fetch_target(REPO_ROOT / "src/fence_evidence/cli.py",
-                         {"src/fence_evidence/cli.py"})
+            fetch_target(REPO_ROOT / "fence_evidence/cli.py",
+                         {"fence_evidence/cli.py"})
 
     def test_refuses_traversal_out_of_the_corpus(self):
         with self.assertRaises(CorpusWriteError):
-            fetch_target(REPO_ROOT / "manuals/../src/x.py", {"manuals/../src/x.py"})
+            fetch_target(REPO_ROOT / "manuals/../fence_evidence/x.py",
+                         {"manuals/../fence_evidence/x.py"})
 
     def test_refuses_a_symlinked_component(self):
         # The symlink must not live inside manuals/ -- creating one there
@@ -96,9 +97,16 @@ class TestFetchTargetIsNotReachableFromPipelineCode(unittest.TestCase):
     PERMITTED = {"paths.py", "fetch.py", "cli.py"}
 
     def test_only_fetch_and_cli_reference_fetch_target(self):
-        src = REPO_ROOT / "src" / "fence_evidence"
+        pkg = REPO_ROOT / "fence_evidence"
+        modules = sorted(pkg.glob("*.py"))
+        # Assert the scan found something. Pointing this at a directory that no
+        # longer exists makes the test pass over an empty list, which is how a
+        # guard quietly stops guarding when the package is moved.
+        self.assertGreater(len(modules), 20,
+                           f"expected to scan the package, found {len(modules)} "
+                           f"modules under {pkg}")
         offenders = []
-        for py in sorted(src.glob("*.py")):
+        for py in modules:
             if py.name in self.PERMITTED:
                 continue
             if "fetch_target" in py.read_text(encoding="utf-8"):

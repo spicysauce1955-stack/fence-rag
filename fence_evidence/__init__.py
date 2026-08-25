@@ -15,6 +15,6 @@ from pathlib import Path
 
 __version__ = "1.0.0"
 
-_PYLIBS = Path(__file__).resolve().parents[2] / "workspace" / "pylibs"
+_PYLIBS = Path(__file__).resolve().parents[1] / "workspace" / "pylibs"
 if _PYLIBS.is_dir() and str(_PYLIBS) not in sys.path:
     sys.path.append(str(_PYLIBS))

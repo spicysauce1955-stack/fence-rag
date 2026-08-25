@@ -5,11 +5,28 @@ import argparse
 import json
 import sys
 
-from .paths import init_workspace
+from .paths import FETCH_HINT, init_workspace
 
 
 def _print(obj) -> None:
     print(json.dumps(obj, indent=2, ensure_ascii=False, default=str))
+
+
+def _warn_unfetched() -> int:
+    """Say so, once, when part of the corpus is still LFS pointers.
+
+    Every measurement downstream of an unfetched corpus is meaningless, and
+    the failure is otherwise invisible -- poppler reports a pointer as a
+    zero-page PDF, which is indistinguishable from a corrupt one.
+    """
+    from .paths import unfetched_corpus_files
+    missing = unfetched_corpus_files()
+    if missing:
+        print(f"WARNING: {len(missing)} corpus file(s) are unsmudged Git LFS "
+              f"pointers, not documents (e.g. {missing[0]}).\n"
+              f"         Results below cover only what is actually on disk.\n"
+              f"         Fetch the corpus first: {FETCH_HINT}", file=sys.stderr)
+    return len(missing)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -117,7 +134,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "manifest":
         from .manifest import build_manifest
         recs = build_manifest()
-        _print({"files": len(recs)})
+        not_fetched = [r for r in recs if r.get("processing_state") == "not-fetched"]
+        absent = [r for r in recs if r.get("processing_state") == "absent-from-disk"]
+        _print({"files": len(recs),
+                "inspected": len(recs) - len(not_fetched) - len(absent),
+                "not_fetched": len(not_fetched),
+                "absent_from_disk": len(absent)})
+        if not_fetched:
+            print(f"WARNING: {len(not_fetched)} of {len(recs)} corpus files are "
+                  f"unsmudged Git LFS pointers and were recorded as 'not-fetched' "
+                  f"rather than inspected.\n"
+                  f"         Fetch them, then re-run this command: {FETCH_HINT}",
+                  file=sys.stderr)
     elif args.cmd == "ingest":
         from .ingest import ingest
         from .pilot import PILOT_PATHS
@@ -131,6 +159,10 @@ def main(argv: list[str] | None = None) -> int:
             ap.error("choose --pilot, --all or --path")
         res = ingest(paths, workers=args.workers, force=args.force, log_name=name)
         _print(res["summary"])
+        # A run that extracted nothing because the corpus is not on disk is not
+        # a successful run, and must not exit 0 into a CI script.
+        if res["summary"]["failed"] or res["summary"]["not_fetched"]:
+            return 1
     elif args.cmd == "search":
         from .retrieval import search_evidence
         filters = {}
@@ -181,10 +213,12 @@ def main(argv: list[str] | None = None) -> int:
         else:
             _print(query_facts(args.type, manufacturer=args.manufacturer, limit=args.limit))
     elif args.cmd == "evaluate":
+        _warn_unfetched()
         from .evaluate import run_evaluation
         _print(run_evaluation(k=args.k, second_stage=args.second_stage,
                               report_name=args.name)["summary"])
     elif args.cmd == "audit":
+        _warn_unfetched()
         from .audit import run_audit
         _print(run_audit(k=args.k))
     elif args.cmd == "table-review":
@@ -230,7 +264,21 @@ def main(argv: list[str] | None = None) -> int:
         from .fetch import fetch_subset, load_remote_manifest
         from .paths import REPO_ROOT
         manifest = load_remote_manifest(args.manifest_url)
-        _print(fetch_subset(manifest, args.subset, REPO_ROOT, workers=args.workers))
+        result = fetch_subset(manifest, args.subset, REPO_ROOT, workers=args.workers)
+        _print(result)
+        if result.get("downloaded") or result.get("copied"):
+            # The index still holds each file's stat data from when it was a
+            # 131-byte pointer, so `git status` calls every fetched file
+            # modified even though `git diff` is empty. Say so here: the
+            # obvious tidy-up -- `git checkout .` -- would revert the corpus
+            # back to pointers.
+            print("note: `git status` will list the fetched files as modified "
+                  "until you run\n      `git add --renormalize .` -- their "
+                  "content is correct and `git diff` is\n      already empty. "
+                  "Do NOT `git checkout` them; that restores the pointers.",
+                  file=sys.stderr)
+        if result.get("failed"):
+            return 1
     elif args.cmd == "publish":
         from .config import load_env, R2Config
         from .distribution import build_manifest, load_corpus_manifest
