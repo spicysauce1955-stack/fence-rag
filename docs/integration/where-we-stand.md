@@ -1,9 +1,10 @@
 # Where we stand
 
 ```text
-Status:  The boundary is agreed. Four review rounds, every item raised by either
-         side dispositioned, no open disagreement on what crosses.
-From:    The Planning & BOM team, closing out v0.4.1.
+Status:  Round CLOSED. contract.md frozen at v1.0. Both open threads resolved in
+         audit/08 — `disputed` accepted, stagger conceded to cut planning.
+         Nothing open, nothing awaiting a decision from either side.
+From:    The Planning & BOM team.
 Purpose: The one page to read if you pick this up cold — what is settled, what is
          deliberately parked, what each side does next.
 ```
@@ -19,15 +20,20 @@ restated around `condition_scope`, banning *instance references* rather than nar
 `contract.md` is the authority. Eighteen binding obligations, and nothing outside that list
 binds.
 
-## Two threads still with you — neither blocking
+## Both threads closed
 
-1. **The name `disputed`.** We renamed your `conflict` because we already have a `Conflict`
-   at resolution time and did not want a second homonym in one round. The discriminator and
-   the semantics are yours; if the word reads wrong, name a better one.
-2. **Where the stagger constraint lives.** You put it on obligation 11's `requires` edge;
-   we think that shelf orders *assembly steps* while stagger constrains *where cuts fall*,
-   and belongs in cut planning. This is the only live disagreement between us, and it
-   decides where 77 instances land. `planning-asks.md` §6d has the argument.
+1. **`disputed`** — accepted, no counter-name. One nuance they raised and we are *not*
+   turning into a field yet: the two sub-cases have different parties. `on: conditions`
+   (108 facts) is their own readers disagreeing and closes by opening a crop;
+   `on: value` is two documents disagreeing and may never close. Both are
+   `closes_by: knowledge`, so nothing routes wrongly. `between: sources | readings`
+   is the cheap addition **when a queue exists to need it** — not on speculation.
+2. **Stagger lives in cut planning** — conceded to us, and the quantification came back
+   stronger than we assumed: **all 20 instances are `unquantified`.** No document in the
+   corpus states an offset. So the minimum joint offset is a **Planning-authored default,
+   declared as ours** — never `attributed_to: "manufacturer"`, which is the unfalsifiable
+   string `rationale.md` §5 exists to warn about. The requirement is theirs and cited; the
+   number is ours and labelled.
 
 ## Parked by agreement — named so nothing is silently dropped
 
@@ -54,8 +60,14 @@ binds.
 
 ## What we need from you, in order
 
-1. **The cell bounding box** (your K4). Still the single item most likely to decide whether
-   a review queue is a bounded task. Above crop cost.
+1. **The cell bounding box** (their K4) — **re-ranked by their data, and they were right
+   to push back.** 973 of 18,472 cells carry a box (5.3%); in structural documents it is
+   12 of 721 (1.7%). The 0% on pdfplumber tables is cheap to fix and they are doing it —
+   but it bounds the *text-layer catalog* queue, not the structural one, because on the
+   73 `table_not_reconstructed` pages **there is no cell to draw a box around.** The grid
+   was never recovered. For those the review unit is the page crop, which
+   `source-refs-design.md` already returns and which they built first. Crop-first was the
+   honest ordering and it is already done.
 2. **The ten `SOURCE_*` codes** and **the eleven-warning starter list**, with params and
    verbatim exemplars — both need entries in two locale bundles on our side.
 3. **The two early publishes**: one `ParameterTable` with a `declared` domain, one
@@ -63,14 +75,22 @@ binds.
 4. **`also_filed_as`** — one source class per content hash. We are relying on it now that
    class is load-bearing.
 
-## The one risk worth naming
+## The risk we named — confirmed, and defused by a decision already taken
 
-Your K5 and our N18 are a chain: **cell box → curation level 2 → any structural coverage at
-all in a first snapshot.** We ranked installation manuals admissible for structural work
-*only* at level 2, and level 2 is currently unreachable by construction, not by backlog —
-`reader_kind` is `agent` on all 1,225 readings. If human review is further out than we are
-assuming, that ranking is worse than the strict exclusion you originally proposed, and we
-would rather revisit it than have it quietly empty the snapshot.
+Level 2 is unreachable by construction: `reader_kind` is `agent` on all 1,225 readings and
+`reviewer` is NULL on every one. Not one human review has happened. (And 504 readings carry
+`cross_family_verified`, which sits in their promotion set today — two *agents* agreeing
+promotes a fact with no human in the loop. They are revoking it. That is their K1 and it is
+the right call.)
+
+**But delta item 2 already took the teeth out of it.** Now that *Planning* applies the
+source policy, those rows cross anyway — published at an honest level 1, rejected by our
+policy, and **visible in the decision graph as rejected** rather than silently absent. That
+is the difference between *"the snapshot is thin"* and *"the snapshot is thin and nobody can
+see why."*
+
+So the ranking stands. Expect the first structural snapshot to be thin: 882 facts — 44.6%
+of the store — come from installation manuals and none clears level 2 on day one.
 
 ## An honest note on what is not done
 
@@ -85,7 +105,16 @@ Each round checked the design against a different **substance** — your corpus,
 reader, our codebase, then our own additions — and each found what the previous could not.
 After round two the design was internally consistent and our engine could not implement it.
 
-**Coherence was never the test.** And the asymmetry that showed up three rounds running:
-what we *added* to your proposal went unchecked, while what you sent was measured. Both of
-the v0.4 items you falsified were ours, and both were assertions we had not tested. That is
-the habit we are taking away from this.
+**Coherence was never the test.**
+
+We had been calling the second pattern an asymmetry — our additions going unchecked while
+their evidence got measured — and their `audit/08` §6 corrected it into something more
+useful. It was never carelessness. **An addition made at the boundary has no substance on
+either side to check it against** until someone holds it up to one. `continuity` was
+checkable in their corpus and nowhere else; obligation 13 was checkable in their corpus and
+nowhere else. Both were sound designs against our engine.
+
+So the habit is not *check our own additions harder*. It is: **anything either side invents
+at the boundary goes to the other side to be measured before it is written as binding.**
+Which is what these four rounds were, and why they worked — and their own miscount, in the
+same note that corrected us, is the same failure in the other direction.

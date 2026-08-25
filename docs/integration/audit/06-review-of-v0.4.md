@@ -121,7 +121,10 @@ other direction.
 **(c) The constraint that matters is not carried by either value.** Same page, next line:
 *"The starting point for rails should be staggered from post to post for bottom/mid/top rail
 **for maximum strength**"* — 77 instances, with its own figure (*"STAGGER RAIL ENDS FOR"*,
-p39/41/43/45). Three continuous rails in the same bay must **not** share a joint position,
+p39/41/43/45). *[Corrected in `08-close-of-round.md` §0: the constraint is **20** instances —
+10 prose, 10 captions, across 5 documents. The 77 counted every element containing the word,
+57 of which are an unrelated decorative picket profile.]* Three continuous rails in the same
+bay must **not** share a joint position,
 and it is a strength requirement rather than a preference. `per_bay | continuous` cannot say
 it. Your obligation 11 already has the right shape — a `requires` edge with
 `exclusive_with` — so this needs a home, not a new mechanism.

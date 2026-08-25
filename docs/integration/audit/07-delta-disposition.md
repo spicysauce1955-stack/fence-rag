@@ -94,8 +94,10 @@ arguments hold:
 - **Terrain collapses it** — a rail cut to 95½″ for rolling terrain is one bay. A bay-level
   fact deciding a member-level field, which is item 4 arriving from the other direction, as
   you say.
-- **Neither value carries the stagger constraint** — 77 instances, with its own figure, and
-  stated as a strength requirement rather than a preference.
+- **Neither value carries the stagger constraint** — 20 instances across 5 guides, with its
+  own figure, stated as a strength requirement rather than a preference. *(Their §3(c) said
+  77; corrected to 20 in `08-close-of-round.md` §0. The conclusion is unchanged; the size
+  is not.)*
 
 **`continuity` as an authored boolean was me flattening a derived property into a fact** —
 the same collapse-a-conditional-into-a-scalar error the first audit taught us about
@@ -129,9 +131,10 @@ is: *joint positions of members sharing a bay must differ by at least X*. That g
 number, an authority and a citation, and it fails as a warned line when it cannot be met
 rather than silently producing three aligned joints.
 
-**What we need from you** is the constraint, not the mechanism: publish the requirement with
-whatever minimum offset the guides state, or as `unquantified` where they only say
-*"staggered … for maximum strength"* — which, on the evidence you quote, is most of the 77.
+**What we need from you** is the constraint, not the mechanism. *(Answered in `08` §2: all
+20 are `unquantified` — no document states an offset. The minimum joint offset therefore
+becomes a Planning-authored default, declared as ours rather than attributed to a
+manufacturer.)*
 
 ---
 

@@ -1,8 +1,8 @@
 # Integration — the boundary with Planning & BOM
 
 ```text
-Status:    contract.md is FROZEN at v1.0 (2026-08-25). Four review rounds, every
-           item dispositioned, no open disagreement on what crosses.
+Status:    CLOSED. contract.md is FROZEN at v1.0 (2026-08-25). Four review rounds,
+           every item dispositioned, nothing awaiting a decision from either side.
            Changing a BINDING item requires a ratified amendment — AMENDING.md.
 Authority: Binding ONLY at the boundary. Silent on everything inside it.
 Origin:    Proposed by Planning & BOM; audited by Knowledge; revised by both.
@@ -55,6 +55,9 @@ Kept in order, because a later disagreement is usually a re-run of an earlier on
 | [`05-acceptance-open-questions.md`](audit/05-acceptance-open-questions.md) | Knowledge's working list — everything needing a decision, and what "done" means |
 | [`06-review-of-v0.4.md`](audit/06-review-of-v0.4.md) | **Knowledge's reply to the v0.4 delta.** Two items agreed with additions, one agreed in substance and wrong in shape, one premise that does not hold |
 | [`07-delta-disposition.md`](audit/07-delta-disposition.md) | **Planning's decision.** All four accepted; the falsified premise was worse than measured — height varies *along* a run, not merely between runs |
+| [`08-close-of-round.md`](audit/08-close-of-round.md) | **Knowledge closes both threads** — `disputed` accepted, stagger conceded — corrects its own 77→20 count, and re-ranks K4 with the cell-coverage numbers |
+| [`09-round-closed.md`](audit/09-round-closed.md) | **Planning acknowledges.** Correction propagated, K4 re-ranked, and Knowledge's account of the boundary-addition problem adopted over ours |
+| [`08-close-of-round.md`](audit/08-close-of-round.md) | **Knowledge closes the round.** `disputed` accepted, stagger conceded to cut planning, the level-2 risk confirmed and defused — and one of Knowledge's own figures corrected |
 
 ---
 
@@ -68,6 +71,7 @@ previous could not:
 | 1 · audit | this platform's **corpus** — 144 documents, 81,794 elements | 29 items. Seven of ten §7 questions surfaced a change; one invariant was falsified |
 | 2 · review | the revision, read by a **second party** taking §8 literally | 6 defects that blocked authoring — including a mechanism argued for and then omitted |
 | 3 · self-audit | Planning's own **codebase** | 7 more, two in code already published here. Then 6 more, every one in something Planning had *added* rather than accepted |
+| 4 · delta | the four surviving items, **re-measured against the corpus** | 2 missing `Gap` kinds; supersession on none of the policy's axes; `continuity` more than binary; obligation 13's *"already true"* falsified by two keys in the store. All four accepted |
 | 4 · delta | the four surviving items, **re-measured against the corpus** | 2 missing `Gap` kinds; supersession on none of the policy's axes; `continuity` more than binary; and obligation 13's *"already true"* falsified by two keys in the store. All four accepted |
 
 **The lesson, worth keeping.** After round two the design was internally consistent and

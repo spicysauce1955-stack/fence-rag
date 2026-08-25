@@ -238,8 +238,11 @@ validates clean and loses the fact silently.
 
 **The stagger constraint needs publishing, and it needs a different home than you
 suggested.** *"The starting point for rails should be staggered from post to post for
-bottom/mid/top rail for maximum strength"* — 77 instances, with its own figure, stated as
-a strength requirement rather than a preference.
+bottom/mid/top rail for maximum strength"* — **20 instances across 5 guides** (10 prose,
+10 figure captions), stated as a strength requirement rather than a preference. *(Corrected
+from 77 in `audit/08` §0 — the higher figure counted a decorative staggered-picket profile
+and one "staggering array of colors". One rule repeated across a product family, not a
+corpus-wide pattern.)*
 
 You pointed at obligation 11's `requires` edge with `exclusive_with`. We think that shelf
 is wrong and would quietly not work: `requires` orders **assembly steps** — *fit this
@@ -252,9 +255,15 @@ members sharing a bay must differ by at least X*. That gives it a number, an aut
 a citation, and it fails as a warned line when it cannot be met rather than silently
 producing three aligned joints.
 
-**What we need from you is the constraint, not the mechanism.** Publish it with whatever
-minimum offset the guides state, or as `unquantified` where they only say *"staggered …
-for maximum strength"* — which on your evidence is most of the 77.
+**Settled in `audit/08` §2, and the answer is stronger than we assumed.** No document in
+the corpus states a stagger offset — **all 20 publish as `unquantified`**. Every dimension
+appearing near the word belongs to the staggered-picket product, not to the rail rule.
+
+**So the number is ours to choose, and must be declared as ours.** A cut planner needs a
+minimum joint offset and this corpus will never supply one. It becomes a Planning-authored
+default with our own attribution — never `attributed_to: "manufacturer"`, which is exactly
+the unfalsifiable string `rationale.md` §5 was written about. The requirement is theirs and
+cited; the number is ours and labelled.
 
 ---
 
