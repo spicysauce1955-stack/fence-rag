@@ -1,8 +1,9 @@
 # Integration — the boundary with Planning & BOM
 
 ```text
-Status:    v0.4.1. Agreed. Four review rounds, every item dispositioned, no open
-           disagreement on what crosses. where-we-stand.md is the one-page state.
+Status:    contract.md is FROZEN at v1.0 (2026-08-25). Four review rounds, every
+           item dispositioned, no open disagreement on what crosses.
+           Changing a BINDING item requires a ratified amendment — AMENDING.md.
 Authority: Binding ONLY at the boundary. Silent on everything inside it.
 Origin:    Proposed by Planning & BOM; audited by Knowledge; revised by both.
 ```
@@ -31,7 +32,8 @@ the boundary: what crosses it, in what shape, and what each side promises the ot
 |---|---|
 | [`where-we-stand.md`](where-we-stand.md) | **Start here.** The state of the boundary in one page — settled, parked, and next on each side |
 | [`boundary-delta-v0.4.md`](boundary-delta-v0.4.md) | The four v0.4 items that needed agreement. All four accepted — see `audit/07` |
-| [`contract.md`](contract.md) | What crosses the boundary, and the promises each side makes |
+| [`contract.md`](contract.md) | **FROZEN v1.0.** What crosses the boundary, and the promises each side makes. Verify with `sha256sum -c contract.sha256` |
+| [`AMENDING.md`](AMENDING.md) | How and when the frozen contract may change — four triggers, five steps, and what is *not* an amendment |
 | [`knowledge-datamodel.md`](knowledge-datamodel.md) | Every entity, field, relationship and invariant, with a traceability map from each audit finding |
 | [`planning-asks.md`](planning-asks.md) | What Planning needs from this platform, ordered by impact |
 | [`source-refs-design.md`](source-refs-design.md) | `GET /source-refs/{id}` — the design, with [`fixtures/`](fixtures/) |
