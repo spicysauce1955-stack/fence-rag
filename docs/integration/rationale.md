@@ -222,7 +222,7 @@ platform. Neither is a specification, and nothing in either is binding.
 
 They exist because the Planning team had to think through what it was asking for before
 asking. Treat them as one team's proposal. Only the items marked BINDING in
-`contract-v0.2.md` are promises.
+`contract.md` are promises.
 
 Links are held by the Planning team; ask if you want them.
 

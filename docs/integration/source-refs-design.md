@@ -2,9 +2,9 @@
 
 ```text
 Status:    Design, for review. Nothing here is implemented.
-Written by: the Knowledge team (this repo), in response to contract-v0.2.md §4.
+Written by: the Knowledge team (this repo), in response to contract.md §4.
 Authority: Advisory on internals. The only binding items it satisfies are
-           contract-v0.2.md §3.1.3 ("every value carries at least one resolvable
+           contract.md §3.1.3 ("every value carries at least one resolvable
            SourceRef, and GET /source-refs/{id} returns something a person can
            look at") and §3.3.1-3.3.3 (what the frontend must show).
 Reads with: docs/curation/02-curation-schema.md §2.5.3 (evidence kinds) and
@@ -435,7 +435,7 @@ the hand-researched material.
 
 ## 8. Open, and what we would want agreed
 
-Logged in `acceptance-open-questions.md`; repeated here so the design is readable
+Logged in `05-acceptance-open-questions.md`; repeated here so the design is readable
 alone.
 
 1. **Does `retain_until` apply to source refs?** The contract pins it on

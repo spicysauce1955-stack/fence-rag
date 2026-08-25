@@ -1,27 +1,29 @@
 # Contract v0.2 — what crosses the boundary
 
 ```text
-Status:    v0.3. Revised after the §7 audit; again after review-of-v0.2.md,
-           which found six defects; and again after Planning audited the design
-           against its own codebase and found seven more, two of them in code
-           already published to this team.
+Status:    v0.4. Revised after the §7 audit; after 03-review-of-v0.2.md, which
+           found six defects; after Planning audited the design against its own
+           codebase and found seven more; and after Planning audited its own
+           ADDITIONS, which found six it had specified with no implementation.
+           Four items here need this team's agreement — collected, with nothing
+           else, in boundary-delta-v0.4.md.
 Authority: Binding at the boundary only. Items marked BINDING are promises a
            consumer relies on. Everything else is this team's decision.
 Change:    Registry additions are NOT breaking changes and need no negotiation.
            Changes to the stable core are negotiated between teams.
-Shapes:    knowledge-datamodel-v0.2.md carries every entity in full, with a
+Shapes:    knowledge-datamodel.md carries every entity in full, with a
            traceability map (§8) from each audit finding to where it landed.
 ```
 
 > **What moved in v0.2.** Five BINDING blocks changed, all of them because
-> `audit-response-v0.1.md` measured this store rather than reading the schema.
+> `01-audit-response.md` measured this store rather than reading the schema.
 > The largest three: the unit vocabulary was four units short (§1.1); the source
 > policy had no class for an installation manual, which is 44.6% of every fact
 > here (§1.4); and `knowledge-datamodel.md`'s **invariant 5** — *"a warning lives
 > on its step"* — was **false**, since only 19.9% of the positionally resolvable
 > warning instances are (§3.1 obligation 10).
 >
-> **What moved in v0.2.1.** Six defects from `review-of-v0.2.md`, none of which
+> **What moved in v0.2.1.** Six defects from `03-review-of-v0.2.md`, none of which
 > re-opened a decision: `Gap` was described as never consumed while gates publish
 > as gaps; `contributing_sources` was argued for and then omitted; twenty-three
 > `_mm` fields broke §1.1's own binding rule; three source-policy ranks were tied
@@ -48,7 +50,8 @@ Quantity     { amount_milli: int, unit: UnitCode, value_raw: [str] }
 UnitCode     mm | mm2 | mm3 | each | gram_milli | cent
              | deg_milli | mph_milli | pa_milli | second_milli
 
-Provenance   { cites: [SourceRef], source_class, curation_level, admitted_by }
+Provenance   { cites: [SourceRef], source_class, curation_level }
+             # admitted_by is NOT here — it is an output of a RUN, see §1.4
 PostRole     end | corner | line | gate | junction | transition
 ```
 
@@ -127,7 +130,42 @@ Snapshot {
 commercial and per-tenant, not knowledge — it stays in Planning, which already pins it
 per run with its own `catalog_hash`. A published `Part` says what a component *is*; a
 company's SKU attaches to it through a link that a person confirmed. See
-`knowledge-datamodel-v0.2.md` §3 for the full shapes of every type above.
+`knowledge-datamodel.md` §3 for the full shapes of every type above.
+
+### 1.2.1 Gap — the shape this contract has invoked six times and never defined
+
+Every never-block promise terminates in a `Gap`, a gate is published as one, and
+`gaps [Gap]` sits in the payload above. Until now it had no fields, so it could not
+actually be authored. It is one type whether this platform publishes it or a planning
+run produces it:
+
+```text
+Gap {
+  id
+  kind         unmodellable_entity        the corpus describes something no type fits
+             | uncovered_condition        a domain point no row covers
+             | unsatisfiable_requirement  nothing can fill a slot
+             | unquantified               stated in prose, never given a number
+             | missing_value              a field that should exist and does not
+             | unmapped_part_kind         a part-kind no counting rule can produce
+
+  subject      EntityRef | SlotRef | ParamRef     WHAT is missing, addressably
+  because      code + params                      renders in both locales
+  cites        [SourceRef]                        evidence, where there is any
+  would_close  str      one sentence: what would resolve this
+  severity     warns_line | informational
+}
+```
+
+> **BINDING.** A `Gap` carries `would_close` — a sentence naming what would resolve it.
+> A gap that only says something is missing sends a curator hunting; one that says
+> *"a footing row for exposure C, non-HVHZ, at 6 ft"* is a work item. That field is what
+> makes a gap report worth receiving rather than worth filing.
+
+**Why `unquantified` earns a place.** Your audit found four statements that *"Accents
+will reduce the amount of rack"* and zero that quantify it. That is neither a missing
+value nor an unmodellable entity — it is a documented effect with no number, and
+flattening it into either loses what the source actually said.
 
 > **BINDING.** Every `SourceRef.belongs_to` cited anywhere inside a snapshot resolves to
 > a `SourceDoc` in that snapshot's `source_docs`. This is the closure rule that makes
@@ -275,15 +313,24 @@ authoritative statement on post embedment in this corpus, and applied to a vinyl
 is a **scope** error — a higher-ranked wrong-scope source beats a lower-ranked right-scope
 one and wins silently. A row backed by `industry_standard` must therefore carry its
 applicability on the condition side, or publish as a gap. Which dimensions those are is an
-open question in `knowledge-datamodel-v0.2.md` §7.2.
+open question in `knowledge-datamodel.md` §7.2.
 
 One mechanism covers four things that would otherwise be separate concerns: which sources
 an actor can see, which sources may back an accepted value, how competing sources rank,
 and how checked a value must be before it counts.
 
-> **BINDING.** Resolution honours the policy, and the winning row records `admitted_by`,
-> so Planning can render *why* a value was chosen without re-deriving it. `policy_version`
-> is part of the snapshot hash.
+> **BINDING — CHANGED IN v0.4.** **Planning** applies the source policy, not this
+> platform, and records `admitted_by` **on the run** rather than on the published row.
+> Admissibility depends on the *task* a value is being used for, and only the planner
+> knows the task — asking this platform to decide it was asking it to guess. Two
+> consequences: a snapshot carries **every admissible row including the ones a policy
+> will reject**, so a decision graph can say *"a spec sheet was inadmissible for a
+> structural parameter"* rather than the value silently never existing; and
+> `source_class` on a row becomes load-bearing rather than informational.
+>
+> *(Superseded wording, kept so the change is legible: resolution honoured the policy
+> and the winning row recorded `admitted_by`, so Planning could render why a value was
+> chosen without re-deriving it.)* `policy_version` remains part of the snapshot hash.
 
 **Unreviewed knowledge is allowed into a snapshot.** Gating it entirely would mean a new
 tenant with an empty review queue could not plan at all, and the two teams could not work
@@ -381,7 +428,7 @@ Either way, plans still generate in the meantime, with a warned line.
 
 ### 3.1 What Planning relies on this platform for
 
-> **BINDING — all sixteen.** v0.2 left these unmarked while stating that everything
+> **BINDING — all eighteen.** v0.2 left these unmarked while stating that everything
 > not marked BINDING is this platform's decision, which made N10, N11, N17 and N24's
 > obligations formally non-binding. They were always meant to be promises; the marker
 > was missing, not the intent.
@@ -437,23 +484,34 @@ This is the complete list. Satisfy these and every internal decision is yours.
     through an intermediate post belongs to no bay at all. Publish all five from the start;
     Planning renders `run` and `site` as present-and-unrendered until phase two, rather
     than dropping them.
-13. **A row states whether its conditions came from the source.** `condition_basis:
+13. **A published `ParameterTable` reads only whole-project facts.** Its conditions may
+    name site facts (exposure, hurricane zone, jurisdiction, code edition, material) and
+    other parameters — never a run, a station, a bay or a panel. This is already true of
+    everything this platform publishes; stating it bindingly is what lets every table be
+    expanded **once, up front**, before any geometry exists. A table conditioned on a bay
+    could not be, because the bay does not exist yet when parameters resolve.
+14. **A member states whether it is continuous across bays.** `Member.continuity` is
+    `per_bay` (the default, and true of almost everything) or `continuous` — a rail
+    supplied in 16 ft lengths, threaded *through* an intermediate post and staggered from
+    post to post, is one physical object in two bays. Published as `per_bay` it is counted
+    twice and cut wrong. Author it only where a guide actually says so.
+15. **A row states whether its conditions came from the source.** `condition_basis:
     stated` with empty conditions means the document gave none — such a row is a
     fallback, is excluded from the `unique` overlap check, and never asserts anything
     about the points it lands on. 66% of the structural facts in the class §1.4 now
     admits are of exactly this shape, and publishing them into a declared domain would
     assert six brackets the source never stated.
-14. **Lapsed authority is judged against a pinned `as_of`, never a clock.** Planning
+16. **Lapsed authority is judged against a pinned `as_of`, never a clock.** Planning
     pins `as_of` on the run alongside the topology and snapshot hashes, and warns when
     a line's backing `valid_until` precedes it. Generation is a pure function: a clock
     read inside it would make the same project against the same snapshot warn
     differently on different days. This corrects our own earlier wording, which said
     *"relative to the run date"* and named no input.
-15. **`Combination` is pinned but not yet consumed.** Nothing in the engine reads one
+17. **`Combination` is pinned but not yet consumed.** Nothing in the engine reads one
     today. The shape is agreed and the seam is named — a `certify()` step raising
     `warning.combination_uncertified` — but until it exists, curating combinations
     buys nothing and this platform should spend the effort elsewhere.
-16. **A gate is published as a `Gap`, never as a `FenceModel`.** `PanelSpec` models no
+18. **A gate is published as a `Gap`, never as a `FenceModel`.** `PanelSpec` models no
     gate: no handedness, no swing direction, no fixed leaf, no `gate.*` namespace for
     hinge selection by leaf weight. A gate filed as a fence model validates clean and
     silently loses all of it — including swing direction and latch height, which are what
@@ -514,4 +572,4 @@ row and column labels and **no cell bounding box in crop pixels**, which
 `docs/curation/02-curation-schema.md` §2.5.3 already requires. A reviewer can be shown the
 crop and not the cell inside it. Everything else on either roadmap costs time if it slips;
 this one decides whether the review queue is a bounded task at all. See
-`planning-asks-v0.2.md`.
+`planning-asks.md`.

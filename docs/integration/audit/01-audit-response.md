@@ -12,7 +12,7 @@ Method:    workspace/indexes/evidence.db queried read-only on 2026-08-24 against
            re-read against the PDF, and page images were looked at where the
            page is a scan. Nothing under manuals/, china/, data/ or workspace/
            was modified.
-Reads with: acceptance-open-questions.md (every item needing a decision, in one
+Reads with: 05-acceptance-open-questions.md (every item needing a decision, in one
            list), source-refs-design.md (the unblocked work, now designed).
 ```
 
@@ -1316,4 +1316,4 @@ them twice.
 **Not asking you to do anything yet either**, except read §2.2, §2.4, §2.5, §2.6
 and §3 — the five places where our data contradicts the proposal rather than
 merely stretching it. Everything needing a decision is in one list in
-`acceptance-open-questions.md` §1, so the negotiation has a single surface.
+`05-acceptance-open-questions.md` §1, so the negotiation has a single surface.

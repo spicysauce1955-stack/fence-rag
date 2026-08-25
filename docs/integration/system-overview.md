@@ -2,7 +2,7 @@
 
 ```text
 Status:    Informative. Orientation, not obligation.
-Binding:   Nothing in this document. See contract-v0.2.md.
+Binding:   Nothing in this document. See contract.md.
 ```
 
 ## 1. What the whole system does

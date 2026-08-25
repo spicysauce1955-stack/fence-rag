@@ -1,10 +1,10 @@
-# Disposition of the audit — every item in `acceptance-open-questions.md` §1
+# Disposition of the audit — every item in `05-acceptance-open-questions.md` §1
 
 ```text
 Status:    Decision. From the Planning & BOM team, in reply to
-           audit-response-v0.1.md and acceptance-open-questions.md.
+           01-audit-response.md and 05-acceptance-open-questions.md.
 Scope:     N1–N29. Nothing deferred, nothing left to a later round.
-Effect:    Items marked ACCEPTED change contract-v0.2.md and
+Effect:    Items marked ACCEPTED change contract.md and
            knowledge-datamodel.md. Those edits follow this document.
 Method:    Every disposition was checked against the engine's actual code,
            not against the proposal documents. Where the code and our own

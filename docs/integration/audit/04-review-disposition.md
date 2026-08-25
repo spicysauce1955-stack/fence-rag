@@ -1,9 +1,9 @@
-# Response to `review-of-v0.2.md`
+# Response to `03-review-of-v0.2.md`
 
 ```text
 Status:  Decision. From the Planning & BOM team.
-Result:  All six blocking defects fixed in contract-v0.2.md and
-         knowledge-datamodel-v0.2.md, now v0.2.1. Every non-blocking item fixed
+Result:  All six blocking defects fixed in contract.md and
+         knowledge-datamodel.md, now v0.2.1. Every non-blocking item fixed
          too — none was worth carrying to v0.3.
 Checked: Two of your claims were checkable facts rather than judgements, so we
          checked them instead of accepting them. Both hold. One of your
@@ -126,7 +126,7 @@ not get a warned line. You get no plan.
 Three things follow:
 
 - **It is ours and it is now our step 0**, ahead of everything in
-  `planning-asks-v0.2.md` §8. There are thirteen `GenerationFailure` raise sites and
+  `planning-asks.md` §8. There are thirteen `GenerationFailure` raise sites and
   we are auditing all of them against §3.2.4, not just this one.
 - **N18 is more urgent, not less.** Your two options both assumed a fallback
   existed. The honest position is that absence is currently fatal, so the argument
@@ -213,7 +213,7 @@ check · `Procedure.id` added · `attaches_to` marked REQUIRED · `max_rack`'s
 conditions (`slope_method`, option axes) bound in §2.7 · `version_status` uses
 `active` · `knowledge-design.md`'s header and §9 brought current · the README's
 "four places" → five and the warning denominator restored ·
-`planning-asks-v0.2.md` §4 no longer attributes N22 and N29 to you as proposals, and
+`planning-asks.md` §4 no longer attributes N22 and N29 to you as proposals, and
 the Chesterfield trace says four superseded approvals.
 
 Two we did not change:
@@ -241,5 +241,5 @@ each than a hundred of either.
 
 **And one thing that changed on our side because of your question:** step 0 is now
 auditing thirteen `GenerationFailure` sites against the never-block obligation,
-ahead of the work in `planning-asks-v0.2.md` §8. A snapshot that produces no plan
+ahead of the work in `planning-asks.md` §8. A snapshot that produces no plan
 would have made every other item on that list untestable.

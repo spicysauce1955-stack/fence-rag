@@ -1,14 +1,17 @@
 # What Planning needs from this platform, and when
 
 ```text
-Status:   Working list, maintained by the Planning & BOM team.
-Purpose:  The mirror of acceptance-open-questions.md — everything we need from
+Status:   v0.4. Working list, maintained by the Planning & BOM team.
+Note:     The four items needing your AGREEMENT are not here — they are in
+          boundary-delta-v0.4.md. This document is what we need you to BUILD
+          or SEND, which is a different list and needs no approval.
+Purpose:  The mirror of 05-acceptance-open-questions.md — everything we need from
           you, ordered by what it costs us if it is late.
 Honest:   Nothing here blocks us this week. Engine steps 1–3 and the evidence
           viewer all run against what is already on disk. This is the three-week
           list, not the today list.
-Reads with: knowledge-datamodel-v0.2.md (the revised model, and §8 traces every
-          audit finding to where it landed), contract-v0.2.md (the promises).
+Reads with: knowledge-datamodel.md (the revised model, and §8 traces every
+          audit finding to where it landed), contract.md (the promises).
 ```
 
 ---

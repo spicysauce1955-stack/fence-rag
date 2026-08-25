@@ -1,9 +1,9 @@
 # Review of v0.2 — the Knowledge team's response to the disposition
 
 ```text
-Status:    Review. From the Knowledge team, on contract-v0.2.md,
-           knowledge-datamodel-v0.2.md, planning-asks-v0.2.md and
-           audit-disposition-v0.1.md.
+Status:    Review. From the Knowledge team, on contract.md,
+           knowledge-datamodel.md, planning-asks.md and
+           02-audit-disposition.md.
 Verdict:   Approve the direction and the dispositions. Six defects to fix
            before either side authors against the model. None needs a redesign.
 Method:    Three independent readers over the contract, the data model, and the
@@ -35,14 +35,14 @@ fail rather than an ambiguity.
 
 ### B1 · `Gap` is tier 3 and "never consumed", and the gate decision depends on publishing gates as Gaps
 
-`knowledge-datamodel-v0.2.md` §4 lists `Conflict · Gap` among the private model and
+`knowledge-datamodel.md` §4 lists `Conflict · Gap` among the private model and
 says *"Everything else stays yours and is never consumed."* §9.1 then says a gate is
 published *"as a `Gap` with `kind = "unmodellable_entity"`"*, and the disposition
 §2.5 says it *"will surface in Planning as a named hole"*. Those cannot both be
 true. `insertion_margin_mm`'s absence (§3.3), the unquantified accent effect on
 racking (§3.8) and every unrepresentable entity land on the same escape hatch.
 
-`contract-v0.2.md` line 98 settles the intent — `gaps [Gap]` is in the snapshot
+`contract.md` line 98 settles the intent — `gaps [Gap]` is in the snapshot
 payload — so this is a stale sentence in §4 rather than a disagreement. But it is
 the sentence that decides whether N17 works at all, and §4's "three crossings" count
 is now wrong: the payload carries at least six object kinds.
@@ -54,7 +54,7 @@ crossing count with contract §1.2.
 
 Two halves of one problem, found independently by two readers.
 
-`grep contributing_sources contract-v0.2.md` returns nothing. The contract argues
+`grep contributing_sources contract.md` returns nothing. The contract argues
 *from* N14 to justify `belongs_to` — line 64, *"an opaque id carries zero
 admissibility bits into a pinned snapshot"* — and then omits the field that carries
 those bits. The disposition's own early-publish ask (§5: *"one definition with
@@ -109,7 +109,7 @@ audit used:
 > 13 × 178 = 2314 mm — **0.575 mm of slack**. The unit convention eats 82% of the
 > fitting clearance, and it eats it silently.
 
-That arithmetic is how `audit-response-v0.1.md` §2.1 proved `gap_after_mm = 0`
+That arithmetic is how `01-audit-response.md` §2.1 proved `gap_after_mm = 0`
 rather than a negative. Rounded, it no longer closes, and a curator would conclude
 there is a gap where there is none.
 
@@ -241,17 +241,17 @@ lists as a bindable dimension. · `SourceDoc.version_status` is enumerated `curr
 superseded | unknown`; our store and `source-refs-design.md` use `active`. One word.
 
 **Satellite documents.** `knowledge-design.md` was half-revised: its header now
-points at `contract-v0.2.md`, but line 8 still routes the reader to the superseded
+points at `contract.md`, but line 8 still routes the reader to the superseded
 `knowledge-datamodel.md`, and §9 still solicits the §7 audit — which is answered,
 dispositioned and folded in. That is the one document a new reader is most likely to
 start from. · `README.md` says the audit found *"four places where the data
 contradicted the proposal"* and lists §2.2, §2.4, §2.5, §3; the audit says **five**
 and names §2.6 as well, which is one of the two the disposition itself called *"worth
-more than the change they ask for"*. · `planning-asks-v0.2.md` §4 says *"we modified
+more than the change they ask for"*. · `planning-asks.md` §4 says *"we modified
 five of your proposals"*, but the disposition correctly separates three modified
 (N2, N18, N25) from two **answered with a decision** (N22, N29) — N29 we raised as a
 question, not a proposal, and on N22 we offered both shapes. It attributes to us
-positions we did not take. · `planning-asks-v0.2.md` §2.2 says the Chesterfield trace
+positions we did not take. · `planning-asks.md` §2.2 says the Chesterfield trace
 carries *"three superseded approvals"*; it is four. · `README.md`'s *"four fifths of
 the warnings … attached to no step at all"* drops the denominator: it is 19.9% of the
 **841 positionally resolvable** instances of 1,038.
@@ -260,7 +260,7 @@ the warnings … attached to no step at all"* drops the denominator: it is 19.9%
 say **1,988 facts** where everything since says **1,976**. Both numbers are in
 `state-and-gaps.md`. We will reconcile it on our side and tell you which is right.
 
-**And one thing we checked specifically:** our own `acceptance-open-questions.md` was
+**And one thing we checked specifically:** our own `05-acceptance-open-questions.md` was
 edited by you and nothing in it was softened. §4's assumptions and §5's methodology
 survived intact, including the double-blind gates pass and *"where the two passes
 disagreed with an earlier assumption of ours, the source won"*. The superseded
@@ -358,7 +358,7 @@ Also worth making explicit, because neither document says it: **N18 puts K4 on t
 critical path.** Level 2 requires a person comparing a value to a page; a bounded
 review requires the cell box; the cell box does not exist. So the chain is *cell box
 → level 2 → any structural coverage at all in a first snapshot*. Your
-`planning-asks-v0.2.md` §1 asks us to raise K4 above K3 and we agree — this is the
+`planning-asks.md` §1 asks us to raise K4 above K3 and we agree — this is the
 reason, and it is stronger than the throughput argument you gave for it.
 
 **N22, N25, N29** — accepted without reservation. `Snapshot.regime` with a typed

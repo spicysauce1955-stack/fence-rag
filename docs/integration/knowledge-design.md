@@ -3,9 +3,9 @@
 ```text
 Status:    Orientation. Written by the Planning & BOM team; audited, revised and
            re-reviewed by both. Current as of v0.2.1.
-Authority: Advisory throughout. Only the BINDING items in contract-v0.2.md are
+Authority: Advisory throughout. Only the BINDING items in contract.md are
            promises; everything here is one team's view of how the pieces fit.
-Detail:    knowledge-datamodel-v0.2.md carries the entities and relationships.
+Detail:    knowledge-datamodel.md carries the entities and relationships.
 ```
 
 ## 1. What this component is for
@@ -187,14 +187,14 @@ Either way plans still generate, with a warned line, in the meantime.
 
 ## 9. Where the conversation stands
 
-The v0.1 challenge was answered in `audit-response-v0.1.md`, dispositioned in
-`audit-disposition-v0.1.md`, folded into v0.2, and reviewed again in
-`review-of-v0.2.md`, which found six defects — all fixed in v0.2.1 and recorded in
-`review-disposition-v0.2.md`.
+The v0.1 challenge was answered in `01-audit-response.md`, dispositioned in
+`02-audit-disposition.md`, folded into v0.2, and reviewed again in
+`03-review-of-v0.2.md`, which found six defects — all fixed in v0.2.1 and recorded in
+`04-review-disposition.md`.
 
-**What is still open is short and named**: `knowledge-datamodel-v0.2.md` §7.1 (the
+**What is still open is short and named**: `knowledge-datamodel.md` §7.1 (the
 three shapes Planning modified rather than accepted) and §7.2 (what is still
-undesigned). `planning-asks-v0.2.md` is the mirror — what Planning needs, ordered
+undesigned). `planning-asks.md` is the mirror — what Planning needs, ordered
 by cost if late.
 
 The standard that made the first round work still applies: a gap per item, with the

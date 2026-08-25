@@ -4,7 +4,7 @@
 Status:    Working log, maintained by the Knowledge team (this repo).
 Purpose:   Everything the integration work turned up that needs a decision,
            and the criteria by which we would call each piece done.
-Companion: audit-response-v0.1.md (the answer to knowledge-datamodel.md §7),
+Companion: 01-audit-response.md (the answer to knowledge-datamodel.md §7),
            source-refs-design.md (the endpoint design).
 ```
 
@@ -19,7 +19,7 @@ are actually in flight.
 
 Each of these changes tier 1 or tier 2, which by `knowledge-datamodel.md` §7
 makes it a negotiation rather than a request. The evidence for each is in
-`audit-response-v0.1.md` under the question named.
+`01-audit-response.md` under the question named.
 
 Ordered by how much of the store each one affects, not by tier.
 
