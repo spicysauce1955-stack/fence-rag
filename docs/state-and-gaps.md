@@ -45,7 +45,7 @@ review responses), `docs/mvp-implementation-spec.md` (the contract),
 | relations: supersedes / superseded_by / same_content_as / same_product_as | 24 / 24 / 38 / 14 |
 | version status: active / superseded / unknown | 3 / 9 / 132 |
 | retrieval units | 10,886 |
-| facts: extracted / flagged | 1,386 / 266 — **1,652 total** (measured 2026-08-25, after A1) |
+| facts: extracted / flagged | 1,440 / 266 — **1,706 total** (measured 2026-08-25, after A1-A5) |
 | facts promoted from table readings | **0** — see G17; the level-2 population is zero by design |
 | table read candidates: unreviewed / agent_verified / cross_family_verified | 709 / 12 / 504 — all 1,225 retained with crops |
 | facts: condition basis (stated / assumed / unexamined) | 0 / 117 / 1,535 — A2 |
@@ -415,6 +415,45 @@ explicitly not amendable.
 `test_no_fact_carries_a_machine_only_review_status` assert it against the live
 store, and `test_table_review.py::test_only_human_review_is_promotable` pins
 `PROMOTABLE` to exactly `{accepted, corrected}`.
+
+### G36 — the first published snapshot exists — NEW CAPABILITY
+
+`source_docs` + `warnings` + `gaps`, built by `fence_evidence/snapshot.py`,
+hashed by `canonical.py`, stored write-once by `snapshot_store.py`. Deliberately
+thin: `parts`, `models` and `parameters` need entities the store does not hold,
+and a snapshot containing very little is still a valid snapshot by design.
+
+| | |
+|---|---|
+| source_docs | 62 |
+| warnings | 282 distinct, 64 of them `fr` or `es` |
+| gaps | 63 — 53 `illegible_source`, 7 `unquantified`, 3 `missing_value` |
+| size | 68 KB, content-addressed, committed to `workspace/snapshots/` |
+
+**`verify()` is a gate, not a report** — a snapshot failing an obligation is
+never returned. It checks the closure rule, obligation 3 (every value cites),
+8 (a gap says what would close it and who can), 10 (`text_raw` + `lang` +
+`attaches_to`), the closed vocabularies, and floats.
+
+What it cannot check, stated in the module itself: **structural validity is
+testable, semantic correspondence is not.** Every check passes on a snapshot that
+attributes the wrong depth to the wrong post.
+
+### G37 — `stock_length` extracted — CLOSED (A5, obligation 14)
+
+54 facts. **The conditional case obligation 14 names is in the store**: 192 in for
+White, 144 in for Blend, which at a 97" maximum spacing is the difference between
+a rail running continuously through an intermediate post and one cut per bay.
+
+Two things the corpus taught that the build plan's example did not: the phrases
+*"stock length"* and *"standard length"* have **zero hits**, and the dominant seam
+is not prose at all but SKU dimension triples in price catalogues. A naive
+`N ft <part>` pattern measures at **18.6% precision** — 127 of 156 matches wrong,
+dominated by 89 hits of `8' Picket`, which is a gate width followed by the field
+name *"Picket Style"*.
+
+**No stock length is stated for a picket, board or plank anywhere in the corpus.**
+Obligation 14's continuity derivation applies to rails, and to nothing else here.
 
 ### G32 — `lang` is recorded, and none of it is measured — CLOSED (A4)
 

@@ -259,6 +259,165 @@ def dual_units(text: str | None) -> dict | None:
     return None
 
 
+# --------------------------------------------------------------- A5, obligation 14
+# "A part publishes its manufactured `stock_length` where a document states one."
+#
+# The value is CONDITIONAL, not scalar, and the condition is colour: the same rail
+# is 16 ft in White and 12 ft in Blend, and at a 97" maximum spacing that is the
+# difference between a member running continuously through an intermediate post
+# and one cut per bay. Publishing a single number would licence a continuous rail
+# in a colour not supplied long enough to be one.
+#
+# Neither "stock length" nor "standard length" occurs anywhere in this corpus.
+# The real wording is "Standard rails are supplied in 16 foot lengths".
+_SUPPLIED = re.compile(
+    r"(?:supplied|furnished|available|sold|packaged)\s+in\s+"
+    r"(?P<num>\d+(?:\.\d+)?)\s*(?P<unit>foot|feet|ft\.?|inch(?:es)?|in\.?|')\s*"
+    r"(?:long\s+)?(?:lengths?|sections?|rails?)", re.IGNORECASE)
+# The parenthetical that carries the second colour: "(12 foot rails for Blend products)"
+_ALT_COLOUR = re.compile(
+    r"(?P<num>\d+(?:\.\d+)?)\s*(?P<unit>foot|feet|ft\.?|')\s*rails?\s+for\s+"
+    r"(?P<colour>[A-Z][A-Za-z]+)", re.IGNORECASE)
+_FOR_COLOUR = re.compile(r"\blengths?\s+for\s+(?P<colour>[A-Z][A-Za-z]+)")
+
+# Measured false positives. A price list is full of `8' Rail Insert Kit` and
+# `PRIVACY FENCE FILL KITS 8' SECTIONS` -- product names, not statements about
+# how rails are supplied -- and `cut to 95 1/2"` is what an installer does to a
+# rail, not how it arrives.
+_NOT_STOCK = re.compile(
+    r"insert\s+kit|fill\s+kits?|\bkit\b|\bheights?\b|\bhigh\b|\bwide\b|\bwidth\b"
+    r"|\bcut\s+to\b|\btrim\b|\bshorten|\bsubtract\b|\bSKU\b|Model\s*#"
+    r"|\bcent(?:er|re)s?\b|\bon\s+cent|\bo\.?c\.?\b|\bspacing\b|\bapart\b"
+    r"|(?:shim|cap)\s+stock|\bin\s+stock\b",
+    re.IGNORECASE)
+
+# A SKU dimension triple: `1-1/2" x 5-1/2" x 16' Rail`. This is where the data
+# actually is -- 735 instances, against 11 in prose. The third dimension is the
+# length; the first two are the profile.
+_TRIPLE = re.compile(
+    r"(?P<a>\d+(?:[-\s]\d+/\d+|\.\d+)?)\s*(?:\"|\u201d|in\.?|inch(?:es)?)\s*[xX\u00d7]\s*"
+    r"(?P<b>\d+(?:[-\s]\d+/\d+|\.\d+)?)\s*(?:\"|\u201d|in\.?|inch(?:es)?)\s*[xX\u00d7]\s*"
+    r"(?P<num>\d+(?:[-\s]\d+/\d+|\.\d+)?)\s*"
+    r"(?P<unit>\"|\u201d|in\.?|inch(?:es)?|'|\u2019|ft\.?|foot|feet)\s*"
+    r"(?P<trailer>[A-Za-z][A-Za-z \-]{0,28})", re.IGNORECASE)
+# The trailing noun must be a linear part. A price list is full of spacer blocks,
+# end loops and carrying cases that match the grammar exactly.
+_PART_WORD = re.compile(r"\b(rail|post|picket|board|plank|spindle|baluster"
+                        r"|channel|stiffener|insert)s?\b", re.IGNORECASE)
+_NOT_PART = re.compile(r"block|spacer|wood|loop|pipe|screw|bolt|nail|bracket"
+                       r"|hinge|latch|size|blend|kit|case", re.IGNORECASE)
+# `- White` on the end of a SKU description. For Freedom, which lists the same
+# 5x5 post at different lengths per colour, this suffix is the ONLY thing
+# expressing the condition -- no sentence anywhere states it.
+_SKU_COLOUR = re.compile(
+    r"[-\u2013]\s*(White|Sand|Gray|Grey|Tan|Clay|Almond|Khaki|Mocha|Cypress"
+    r"|Driftwood|Black|[A-Z][a-z]+\s+Blend|Blend)\b")
+
+_FEET = ("foot", "feet", "ft", "ft.", "'")
+MIN_STOCK_IN, MAX_STOCK_IN = 48.0, 288.0        # 4 ft to 24 ft
+
+
+def _to_inches(num: str, unit: str) -> float | None:
+    v = float(num)
+    u = unit.lower().rstrip(".")
+    if u in ("foot", "feet", "ft", "'"):
+        return v * 12.0
+    if u in ("inch", "inches", "in"):
+        return v
+    return None
+
+
+def _stock_from_triples(text: str) -> list[dict]:
+    """Lengths stated as the third dimension of a SKU triple."""
+    out = []
+    for m in _TRIPLE.finditer(text):
+        trailer = m.group("trailer").strip()
+        if _NOT_PART.search(trailer) or not (pw := _PART_WORD.search(trailer)):
+            continue
+        inches = _to_inches(m.group("num"), m.group("unit"))
+        if inches is None or not (MIN_STOCK_IN <= inches <= MAX_STOCK_IN):
+            continue
+        cond = {"part": pw.group(1).lower()}
+        # the trailer usually swallows the suffix ("Rail - White"), so look there
+        # first and only then at what follows
+        if c := _SKU_COLOUR.search(trailer + text[m.end():m.end() + 30]):
+            cond["colour"] = c.group(1)
+        out.append({
+            "value_original": f"{m.group('num')} {m.group('unit').rstrip('.')}",
+            "value_normalized": inches, "unit_original": m.group("unit"),
+            "unit_normalized": "in", "conditions": cond,
+            # The part is read off the SKU line itself; the colour, where present,
+            # is a suffix the publisher wrote. Both are the document speaking.
+            "condition_basis": "stated"})
+    return out
+
+
+def _fraction(num: str) -> float:
+    """`16`, `93-3/4`, `5.5` -> a float. Prohibition 7 keeps the original too."""
+    t = num.strip().replace("\u2044", "/")
+    m = re.match(r"^(\d+)[-\s](\d+)/(\d+)$", t)
+    if m:
+        return int(m.group(1)) + int(m.group(2)) / int(m.group(3))
+    return float(t)
+
+
+def stock_lengths(text: str | None, *, element_type: str | None = None,
+                  text_source: str | None = None) -> list[dict]:
+    """Manufactured lengths a document states, with the colour that scopes them.
+
+    Returns one dict per (length, condition) pair -- two for the White/Blend
+    sentence, one for a bare statement. Empty where the text states no supplied
+    length, which is the common case.
+    """
+    # Scanned NOA drawings OCR into text that looks exactly like a SKU triple but
+    # states the *tested specimen's* members at 96" post spacing -- not orderable
+    # lengths. 176 measured false positives, removed by refusing the element kind.
+    if element_type in ("drawing", "drawing_label", "figure", "ocr_supplement"):
+        return []
+    if text_source in ("ocr", "image_ocr"):
+        return []
+    if not text or _NOT_STOCK.search(text):
+        return []
+    if triples := _stock_from_triples(text):
+        return triples
+    m = _SUPPLIED.search(text)
+    if not m:
+        return []
+    inches = _to_inches(m.group("num"), m.group("unit"))
+    if inches is None or not (MIN_STOCK_IN <= inches <= MAX_STOCK_IN):
+        return []
+
+    lexeme = f"{m.group('num')} {m.group('unit').rstrip('.')}"
+    tail = text[m.end():]
+
+    # "…16 foot lengths for White (12 foot rails for Blend products)"
+    primary_colour = None
+    if fc := _FOR_COLOUR.search(text[m.start():]):
+        primary_colour = fc.group("colour")
+    alts = [a for a in _ALT_COLOUR.finditer(tail)]
+
+    out = []
+    # The colour is `stated` only when the document names it in the same
+    # sentence. A bare "supplied in 16 foot lengths" has no condition and must
+    # not claim one -- `unexamined` says nobody looked for a colour, which is
+    # true, rather than `assumed`, which would claim an inference.
+    out.append({"value_original": f"{lexeme} lengths",
+                "value_normalized": inches, "unit_original": m.group("unit"),
+                "unit_normalized": "in",
+                "conditions": {"colour": primary_colour} if primary_colour else {},
+                "condition_basis": "stated" if primary_colour else "unexamined"})
+    for a in alts:
+        alt_in = _to_inches(a.group("num"), a.group("unit"))
+        if alt_in is None or not (MIN_STOCK_IN <= alt_in <= MAX_STOCK_IN):
+            continue
+        out.append({"value_original": f"{a.group('num')} {a.group('unit').rstrip('.')} rails",
+                    "value_normalized": alt_in, "unit_original": a.group("unit"),
+                    "unit_normalized": "in",
+                    "conditions": {"colour": a.group("colour")},
+                    "condition_basis": "stated"})
+    return out
+
+
 def extract_facts(*, document_id: str | None = None,
                   conn: sqlite3.Connection | None = None) -> dict:
     own = conn is None
@@ -289,6 +448,32 @@ def extract_facts(*, document_id: str | None = None,
             conf = row["ocr_confidence"]
             heading_path = json.loads(row["heading_path"] or "[]")
             conditions = _conditions(text, heading_path)
+
+            # A5 / obligation 14. Its own pass, because a stock length is
+            # conditional on colour and part rather than on the wind/exposure
+            # dimensions `_conditions` knows, and because the SKU-triple seam
+            # needs the element's kind to reject scanned drawings.
+            for sl in stock_lengths(text, element_type=row["element_type"],
+                                    text_source=row["text_source"]):
+                conn.execute("""INSERT INTO facts(document_id, version_id, page_no,
+                    element_id, fact_type, subject, value_original, value_normalized,
+                    unit_original, unit_normalized, conditions, condition_basis,
+                    condition_basis_note, value_alternates, evidence_text,
+                    extractor, ocr_derived, review_status, created_at)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (row["document_id"], row["version_id"], row["page_no"],
+                     row["element_id"], "stock_length_in",
+                     " > ".join(heading_path[-2:]) or None,
+                     sl["value_original"], sl["value_normalized"],
+                     sl["unit_original"], sl["unit_normalized"],
+                     json.dumps(sl["conditions"]), sl["condition_basis"],
+                     "the document states the part, and the colour where one is "
+                     "given, on the same line as the length"
+                     if sl["condition_basis"] == "stated" else None,
+                     None, text[:180].strip(), "regex-v1", int(from_ocr),
+                     "extracted", now()))
+                counts["stock_length_in"] = counts.get("stock_length_in", 0) + 1
+                total += 1
             for match in _scan_text(text):
                 fact_type = match["fact_type"]
                 fact_conditions = dict(conditions)
