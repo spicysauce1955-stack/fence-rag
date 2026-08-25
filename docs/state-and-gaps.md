@@ -706,10 +706,11 @@ fresh checkout has not run. A clean rebuild therefore reports 1,652 facts and
   vacuously again.
 
 **Not changed:** `PYTHONPATH=src` invocations inside `eval/gold-questions-*.json`
-`method` fields, `docs/superpowers/plans/`, and
-`workspace/reports/independent-review.md`. Those record how a question was
-verified or what a past review covered; rewriting them would falsify the record.
-They no longer describe a runnable command.
+`method` fields and `workspace/reports/independent-review.md`. Those record how a
+question was verified or what a past review covered; rewriting them would falsify
+the record. They no longer describe a runnable command. (`docs/superpowers/plans/`
+carried the same stale invocation and was removed on 2026-08-25 — the plan it held
+was complete and its outcome is recorded in `docs/distribution-design.md`.)
 
 ---
 
