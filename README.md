@@ -2,8 +2,8 @@
 
 A source-preserving evidence store and lexical retrieval layer over the vinyl
 fence document corpus in this repository — 137 PDFs, 6 CAD images and one DOCX
-specification, 2140 pages, including the Miami-Dade NOA packages that carry the
-PE-sealed wind-load and footing tables.
+specification, 2147 pages (2140 of them PDF), including the Miami-Dade NOA
+packages that carry the PE-sealed wind-load and footing tables.
 
 The goal is not a RAG demo. It is to answer a question like *"what footing depth
 applies to CertainTeed Chesterfield at Exposure C?"* **with the page it came
@@ -43,20 +43,53 @@ there is no allowance to exhaust, no shared budget to be sparing with, and
 nothing you can do here that makes reads fail for anyone else.
 
 ```bash
-# 1. Code, docs and datasets only — ~1 MB, no LFS bandwidth spent.
-#    The PDFs arrive as pointer files; step 3 replaces them with real bytes.
+# 1. Configure Git LFS once per machine. Installing the binary is not enough —
+#    `git lfs install` is what registers the filters, and step 5 is unsafe
+#    without them. Skip only if you have run it before on this machine.
+git lfs install
+
+# 2. Code, docs and datasets only — ~9 MB, no LFS bandwidth spent.
+#    The PDFs arrive as pointer files; step 4 replaces them with real bytes.
 GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/spicysauce1955-stack/fence-rag.git
 cd fence-rag
 
-# 2. Prerequisites: poppler, tesseract, and pdfplumber into workspace/pylibs/.
+# 3. Prerequisites: poppler, tesseract, and pdfplumber into workspace/pylibs/.
 scripts/bootstrap.sh
 
-# 3. The corpus — all of it, or just the part you need.
+# 4. The corpus — all of it, or just the part you need.
 python3 -m fence_evidence.cli fetch --subset structural   #  32 files,  73.5 MB
 python3 -m fence_evidence.cli fetch --subset bufftech     #  14 files,  78.5 MB
 python3 -m fence_evidence.cli fetch --subset china        #   4 files,  35.4 MB
 python3 -m fence_evidence.cli fetch --subset all          # 144 files, 376.5 MB
+
+# 5. Tell git the fetched bytes are what the pointers stood for.
+#    Requires step 1. Check first: `git config filter.lfs.clean` must print
+#    something. If it prints nothing, STOP and read the warning below.
+git add --renormalize .
 ```
+
+Run every command from the repository root. `fence_evidence/` sits there and is
+not installed, so `python3 -m fence_evidence.cli …` resolves through the working
+directory — from any other directory it will not import.
+
+Step 5 is not optional bookkeeping. `git status` records each file's size and
+mtime when it is checked out, and at clone time every PDF was a 131-byte
+pointer, so after fetching, git lists all 137 of them as modified even though
+`git diff` is empty and the content is byte-for-byte correct. `--renormalize`
+re-reads them through the LFS clean filter, which turns each one back into the
+pointer already in the index, and `git status` goes quiet. Without it the
+obvious tidy-up — `git checkout .` or "discard changes" in an editor — silently
+reverts the whole corpus to pointers.
+
+> **Do not run step 5 if `git config filter.lfs.clean` prints nothing.** That
+> means `git lfs install` has never been run on this machine, so git does not
+> know what `filter=lfs` in `.gitattributes` means and skips the clean filter
+> entirely. `--renormalize` would then stage 376 MB of raw PDF as ordinary git
+> blobs, and committing that pushes the whole corpus into git history outside
+> LFS — permanently. Run `git lfs install` first (or `git lfs install --local`
+> to confine it to this repository), then step 5. If the `git-lfs` binary is not
+> available at all, skip step 5 and live with the noisy `git status`; the
+> fetched files are correct either way.
 
 | subset | what it is | files | objects | bytes |
 |---|---|---:|---:|---:|
@@ -80,6 +113,14 @@ a corrupted or half-fetched checkout. `--workers N` sets the download pool, and
 
 `workspace/catalog/slice-bufftech-extruded-pvc.jsonl` lists exactly which files
 the Bufftech slice is, if you want to see before you fetch.
+
+The subsets are for reading a slice of the corpus, not for running the pipeline.
+**The quick start below needs `--subset all`**: the 10 pilot documents are spread
+across seven manufacturers, the gold question set draws on the whole corpus, and
+no subset covers either. Anything still held as a pointer is recorded as
+`not-fetched`, refused by `ingest`, and warned about by `evaluate` and `audit` —
+so a partial fetch will not corrupt your store, but it will not run the pipeline
+either.
 
 ### Fallback: Git LFS
 
@@ -123,22 +164,37 @@ If you do end up on this path:
 `docs/distribution-design.md` records why the corpus is hosted this way and
 what the arrangement still does not solve.
 
+### Publishing (maintainer only)
+
+Consuming the corpus is anonymous and needs no credentials. Uploading it does:
+`cli publish` reads Cloudflare R2 keys from a git-ignored `.env`, for which
+`.env.example` is the annotated template — `cp .env.example .env` and fill it
+in. Nothing else in the repository reads `.env`, so if you are not the person
+who owns the bucket you can ignore both files.
+
 ## Quick start
 
 No installation is required; the pipeline runs on the standard library plus
 poppler and tesseract. `pdfplumber` is optional and, when present, is loaded
-from `workspace/pylibs/`.
+from `workspace/pylibs/`. Run these from the repository root.
 
 ```bash
 python3 -m fence_evidence.cli fetch --subset all  # the corpus, if you skipped it above
 python3 -m fence_evidence.cli manifest          # Phase 0: inspect the corpus
 python3 -m fence_evidence.cli ingest --pilot    # Phase 1: 10-document pilot
-python3 tests/run_tests.py                      # preservation + contract gates
+python3 tests/run_tests.py                      # preservation + contract gates (a)
 python3 -m fence_evidence.cli evaluate          # Phase 4: gold question set
 python3 -m fence_evidence.cli ingest --all      # Phase 5: full corpus
 python3 -m fence_evidence.cli facts --extract   # Phase 6: structured facts
 python3 -m fence_evidence.cli report            # regenerate workspace reports
 ```
+
+(a) Run in this order, `run_tests.py` reports `OK` with about 22 skips: those
+tests assert about documents outside the 10-document pilot, or about facts
+Phase 6 has not extracted yet. Each skip names the command that unlocks it, and
+they all run once `ingest --all` and `facts --extract` have. Use
+`tests/run_tests.py` rather than a bare `python3 -m unittest` from `tests/` —
+only the runner reports those as skips instead of failures.
 
 Searching:
 
@@ -184,9 +240,13 @@ for hit in search_evidence("racking degrees Chesterfield", limit=5):
 
 ## Non-negotiables
 
-The corpus is read-only, enforced in code: every write goes through
+The corpus is read-only, enforced in code: every pipeline write goes through
 `fence_evidence.paths.ensure_writable`, which refuses any path outside
-`workspace/`. Document content is data and is never executed — external tools
+`workspace/`. The single exception is `cli fetch`, which has to populate the
+corpus the way `git lfs pull` does; it writes through `paths.fetch_target`
+instead, which accepts only a non-symlinked path inside a corpus root that the
+distribution manifest names, and `tests/test_safety.py` asserts no other module
+can reach it. Document content is data and is never executed — external tools
 are always invoked with argument lists, never a shell. OCR text is stored beside
 source text, never over it. Superseded approvals stay separate records, linked
 by a relation. Byte-identical files filed under different manufacturers are

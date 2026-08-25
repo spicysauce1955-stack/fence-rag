@@ -16,7 +16,8 @@ from pathlib import Path
 from . import __version__
 from .extract import extract
 from .manifest import load_manifest
-from .paths import REPO_ROOT, open_write, REPORTS_DIR
+from .paths import (FETCH_HINT, REPO_ROOT, REPORTS_DIR, is_lfs_pointer,
+                    open_write)
 from .relations import derive_relations
 from .store import (build_retrieval_units, connect, finish_run, migrate, now,
                     start_run, stats, tool_fingerprint, version_exists,
@@ -36,13 +37,61 @@ def _extract_one(args):
         return source_path, None, traceback.format_exc(limit=6)
 
 
+class StaleManifestError(RuntimeError):
+    """The manifest disagrees with what is on disk; Phase 0 must be re-run."""
+
+
+def partition_targets(targets: list[str], manifest: dict[str, dict]) -> dict:
+    """Split requested paths into ready / not-fetched / stale / unknown.
+
+    Reads the bytes on disk rather than trusting the manifest row. The two
+    disagree in both directions and both matter: a manifest built before
+    `cli fetch` describes pointers for files that are now real, and one built
+    after a fetch that has since been reverted describes content that is gone.
+    Extracting either way produces a document that misreports its own source.
+    """
+    out: dict[str, list[str]] = {"ready": [], "not_fetched": [], "stale": [],
+                                 "unknown": []}
+    for sp in targets:
+        row = manifest.get(sp)
+        if not row:
+            out["unknown"].append(sp)
+            continue
+        pointer_on_disk = is_lfs_pointer(REPO_ROOT / sp)
+        row_says_fetched = bool(row.get("sha256"))
+        if pointer_on_disk:
+            out["not_fetched"].append(sp)
+        elif not row_says_fetched:
+            # Bytes arrived after the manifest was built. Extracting now would
+            # record the document against a null hash.
+            out["stale"].append(sp)
+        else:
+            out["ready"].append(sp)
+    return out
+
+
 def ingest(source_paths: list[str] | None = None, *, workers: int = 6,
            force: bool = False, log_name: str = "ingestion") -> dict:
     manifest = {r["source_path"]: r for r in load_manifest()}
     targets = source_paths if source_paths is not None else [
         r["source_path"] for r in manifest.values()
-        if r.get("sha256") and r.get("extraction_method") not in (None, "unsupported", "unreadable")
+        # "not-fetched" rows are deliberately kept in: excluding them here is
+        # what made a whole-corpus run over an unfetched checkout look like a
+        # complete success. They are counted and reported below instead.
+        if r.get("extraction_method") not in (None, "unsupported", "unreadable")
     ]
+
+    parts = partition_targets(targets, manifest)
+    if parts["unknown"]:
+        raise KeyError(f"{parts['unknown'][0]} is not in the corpus manifest; "
+                       f"run Phase 0 first ({len(parts['unknown'])} such paths)")
+    if parts["stale"]:
+        raise StaleManifestError(
+            f"{len(parts['stale'])} file(s) are present on disk but carry no hash in "
+            f"the manifest, e.g. {parts['stale'][0]}. The manifest was built before "
+            f"these were fetched. Re-run `python3 -m fence_evidence.cli manifest`.")
+    not_fetched = parts["not_fetched"]
+    targets = parts["ready"]
 
     conn = connect()
     migrate(conn)
@@ -52,23 +101,28 @@ def ingest(source_paths: list[str] | None = None, *, workers: int = 6,
 
     todo, skipped = [], []
     for sp in targets:
-        row = manifest.get(sp)
-        if not row:
-            raise KeyError(f"{sp} is not in the corpus manifest; run Phase 0 first")
+        row = manifest[sp]
         if not force and version_exists(conn, row["doc_id"], row["sha256"], fp):
             skipped.append(sp)
             continue
         todo.append((sp, row["doc_id"]))
 
     log_path = REPORTS_DIR / f"{log_name}-log.jsonl"
-    results = {"ingested": [], "skipped": skipped, "failed": []}
+    results = {"ingested": [], "skipped": skipped, "failed": [],
+               "not_fetched": not_fetched}
     started = datetime.now(timezone.utc)
 
     with open_write(log_path, "a") as log:
         log.write(json.dumps({"event": "run_start", "run_id": run_id, "at": now(),
                               "targets": len(targets), "to_extract": len(todo),
                               "already_current": len(skipped),
+                              "not_fetched": len(not_fetched),
                               "tool_versions": tv}) + "\n")
+        if not_fetched:
+            print(f"WARNING: {len(not_fetched)} requested file(s) are still "
+                  f"unsmudged Git LFS pointers and were NOT ingested, "
+                  f"e.g. {not_fetched[0]}\n"
+                  f"         fetch the corpus first: {FETCH_HINT}", file=sys.stderr)
         pool_error = None
         try:
             if todo:
@@ -118,7 +172,9 @@ def ingest(source_paths: list[str] | None = None, *, workers: int = 6,
                    "elapsed_s": round(elapsed, 1), "relations": rel_counts,
                    "retrieval_units": n_units, "store": stats(conn),
                    "ingested": len(results["ingested"]), "skipped": len(skipped),
-                   "failed": len(results["failed"])}
+                   "failed": len(results["failed"]),
+                   "not_fetched": len(not_fetched),
+                   "not_fetched_paths": not_fetched[:10]}
         log.write(json.dumps(summary) + "\n")
     results["summary"] = summary
     conn.close()

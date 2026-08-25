@@ -15,8 +15,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .ids import doc_id_for, sha256_file
-from .paths import (CORPUS_ROOTS, DOCUMENT_INDEXES, MANIFEST_PATH, REPO_ROOT,
-                    open_write, rel)
+from .paths import (CORPUS_ROOTS, DOCUMENT_INDEXES, FETCH_HINT, MANIFEST_PATH,
+                    REPO_ROOT, is_lfs_pointer, lfs_pointer_info, open_write, rel)
 
 # Files with a text layer this thin are treated as scans needing OCR.
 SCAN_CHARS_PER_PAGE = 60
@@ -149,6 +149,25 @@ def inspect_file(args) -> dict:
     rec["issue_date"], rec["expiration_date"] = _dates(curated)
     rec["version_status"], rec["version_status_basis"] = _version_status(rp, curated)
 
+    # An unsmudged LFS pointer is not the document. Recording the stub's hash
+    # would put a 131-byte placeholder's identity where the source's belongs,
+    # and every consumer that gates on sha256 -- ingestion, publish -- would
+    # then treat it as real content. Leave sha256 null, the way an
+    # absent-from-disk row does, and say why.
+    if is_lfs_pointer(path):
+        ptr = lfs_pointer_info(path) or {}
+        rec["sha256"] = None
+        rec["file_size_bytes"] = stat.st_size
+        rec["lfs_pointer"] = True
+        rec["lfs_declared_sha256"] = ptr.get("oid")
+        rec["lfs_declared_size_bytes"] = ptr.get("size")
+        rec["extraction_method"] = "not-fetched"
+        rec["processing_state"] = "not-fetched"
+        rec["inspection_notes"].append(
+            "unsmudged Git LFS pointer, not document content; "
+            f"fetch the bytes with `{FETCH_HINT}`")
+        return rec
+
     if suffix in PDF_SUFFIXES:
         info = _pdfinfo(path)
         try:
@@ -247,4 +266,9 @@ if __name__ == "__main__":
     print(f"  suspected scans    : {sum(1 for r in pdfs if r.get('suspected_scan'))}")
     print(f"  total pages        : {sum(r.get('page_count') or 0 for r in pdfs)}")
     print(f"absent from disk     : {sum(1 for r in recs if r['processing_state'] == 'absent-from-disk')}")
+    n_unfetched = sum(1 for r in recs if r['processing_state'] == 'not-fetched')
+    print(f"not fetched (pointer): {n_unfetched}")
+    if n_unfetched:
+        print(f"  -> {n_unfetched} file(s) are unsmudged Git LFS pointers, not "
+              f"documents; fetch them with `{FETCH_HINT}`")
     print(f"wrote {MANIFEST_PATH}")

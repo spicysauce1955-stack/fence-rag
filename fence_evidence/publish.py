@@ -48,7 +48,12 @@ def publish_objects(cfg: R2Config, rows: list[dict], dry_run: bool = True) -> di
     out = {"unique_objects": 0, "uploaded": 0, "already_present": 0,
            "skipped_duplicate_paths": 0, "bytes": 0, "dry_run": dry_run}
     for r in rows:
-        sha = r["sha256"]
+        sha = r.get("sha256")
+        if not sha:
+            raise RuntimeError(
+                f"{r['source_path']} has no sha256 in the corpus manifest "
+                f"(not fetched, or absent from disk); refusing to publish a "
+                f"partial corpus. Fetch it and re-run `cli manifest`.")
         if sha in seen:
             out["skipped_duplicate_paths"] += 1
             continue

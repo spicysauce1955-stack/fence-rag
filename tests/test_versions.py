@@ -1,7 +1,7 @@
 """Date-aware, conservative version resolution."""
 import unittest
 
-from context import requires_store
+from context import requires_facts, requires_store
 from fence_evidence.retrieval import resolve_document_version
 from fence_evidence.store import connect
 from fence_evidence.versions import (document_dates, effective_at, expiry_status,
@@ -124,7 +124,7 @@ class TestSupersessionDirection(unittest.TestCase):
                              f"marked {r['version_status']}")
 
 
-@requires_store
+@requires_facts
 class TestResolutionUsesDateFacts(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

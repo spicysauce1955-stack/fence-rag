@@ -187,14 +187,19 @@ to match against.
 The capability matrix records component selection as unbound, BOM construction as
 "Nothing," and assembly as "Not represented in any form."
 
-Part of that is missing data. Part of it is a missing vocabulary: there is no way in either
-system today to say *this product can serve as a top rail*, or *a panel has two post slots
-and N infill slots*. Without that, no bill of materials is derivable regardless of how many
-facts are extracted.
+**Correction to an earlier draft of this document.** It claimed there was "no way in either
+system today" to say *this product can serve as a top rail* or *a panel has two post slots
+and N infill slots*. That was wrong, and reading the consumer's code properly settled it:
+`PartType` is exactly the first, and `PanelSpec` with its frame slots, infill pattern and
+fixing rules is exactly the second. Both have been there.
 
-The spine is the small set of part-jobs the consumer has counting rules for. Extensions let
-this platform name whatever a manual actually describes — a `rebar_separator_clip` filed
-under `role:fastener` inherits "counted per connection" and needs no code on either side.
+What is missing is **data**, not vocabulary. The types can express a Chesterfield panel
+today; nobody has authored one. That is a better position than the draft claimed, and it
+moves the work from "design a structure model" to "curate against one that exists".
+
+The spine is the shared filing vocabulary. Extensions let this platform name whatever a
+manual actually describes — a `rebar_separator_clip` filed under `fastener` is counted by
+a fixing rule exactly as any fastener is, and needs no code on either side.
 
 The split exists so that adding a part-kind is usually a data change. It is deliberately
 not *always* a data change: when a manual describes something no existing rule can count —
@@ -217,7 +222,7 @@ platform. Neither is a specification, and nothing in either is binding.
 
 They exist because the Planning team had to think through what it was asking for before
 asking. Treat them as one team's proposal. Only the items marked BINDING in
-`contract-v0.1.md` are promises.
+`contract.md` are promises.
 
 Links are held by the Planning team; ask if you want them.
 

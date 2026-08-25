@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 # --- read-only corpus roots -------------------------------------------------
 CORPUS_ROOTS = (
@@ -110,6 +110,66 @@ def open_write(path: os.PathLike | str, mode: str = "w", **kw):
 def rel(path: os.PathLike | str) -> str:
     """Path relative to the repository root, for provenance records."""
     return os.path.relpath(Path(path).resolve(), REPO_ROOT)
+
+
+# --- unfetched corpus files -------------------------------------------------
+# A `GIT_LFS_SKIP_SMUDGE=1` clone leaves every corpus PDF as a ~131-byte text
+# stub. Nothing downstream can tell one from a genuinely corrupt PDF by size or
+# by pdfinfo output -- both give "0 pages" -- so the manifest used to record the
+# stub's hash as though it were the document, and ingestion reported a
+# successful run over content that was never there. Identify the stub by its
+# signature instead, and refuse to treat it as a document. `cli fetch` replaces
+# it with the real bytes.
+LFS_POINTER_MAGIC = b"version https://git-lfs"
+FETCH_HINT = "python3 -m fence_evidence.cli fetch --subset all"
+
+
+def is_lfs_pointer(path: os.PathLike | str) -> bool:
+    """True when the file is an unsmudged Git LFS pointer, not real content."""
+    try:
+        with open(path, "rb") as fh:
+            return fh.read(len(LFS_POINTER_MAGIC)) == LFS_POINTER_MAGIC
+    except OSError:
+        return False
+
+
+def lfs_pointer_info(path: os.PathLike | str) -> dict | None:
+    """What a pointer file claims about the object it stands in for.
+
+    Returns ``{"oid": <sha256>, "size": <int>}`` -- the real file's hash and
+    length, which the pointer records even though the bytes are absent -- or
+    None when ``path`` is not a pointer. The oid is the object key `cli fetch`
+    would download, so it is worth keeping in the manifest for traceability.
+    """
+    try:
+        with open(path, "rb") as fh:
+            head = fh.read(512)
+    except OSError:
+        return None
+    if not head.startswith(LFS_POINTER_MAGIC):
+        return None
+    info: dict = {"oid": None, "size": None}
+    for line in head.decode("utf-8", "replace").splitlines():
+        if line.startswith("oid sha256:"):
+            info["oid"] = line.split("oid sha256:", 1)[1].strip()
+        elif line.startswith("size "):
+            try:
+                info["size"] = int(line.split(None, 1)[1].strip())
+            except (ValueError, IndexError):
+                pass
+    return info
+
+
+def unfetched_corpus_files() -> list[str]:
+    """Repo-relative paths of corpus files still held as LFS pointers."""
+    out = []
+    for root in CORPUS_ROOTS:
+        if not root.is_dir():
+            continue
+        for f in sorted(root.rglob("*")):
+            if f.is_file() and is_lfs_pointer(f):
+                out.append(rel(f))
+    return out
 
 
 def resolve_asset(rel_path: "str | None") -> "Path | None":

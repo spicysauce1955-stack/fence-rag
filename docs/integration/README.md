@@ -1,64 +1,119 @@
 # Integration — the boundary with Planning & BOM
 
 ```text
-Status:    Proposal, v0.1. For review by this team.
+Status:    contract.md FROZEN and RATIFIED at v1.1 (2026-08-25), signed by both
+           teams — audit/11-ratification-v1.1.md. Nothing on the boundary is open.
+           v1.0 was never ratified: the cold read before signature found
+           obligation 6 contradicting §1.4, filed as amendments/001 and cut.
+           Changing a BINDING item requires a ratified amendment — AMENDING.md.
 Authority: Binding ONLY at the boundary. Silent on everything inside it.
-Origin:    Written by the Planning & BOM team (the consumer of this platform).
+Origin:    Proposed by Planning & BOM; audited by Knowledge; revised by both.
 ```
 
-## What this directory is
+A separate system — **Planning & BOM** — turns a customer's map into a plan and a bill
+of materials, and it needs the knowledge this platform produces. These documents describe
+the boundary: what crosses it, in what shape, and what each side promises the other.
 
-This platform is about to acquire a consumer. A separate system — **Planning & BOM** —
-turns a customer's map into a plan and a bill of materials, and it needs the knowledge
-this platform produces.
+---
 
-These documents describe the boundary between them: what crosses it, in what shape, and
-what each side promises the other. They exist so that two teams working in two
-repositories can build independently without discovering their disagreements at
-integration time.
+## Start here
+
+| If you are… | Read |
+|---|---|
+| **Picking this up cold** | [`where-we-stand.md`](where-we-stand.md) — one page: what is settled, what is parked, what each side does next |
+| **New to this** | [`system-overview.md`](system-overview.md), then [`knowledge-datamodel.md`](knowledge-datamodel.md) §0–§3 |
+| **Checking a promise** | [`contract.md`](contract.md) — eighteen BINDING obligations; nothing else binds |
+| **Planning your sprint** | [`planning-asks.md`](planning-asks.md) — what Planning needs, ordered by cost if late |
+| **Wondering why a decision went that way** | [`audit/`](audit/) — every round, with the evidence |
+
+---
+
+## Current documents
 
 | Document | Answers |
 |---|---|
+| [`where-we-stand.md`](where-we-stand.md) | **Start here.** The state of the boundary in one page — settled, parked, and next on each side |
+| [`boundary-delta-v0.4.md`](boundary-delta-v0.4.md) | The four v0.4 items that needed agreement. All four accepted — see `audit/07` |
+| [`contract.md`](contract.md) | **FROZEN v1.1, ratified.** What crosses the boundary, and the promises each side makes. Verify with `sha256sum -c contract.sha256` |
+| [`AMENDING.md`](AMENDING.md) | How and when the frozen contract may change — four triggers, five steps, and what is *not* an amendment |
+| [`amendments/`](amendments/) | Filed amendments. **001** — obligation 6's superseded clause, accepted, cut as v1.1 |
+| [`amendments/`](amendments/) | Filed amendments. **001** — obligation 6 carries a clause §1.4 marks superseded (trigger D) |
+| [`knowledge-datamodel.md`](knowledge-datamodel.md) | Every entity, field, relationship and invariant, with a traceability map from each audit finding |
+| [`planning-asks.md`](planning-asks.md) | What Planning needs from this platform, ordered by impact |
+| [`source-refs-design.md`](source-refs-design.md) | `GET /source-refs/{id}` — the design, with [`fixtures/`](fixtures/) |
 | [`system-overview.md`](system-overview.md) | What is being built overall, and where this platform sits in it |
-| [`contract-v0.1.md`](contract-v0.1.md) | What crosses the boundary, and the promises each side makes |
+| [`knowledge-design.md`](knowledge-design.md) | How this component fits — what it publishes, the workflows, what stays private |
 | [`rationale.md`](rationale.md) | Why each binding item exists — mostly measured from this store |
 
-## How this relates to the documents you already have
+## The audit trail — [`audit/`](audit/)
+
+Kept in order, because a later disagreement is usually a re-run of an earlier one.
+
+| | |
+|---|---|
+| [`00-datamodel-v0.1-superseded.md`](audit/00-datamodel-v0.1-superseded.md) | The original proposal, unedited. Its §7 is what round one answered |
+| [`01-audit-response.md`](audit/01-audit-response.md) | **Knowledge's answer**, measured against the corpus — a document path, page and verbatim quote behind every claim |
+| [`02-audit-disposition.md`](audit/02-audit-disposition.md) | **Planning's decision** on all 29 items: 24 as written, 3 modified, 2 decided, none rejected |
+| [`03-review-of-v0.2.md`](audit/03-review-of-v0.2.md) | **Knowledge's review** of the revision: six defects that blocked authoring |
+| [`04-review-disposition.md`](audit/04-review-disposition.md) | **Planning's response.** All six fixed; one of its questions found a bug in the engine |
+| [`05-acceptance-open-questions.md`](audit/05-acceptance-open-questions.md) | Knowledge's working list — everything needing a decision, and what "done" means |
+| [`06-review-of-v0.4.md`](audit/06-review-of-v0.4.md) | **Knowledge's reply to the v0.4 delta.** Two items agreed with additions, one agreed in substance and wrong in shape, one premise that does not hold |
+| [`07-delta-disposition.md`](audit/07-delta-disposition.md) | **Planning's decision.** All four accepted; the falsified premise was worse than measured — height varies *along* a run, not merely between runs |
+| [`08-close-of-round.md`](audit/08-close-of-round.md) | **Knowledge closes both threads** — `disputed` accepted, stagger conceded to cut planning, the level-2 risk confirmed and defused. Corrects its own 77→20 count and re-ranks K4 on the cell-coverage numbers |
+| [`09-round-closed.md`](audit/09-round-closed.md) | **Planning acknowledges.** Correction propagated, K4 re-ranked, and Knowledge's account of the boundary-addition problem adopted over Planning's own |
+| [`10-ratification-v1.0.md`](audit/10-ratification-v1.0.md) | **The v1.0 record — never ratified.** Planning signed; Knowledge did not, because obligation 6 read wrong cold. Its §3.2 is the declared non-compliance, still in force |
+| [`11-ratification-v1.1.md`](audit/11-ratification-v1.1.md) | **RATIFIED.** Both sides signed v1.1. The last document on the boundary until an amendment or a release |
+
+---
+
+## How the boundary got to v0.4
+
+Each round checked the design against a different **substance**, and each found what the
+previous could not:
+
+| Round | Checked against | Found |
+|---|---|---|
+| 1 · audit | this platform's **corpus** — 144 documents, 81,794 elements | 29 items. Seven of ten §7 questions surfaced a change; one invariant was falsified |
+| 2 · review | the revision, read by a **second party** taking §8 literally | 6 defects that blocked authoring — including a mechanism argued for and then omitted |
+| 3 · self-audit | Planning's own **codebase** | 7 more, two in code already published here. Then 6 more, every one in something Planning had *added* rather than accepted |
+| 4 · delta | the four surviving items, **re-measured against the corpus** | 2 missing `Gap` kinds; supersession on none of the policy's axes; `continuity` more than binary; obligation 13's *"already true"* falsified by two keys in the store. All four accepted |
+| 4 · delta | the four surviving items, **re-measured against the corpus** | 2 missing `Gap` kinds; supersession on none of the policy's axes; `continuity` more than binary; and obligation 13's *"already true"* falsified by two keys in the store. All four accepted |
+
+**The lesson, worth keeping.** After round two the design was internally consistent and
+the engine could not implement it. Coherence is not the test — a design has to be checked
+against a substance outside itself, and each substance catches a different class of error.
+
+---
+
+## How this relates to your own documents
 
 `CLAUDE.md` gives an authority ordering: `mvp-implementation-spec.md` is authoritative,
 `guide.md` is the contract it implements, `target-architecture.md` is informative,
 `state-and-gaps.md` is the measured snapshot. **Nothing here displaces any of those.**
 
-The distinction is inside versus outside:
-
 - Those documents govern **how this platform works**. They remain the authority.
-- These documents govern **what this platform exposes to a consumer**. They are the
-  authority on that, and on nothing else.
+- These govern **what it exposes to a consumer**, and nothing else.
 
-Where a document here appears to say something about your internals, it is wrong and
-should be read as advisory. The contract has a short, explicit list of binding items;
-everything not on that list is this team's decision.
+**`docs/curation/` is not superseded by any of this.** It sits in tier 3, both teams have
+read that as settled, and it remains this team's internals. Where a document here appears
+to say something about your internals, it is wrong and should be read as advisory.
 
-## What is explicitly not specified here
+## Not specified here
 
 Storage engine and schema. Whether claims live in one table or twenty. Extraction
-pipeline, models, and OCR strategy. How a review queue is ordered and what the reviewer
-sees. Whether curation runs as a CLI, a batch job, or a service. Language and runtime
-beyond the API shape. Retrieval implementation. Release cadence. Whether you adopt the
-reference sketches referenced in `rationale.md`.
+pipeline, models, OCR strategy. How a review queue is ordered and what the reviewer sees.
+Whether curation runs as a CLI, a batch job or a service. Language and runtime beyond the
+API shape. Retrieval implementation. Release cadence.
 
 ## The one thing worth reading first
 
 The consumer is a **pure function**. Given the same project and the same knowledge it
-must produce the same plan, provably, years later — including with this platform
-unreachable. That single property explains most of what the contract asks for, and in
-particular why knowledge is fetched as one immutable, content-addressed object before a
-run rather than queried during one.
+produces the same plan, provably, years later — including with this platform unreachable.
+That property explains most of what the contract asks for, and in particular why
+knowledge is fetched as one immutable, content-addressed object *before* a run rather
+than queried during one.
 
-## Status of this proposal
-
-v0.1, unreviewed by this team. Items are expected to change. Registry additions are not
-breaking changes and need no negotiation; changes to the stable core do.
-
-The two pieces of work that cross no boundary and need no agreement are named at the end
-of the contract. One of them is on this side and can start immediately.
+Its corollary is an obligation on Planning, not on you: **a missing role, an uncovered
+condition or an unsatisfiable requirement produces a plan with a named, warned line —
+never a failed run.** A gap you publish does not break anybody, and a snapshot containing
+very little is still a valid snapshot.

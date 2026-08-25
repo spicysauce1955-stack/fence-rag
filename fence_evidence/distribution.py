@@ -32,6 +32,16 @@ def load_corpus_manifest(path: Path | None = None) -> list[dict]:
 
 
 def build_manifest(rows: list[dict], base_url: str, generated_at: str) -> dict:
+    # A row with no sha256 is a file the manifest could not hash: not fetched,
+    # or referenced by a curated index and absent from disk. Projecting one
+    # would publish the key "objects/None" and hand every downloader a
+    # manifest entry that cannot be satisfied, so refuse the whole run.
+    unhashed = [r["source_path"] for r in rows if not r.get("sha256")]
+    if unhashed:
+        raise ValueError(
+            f"{len(unhashed)} manifest row(s) carry no sha256 and cannot be "
+            f"published, e.g. {unhashed[0]}. Fetch the corpus and re-run "
+            f"`cli manifest` before publishing.")
     files = []
     for r in rows:
         subsets = sorted(name for name, pred in SUBSETS.items() if pred(r))

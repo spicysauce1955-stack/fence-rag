@@ -71,7 +71,7 @@ build a command.
 
 ## C0 — Schema, guards, and the curation CLI
 
-**Build.** `src/fence_evidence/curation/` with `schema.py`, `guard.py`,
+**Build.** `fence_evidence/curation/` with `schema.py`, `guard.py`,
 `entities.py`, `dossier.py`, `pagemap.py`, `migrate.py`, `claims.py`,
 `crops.py`, `grids.py`, `review.py`, `procedures.py`, `conflicts.py`,
 `bundle.py`, `audit.py`. Additive migration; `store.SCHEMA_VERSION` → 2.

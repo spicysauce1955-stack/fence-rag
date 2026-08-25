@@ -9,7 +9,7 @@ Two things that must not be confused:
 1. A **research corpus + dataset** — vinyl-fence installation and structural-engineering source
    documents (137 PDFs, 6 CAD PNGs, 1 DOCX; 2147 pages) plus hand-researched JSON describing their
    contents. This is the read-only input.
-2. The **fence evidence system** (`src/fence_evidence/`) — a source-preserving evidence store and
+2. The **fence evidence system** (`fence_evidence/`) — a source-preserving evidence store and
    SQLite FTS5 retrieval layer over that corpus, which answers questions like *"what footing depth
    applies to CertainTeed Chesterfield at Exposure C?"* with the document, page, bounding box and
    page image the answer came from.
@@ -33,6 +33,7 @@ a fact with no human review.
 
 ```bash
 # the evidence system
+python3 -m fence_evidence.cli fetch --subset all   # the corpus itself; nothing works without it
 python3 -m fence_evidence.cli manifest        # Phase 0: inspect the corpus
 python3 -m fence_evidence.cli ingest --pilot  # 10-document preservation pilot
 python3 -m fence_evidence.cli ingest --all    # full corpus (~33 min, 10 workers)
@@ -41,7 +42,7 @@ python3 -m fence_evidence.cli evaluate        # gold question set
 python3 -m fence_evidence.cli facts --extract
 python3 -m fence_evidence.cli report          # regenerate workspace/reports/
 python3 -m fence_evidence.cli audit           # relevance audit of the retrieval projection
-python3 tests/run_tests.py                    # 225 tests, stdlib only
+python3 tests/run_tests.py                    # whole suite, stdlib only
 
 # the pre-existing dataset builders (they own their outputs; see below)
 python3 scripts/build_master.py   # data/*.json + data/structural/*.json -> master-dataset.json + data/documents-index.json
@@ -49,10 +50,22 @@ python3 scripts/build_china.py    # china/data/*.json -> china/china-dataset.jso
 ```
 
 Run a single test: `cd tests && python3 -m unittest test_preservation -v`, or one case with
-`python3 -m unittest test_units.TestRotation.test_page_rotations_parses_pdfinfo_output`.
+`python3 -m unittest test_units.TestRotation.test_page_rotations_parses_pdfinfo_output`. Note that
+`run_tests.py` is the only entry point that reports skips correctly — a bare `python3 -m unittest`
+from `tests/` still works, but a test needing a corpus or a store that you do not have shows up as
+a failure there rather than a skip.
 
-`src/` is not installed; the CLI and tests put it on `sys.path` themselves. If you invoke a module
-directly, use `PYTHONPATH=src python3 -m fence_evidence.<module>`.
+The package lives at the repository root (`fence_evidence/`), not under `src/`, and is not
+installed. Python puts the working directory on `sys.path` for `-m`, so `python3 -m
+fence_evidence.cli …` works from the repo root with no `PYTHONPATH` and no install step; run it
+from anywhere else and it will not import. `tests/run_tests.py` and `tests/context.py` insert the
+root themselves, so tests work from any directory.
+
+**A fresh checkout has no corpus.** `GIT_LFS_SKIP_SMUDGE=1 git clone` — the documented path —
+leaves every PDF as a ~131-byte LFS pointer until `cli fetch` runs. `manifest` records those rows
+as `processing_state: "not-fetched"` with a null `sha256`, `ingest` refuses them and exits non-zero,
+and `evaluate`/`audit` warn. Do not read a measurement off an unfetched checkout; the numbers are
+about the files that happen to be there.
 
 The two `scripts/build_*.py` dataset builders are pure-stdlib, idempotent, and safe to re-run; they
 overwrite their outputs. They print a reconciliation summary — the lines that matter are

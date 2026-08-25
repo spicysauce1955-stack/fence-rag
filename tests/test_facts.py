@@ -2,7 +2,7 @@
 import json
 import unittest
 
-from context import requires_store, store_snapshot
+from context import requires_facts, requires_store, store_snapshot
 from fence_evidence.facts import (_conditions, _normalise, _scan_text, _to_float,
                                   extract_facts, query_facts)
 from fence_evidence.store import connect
@@ -98,7 +98,7 @@ class TestFootingDiameterAdjacency(unittest.TestCase):
             "Intermediate Rails: All 5', 6', 7' and 8' heights"), [])
 
 
-@requires_store
+@requires_facts
 class TestReextractionPreservesPromotedFacts(unittest.TestCase):
     """extract_facts() must only touch its own regex-derived rows.
 
