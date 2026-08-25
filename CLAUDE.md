@@ -33,6 +33,7 @@ a fact with no human review.
 
 ```bash
 # the evidence system
+python3 -m fence_evidence.cli fetch --subset all   # the corpus itself; nothing works without it
 python3 -m fence_evidence.cli manifest        # Phase 0: inspect the corpus
 python3 -m fence_evidence.cli ingest --pilot  # 10-document preservation pilot
 python3 -m fence_evidence.cli ingest --all    # full corpus (~33 min, 10 workers)
