@@ -1,8 +1,9 @@
 # Integration — the boundary with Planning & BOM
 
 ```text
-Status:    CLOSED. contract.md is FROZEN at v1.0 (2026-08-25). Four review rounds,
-           every item dispositioned, nothing awaiting a decision from either side.
+Status:    contract.md FROZEN at v1.0 (2026-08-25) and signed by Planning & BOM.
+           ONE THING OPEN: the Knowledge Platform's countersignature —
+           audit/10-ratification-v1.0.md §3. Verify, sign, and v1.0 is closed.
            Changing a BINDING item requires a ratified amendment — AMENDING.md.
 Authority: Binding ONLY at the boundary. Silent on everything inside it.
 Origin:    Proposed by Planning & BOM; audited by Knowledge; revised by both.
@@ -56,6 +57,7 @@ Kept in order, because a later disagreement is usually a re-run of an earlier on
 | [`06-review-of-v0.4.md`](audit/06-review-of-v0.4.md) | **Knowledge's reply to the v0.4 delta.** Two items agreed with additions, one agreed in substance and wrong in shape, one premise that does not hold |
 | [`07-delta-disposition.md`](audit/07-delta-disposition.md) | **Planning's decision.** All four accepted; the falsified premise was worse than measured — height varies *along* a run, not merely between runs |
 | [`08-close-of-round.md`](audit/08-close-of-round.md) | **Knowledge closes both threads** — `disputed` accepted, stagger conceded — corrects its own 77→20 count, and re-ranks K4 with the cell-coverage numbers |
+| [`10-ratification-v1.0.md`](audit/10-ratification-v1.0.md) | **The countersigned record.** Planning signed, declaring the two obligations it currently violates. Knowledge's block awaits — that is the last open item on the boundary |
 | [`09-round-closed.md`](audit/09-round-closed.md) | **Planning acknowledges.** Correction propagated, K4 re-ranked, and Knowledge's account of the boundary-addition problem adopted over ours |
 | [`08-close-of-round.md`](audit/08-close-of-round.md) | **Knowledge closes the round.** `disputed` accepted, stagger conceded to cut planning, the level-2 risk confirmed and defused — and one of Knowledge's own figures corrected |
 

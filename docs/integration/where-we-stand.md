@@ -1,13 +1,26 @@
 # Where we stand
 
 ```text
-Status:  Round CLOSED. contract.md frozen at v1.0. Both open threads resolved in
-         audit/08 — `disputed` accepted, stagger conceded to cut planning.
-         Nothing open, nothing awaiting a decision from either side.
+Status:  contract.md frozen at v1.0 and signed by Planning & BOM. Both review
+         threads resolved in audit/08. ONE item open: the Knowledge Platform's
+         countersignature — audit/10-ratification-v1.0.md §3.
 From:    The Planning & BOM team.
 Purpose: The one page to read if you pick this up cold — what is settled, what is
          deliberately parked, what each side does next.
 ```
+
+## The one thing still open
+
+**v1.0 is frozen but not yet ratified.** Planning froze it unilaterally and has signed
+`audit/10-ratification-v1.0.md`, declaring the two obligations our engine currently
+violates. The Knowledge Platform's block is blank. Our own `AMENDING.md` §5 forbids
+ratifying by inference, so *"we are authoring against v1.0"* — true and stated — is not a
+signature.
+
+**To close it:** verify the manifest (it now covers `AMENDING.md` too, which it did not
+when you last checked), fill in §3, commit. If any of the 18 reads wrong on a second pass,
+file an amendment instead of signing — an unsigned v1.0 with a real objection is worth more
+than a signed one with a silent reservation.
 
 ## Settled
 
