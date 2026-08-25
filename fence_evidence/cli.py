@@ -120,6 +120,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--dry-run", action="store_true",
                    help="build and report without storing")
 
+    p = sub.add_parser("dataset",
+                       help="baseline and verify the hand-researched dataset")
+    p.add_argument("--write", action="store_true", help="write the SHA-256 baseline")
+    p.add_argument("--verify", action="store_true", help="check the tree against it")
+
     sub.add_parser("migrate",
                    help="bring an existing store up to the current schema: add any "
                         "missing columns and backfill what they need")
@@ -284,6 +289,16 @@ def main(argv: list[str] | None = None) -> int:
             _print(summary)
         else:
             _print({"error": "choose one of --build, --dry-run, --list, --get"})
+    elif args.cmd == "dataset":
+        from .dataset import DatasetChanged, verify_dataset, write_digests
+        if args.write:
+            _print({"baseline": str(write_digests())})
+        else:
+            try:
+                _print(verify_dataset())
+            except DatasetChanged as exc:
+                print(str(exc))
+                return 1
     elif args.cmd == "migrate":
         from .store import (backfill_lang, connect as _c, migrate as _m,
                             retire_columns, SCHEMA_VERSION)

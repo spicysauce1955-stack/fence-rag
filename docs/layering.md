@@ -1,8 +1,9 @@
 # Layering — five layers, and one rule about direction
 
 ```text
-Status:   PROPOSED. Nothing here is adopted. It disagrees with CLAUDE.md in one
-          place and with docs/curation/ in another, both named in §5.
+Status:   PROPOSED as vocabulary. One thing in it is DECIDED: §5 settles what
+          the hand-researched dataset is, on measured evidence, and §5a records
+          where the layering still disagrees with docs/curation/.
 Scope:    A way of describing what already exists, plus one rule that is new.
           The rule has already been applied once — see §3 — because it caught a
           defect while being written.
@@ -131,28 +132,101 @@ table reading, and it needs the same treatment — a person confirming it with t
 crop rendered. Structural validity is testable; semantic correspondence is
 reviewable.
 
-## 5. Where this disagrees with what is already written
+## 5. The L4 question, decided
 
-Both disagreements are real and neither is resolved by this document.
+The proposal originally left this open. It is now decided, on measured evidence,
+and the reasoning is here so it can be overturned rather than merely disagreed
+with.
 
-**`CLAUDE.md` places the dataset in L1, not L4.** Verbatim: *"A research corpus
-+ dataset — …137 PDFs… plus hand-researched JSON describing their contents.
-**This is the read-only input.**"* It groups the JSON *with* the corpus as input.
-This document treats it as an intermediate entity layer.
+**Two readings were on the table.** *(A) SPINE* — the dataset is the entity
+layer; add `sources[]` to each component and publish the 225 as `Part`s. *(C)
+HYPOTHESIS* — the dataset is a source document that happens to be human-authored;
+curate it like any other source, and it becomes a work queue rather than a
+publication.
 
-The two readings lead to different work, and the CLAUDE.md one may be the better
-of them: **if the dataset is input, it is a source document that happens to be
-human-authored**, and the right treatment is to curate it like any other source
-— read it, extract claims, check them against harder evidence, record where each
-came from — rather than to adopt it as a spine and bolt citations on. That
-reading also explains G16 cleanly: those four claims are not corrupt data in a
-trusted spine, they are what happens when a source is trusted without being
-checked, which is the thing this platform exists to prevent.
+### Decided: (C) for the values, (A) for the composition graph
 
-**`docs/curation/` positions itself elsewhere.** Its header says *"between the
-canonical evidence store and the retrieval projection"* — between L2 and the
-projection, not at L4. So the one existing proposal that discusses an
-intermediate layer does not use this numbering.
+Not a split-the-difference compromise. The two halves of the dataset have
+genuinely different epistemic status, and the repository's own documents already
+say so in both directions.
+
+**The values are curated as an ordinary source.** Every claim in `data/*.json`
+and `data/structural/*.json` enters review as a `curated_dataset` claim that must
+beat a page to be accepted. Four measurements decide it:
+
+| | |
+|---|---|
+| Its only accuracy measurement | **4 contradicted in 30 checked — 13.3%**, and 25% in `certainteed-bufftech-structural.json`, the file the rest of the corpus leans on most (G16) |
+| Accuracy evidence for the **225 components** | **None.** The 13.3% is measured on the *other* half; pass 1 has never been checked at all |
+| `component_id` values appearing anywhere in the corpus | **14 of 225.** Published as `Part.id`, the entity layer's primary key would be uncited by construction |
+| Values that could never be anchored to any document | **12–25%** — resin chemistry, UV loading, marketing claims. `impact modifier` and `PHR` have **zero hits** across all 81,794 elements |
+
+And the repository already grades it this way: `docs/curation/` ranks
+`curated_dataset` at **authority 20 of 100**, above only `inferred`, and states
+that such evidence *"can never reach `accepted`"*. `worklist.py` hard-codes G16's
+four errors as `curated_dataset_error` with `why_human: "amending your research
+dataset is your call"`. Nothing in the repository calls the dataset
+authoritative.
+
+**The strongest argument for (C):** adopting the dataset as a spine is the same
+defect A1 just spent a build-plan item removing — an unreviewed source conferring
+a curation level nobody earned — reintroduced one layer up and at ten times the
+scale. G16's four errors are footing depths, spacing applicability, a PE licence
+jurisdiction and reinforcement dimensions: exactly the class where a confidently
+wrong number is the failure mode.
+
+**The composition graph is authored, and is carved out.** Invariant 10 of the
+data model is explicit:
+
+> **Structure is authored, not extracted.** No table reader produces a `PanelSpec`.
+
+No amount of curation over 2,147 pages will establish that `BT-POST-5X5`,
+`BT-RAIL-CHESTERFIELD` and `BT-PICKET-7-7-TG` compose one Chesterfield panel.
+Somebody authored that, 59 times, and it cannot be re-derived from evidence.
+Demoting the whole dataset to "just another source" would leave Phase D with no
+route to a `Part` at all. So the *membership* — which components belong to which
+assembly belongs to which line — is retained as authored structure carrying
+`Authorship`, while every *value* on those components is curated.
+
+**The strongest argument against this decision**, stated so it is not lost: it
+discards, for the value half, the only artifact in the repository that already
+has the shape the contract's structural types need, and pays for that in
+curation hours. The carve-out is what keeps that cost bounded.
+
+### What was done immediately
+
+`workspace/catalog/data-digests.json` now exists — a SHA-256 of all 16
+hand-maintained dataset files, written by `fence_evidence/dataset.py` and checked
+by `cli dataset --verify`. Acceptance criterion P1b asked for it and it did not
+exist. `data/` has **exactly one commit** in its history; the moment that changes,
+the ability to say what the researcher originally wrote is gone. This is cheap
+insurance and it is now in place regardless of what happens next.
+
+### Still open, and logged rather than assumed
+
+Whether a `PanelSpec` member edge counts as a "value" under invariant 8
+(*"every published value carries a resolvable `SourceRef`"*) is **not settled
+anywhere**. If it does, the carve-out needs an `AMENDING.md` conversation; if it
+does not, `Authorship` on structure is already legal. Filed as C3 in
+`docs/integration/amendments/CANDIDATES.md`.
+
+## 5a. Where this still disagrees with what is already written
+
+**`CLAUDE.md` places the dataset in L1, not L4** — *"…plus hand-researched JSON
+describing their contents. **This is the read-only input.**"*
+
+That disagreement is now **mostly resolved in CLAUDE.md's favour.** If the dataset
+is input, it is a source document that happens to be human-authored, and the
+right treatment is to curate it like any other source — which is exactly what §5
+decides. The layering keeps an L4 label because the composition graph genuinely
+does sit between assertions and publication, and nothing else in the stack does.
+So: **the dataset's values are L1 input; its structure is L4.** One file, two
+roles, which is unusual enough to be worth saying out loud.
+
+**`docs/curation/` positions itself elsewhere** — *"between the canonical evidence
+store and the retrieval projection"*, which is not this numbering. Unresolved, and
+low stakes: it is a proposal describing where its tables sit, not a claim about
+the stack.
 
 ## 6. What adopting this would change
 

@@ -99,6 +99,37 @@ it gets an answer either way.
 
 ---
 
+## C3 — is a `PanelSpec` member edge a "value"?
+
+| | |
+|---|---|
+| **Trigger** | **D** — possibly; it may be settled and merely unwritten |
+| **Raised** | 2026-08-25, deciding how the hand-researched dataset is treated |
+| **Blocking?** | **No**, but it blocks *design* sooner than the others. Batches for now. |
+
+Invariant 8 (`knowledge-datamodel.md`): *"Every published **value** carries a
+resolvable `SourceRef`."* Invariant 10, same document: *"**Structure is authored,
+not extracted.** No table reader produces a `PanelSpec`."*
+
+Those two are not obviously compatible. If the *membership* edge — this component
+belongs to this panel — counts as a "value", then structure needs a `SourceRef`,
+and invariant 10 says no such reference can exist because nothing extracts it.
+If it does not count, `Authorship` on structure is already legal and there is
+nothing to amend.
+
+**Why it matters now.** `docs/layering.md` §5 decides that the dataset's *values*
+are curated as an ordinary source while its *composition graph* — 32 lines, 59
+assemblies, 225 components — is retained as authored structure. That carve-out is
+the only route to a `Part` at all, since no amount of curation over 2,147 pages
+establishes that three particular components compose one Chesterfield panel. If
+membership is a "value", the carve-out needs an amendment before it can be built.
+
+**Likely disposition:** a clarifying sentence distinguishing an asserted quantity
+from an authored relation. Cheap if it is only wording; expensive to discover
+after Phase D is built either way.
+
+---
+
 ## Not candidates — recorded so they are not re-raised
 
 - **`retain_until` has no specified value.** The contract requires a snapshot

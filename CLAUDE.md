@@ -29,8 +29,13 @@ the spec and the guide cite it).
 entities → published) and one rule: *every reference points down a layer, never up*. The rule
 already landed once — it inverted `table_read_candidates.promoted_fact_id` into
 `facts.from_candidate_id` at `SCHEMA_VERSION = 3`, deleting a cleanup statement and a test that
-policed a bug the schema now forbids. §5 of that document names where it **disagrees with this
-file** about where the hand-researched dataset belongs; that disagreement is open.
+policed a bug the schema now forbids. §5 **decides** what the hand-researched dataset is,
+on measured evidence: its *values* are curated like any other source (authority 20, must
+beat a page to be accepted), while its *composition graph* — 32 lines, 59 assemblies, 225
+components — is retained as authored structure, because invariant 10 says structure is
+authored and no reader produces a `PanelSpec`. That mostly resolves this file's "read-only
+input" reading in its own favour. `workspace/catalog/data-digests.json` now baselines all
+16 dataset files; `cli dataset --verify` checks them.
 
 Read in this order when picking the work up cold: `docs/state-and-gaps.md` (measured state and
 every known gap), `docs/build-plan.md` (what to build next and in what order), then
