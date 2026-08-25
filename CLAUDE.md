@@ -49,7 +49,8 @@ cd docs/integration && sha256sum -c contract.sha256   # both lines must print OK
 
 Do not edit `contract.md` or `AMENDING.md`. A change to a BINDING item goes through
 `AMENDING.md` — four triggers, five steps, and `amendments/001` is the worked example of one
-found and accepted. Registry additions (a new part type, warning code, condition dimension,
+found and accepted. Items noticed but not yet filed wait in `amendments/CANDIDATES.md`;
+§4 batches everything except a trigger-A falsification or a trigger-B blocker. Registry additions (a new part type, warning code, condition dimension,
 source class) are **not** amendments and need no negotiation. If you are changing a binding item
 and there is no file in `amendments/`, stop.
 
