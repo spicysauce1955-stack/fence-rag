@@ -306,11 +306,20 @@ def main(argv: list[str] | None = None) -> int:
             if args.verify:
                 result = verify_snapshots(conn)
                 _print(result)
+                if result["snapshots"] == 0 and result["tombstoned_skipped"] == 0:
+                    print("FAILED: nothing was verified -- 0 snapshots found "
+                          "(0 tombstoned, 0 live) under workspace/snapshots/. "
+                          "A green exit here would mean zero citations were "
+                          "checked, not that they resolved; that is not a "
+                          "pass.", file=sys.stderr)
+                    return 1
                 if result["dangling"] or result["unknown_versions"]:
                     print(f"FAILED: {len(result['dangling'])} published "
-                          f"citation(s) no longer resolve. A snapshot is "
-                          f"immutable, so this cannot be repaired -- see "
-                          f"docs/four-layer-model-design.md 5.1.",
+                          f"citation(s) no longer resolve; "
+                          f"{len(result['unknown_versions'])} published "
+                          f"citation(s) name an unknown document version. A "
+                          f"snapshot is immutable, so this cannot be repaired "
+                          f"-- see docs/four-layer-model-design.md 5.1.",
                           file=sys.stderr)
                     return 1
             else:
