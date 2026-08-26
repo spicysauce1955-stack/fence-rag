@@ -32,6 +32,7 @@ from datetime import date, timedelta
 
 from .canonical import canonical_bytes, content_hash
 from .lang import detect_lang
+from .refs import ref_id
 from .store import connect
 
 CONTRACT_VERSION = "1.1.0"
@@ -161,11 +162,6 @@ class Gap:
     would_close: str
     closes_by: str
     severity: str
-
-
-def ref_id(sha256: str, page_no: int, bbox: str | None) -> str:
-    """A reference's id, derived from what it points at and nothing else."""
-    return hashlib.sha256(f"{sha256}:{page_no}:{bbox}".encode()).hexdigest()[:16]
 
 
 class SnapshotBuilder:
