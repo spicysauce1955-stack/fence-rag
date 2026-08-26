@@ -583,6 +583,40 @@ table and a fresh one agree on the *set* of columns but not their **order**
 but `dict(row)` key order is store-history-dependent, so never byte-compare
 serialised rows between a migrated and a re-ingested store.
 
+### G38 — a toolchain upgrade silently breaks published citations — DETECTED, NOT FIXED
+
+`ref_id` is `sha256(content_hash:page_no:bbox)[:16]`. Two of those three inputs
+are permanent; `bbox` is a measurement produced by `pdftotext -bbox-layout`.
+`store.py:475` already treats a version's identity as **bytes × toolchain** —
+*"True when this exact content was already extracted by these exact tools"* —
+but the fingerprint appears only in that guard, never in the `version_id`. So
+when the fingerprint differs, ingest does not skip and `store.py:520`
+`delete_version_rows()` **deletes** the canonical rows the old ids named.
+
+Measured: a 0.02pt bbox shift — 1/3600 of an inch — takes `cd9f0d9d9c4e300f` to
+`e25f68cec20de1bc`. The citation does not get repointed at wrong pixels; it
+stops resolving. A snapshot is immutable, so **obligation 3 breaks
+retroactively on an already-published artifact**, with no error anywhere. G31
+is proof the event class occurs: a clean rebuild produced 81,788 elements where
+the store had 81,794.
+
+**Currently clean.** All **431** published cites resolve, spanning 3 extraction
+runs. `python3 -m fence_evidence.cli refs --verify` asserts it and exits
+non-zero otherwise, so this is now a detected condition rather than a silent
+one.
+
+**A better hash is not the fix** — measured over all 81,794 elements,
+`sha:page:text` yields *fewer* distinct ids (56,090 against 69,306) and 6,660
+`figure` elements have no text at all. A sub-page identifier cannot be stable
+across re-extraction because the rectangle it names is itself produced by
+extraction.
+
+**Not closed because** the fix is extraction *editions* — putting the toolchain
+fingerprint into the version's identity so re-extraction is additive, and
+retaining an edition while any un-tombstoned snapshot cites it. ~31 MB per
+edition on a 69 MB store. Designed in `docs/four-layer-model-design.md` §5.1;
+plan 2 of `docs/four-layer-plan-1-refs.md`'s sequence.
+
 ### G10 — Not built at all (deliberate)
 
 Dense/semantic retrieval · visual page retrieval · reranking · a served HTTP API

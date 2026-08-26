@@ -100,6 +100,8 @@ python3 -m fence_evidence.cli migrate         # additive schema migration + back
 python3 -m fence_evidence.cli dataset --verify   # data/ still matches its SHA-256 baseline
 python3 -m fence_evidence.cli snapshot --build   # publish source_docs + warnings + gaps
 python3 -m fence_evidence.cli snapshot --list
+python3 -m fence_evidence.cli refs --verify     # every published citation still resolves
+python3 -m fence_evidence.cli refs --index      # rebuild the ref index and report it
 python3 -m fence_evidence.cli promote-tables --revoke --apply  # un-promote what no person reviewed
 python3 tests/run_tests.py                    # whole suite, stdlib only
 
@@ -224,7 +226,9 @@ Publishing, added 2026-08-25: `canonical.py` (deterministic bytes — obligation
 `snapshot.py` (the builder and the `verify()` gate) · `snapshot_store.py` (write-once, tombstone
 rather than delete) · `dataset.py` (the hand-researched dataset's SHA-256 baseline) ·
 `crops.py` (the normative source-ref transform — **built, measured, and deliberately unwired**
-until Phase B's endpoint exists).
+until Phase B's endpoint exists) ·
+`refs.py` (the evidence identifier and its rebuildable inverse — one owner; the
+`sref_` scheme in source-refs-design.md §1 is superseded)
 
 Things that will bite you if you don't know them (all measured, see the corpus audit):
 - Six documents have text layers that decode to mojibake and are re-OCR'd per page. Character-count
@@ -261,6 +265,13 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   `("accepted", "corrected")` and nothing in the package writes either — so
   `promote-tables --apply` is a no-op today. The review loop is a hole in the middle, not a
   missing tail, and it is the critical path.
+- **`ref_id` embeds a bbox, and a re-extraction can move it.** A 0.02pt shift
+  changes the id completely and `delete_version_rows()` removes the rows the old
+  id named, so a toolchain upgrade breaks published citations retroactively and
+  obligation 3 with them. All 431 currently resolve; `cli refs --verify` is the
+  guard. The fix is extraction editions — see `docs/four-layer-model-design.md`
+  §5.1 and G38. **Do not change `ref_id`'s formula**; published snapshots depend
+  on it byte-for-byte.
 
 ## Constraints when building the pipeline
 

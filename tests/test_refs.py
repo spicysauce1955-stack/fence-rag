@@ -335,5 +335,54 @@ class TestVerifyDetectsRot(unittest.TestCase):
         conn.close()
 
 
+@requires_full_store
+class TestKnownDefects(unittest.TestCase):
+    """Asserted as *current state*, not as desired behaviour.
+
+    Both are docs/four-layer-model-design.md 5.2 and both are plan 2's work.
+    They are pinned here so that fixing one produces a visible failure rather
+    than a silent change of meaning.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        from fence_evidence.store import connect
+        cls.conn = connect(read_only=True)
+        cls.index = build_index(cls.conn)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.conn.close()
+
+    def test_the_id_omits_kind_so_a_page_ref_can_collide(self):
+        """A bbox-less element produces the identical id to its own page.
+
+        Measured: all 416 bbox-less elements collapse onto ONE id, which is also
+        that page's page-ref. They are all in the ARCAT CSI MasterSpec DOCX at
+        page 1 -- the document with no page geometry at all (G4). So its entire
+        text is addressable only as "page 1", and a citation to any of the 416 is
+        indistinguishable from a citation to any other, or to the whole page.
+        """
+        collisions = [l for l in self.index.values()
+                      if l.is_page and l.element_ids]
+        self.assertGreaterEqual(
+            len(collisions), 1,
+            "expected the known kind collision; if it is gone, plan 2 landed "
+            "and this test should be replaced by its inverse")
+        worst = max(collisions, key=lambda l: len(l.element_ids))
+        self.assertGreater(
+            len(worst.element_ids), 100,
+            "the DOCX's bbox-less elements should all land on one id; if this "
+            "dropped, either the DOCX gained geometry or the id gained `kind`")
+
+    def test_the_id_is_not_injective_over_elements(self):
+        """It addresses a rectangle, deliberately -- but a resolver still needs
+        a stated rule for which element's text to quote."""
+        shared = [l for l in self.index.values() if len(l.element_ids) > 1]
+        self.assertGreater(len(shared), 1_000)
+        worst = max(shared, key=lambda l: len(l.element_ids))
+        self.assertGreater(len(worst.element_ids), 2)
+
+
 if __name__ == "__main__":
     unittest.main()
