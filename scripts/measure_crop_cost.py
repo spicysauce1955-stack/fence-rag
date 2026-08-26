@@ -1,8 +1,9 @@
 """K3 — what does a cold paragraph crop cost?
 
-A benchmark, not a dataset builder: it reads the store and the corpus, writes
-nothing, and is safe to re-run. (The two `build_*.py` scripts beside it own their
-outputs; this one has none.) Results as of 2026-08-25 are in
+A benchmark, not a dataset builder: it reads the store and the corpus and is safe
+to re-run. (The two `build_*.py` scripts beside it own their outputs; this one has
+none.) One caveat since `SCHEMA_VERSION` 2: `store.connect()` applies any pending
+additive migration, so on an out-of-date store this is not strictly read-only. Results as of 2026-08-25 are in
 `workspace/reports/k3-crop-render-cost.md`.
 
 source-refs-design.md §8.4: "§4.2 chooses poppler windowing over cached Pillow

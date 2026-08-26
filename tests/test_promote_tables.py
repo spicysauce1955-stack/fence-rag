@@ -105,7 +105,10 @@ class TestPromotedFacts(unittest.TestCase):
         for r in self.rows:
             cond = json.loads(r["conditions"])
             if cond["hvhz_applicability"] == "unresolved":
-                self.assertTrue(cond.get("_applicability_basis"),
+                # A2 moved this note OUT of `conditions` -- under §1.3 everything
+                # in there publishes as a condition dimension, and a sentence
+                # about readers disagreeing is not one. It lives on the fact now.
+                self.assertTrue(r["condition_basis_note"],
                                 "unresolved applicability with no reason recorded")
 
     def test_no_promoted_fact_came_from_same_family_agreement_alone(self):

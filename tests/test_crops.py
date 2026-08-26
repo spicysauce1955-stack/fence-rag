@@ -66,7 +66,6 @@ class TestWindowGeometry(unittest.TestCase):
 @requires_store
 class TestRenderAgainstTheCorpus(unittest.TestCase):
     def test_renders_a_real_element_to_a_png(self):
-        import sqlite3
         from fence_evidence.crops import render_crop
         from fence_evidence.store import connect
         conn = connect()

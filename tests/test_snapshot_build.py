@@ -15,8 +15,8 @@ import unittest
 
 import context  # noqa: F401  -- puts the repo root on sys.path
 from context import requires_store
-from fence_evidence.snapshot import (Gap, SnapshotBuilder, SourceDoc, SourceRef,
-                                     SOURCE_CLASS, build_snapshot)
+from fence_evidence.snapshot import (SnapshotBuilder, SOURCE_CLASS,
+                                     build_snapshot)
 
 
 class TestSourceClassMapping(unittest.TestCase):

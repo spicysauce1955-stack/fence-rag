@@ -282,7 +282,7 @@ a metric pass would destroy its value. It costs roughly 0.02 of unit support.
 ## Phase 6 — Structured technical facts
 
 **Implemented.** `facts.py`: a documented regex extractor (`extractor='regex-v1'`)
-over canonical elements, producing 1,652 facts with mandatory provenance —
+over canonical elements, producing 1,714 facts with mandatory provenance —
 document, version, page, element, evidence text — the original wording, the
 normalised value beside it, the conditions it holds under, and a review status.
 266 are `flagged` rather than `extracted` because they were read from OCR text on
@@ -457,7 +457,7 @@ signed `audit/11`).
   had drifted from it.
 - **A2** — `facts.condition_basis` + `condition_basis_note`. Three values, not
   the contract's two: `unexamined` is internal and publishes as `assumed`,
-  because 1,535 regex facts have no conditions since *the extractor never looked*,
+  because 1,538 regex facts have no conditions since *the extractor never looked*,
   and calling that `assumed` claims an inference nobody performed. **Both writers
   were fixed, not only the rows** — `promote_verified()` and `promote()` would
   have written `_applicability_basis` straight back into `conditions` the moment
@@ -466,7 +466,7 @@ signed `audit/11`).
   represent a disagreeing second unit) is closed. **Coverage is 0%**, and that is
   recorded rather than smoothed: see G34.
 - **A4** — `elements.lang` + `lang_basis`, all 81,794 tagged.
-- **A5** — `stock_length_in`, 54 facts. The case obligation 14 names is in the
+- **A5** — `stock_length_in`, 62 facts. The case obligation 14 names is in the
   store: 192 in for White, 144 in for Blend.
 
 Also landed: `store.ensure_columns()` / `retire_columns()` (`SCHEMA_VERSION` 3),
@@ -545,7 +545,7 @@ depth, floats and sets refused, whitespace minimal, unicode *not* escaped),
 `snapshot.py` (the builder and the `verify()` gate), `snapshot_store.py`
 (write-once, tombstone rather than delete). `cli snapshot --build|--list|--get`.
 
-**Built**: 62 `source_docs`, 282 `warnings`, 63 `gaps`, 68 KB, committed to
+**Built**: 62 `source_docs`, 282 `warnings`, 63 `gaps`, 175 KB, committed to
 `workspace/snapshots/`. Deliberately thin — `parts`, `models` and `parameters`
 need entities the store does not hold, and a snapshot containing very little is
 still a valid snapshot by design.
@@ -625,7 +625,7 @@ active member at all. After the fix, NOA 24-0117.05 and its three duplicate
 filings are no longer superseded and the 2006 approval 06-1019.01 correctly is.
 `tests/test_versions.py` asserts the direction in both directions.
 
-### Scanned NOA table reading — designed, not run
+### Scanned NOA table reading — ran; awaiting a reviewer
 
 **Designed.** `docs/experiment-noa-table-reading.md`: four stages, per-cell OCR
 with abstention on disagreement, a `table_read_candidates` table, and a review
@@ -634,5 +634,11 @@ specific cell against its crop. One confidently-wrong numeric cell fails the
 experiment outright.
 
 **Input built.** `cli noa-table-crops` writes 44 full-page crops with SHA-256s
-and a manifest; the 73 flagged pages deduplicate to 44 distinct contents. No
-values are read.
+and a manifest; the 73 flagged pages deduplicate to 44 distinct contents.
+
+**And it ran.** 1,225 candidate readings by 7 agent readers over all 44 pages,
+cross-family compared: 709 `unreviewed`, 504 `cross_family_verified`, 12
+`agent_verified`. **Not one has been reviewed by a person** — `reviewer` is NULL
+on every row — and after A1 none is promotable, which is the honest state rather
+than a contradiction. The 504 are the front of a review queue that has no
+interface yet, and building that interface is the critical path (Phase B).

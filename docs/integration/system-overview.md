@@ -121,7 +121,7 @@ This platform's own measured position is the honest starting point. From
   carry one `table` element between them.
 - Component selection, BOM construction and assembly are recorded as absent or
   unrepresented.
-- **1,652 facts exist; none has been reviewed by a person.** (1,976 until 2026-08-25, when build-plan A1 un-promoted the 324 written on machine agreement alone.)
+- **1,714 facts exist; none has been reviewed by a person.** (1,976 until 2026-08-25, when build-plan A1 un-promoted the 324 written on machine agreement alone.)
 
 None of that blocks the integration work. The contract is designed so that a snapshot
 containing very little is still a valid snapshot, and Planning still produces a plan from

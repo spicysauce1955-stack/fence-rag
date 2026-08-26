@@ -23,10 +23,17 @@ manuals/  china/manuals/  data/    catalog/    corpus-manifest.jsonl
         │
         ▼
   canonical evidence store ──────► retrieval units ──► FTS5 BM25 search
-  documents, versions, pages,      (rebuildable            │
-  elements, tables, table_cells,    projection)            ▼
-  assets, relations, facts,                          result + page image
-  quality_issues, extraction_runs                     + region crop + bbox
+  documents, versions, pages,   │  (rebuildable            │
+  elements, tables, table_cells,│   projection)            ▼
+  assets, relations, facts,     │                    result + page image
+  quality_issues,               │                     + region crop + bbox
+  table_read_candidates,        │
+  extraction_runs               │
+                                ▼
+                        a published Snapshot
+                        hashed, verified, write-once
+                        workspace/snapshots/
+                        (source_docs + warnings + gaps so far)
 ```
 
 Canonical rows record what the source actually contained. Retrieval units are a
@@ -187,9 +194,15 @@ python3 -m fence_evidence.cli evaluate          # Phase 4: gold question set
 python3 -m fence_evidence.cli ingest --all      # Phase 5: full corpus
 python3 -m fence_evidence.cli facts --extract   # Phase 6: structured facts
 python3 -m fence_evidence.cli report            # regenerate workspace reports
+python3 -m fence_evidence.cli snapshot --build  # publish source_docs + warnings + gaps
 ```
 
-(a) Run in this order, `run_tests.py` reports `OK` with about 22 skips: those
+On a store built before `SCHEMA_VERSION 3`, run `cli migrate` first — it adds any
+missing columns and backfills them, and is safe to re-run. `cli dataset --verify`
+checks that `data/` still matches the SHA-256 baseline in
+`workspace/catalog/data-digests.json`.
+
+(a) Run in this order, `run_tests.py` reports `OK` with a handful of skips: those
 tests assert about documents outside the 10-document pilot, or about facts
 Phase 6 has not extracted yet. Each skip names the command that unlocks it, and
 they all run once `ingest --all` and `facts --extract` have. Use
@@ -206,6 +219,14 @@ python3 -m fence_evidence.cli noa-table-crops           # crops for the unreadab
 python3 -m fence_evidence.cli resolve 23-0314.05 --as-of 2026-08-20
 python3 -m fence_evidence.cli page doc-3c8ab51045c7 17  # a page and its elements
 python3 -m fence_evidence.cli region element-...        # image evidence
+python3 -m fence_evidence.cli document 23-0314.05       # record, versions, relations
+python3 -m fence_evidence.cli context element-...       # neighbouring elements
+python3 -m fence_evidence.cli stats                     # row counts
+python3 -m fence_evidence.cli rebuild-index             # projection, from canonical rows
+python3 -m fence_evidence.cli worklist                  # machine / review / human piles
+python3 -m fence_evidence.cli table-review --agreement A B
+python3 -m fence_evidence.cli promote-tables            # dry run by default
+python3 -m fence_evidence.cli snapshot --list
 ```
 
 Every search result carries `source_path`, `page`, `element_id`, `bbox`,
@@ -236,10 +257,10 @@ for hit in search_evidence("racking degrees Chesterfield", limit=5):
 | `docs/phase-checkpoints.md` | per-phase record: implemented, tested, incomplete |
 | `docs/state-and-gaps.md` | current snapshot: measured state, and every known gap |
 | `docs/second-stage-evaluation.md` | within-page retrieval: measurement and the decision not to default it on |
-| `docs/experiment-noa-table-reading.md` | designed, not run: per-cell reading of the 73 scanned table pages |
+| `docs/experiment-noa-table-reading.md` | ran: 1,225 candidate readings over 44 pages by 7 agent readers, none yet reviewed by a person |
 | `workspace/reports/projection-relevance-audit.md` | relevance audit of the index; recommendations not applied |
 | `workspace/reports/` | environment, corpus audit, dependency options, pilot selection, coverage, evaluation |
-| `eval/gold-questions-*.json` | 44 hand-verified benchmark questions |
+| `eval/gold-questions-*.json` | 59 hand-verified benchmark questions |
 
 ## Non-negotiables
 

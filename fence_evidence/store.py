@@ -269,7 +269,6 @@ CREATE TABLE IF NOT EXISTS facts (
     ocr_derived     INTEGER NOT NULL DEFAULT 0,
     -- extracted        : found by the regex extractor, unchecked
     -- flagged          : read from low-confidence OCR; needs checking
-    -- cross_family_verified : readers from two model families read it identically
     -- reviewed         : a person accepted or corrected it
     -- rejected         : checked and wrong
     review_status   TEXT NOT NULL DEFAULT 'extracted',
@@ -339,6 +338,8 @@ def ensure_columns(conn: sqlite3.Connection, spec=None) -> list[str]:
         added.append(f"{table}.{column}")
     if added:
         conn.commit()
+    # Both directions, so a caller can report them. `retired["refused"]` is the
+    # half that needs a person -- a column still holding data is not dropped.
     return added
 
 
@@ -408,14 +409,16 @@ def retire_columns(conn: sqlite3.Connection, spec=None) -> dict:
     return {"dropped": dropped, "refused": kept}
 
 
-def migrate(conn: sqlite3.Connection) -> list[str]:
+def migrate(conn: sqlite3.Connection) -> dict:
     conn.executescript(SCHEMA)
     added = ensure_columns(conn)
-    retire_columns(conn)
+    retired = retire_columns(conn)
     conn.execute("INSERT OR REPLACE INTO schema_meta(key, value) VALUES ('schema_version', ?)",
                  (str(SCHEMA_VERSION),))
     conn.commit()
-    return added
+    # Both directions, so a caller can report them. `retired['refused']` is the
+    # half that needs a person: a column still holding data is never dropped.
+    return {"added": added, "retired": retired}
 
 
 def tool_fingerprint(tool_versions: dict) -> str:

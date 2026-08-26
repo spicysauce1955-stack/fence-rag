@@ -129,6 +129,18 @@ class TestTheSkuSeam(unittest.TestCase):
             stock_lengths("Gate Width: Single 4', 5' Double 8' & 10' Picket Style: Flat top"),
             [])
 
+    def test_a_fractional_length_does_not_crash(self):
+        """`_TRIPLE` deliberately captures `15-1/2` but `float()` cannot parse it.
+        This was an unguarded ValueError in `cli facts --extract`, invisible
+        because every other case here uses a whole number."""
+        got = stock_lengths('1-1/2" x 5-1/2" x 15-1/2\' Rail - White')
+        self.assertEqual(got[0]["value_normalized"], 186.0)      # 15.5 ft
+        self.assertEqual(got[0]["value_original"], "15-1/2 '")
+
+    def test_a_fractional_inch_length(self):
+        got = stock_lengths('1-1/2" x 5-1/2" x 93-3/4" Rail')
+        self.assertEqual(got[0]["value_normalized"], 93.75)
+
     def test_an_implausible_length_is_a_parse_not_a_length(self):
         self.assertEqual(stock_lengths('5"X5"X9" HEAVY WALL POST'), [])   # OCR: 9' as 9"
         self.assertEqual(stock_lengths("NOT TO EXCEED 964' RAIL RETAINER"), [])

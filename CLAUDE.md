@@ -63,9 +63,10 @@ The API surfaces that must not move are in `contract.md` §1.5; transport, frame
 pagination are deliberately unspecified. `audit/` is the reasoning behind every decision, kept in
 order, and `audit/10-ratification-v1.0.md` §3.2 is the non-compliance this platform declared at
 signature — **partly closed as of 2026-08-25**. Its live violation (obligation 6) and its
-three representational gaps (obligations 4, 15, 10) closed with build-plan A1-A4. Still in
-force: obligation 14's missing `stock_length` extractor (A5) and the twelve unbuilt
-publishing-layer obligations.
+three representational gaps (obligations 4, 15, 10) closed with build-plan A1-A5, all
+five of which landed 2026-08-25. Still in force: the unbuilt publishing-layer
+obligations — and note that nothing is published at curation level 2, nor can be,
+because no interface exists for a person to accept a reading.
 
 Nothing in `docs/integration/` displaces the documents above. Those govern how this platform
 works; the contract governs only what it exposes.
@@ -199,7 +200,11 @@ data/                       derived/   page images + region crops (4.4 GB, git-i
         |
         v
    canonical store  ---->  retrieval_units + FTS5  ---->  search result
-   (11 tables)             (derived, rebuildable)         + page image + bbox
+   (13 tables)      |      (derived, rebuildable)         + page image + bbox
+                    |
+                    +----->  canonical.py -> snapshot.py -> snapshot_store.py
+                             a published Snapshot: hashed, verified, write-once
+                             (source_docs + warnings + gaps only, so far)
 ```
 
 The split that matters: **canonical** tables (`documents`, `document_versions`, `pages`,

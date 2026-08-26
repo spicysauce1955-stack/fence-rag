@@ -8,15 +8,15 @@ page whose mean word confidence is below 80 is created as `flagged`, not
 
 | Measure | Value |
 |---|---|
-| facts | 1706 |
-| with conditions attached | 168 |
+| facts | 1714 |
+| with conditions attached | 176 |
 | facts without a source element | 0 |
 
 ## By review status
 
 | Status | Count |
 |---|---|
-| extracted | 1440 |
+| extracted | 1448 |
 | flagged | 266 |
 
 ## By type
@@ -30,7 +30,7 @@ page whose mean word confidence is below 80 is created as `flagged`, not
 | depth_below_grade_in | 100 | 0 | 16 |
 | effective_date | 84 | 20 | 84 |
 | expiration_date | 75 | 10 | 75 |
-| stock_length_in | 54 | 0 | 0 |
+| stock_length_in | 62 | 0 | 0 |
 | footing_diameter_in | 25 | 5 | 11 |
 | exposure_category | 15 | 0 | 0 |
 | racking_degrees | 5 | 2 | 5 |
@@ -49,12 +49,12 @@ not assert an inference it never made.
 |---|---|---|
 | unexamined | 1538 | no conditions, and nothing looked for any |
 | assumed | 117 | captured by regex proximity, not asserted by the document |
-| stated | 51 | the document said so |
+| stated | 59 | the document said so |
 
 ## Second units, where a source states one
 
 Obligation 4: where a source states two units and they disagree, publish both.
-**3** of 1706 facts carry an alternate lexeme in `value_alternates`,
+**3** of 1714 facts carry an alternate lexeme in `value_alternates`,
 of which **0 disagree** with the primary value.
 
 **Read that second number carefully.** The schema can now represent a disagreeing

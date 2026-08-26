@@ -128,7 +128,7 @@ the interface.
 
 ## 4. Why a review gate, and why it is not absolute
 
-The store's current position: **1,652 facts, none reviewed by a person.** Until
+The store's current position: **1,714 facts, none reviewed by a person.** Until
 2026-08-25 it was 1,976, of which 324 had been promoted automatically on cross-family
 agreement. That mechanism is gone — `table_review.PROMOTABLE` is now `("accepted",
 "corrected")`, `state-and-gaps.md` G17 records the change, and what `docs/curation/` C0

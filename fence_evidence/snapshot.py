@@ -24,6 +24,7 @@ identical knowledge produced different bytes, and obligation 1 would be a lie.
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 import sqlite3
 from dataclasses import asdict, dataclass
@@ -283,9 +284,9 @@ class SnapshotBuilder:
                 continue
 
             lexeme, body, anchor = None, None, r
-            if _LEXEME_ONLY.match(text):
+            if lex_only := _LEXEME_ONLY.match(text):
                 # the word is a heading; the body is the next element on the page
-                lexeme = _LEXEME_ONLY.match(text).group(1).upper()
+                lexeme = lex_only.group(1).upper()
                 nxt = rows[i + 1] if i + 1 < len(rows) else None
                 if (nxt and nxt["document_id"] == r["document_id"]
                         and nxt["page_no"] == r["page_no"] and body_of(nxt)
@@ -341,8 +342,7 @@ class SnapshotBuilder:
                          closes_by="knowledge", severity="informational")
                 continue
 
-            import json as _json
-            path = _json.loads(r["heading_path"] or "[]")
+            path = json.loads(r["heading_path"] or "[]")
             step = next((h for h in reversed(path)
                          if _STEP_HEADING.match(h) and not _NOT_A_STEP.search(h)), None)
 
@@ -358,6 +358,12 @@ class SnapshotBuilder:
 
             w = {"text_raw": text,                  # verbatim, never normalised
                  "lang": lang,
+                 # The basis travels with the guess, the same way
+                 # `condition_basis` and `version_status_basis` do. `lang` here
+                 # is never `measured` -- script is measurable by Unicode range,
+                 # language is not -- and publishing the guess without saying so
+                 # is the thing obligation 10 exists to prevent.
+                 "lang_basis": lang_basis,
                  "severity_lexeme": lexeme,
                  "attaches_to": self._attaches_to(r, step),
                  "cites": [asdict(ref)]}
@@ -430,12 +436,16 @@ def verify(snapshot: dict) -> None:
                 fail.append(f"{path}: closure - SourceRef {node['id']} belongs_to "
                             f"{node['belongs_to'][:12]}..., not in source_docs")
             for k, v in node.items():
-                if isinstance(v, float):
-                    fail.append(f"{path}.{k}: a float ({v!r}) cannot cross")
                 walk(v, f"{path}.{k}")
         elif isinstance(node, list):
             for i, v in enumerate(node):
                 walk(v, f"{path}[{i}]")
+        elif isinstance(node, float):
+            # Checked here as well as in `canonical`, and at every depth: the
+            # earlier version tested only dict VALUES, so a float inside a list
+            # passed verify and was then refused by the canonicaliser -- a check
+            # that gives false assurance is worse than no check.
+            fail.append(f"{path}: a float ({node!r}) cannot cross")
     walk(snapshot)
 
     for i, w in enumerate(snapshot.get("warnings", [])):

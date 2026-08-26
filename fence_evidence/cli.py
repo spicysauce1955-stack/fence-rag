@@ -301,12 +301,13 @@ def main(argv: list[str] | None = None) -> int:
                 return 1
     elif args.cmd == "migrate":
         from .store import (backfill_lang, connect as _c, migrate as _m,
-                            retire_columns, SCHEMA_VERSION)
+                            SCHEMA_VERSION)
         conn = _c()
         try:
-            added = _m(conn)
-            _print({"schema_version": SCHEMA_VERSION, "columns_added": added,
-                    "columns_retired": retire_columns(conn),
+            result = _m(conn)
+            _print({"schema_version": SCHEMA_VERSION,
+                    "columns_added": result["added"],
+                    "columns_retired": result["retired"],
                     "lang": backfill_lang(conn)})
         finally:
             conn.close()

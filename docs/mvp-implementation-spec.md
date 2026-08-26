@@ -108,7 +108,28 @@ Derived (rebuildable from canonical, may be dropped and regenerated):
 ```text
 retrieval_units    searchable projection of one or more canonical elements
 retrieval_fts      FTS5 virtual table over retrieval_units
-facts              Phase 6 structured technical facts (provenance-bearing)
+```
+
+Partly derived — `facts` is regenerable **only** for `extractor LIKE 'regex-%'`:
+
+```text
+facts              structured technical facts (provenance-bearing). The delete in
+                   `cli facts --extract` is scoped to regex rows, because a fact
+                   promoted from a reviewed table reading cannot be re-derived:
+                   it came from a person's decision, not from an element. It
+                   names its reading through `facts.from_candidate_id`, so
+                   deleting the fact takes the link with it. See G18.
+```
+
+Review input — not derived, and not recreatable by any command:
+
+```text
+table_read_candidates  readings of the scanned tables OCR could not rebuild, from
+                       any reader: an agent, a future per-cell OCR pass, or a
+                       person. Nothing here is a fact. 1,225 rows over 44 pages,
+                       each with its crop and crop_sha256. Recreating them means
+                       re-running the readers and re-doing any human review, so
+                       treat this as canonical-grade despite being a review table.
 ```
 
 Invariants:

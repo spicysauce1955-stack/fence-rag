@@ -27,9 +27,9 @@ Naming the layers is cheap. The rule in §2 is the part that earns its keep.
 |---|---|---|---|
 | **L1** | Raw | the corpus — 144 files, read-only, content-addressed | `cli fetch` |
 | **L2** | Canonical | what each page contained — 81,794 elements, boxes, images | `cli ingest` |
-| **L3** | Assertions | a value, its conditions, and where it was read — 1,652 facts | `cli facts --extract` |
+| **L3** | Assertions | a value, its conditions, and where it was read — 1,714 facts | `cli facts --extract` |
 | **L4** | Entities | the things a bill of materials names — parts, panels, slots | *nothing* |
-| **L5** | Published | the contract shapes, hashed and immutable | *nothing* |
+| **L5** | Published | the contract shapes, hashed and immutable | `cli snapshot --build` |
 
 > ### THE RULE
 >
@@ -107,7 +107,7 @@ contradicted by their own sources, and why the only way to find them was for a
 person to go back to the page by hand. There is no automated check that could
 have caught it, because there is nothing to check against.
 
-**L5 does not exist.** No snapshot builder, no `ParameterTable`, no `Part`.
+**L5 exists thinly.** `canonical.py` + `snapshot.py` + `snapshot_store.py` build, verify and store a snapshot — 62 `source_docs`, 282 `warnings`, 63 `gaps`. Still absent: `ParameterTable`, `Part`, and everything that needs an anchored L4.
 
 ### What anchoring L4 would look like
 

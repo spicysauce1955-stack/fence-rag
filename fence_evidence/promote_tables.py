@@ -143,7 +143,7 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
                     created += 1
                     by_type[fact_type] += 1
                     continue
-                cur = conn.execute("""INSERT INTO facts(document_id, version_id, page_no,
+                conn.execute("""INSERT INTO facts(document_id, version_id, page_no,
                     element_id, fact_type, subject, value_original, value_normalized,
                     unit_original, unit_normalized, conditions, condition_basis,
                     condition_basis_note, evidence_text, extractor,

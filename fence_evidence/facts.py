@@ -313,16 +313,41 @@ _SKU_COLOUR = re.compile(
     r"[-\u2013]\s*(White|Sand|Gray|Grey|Tan|Clay|Almond|Khaki|Mocha|Cypress"
     r"|Driftwood|Black|[A-Z][a-z]+\s+Blend|Blend)\b")
 
-_FEET = ("foot", "feet", "ft", "ft.", "'")
 MIN_STOCK_IN, MAX_STOCK_IN = 48.0, 288.0        # 4 ft to 24 ft
 
 
+def _fraction(num: str) -> float | None:
+    """`16`, `93-3/4`, `5.5`, `7/8` -> a float; None where it is not a number.
+
+    Returns None rather than raising: this is reached from a regex match, and a
+    caller that gets None skips the match, where an exception would abort a whole
+    extraction run over one odd string.
+    """
+    t = (num or "").strip().replace("\u2044", "/")
+    if m := re.match(r"^(\d+)[-\s](\d+)/(\d+)$", t):          # 93-3/4
+        return int(m.group(1)) + int(m.group(2)) / int(m.group(3))
+    if m := re.match(r"^(\d+)/(\d+)$", t):                      # 7/8
+        return int(m.group(1)) / int(m.group(2))
+    try:
+        return float(t)
+    except ValueError:
+        return None
+
+
 def _to_inches(num: str, unit: str) -> float | None:
-    v = float(num)
+    # `_fraction`, not `float`: `_TRIPLE` deliberately captures `15-1/2` and
+    # `93-3/4`, and a bare float() raises on both. That was an unguarded
+    # ValueError in `cli facts --extract`.
+    v = _fraction(num)
+    if v is None:
+        return None
+    # Every glyph the corpus actually uses, not only the words. `93-3/4"` was
+    # silently returning None -- so SKU triples whose length used the inch mark
+    # were dropped rather than extracted, and nothing complained.
     u = unit.lower().rstrip(".")
-    if u in ("foot", "feet", "ft", "'"):
+    if u in ("foot", "feet", "ft", "'", "\u2019"):
         return v * 12.0
-    if u in ("inch", "inches", "in"):
+    if u in ("inch", "inches", "in", '"', "\u201d"):
         return v
     return None
 
@@ -350,15 +375,6 @@ def _stock_from_triples(text: str) -> list[dict]:
             # is a suffix the publisher wrote. Both are the document speaking.
             "condition_basis": "stated"})
     return out
-
-
-def _fraction(num: str) -> float:
-    """`16`, `93-3/4`, `5.5` -> a float. Prohibition 7 keeps the original too."""
-    t = num.strip().replace("\u2044", "/")
-    m = re.match(r"^(\d+)[-\s](\d+)/(\d+)$", t)
-    if m:
-        return int(m.group(1)) + int(m.group(2)) / int(m.group(3))
-    return float(t)
 
 
 def stock_lengths(text: str | None, *, element_type: str | None = None,
@@ -426,12 +442,11 @@ def extract_facts(*, document_id: str | None = None,
         # Only regex-derived facts are regenerated here. Facts promoted from
         # verified table readings (extractor='table-read:...', see
         # promote_tables.py) must survive a re-extraction: promote_verified()
-        # only ever promotes a table_read_candidates row once
-        # (`from_candidate_id IS NULL`), so deleting those facts here would
-        # both destroy 300+ human/agent-gated readings and leave
-        # facts.from_candidate_id pointing at rows that no
-        # longer exist -- with no way to re-promote them, since the
-        # candidate no longer looks unpromoted.
+        # only ever promotes a candidate that no fact already names, so
+        # deleting a regex fact cannot strand one. Note the pointer direction:
+        # the FACT names the candidate, so deleting a fact takes its link with
+        # it and nothing can dangle -- which is why the column was inverted.
+        # See docs/layering.md §3.
         if document_id:
             conn.execute("DELETE FROM facts WHERE document_id=? AND extractor LIKE 'regex-%'",
                         (document_id,))
