@@ -48,5 +48,57 @@ class TestIdentity(unittest.TestCase):
         self.assertIs(via_snapshot, ref_id)
 
 
+from context import requires_full_store
+from fence_evidence.refs import Locus, build_index, resolve
+
+
+@requires_full_store
+class TestIndex(unittest.TestCase):
+    """The inverse is a projection: rebuilt from canonical rows, never stored."""
+
+    @classmethod
+    def setUpClass(cls):
+        from fence_evidence.store import connect
+        cls.conn = connect(read_only=True)
+        cls.index = build_index(cls.conn)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.conn.close()
+
+    def test_it_indexes_the_whole_store(self):
+        self.assertGreater(len(self.index), 60_000)
+
+    def test_no_two_different_loci_share_an_id(self):
+        """A true hash collision would make a citation ambiguous across documents."""
+        for rid, locus in self.index.items():
+            self.assertIsInstance(locus, Locus)
+        # Distinct (sha, page, bbox) triples must map to distinct ids.
+        triples = {(l.sha256, l.page_no, l.bbox) for l in self.index.values()}
+        self.assertEqual(len(triples), len(self.index))
+
+    def test_a_known_element_resolves_to_its_rectangle(self):
+        rid = ref_id(
+            "00c965f58d3030b7e7c8a6c8c0b7e99f1579c5599dc476c8f6a62dd88c6cdd58",
+            5, "[117.69, 271.47, 266.99, 294.03]")
+        locus = resolve(self.index, rid)
+        self.assertIsNotNone(locus)
+        self.assertEqual(locus.page_no, 5)
+        self.assertIn("element-da08178108-0022", locus.element_ids)
+
+    def test_an_unknown_id_resolves_to_none(self):
+        self.assertIsNone(resolve(self.index, "0" * 16))
+
+    def test_a_shared_rectangle_carries_every_element_not_one(self):
+        """9,929 ids cover more than one element. Picking one silently would be
+        a wrong quote; carrying all of them is the honest shape. See 5.2."""
+        shared = [l for l in self.index.values() if len(l.element_ids) > 1]
+        self.assertGreater(len(shared), 1_000)
+
+    def test_page_refs_are_indexed_and_flagged(self):
+        pages = [l for l in self.index.values() if l.is_page]
+        self.assertGreater(len(pages), 1_000)
+
+
 if __name__ == "__main__":
     unittest.main()
