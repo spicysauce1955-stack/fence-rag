@@ -1,14 +1,16 @@
 # Build plan — what this component builds next
 
 ```text
-Status:   The starting point for implementation. Written at the close of the
-          integration rounds, 2026-08-25, with contract v1.1 ratified by both teams.
+Status:   Written at the close of the integration rounds, 2026-08-25, with contract
+          v1.1 ratified by both teams. **Phase A is complete (A1-A5). Phase B is
+          next** — and the review verb belongs with it, see §2 Phase B.
 Authority: Advisory on sequencing. The authorities are unchanged —
           docs/mvp-implementation-spec.md for how this platform works, and
           docs/integration/contract.md (FROZEN v1.1) for what crosses the boundary.
 Read first: docs/state-and-gaps.md (what is measured and true today), then
-          docs/integration/audit/10-ratification-v1.0.md §3.2 (what we declared
-          we cannot yet satisfy, signed and still in force).
+          docs/phase-checkpoints.md "Phase A" for what closing it actually taught,
+          then docs/integration/audit/10-ratification-v1.0.md §3.2 (what we
+          declared we cannot yet satisfy — now partly closed, see §0).
 ```
 
 ## 0. Where the work stands
@@ -18,19 +20,27 @@ contract both teams have signed, and `docs/integration/` needs no more design wo
 open items are work items, not agreements.
 
 **What exists:** a source-preserving evidence store over 144 documents / 2,147 pages /
-81,794 elements, with FTS5 retrieval, a fact layer, supersession relations and a
-regenerable projection. 316 tests pass.
+81,794 elements, with FTS5 retrieval, a fact layer (1,706 facts, 12 types), supersession
+relations, a regenerable projection — and, since 2026-08-25, **a first published
+snapshot**: 62 `source_docs`, 282 `warnings`, 63 `gaps`, hashed and stored write-once.
+419 tests pass.
 
-**What does not exist:** the publishing layer. Nothing this platform holds crosses the
-boundary yet — there is no snapshot, no `ParameterTable`, no `Gap`, no part-type spine, no
-API surface at all. Twelve of the eighteen obligations describe that layer, and we declared
-all twelve unbuilt at signature.
+**Phase A is closed.** All five items landed, and each was a promise already made in
+writing at ratification. The level-2 population is zero, which is the honest number:
+`reviewer` is NULL on all 1,225 readings. What closing it *taught* is in
+`docs/phase-checkpoints.md` — several items turned out to rest on a premise that did not
+hold, and two of them found defects in code written the same day.
 
-**The one live violation**, also declared, is **closed** — A1 landed 2026-08-25.
-`cross_family_verified` is out of `table_review.PROMOTABLE`, the 324 facts it promoted are
-un-promoted, and the level-2 population is zero. `reviewer` is still NULL on all 1,225
-readings, which is now the honest state rather than a contradiction: the readings are
-retained with their crops as the front of the review queue. See `state-and-gaps.md` G17.
+**What does not exist:** most of the publishing layer. No `ParameterTable`, no `Part`, no
+part-type spine, no HTTP surface. And **no way for a person to accept or correct a
+reading** — the review loop is implemented on both sides of the human decision and has a
+hole where the decision goes. That hole, not the publisher, is the critical path: A1 made
+human review the only route back to curation level 2.
+
+**Two things are waiting on the other team**, logged rather than filed:
+`docs/integration/amendments/CANDIDATES.md` C1 (`curation_level` 0 vs 1 is never defined,
+and three binding mechanisms read it), C2 (`Warning.attaches_to.ref` is untyped) and C3
+(whether a `PanelSpec` member edge is a "value" — the L4 carve-out depends on it).
 
 ## 1. What must not move
 
@@ -103,7 +113,18 @@ implementation**.
   foundation Phase B builds on.
 - The ten `SOURCE_*` warning codes are final and already published to Planning.
 
-**Done when:** the seven fixtures round-trip against the live endpoint byte-for-byte.
+**And the review verb belongs here, not later.** `table_review.PROMOTABLE` is
+`("accepted", "corrected")` and **nothing in the package writes either one** — the only
+places they are set are test fixtures simulating a reviewer who does not exist. So
+`promote-tables --apply` can only ever be a no-op today, and `worklist`'s instruction
+*"confirm or correct, then promote"* names nothing runnable. What is missing, precisely:
+a verb like `table-review --accept ID --reviewer NAME [--value CORRECTED]` writing
+`review_status`, `reviewed_value`, `reviewer` and `reviewed_at`; and a way to *see* the
+crop beside the reading while deciding, which is what this phase's endpoint provides.
+`mark_cross_family_verified` also exists and is orphaned — no CLI verb reaches it.
+
+**Done when:** the seven fixtures round-trip against the live endpoint byte-for-byte,
+and a person can accept a reading and see it become a fact.
 
 ### Phase C — what Planning is waiting on
 

@@ -95,6 +95,11 @@ python3 -m fence_evidence.cli evaluate        # gold question set
 python3 -m fence_evidence.cli facts --extract
 python3 -m fence_evidence.cli report          # regenerate workspace/reports/
 python3 -m fence_evidence.cli audit           # relevance audit of the retrieval projection
+python3 -m fence_evidence.cli migrate         # additive schema migration + backfills; safe to re-run
+python3 -m fence_evidence.cli dataset --verify   # data/ still matches its SHA-256 baseline
+python3 -m fence_evidence.cli snapshot --build   # publish source_docs + warnings + gaps
+python3 -m fence_evidence.cli snapshot --list
+python3 -m fence_evidence.cli promote-tables --revoke --apply  # un-promote what no person reviewed
 python3 tests/run_tests.py                    # whole suite, stdlib only
 
 # the pre-existing dataset builders (they own their outputs; see below)
@@ -205,9 +210,16 @@ single PDF, and a test asserts the rebuild is byte-identical. Most retrieval-qua
 be projection changes, not re-extractions.
 
 Module map: `paths.py` (write guard) · `manifest.py` (Phase 0) · `extract.py` + `layout.py` +
-`hocr.py` + `tables.py` + `quality.py` (extraction) · `store.py` (schema, writers, projection) ·
-`ingest.py` (orchestration) · `relations.py` (supersession) · `retrieval.py` (the six interfaces) ·
-`evaluate.py` (gold set) · `facts.py` (Phase 6) · `reports.py` · `cli.py`.
+`hocr.py` + `tables.py` + `quality.py` + `lang.py` (extraction) · `store.py` (schema, writers,
+projection, additive migration) · `ingest.py` (orchestration) · `relations.py` (supersession) ·
+`retrieval.py` (the six interfaces) · `evaluate.py` (gold set) · `facts.py` (Phase 6 + A5) ·
+`reports.py` · `cli.py`.
+
+Publishing, added 2026-08-25: `canonical.py` (deterministic bytes — obligation 1 lives here) ·
+`snapshot.py` (the builder and the `verify()` gate) · `snapshot_store.py` (write-once, tombstone
+rather than delete) · `dataset.py` (the hand-researched dataset's SHA-256 baseline) ·
+`crops.py` (the normative source-ref transform — **built, measured, and deliberately unwired**
+until Phase B's endpoint exists).
 
 Things that will bite you if you don't know them (all measured, see the corpus audit):
 - Six documents have text layers that decode to mojibake and are re-OCR'd per page. Character-count
@@ -226,6 +238,24 @@ Things that will bite you if you don't know them (all measured, see the corpus a
 - No-answer detection does not work on near-miss questions and cannot be fixed with a threshold —
   the features measurably do not separate. Report `no_answer_precision` and
   `false_unsupported_rate` together, never one alone.
+- **Never derive `lang` from `corpus_track`.** That axis is a standards regime (GB vs ASTM), not
+  a language: there are **zero CJK-bearing elements** in this corpus and the China-track documents
+  are English-language export catalogues. And `en` is not a safe default either — 1,308 elements
+  are French or Spanish, in the *same PDFs* as the English (Barrette prints EN on pages 2–13 and
+  FR/ES on 14–22). `tests/test_basis_columns.py` fails if the shortcut returns.
+- **Every reference points DOWN a layer, never up.** A row may name what it was derived FROM,
+  never what was derived FROM IT. `docs/layering.md` has the reasoning;
+  `tests/test_pointer_direction.py` enforces it. It already caught one defect —
+  `promoted_fact_id` — whose inversion deleted a cleanup statement and a test.
+- **`retain_until` is deliberately outside the snapshot hash.** It moves with the clock, so
+  hashing it would mean two builds over identical knowledge never matched. What exactly belongs
+  in "the canonical member list" is not fully specified; that is a reading, not a quote.
+- **`crops.py` is built, measured and unwired on purpose.** Only tests and
+  `scripts/measure_crop_cost.py` call it. It backs `GET /source-refs/{id}`, which is Phase B.
+- **There is no way for a person to accept or correct a reading.** `PROMOTABLE` is
+  `("accepted", "corrected")` and nothing in the package writes either — so
+  `promote-tables --apply` is a no-op today. The review loop is a hole in the middle, not a
+  missing tail, and it is the critical path.
 
 ## Constraints when building the pipeline
 
