@@ -137,16 +137,32 @@ def verify_snapshots(conn: sqlite3.Connection, *,
     ``verify()`` in shape: a recursive ``walk(node, path)`` that accumulates a
     ``$.foo[3].bar`` path as it descends, one file over.
 
-    A dict is a citation when it sits inside a list bound to the key
-    ``"cites"`` and carries an ``id``. That is a narrower test than "any dict
-    with `id` and `belongs_to`": a well-formed citation is `SourceRef(id,
-    belongs_to)` via `asdict`, but so is a `Gap` -- gaps carry a bare `id` too,
-    and there are 63 of them in the shipped snapshot outside any `cites` list.
-    Gating on shape alone over-counts them. Gating on the `cites` list instead
-    of on `belongs_to` being present also means a *malformed* citation --
-    missing `belongs_to` entirely -- is still recognised as a citation rather
-    than silently skipped; see ``unknown_versions`` below, which is exactly
-    for catching that.
+    A dict is a citation when it has an ``id`` AND EITHER (a) it also carries
+    a ``belongs_to``, or (b) it sits inside a list bound to the key
+    ``"cites"``. Neither arm alone is right, and this module has already
+    shipped one that got it wrong once:
+
+    * Arm (a) is what keeps this function agreeing with ``snapshot.py``'s own
+      ``verify()``/``walk()``, which treats any dict with both ``id`` and
+      ``belongs_to``, at any depth, as a `SourceRef`. Gating on the `cites`
+      list alone (as an earlier version of this function did) missed a
+      well-formed citation published outside one -- a silent under-count in
+      exactly the same failure class this command exists to eliminate, and
+      the two functions would have disagreed about what a citation *is*: the
+      "one concept designed twice" failure `refs.py` was created to end.
+    * Arm (b) is what keeps a *malformed* citation visible -- one missing
+      `belongs_to` entirely. `SourceRef(id, belongs_to)` via `asdict` always
+      has both in a well-formed payload, but a hand-edited or corrupted one
+      might not; gating on `id` and `belongs_to` alone (the pure mirror of
+      `snapshot.py`) would make such a citation structurally invisible to
+      this function, silently, which is the same failure moved rather than
+      fixed. Position inside a `cites` list is still evidence of citation
+      intent even when the shape is broken.
+    * Gating on a bare ``id`` alone, with neither arm, is wrong the other
+      direction: `Gap` is `(id, kind, subject, would_close, closes_by,
+      severity)` -- no `belongs_to`, not inside a `cites` list -- and there
+      are 63 of them in the shipped snapshot. That gate inflates `cites` from
+      431 to 494.
 
     Tombstoned snapshots are skipped: their payload is gone by design, and
     holding them to a resolvability promise would report a deliberate excision
@@ -166,7 +182,7 @@ def verify_snapshots(conn: sqlite3.Connection, *,
 
     def walk(node, sid, path="$", in_cites=False):
         if isinstance(node, dict):
-            if in_cites and "id" in node:
+            if "id" in node and ("belongs_to" in node or in_cites):
                 out["cites"] += 1
                 rid, owner = node.get("id"), node.get("belongs_to")
                 if resolve(index, rid) is None:

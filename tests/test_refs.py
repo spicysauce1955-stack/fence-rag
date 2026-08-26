@@ -263,6 +263,77 @@ class TestVerifyDetectsRot(unittest.TestCase):
         self.assertIsNone(result["unknown_versions"][0]["belongs_to"])
         conn.close()
 
+    def test_a_wellformed_citation_outside_any_cites_list_is_still_found(self):
+        """snapshot.py's own verify()/walk() treats any dict with both `id`
+        and `belongs_to`, at any depth, as a SourceRef -- not only inside a
+        list literally named `cites`. This module must agree, or the two
+        functions answer "is this a citation?" differently, which is exactly
+        the "one concept designed twice" failure `refs.py` exists to end.
+        Fabricates a well-formed citation directly at `parts[0]["source_ref"]`,
+        not inside any `cites` list."""
+        import json
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript("""
+            CREATE TABLE documents(document_id TEXT);
+            CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
+            INSERT INTO document_versions VALUES ('v1', 'd1', 'aa');
+        """)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "snap1.json").write_text(json.dumps({
+                "snapshot_id": "snap1",
+                "warnings": [],
+                "parts": [{"name": "post-cap",
+                           "source_ref": {"id": "c" * 16, "belongs_to": "aa"}}],
+            }))
+            result = verify_snapshots(conn, root=root)
+        self.assertEqual(result["cites"], 1)
+        self.assertEqual(result["resolved"], 0)
+        self.assertEqual(len(result["dangling"]), 1)
+        self.assertEqual(result["dangling"][0]["ref_id"], "c" * 16)
+        self.assertEqual(result["dangling"][0]["at"], "$.parts[0].source_ref")
+        conn.close()
+
+    def test_a_gap_style_id_is_not_counted_as_a_citation(self):
+        """A `Gap` is `(id, kind, subject, would_close, closes_by, severity)`
+        -- a bare `id`, no `belongs_to`, and not inside any `cites` list. It
+        must not be mistaken for a citation: the shipped snapshot carries 63
+        of them, and counting them would inflate `cites` from 431 to 494."""
+        import json
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript("""
+            CREATE TABLE documents(document_id TEXT);
+            CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
+        """)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "snap1.json").write_text(json.dumps({
+                "snapshot_id": "snap1",
+                "warnings": [],
+                "gaps": [{"id": "g" * 16, "kind": "unresolved_query",
+                          "subject": "x", "would_close": "y",
+                          "closes_by": "planning", "severity": "info"}],
+            }))
+            result = verify_snapshots(conn, root=root)
+        self.assertEqual(result["cites"], 0)
+        self.assertEqual(result["dangling"], [])
+        self.assertEqual(result["unknown_versions"], [])
+        conn.close()
+
 
 if __name__ == "__main__":
     unittest.main()
