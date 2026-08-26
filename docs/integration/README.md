@@ -61,7 +61,7 @@ Kept in order, because a later disagreement is usually a re-run of an earlier on
 | [`07-delta-disposition.md`](audit/07-delta-disposition.md) | **Planning's decision.** All four accepted; the falsified premise was worse than measured — height varies *along* a run, not merely between runs |
 | [`08-close-of-round.md`](audit/08-close-of-round.md) | **Knowledge closes both threads** — `disputed` accepted, stagger conceded to cut planning, the level-2 risk confirmed and defused. Corrects its own 77→20 count and re-ranks K4 on the cell-coverage numbers |
 | [`09-round-closed.md`](audit/09-round-closed.md) | **Planning acknowledges.** Correction propagated, K4 re-ranked, and Knowledge's account of the boundary-addition problem adopted over Planning's own |
-| [`10-ratification-v1.0.md`](audit/10-ratification-v1.0.md) | **The v1.0 record — never ratified.** Planning signed; Knowledge did not, because obligation 6 read wrong cold. Its §3.2 is the declared non-compliance, still in force |
+| [`10-ratification-v1.0.md`](audit/10-ratification-v1.0.md) | **The v1.0 record — never ratified.** Planning signed; Knowledge did not, because obligation 6 read wrong cold. Its §3.2 is the declared non-compliance — **partly closed 2026-08-25** by build-plan A1-A4; the twelve unbuilt obligations and A5 remain |
 | [`11-ratification-v1.1.md`](audit/11-ratification-v1.1.md) | **RATIFIED.** Both sides signed v1.1. The last document on the boundary until an amendment or a release |
 
 ---

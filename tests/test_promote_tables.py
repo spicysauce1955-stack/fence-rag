@@ -2,9 +2,12 @@
 import json
 import unittest
 
-from context import requires_store
+import shutil
+
+from context import requires_store, store_snapshot
 from fence_evidence.promote_tables import (_inches, _match, KEY_COLUMNS,
                                            VALUE_COLUMNS, hvhz_for_exposure)
+from fence_evidence.table_review import PROMOTABLE
 from fence_evidence.store import connect
 
 
@@ -70,6 +73,32 @@ class TestPromotedFacts(unittest.TestCase):
             self.assertTrue(cond.get("exposure_category") or cond.get("fence_height"),
                             "promoted without the key column that scopes it")
 
+    def test_no_fact_was_promoted_without_a_person(self):
+        """Obligation 6: nothing reaches level 2 that no person compared to the crop.
+
+        Machine agreement ranks the review queue; it never clears it. A fact
+        naming a candidate that carries a machine-only status is the defect A1
+        closed, and this is the assertion that keeps it closed.
+
+        Note the direction: the join starts at `facts`, because that is the side
+        holding the pointer -- see tests/test_pointer_direction.py.
+        """
+        machine = self.conn.execute(f"""
+            SELECT c.review_status, COUNT(*) n
+              FROM facts f
+              JOIN table_read_candidates c ON c.candidate_id = f.from_candidate_id
+             WHERE c.review_status NOT IN ({','.join('?' * len(PROMOTABLE))})
+             GROUP BY 1""", PROMOTABLE).fetchall()
+        self.assertEqual([tuple(r) for r in machine], [],
+                         "a reading became a fact with no person in the loop")
+
+    def test_no_fact_carries_a_machine_only_review_status(self):
+        orphans = self.conn.execute(
+            "SELECT COUNT(*) FROM facts WHERE review_status IN "
+            "('cross_family_verified', 'agent_verified')").fetchone()[0]
+        self.assertEqual(orphans, 0,
+                         "a fact is labelled with a status no person conferred")
+
     def test_unresolved_applicability_is_stated_not_omitted(self):
         if not self.rows:
             self.skipTest("no table readings promoted yet")
@@ -87,7 +116,7 @@ class TestPromotedFacts(unittest.TestCase):
         if not self.rows:
             self.skipTest("no table readings promoted yet")
         linked = self.conn.execute(
-            "SELECT COUNT(*) FROM table_read_candidates WHERE promoted_fact_id IS NOT NULL"
+            "SELECT COUNT(*) FROM table_read_candidates WHERE from_candidate_id IS NOT NULL"
         ).fetchone()[0]
         self.assertEqual(linked, len(self.rows))
 
@@ -104,6 +133,57 @@ class TestPromotedFacts(unittest.TestCase):
             self.assertNotEqual(app, "HVHZ and non-HVHZ",
                                 "the Exposure B 24-inch row was promoted as HVHZ-applicable, "
                                 "which is the error the curated dataset made")
+
+
+@requires_store
+class TestRevokeMachinePromotions(unittest.TestCase):
+    """A1: un-promote what the old gate let through, without losing the reading."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.snapshot = store_snapshot()
+        cls.conn = connect(cls.snapshot)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.conn.close()
+        shutil.rmtree(cls.snapshot.parent, ignore_errors=True)
+
+    def test_revokes_facts_but_keeps_the_readings(self):
+        from fence_evidence.promote_tables import revoke_machine_promotions
+        before = self.conn.execute(
+            "SELECT COUNT(*) FROM table_read_candidates").fetchone()[0]
+        crops = self.conn.execute(
+            "SELECT COUNT(*) FROM table_read_candidates WHERE crop_sha256 IS NOT NULL"
+        ).fetchone()[0]
+
+        out = revoke_machine_promotions(self.conn)
+
+        self.assertEqual(out["facts_deleted"], out["candidates_reset"])
+        self.assertEqual(
+            self.conn.execute("SELECT COUNT(*) FROM table_read_candidates").fetchone()[0],
+            before, "revocation destroyed readings; it must only un-promote them")
+        self.assertEqual(
+            self.conn.execute("SELECT COUNT(*) FROM table_read_candidates "
+                              "WHERE crop_sha256 IS NOT NULL").fetchone()[0],
+            crops, "revocation dropped the crop evidence the review queue needs")
+        left = self.conn.execute(
+            "SELECT COUNT(*) FROM facts f "
+            "JOIN table_read_candidates c ON c.candidate_id = f.from_candidate_id "
+            "WHERE c.review_status NOT IN ('accepted','corrected')").fetchone()[0]
+        self.assertEqual(left, 0)
+
+    def test_is_idempotent(self):
+        from fence_evidence.promote_tables import revoke_machine_promotions
+        revoke_machine_promotions(self.conn)
+        again = revoke_machine_promotions(self.conn)
+        self.assertEqual(again["facts_deleted"], 0)
+
+    def test_dry_run_changes_nothing(self):
+        from fence_evidence.promote_tables import revoke_machine_promotions
+        n = self.conn.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+        revoke_machine_promotions(self.conn, dry_run=True)
+        self.assertEqual(self.conn.execute("SELECT COUNT(*) FROM facts").fetchone()[0], n)
 
 
 if __name__ == "__main__":

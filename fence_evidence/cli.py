@@ -104,8 +104,30 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--reader")
 
     p = sub.add_parser("promote-tables",
-                       help="turn cross-family-verified table readings into conditioned facts")
+                       help="turn human-reviewed table readings into conditioned facts")
     p.add_argument("--apply", action="store_true", help="write them (default is a dry run)")
+    p.add_argument("--revoke", action="store_true",
+                   help="un-promote facts no person reviewed (build-plan A1); "
+                        "keeps every reading and its crop")
+
+    p = sub.add_parser("snapshot",
+                       help="build, store and inspect published snapshots")
+    p.add_argument("--build", action="store_true", help="build one and store it")
+    p.add_argument("--tenant", default="default")
+    p.add_argument("--regime", default="us_astm", choices=["us_astm", "cn_gb"])
+    p.add_argument("--list", action="store_true", help="what is held")
+    p.add_argument("--get", metavar="ID", help="fetch one by hash")
+    p.add_argument("--dry-run", action="store_true",
+                   help="build and report without storing")
+
+    p = sub.add_parser("dataset",
+                       help="baseline and verify the hand-researched dataset")
+    p.add_argument("--write", action="store_true", help="write the SHA-256 baseline")
+    p.add_argument("--verify", action="store_true", help="check the tree against it")
+
+    sub.add_parser("migrate",
+                   help="bring an existing store up to the current schema: add any "
+                        "missing columns and backfill what they need")
 
     sub.add_parser("worklist",
                    help="split unresolved material into machine / review / human piles")
@@ -239,8 +261,55 @@ def main(argv: list[str] | None = None) -> int:
         conn.close()
         _print(out)
     elif args.cmd == "promote-tables":
-        from .promote_tables import promote_verified
-        _print(promote_verified(dry_run=not args.apply))
+        if args.revoke:
+            from .promote_tables import revoke_machine_promotions
+            _print(revoke_machine_promotions(dry_run=not args.apply))
+        else:
+            from .promote_tables import promote_verified
+            _print(promote_verified(dry_run=not args.apply))
+    elif args.cmd == "snapshot":
+        from .snapshot import build_snapshot
+        from .snapshot_store import get_snapshot, list_snapshots, put_snapshot
+        if args.get:
+            _print(get_snapshot(args.get))
+        elif args.list:
+            _print(list_snapshots())
+        elif args.build or args.dry_run:
+            snap = build_snapshot(tenant=args.tenant, regime=args.regime)
+            summary = {"snapshot_id": snap["snapshot_id"],
+                       "tenant": snap["tenant"], "regime": snap["regime"],
+                       "retain_until": snap["retain_until"],
+                       "source_docs": len(snap["source_docs"]),
+                       "warnings": len(snap["warnings"]),
+                       "gaps": len(snap["gaps"]),
+                       "stored": False}
+            if args.build:
+                put_snapshot(snap)
+                summary["stored"] = True
+            _print(summary)
+        else:
+            _print({"error": "choose one of --build, --dry-run, --list, --get"})
+    elif args.cmd == "dataset":
+        from .dataset import DatasetChanged, verify_dataset, write_digests
+        if args.write:
+            _print({"baseline": str(write_digests())})
+        else:
+            try:
+                _print(verify_dataset())
+            except DatasetChanged as exc:
+                print(str(exc))
+                return 1
+    elif args.cmd == "migrate":
+        from .store import (backfill_lang, connect as _c, migrate as _m,
+                            retire_columns, SCHEMA_VERSION)
+        conn = _c()
+        try:
+            added = _m(conn)
+            _print({"schema_version": SCHEMA_VERSION, "columns_added": added,
+                    "columns_retired": retire_columns(conn),
+                    "lang": backfill_lang(conn)})
+        finally:
+            conn.close()
     elif args.cmd == "worklist":
         from .worklist import build
         _print(build())

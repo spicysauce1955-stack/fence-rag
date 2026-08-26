@@ -69,13 +69,20 @@ class TestPromotionGate(unittest.TestCase):
             promote(self.conn, self.ids["agent_verified"], fact_type="footing_depth_in")
         self.assertIn("correlated", str(ctx.exception))
 
-    def test_cross_family_agreement_promotes(self):
-        fact_id = promote(self.conn, self.ids["cross_family_verified"],
-                          fact_type="footing_depth_in")
+    def test_cross_family_agreement_alone_is_refused(self):
+        """Two agents agreeing is evidence, not review. Only a person promotes."""
+        with self.assertRaises(ReviewRequired) as ctx:
+            promote(self.conn, self.ids["cross_family_verified"],
+                    fact_type="footing_depth_in")
+        self.assertIn("person", str(ctx.exception))
+
+    def test_human_review_promotes(self):
+        fact_id = promote(self.conn, self.ids["accepted"],
+                          fact_type="footing_depth_in", reviewer="a-person")
         fact = self.conn.execute("SELECT * FROM facts WHERE fact_id=?",
                                  (fact_id,)).fetchone()
-        self.assertEqual(fact["review_status"], "cross_family_verified")
-        self.assertIn("cross_family_verified", fact["extractor"])
+        self.assertEqual(fact["review_status"], "reviewed")
+        self.assertIn("accepted", fact["extractor"])
 
     def test_cross_family_marking_needs_two_families(self):
         out = mark_cross_family_verified(self.conn, ["calibration-A", "calibration-B"])
@@ -100,10 +107,14 @@ class TestPromotionGate(unittest.TestCase):
         self.assertTrue(fact["element_id"])
         self.assertTrue(fact["evidence_text"])
         self.assertIn("table-review", fact["extractor"])
-        link = self.conn.execute("SELECT promoted_fact_id, reviewer FROM "
+        link = self.conn.execute("SELECT reviewer FROM "
                                  "table_read_candidates WHERE candidate_id=?",
                                  (self.ids["accepted"],)).fetchone()
-        self.assertEqual(link["promoted_fact_id"], fact_id)
+        # The link lives on the fact and points down -- the candidate records
+        # only that a person handled it. See tests/test_pointer_direction.py.
+        back = self.conn.execute("SELECT from_candidate_id FROM facts WHERE fact_id=?",
+                                 (fact_id,)).fetchone()
+        self.assertIsNotNone(back["from_candidate_id"])
         self.assertEqual(link["reviewer"], "test")
 
     def test_a_candidate_without_its_crop_cannot_be_promoted(self):
@@ -125,9 +136,11 @@ class TestPromotionGate(unittest.TestCase):
         with self.assertRaises(ReviewRequired):
             promote(self.conn, 10**9, fact_type="footing_depth_in")
 
-    def test_promotable_statuses_exclude_same_family_agreement(self):
+    def test_only_human_review_is_promotable(self):
+        """No machine-only status promotes. Agreement is evidence for a reviewer."""
         self.assertNotIn("agent_verified", PROMOTABLE)
-        self.assertIn("cross_family_verified", PROMOTABLE)
+        self.assertNotIn("cross_family_verified", PROMOTABLE)
+        self.assertEqual(set(PROMOTABLE), {"accepted", "corrected"})
 
 
 if __name__ == "__main__":

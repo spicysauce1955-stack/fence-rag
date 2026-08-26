@@ -16,9 +16,10 @@ from typing import Iterable
 
 from .ids import element_id_for, page_id_for, version_id_for
 from .model import ExtractedDocument
+from .lang import detect_lang
 from .paths import EVIDENCE_DB, ensure_writable
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 3
 
 SCHEMA = """
 PRAGMA journal_mode=WAL;
@@ -101,6 +102,13 @@ CREATE TABLE IF NOT EXISTS elements (
     caption         TEXT,
     bbox            TEXT,                         -- JSON [x0,y0,x1,y1]
     region_image_path TEXT,
+    -- BCP-47 tag and how we know it. Obligation 10 requires `lang` and forbids
+    -- normalising it; `lang_basis` keeps the assumption visible rather than
+    -- letting `en` look like a measurement. Never derive lang from
+    -- corpus_track: that axis is a standards regime (GB vs ASTM), not a
+    -- language, and every China-track element measured here is English.
+    lang            TEXT,
+    lang_basis      TEXT,
     extra           TEXT NOT NULL DEFAULT '{}'
 );
 CREATE INDEX IF NOT EXISTS ix_elements_page ON elements(page_id, ordinal);
@@ -218,7 +226,6 @@ CREATE TABLE IF NOT EXISTS table_read_candidates (
     reviewed_value  TEXT,
     reviewer        TEXT,
     reviewed_at     TEXT,
-    promoted_fact_id INTEGER,
     created_at      TEXT NOT NULL,
     UNIQUE(document_id, page_no, reader, row_index, col_index)
 );
@@ -239,6 +246,24 @@ CREATE TABLE IF NOT EXISTS facts (
     unit_original   TEXT,
     unit_normalized TEXT,
     conditions      TEXT NOT NULL DEFAULT '{}',
+    -- Obligation 15: a row states whether its conditions came from the source.
+    --   stated     : the document gave them -- including giving none, which
+    --                makes the row an explicit fallback
+    --   assumed    : we inferred them, and a person could disagree
+    --   unexamined : nobody looked. The regex matched a number and never asked
+    --                what scoped it. Publishes as `assumed`; kept distinct here
+    --                so the store does not assert an inference it never made.
+    condition_basis TEXT NOT NULL DEFAULT 'unexamined',
+    condition_basis_note TEXT,
+    -- Obligation 4: where a source states two units and they disagree, publish
+    -- both. JSON [{value_original, unit_original, value_normalized,
+    -- unit_normalized}]. The primary pair above stays the primary pair.
+    value_alternates TEXT,
+    -- The reading this fact was promoted from, where it came from one. Points
+    -- DOWN, at the evidence -- never the reverse. `table_read_candidates` used
+    -- to carry `promoted_fact_id` instead, which had to be NULLed by hand on
+    -- every delete and could dangle; a real foreign key cannot.
+    from_candidate_id INTEGER REFERENCES table_read_candidates(candidate_id),
     evidence_text   TEXT NOT NULL,
     extractor       TEXT NOT NULL,
     ocr_derived     INTEGER NOT NULL DEFAULT 0,
@@ -258,6 +283,87 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+# Columns added after a table first shipped. SCHEMA above is authoritative for a
+# NEW store; this list is what an EXISTING one is missing, because `migrate()` is
+# CREATE TABLE IF NOT EXISTS and a table that already exists silently ignores its
+# new columns. Every entry must also appear in SCHEMA, or a fresh store ends up
+# without a column a migrated one has. tests/test_migration.py asserts the two
+# agree on the SET of columns -- not on their ORDER, which genuinely does differ:
+# ALTER appends, so a migrated `facts` carries the new columns at the end while a
+# fresh one has them next to `conditions`. Nothing reads these tables
+# positionally (every SELECT * goes through sqlite3.Row), so the difference is
+# invisible -- but `dict(row)` key order is store-history-dependent, so never
+# byte-compare serialised rows between a migrated and a re-ingested store.
+# Additive only: no drops, no renames, no type changes. Those need a rebuild.
+ADDED_COLUMNS = [
+    # schema_version 2 -- build-plan A2/A3/A4
+    ("elements", "lang", "TEXT"),
+    ("elements", "lang_basis", "TEXT"),
+    ("facts", "condition_basis", "TEXT NOT NULL DEFAULT 'unexamined'"),
+    ("facts", "condition_basis_note", "TEXT"),
+    ("facts", "value_alternates", "TEXT"),
+    # schema_version 3 -- pointer direction: a fact names its reading, not the
+    # reverse. The REFERENCES clause is carried here too, so a migrated store
+    # gets the same declared foreign key as a fresh one rather than a soft link
+    # (SQLite accepts it on ADD COLUMN as long as the default is NULL).
+    ("facts", "from_candidate_id",
+     "INTEGER REFERENCES table_read_candidates(candidate_id)"),
+]
+
+# Columns that have been retired. Dropping is destructive and these tables are
+# not all rebuildable, so `retire_columns` refuses to drop a column that still
+# holds data -- it reports instead, and a human decides. Symmetric with
+# ADDED_COLUMNS so the two directions are declared in one place.
+RETIRED_COLUMNS = [
+    ("table_read_candidates", "promoted_fact_id",
+     "pointed UP at a derived row; superseded by facts.from_candidate_id"),
+]
+
+
+def ensure_columns(conn: sqlite3.Connection, spec=None) -> list[str]:
+    """Add any column in `spec` that its table does not already have.
+
+    Returns the `table.column` names actually added, so a caller can report the
+    migration rather than perform it silently. A table that does not exist is
+    skipped rather than fatal: a store predating it has nothing to migrate.
+    """
+    spec = ADDED_COLUMNS if spec is None else spec
+    added = []
+    for table, column, ddl in spec:
+        info = conn.execute(f"PRAGMA table_info({table})").fetchall()
+        if not info:
+            continue
+        if column in {r[1] for r in info}:
+            continue
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}")
+        added.append(f"{table}.{column}")
+    if added:
+        conn.commit()
+    return added
+
+
+def backfill_lang(conn: sqlite3.Connection, *, dry_run: bool = False) -> dict:
+    """Tag elements that predate the `lang` column.
+
+    Re-ingesting 144 PDFs to fill a nullable text column would be absurd, and
+    `elements` is canonical -- it cannot be dropped and rebuilt the way `facts`
+    can. So the tag is computed from text already in the store.
+    """
+    rows = conn.execute("""SELECT element_id, text, ocr_text FROM elements
+                            WHERE lang IS NULL""").fetchall()
+    counts: dict[str, int] = {}
+    for r in rows:
+        lang, basis = detect_lang(r["text"] or r["ocr_text"])
+        counts[f"{lang}/{basis}"] = counts.get(f"{lang}/{basis}", 0) + 1
+        if not dry_run:
+            conn.execute("UPDATE elements SET lang=?, lang_basis=? WHERE element_id=?",
+                         (lang, basis, r["element_id"]))
+    if not dry_run:
+        conn.commit()
+    return {"tagged": 0 if dry_run else len(rows), "would_tag": len(rows) if dry_run else 0,
+            "by_result": counts}
+
+
 def connect(db_path: Path | None = None, *, read_only: bool = False) -> sqlite3.Connection:
     path = Path(db_path or EVIDENCE_DB)
     if not read_only:
@@ -266,14 +372,50 @@ def connect(db_path: Path | None = None, *, read_only: bool = False) -> sqlite3.
     conn = sqlite3.connect(str(path))
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys=ON")
+    if not read_only:
+        # An additive migration a writer cannot skip. Only `ingest` used to call
+        # migrate(), so a store built before a column was added met it as
+        # `no such column` in whatever command ran next -- and the fix looked
+        # like a 33-minute re-ingest that was not actually needed. Five PRAGMA
+        # reads and, on an up-to-date store, no writes at all.
+        ensure_columns(conn)
     return conn
 
 
-def migrate(conn: sqlite3.Connection) -> None:
+def retire_columns(conn: sqlite3.Connection, spec=None) -> dict:
+    """Drop retired columns, but only where they hold nothing.
+
+    A drop cannot be undone by re-running anything -- `table_read_candidates` is
+    not regenerable -- so a column with data in it is reported and left alone
+    rather than quietly destroyed.
+    """
+    spec = RETIRED_COLUMNS if spec is None else spec
+    dropped, kept = [], {}
+    for table, column, why in spec:
+        info = conn.execute(f"PRAGMA table_info({table})").fetchall()
+        if not info or column not in {r[1] for r in info}:
+            continue
+        n = conn.execute(
+            f"SELECT COUNT(*) FROM {table} WHERE {column} IS NOT NULL").fetchone()[0]
+        if n:
+            kept[f"{table}.{column}"] = (
+                f"{n} rows still carry a value; refusing to drop ({why})")
+            continue
+        conn.execute(f"ALTER TABLE {table} DROP COLUMN {column}")
+        dropped.append(f"{table}.{column}")
+    if dropped:
+        conn.commit()
+    return {"dropped": dropped, "refused": kept}
+
+
+def migrate(conn: sqlite3.Connection) -> list[str]:
     conn.executescript(SCHEMA)
+    added = ensure_columns(conn)
+    retire_columns(conn)
     conn.execute("INSERT OR REPLACE INTO schema_meta(key, value) VALUES ('schema_version', ?)",
                  (str(SCHEMA_VERSION),))
     conn.commit()
+    return added
 
 
 def tool_fingerprint(tool_versions: dict) -> str:
@@ -415,15 +557,18 @@ def write_extracted(conn: sqlite3.Connection, extracted: ExtractedDocument,
                        "page_image", page.page_image_path)
         for el in page.elements:
             element_id = element_id_for(page_id, el.ordinal)
+            el_lang, el_lang_basis = detect_lang(el.text or el.ocr_text)
             conn.execute("""INSERT INTO elements(element_id, page_id, version_id, document_id,
                 page_no, ordinal, element_type, text, ocr_text, text_source, ocr_confidence,
-                heading_level, heading_path, caption, bbox, region_image_path, extra)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                heading_level, heading_path, caption, bbox, region_image_path,
+                lang, lang_basis, extra)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                          (element_id, page_id, version_id, doc_id, page.page_no, el.ordinal,
                           el.element_type, el.text or "", el.ocr_text, el.text_source,
                           el.ocr_confidence, el.heading_level, json.dumps(el.heading_path),
                           el.caption, json.dumps(el.bbox) if el.bbox else None,
-                          el.region_image_path, json.dumps(el.extra)))
+                          el.region_image_path, el_lang, el_lang_basis,
+                          json.dumps(el.extra)))
             if el.region_image_path:
                 _asset_row(conn, doc_id, version_id, page.page_no, element_id,
                            "region_image", el.region_image_path)

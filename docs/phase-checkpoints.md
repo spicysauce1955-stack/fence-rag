@@ -282,10 +282,10 @@ a metric pass would destroy its value. It costs roughly 0.02 of unit support.
 ## Phase 6 — Structured technical facts
 
 **Implemented.** `facts.py`: a documented regex extractor (`extractor='regex-v1'`)
-over canonical elements, producing 1,664 facts with mandatory provenance —
+over canonical elements, producing 1,652 facts with mandatory provenance —
 document, version, page, element, evidence text — the original wording, the
 normalised value beside it, the conditions it holds under, and a review status.
-271 are `flagged` rather than `extracted` because they were read from OCR text on
+266 are `flagged` rather than `extracted` because they were read from OCR text on
 a page below 80% mean word confidence.
 
 | Fact type | Count |
@@ -440,6 +440,131 @@ text and the PE licence number `52609`, neither of which the 300 dpi pass found.
 ---
 
 ## Post-MVP work
+
+### Phase A — closing the declared non-compliance (A1–A5, complete)
+
+**Implemented.** The five items `docs/build-plan.md` Phase A names, each of which
+was a promise made in writing at ratification (`audit/10` §3.2, carried into the
+signed `audit/11`).
+
+- **A1** — `table_review.PROMOTABLE` is `("accepted", "corrected")`.
+  `promote_tables.revoke_machine_promotions()` un-promoted the 324 facts written
+  on machine agreement alone. It un-promotes rather than deletes: all 1,225
+  readings keep their crop and `crop_sha256`, because cross-family agreement is
+  the right thing to *order* a review queue by and never the thing that clears
+  it. A1 was a **restoration** — `store.py`'s own schema comment had always said
+  promotion "refuses any status other than `accepted` or `corrected`"; the code
+  had drifted from it.
+- **A2** — `facts.condition_basis` + `condition_basis_note`. Three values, not
+  the contract's two: `unexamined` is internal and publishes as `assumed`,
+  because 1,535 regex facts have no conditions since *the extractor never looked*,
+  and calling that `assumed` claims an inference nobody performed. **Both writers
+  were fixed, not only the rows** — `promote_verified()` and `promote()` would
+  have written `_applicability_basis` straight back into `conditions` the moment
+  review began promoting.
+- **A3** — `facts.value_alternates`. The declared gap (the schema could not
+  represent a disagreeing second unit) is closed. **Coverage is 0%**, and that is
+  recorded rather than smoothed: see G34.
+- **A4** — `elements.lang` + `lang_basis`, all 81,794 tagged.
+- **A5** — `stock_length_in`, 54 facts. The case obligation 14 names is in the
+  store: 192 in for White, 144 in for Blend.
+
+Also landed: `store.ensure_columns()` / `retire_columns()` (`SCHEMA_VERSION` 3),
+because `migrate()` was `CREATE TABLE IF NOT EXISTS` and a new column on an
+existing store was a silent no-op — and only `ingest` called it, so anyone
+running `cli facts --extract` met `no such column` and an apparent fix of a
+33-minute re-ingest they did not need. Retirement **refuses to drop a column that
+still holds data**.
+
+**Tested.** 419 tests, 5 skipped. The ones that matter are invariants asserted
+against the live store rather than against a fixture:
+`test_no_fact_was_promoted_without_a_person`,
+`test_language_is_not_derived_from_corpus_track`,
+`test_no_underscore_key_survives_in_conditions`,
+`test_only_human_review_is_promotable`, and
+`tests/test_pointer_direction.py`, which pins the layering rule in §Layering.
+
+**Findings that changed the work.**
+
+- **`corpus_track` is not a language axis.** The obvious A4 implementation —
+  `us→en`, `china→zh` — would have been wrong on every row it touched. There are
+  **zero CJK-bearing elements corpus-wide**; the China-track documents are
+  English-language export catalogues. Tesseract here has only `eng` installed.
+- **And then `en` was wrong too.** A survey found 1,308 elements — 26
+  `AVERTISSEMENT`, 25 `ADVERTENCIA`, and the French and Spanish halves of the
+  Barrette bilingual guides — tagged English by a detector that accepted any
+  Latin script. Obligation 10 exempts source warnings from translation *on the
+  strength of the lang tag*, so a wrong tag defeats the mechanism the exemption
+  relies on. Now en 58,033 / und 22,453 / es 674 / fr 634.
+- **A1 changed A2's premise.** The 324 facts carrying `_applicability_basis` were
+  the machine-promoted ones, so the store holds 0. The defect was latent, not
+  gone — hence fixing the writer.
+- **Obligation 4's disagreement clause is at 0% coverage, not 3/48.** All three
+  `value_alternates` are the same *agreeing* statement (`24 in. (609.6 mm)`).
+  64 real disagreeing statements exist across 15 unique-content documents and
+  **none is reachable**: every one is about product geometry — fence height, mesh
+  opening, member section — while the extractor covers footing, spacing, wind and
+  approval metadata. Closing it is a fact-type expansion, not a parsing fix.
+- **A naive `stock_length` pattern measures at 18.6% precision** — 127 of 156
+  matches wrong, dominated by 89 hits of `8' Picket`, a gate width followed by
+  the field name "Picket Style". "stock length" and "standard length" have zero
+  hits corpus-wide; the dominant seam is SKU dimension triples, not prose.
+
+**Not done, deliberately.** Obligation 4's disagreement clause needs new fact
+types (G34). Nothing was published at curation level 2, and cannot be: `reviewer`
+is NULL on all 1,225 readings and there is **no interface for a person to accept
+or correct one** — the review loop is a hole in the middle, not a missing tail.
+
+### K3 — the cold crop cost, measured
+
+**Implemented.** `fence_evidence/crops.py`, the normative §4.1 transform for
+`GET /source-refs/{id}`: poppler windowing, dpi from the page and never
+hardcoded, top-left origin with no rotation flip, 4 px pad, clamped, failure that
+raises. **Unwired on purpose** — only `tests/test_crops.py` and
+`scripts/measure_crop_cost.py` call it, because the endpoint it backs is Phase B.
+
+**Measured**, 400 elements sampled (`workspace/reports/k3-crop-render-cost.md`):
+p50 **24.8 ms**, p90 139 ms, p95 308 ms, p99 5,562 ms, max 7,541 ms. 3.2% exceed
+one second.
+
+**Findings.** Windowing is a real optimisation, not cosmetic — 27.9 ms against
+394 ms for a full page render of the same page, about a tenth. The distribution
+is **bimodal**: the slowest 8 of 400 were one file, the 20 MB Showtech China
+catalogue. And the review queue is far cheaper than the corpus p99 suggests — its
+504 readings sit on **ten distinct pages** at 164 ms each, because table readings
+cluster onto table pages.
+
+**Decided.** Render on demand as designed; cache by **page**, not by element; no
+pre-render pass. Pre-cutting all 73,894 uncropped elements would cost ~5 hours
+single-threaded to remove a 25 ms median that a page cache removes anyway.
+
+### The first published snapshot
+
+**Implemented.** `canonical.py` (deterministic bytes — sorted keys at every
+depth, floats and sets refused, whitespace minimal, unicode *not* escaped),
+`snapshot.py` (the builder and the `verify()` gate), `snapshot_store.py`
+(write-once, tombstone rather than delete). `cli snapshot --build|--list|--get`.
+
+**Built**: 62 `source_docs`, 282 `warnings`, 63 `gaps`, 68 KB, committed to
+`workspace/snapshots/`. Deliberately thin — `parts`, `models` and `parameters`
+need entities the store does not hold, and a snapshot containing very little is
+still a valid snapshot by design.
+
+**Two properties carry it.** *Closure is structural*: `source_ref()` registers the
+`SourceDoc` as a side effect of minting the `SourceRef`, so a dangling
+`belongs_to` cannot be constructed. *Ids are functions of content*:
+`sha256(content_hash:page:bbox)[:16]`, because a counter or a uuid would mean two
+builds over identical knowledge produced different bytes.
+
+`retain_until` is deliberately **outside** the hashed members — it moves with the
+clock, and hashing it would mean two builds over identical knowledge never
+matched. What exactly belongs in "the canonical member list" is not fully
+specified; that is a reading, not a quote.
+
+**Not done.** `verify()` establishes structural validity only. Every check in it
+passes on a snapshot that attributes the wrong footing depth to the wrong post,
+because the builder faithfully publishes what it was given. **Structural validity
+is testable; semantic correspondence is reviewable.**
 
 ### Relevance audit of the retrieval projection
 

@@ -105,7 +105,7 @@ class TestReextractionPreservesPromotedFacts(unittest.TestCase):
     Facts promoted from verified table readings (extractor starting
     'table-read:') are gated by a human/agent review process this module
     knows nothing about, and promote_tables.py can never re-create one once
-    its source candidate's promoted_fact_id is set -- so a full re-extraction
+    the fact names its source candidate -- so a full re-extraction
     that deletes every fact row would destroy them permanently.
 
     Each test gets its own snapshot (rather than a shared class-level one):
@@ -122,29 +122,19 @@ class TestReextractionPreservesPromotedFacts(unittest.TestCase):
         import shutil
         shutil.rmtree(self.snapshot.parent, ignore_errors=True)
 
-    def test_promoted_facts_survive_a_full_reextraction(self):
-        before = self.conn.execute(
-            "SELECT COUNT(*) FROM facts WHERE extractor LIKE 'table-read:%'").fetchone()[0]
-        if before == 0:
-            self.skipTest("no table readings promoted yet")
-        extract_facts(conn=self.conn)
-        after = self.conn.execute(
-            "SELECT COUNT(*) FROM facts WHERE extractor LIKE 'table-read:%'").fetchone()[0]
-        self.assertEqual(before, after,
-                         "a full re-extraction deleted table-promoted facts")
+    def test_a_promoted_fact_names_its_reading(self):
+        """The inverse of the old dangling-id test.
 
-    def test_no_dangling_promoted_fact_id_after_reextraction(self):
-        n_candidates = self.conn.execute(
-            "SELECT COUNT(*) FROM table_read_candidates "
-            "WHERE promoted_fact_id IS NOT NULL").fetchone()[0]
-        if n_candidates == 0:
-            self.skipTest("no promoted table candidates yet")
-        extract_facts(conn=self.conn)
-        dangling = self.conn.execute("""SELECT COUNT(*) FROM table_read_candidates t
-            LEFT JOIN facts f ON f.fact_id = t.promoted_fact_id
-            WHERE t.promoted_fact_id IS NOT NULL AND f.fact_id IS NULL""").fetchone()[0]
-        self.assertEqual(dangling, 0,
-                         "re-extraction left promoted_fact_id pointing at a deleted fact")
+        `facts.from_candidate_id` points DOWN at the evidence, and is a declared
+        foreign key, so a fact cannot name a reading that is not there. The test
+        this replaces asserted no dangling `promoted_fact_id` survived a
+        re-extraction -- a bug the schema now makes unrepresentable.
+        """
+        bad = self.conn.execute("""SELECT COUNT(*) FROM facts f
+             LEFT JOIN table_read_candidates c ON c.candidate_id = f.from_candidate_id
+            WHERE f.from_candidate_id IS NOT NULL AND c.candidate_id IS NULL
+        """).fetchone()[0]
+        self.assertEqual(bad, 0, "a fact names a reading that does not exist")
 
     def test_regex_facts_are_still_regenerated(self):
         before = self.conn.execute(
