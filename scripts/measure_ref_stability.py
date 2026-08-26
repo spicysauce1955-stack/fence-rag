@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Reproduce the four measurements docs/four-layer-model-design.md §5.1 rests on.
+"""Reproduce the measurements docs/four-layer-model-design.md §5.1 rests on:
+four numbered sections, printing six figures between them (§3 and §4 each
+print a second line beyond their headline number).
 
 Read-only. Run from the repository root:
 
@@ -8,7 +10,6 @@ Read-only. Run from the repository root:
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 import sqlite3
 import sys
@@ -37,7 +38,7 @@ def main() -> int:
                COALESCE(NULLIF(e.text, ''), NULLIF(e.ocr_text, '')) AS body,
                v.sha256
           FROM elements e
-          JOIN document_versions v ON v.document_id = e.document_id""")]
+          JOIN document_versions v ON v.version_id = e.version_id""")]
 
     # 1 -- hash sensitivity: a 0.02pt shift changes the id completely.
     sha = "00c965f58d3030b7e7c8a6c8c0b7e99f1579c5599dc476c8f6a62dd88c6cdd58"

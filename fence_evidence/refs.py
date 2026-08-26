@@ -30,6 +30,10 @@ What this module does NOT yet do, deliberately -- see
   ref. `build_index` reports that rather than hiding it.
 * The id is not injective over elements: 9,929 ids cover more than one element.
   `Locus.element_ids` therefore carries **all** of them and no rule picks one.
+  (`cli refs --index` reports 9,930: `scripts/measure_ref_stability.py`'s
+  count excludes the 416 bbox-less elements that collide with their page ref;
+  `build_index` does not filter that group out. Both figures are correct for
+  what they count -- they are not a discrepancy to chase.)
 """
 from __future__ import annotations
 
@@ -80,10 +84,15 @@ def build_index(conn: sqlite3.Connection) -> dict[str, Locus]:
     elements: dict[str, list[str]] = {}
     loci: dict[str, tuple[str, int, str | None]] = {}
 
+    # Join on version_id, not document_id: an element belongs to exactly one
+    # version, and joining by document fans out once a document has two --
+    # store.py's UNIQUE(document_id, sha256) allows that and never deletes
+    # the old version row, so a document-id join would cross-product every
+    # element against both hashes.
     for row in conn.execute("""
             SELECT e.element_id, e.page_no, e.bbox, v.sha256
               FROM elements e
-              JOIN document_versions v ON v.document_id = e.document_id"""):
+              JOIN document_versions v ON v.version_id = e.version_id"""):
         rid = ref_id(row["sha256"], row["page_no"], row["bbox"])
         elements.setdefault(rid, []).append(row["element_id"])
         loci[rid] = (row["sha256"], row["page_no"], row["bbox"])
