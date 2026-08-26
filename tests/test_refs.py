@@ -70,12 +70,33 @@ class TestIndex(unittest.TestCase):
         self.assertGreater(len(self.index), 60_000)
 
     def test_no_two_different_loci_share_an_id(self):
-        """A true hash collision would make a citation ambiguous across documents."""
+        """A true hash collision would make a citation ambiguous across documents.
+
+        `build_index` keys its dict by `rid`, and `rid` is a pure function of
+        `(sha, page, bbox)` -- so checking `len(triples) == len(self.index)`
+        against the *built* index can never fail: it collapses two colliding
+        triples into one entry and then compares against itself. This instead
+        builds an id -> set-of-triples map directly from the element rows
+        (mirroring `scripts/measure_ref_stability.py` item 2) and asserts no
+        id maps to more than one distinct triple -- the thing this test claims
+        to guard.
+        """
         for rid, locus in self.index.items():
             self.assertIsInstance(locus, Locus)
-        # Distinct (sha, page, bbox) triples must map to distinct ids.
-        triples = {(l.sha256, l.page_no, l.bbox) for l in self.index.values()}
-        self.assertEqual(len(triples), len(self.index))
+
+        seen: dict[str, set] = {}
+        for row in self.conn.execute("""
+                SELECT e.page_no, e.bbox, v.sha256
+                  FROM elements e
+                  JOIN document_versions v ON v.version_id = e.version_id"""):
+            rid = ref_id(row["sha256"], row["page_no"], row["bbox"])
+            seen.setdefault(rid, set()).add(
+                (row["sha256"], row["page_no"], row["bbox"]))
+        colliding = {rid: triples for rid, triples in seen.items()
+                     if len(triples) > 1}
+        self.assertEqual(colliding, {},
+                         "a true hash collision: one id names more than one "
+                         "distinct (sha, page, bbox) triple")
 
     def test_a_known_element_resolves_to_its_rectangle(self):
         rid = ref_id(
@@ -150,7 +171,7 @@ class TestVerifyDetectsRot(unittest.TestCase):
         conn.executescript("""
             CREATE TABLE documents(document_id TEXT);
             CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
-            CREATE TABLE elements(element_id TEXT, document_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, version_id TEXT, page_no INT, bbox TEXT);
             CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
             INSERT INTO document_versions VALUES ('v1', 'd1', 'aa');
         """)
@@ -177,7 +198,7 @@ class TestVerifyDetectsRot(unittest.TestCase):
         conn.row_factory = sqlite3.Row
         conn.executescript("""
             CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
-            CREATE TABLE elements(element_id TEXT, document_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, version_id TEXT, page_no INT, bbox TEXT);
             CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
         """)
         with tempfile.TemporaryDirectory() as tmp:
@@ -210,7 +231,7 @@ class TestVerifyDetectsRot(unittest.TestCase):
         conn.executescript("""
             CREATE TABLE documents(document_id TEXT);
             CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
-            CREATE TABLE elements(element_id TEXT, document_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, version_id TEXT, page_no INT, bbox TEXT);
             CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
             INSERT INTO document_versions VALUES ('v1', 'd1', 'aa');
         """)
@@ -246,7 +267,7 @@ class TestVerifyDetectsRot(unittest.TestCase):
         conn.executescript("""
             CREATE TABLE documents(document_id TEXT);
             CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
-            CREATE TABLE elements(element_id TEXT, document_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, version_id TEXT, page_no INT, bbox TEXT);
             CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
             INSERT INTO document_versions VALUES ('v1', 'd1', 'aa');
         """)
@@ -281,7 +302,7 @@ class TestVerifyDetectsRot(unittest.TestCase):
         conn.executescript("""
             CREATE TABLE documents(document_id TEXT);
             CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
-            CREATE TABLE elements(element_id TEXT, document_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, version_id TEXT, page_no INT, bbox TEXT);
             CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
             INSERT INTO document_versions VALUES ('v1', 'd1', 'aa');
         """)
@@ -316,7 +337,7 @@ class TestVerifyDetectsRot(unittest.TestCase):
         conn.executescript("""
             CREATE TABLE documents(document_id TEXT);
             CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
-            CREATE TABLE elements(element_id TEXT, document_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, version_id TEXT, page_no INT, bbox TEXT);
             CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
         """)
         with tempfile.TemporaryDirectory() as tmp:
