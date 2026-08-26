@@ -100,5 +100,98 @@ class TestIndex(unittest.TestCase):
         self.assertGreater(len(pages), 1_000)
 
 
+from fence_evidence.refs import verify_snapshots
+
+
+@requires_full_store
+class TestVerify(unittest.TestCase):
+    """Every published citation must still resolve. Obligation 3 in one command."""
+
+    @classmethod
+    def setUpClass(cls):
+        from fence_evidence.store import connect
+        cls.conn = connect(read_only=True)
+        cls.result = verify_snapshots(cls.conn)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.conn.close()
+
+    def test_it_looked_at_something(self):
+        self.assertGreaterEqual(self.result["snapshots"], 1)
+        self.assertGreaterEqual(self.result["cites"], 1)
+
+    def test_every_published_cite_resolves_today(self):
+        self.assertEqual(self.result["dangling"], [],
+                         "a published value cites evidence that no longer "
+                         "resolves; contract obligation 3 is violated and a "
+                         "snapshot is immutable, so this cannot be repaired")
+
+    def test_every_belongs_to_names_a_real_version(self):
+        self.assertEqual(self.result["unknown_versions"], [])
+
+    def test_resolved_and_dangling_account_for_every_cite(self):
+        self.assertEqual(self.result["resolved"] + len(self.result["dangling"]),
+                         self.result["cites"])
+
+
+class TestVerifyDetectsRot(unittest.TestCase):
+    """The guard must actually fire. Proven against a fabricated snapshot in a
+    temporary directory, so no real published artifact is touched."""
+
+    def test_a_dangling_cite_is_reported(self):
+        import json
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript("""
+            CREATE TABLE documents(document_id TEXT);
+            CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
+            INSERT INTO document_versions VALUES ('v1', 'd1', 'aa');
+        """)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "snap1.json").write_text(json.dumps({
+                "snapshot_id": "snap1",
+                "warnings": [{"cites": [{"id": "f" * 16, "belongs_to": "aa"}]}],
+            }))
+            result = verify_snapshots(conn, root=root)
+        self.assertEqual(result["cites"], 1)
+        self.assertEqual(result["resolved"], 0)
+        self.assertEqual(len(result["dangling"]), 1)
+        self.assertEqual(result["dangling"][0]["ref_id"], "f" * 16)
+        conn.close()
+
+    def test_a_tombstoned_snapshot_is_skipped(self):
+        import json
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript("""
+            CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
+        """)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "snap1.json").write_text(json.dumps({
+                "snapshot_id": "snap1", "tombstoned": True,
+                "warnings": [{"cites": [{"id": "f" * 16, "belongs_to": "aa"}]}],
+            }))
+            result = verify_snapshots(conn, root=root)
+        self.assertEqual(result["tombstoned_skipped"], 1)
+        self.assertEqual(result["cites"], 0)
+        self.assertEqual(result["dangling"], [])
+        conn.close()
+
+
 if __name__ == "__main__":
     unittest.main()

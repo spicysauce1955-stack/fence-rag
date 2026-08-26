@@ -111,3 +111,56 @@ def resolve(index: dict[str, Locus], rid: str) -> Locus | None:
     obligation 3.
     """
     return index.get(rid)
+
+
+import json
+from pathlib import Path
+
+
+def verify_snapshots(conn: sqlite3.Connection, *,
+                     root: Path | None = None) -> dict:
+    """Assert every published citation still resolves against this store.
+
+    Contract obligation 3 requires every published value to carry a *resolvable*
+    ``SourceRef``. A snapshot is immutable, so a citation that stops resolving
+    can never be repaired -- which makes silent rot the worst possible failure
+    mode and a loud one the whole point of this function.
+
+    Tombstoned snapshots are skipped: their payload is gone by design, and
+    holding them to a resolvability promise would report a deliberate excision
+    as damage.
+    """
+    from .snapshot_store import SNAPSHOT_DIR
+
+    base = Path(root) if root is not None else SNAPSHOT_DIR
+    index = build_index(conn)
+    known_versions = {r["sha256"] for r in
+                      conn.execute("SELECT sha256 FROM document_versions")}
+
+    out = {"snapshots": 0, "tombstoned_skipped": 0, "cites": 0, "resolved": 0,
+           "dangling": [], "unknown_versions": []}
+    if not base.exists():
+        return out
+
+    for path in sorted(base.glob("*.json")):
+        payload = json.loads(path.read_bytes())
+        if payload.get("tombstoned"):
+            out["tombstoned_skipped"] += 1
+            continue
+        out["snapshots"] += 1
+        sid = payload.get("snapshot_id", path.stem)
+        for warning in payload.get("warnings", []):
+            for cite in warning.get("cites", []):
+                out["cites"] += 1
+                rid, owner = cite.get("id"), cite.get("belongs_to")
+                if resolve(index, rid) is None:
+                    out["dangling"].append(
+                        {"snapshot_id": sid, "ref_id": rid, "belongs_to": owner,
+                         "reason": "no canonical row produces this id; the "
+                                   "evidence it named is not in this store"})
+                else:
+                    out["resolved"] += 1
+                if owner and owner not in known_versions:
+                    out["unknown_versions"].append(
+                        {"snapshot_id": sid, "ref_id": rid, "belongs_to": owner})
+    return out

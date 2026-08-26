@@ -120,6 +120,15 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--dry-run", action="store_true",
                    help="build and report without storing")
 
+    p = sub.add_parser("refs",
+                       help="the evidence identifier: rebuild the index, or "
+                            "verify every published citation still resolves")
+    p.add_argument("--verify", action="store_true",
+                   help="walk every un-tombstoned snapshot; exit non-zero on a "
+                        "citation that no longer resolves")
+    p.add_argument("--index", action="store_true",
+                   help="rebuild the ref index and report its shape")
+
     p = sub.add_parser("dataset",
                        help="baseline and verify the hand-researched dataset")
     p.add_argument("--write", action="store_true", help="write the SHA-256 baseline")
@@ -289,6 +298,29 @@ def main(argv: list[str] | None = None) -> int:
             _print(summary)
         else:
             _print({"error": "choose one of --build, --dry-run, --list, --get"})
+    elif args.cmd == "refs":
+        from .refs import build_index, verify_snapshots
+        from .store import connect
+        conn = connect(read_only=True)
+        try:
+            if args.verify:
+                result = verify_snapshots(conn)
+                _print(result)
+                if result["dangling"] or result["unknown_versions"]:
+                    print(f"FAILED: {len(result['dangling'])} published "
+                          f"citation(s) no longer resolve. A snapshot is "
+                          f"immutable, so this cannot be repaired -- see "
+                          f"docs/four-layer-model-design.md 5.1.",
+                          file=sys.stderr)
+                    return 1
+            else:
+                index = build_index(conn)
+                shared = [l for l in index.values() if len(l.element_ids) > 1]
+                _print({"ref_ids": len(index),
+                        "page_refs": sum(1 for l in index.values() if l.is_page),
+                        "ids_covering_multiple_elements": len(shared)})
+        finally:
+            conn.close()
     elif args.cmd == "dataset":
         from .dataset import DatasetChanged, verify_dataset, write_digests
         if args.write:
