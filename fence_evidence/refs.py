@@ -121,10 +121,32 @@ def verify_snapshots(conn: sqlite3.Connection, *,
                      root: Path | None = None) -> dict:
     """Assert every published citation still resolves against this store.
 
-    Contract obligation 3 requires every published value to carry a *resolvable*
-    ``SourceRef``. A snapshot is immutable, so a citation that stops resolving
-    can never be repaired -- which makes silent rot the worst possible failure
-    mode and a loud one the whole point of this function.
+    Contract obligation 3 requires every published *value* -- not every
+    *warning* -- to carry a *resolvable* ``SourceRef``. A snapshot is
+    immutable, so a citation that stops resolving can never be repaired --
+    which makes silent rot the worst possible failure mode and a loud one the
+    whole point of this function.
+
+    This walks the ENTIRE payload, not just ``warnings[].cites[]``. Today all
+    431 published citations happen to live there, but the snapshot's other
+    top-level keys -- ``combinations, models, parameters, part_types, parts,
+    procedures, rules`` -- are all declared citation-bearing and currently
+    empty. A walk scoped to ``warnings`` would under-count silently the day
+    any of those sections gains a citation, which is exactly the failure class
+    this command exists to eliminate. The walk mirrors ``snapshot.py``'s own
+    ``verify()`` in shape: a recursive ``walk(node, path)`` that accumulates a
+    ``$.foo[3].bar`` path as it descends, one file over.
+
+    A dict is a citation when it sits inside a list bound to the key
+    ``"cites"`` and carries an ``id``. That is a narrower test than "any dict
+    with `id` and `belongs_to`": a well-formed citation is `SourceRef(id,
+    belongs_to)` via `asdict`, but so is a `Gap` -- gaps carry a bare `id` too,
+    and there are 63 of them in the shipped snapshot outside any `cites` list.
+    Gating on shape alone over-counts them. Gating on the `cites` list instead
+    of on `belongs_to` being present also means a *malformed* citation --
+    missing `belongs_to` entirely -- is still recognised as a citation rather
+    than silently skipped; see ``unknown_versions`` below, which is exactly
+    for catching that.
 
     Tombstoned snapshots are skipped: their payload is gone by design, and
     holding them to a resolvability promise would report a deliberate excision
@@ -142,25 +164,38 @@ def verify_snapshots(conn: sqlite3.Connection, *,
     if not base.exists():
         return out
 
-    for path in sorted(base.glob("*.json")):
-        payload = json.loads(path.read_bytes())
-        if payload.get("tombstoned"):
-            out["tombstoned_skipped"] += 1
-            continue
-        out["snapshots"] += 1
-        sid = payload.get("snapshot_id", path.stem)
-        for warning in payload.get("warnings", []):
-            for cite in warning.get("cites", []):
+    def walk(node, sid, path="$", in_cites=False):
+        if isinstance(node, dict):
+            if in_cites and "id" in node:
                 out["cites"] += 1
-                rid, owner = cite.get("id"), cite.get("belongs_to")
+                rid, owner = node.get("id"), node.get("belongs_to")
                 if resolve(index, rid) is None:
                     out["dangling"].append(
                         {"snapshot_id": sid, "ref_id": rid, "belongs_to": owner,
+                         "at": path,
                          "reason": "no canonical row produces this id; the "
                                    "evidence it named is not in this store"})
                 else:
                     out["resolved"] += 1
-                if owner and owner not in known_versions:
+                # An absent or empty `belongs_to` must be visible, not skipped:
+                # `owner and ...` would short-circuit on a falsy owner and the
+                # cite would be reported neither dangling nor unknown -- it
+                # would simply vanish.
+                if not owner or owner not in known_versions:
                     out["unknown_versions"].append(
                         {"snapshot_id": sid, "ref_id": rid, "belongs_to": owner})
+            for k, v in node.items():
+                walk(v, sid, f"{path}.{k}", in_cites=(k == "cites"))
+        elif isinstance(node, list):
+            for i, v in enumerate(node):
+                walk(v, sid, f"{path}[{i}]", in_cites=in_cites)
+
+    for snap_path in sorted(base.glob("*.json")):
+        payload = json.loads(snap_path.read_bytes())
+        if payload.get("tombstoned"):
+            out["tombstoned_skipped"] += 1
+            continue
+        out["snapshots"] += 1
+        sid = payload.get("snapshot_id", snap_path.stem)
+        walk(payload, sid)
     return out

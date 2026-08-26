@@ -192,6 +192,77 @@ class TestVerifyDetectsRot(unittest.TestCase):
         self.assertEqual(result["dangling"], [])
         conn.close()
 
+    def test_a_citation_outside_warnings_is_still_found(self):
+        """Obligation 3 is about every published value, not just warnings.
+        `combinations, models, parameters, part_types, parts, procedures,
+        rules` are all declared citation-bearing top-level sections and are
+        empty today -- but a scoped walk would under-count silently the day
+        one of them gains a citation. This fabricates exactly that: a
+        citation living under `parts[0]["cites"][0]`, nowhere near
+        `warnings`."""
+        import json
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript("""
+            CREATE TABLE documents(document_id TEXT);
+            CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
+            INSERT INTO document_versions VALUES ('v1', 'd1', 'aa');
+        """)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "snap1.json").write_text(json.dumps({
+                "snapshot_id": "snap1",
+                "warnings": [],
+                "parts": [{"name": "post-cap", "cites": [
+                    {"id": "e" * 16, "belongs_to": "aa"}]}],
+            }))
+            result = verify_snapshots(conn, root=root)
+        self.assertEqual(result["cites"], 1)
+        self.assertEqual(result["resolved"], 0)
+        self.assertEqual(len(result["dangling"]), 1)
+        self.assertEqual(result["dangling"][0]["ref_id"], "e" * 16)
+        self.assertEqual(result["dangling"][0]["at"], "$.parts[0].cites[0]")
+        conn.close()
+
+    def test_a_cite_with_no_belongs_to_is_not_invisible(self):
+        """`owner and owner not in known_versions` would short-circuit on a
+        falsy owner, so a cite with no `belongs_to` at all would be reported
+        neither dangling nor unknown -- it would simply vanish. It must land
+        in `unknown_versions` instead, carrying whatever `belongs_to` actually
+        was (here, absent -> None)."""
+        import json
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript("""
+            CREATE TABLE documents(document_id TEXT);
+            CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
+            INSERT INTO document_versions VALUES ('v1', 'd1', 'aa');
+        """)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "snap1.json").write_text(json.dumps({
+                "snapshot_id": "snap1",
+                "warnings": [{"cites": [{"id": "d" * 16}]}],
+            }))
+            result = verify_snapshots(conn, root=root)
+        self.assertEqual(result["cites"], 1)
+        self.assertEqual(len(result["unknown_versions"]), 1)
+        self.assertEqual(result["unknown_versions"][0]["ref_id"], "d" * 16)
+        self.assertIsNone(result["unknown_versions"][0]["belongs_to"])
+        conn.close()
+
 
 if __name__ == "__main__":
     unittest.main()
