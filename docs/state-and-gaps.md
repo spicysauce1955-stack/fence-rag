@@ -617,6 +617,42 @@ retaining an edition while any un-tombstoned snapshot cites it. ~31 MB per
 edition on a 69 MB store. Designed in `docs/four-layer-model-design.md` §5.1;
 plan 2 of `docs/four-layer-plan-1-refs.md`'s sequence.
 
+### G39 — `snapshot --build --dry-run` stores anyway — DETECTED, NOT FIXED
+
+`cli.py`'s snapshot dispatch is:
+
+```python
+elif args.build or args.dry_run:
+    ...
+    if args.build: put_snapshot(snap)
+```
+
+Both flags reach the same branch, and the `if args.build:` guard only decides
+whether to store — it never checks `args.dry_run`. So
+`python3 -m fence_evidence.cli snapshot --build --dry-run` does not merely
+ignore `--dry-run`; it contradicts it: the snapshot is built *and stored*,
+and the printed summary reports `"stored": true`. `--dry-run` alone (without
+`--build`) behaves correctly — it is only the combination that mints a file.
+
+This matters more here than an ordinary CLI footgun would: `workspace/snapshots/`
+is write-once, and `snapshot_store.py` can only tombstone a member, never
+delete one. An operator who reaches for `--dry-run` specifically to preview a
+build without committing it instead adds a permanent row to a store that has
+no way to undo the mistake.
+
+**No published artifact was harmed.** The one committed snapshot,
+`02a8833be1f0da2048b039e4e42a5c81de8fba2b4851d5e12c7662d14d43ceac.json`
+(md5 `67188296dc37d6e11c66d23203320297`), was built with plain `--build`; this
+gap was found by reading the dispatch logic, not by triggering it, and
+`snapshot --build`/`--dry-run` were not run against the live store while
+diagnosing it.
+
+**Not fixed here.** The fix is a one-line change —
+`sub.add_parser("snapshot", ...)`'s `--build` and `--dry-run` arguments need
+`add_mutually_exclusive_group()` so the two cannot both be true — but that is
+a CLI *behaviour* change, out of scope for the branch that found it, and is
+deferred to its own commit.
+
 ### G10 — Not built at all (deliberate)
 
 Dense/semantic retrieval · visual page retrieval · reranking · a served HTTP API

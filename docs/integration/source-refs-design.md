@@ -12,6 +12,10 @@ Reads with: docs/curation/02-curation-schema.md §2.5.3 (evidence kinds) and
            (derived/ is a cache).
 Companion: fixtures/source-ref-examples.json — seven real records the frontend
            can build against today.
+Known stale: §1's `sref_` locator over a seven-field tuple is SUPERSEDED by
+           `fence_evidence/refs.py`, which owns `ref_id` now -- do not build
+           `sref_`. The rest of this document, notably §4.2 and §4.3 (the crop
+           reasoning), still stands.
 ```
 
 ## 0. Why this first
