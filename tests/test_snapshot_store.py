@@ -57,6 +57,35 @@ class TestWriteOnce(unittest.TestCase):
         put_snapshot(_snap(), root=self.root)
         put_snapshot(_snap(), root=self.root)          # must not raise
 
+    def test_a_rebuild_on_a_later_day_is_the_same_snapshot(self):
+        """`retain_until` sits OUTSIDE the hash on purpose — it moves with the
+        clock, and hashing it would mean two builds over identical knowledge
+        never matched. But that means a rebuild tomorrow has the same id and
+        different bytes, and refusing it would be wrong: the ID is the identity.
+
+        The stored copy wins. Its `retain_until` is the promise already made to
+        whoever pinned that hash, and a later build must not quietly extend or
+        shorten it.
+        """
+        put_snapshot(_snap(), root=self.root)
+        later = _snap()
+        later["retain_until"] = "2029-06-01"           # a day passed
+        put_snapshot(later, root=self.root)            # must not raise
+        self.assertEqual(get_snapshot("a" * 64, root=self.root)["retain_until"],
+                         "2028-01-01", "the stored promise was overwritten")
+
+    def test_the_same_id_with_different_CONTENT_is_still_refused(self):
+        """Only the unhashed metadata may differ. If a hashed member changed, the
+        id should have changed too, so something is badly wrong."""
+        put_snapshot(_snap(), root=self.root)
+        tampered = _snap()
+        tampered["warnings"] = [{"text_raw": "injected", "lang": "en",
+                                 "severity_lexeme": None,
+                                 "attaches_to": {"kind": "document", "ref": "h1"},
+                                 "cites": []}]
+        with self.assertRaises(SnapshotExists):
+            put_snapshot(tampered, root=self.root)
+
     def test_fetching_something_that_was_never_stored_raises(self):
         with self.assertRaises(SnapshotMissing):
             get_snapshot("b" * 64, root=self.root)
