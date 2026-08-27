@@ -179,12 +179,19 @@ class SnapshotBuilder:
         """Mint a reference, registering its document. Closure happens here."""
         if element_id in self._refs:
             return self._refs[element_id]
+        # Join on version_id, not document_id: an element belongs to exactly
+        # one version, and joining by document fans out once a document has
+        # two, making .fetchone() return whichever version row SQLite
+        # happens to return first -- not the element's own version. Same
+        # reasoning as refs.build_index's matching comment; the two joins
+        # must agree, or the minting side and the index side can disagree
+        # about which version an element belongs to.
         row = self.conn.execute("""
             SELECT e.page_no, e.bbox, v.sha256, d.document_id, d.doc_type,
                    d.version_status, d.version_status_basis,
                    d.issue_date, d.expiration_date
               FROM elements e
-              JOIN document_versions v ON v.document_id = e.document_id
+              JOIN document_versions v ON v.version_id = e.version_id
               JOIN documents d         ON d.document_id = e.document_id
              WHERE e.element_id = ?""", (element_id,)).fetchone()
         if row is None:
