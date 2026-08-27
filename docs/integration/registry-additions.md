@@ -55,6 +55,10 @@ bundle rule and travel verbatim and `lang`-tagged.
 | `SOURCE_VERSION_STATUS_UNKNOWN` | — | status is `unknown` | 132 documents |
 | `SOURCE_STATUS_BASIS_FILENAME` | — | basis is a filename keyword, not a document assertion | **9 documents** |
 | `SOURCE_CONTENT_DUPLICATED` | `also_filed_under` | a `same_content_as` edge exists | 40 edges, **15 groups** |
+<!-- `also_filed_under` (this warning's param) and `SourceDoc.also_filed_as` (§5's
+     published field) are different objects carrying the same fact: one is a
+     warning a viewer renders, the other is a field the policy reads. The names
+     are close enough to misread as a typo, so: both are intentional. -->
 | `SOURCE_NO_IMAGE_AVAILABLE` | `reason` | DOCX, or `derived` | 1 document |
 | `SOURCE_NOT_FETCHED` | `subset` | the corpus subset is not local | deployment-dependent |
 

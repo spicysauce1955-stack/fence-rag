@@ -187,9 +187,26 @@ consumed. The image URL is relative, per `source-refs-design.md` §5, because cr
 traverse Planning's backend.
 
 Batch request `{"ids": [...]}`, cap **50**. Response
-`{"refs": [...], "not_rendered": ["<id>"], "deadline_exceeded": bool}` — a deadline
-returns partial results and never an error, because a reviewer seeing nothing is the
-worse failure.
+`{"refs": [...], "not_rendered": [...], "unknown": [...], "deadline_exceeded": bool}`
+— a deadline returns partial results and never an error, because a reviewer seeing
+nothing is the worse failure.
+
+`unknown` was added after implementation and is a fourth key rather than a flag,
+because the two lists ask the caller for **opposite things**: `not_rendered` means
+*retry*, `unknown` means *fix the caller*. The first draft put both in
+`not_rendered` and left `deadline_exceeded` to separate them, which works until a
+single batch contains one of each — and a 50-id screenful containing one bad id and
+one slow crop is not an edge case.
+
+`superseded_by` publishes **content hashes**, not `doc-…` ids. `belongs_to` is a
+content hash everywhere else on this wire, and a document id is an internal handle
+Planning cannot resolve.
+
+**Seven documents have no crop at all** — the six CAD PNGs and the one DOCX, 82
+`image_ocr` elements. `crops.py` renders with poppler specifically to avoid a Pillow
+dependency, and the cost is that those refs return `image: null` permanently. They
+are `SOURCE_NO_IMAGE_AVAILABLE`, not `SOURCE_NOT_FETCHED`: neither becomes
+pictureable by downloading anything.
 
 ### 5.2 `POST /reviews`
 
