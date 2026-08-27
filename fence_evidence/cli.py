@@ -301,6 +301,14 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "refs":
         from .refs import build_index, verify_snapshots
         from .store import connect
+        # Mirror snapshot's own dispatch: require a choice and refuse to
+        # silently resolve the combination, rather than the previous
+        # `if args.verify: ... else: build_index(...)`, under which a bare
+        # `cli refs` silently rebuilt the index and `--verify --index`
+        # silently ignored `--index`.
+        if args.verify == args.index:
+            _print({"error": "choose one of --verify, --index"})
+            return 0
         conn = connect(read_only=True)
         try:
             if args.verify:
@@ -313,14 +321,50 @@ def main(argv: list[str] | None = None) -> int:
                           "checked, not that they resolved; that is not a "
                           "pass.", file=sys.stderr)
                     return 1
-                if result["dangling"] or result["unknown_versions"]:
-                    print(f"FAILED: {len(result['dangling'])} published "
-                          f"citation(s) no longer resolve; "
-                          f"{len(result['unknown_versions'])} published "
-                          f"citation(s) name an unknown document version. A "
-                          f"snapshot is immutable, so this cannot be repaired "
-                          f"-- see docs/four-layer-model-design.md 5.1.",
-                          file=sys.stderr)
+                # unknown_versions is the distinguishing signal: a dangling
+                # cite whose belongs_to names a version this store does not
+                # have at all means the store is incomplete (e.g. built from
+                # `cli ingest --pilot`), not that the citation rotted. A
+                # dangling cite whose version IS present, and no longer
+                # resolves anyway, is genuine, irreparable rot. Conflating
+                # the two turns a routine partial-store run into an alarming
+                # and wrong "cannot be repaired" diagnosis.
+                unknown_ref_ids = {u["ref_id"] for u in result["unknown_versions"]}
+                rot = [d for d in result["dangling"]
+                      if d["ref_id"] not in unknown_ref_ids]
+                failed = False
+                if result["unreadable"]:
+                    names = ", ".join(u["file"] for u in result["unreadable"])
+                    print(f"FAILED: {len(result['unreadable'])} snapshot "
+                          f"file(s) under workspace/snapshots/ could not be "
+                          f"parsed, and were skipped rather than verified: "
+                          f"{names}.", file=sys.stderr)
+                    failed = True
+                if rot:
+                    print(f"FAILED: {len(rot)} published citation(s) no "
+                          f"longer resolve, and the document version they "
+                          f"name IS present in this store -- genuine rot. A "
+                          f"snapshot is immutable, so this cannot be "
+                          f"repaired -- see docs/four-layer-model-design.md "
+                          f"5.1.", file=sys.stderr)
+                    failed = True
+                if result["unknown_versions"]:
+                    print(f"FAILED: {len(result['unknown_versions'])} "
+                          f"published citation(s) name a document version "
+                          f"this store does not have at all. That is almost "
+                          f"always an incomplete store, not rot -- run `cli "
+                          f"fetch` and `cli ingest --all`, then re-run `cli "
+                          f"refs --verify`.", file=sys.stderr)
+                    failed = True
+                if result["mismatched_owner"]:
+                    print(f"FAILED: {len(result['mismatched_owner'])} "
+                          f"published citation(s) resolve to a different "
+                          f"document version's evidence than they claim. A "
+                          f"snapshot is immutable, so this cannot be "
+                          f"repaired -- see docs/four-layer-model-design.md "
+                          f"5.1.", file=sys.stderr)
+                    failed = True
+                if failed:
                     return 1
             else:
                 index = build_index(conn)
