@@ -653,6 +653,17 @@ diagnosing it.
 a CLI *behaviour* change, out of scope for the branch that found it, and is
 deferred to its own commit.
 
+**A second, related instance.** `refs`'s own usage-error branch (added by the
+same plan, `cli refs` with neither or both of `--verify`/`--index`) was found
+to have copied this shape rather than only its symptom: it printed
+`{"error": "choose one of --verify, --index"}` and fell through to the same
+exit-0 as `snapshot`'s branch above. For `refs --verify`, a CI guard, that is
+worse than the `snapshot` case — it is the exact vacuous-green failure class
+the guard exists to close, so it was corrected to exit `2` (argparse's usage-
+error convention, distinct from `1` for "the guard fired and found rot").
+`snapshot`'s own branch was deliberately left as documented above, still
+exiting 0, still awaiting the same `add_mutually_exclusive_group()` fix.
+
 ### G10 — Not built at all (deliberate)
 
 Dense/semantic retrieval · visual page retrieval · reranking · a served HTTP API

@@ -616,5 +616,39 @@ class TestVerifyUnreadable(unittest.TestCase):
         conn.close()
 
 
+class TestCLIRefsDispatch(unittest.TestCase):
+    """`cli refs` with neither or both of --verify/--index must fail loudly.
+
+    Correction to FIX 6: the first cut mirrored snapshot's own dispatch,
+    which falls through to exit 0 on this same usage error. For refs
+    --verify -- a CI guard -- an error message on stdout with a green exit
+    is exactly the vacuous-green failure class the guard exists to close,
+    so this must exit non-zero (2, argparse's usage-error convention) no
+    matter how snapshot's sibling branch behaves.
+    """
+
+    def _run(self, argv):
+        import contextlib
+        import io
+
+        from fence_evidence.cli import main
+
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = main(argv)
+        return code, buf.getvalue()
+
+    def test_neither_flag_exits_nonzero(self):
+        code, out = self._run(["refs"])
+        self.assertNotEqual(code, 0)
+        self.assertIn("choose one of", out)
+
+    def test_both_flags_exits_nonzero(self):
+        code, out = self._run(["refs", "--verify", "--index"])
+        self.assertNotEqual(code, 0)
+        self.assertIn("choose one of", out)
+
+
+
 if __name__ == "__main__":
     unittest.main()

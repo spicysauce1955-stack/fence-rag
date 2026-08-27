@@ -9,6 +9,7 @@ Read-only. Run from the repository root:
 """
 from __future__ import annotations
 
+import hashlib
 import re
 import sqlite3
 import sys
@@ -20,6 +21,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fence_evidence.paths import EVIDENCE_DB  # noqa: E402
 from fence_evidence.refs import ref_id  # noqa: E402
+
+
+def _alt_hash(s: str) -> str:
+    """A counterfactual identity scheme's hash -- deliberately NOT ref_id.
+
+    §3 measures schemes that are explicitly not the shipped identifier.
+    `ref_id`'s `bbox` argument is "the raw elements.bbox text, passed
+    through unchanged" per its own docstring, not a general-purpose payload
+    slot, so these are hashed independently rather than minted through
+    ref_id with element text stuffed into that argument.
+    """
+    return hashlib.sha256(s.encode()).hexdigest()[:16]
 
 
 def main() -> int:
@@ -54,17 +67,16 @@ def main() -> int:
     print(f"\n2. index over {len(rows)} elements: {len(idx)} distinct ids "
           f"in {ms:.0f} ms, {true_collisions} true collisions")
 
-    # 3 -- alternative schemes, to show a better hash is not the fix.
+    # 3 -- alternative schemes, to show a better hash is not the fix. Only
+    # the shipped scheme goes through ref_id; the other two are counterfactual
+    # (see _alt_hash) and hash different content (normalised text, and
+    # type+text) that ref_id's bbox argument does not accept.
     def norm(t): return re.sub(r"\s+", " ", t or "").strip().lower()
-    # The two comparison schemes are not ref_id -- they hash different content
-    # (normalised text, and type+text) -- but ref_id's third argument is
-    # interpolated verbatim, so folding the extra field(s) into it reuses the
-    # one hash implementation without changing a single printed number.
     schemes = {
         "sha:page:bbox (shipped)": lambda r: ref_id(r['sha256'], r['page_no'], r['bbox']),
-        "sha:page:text": lambda r: ref_id(r['sha256'], r['page_no'], norm(r['body'])),
-        "sha:page:type:text": lambda r: ref_id(
-            r['sha256'], r['page_no'], f"{r['element_type']}:{norm(r['body'])}"),
+        "sha:page:text": lambda r: _alt_hash(f"{r['sha256']}:{r['page_no']}:{norm(r['body'])}"),
+        "sha:page:type:text": lambda r: _alt_hash(
+            f"{r['sha256']}:{r['page_no']}:{r['element_type']}:{norm(r['body'])}"),
     }
     print("\n3. alternative identity schemes")
     for name, fn in schemes.items():

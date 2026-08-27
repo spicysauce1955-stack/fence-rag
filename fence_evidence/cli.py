@@ -301,14 +301,19 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "refs":
         from .refs import build_index, verify_snapshots
         from .store import connect
-        # Mirror snapshot's own dispatch: require a choice and refuse to
-        # silently resolve the combination, rather than the previous
-        # `if args.verify: ... else: build_index(...)`, under which a bare
-        # `cli refs` silently rebuilt the index and `--verify --index`
-        # silently ignored `--index`.
+        # Require a choice and refuse to silently resolve the combination,
+        # rather than the previous `if args.verify: ... else:
+        # build_index(...)`, under which a bare `cli refs` silently rebuilt
+        # the index and `--verify --index` silently ignored `--index`. This
+        # deliberately does NOT mirror snapshot's sibling branch, which
+        # falls through to exit 0 on the same kind of usage error: for a CI
+        # guard, an error on stdout with a green exit is the vacuous-green
+        # failure class refs --verify exists to close, so this exits 2 --
+        # argparse's own convention for a usage error, distinct from 1 ("the
+        # guard fired"). See G39 in docs/state-and-gaps.md.
         if args.verify == args.index:
             _print({"error": "choose one of --verify, --index"})
-            return 0
+            return 2
         conn = connect(read_only=True)
         try:
             if args.verify:
