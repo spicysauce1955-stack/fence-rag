@@ -176,6 +176,31 @@ def verify_snapshots(conn: sqlite3.Connection, *,
     Tombstoned snapshots are skipped: their payload is gone by design, and
     holding them to a resolvability promise would report a deliberate excision
     as damage.
+
+    Two more signals ride along with ``resolved``, both free once a locus is
+    in hand, because ``Locus`` carries the version it belongs to:
+
+    * ``mismatched_owner`` -- a resolved id whose locus names a *different*
+      version than the cite's own ``belongs_to``. Without this, such a cite
+      is counted ``resolved`` (the id does resolve to *something*) and also
+      passes ``unknown_versions`` (its ``belongs_to`` is a real version, just
+      the wrong one) -- so nothing else here would ever catch a citation with
+      a valid id and the wrong owner attached. 0 today.
+    * ``resolved_as_page_only`` -- a count, not a list, of resolved cites
+      whose locus is a page ref (``is_page``) with **no** ``element_ids``.
+      This is not a failure: it is the §5.2 `kind` defect (a bbox-less
+      element's ref is byte-identical to its page ref) showing up in the
+      guard rather than only in the index, per ``build_index``'s docstring.
+      Such a citation resolves *forever*, even after every element it named
+      is deleted, because the `pages` row backing its id never goes away --
+      at which point there is no text left to quote. 0 today; watch it, do
+      not gate on it -- plan 2's work.
+
+    A per-file parse failure is recorded into ``unreadable`` rather than
+    raised: a command whose purpose is turning silent rot into a loud,
+    *specific* failure must not itself go silent-and-total on one stray or
+    partially-written ``.json`` file. The remaining snapshots are still
+    verified.
     """
     from .snapshot_store import SNAPSHOT_DIR
 
@@ -185,7 +210,8 @@ def verify_snapshots(conn: sqlite3.Connection, *,
                       conn.execute("SELECT sha256 FROM document_versions")}
 
     out = {"snapshots": 0, "tombstoned_skipped": 0, "cites": 0, "resolved": 0,
-           "dangling": [], "unknown_versions": []}
+           "resolved_as_page_only": 0, "dangling": [], "unknown_versions": [],
+           "mismatched_owner": [], "unreadable": []}
     if not base.exists():
         return out
 
@@ -194,7 +220,8 @@ def verify_snapshots(conn: sqlite3.Connection, *,
             if "id" in node and ("belongs_to" in node or in_cites):
                 out["cites"] += 1
                 rid, owner = node.get("id"), node.get("belongs_to")
-                if resolve(index, rid) is None:
+                locus = resolve(index, rid)
+                if locus is None:
                     out["dangling"].append(
                         {"snapshot_id": sid, "ref_id": rid, "belongs_to": owner,
                          "at": path,
@@ -202,6 +229,15 @@ def verify_snapshots(conn: sqlite3.Connection, *,
                                    "evidence it named is not in this store"})
                 else:
                     out["resolved"] += 1
+                    if locus.is_page and not locus.element_ids:
+                        out["resolved_as_page_only"] += 1
+                    if owner and locus.sha256 != owner:
+                        out["mismatched_owner"].append(
+                            {"snapshot_id": sid, "ref_id": rid,
+                             "belongs_to": owner, "at": path,
+                             "reason": f"this id resolves to evidence in "
+                                       f"version {locus.sha256}, not the "
+                                       f"cited belongs_to {owner}"})
                 # An absent or empty `belongs_to` must be visible, not skipped:
                 # `owner and ...` would short-circuit on a falsy owner and the
                 # cite would be reported neither dangling nor unknown -- it
@@ -216,7 +252,15 @@ def verify_snapshots(conn: sqlite3.Connection, *,
                 walk(v, sid, f"{path}[{i}]", in_cites=in_cites)
 
     for snap_path in sorted(base.glob("*.json")):
-        payload = json.loads(snap_path.read_bytes())
+        try:
+            payload = json.loads(snap_path.read_bytes())
+            if not isinstance(payload, dict):
+                raise TypeError(
+                    f"expected a JSON object at the top level, got "
+                    f"{type(payload).__name__}")
+        except (json.JSONDecodeError, TypeError, UnicodeDecodeError) as exc:
+            out["unreadable"].append({"file": snap_path.name, "reason": str(exc)})
+            continue
         if payload.get("tombstoned"):
             out["tombstoned_skipped"] += 1
             continue

@@ -405,5 +405,216 @@ class TestKnownDefects(unittest.TestCase):
         self.assertGreater(len(worst.element_ids), 2)
 
 
+class TestVerifyMismatchedOwner(unittest.TestCase):
+    """A resolved id can still name the wrong version's evidence.
+
+    `Locus` carries `sha256`, so once a cite resolves, checking it against
+    the cite's own `belongs_to` is free. Without the check, a cite pairing a
+    valid `id` with the wrong `belongs_to` is counted `resolved` and also
+    passes `unknown_versions` -- as long as the wrong `belongs_to` names some
+    real version -- so nothing else catches it.
+    """
+
+    def test_a_valid_id_with_the_wrong_belongs_to_is_reported(self):
+        import json
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+
+        from fence_evidence.refs import ref_id
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript("""
+            CREATE TABLE documents(document_id TEXT);
+            CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, version_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
+            INSERT INTO document_versions VALUES ('v1', 'd1', 'aa');
+            INSERT INTO document_versions VALUES ('v2', 'd2', 'bb');
+            INSERT INTO elements VALUES ('e1', 'd1', 'v1', 5, '[1,2,3,4]');
+        """)
+        rid = ref_id("aa", 5, "[1,2,3,4]")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "snap1.json").write_text(json.dumps({
+                "snapshot_id": "snap1",
+                "warnings": [{"cites": [{"id": rid, "belongs_to": "bb"}]}],
+            }))
+            result = verify_snapshots(conn, root=root)
+        self.assertEqual(result["cites"], 1)
+        self.assertEqual(result["resolved"], 1)
+        self.assertEqual(len(result["mismatched_owner"]), 1)
+        self.assertEqual(result["mismatched_owner"][0]["ref_id"], rid)
+        self.assertEqual(result["mismatched_owner"][0]["belongs_to"], "bb")
+        conn.close()
+
+    def test_an_honestly_owned_cite_is_not_flagged(self):
+        import json
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+
+        from fence_evidence.refs import ref_id
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript("""
+            CREATE TABLE documents(document_id TEXT);
+            CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, version_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
+            INSERT INTO document_versions VALUES ('v1', 'd1', 'aa');
+            INSERT INTO elements VALUES ('e1', 'd1', 'v1', 5, '[1,2,3,4]');
+        """)
+        rid = ref_id("aa", 5, "[1,2,3,4]")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "snap1.json").write_text(json.dumps({
+                "snapshot_id": "snap1",
+                "warnings": [{"cites": [{"id": rid, "belongs_to": "aa"}]}],
+            }))
+            result = verify_snapshots(conn, root=root)
+        self.assertEqual(result["resolved"], 1)
+        self.assertEqual(result["mismatched_owner"], [])
+        conn.close()
+
+
+class TestVerifyResolvedAsPageOnly(unittest.TestCase):
+    """A cite that only ever resolves to a bare page ref, forever.
+
+    Because `ref_id` omits `kind`, a bbox-less element's ref is
+    byte-identical to its page ref, and `build_index` inserts a page's id
+    from the `pages` table regardless of whether any element survives. Such
+    a citation resolves green even after every element it named is deleted,
+    at which point there is no text left to quote -- the §5.2 `kind` defect
+    showing up in the guard, not only in the index. Not a failure today (0
+    live cites are in this class); reported so it can be watched.
+    """
+
+    def test_a_pure_page_ref_is_counted_separately_from_resolved(self):
+        import json
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+
+        from fence_evidence.refs import ref_id
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript("""
+            CREATE TABLE documents(document_id TEXT);
+            CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, version_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
+            INSERT INTO document_versions VALUES ('v1', 'd1', 'aa');
+            INSERT INTO pages VALUES ('p1', 'v1', 1);
+        """)
+        rid = ref_id("aa", 1, None)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "snap1.json").write_text(json.dumps({
+                "snapshot_id": "snap1",
+                "warnings": [{"cites": [{"id": rid, "belongs_to": "aa"}]}],
+            }))
+            result = verify_snapshots(conn, root=root)
+        self.assertEqual(result["resolved"], 1)
+        self.assertEqual(result["resolved_as_page_only"], 1)
+        self.assertEqual(result["dangling"], [])
+        conn.close()
+
+    def test_a_cite_backed_by_an_element_is_not_page_only(self):
+        import json
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+
+        from fence_evidence.refs import ref_id
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript("""
+            CREATE TABLE documents(document_id TEXT);
+            CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, version_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
+            INSERT INTO document_versions VALUES ('v1', 'd1', 'aa');
+            INSERT INTO elements VALUES ('e1', 'd1', 'v1', 5, '[1,2,3,4]');
+        """)
+        rid = ref_id("aa", 5, "[1,2,3,4]")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "snap1.json").write_text(json.dumps({
+                "snapshot_id": "snap1",
+                "warnings": [{"cites": [{"id": rid, "belongs_to": "aa"}]}],
+            }))
+            result = verify_snapshots(conn, root=root)
+        self.assertEqual(result["resolved"], 1)
+        self.assertEqual(result["resolved_as_page_only"], 0)
+        conn.close()
+
+
+class TestVerifyUnreadable(unittest.TestCase):
+    """A stray, corrupt, or malformed snapshot file must not abort the walk.
+
+    A command whose purpose is turning silent rot into a loud, *specific*
+    failure must not itself go silent-and-total -- a traceback that verifies
+    nothing and names no snapshot -- on one bad file among many.
+    """
+
+    def test_a_corrupt_json_file_is_recorded_not_raised(self):
+        import json
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript("""
+            CREATE TABLE documents(document_id TEXT);
+            CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, version_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
+            INSERT INTO document_versions VALUES ('v1', 'd1', 'aa');
+        """)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "broken.json").write_text("{not valid json")
+            (root / "snap1.json").write_text(json.dumps({
+                "snapshot_id": "snap1",
+                "warnings": [{"cites": [{"id": "f" * 16, "belongs_to": "aa"}]}],
+            }))
+            result = verify_snapshots(conn, root=root)
+        self.assertEqual(len(result["unreadable"]), 1)
+        self.assertEqual(result["unreadable"][0]["file"], "broken.json")
+        # The good snapshot alongside it must still be verified.
+        self.assertEqual(result["snapshots"], 1)
+        self.assertEqual(result["cites"], 1)
+        conn.close()
+
+    def test_a_non_object_payload_is_recorded_not_raised(self):
+        import json
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript("""
+            CREATE TABLE documents(document_id TEXT);
+            CREATE TABLE document_versions(version_id TEXT, document_id TEXT, sha256 TEXT);
+            CREATE TABLE elements(element_id TEXT, document_id TEXT, version_id TEXT, page_no INT, bbox TEXT);
+            CREATE TABLE pages(page_id TEXT, version_id TEXT, page_no INT);
+        """)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "list.json").write_text(json.dumps([1, 2, 3]))
+            result = verify_snapshots(conn, root=root)
+        self.assertEqual(len(result["unreadable"]), 1)
+        self.assertEqual(result["unreadable"][0]["file"], "list.json")
+        self.assertEqual(result["snapshots"], 0)
+        conn.close()
+
+
 if __name__ == "__main__":
     unittest.main()
