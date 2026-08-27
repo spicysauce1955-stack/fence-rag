@@ -129,6 +129,35 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--index", action="store_true",
                    help="rebuild the ref index and report its shape")
 
+    p = sub.add_parser("review",
+                       help="the human review loop: accept or correct a machine "
+                            "reading of a scanned table")
+    p.add_argument("--queue", action="store_true",
+                   help="what is waiting for a person")
+    p.add_argument("--accept", metavar="CROP_SHA256",
+                   help="record a review of one table crop")
+    p.add_argument("--reviewer", help="who reviewed it (required with --accept)")
+    p.add_argument("--verdict", default="accepted",
+                   choices=["accepted", "rejected", "bracket_unclear"],
+                   help="bracket_unclear is not a rejection: the values can be "
+                        "right while the applicability is unreadable")
+    p.add_argument("--grid", metavar="FILE",
+                   help="JSON [{row,col,value}] -- the confirmed cells")
+    p.add_argument("--spans", metavar="FILE",
+                   help="JSON [{row_from,row_to,col,text}] -- merged cells, which "
+                        "is the structure the readers cannot see")
+    p.add_argument("--notes")
+    p.add_argument("--rebuild", action="store_true",
+                   help="regenerate the candidate annotations from table_reviews")
+
+    p = sub.add_parser("serve",
+                       help="the read/write API behind Planning's screens")
+    p.add_argument("--host", default="127.0.0.1")
+    p.add_argument("--port", type=int, default=8765)
+    p.add_argument("--token", action="append", default=[],
+                   help="bearer token on the allowlist; repeatable. Falls back to "
+                        "FENCE_API_TOKENS (comma-separated) in the environment")
+
     p = sub.add_parser("dataset",
                        help="baseline and verify the hand-researched dataset")
     p.add_argument("--write", action="store_true", help="write the SHA-256 baseline")
@@ -311,6 +340,56 @@ def main(argv: list[str] | None = None) -> int:
                 put_snapshot(snap)
                 summary["stored"] = True
             _print(summary)
+    elif args.cmd == "review":
+        import json as _json
+        from pathlib import Path as _P
+        from . import reviews
+        from .store import connect as _c
+        # Same shape as snapshot's and refs' guards: require exactly one mode and
+        # exit 2 on a usage error rather than printing an error and exiting 0.
+        modes = (bool(args.queue), args.accept is not None, bool(args.rebuild))
+        if sum(modes) != 1:
+            _print({"error": "choose one of --queue, --accept, --rebuild"})
+            return 2
+        conn = _c()
+        try:
+            if args.queue:
+                _print({"queue": reviews.review_queue(conn),
+                        "summary": reviews.review_summary(conn)})
+            elif args.rebuild:
+                _print(reviews.rebuild_projection(conn))
+            else:
+                if not args.reviewer:
+                    _print({"error": "--accept requires --reviewer: the name is the "
+                                     "only thing separating 'software read this' "
+                                     "from 'a person confirmed it'"})
+                    return 2
+                load = lambda f: _json.loads(_P(f).read_text()) if f else []
+                try:
+                    _print(reviews.submit_review(
+                        conn, crop_sha256=args.accept, reviewer=args.reviewer,
+                        verdict=args.verdict, grid=load(args.grid),
+                        spans=load(args.spans), notes=args.notes))
+                except reviews.ReviewRefused as e:
+                    _print({"error": e.code, "message": str(e)})
+                    return 1
+        finally:
+            conn.close()
+    elif args.cmd == "serve":
+        import os
+        from . import api
+        tokens = set(args.token) or {
+            t.strip() for t in os.environ.get("FENCE_API_TOKENS", "").split(",")
+            if t.strip()}
+        if not tokens:
+            # An open write endpoint is worse than no endpoint. contract.md 1.5's
+            # Authoring surface is proxied from one backend, never a browser.
+            _print({"error": "no bearer token configured; pass --token or set "
+                             "FENCE_API_TOKENS"})
+            return 2
+        print(f"serving on {args.host}:{args.port} "
+              f"({len(tokens)} token(s) on the allowlist)", file=sys.stderr)
+        api.serve(args.host, args.port, tokens=tokens)
     elif args.cmd == "refs":
         from .refs import build_index, verify_snapshots
         from .store import connect
