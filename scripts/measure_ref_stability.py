@@ -9,7 +9,6 @@ Read-only. Run from the repository root:
 """
 from __future__ import annotations
 
-import hashlib
 import re
 import sqlite3
 import sys
@@ -20,10 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fence_evidence.paths import EVIDENCE_DB  # noqa: E402
-
-
-def _h(s: str) -> str:
-    return hashlib.sha256(s.encode()).hexdigest()[:16]
+from fence_evidence.refs import ref_id  # noqa: E402
 
 
 def main() -> int:
@@ -44,14 +40,14 @@ def main() -> int:
     sha = "00c965f58d3030b7e7c8a6c8c0b7e99f1579c5599dc476c8f6a62dd88c6cdd58"
     today, shifted = "[117.69, 271.47, 266.99, 294.03]", "[117.69, 271.47, 266.99, 294.05]"
     print("1. hash sensitivity to a 0.02pt bbox shift (1/3600 inch)")
-    print(f"   {today} -> {_h(f'{sha}:5:{today}')}")
-    print(f"   {shifted} -> {_h(f'{sha}:5:{shifted}')}")
+    print(f"   {today} -> {ref_id(sha, 5, today)}")
+    print(f"   {shifted} -> {ref_id(sha, 5, shifted)}")
 
     # 2 -- index rebuild cost and collision count.
     t0 = time.time()
     idx: dict[str, set[tuple]] = {}
     for r in rows:
-        idx.setdefault(_h(f"{r['sha256']}:{r['page_no']}:{r['bbox']}"), set()).add(
+        idx.setdefault(ref_id(r['sha256'], r['page_no'], r['bbox']), set()).add(
             (r["sha256"], r["page_no"], r["bbox"]))
     ms = (time.time() - t0) * 1000
     true_collisions = sum(1 for v in idx.values() if len(v) > 1)
@@ -60,11 +56,15 @@ def main() -> int:
 
     # 3 -- alternative schemes, to show a better hash is not the fix.
     def norm(t): return re.sub(r"\s+", " ", t or "").strip().lower()
+    # The two comparison schemes are not ref_id -- they hash different content
+    # (normalised text, and type+text) -- but ref_id's third argument is
+    # interpolated verbatim, so folding the extra field(s) into it reuses the
+    # one hash implementation without changing a single printed number.
     schemes = {
-        "sha:page:bbox (shipped)": lambda r: _h(f"{r['sha256']}:{r['page_no']}:{r['bbox']}"),
-        "sha:page:text": lambda r: _h(f"{r['sha256']}:{r['page_no']}:{norm(r['body'])}"),
-        "sha:page:type:text": lambda r: _h(
-            f"{r['sha256']}:{r['page_no']}:{r['element_type']}:{norm(r['body'])}"),
+        "sha:page:bbox (shipped)": lambda r: ref_id(r['sha256'], r['page_no'], r['bbox']),
+        "sha:page:text": lambda r: ref_id(r['sha256'], r['page_no'], norm(r['body'])),
+        "sha:page:type:text": lambda r: ref_id(
+            r['sha256'], r['page_no'], f"{r['element_type']}:{norm(r['body'])}"),
     }
     print("\n3. alternative identity schemes")
     for name, fn in schemes.items():
@@ -78,19 +78,19 @@ def main() -> int:
     pages = {}
     for r in conn.execute("""SELECT p.page_no, v.sha256 FROM pages p
               JOIN document_versions v ON v.version_id = p.version_id"""):
-        pages[_h(f"{r['sha256']}:{r['page_no']}:None")] = (r["sha256"], r["page_no"])
+        pages[ref_id(r['sha256'], r['page_no'], None)] = (r["sha256"], r["page_no"])
     hits = [r for r in rows
-            if _h(f"{r['sha256']}:{r['page_no']}:{r['bbox']}") in pages]
+            if ref_id(r['sha256'], r['page_no'], r['bbox']) in pages]
     print(f"\n4. kind collisions (a bbox-less element ref == its page ref): {len(hits)}")
     for r in hits[:3]:
         # Bound to a name first: nesting same-type quotes inside an f-string is
         # only legal from Python 3.12 (PEP 701) and this repo's floor is 3.10.
-        rid = _h(f"{r['sha256']}:{r['page_no']}:{r['bbox']}")
+        rid = ref_id(r['sha256'], r['page_no'], r['bbox'])
         print(f"   {rid} = element {r['element_id']} "
               f"({r['element_type']}, bbox={r['bbox']}) AND page {r['page_no']}")
 
     shared_ids = {k for k, v in Counter(
-        _h(f"{r['sha256']}:{r['page_no']}:{r['bbox']}") for r in rows
+        ref_id(r['sha256'], r['page_no'], r['bbox']) for r in rows
         if r["bbox"]).items() if v > 1}
     print(f"   ids covering more than one element: {len(shared_ids)}")
     conn.close()
