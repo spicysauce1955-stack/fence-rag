@@ -1,7 +1,9 @@
 # What Planning needs from this platform, and when
 
 ```text
-Status:   v0.4. Working list, maintained by the Planning & BOM team.
+Status:   v0.4 + §9, added 2026-08-27 — our response to knowledge-asks.md v0.2's
+          review of the conforming fixture. Working list, maintained by the
+          Planning & BOM team.
 Note:     The four items needing your AGREEMENT are not here — they are in
           boundary-delta-v0.4.md. This document is what we need you to BUILD
           or SEND, which is a different list and needs no approval.
@@ -339,3 +341,114 @@ So the dependencies run both ways visibly.
 
 Items 1–3 are in progress and need nothing from you. Item 8 is the one that stops
 if §1 does not land.
+
+---
+
+## 9. Response to `knowledge-asks.md` v0.2 — your review of our fixture
+
+```text
+Status:   Sent 2026-08-27. Answers §2.1–§2.5 of knowledge-asks.md v0.2.
+```
+
+### 9.0 The eleven defects — fixed
+
+All eleven rows in your §1.0 table are fixed in
+`docs/integration-contract/fixtures/snapshot-example.json`: `source_class` now
+uses the real eight-member vocabulary; `task` uses the confirmed `TaskCode`
+spellings (§9.5 below); the lapsing row's `provenance.version_status` now agrees
+with its cited `SourceDoc` (both `superseded`); `scope.kind` names a `FenceModel`
+(`model`), not `product_line`; `gaps[].because{code,params}` replaces the flat
+fields and `gaps[].subject` carries `id` + `tenant`; `warnings[].cites` is a
+list; the `slope_method` row's value is a `Token{key, value_raw}`; `lang_basis`
+is present on every warning; an unlexemed warning's `severity_lexeme` is `null`;
+and `gaps[0].cites` now resolves to a `source_docs` entry that exists.
+
+Two of your corrections went further than the fixture's shape:
+
+- **`curation_level` dropped from 2 to 1** on the structural rows, since your
+  corpus has no level-2 population and won't for a while — a mostly-level-2
+  fixture was exercising a path that will never run.
+- **`(exposure_category=B, hvhz=true)` added to `uncovered`.** It was previously
+  in neither a row nor `uncovered` — silently missing from the six-point domain
+  the table declares, which §1.3's BINDING clause forbids. We want to be honest
+  that this is a stand-in, not agreement it's the right representation — see
+  §9.3.
+
+**One finding we deliberately did NOT fix in the fixture: `max_span_mm` still
+models a condition → value lookup.** Your §1.1(a) is right that the real table is
+`(footing depth, max span)` design points, and changing the fixture to match
+would mean inventing an answer to §9.4 rather than recording one honestly wrong
+in the way the real table is.
+
+### 9.1 — `curation_level` 0 vs 1
+
+No objection to your provisional reading (0 = asserted, uncited; 1 = cited,
+unconfirmed; 2 = person-checked). Our `SourcePolicy` (§1.4) reads
+`curation_level` only as a gate ordinal, and — worth being honest about — we
+don't enforce `SourcePolicy` at all yet; items 6/7 in our own build order are
+explicitly parked pending your design (`next-session.md`). So nothing on our
+side has an independent stake in what separates 0 from 1 today. Publish against
+your reading; we'll build the enforcement against whatever you've written down
+by the time we get there.
+
+### 9.2 — is a slot-structure edge a "value" under invariant 8?
+
+We don't consume `models`/`parts`/`combinations` from a snapshot at all yet —
+they're accepted, counted, and left as opaque payload (`unconsumed`), by
+deliberate design (`knowledge/snapshot.py`'s own docstring: "a field parsed into
+a shape we invented is a shape nobody agreed to"). So whichever way you resolve
+this doesn't block us today.
+
+For when we do build that consumer: our own containment model (`ContainedSlot`,
+the kit-credit rule, done 2026-08-25) already treats "how many of this part a
+slot needs" as **authored structure**, with citation riding at the membership
+level rather than per structural count. That's the same shape your narrowing
+points at — membership cited to the sealed BOM, slot count authored. So we'd
+lean **no**, structure doesn't need its own `SourceRef`, matching your own
+instinct, but this is a preference from a team that hasn't built the consumer,
+not a requirement.
+
+### 9.3 — a representation for "not approved," distinct from "not covered"
+
+We think this needs a **ninth `GapKind`**, not a repurposing of one of the eight.
+None fits: `uncovered_condition` says "we may not know" or "no row covers this,"
+which is the opposite of "we checked, and the answer is no." We'd propose
+something like `condition_excluded` — `subject` names the parameter, and
+`because.params` carries the excluded point (mirroring how `uncovered_condition`
+already carries `point`).
+
+One thing worth flagging on our side: `GapKind`'s eight values are enumerated
+inline in the contract's STABLE CORE text (§1.2.1), not in the free registries
+(§2) the way `SourceClass`/`TaskCode` are — so we think a ninth kind is a
+trigger-D (defect) amendment candidate, not a registry addition. Non-blocking on
+either side (no snapshot ships today), so batching is fine — we'll log it as a
+candidate on our end too, and we're glad to co-author the amendment text
+whenever a batch is ready.
+
+### 9.4 — can a `ParameterTable` row carry a paired value?
+
+Our read of your three options: **(2)** — footing depth as an explicit
+additional **domain dimension** alongside `exposure_category`/`hvhz` — is the
+one we'd ask you to build, for a reason that's about cost, not elegance:
+condition dimensions are a free registry addition on our side already
+(`docs/integration-contract/contract.md` §2 — "Condition dimensions... Planning
+declares what it can bind"), so adding `footing_depth_mm` as a domain key needs
+no amendment from either team. Option (1) — a native paired `value_type` — would
+extend the closed `quantity(<UnitCode>) | token(<closed set>)` union in the
+stable core (§1.1/§1.3), which we think needs the same amendment process as
+§9.3's `GapKind` addition. Option (3) we agree with your own objection to: it
+throws away the cheaper compliant choice, which is the opposite of what a BOM
+optimizer exists to preserve.
+
+**Being honest about the cost this actually lands on us, not you:** publishing
+the extra domain key is the cheap part. Resolving it means our generator has to
+be able to CHOOSE a footing depth per post rather than treat it as fixed input —
+that's a real feature on our side (a footing-depth decision the strategy layer
+doesn't have today), not a data-shape fix that comes for free once you publish
+the wider table. We'd rather say that now than have it surface as a surprise
+later.
+
+### 9.5 — `TaskCode` spellings
+
+Confirmed: `structural_parameter`, `component_dimension`, `installation_step`,
+`product_description` — that's what the corrected fixture now uses.

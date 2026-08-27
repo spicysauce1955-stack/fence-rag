@@ -130,6 +130,74 @@ after Phase D is built either way.
 
 ---
 
+## ~~C4 — no `GapKind` for "the authority explicitly does not extend here"~~ — STRUCK
+
+**Struck 2026-08-27 (`conversation.md` T1→T2).** The premise held — a real footing
+table does affirmatively exclude `(exposure_category=B, hvhz=true)`, confirmed
+against source by Knowledge — but the fact does not need a new stable-core
+`GapKind` to say so. `kind: uncovered_condition` + `domain_basis: measured`
+already means "this table really does not cover that point," which IS "checked,
+not a guess"; what was missing was only the WHY, and `because{code, params}` —
+already a free registry addition per §2 — is exactly the field for that. Agreed
+disposition: a new platform code, `parameter_condition_excluded`, carrying the
+excluded point the same way `uncovered_parameter_point` already carries `point`.
+Needs no amendment. The stand-in fixture note in
+`docs/integration-contract/fixtures/README.md` should be replaced with this code
+once either side implements it.
+
+<details><summary>Original entry, for the record</summary>
+
+`uncovered_condition` means "no row covers this point" or "we may not know the
+table's extent." Neither is the fact at `(exposure_category=B, hvhz=true)` in a
+real footing table: both non-HVHZ rows are bracketed, and the approval simply
+does not extend to HVHZ at exposure B. A planner reading `uncovered` there would
+be told "may not know" when the true fact is "checked, and refused" — and would
+be free to proceed as though a value might still turn up, which it structurally
+cannot.
+
+`GapKind`'s eight values are enumerated inline in the contract's stable-core text
+(§1.2.1), not in the free registries (§2), so a ninth value reads as a trigger-D
+defect amendment rather than a registry addition.
+
+</details>
+
+---
+
+## C5 — `ParameterTable.value_type` cannot express a paired design point
+
+| | |
+|---|---|
+| **Trigger** | **D** — real corpus data does not fit the closed `value_type` shape |
+| **Raised** | 2026-08-27, same review as C4 |
+| **Blocking?** | **No.** Neither side publishes `max_span_mm` against real data yet. Batches. |
+
+A real footing/span table is not one value per `(exposure, hvhz)` point — it is
+**two** design points per exposure, `(footing depth, max span)`, where a deeper
+footing buys a wider span. `value_type: quantity(<UnitCode>) | token(<closed
+set>)` — declared once, on the table — cannot express a pair, and `hit_policy:
+unique` is violated by the real data as a result (two valid rows at one domain
+point, no dimension to split them).
+
+**Disposition flipped 2026-08-27 (`conversation.md` T1→T2).** Planning's original
+preference — footing depth as an additional domain dimension — is withdrawn.
+Measured against real corpus data, that shape turns one `unique` violation into
+**8 of 18 cross-product artifacts**, several actively misleading (a footing
+depth below what the table certifies at all reading as an ordinary coverage
+hole). More fundamentally, `domain` per §2 is what Planning **binds from site
+facts at run time** — footing depth is not a site fact, it is a design decision
+a fence gets built to, the same category as choosing between two admissible
+SKUs. **Agreed disposition: option (1), a paired/compound `value_type`.** Still
+trigger-D — extends the closed `quantity(<UnitCode>) | token(<closed set>)`
+union in the stable core — and still needs the amendment process; both sides
+are willing co-authors. Worth batching with C1 if both are ready around the same
+time, since both touch `Provenance`/`ParameterTable`.
+
+Rejected by both sides: `hit_policy: collect_min`/`priority` over the two rows,
+which silently discards the cheaper compliant option — one worked example, 7
+posts vs. 9 on a 40 ft run at exposure C.
+
+---
+
 ## Not candidates — recorded so they are not re-raised
 
 - **`retain_until` has no specified value.** The contract requires a snapshot
