@@ -11,6 +11,7 @@ The design answer is not to validate closure afterwards but to make it
 *unrepresentable*: minting a reference registers its document, so a builder that
 skipped the registration could not produce the reference either.
 """
+import re
 import unittest
 
 import context  # noqa: F401  -- puts the repo root on sys.path
@@ -138,6 +139,76 @@ class TestBuiltSnapshot(unittest.TestCase):
         for g in self.snap["gaps"]:
             self.assertTrue(g.get("would_close"), f"gap {g.get('id')} has no would_close")
             self.assertIn(g.get("closes_by"), ("knowledge", "planning"))
+
+    def test_would_close_names_the_gap_it_belongs_to(self):
+        """G40: would_close must be a work item, not a template constant.
+
+        contract.md 1.2.1 is BINDING on this field and says what it is for:
+        "A gap that only says something is missing sends a curator hunting;
+        one that says 'a footing row for exposure C, non-HVHZ, at 6 ft' is a
+        work item." Before this landed, 63 gaps carried 4 distinct sentences
+        and 51 of those were identical -- compliant with the letter, useless
+        for the purpose. Planning now also relies on this field to carry the
+        reason a condition point is excluded, which no other field holds.
+        """
+        gaps = self.snap["gaps"]
+        sentences = [g["would_close"] for g in gaps]
+        distinct = len(set(sentences))
+        # Not "all distinct": two gaps could legitimately coincide. But a
+        # handful of constants across dozens of gaps is the defect itself.
+        self.assertGreaterEqual(
+            distinct, len(gaps) * 0.9,
+            f"only {distinct} distinct would_close across {len(gaps)} gaps -- "
+            f"these are templates, not work items")
+        for g in gaps:
+            w = g["would_close"]
+            self.assertTrue(
+                re.search(r"\bp\d+\b", w) or g["subject"].startswith("doc-"),
+                f"element-scoped gap does not name its page: {w!r}")
+
+    def test_the_eleven_promised_warning_classes_all_publish(self):
+        """G42: five classes were promised to Planning and emitted nothing.
+
+        `planning-asks.md` 3.2 commits this platform to eleven platform warning
+        codes. Five of them -- the post-strike rule, the frost-line check, the
+        post-top rule, the panel-both-ends rule and warranty exclusions -- are
+        written as ordinary bullets or as prose, with no severity lexeme and no
+        consequence clause, so neither _LEXEME_* nor _HAZARD saw them. They
+        published 0 instances against 16-254 matching elements each.
+
+        The general fix -- treating a bare "never" as a hazard -- is measured at
+        248 hits and dominated by ordinary sequencing steps, which is why
+        _HAZARD excludes it. These are named individually instead.
+        """
+        classes = {
+            "post strike": r"never strike",
+            "frost line": r"codes? for frost line",
+            "post top": r"never cut the top",
+            "panel both ends": r"never attach both ends",
+            "warranty exclusion": r"not covered (?:by|under)[^.]{0,25}warrant",
+        }
+        for name, pat in classes.items():
+            with self.subTest(warning_class=name):
+                rx = re.compile(pat, re.IGNORECASE)
+                hits = [w for w in self.snap["warnings"]
+                        if rx.search(w["text_raw"])]
+                self.assertTrue(hits, f"{name} publishes no warning")
+
+    def test_a_rule_warning_publishes_its_bullet_not_the_whole_list(self):
+        """The rule is one line of a list; publishing the list is not a warning.
+
+        These bullets sit in installation lists carrying a dozen steps. A
+        reader shown all twelve has not been warned, so the publisher extracts
+        the matched fragment. The citation still resolves to the containing
+        element, which is where the bbox is.
+        """
+        rx = re.compile(r"never strike", re.IGNORECASE)
+        hits = [w for w in self.snap["warnings"] if rx.search(w["text_raw"])]
+        self.assertTrue(hits)
+        for w in hits:
+            self.assertLess(len(w["text_raw"]), 200,
+                            "the whole list element was published, not the rule")
+            self.assertNotIn("\u2022", w["text_raw"])
 
     def test_building_twice_produces_the_same_hash(self):
         again = build_snapshot(tenant="acme", regime="us_astm")

@@ -91,52 +91,64 @@ components, sized fourteen 2s and one 4. This was already corrected in
 The eleven classes named in `planning-asks.md` §3.2, each with its instance counts and a
 verbatim exemplar carrying a resolvable `ref_id`.
 
-**Published** counts the 282 warnings in the current snapshot. **Elements** counts every
-element in the store whose text matches, published as a warning or not. The gap between
-those two columns is the finding in §3.1.
+**Published** counts distinct warnings in the current snapshot (289 in total);
+**Cites** counts the source references backing them, since one warning printed in several
+documents is one warning with several citations. **Elements** counts every element in the
+store whose text matches, published as a warning or not — it runs far ahead of Published
+because a rule repeated across a product family is one warning, and because the pattern
+also matches prose that is not a warning at all. §3.1 is the history of the five rows that
+read zero when this list was drafted.
 
-| Code | Published | Elements | Docs | `ref_id` | Verbatim exemplar |
-|---|---|---|---|---|---|
-| `WARN_UTILITY_LOCATE` | 7 | 130 | 26 | `eb2c863494b90243` | "Call before you dig." |
-| `WARN_FREEZE_THAW` | 12 | 83 | 6 | `882b1218393c89e8` | "Caution – In climates that experience freeze-thaw cycles, this installation method could result in post cracking over time." |
-| `WARN_POST_STRIKE_UNSUPPORTED` ⚠ | **0** | 71 | 7 | `ec094805f6f9e8b2` | "Never strike the PVC post without a wood support" |
-| `WARN_EYE_PROTECTION` | 18 | 78 | 41 | `9ea589d2ed085734` | "ALWAYS WEAR SAFETY GLASSES." |
-| `WARN_PARTS_MISSING_DAMAGED` | 6 | 35 | 35 | `b8ad6543485400cf` | "DO NOT attempt to assemble the kit if parts are missing or damaged." |
-| `WARN_DO_NOT_RETURN` | 5 | 33 | 33 | `6aa84dabb01fa9c9` | "DO NOT return the product to the store." |
-| `WARN_FROST_LINE` ⚠ | **0** | 254 | 28 | `382abfe6174ee952` | "Check local codes for frost line depth and regulations." |
-| `WARN_POOL_CODE` | 6 | 117 | 23 | `7593394e9edc8b8b` | "Not pool code approved." |
-| `WARN_POST_TOP_CUT` ⚠ | **0** | 25 | 5 | `9a87439073cfe499` | "Never cut the top of the post" |
-| `WARN_WARRANTY_EXCLUSION` ⚠ | **0** | 16 | 11 | `8ad14577225d2658` | "Separate and distinct warranties for hardware and other products are not covered under this warranty." |
-| `WARN_PANEL_BOTH_ENDS` ⚠ | **0** | 20 | 5 | `7eac16268355bea3` | "Never attach both ends of a panel to posts" |
+| Code | Published | Cites | Elements | Docs | `ref_id` | Verbatim exemplar |
+|---|---|---|---|---|---|---|
+| `WARN_UTILITY_LOCATE` | 7 | 18 | 130 | 26 | `eb2c863494b90243` | "Call before you dig." |
+| `WARN_FREEZE_THAW` | 12 | 14 | 83 | 6 | `882b1218393c89e8` | "Caution – In climates that experience freeze-thaw cycles, this installation method could result in post cracking over time." |
+| `WARN_POST_STRIKE_UNSUPPORTED` | 1 | 5 | 71 | 7 | `021ff5cb7895e64d` | "Never strike the PVC post without a wood support" |
+| `WARN_EYE_PROTECTION` | 18 | 52 | 78 | 41 | `9ea589d2ed085734` | "ALWAYS WEAR SAFETY GLASSES." |
+| `WARN_PARTS_MISSING_DAMAGED` | 6 | 24 | 35 | 35 | `b8ad6543485400cf` | "DO NOT attempt to assemble the kit if parts are missing or damaged." |
+| `WARN_DO_NOT_RETURN` | 5 | 21 | 33 | 33 | `6aa84dabb01fa9c9` | "DO NOT return the product to the store." |
+| `WARN_FROST_LINE` | 3 | 15 | 18 | 16 | `6f0e2e1b3206c206` | "Check local codes for frost line depth and regulations" |
+| `WARN_POOL_CODE` | 6 | 12 | 117 | 23 | `7593394e9edc8b8b` | "Not pool code approved." |
+| `WARN_POST_TOP_CUT` | 1 | 3 | 25 | 5 | `74a8b651f6a3a39c` | "Never cut the top of the post" |
+| `WARN_WARRANTY_EXCLUSION` | 1 | 1 | 4 | 4 | `8ad14577225d2658` | "Separate and distinct warranties for hardware and other products are not covered under this warranty." |
+| `WARN_PANEL_BOTH_ENDS` | 1 | 3 | 20 | 5 | `e59b70b33b4e1d30` | "Never attach both ends of a panel to posts" |
 
-### 3.1 Five of the eleven cannot currently be emitted
+### 3.1 All eleven publish — five of them only since 2026-08-27
 
-The five marked ⚠ have **zero instances in the published warning set** and between 16 and
-254 in the store. They are not missing from the corpus — they are missing from the
-*warnings*.
+When this list was first measured, **five of the eleven had zero instances in the
+published warning set** against 16-254 matching elements each. They were not missing from
+the corpus; they were missing from `warnings[]`, because the detector recognises a warning
+by a severity lexeme (`WARNING:`, `NOTE:`, `CAUTION:`) or by a consequence clause, and
+these are written as ordinary bullets inside installation lists:
 
-The cause is the detector. `snapshot.py` recognises a warning by a severity lexeme
-(`WARNING:`, `NOTE:`, `CAUTION:`) or a hazard regex. All five of these are written as
-ordinary bullet points inside installation lists:
-
-> • Level and square fence
 > • To lower a post, place a wood block from corner to corner on the post and carefully
 >   tap with a mallet
 > • **Never strike the PVC post without a wood support**
 
-No lexeme, no hazard word — so it is an `installation_step`, not a warning, and it never
-reaches `warnings[]`. The same is true of the frost-line check, the post-top rule and the
-panel-both-ends rule. `WARN_WARRANTY_EXCLUSION` fails differently: warranty exclusions live
-in warranty documents as running prose, and the detector never looks there.
+**Fixed, narrowly.** The general form — treating a bare *never* or *do not* as a hazard —
+is measured at 248 hits in this corpus and is dominated by ordinary sequencing steps
+(*"dry-assemble all parts. Do not use glue."* is a step, not a warning), so the four rules
+are named individually rather than generalised. Warranty exclusions are matched on the
+phrasing the warranty documents actually use, which the existing consequence pattern
+missed by one preposition.
 
-**This is ours to fix and it is not a code change to the registry.** The eleven codes are
-right; the publisher cannot yet produce five of them. The exemplars and `ref_id`s above are
-minted from the elements directly and resolve today, so the *evidence* exists — only the
-classification does not. Registering all eleven now is still correct: a code with zero
-current instances costs Planning one bundle entry and nothing else, and the alternative is
-shipping a list that changes size later.
+Two things fell out of doing it, both visible in the table above:
 
-Filed as a defect against the publisher, not against this list.
+- **A rule publishes as its bullet, not as the list it was printed in.** A reader shown
+  twelve installation steps has not been warned. The citation still resolves to the
+  containing element, which is where the bounding box is; the text is the rule.
+- **Deduplication only works once the bullet glyph is gone.** OCR renders it as a cent
+  sign or a guillemet often enough that the same rule arrived as three separate warnings
+  that did not dedupe against each other. `Never strike the PVC post without a wood
+  support` is now one warning with **five citations** rather than three warnings with one
+  each.
+
+One deliberate non-fix: a table of contents can carry the warranty phrase and split into
+fragments of dot leaders and page numbers. A fragment must now look like prose — no dot
+leaders, mostly letters — because publishing a contents line as a safety warning is worse
+than missing the warning.
+
+Logged as **G42**, now closed. The total warning count moved 282 → 289.
 
 ---
 
@@ -205,5 +217,5 @@ one: identical *extracted text* with different bytes, so `same_content_as` does 
 |---|---|
 | Locale bundles | 21 platform codes need `en` + `he` entries: ten `SOURCE_*`, eleven `WARN_*`. Plus `CURATION_MACHINE_CONSENSUS` if not already added, and `parameter_condition_excluded` from T2 |
 | Nothing to negotiate | every item here is a §2 registry addition |
-| One thing to note | five `WARN_*` codes will report zero instances until the publisher's detector is fixed; the bundle entries are still worth adding now |
+| One thing to note | all eleven report non-zero as of 2026-08-27; the five that were empty when this list was drafted are fixed (§3.1) |
 | One thing we owe back | a `family` column on the reader table, or a decision to ship reader ids instead (§4) |

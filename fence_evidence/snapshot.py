@@ -115,6 +115,32 @@ _HAZARD = re.compile(
     r"|underground utilit|call before you dig|always wear|eye protection"
     r"|limitation of liability", re.IGNORECASE)
 
+# G42. Four safety rules this corpus states as ordinary bullets inside
+# installation lists, with no lexeme and no consequence clause, so neither
+# _LEXEME_* nor _HAZARD sees them:
+#
+#   * To lower a post, place a wood block ... and carefully tap with a mallet
+#   * Never strike the PVC post without a wood support
+#
+# The general form -- a bare "never" or "do not" -- is measured at 248 hits and
+# dominated by ordinary sequencing steps, which is why _HAZARD deliberately
+# excludes it. These are named individually instead: each was checked by hand,
+# and each is a rule whose violation damages the fence or the installer.
+_RULE_WARNING = re.compile(
+    r"never strike"
+    r"|never cut the top"
+    r"|never attach both ends"
+    # The actionable form only. A bare "frost line depth" also matches a
+    # glossary entry -- "Frost Line  Lowest level in soil that freezes" -- and
+    # a definition is not a warning.
+    r"|codes? for frost line"
+    # The phrasing the warranty documents actually use. _HAZARD carries
+    # "void the warranty" and "not be covered by the warranty" and misses
+    # "are not covered under this warranty"; it is routed here rather than
+    # added there because _HAZARD publishes the whole element, and these sit
+    # inside multi-page warranty sections.
+    r"|not covered (?:by|under)[^.]{0,25}warrant", re.IGNORECASE)
+
 # Measured false positives, each one checked by hand.
 _NOT_A_WARNING = re.compile(
     r"NOTICE OF ACCEPTANCE"                 # 76 hits: a Miami-Dade form header
@@ -130,6 +156,69 @@ _DANGLING = re.compile(
     re.IGNORECASE)
 MIN_BODY_CHARS = 12
 OCR_TRUST_FLOOR = 80.0
+
+
+def _where(row) -> str:
+    """`p12 of "Bufftech Gate Installation Guide"` -- a gap's location, in words.
+
+    G40: every would_close used to be a string literal, so 51 of 63 published
+    gaps carried the same sentence and a curator could not tell the work items
+    apart. contract.md 1.2.1 is BINDING on this field and says why: a gap that
+    only says something is missing sends a curator hunting, one that names the
+    thing is a work item. All of this was already in scope and simply not used.
+    """
+    return f"p{row['page_no']} of {_label(row)}"
+
+
+def _label(row) -> str:
+    """A document in a sentence: its title, or its id when it has none.
+
+    Titles are capped because several are curation notes rather than titles --
+    one runs to 118 characters explaining which pass the file arrived in -- and
+    a would_close is read in a queue, not a catalogue.
+    """
+    title = " ".join((row["title"] or "").split())
+    if not title:
+        return row["document_id"]
+    if len(title) > 64:
+        title = title[:63].rstrip(" ,;(-") + "..."
+    return f'"{title}"' 
+
+
+def _bullet_containing(text: str, rx: re.Pattern) -> str | None:
+    """The one bullet a rule matched, not the list it was printed in.
+
+    G42's rules fire inside list elements carrying a dozen bullets. Publishing
+    the whole element as `text_raw` would be verbatim and useless -- the
+    warning is one line of it, and a reader shown twelve steps has not been
+    warned. The citation still resolves to the containing element, which is
+    where the bbox is; the text is the rule.
+    """
+    for part in re.split(r"\n?\s*[\u2022*\u00b7\u00a2\u00ab]\s*|(?<=[.!?])\s+",
+                         text):
+        # OCR renders the bullet glyph as a cent sign, a guillemet or a stray
+        # letter often enough that leaving it in `text_raw` splits one rule
+        # into three warnings that no longer dedupe against each other.
+        p = " ".join(part.split()).lstrip("\u2022*\u00b7\u00a2\u00ab-\u2013 ").strip()
+        if not p or not rx.search(p):
+            continue
+        # A table of contents can carry the phrase and split into fragments
+        # that are dot leaders and page numbers. Publishing one as a safety
+        # warning is worse than missing the warning, so a fragment has to look
+        # like prose: no dot leaders, and mostly letters.
+        if "...." in p:
+            continue
+        letters = sum(ch.isalpha() or ch.isspace() for ch in p)
+        if letters < 0.85 * len(p):
+            continue
+        return p
+    return None
+
+
+def _tail(text: str, n: int = 55) -> str:
+    """The last few words of a truncated warning, so the break point is visible."""
+    t = " ".join((text or "").split())
+    return t if len(t) <= n else "..." + t[-n:]
 
 # A numbered installation step, for attaches_to. Checklist headings such as
 # "1. Getting Started" and "2. Tools" are front matter, not steps.
@@ -188,7 +277,7 @@ class SnapshotBuilder:
         # about which version an element belongs to.
         row = self.conn.execute("""
             SELECT e.page_no, e.bbox, v.sha256, d.document_id, d.doc_type,
-                   d.version_status, d.version_status_basis,
+                   d.title, d.version_status, d.version_status_basis,
                    d.issue_date, d.expiration_date
               FROM elements e
               JOIN document_versions v ON v.version_id = e.version_id
@@ -209,9 +298,10 @@ class SnapshotBuilder:
                 expiration_date=row["expiration_date"])
             if row["doc_type"] in UNCLASSIFIED:
                 self.gap(kind="missing_value", subject=row["document_id"],
-                         would_close="classify this document's source class; it is "
-                                     "published at the weakest class so it cannot "
-                                     "make anything wrongly admissible",
+                         would_close=f"classify the source class of {_label(row)} "
+                                     f"(filed as {row['doc_type']!r}); it is "
+                                     f"published at the weakest class, so it cannot "
+                                     f"make anything wrongly admissible until it is",
                          closes_by="knowledge", severity="informational")
 
         ref = SourceRef(id=ref_id(row["sha256"], row["page_no"], row["bbox"]),
@@ -270,7 +360,7 @@ class SnapshotBuilder:
         rows = self.conn.execute("""
             SELECT e.element_id, e.page_no, e.ordinal, e.text, e.ocr_text,
                    e.text_source, e.ocr_confidence, e.lang, e.heading_path,
-                   e.document_id, v.sha256, d.doc_type
+                   e.document_id, v.sha256, d.doc_type, d.title
               FROM elements e
               JOIN document_versions v ON v.document_id = e.document_id
               JOIN documents d         ON d.document_id = e.document_id
@@ -298,7 +388,7 @@ class SnapshotBuilder:
                     text = f"{text}\n{body}"
                 else:
                     self.gap(kind="unquantified", subject=r["element_id"],
-                             would_close=f"the page prints {lexeme!r} with no "
+                             would_close=f"{_where(r)} prints {lexeme!r} with no "
                                          f"instruction after it; a person should "
                                          f"read the page image and record what it says",
                              closes_by="knowledge", severity="informational")
@@ -308,28 +398,41 @@ class SnapshotBuilder:
                 body = text[m.end():].strip()
             elif _HAZARD.search(text):
                 lexeme, body = None, text          # a warning without the word
+            elif _RULE_WARNING.search(text):
+                # G42: a rule stated as a bullet. Publish the bullet, not the
+                # list around it; the ref still names the containing element.
+                bullet = _bullet_containing(text, _RULE_WARNING)
+                if not bullet:
+                    continue
+                lexeme, body, text = None, bullet, bullet
             else:
                 continue
 
             if len(body) < MIN_BODY_CHARS:
                 self.gap(kind="unquantified", subject=r["element_id"],
-                         would_close="a severity word with no usable instruction "
-                                     "after it; read the page image",
+                         would_close=f"{_where(r)} prints "
+                                     f"{(lexeme or 'a severity word')!r} followed "
+                                     f"only by {_tail(body)!r}; read the page image "
+                                     f"and record the instruction",
                          closes_by="knowledge", severity="informational")
                 continue
             if _DANGLING.search(body) or body[:1].islower():
                 # ends on a function word or starts mid-sentence: the column or
                 # the page cut it. Verbatim-but-truncated is worse than absent.
                 self.gap(kind="illegible_source", subject=r["element_id"],
-                         would_close="this warning is cut off mid-clause; a person "
-                                     "should read the page image and record it whole",
+                         would_close=f"the warning on {_where(r)} breaks after "
+                                     f"{_tail(body)!r}; a person should read the "
+                                     f"page image and record the sentence whole",
                          closes_by="knowledge", severity="warns_line")
                 continue
             if (r["text_source"] in ("ocr", "image_ocr")
                     and (r["ocr_confidence"] or 0) < OCR_TRUST_FLOOR):
                 self.gap(kind="illegible_source", subject=r["element_id"],
-                         would_close="OCR read this warning below the confidence "
-                                     "floor; a person should read the page image",
+                         would_close=f"OCR read the warning on {_where(r)} at "
+                                     f"{r['ocr_confidence']:.1f}% against a "
+                                     f"{OCR_TRUST_FLOOR:.0f}% floor and produced "
+                                     f"{_tail(body)!r}; a person should read the "
+                                     f"page image",
                          closes_by="knowledge", severity="warns_line")
                 continue
             # Detect on the text actually being published, not on the anchor
@@ -340,8 +443,9 @@ class SnapshotBuilder:
             lang, lang_basis = detect_lang(text)
             if lang == "und":
                 self.gap(kind="missing_value", subject=r["element_id"],
-                         would_close="this text has no determinable language; "
-                                     "obligation 10 requires lang on published text",
+                         would_close=f"the warning on {_where(r)} has no "
+                                     f"determinable language ({_tail(text)!r}); "
+                                     f"obligation 10 requires lang on published text",
                          closes_by="knowledge", severity="informational")
                 continue
 

@@ -42,7 +42,16 @@ Scope:    Both repos. This file is copied between them; append at the bottom, ne
 5. **`contract.md` and `AMENDING.md` are never touched from here.** A change to a BINDING
    item goes through `AMENDING.md`'s five steps and lands in `amendments/`.
 
-6. **Turn header format:**
+6. **Internal detail is evidence, not status.** A turn carries what crosses the boundary:
+   types, wire formats, registry entries, and the facts each side must model against.
+   One side's codebase, test counts, defect list or work plan belongs in a turn **only as
+   evidence for a boundary question** — T2's measurement that a new `GapKind` costs three
+   changes against a new code's one is what decided C4, and that is exactly the admissible
+   use. Reporting a passing test count is not, and neither is advice about how the other
+   side should build. Each team owns its own project; this file exists so the two agree on
+   the seam between them.
+
+7. **Turn header format:**
 
    ```markdown
    ## T<n> · <from> → <to> · YYYY-MM-DD

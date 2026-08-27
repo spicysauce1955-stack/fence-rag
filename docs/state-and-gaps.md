@@ -674,9 +674,14 @@ is the defect, so it stored. `workspace/snapshots/9a5fdebb…156d0d.json`, tenan
 It is **not corrupt or spurious**: a subsequent `--dry-run` under the fix
 rebuilds the identical `snapshot_id`, so the bytes are exactly what a legitimate
 `--build` for the `default` tenant produces. It was never published and no run
-stamped its hash. Disposition is open — deleting it contradicts the store's
-write-once discipline, and tombstoning it would record an excision that never
-happened.
+stamped its hash.
+
+**Deleted 2026-08-27**, on the reasoning that it was minted by a defect rather
+than by an operator: no consumer holds the hash, no run stamped it, and the
+write-once discipline exists to protect artifacts someone may have cited. A
+tombstone was rejected as the worse option — it would record an excision of
+something that was never published, making the store's own history less true
+rather than more.
 
 The general lesson is cheap and worth keeping: **a red-green check against a
 destructive defect reproduces the destruction.** Where the defect writes to a
@@ -1020,7 +1025,7 @@ the record. They no longer describe a runnable command. (`docs/superpowers/plans
 carried the same stale invocation and was removed on 2026-08-25 — the plan it held
 was complete and its outcome is recorded in `docs/distribution-design.md`.)
 
-### G40 — every published `would_close` is a template constant — DETECTED, NOT FIXED
+### G40 — every published `would_close` is a template constant — FIXED
 
 `contract.md` §1.2.1 makes `would_close` BINDING and says why: *"A gap that only
 says something is missing sends a curator hunting; one that says 'a footing row
@@ -1043,8 +1048,22 @@ beats search-then-judge by roughly an order of magnitude — applies to the gap
 list exactly as it applies to the review queue, and a generic `would_close`
 forces search-then-judge on every item.
 
-**Not closed because** it is a Phase 1 fix and Phase 1 has not run. Cheap when it
-comes: the data is already in hand at the point of construction.
+**Fixed 2026-08-27.** Two helpers — `_where(row)` renders `p12 of "<title>"`, and
+`_tail(text)` shows where a truncated warning stops — and `d.title` added to the
+two queries that lacked it. All six construction sites interpolate.
+
+Measured after: **63 gaps, 63 distinct `would_close`.** Every gap names its own
+work item, with the page, the document, the break point, and for an OCR gap the
+confidence against the floor. Titles are capped at 64 characters because several
+are curation notes rather than titles.
+
+`tests/test_snapshot_build.py::test_would_close_names_the_gap_it_belongs_to`
+asserts distinctness at 90% of gap count rather than 100% — two gaps could
+legitimately coincide, but four constants across sixty-three cannot.
+
+It stopped being a tidiness defect partway through: Planning's implementation of
+`parameter_condition_excluded` carries the excluded-point reason in `would_close`,
+so the field now holds the only copy of a fact no other field has.
 
 ---
 
@@ -1075,7 +1094,7 @@ measuring before promising.
 
 ---
 
-### G42 — five of the eleven promised warning classes are undetectable — DETECTED, NOT FIXED
+### G42 — five of the eleven promised warning classes are undetectable — FIXED
 
 `planning-asks.md` §3.2 commits this platform to eleven platform warning codes,
 with counts and verbatim exemplars. Measured while producing them
@@ -1109,12 +1128,31 @@ warranty documents, which the detector never reads.
 resolve — they were minted from the elements directly. What is missing is the
 classification, not the evidence.
 
-**Not closed because** widening the detector is a projection change with a real
-false-positive cost: `Never cut the top of the post` is a warning, and `Never
-attach both ends of a panel to posts` is a warning, but most `Never …` bullets
-in these lists are ordinary sequencing instructions. The honest fix is a
-per-class rule rather than a broader lexeme set, and it should land with Phase 1's
-publisher work rather than as a regex widened in a hurry.
+**Fixed 2026-08-27, narrowly.** Not by widening the lexeme set — the general
+form is measured at 248 hits and dominated by ordinary sequencing steps, which is
+why `_HAZARD` excludes it. `_RULE_WARNING` names the four bullet rules
+individually, and warranty exclusions are matched on the phrasing the warranty
+documents actually use (`not covered under this warranty`), which `_HAZARD` missed
+by one preposition.
+
+Two things fell out of doing it:
+
+- **A rule publishes as its bullet, not the list it sits in.** These bullets live
+  in installation lists carrying a dozen steps, and a reader shown all twelve has
+  not been warned. `_bullet_containing()` extracts the matched fragment; the
+  citation still resolves to the containing element, which is where the bbox is.
+- **Deduplication only works once the bullet glyph is stripped.** OCR renders it
+  as `¢` or `«` often enough that one rule arrived as three warnings that did not
+  dedupe. `Never strike the PVC post without a wood support` is now **one warning
+  with five citations**.
+
+One deliberate non-fix: a table of contents can carry the warranty phrase and
+split into fragments of dot leaders and page numbers, so a fragment must now look
+like prose — no dot leaders, ≥85% letters. Publishing a contents line as a safety
+warning is worse than missing the warning.
+
+Warnings moved 282 → 289. Two tests pin it, including one asserting a rule
+publishes its bullet rather than the whole list.
 
 ---
 
