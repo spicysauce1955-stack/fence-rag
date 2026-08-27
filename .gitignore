@@ -11,3 +11,6 @@ workspace/tests/snapstore/
 .env
 .env.*
 !.env.example
+
+# Agent process artifacts (SDD ledgers, review packages, task reports)
+.superpowers/
