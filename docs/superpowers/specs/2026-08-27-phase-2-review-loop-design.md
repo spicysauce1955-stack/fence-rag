@@ -311,6 +311,40 @@ pixels, and a cache keyed on `ref_id` alone would serve stale crops after an upg
 
 ---
 
+## 8.1 What the implementation surfaced
+
+Recorded because the spec did not say, and the code now does.
+
+**A backdated review broke acceptance 3, and did so silently.** `submit_review`
+applies reviews as they arrive, last write wins. The first implementation replayed
+them ordered by `reviewed_at`, so a review submitted *second* but stamped *earlier*
+won live and lost on rebuild — the projection and its own source disagreeing, which
+is the single thing D3 exists to prevent. Reproduced, then fixed by replaying in
+arrival order (`rowid`). `INSERT OR REPLACE` on a resubmitted `review_id` assigns a
+new rowid, which is the wanted semantics: a resubmission is the most recent arrival.
+Regression test: `test_a_backdated_review_replays_in_arrival_order`.
+
+**An `accepted` verdict annotates only the positions it submitted.** A position the
+reviewer omitted stays `unreviewed` rather than being promoted by omission —
+silence is not confirmation. `rejected` and `bracket_unclear` annotate every row of
+the crop, because those verdicts are about the table as a whole.
+
+**"Differs" is judged after normalisation.** A curly quote against a straight one is
+not a correction, and recording it as one would misreport what review found.
+
+**One crop can belong to two documents.** 14 groups of corpus files are
+byte-identical under different manufacturers, so identical pixels can carry two
+`document_id`s. `table_reviews` has a single `document_id`; the lowest is stored and
+the projection lands on every reading of those pixels. Deterministic and honest, but
+it is a real ambiguity the schema cannot express — the same one `also_filed_as`
+exists for on the publishing side.
+
+**Non-string cell values are refused, not coerced.** The column is TEXT and
+`normalise` takes a string; a client sending `24` rather than `"24\""` gets a 422
+rather than a silent stringification.
+
+---
+
 ## 9. Acceptance
 
 1. `cli review --accept` writes `table_reviews` and the projection in one transaction.

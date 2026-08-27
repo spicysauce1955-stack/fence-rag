@@ -341,16 +341,18 @@ def main(argv: list[str] | None = None) -> int:
                 summary["stored"] = True
             _print(summary)
     elif args.cmd == "review":
-        import json as _json
-        from pathlib import Path as _P
-        from . import reviews
-        from .store import connect as _c
         # Same shape as snapshot's and refs' guards: require exactly one mode and
         # exit 2 on a usage error rather than printing an error and exiting 0.
+        # Checked before the imports, so a usage error does not depend on a
+        # module being importable.
         modes = (bool(args.queue), args.accept is not None, bool(args.rebuild))
         if sum(modes) != 1:
             _print({"error": "choose one of --queue, --accept, --rebuild"})
             return 2
+        import json as _json
+        from pathlib import Path as _P
+        from . import reviews
+        from .store import connect as _c
         conn = _c()
         try:
             if args.queue:
