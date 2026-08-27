@@ -214,10 +214,31 @@ so a new HTTP error code in that namespace would break their CI.
 | HTTP | code | when |
 |---|---|---|
 | 401 | `error.unauthorized` | missing or unknown bearer token |
+| 404 | `error.not_found` | no such route |
 | 404 | `error.unknown_ref` | no such `ref_id` |
+| 405 | `error.method_not_allowed` | known path, wrong verb |
 | 409 | `error.crop_mismatch` | the echo does not match what we would serve |
 | 413 | `error.batch_too_large` | more than 50 ids |
+| 413 | `error.request_too_large` | body over 1 MiB |
+| 422 | `error.malformed_request` | the body is not the shape this route takes |
 | 422 | `error.malformed_review` | bad verdict, bad grid, span outside the grid |
+| 500 | `error.internal` | a service raised unexpectedly; `serve()` only |
+
+The last five were not in the first draft and were added after implementation.
+Four are transport facts HTTP forces on any router, and the fifth matters more than
+it looks: **a malformed body is not a malformed review.** Collapsing them tells a
+client its *review* was rejected when what was actually wrong was the envelope, and
+the two have different fixes. Likewise `request_too_large` is separated from
+`batch_too_large`: one means "send fewer ids", the other "send less bytes."
+
+**A ref that resolves but whose crop will not render is not an error.** It returns
+200 with `"image": null` and a `SOURCE_NO_IMAGE_AVAILABLE` warning carrying `reason`
+— a code already in `registry-additions.md` §2 with exactly that param. The quoted
+text is still evidence, and §7's rule that a reviewer seeing nothing is the worse
+failure applies here as much as it does to the deadline. Only an unresolvable `id`
+is a 404. In a batch, such a ref is a normal entry with `image: null`, never a member
+of `not_rendered` — that list is reserved for ids dropped by the deadline, which are
+retryable, and an unrenderable crop is not.
 
 ---
 
