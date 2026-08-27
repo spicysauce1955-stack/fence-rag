@@ -199,14 +199,37 @@ class TestRefusals(unittest.TestCase):
     def test_an_unknown_verdict_is_refused(self):
         self._refused("error.malformed_review", verdict="looks-fine")
 
-    def test_a_span_outside_the_grid_is_refused(self):
-        """Acceptance 5."""
+    def test_a_span_outside_the_grid_ROWS_is_refused(self):
+        """Acceptance 5. Rows are bounded; a span must cover rows that exist."""
         self._refused("error.malformed_review",
                       spans=[{"row_from": 0, "row_to": 9, "col": 0, "text": "x"}])
         self._refused("error.malformed_review",
-                      spans=[{"row_from": 0, "row_to": 1, "col": 7, "text": "x"}])
+                      spans=[{"row_from": -1, "row_to": 1, "col": 0, "text": "x"}])
         self.assertEqual(
             self.conn.execute("SELECT COUNT(*) FROM table_reviews").fetchone()[0], 0)
+
+    def test_a_span_may_name_a_column_the_readers_never_transcribed(self):
+        """The bug this replaced a bound with: spans record what the grid lacks.
+
+        Measured: every `wind_exposure_footing` crop in the queue was
+        transcribed as columns 0..2 -- wind exposure, footing depth, max post
+        spacing -- and the fourth column carrying "NON HVHZ" appears in no
+        reading anywhere. Bounding `span.col` by the transcribed grid refused
+        the one fact spans exist to record, and the end-to-end run on real data
+        is what found it.
+        """
+        out = submit_review(self.conn, crop_sha256=CROP, reviewer="alice",
+                            verdict="accepted",
+                            grid=[{"row": 0, "col": 0, "value": "B"}],
+                            spans=[{"row_from": 0, "row_to": 0, "col": 3,
+                                    "text": "NON HVHZ"}])
+        self.assertTrue(out["review_id"])
+        stored = self.conn.execute("SELECT spans FROM table_reviews").fetchone()[0]
+        self.assertIn("NON HVHZ", stored)
+
+    def test_a_negative_span_column_is_still_refused(self):
+        self._refused("error.malformed_review",
+                      spans=[{"row_from": 0, "row_to": 1, "col": -1, "text": "x"}])
 
     def test_a_span_with_no_grid_is_refused(self):
         self._refused("error.malformed_review", grid=[],

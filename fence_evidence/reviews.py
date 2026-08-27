@@ -111,7 +111,7 @@ def _check_spans(spans, grid_map: dict[tuple[int, int], str]) -> None:
                             "spans were given with no grid to place them in")
     rows = {r for r, _ in grid_map}
     cols = {c for _, c in grid_map}
-    row_lo, row_hi, col_lo, col_hi = min(rows), max(rows), min(cols), max(cols)
+    row_lo, row_hi = min(rows), max(rows)
     for i, span in enumerate(spans):
         if not isinstance(span, dict):
             raise ReviewRefused("error.malformed_review", f"spans[{i}] is not an object")
@@ -130,10 +130,17 @@ def _check_spans(spans, grid_map: dict[tuple[int, int], str]) -> None:
             raise ReviewRefused("error.malformed_review",
                                 f"spans[{i}] covers rows {vals['row_from']}..{vals['row_to']}, "
                                 f"outside the grid's rows {row_lo}..{row_hi}")
-        if not col_lo <= vals["col"] <= col_hi:
+        # Rows are bounded, columns deliberately are NOT. A span records
+        # structure the readers did not capture, and on the footing tables the
+        # applicability column is exactly that: measured, every
+        # wind_exposure_footing crop was transcribed as columns 0..2 -- wind
+        # exposure, footing depth, max post spacing -- and the fourth column
+        # carrying "NON HVHZ" appears in no reading anywhere. Bounding col by
+        # the transcribed grid would forbid recording the one fact spans exist
+        # for. A negative column is still nonsense.
+        if vals["col"] < 0:
             raise ReviewRefused("error.malformed_review",
-                                f"spans[{i}].col {vals['col']} is outside the grid's "
-                                f"columns {col_lo}..{col_hi}")
+                                f"spans[{i}].col is negative: {vals['col']}")
         if vals["row_from"] > vals["row_to"]:
             raise ReviewRefused("error.malformed_review",
                                 f"spans[{i}] runs backwards: {vals['row_from']} > "

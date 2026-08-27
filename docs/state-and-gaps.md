@@ -1156,6 +1156,45 @@ publishes its bullet rather than the whole list.
 
 ---
 
+### G43 — promotion multiplies every fact by the number of readers — DETECTED, NOT FIXED
+
+Found by the first end-to-end run of the Phase 2 review loop, against a **copy**
+of the store. Reviewing one `wind_exposure_footing` crop and running
+`promote_verified(dry_run=False)`:
+
+```
+promote --apply   : 36 facts created from 6 rows
+distinct (fact_type, value_original, conditions) : 12 of 36
+```
+
+**Three identical facts per cell, one per reader.** `promote_tables.promote_verified`
+groups by `(document_id, page_no, row_index)` and iterates the promotable
+*readings* in that group. A footing crop carries 18 cells read by 3 readers = 54
+readings, so each distinct value promotes three times.
+
+**Pre-existing, not caused by Phase 2.** It was unreachable while `PROMOTABLE`
+was `("accepted", "corrected")` and nothing wrote either — the defect has been
+in the code since A1 revoked `cross_family_verified`, hidden behind a no-op.
+Closing the no-op is what made it observable.
+
+**Why it matters now.** These rows are what a `ParameterTable` is built from. Three
+identical rows at one domain point violate `hit_policy: unique` mechanically, and
+the contract's §1.3 check would fire on data this platform generated itself —
+independently of the real design-point pairing that C5 is about. A reviewer would
+also see each value three times in any queue built on `facts`.
+
+**Not fixed here** because it belongs to `promote_tables.py` and wants its own
+tests; Phase 2's acceptance is about the loop existing, and it does. The likely fix
+is to reduce each `(row_index, col_index)` to one reading before promoting — the
+readers agree on values (§2 of the Phase 2 spec measured 6 disagreements in 174
+multi-read positions, all of them merged-cell artifacts), so any consistent choice
+works and the disagreement cases are exactly what the human verdict already settled.
+
+**This must land before anything publishes**, since a promoted fact is what reaches
+`ParameterTable.rows`.
+
+---
+
 ---
 
 ## 4. If work resumes, in order
