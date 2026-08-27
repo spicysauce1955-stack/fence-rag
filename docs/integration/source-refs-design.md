@@ -12,6 +12,10 @@ Reads with: docs/curation/02-curation-schema.md §2.5.3 (evidence kinds) and
            (derived/ is a cache).
 Companion: fixtures/source-ref-examples.json — seven real records the frontend
            can build against today.
+Known stale: §1's `sref_` locator over a seven-field tuple is SUPERSEDED by
+           `fence_evidence/refs.py`, which owns `ref_id` now -- do not build
+           `sref_`. The rest of this document, notably §4.2 and §4.3 (the crop
+           reasoning), still stands.
 ```
 
 ## 0. Why this first
@@ -333,8 +337,10 @@ crops become a legacy cache that is not served.** Three reasons:
    picture.
 
 The cost is honest and worth stating: rendering a paragraph crop means poppler
-touches the PDF rather than an already-decoded PNG. Measured cost is not yet
-known — see §8.
+touches the PDF rather than an already-decoded PNG. **Now measured** — 24.8 ms at
+p50 and about a tenth of a full-page render, against a 5.6 s p99 concentrated in
+nine large scanned documents. See §8.4 and
+`workspace/reports/k3-crop-render-cost.md`.
 
 ### 4.3 Materialisation, not storage
 
@@ -453,10 +459,17 @@ alone.
 3. **Batch resolution.** A review screen showing 50 rows would issue 50 requests.
    We would like `POST /source-refs:batch` taking up to N ids. Adding it does not
    change any shape in the contract.
-4. **Render cost is unmeasured.** §4.2 chooses poppler windowing over cached
-   Pillow crops on correctness and dependency grounds without knowing what a cold
-   paragraph crop costs. That number should exist before a queue is built on it —
-   the same discipline `knowledge-design.md` §8 applies to curator throughput.
+4. ~~**Render cost is unmeasured.**~~ **MEASURED 2026-08-25** —
+   `workspace/reports/k3-crop-render-cost.md`, harness at
+   `scripts/measure_crop_cost.py`. A cold crop is **24.8 ms at p50, 308 ms at
+   p95, 5.6 s at p99**; 3.2% of crops exceed one second. Windowing costs about a
+   **tenth** of a full-page render, so §4.2's choice holds on cost as well as on
+   correctness. The p99 is two documents — the 20 MB and 11 MB Showtech China
+   catalogs — and 9 scanned documents over 10 MB hold 13.9% of all boxed
+   elements. **Render on demand as designed; cache the page, not the element; no
+   pre-render pass.** The review queue specifically: its 504 readings sit on
+   **10 distinct pages** at 164 ms each, so a 50-row screen is 1.3 s cold and
+   almost entirely cache hits after the first row of each page.
 5. **The `us` / `china` tracks.** The two corpora are deliberately separate:
    Chinese-language, metric, GB standards rather than ASTM. Nothing in the
    contract mentions a track, and `Snapshot` has a `tenant` but no locale or

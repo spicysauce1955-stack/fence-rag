@@ -10,7 +10,7 @@ probed, not assumed.
 | python | 3.12.3 |
 | platform | Linux-6.17.0-20-generic-x86_64-with-glibc2.39 |
 | cpu count | 24 |
-| disk free | 700 GB of 1006 GB |
+| disk free | 683 GB of 1006 GB |
 | pipeline version | 1.0.0 |
 
 ## Extraction tools

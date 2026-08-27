@@ -104,8 +104,39 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--reader")
 
     p = sub.add_parser("promote-tables",
-                       help="turn cross-family-verified table readings into conditioned facts")
+                       help="turn human-reviewed table readings into conditioned facts")
     p.add_argument("--apply", action="store_true", help="write them (default is a dry run)")
+    p.add_argument("--revoke", action="store_true",
+                   help="un-promote facts no person reviewed (build-plan A1); "
+                        "keeps every reading and its crop")
+
+    p = sub.add_parser("snapshot",
+                       help="build, store and inspect published snapshots")
+    p.add_argument("--build", action="store_true", help="build one and store it")
+    p.add_argument("--tenant", default="default")
+    p.add_argument("--regime", default="us_astm", choices=["us_astm", "cn_gb"])
+    p.add_argument("--list", action="store_true", help="what is held")
+    p.add_argument("--get", metavar="ID", help="fetch one by hash")
+    p.add_argument("--dry-run", action="store_true",
+                   help="build and report without storing")
+
+    p = sub.add_parser("refs",
+                       help="the evidence identifier: rebuild the index, or "
+                            "verify every published citation still resolves")
+    p.add_argument("--verify", action="store_true",
+                   help="walk every un-tombstoned snapshot; exit non-zero on a "
+                        "citation that no longer resolves")
+    p.add_argument("--index", action="store_true",
+                   help="rebuild the ref index and report its shape")
+
+    p = sub.add_parser("dataset",
+                       help="baseline and verify the hand-researched dataset")
+    p.add_argument("--write", action="store_true", help="write the SHA-256 baseline")
+    p.add_argument("--verify", action="store_true", help="check the tree against it")
+
+    sub.add_parser("migrate",
+                   help="bring an existing store up to the current schema: add any "
+                        "missing columns and backfill what they need")
 
     sub.add_parser("worklist",
                    help="split unresolved material into machine / review / human piles")
@@ -239,8 +270,137 @@ def main(argv: list[str] | None = None) -> int:
         conn.close()
         _print(out)
     elif args.cmd == "promote-tables":
-        from .promote_tables import promote_verified
-        _print(promote_verified(dry_run=not args.apply))
+        if args.revoke:
+            from .promote_tables import revoke_machine_promotions
+            _print(revoke_machine_promotions(dry_run=not args.apply))
+        else:
+            from .promote_tables import promote_verified
+            _print(promote_verified(dry_run=not args.apply))
+    elif args.cmd == "snapshot":
+        from .snapshot import build_snapshot
+        from .snapshot_store import get_snapshot, list_snapshots, put_snapshot
+        if args.get:
+            _print(get_snapshot(args.get))
+        elif args.list:
+            _print(list_snapshots())
+        elif args.build or args.dry_run:
+            snap = build_snapshot(tenant=args.tenant, regime=args.regime)
+            summary = {"snapshot_id": snap["snapshot_id"],
+                       "tenant": snap["tenant"], "regime": snap["regime"],
+                       "retain_until": snap["retain_until"],
+                       "source_docs": len(snap["source_docs"]),
+                       "warnings": len(snap["warnings"]),
+                       "gaps": len(snap["gaps"]),
+                       "stored": False}
+            if args.build:
+                put_snapshot(snap)
+                summary["stored"] = True
+            _print(summary)
+        else:
+            _print({"error": "choose one of --build, --dry-run, --list, --get"})
+    elif args.cmd == "refs":
+        from .refs import build_index, verify_snapshots
+        from .store import connect
+        # Require a choice and refuse to silently resolve the combination,
+        # rather than the previous `if args.verify: ... else:
+        # build_index(...)`, under which a bare `cli refs` silently rebuilt
+        # the index and `--verify --index` silently ignored `--index`. This
+        # deliberately does NOT mirror snapshot's sibling branch, which
+        # falls through to exit 0 on the same kind of usage error: for a CI
+        # guard, an error on stdout with a green exit is the vacuous-green
+        # failure class refs --verify exists to close, so this exits 2 --
+        # argparse's own convention for a usage error, distinct from 1 ("the
+        # guard fired"). See G39 in docs/state-and-gaps.md.
+        if args.verify == args.index:
+            _print({"error": "choose one of --verify, --index"})
+            return 2
+        conn = connect(read_only=True)
+        try:
+            if args.verify:
+                result = verify_snapshots(conn)
+                _print(result)
+                if result["snapshots"] == 0 and result["tombstoned_skipped"] == 0:
+                    print("FAILED: nothing was verified -- 0 snapshots found "
+                          "(0 tombstoned, 0 live) under workspace/snapshots/. "
+                          "A green exit here would mean zero citations were "
+                          "checked, not that they resolved; that is not a "
+                          "pass.", file=sys.stderr)
+                    return 1
+                # unknown_versions is the distinguishing signal: a dangling
+                # cite whose belongs_to names a version this store does not
+                # have at all means the store is incomplete (e.g. built from
+                # `cli ingest --pilot`), not that the citation rotted. A
+                # dangling cite whose version IS present, and no longer
+                # resolves anyway, is genuine, irreparable rot. Conflating
+                # the two turns a routine partial-store run into an alarming
+                # and wrong "cannot be repaired" diagnosis.
+                unknown_ref_ids = {u["ref_id"] for u in result["unknown_versions"]}
+                rot = [d for d in result["dangling"]
+                      if d["ref_id"] not in unknown_ref_ids]
+                failed = False
+                if result["unreadable"]:
+                    names = ", ".join(u["file"] for u in result["unreadable"])
+                    print(f"FAILED: {len(result['unreadable'])} snapshot "
+                          f"file(s) under workspace/snapshots/ could not be "
+                          f"parsed, and were skipped rather than verified: "
+                          f"{names}.", file=sys.stderr)
+                    failed = True
+                if rot:
+                    print(f"FAILED: {len(rot)} published citation(s) no "
+                          f"longer resolve, and the document version they "
+                          f"name IS present in this store -- genuine rot. A "
+                          f"snapshot is immutable, so this cannot be "
+                          f"repaired -- see docs/four-layer-model-design.md "
+                          f"5.1.", file=sys.stderr)
+                    failed = True
+                if result["unknown_versions"]:
+                    print(f"FAILED: {len(result['unknown_versions'])} "
+                          f"published citation(s) name a document version "
+                          f"this store does not have at all. That is almost "
+                          f"always an incomplete store, not rot -- run `cli "
+                          f"fetch` and `cli ingest --all`, then re-run `cli "
+                          f"refs --verify`.", file=sys.stderr)
+                    failed = True
+                if result["mismatched_owner"]:
+                    print(f"FAILED: {len(result['mismatched_owner'])} "
+                          f"published citation(s) resolve to a different "
+                          f"document version's evidence than they claim. A "
+                          f"snapshot is immutable, so this cannot be "
+                          f"repaired -- see docs/four-layer-model-design.md "
+                          f"5.1.", file=sys.stderr)
+                    failed = True
+                if failed:
+                    return 1
+            else:
+                index = build_index(conn)
+                shared = [l for l in index.values() if len(l.element_ids) > 1]
+                _print({"ref_ids": len(index),
+                        "page_refs": sum(1 for l in index.values() if l.is_page),
+                        "ids_covering_multiple_elements": len(shared)})
+        finally:
+            conn.close()
+    elif args.cmd == "dataset":
+        from .dataset import DatasetChanged, verify_dataset, write_digests
+        if args.write:
+            _print({"baseline": str(write_digests())})
+        else:
+            try:
+                _print(verify_dataset())
+            except DatasetChanged as exc:
+                print(str(exc))
+                return 1
+    elif args.cmd == "migrate":
+        from .store import (backfill_lang, connect as _c, migrate as _m,
+                            SCHEMA_VERSION)
+        conn = _c()
+        try:
+            result = _m(conn)
+            _print({"schema_version": SCHEMA_VERSION,
+                    "columns_added": result["added"],
+                    "columns_retired": result["retired"],
+                    "lang": backfill_lang(conn)})
+        finally:
+            conn.close()
     elif args.cmd == "worklist":
         from .worklist import build
         _print(build())

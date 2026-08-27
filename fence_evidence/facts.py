@@ -206,6 +206,234 @@ def _iter_candidates(conn: sqlite3.Connection, document_id: str | None) -> Itera
     yield from conn.execute(sql, params)
 
 
+# Obligation 15's vocabulary. `unexamined` is ours, not the contract's: the
+# regex matches a number and never asks what scoped it, and calling that
+# `assumed` claims an inference nobody performed. It collapses on publish.
+CONDITION_BASIS = ("stated", "assumed", "unexamined")
+
+
+def publish_condition_basis(basis: str) -> str:
+    """Collapse the internal vocabulary to the contract's `stated | assumed`."""
+    return "stated" if basis == "stated" else "assumed"
+
+
+# `4 inch (101 mm)` -- a parenthesised metric restatement of the value just
+# given. 4" is 101.600 mm, so the document disagrees with itself by 0.6 mm, and
+# obligation 4 says publish both rather than pick one. The unit alternatives are
+# spelled out so `(see detail A)` and `(typical)` cannot match.
+_DUAL_UNIT = re.compile(
+    r"""(?P<num>\d+(?:\.\d+)?)\s*
+        (?P<unit>mm|millimet(?:er|re)s?|cm|centimet(?:er|re)s?|m\b|met(?:er|re)s?)
+        \s*\)""",
+    re.IGNORECASE | re.VERBOSE)
+
+_UNIT_NORMAL = {"mm": "mm", "millimeter": "mm", "millimetre": "mm",
+                "millimeters": "mm", "millimetres": "mm",
+                "cm": "cm", "centimeter": "cm", "centimetre": "cm",
+                "centimeters": "cm", "centimetres": "cm",
+                "m": "m", "meter": "m", "metre": "m", "meters": "m", "metres": "m"}
+
+
+def dual_units(text: str | None) -> dict | None:
+    """The second unit a source states for a value it has just given.
+
+    Returns the alternate as its own verbatim lexeme plus a normalised value, or
+    None where the source states only one unit. Obligation 4 wants **every**
+    verbatim source lexeme, so this preserves the document's own digits rather
+    than recomputing them -- `83 mm` stays `83 mm` even though 3-1/4" is 82.550.
+    """
+    if not text:
+        return None
+    # An opening paren must precede, or `4 inch 101 mm)` would match on noise.
+    for m in _DUAL_UNIT.finditer(text):
+        open_paren = text.rfind("(", 0, m.start())
+        if open_paren == -1 or ")" in text[open_paren:m.start()]:
+            continue
+        unit = _UNIT_NORMAL.get(m.group("unit").lower())
+        if not unit:
+            continue
+        return {"value_original": f"{m.group('num')} {unit}",
+                "unit_original": unit,
+                "value_normalized": float(m.group("num")),
+                "unit_normalized": unit}
+    return None
+
+
+# --------------------------------------------------------------- A5, obligation 14
+# "A part publishes its manufactured `stock_length` where a document states one."
+#
+# The value is CONDITIONAL, not scalar, and the condition is colour: the same rail
+# is 16 ft in White and 12 ft in Blend, and at a 97" maximum spacing that is the
+# difference between a member running continuously through an intermediate post
+# and one cut per bay. Publishing a single number would licence a continuous rail
+# in a colour not supplied long enough to be one.
+#
+# Neither "stock length" nor "standard length" occurs anywhere in this corpus.
+# The real wording is "Standard rails are supplied in 16 foot lengths".
+_SUPPLIED = re.compile(
+    r"(?:supplied|furnished|available|sold|packaged)\s+in\s+"
+    r"(?P<num>\d+(?:\.\d+)?)\s*(?P<unit>foot|feet|ft\.?|inch(?:es)?|in\.?|')\s*"
+    r"(?:long\s+)?(?:lengths?|sections?|rails?)", re.IGNORECASE)
+# The parenthetical that carries the second colour: "(12 foot rails for Blend products)"
+_ALT_COLOUR = re.compile(
+    r"(?P<num>\d+(?:\.\d+)?)\s*(?P<unit>foot|feet|ft\.?|')\s*rails?\s+for\s+"
+    r"(?P<colour>[A-Z][A-Za-z]+)", re.IGNORECASE)
+_FOR_COLOUR = re.compile(r"\blengths?\s+for\s+(?P<colour>[A-Z][A-Za-z]+)")
+
+# Measured false positives. A price list is full of `8' Rail Insert Kit` and
+# `PRIVACY FENCE FILL KITS 8' SECTIONS` -- product names, not statements about
+# how rails are supplied -- and `cut to 95 1/2"` is what an installer does to a
+# rail, not how it arrives.
+_NOT_STOCK = re.compile(
+    r"insert\s+kit|fill\s+kits?|\bkit\b|\bheights?\b|\bhigh\b|\bwide\b|\bwidth\b"
+    r"|\bcut\s+to\b|\btrim\b|\bshorten|\bsubtract\b|\bSKU\b|Model\s*#"
+    r"|\bcent(?:er|re)s?\b|\bon\s+cent|\bo\.?c\.?\b|\bspacing\b|\bapart\b"
+    r"|(?:shim|cap)\s+stock|\bin\s+stock\b",
+    re.IGNORECASE)
+
+# A SKU dimension triple: `1-1/2" x 5-1/2" x 16' Rail`. This is where the data
+# actually is -- 735 instances, against 11 in prose. The third dimension is the
+# length; the first two are the profile.
+_TRIPLE = re.compile(
+    r"(?P<a>\d+(?:[-\s]\d+/\d+|\.\d+)?)\s*(?:\"|\u201d|in\.?|inch(?:es)?)\s*[xX\u00d7]\s*"
+    r"(?P<b>\d+(?:[-\s]\d+/\d+|\.\d+)?)\s*(?:\"|\u201d|in\.?|inch(?:es)?)\s*[xX\u00d7]\s*"
+    r"(?P<num>\d+(?:[-\s]\d+/\d+|\.\d+)?)\s*"
+    r"(?P<unit>\"|\u201d|in\.?|inch(?:es)?|'|\u2019|ft\.?|foot|feet)\s*"
+    r"(?P<trailer>[A-Za-z][A-Za-z \-]{0,28})", re.IGNORECASE)
+# The trailing noun must be a linear part. A price list is full of spacer blocks,
+# end loops and carrying cases that match the grammar exactly.
+_PART_WORD = re.compile(r"\b(rail|post|picket|board|plank|spindle|baluster"
+                        r"|channel|stiffener|insert)s?\b", re.IGNORECASE)
+_NOT_PART = re.compile(r"block|spacer|wood|loop|pipe|screw|bolt|nail|bracket"
+                       r"|hinge|latch|size|blend|kit|case", re.IGNORECASE)
+# `- White` on the end of a SKU description. For Freedom, which lists the same
+# 5x5 post at different lengths per colour, this suffix is the ONLY thing
+# expressing the condition -- no sentence anywhere states it.
+_SKU_COLOUR = re.compile(
+    r"[-\u2013]\s*(White|Sand|Gray|Grey|Tan|Clay|Almond|Khaki|Mocha|Cypress"
+    r"|Driftwood|Black|[A-Z][a-z]+\s+Blend|Blend)\b")
+
+MIN_STOCK_IN, MAX_STOCK_IN = 48.0, 288.0        # 4 ft to 24 ft
+
+
+def _fraction(num: str) -> float | None:
+    """`16`, `93-3/4`, `5.5`, `7/8` -> a float; None where it is not a number.
+
+    Returns None rather than raising: this is reached from a regex match, and a
+    caller that gets None skips the match, where an exception would abort a whole
+    extraction run over one odd string.
+    """
+    t = (num or "").strip().replace("\u2044", "/")
+    if m := re.match(r"^(\d+)[-\s](\d+)/(\d+)$", t):          # 93-3/4
+        return int(m.group(1)) + int(m.group(2)) / int(m.group(3))
+    if m := re.match(r"^(\d+)/(\d+)$", t):                      # 7/8
+        return int(m.group(1)) / int(m.group(2))
+    try:
+        return float(t)
+    except ValueError:
+        return None
+
+
+def _to_inches(num: str, unit: str) -> float | None:
+    # `_fraction`, not `float`: `_TRIPLE` deliberately captures `15-1/2` and
+    # `93-3/4`, and a bare float() raises on both. That was an unguarded
+    # ValueError in `cli facts --extract`.
+    v = _fraction(num)
+    if v is None:
+        return None
+    # Every glyph the corpus actually uses, not only the words. `93-3/4"` was
+    # silently returning None -- so SKU triples whose length used the inch mark
+    # were dropped rather than extracted, and nothing complained.
+    u = unit.lower().rstrip(".")
+    if u in ("foot", "feet", "ft", "'", "\u2019"):
+        return v * 12.0
+    if u in ("inch", "inches", "in", '"', "\u201d"):
+        return v
+    return None
+
+
+def _stock_from_triples(text: str) -> list[dict]:
+    """Lengths stated as the third dimension of a SKU triple."""
+    out = []
+    for m in _TRIPLE.finditer(text):
+        trailer = m.group("trailer").strip()
+        if _NOT_PART.search(trailer) or not (pw := _PART_WORD.search(trailer)):
+            continue
+        inches = _to_inches(m.group("num"), m.group("unit"))
+        if inches is None or not (MIN_STOCK_IN <= inches <= MAX_STOCK_IN):
+            continue
+        cond = {"part": pw.group(1).lower()}
+        # the trailer usually swallows the suffix ("Rail - White"), so look there
+        # first and only then at what follows
+        if c := _SKU_COLOUR.search(trailer + text[m.end():m.end() + 30]):
+            cond["colour"] = c.group(1)
+        out.append({
+            "value_original": f"{m.group('num')} {m.group('unit').rstrip('.')}",
+            "value_normalized": inches, "unit_original": m.group("unit"),
+            "unit_normalized": "in", "conditions": cond,
+            # The part is read off the SKU line itself; the colour, where present,
+            # is a suffix the publisher wrote. Both are the document speaking.
+            "condition_basis": "stated"})
+    return out
+
+
+def stock_lengths(text: str | None, *, element_type: str | None = None,
+                  text_source: str | None = None) -> list[dict]:
+    """Manufactured lengths a document states, with the colour that scopes them.
+
+    Returns one dict per (length, condition) pair -- two for the White/Blend
+    sentence, one for a bare statement. Empty where the text states no supplied
+    length, which is the common case.
+    """
+    # Scanned NOA drawings OCR into text that looks exactly like a SKU triple but
+    # states the *tested specimen's* members at 96" post spacing -- not orderable
+    # lengths. 176 measured false positives, removed by refusing the element kind.
+    if element_type in ("drawing", "drawing_label", "figure", "ocr_supplement"):
+        return []
+    if text_source in ("ocr", "image_ocr"):
+        return []
+    if not text or _NOT_STOCK.search(text):
+        return []
+    if triples := _stock_from_triples(text):
+        return triples
+    m = _SUPPLIED.search(text)
+    if not m:
+        return []
+    inches = _to_inches(m.group("num"), m.group("unit"))
+    if inches is None or not (MIN_STOCK_IN <= inches <= MAX_STOCK_IN):
+        return []
+
+    lexeme = f"{m.group('num')} {m.group('unit').rstrip('.')}"
+    tail = text[m.end():]
+
+    # "…16 foot lengths for White (12 foot rails for Blend products)"
+    primary_colour = None
+    if fc := _FOR_COLOUR.search(text[m.start():]):
+        primary_colour = fc.group("colour")
+    alts = [a for a in _ALT_COLOUR.finditer(tail)]
+
+    out = []
+    # The colour is `stated` only when the document names it in the same
+    # sentence. A bare "supplied in 16 foot lengths" has no condition and must
+    # not claim one -- `unexamined` says nobody looked for a colour, which is
+    # true, rather than `assumed`, which would claim an inference.
+    out.append({"value_original": f"{lexeme} lengths",
+                "value_normalized": inches, "unit_original": m.group("unit"),
+                "unit_normalized": "in",
+                "conditions": {"colour": primary_colour} if primary_colour else {},
+                "condition_basis": "stated" if primary_colour else "unexamined"})
+    for a in alts:
+        alt_in = _to_inches(a.group("num"), a.group("unit"))
+        if alt_in is None or not (MIN_STOCK_IN <= alt_in <= MAX_STOCK_IN):
+            continue
+        out.append({"value_original": f"{a.group('num')} {a.group('unit').rstrip('.')} rails",
+                    "value_normalized": alt_in, "unit_original": a.group("unit"),
+                    "unit_normalized": "in",
+                    "conditions": {"colour": a.group("colour")},
+                    "condition_basis": "stated"})
+    return out
+
+
 def extract_facts(*, document_id: str | None = None,
                   conn: sqlite3.Connection | None = None) -> dict:
     own = conn is None
@@ -214,12 +442,11 @@ def extract_facts(*, document_id: str | None = None,
         # Only regex-derived facts are regenerated here. Facts promoted from
         # verified table readings (extractor='table-read:...', see
         # promote_tables.py) must survive a re-extraction: promote_verified()
-        # only ever promotes a table_read_candidates row once
-        # (`promoted_fact_id IS NULL`), so deleting those facts here would
-        # both destroy 300+ human/agent-gated readings and leave
-        # table_read_candidates.promoted_fact_id pointing at rows that no
-        # longer exist -- with no way to re-promote them, since the
-        # candidate no longer looks unpromoted.
+        # only ever promotes a candidate that no fact already names, so
+        # deleting a regex fact cannot strand one. Note the pointer direction:
+        # the FACT names the candidate, so deleting a fact takes its link with
+        # it and nothing can dangle -- which is why the column was inverted.
+        # See docs/layering.md §3.
         if document_id:
             conn.execute("DELETE FROM facts WHERE document_id=? AND extractor LIKE 'regex-%'",
                         (document_id,))
@@ -236,6 +463,32 @@ def extract_facts(*, document_id: str | None = None,
             conf = row["ocr_confidence"]
             heading_path = json.loads(row["heading_path"] or "[]")
             conditions = _conditions(text, heading_path)
+
+            # A5 / obligation 14. Its own pass, because a stock length is
+            # conditional on colour and part rather than on the wind/exposure
+            # dimensions `_conditions` knows, and because the SKU-triple seam
+            # needs the element's kind to reject scanned drawings.
+            for sl in stock_lengths(text, element_type=row["element_type"],
+                                    text_source=row["text_source"]):
+                conn.execute("""INSERT INTO facts(document_id, version_id, page_no,
+                    element_id, fact_type, subject, value_original, value_normalized,
+                    unit_original, unit_normalized, conditions, condition_basis,
+                    condition_basis_note, value_alternates, evidence_text,
+                    extractor, ocr_derived, review_status, created_at)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (row["document_id"], row["version_id"], row["page_no"],
+                     row["element_id"], "stock_length_in",
+                     " > ".join(heading_path[-2:]) or None,
+                     sl["value_original"], sl["value_normalized"],
+                     sl["unit_original"], sl["unit_normalized"],
+                     json.dumps(sl["conditions"]), sl["condition_basis"],
+                     "the document states the part, and the colour where one is "
+                     "given, on the same line as the length"
+                     if sl["condition_basis"] == "stated" else None,
+                     None, text[:180].strip(), "regex-v1", int(from_ocr),
+                     "extracted", now()))
+                counts["stock_length_in"] = counts.get("stock_length_in", 0) + 1
+                total += 1
             for match in _scan_text(text):
                 fact_type = match["fact_type"]
                 fact_conditions = dict(conditions)
@@ -246,18 +499,34 @@ def extract_facts(*, document_id: str | None = None,
                 if from_ocr and (conf is None or conf < OCR_REVIEW_CONFIDENCE):
                     review = "flagged"
                 start = max(0, match["start"] - 90)
+                evidence = text[start:match["end"] + 90].strip()
+                # A2. The regex captures conditions by *proximity* -- it matches
+                # `exposure_category` near a number without establishing the
+                # document attached them to it (G15 records that failure). So a
+                # captured condition is `assumed`, and no conditions at all is
+                # `unexamined`: nobody looked. Neither is `stated`, which would
+                # require the document to have said so.
+                basis = "assumed" if fact_conditions else "unexamined"
+                # A3. Look for the second unit inside the value's own window,
+                # not the whole element, or a `(mm)` elsewhere on the page binds
+                # to the wrong number.
+                alt = dual_units(text[match["start"]:match["end"] + 40])
                 conn.execute("""INSERT INTO facts(document_id, version_id, page_no,
                     element_id, fact_type, subject, value_original, value_normalized,
-                    unit_original, unit_normalized, conditions, evidence_text,
+                    unit_original, unit_normalized, conditions, condition_basis,
+                    condition_basis_note, value_alternates, evidence_text,
                     extractor, ocr_derived, review_status, created_at)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                     (row["document_id"], row["version_id"], row["page_no"],
                      row["element_id"], fact_type,
                      " > ".join(heading_path[-2:]) or None,
                      match["match_text"], match["value_normalized"],
                      match["unit_original"] or None, match["unit_normalized"],
-                     json.dumps(fact_conditions), text[start:match["end"] + 90].strip(),
-                     "regex-v1", int(from_ocr), review, now()))
+                     json.dumps(fact_conditions), basis,
+                     "conditions captured by regex proximity, not asserted by the "
+                     "document" if fact_conditions else None,
+                     json.dumps([alt]) if alt else None,
+                     evidence, "regex-v1", int(from_ocr), review, now()))
                 counts[fact_type] = counts.get(fact_type, 0) + 1
                 total += 1
                 flagged += 1 if review == "flagged" else 0
@@ -296,6 +565,10 @@ def query_facts(fact_type: str | None = None, *, conditions: dict | None = None,
         rows = [dict(r) for r in conn.execute(sql, params)]
         for r in rows:
             r["conditions"] = json.loads(r["conditions"] or "{}")
+            # Same treatment as `conditions`, for the same reason: a caller
+            # reading one row should not get a dict for one JSON column and a
+            # raw string for the one beside it.
+            r["value_alternates"] = json.loads(r["value_alternates"] or "[]")
             resolved_page_image = resolve_asset(r.get("page_image_path"))
             r["page_image_path"] = rel(resolved_page_image) if resolved_page_image else None
         if conditions:

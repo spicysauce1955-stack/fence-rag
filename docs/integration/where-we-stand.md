@@ -96,9 +96,12 @@ binds.
 
 Level 2 is unreachable by construction: `reader_kind` is `agent` on all 1,225 readings and
 `reviewer` is NULL on every one. Not one human review has happened. (And 504 readings carry
-`cross_family_verified`, which sits in their promotion set today — two *agents* agreeing
-promotes a fact with no human in the loop. They are revoking it. That is their K1 and it is
-the right call.)
+`cross_family_verified`, which sat in their promotion set — two *agents* agreeing promoted a
+fact with no human in the loop. **They have now revoked it: `PROMOTABLE` is `("accepted",
+"corrected")` as of 2026-08-25, the 324 machine-promoted facts are un-promoted, and the
+level-2 population is zero.** That was their K1 and it was the right call. The readings are
+retained with their crops, and the agreement itself now publishes as
+`CURATION_MACHINE_CONSENSUS` — see `planning-asks.md` §3.3.)
 
 **But delta item 2 already took the teeth out of it.** Now that *Planning* applies the
 source policy, those rows cross anyway — published at an honest level 1, rejected by our
@@ -106,7 +109,7 @@ policy, and **visible in the decision graph as rejected** rather than silently a
 is the difference between *"the snapshot is thin"* and *"the snapshot is thin and nobody can
 see why."*
 
-So the ranking stands. Expect the first structural snapshot to be thin: 882 facts — 44.6%
+So the ranking stands. Expect the first structural snapshot to be thin: 774 facts — 46.9%
 of the store — come from installation manuals and none clears level 2 on day one.
 
 ## An honest note on what is not done

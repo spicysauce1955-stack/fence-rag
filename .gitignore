@@ -5,6 +5,7 @@ workspace/pylibs/
 workspace/derived/
 workspace/indexes/
 workspace/tests/snapshots/
+workspace/tests/snapstore/
 
 # Secrets — never commit. This repository is public.
 .env

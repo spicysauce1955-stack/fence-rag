@@ -25,6 +25,18 @@ contract it implements, including 12 numbered prohibitions), `docs/target-archit
 (informative future direction), `rag-pipeline-plan.md` (historical, superseded, kept only because
 the spec and the guide cite it).
 
+`docs/layering.md` is a **proposal** naming five layers (raw → canonical → assertions →
+entities → published) and one rule: *every reference points down a layer, never up*. The rule
+already landed once — it inverted `table_read_candidates.promoted_fact_id` into
+`facts.from_candidate_id` at `SCHEMA_VERSION = 3`, deleting a cleanup statement and a test that
+policed a bug the schema now forbids. §5 **decides** what the hand-researched dataset is,
+on measured evidence: its *values* are curated like any other source (authority 20, must
+beat a page to be accepted), while its *composition graph* — 32 lines, 59 assemblies, 225
+components — is retained as authored structure, because invariant 10 says structure is
+authored and no reader produces a `PanelSpec`. That mostly resolves this file's "read-only
+input" reading in its own favour. `workspace/catalog/data-digests.json` now baselines all
+16 dataset files; `cli dataset --verify` checks them.
+
 Read in this order when picking the work up cold: `docs/state-and-gaps.md` (measured state and
 every known gap), `docs/build-plan.md` (what to build next and in what order), then
 `docs/integration/README.md`. `docs/phase-checkpoints.md` records what was built, tested and
@@ -42,14 +54,19 @@ cd docs/integration && sha256sum -c contract.sha256   # both lines must print OK
 
 Do not edit `contract.md` or `AMENDING.md`. A change to a BINDING item goes through
 `AMENDING.md` — four triggers, five steps, and `amendments/001` is the worked example of one
-found and accepted. Registry additions (a new part type, warning code, condition dimension,
+found and accepted. Items noticed but not yet filed wait in `amendments/CANDIDATES.md`;
+§4 batches everything except a trigger-A falsification or a trigger-B blocker. Registry additions (a new part type, warning code, condition dimension,
 source class) are **not** amendments and need no negotiation. If you are changing a binding item
 and there is no file in `amendments/`, stop.
 
 The API surfaces that must not move are in `contract.md` §1.5; transport, framework, auth and
 pagination are deliberately unspecified. `audit/` is the reasoning behind every decision, kept in
 order, and `audit/10-ratification-v1.0.md` §3.2 is the non-compliance this platform declared at
-signature — still in force, and Phase A of the build plan is closing it.
+signature — **partly closed as of 2026-08-25**. Its live violation (obligation 6) and its
+three representational gaps (obligations 4, 15, 10) closed with build-plan A1-A5, all
+five of which landed 2026-08-25. Still in force: the unbuilt publishing-layer
+obligations — and note that nothing is published at curation level 2, nor can be,
+because no interface exists for a person to accept a reading.
 
 Nothing in `docs/integration/` displaces the documents above. Those govern how this platform
 works; the contract governs only what it exposes.
@@ -60,9 +77,11 @@ slice, a staged plan, and acceptance criteria. It sits in **tier 3 — this team
 the contract is silent on it. It remains **a proposal under review**: nothing in it is implemented,
 no corpus-wide curation has run, and the projection has not been regenerated. Read
 `docs/curation/README.md` first. One exception to "proposal": its C0 — removing
-`cross_family_verified` from `table_review.PROMOTABLE`, which today lets two agent readings promote
-a fact with no human review — is now a **commitment** made in writing at ratification, and is item
-A1 of `docs/build-plan.md`.
+`cross_family_verified` from `table_review.PROMOTABLE`, which let two agent readings promote a fact
+with no human review — was a **commitment** made in writing at ratification, and **landed
+2026-08-25** as item A1 of `docs/build-plan.md`. `PROMOTABLE` is now `("accepted", "corrected")`,
+the 324 machine-promoted facts are un-promoted, and all 1,225 readings are retained with their
+crops as a review queue. See `docs/state-and-gaps.md` G17.
 
 ## Commands
 
@@ -77,6 +96,13 @@ python3 -m fence_evidence.cli evaluate        # gold question set
 python3 -m fence_evidence.cli facts --extract
 python3 -m fence_evidence.cli report          # regenerate workspace/reports/
 python3 -m fence_evidence.cli audit           # relevance audit of the retrieval projection
+python3 -m fence_evidence.cli migrate         # additive schema migration + backfills; safe to re-run
+python3 -m fence_evidence.cli dataset --verify   # data/ still matches its SHA-256 baseline
+python3 -m fence_evidence.cli snapshot --build   # publish source_docs + warnings + gaps
+python3 -m fence_evidence.cli snapshot --list
+python3 -m fence_evidence.cli refs --verify     # every published citation still resolves
+python3 -m fence_evidence.cli refs --index      # rebuild the ref index and report it
+python3 -m fence_evidence.cli promote-tables --revoke --apply  # un-promote what no person reviewed
 python3 tests/run_tests.py                    # whole suite, stdlib only
 
 # the pre-existing dataset builders (they own their outputs; see below)
@@ -176,7 +202,11 @@ data/                       derived/   page images + region crops (4.4 GB, git-i
         |
         v
    canonical store  ---->  retrieval_units + FTS5  ---->  search result
-   (11 tables)             (derived, rebuildable)         + page image + bbox
+   (13 tables)      |      (derived, rebuildable)         + page image + bbox
+                    |
+                    +----->  canonical.py -> snapshot.py -> snapshot_store.py
+                             a published Snapshot: hashed, verified, write-once
+                             (source_docs + warnings + gaps only, so far)
 ```
 
 The split that matters: **canonical** tables (`documents`, `document_versions`, `pages`,
@@ -187,9 +217,18 @@ single PDF, and a test asserts the rebuild is byte-identical. Most retrieval-qua
 be projection changes, not re-extractions.
 
 Module map: `paths.py` (write guard) · `manifest.py` (Phase 0) · `extract.py` + `layout.py` +
-`hocr.py` + `tables.py` + `quality.py` (extraction) · `store.py` (schema, writers, projection) ·
-`ingest.py` (orchestration) · `relations.py` (supersession) · `retrieval.py` (the six interfaces) ·
-`evaluate.py` (gold set) · `facts.py` (Phase 6) · `reports.py` · `cli.py`.
+`hocr.py` + `tables.py` + `quality.py` + `lang.py` (extraction) · `store.py` (schema, writers,
+projection, additive migration) · `ingest.py` (orchestration) · `relations.py` (supersession) ·
+`retrieval.py` (the six interfaces) · `evaluate.py` (gold set) · `facts.py` (Phase 6 + A5) ·
+`reports.py` · `cli.py`.
+
+Publishing, added 2026-08-25: `canonical.py` (deterministic bytes — obligation 1 lives here) ·
+`snapshot.py` (the builder and the `verify()` gate) · `snapshot_store.py` (write-once, tombstone
+rather than delete) · `dataset.py` (the hand-researched dataset's SHA-256 baseline) ·
+`crops.py` (the normative source-ref transform — **built, measured, and deliberately unwired**
+until Phase B's endpoint exists) ·
+`refs.py` (the evidence identifier and its rebuildable inverse — one owner; the
+`sref_` scheme in source-refs-design.md §1 is superseded)
 
 Things that will bite you if you don't know them (all measured, see the corpus audit):
 - Six documents have text layers that decode to mojibake and are re-OCR'd per page. Character-count
@@ -208,6 +247,31 @@ Things that will bite you if you don't know them (all measured, see the corpus a
 - No-answer detection does not work on near-miss questions and cannot be fixed with a threshold —
   the features measurably do not separate. Report `no_answer_precision` and
   `false_unsupported_rate` together, never one alone.
+- **Never derive `lang` from `corpus_track`.** That axis is a standards regime (GB vs ASTM), not
+  a language: there are **zero CJK-bearing elements** in this corpus and the China-track documents
+  are English-language export catalogues. And `en` is not a safe default either — 1,308 elements
+  are French or Spanish, in the *same PDFs* as the English (Barrette prints EN on pages 2–13 and
+  FR/ES on 14–22). `tests/test_basis_columns.py` fails if the shortcut returns.
+- **Every reference points DOWN a layer, never up.** A row may name what it was derived FROM,
+  never what was derived FROM IT. `docs/layering.md` has the reasoning;
+  `tests/test_pointer_direction.py` enforces it. It already caught one defect —
+  `promoted_fact_id` — whose inversion deleted a cleanup statement and a test.
+- **`retain_until` is deliberately outside the snapshot hash.** It moves with the clock, so
+  hashing it would mean two builds over identical knowledge never matched. What exactly belongs
+  in "the canonical member list" is not fully specified; that is a reading, not a quote.
+- **`crops.py` is built, measured and unwired on purpose.** Only tests and
+  `scripts/measure_crop_cost.py` call it. It backs `GET /source-refs/{id}`, which is Phase B.
+- **There is no way for a person to accept or correct a reading.** `PROMOTABLE` is
+  `("accepted", "corrected")` and nothing in the package writes either — so
+  `promote-tables --apply` is a no-op today. The review loop is a hole in the middle, not a
+  missing tail, and it is the critical path.
+- **`ref_id` embeds a bbox, and a re-extraction can move it.** A 0.02pt shift
+  changes the id completely and `delete_version_rows()` removes the rows the old
+  id named, so a toolchain upgrade breaks published citations retroactively and
+  obligation 3 with them. All 431 currently resolve; `cli refs --verify` is the
+  guard. The fix is extraction editions — see `docs/four-layer-model-design.md`
+  §5.1 and G38. **Do not change `ref_id`'s formula**; published snapshots depend
+  on it byte-for-byte.
 
 ## Constraints when building the pipeline
 

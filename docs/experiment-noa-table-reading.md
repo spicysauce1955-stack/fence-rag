@@ -1,7 +1,8 @@
 # Experiment design — reading the scanned NOA table pages
 
 ```text
-Status: Design. Not implemented.
+Status: RAN. 1,225 readings loaded; see §'Superseded by measurement'
+        below and docs/state-and-gaps.md G13/G17.
 Scope:  Table extraction from pages retrieval has already selected.
         Not visual search, not page-level visual retrieval, not embeddings.
 Gate:   No numeric fact from this path may be promoted without human review.

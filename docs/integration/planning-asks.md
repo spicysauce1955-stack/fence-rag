@@ -88,7 +88,7 @@ prove the adapter, not the coverage.
 
 ---
 
-## 3. Two lists we cannot write ourselves
+## 3. Three lists we cannot write ourselves
 
 ### 3.1 The ten `SOURCE_*` codes, final
 
@@ -116,6 +116,43 @@ count and a verbatim exemplar, as you proposed.
 Same treatment — platform codes, both bundles. The other 215 distinct warnings
 publish as source warnings, verbatim and `lang`-tagged, and we render them
 untranslated.
+
+### 3.3 One new platform code — `CURATION_MACHINE_CONSENSUS`
+
+**A registry addition, not an amendment.** `contract.md` §2 says adding an entry is
+never a breaking change, and `AMENDING.md` §2 lists warning codes as explicitly not
+amendable. Nothing binding moves. You need one `warning.CURATION_MACHINE_CONSENSUS`
+entry in each of `he.json` and `en.json`; that is the whole ask.
+
+**Why it exists.** Your `where-we-stand.md` read of our K1 was right, and we have now
+done it: `cross_family_verified` is out of `table_review.PROMOTABLE`, the 324 facts it
+promoted are un-promoted, and **the level-2 population of this store is zero**. But
+revoking the promotion threw away a real signal along with the false label — a reading
+that two independent model families agreed on is not the same thing as a reading nobody
+has checked, and at level 1 they are currently indistinguishable.
+
+This code carries that difference without touching the scale.
+
+| | |
+|---|---|
+| Code | `CURATION_MACHINE_CONSENSUS` |
+| Rides on | `Provenance`, beside `curation_level` — not on `SourceRef` |
+| Params | `readers` (int), `families` (list of str), `crop_sha256` (str) |
+| Today | **168 distinct cells**, 504 readings, 3 readers each, families `claude-sonnet` + `openai-codex` |
+
+**What it does not do, said plainly.** It does not affect admissibility. These rows
+publish at **level 1** and your policy rejects them for structural tasks exactly as
+`where-we-stand.md` describes — crossing anyway, visible in the decision graph as
+rejected rather than silently absent. The code is evidence, not a lever: it tells a
+curator which level-1 rows are worth reviewing first, and it lets a frontend show *why*
+a rejected row was nonetheless worth surfacing. If you find yourself writing a policy
+row that keys on it, that is the signal that this should have been an amendment
+instead — tell us and we will file one.
+
+**The distinction we are protecting.** Machine agreement ranks a review queue. It never
+clears it. The failure this closes is a number that reads as checked because two models
+happened to concur, and the values concerned are footing depths and post spacings, where
+a confidently wrong answer is the failure mode.
 
 ---
 

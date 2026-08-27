@@ -1,0 +1,69 @@
+{
+  "files": {
+    "china/data/china-installation-technical.json": {
+      "bytes": 18466,
+      "sha256": "354f7ecd1aba3390bad12babfca601347147a270bc2502b55542b79d233bf675"
+    },
+    "china/data/china-manufacturers.json": {
+      "bytes": 28505,
+      "sha256": "237ed2fa2122ad6aae104484e517097570d290b3fdb566d4cda86116e05d3ec7"
+    },
+    "data/barrette-outdoor-living.json": {
+      "bytes": 45640,
+      "sha256": "ee1e6e90272819d1b77023c6b374c69a6eaf6a813520df680e43be954ff8b486"
+    },
+    "data/certainteed-bufftech.json": {
+      "bytes": 41724,
+      "sha256": "730f60e008e85367aa79528e0d4061a26ce1389707e902e92707d2a8cb699483"
+    },
+    "data/freedom-outdoor-living.json": {
+      "bytes": 42359,
+      "sha256": "c26804bfc94fa989735cd753471e36105cba9eb8ca75e8a9ccdb0833e71cbd4b"
+    },
+    "data/illusions-vinyl-fence.json": {
+      "bytes": 30496,
+      "sha256": "4e3ace10d39f72cf56395371da63390b216005ed767e49b9f8b27d162bad4a58"
+    },
+    "data/industry-standards.json": {
+      "bytes": 27017,
+      "sha256": "9ee070e708036738a9e362c43b821ae7864427f51de1767d931dbc97aa066687"
+    },
+    "data/structural/barrette-outdoor-living-structural.json": {
+      "bytes": 28319,
+      "sha256": "61c14439efefeda73529074a33a7d8751906629158e6ee197df6506d027e48e0"
+    },
+    "data/structural/certainteed-bufftech-structural.json": {
+      "bytes": 28802,
+      "sha256": "0e246301f5cd4d43373a0c78577b05f65853e2eb78f73e6df2d527af08877802"
+    },
+    "data/structural/freedom-outdoor-living-structural.json": {
+      "bytes": 35599,
+      "sha256": "75494c51a24077211f0dfadf54ff013ed5bb43921bcd20b33cc4bf83ac60751e"
+    },
+    "data/structural/illusions-vinyl-fence-structural.json": {
+      "bytes": 14228,
+      "sha256": "b2e1e2ceac9b756d1efce79e911a86c93cd883dcfb9c332ba33094a4bf3450b3"
+    },
+    "data/structural/industry-standards-structural.json": {
+      "bytes": 30599,
+      "sha256": "9055e99c408b8d21f4ec2cbc766219e9acaafc8823fe83b39f6b7756dfcf9927"
+    },
+    "data/structural/wam-bam-structural.json": {
+      "bytes": 19800,
+      "sha256": "b6c739096c952a2b12e6d77b5e1fb79fdb571bbb179d2fd996ee027a4350eb94"
+    },
+    "data/structural/weatherables-structural.json": {
+      "bytes": 26934,
+      "sha256": "bf70bab18759d460e61062a90aebcd367ca7a202889cb18823c54739f1acb668"
+    },
+    "data/wam-bam.json": {
+      "bytes": 54232,
+      "sha256": "5fbdc5ac204f74b2f6f3fb00e7a96e35de4497c1c342553569d4e25af7c95ecf"
+    },
+    "data/weatherables.json": {
+      "bytes": 59007,
+      "sha256": "09e52ff01e9d1f1dea7e36dc472563ffe6f49a26c4e832a2833fee3c9d85d3f1"
+    }
+  },
+  "why": "A baseline of the hand-researched dataset before any curation phase touches it. `data/` has one commit in its history and carries four claims contradicted by their own sources (state-and-gaps G16), which are still present verbatim because correcting someone's research is their call. If a value is ever silently amended, this is what makes the change visible rather than invisible. Acceptance criterion P1b."
+}

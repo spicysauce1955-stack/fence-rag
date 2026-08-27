@@ -37,7 +37,7 @@ the boundary: what crosses it, in what shape, and what each side promises the ot
 | [`contract.md`](contract.md) | **FROZEN v1.1, ratified.** What crosses the boundary, and the promises each side makes. Verify with `sha256sum -c contract.sha256` |
 | [`AMENDING.md`](AMENDING.md) | How and when the frozen contract may change — four triggers, five steps, and what is *not* an amendment |
 | [`amendments/`](amendments/) | Filed amendments. **001** — obligation 6's superseded clause, accepted, cut as v1.1 |
-| [`amendments/`](amendments/) | Filed amendments. **001** — obligation 6 carries a clause §1.4 marks superseded (trigger D) |
+| [`amendments/CANDIDATES.md`](amendments/CANDIDATES.md) | Noticed, not filed. Three open: `curation_level` 0-vs-1, `Warning.attaches_to.ref`, and whether a `PanelSpec` member edge is a "value" |
 | [`knowledge-datamodel.md`](knowledge-datamodel.md) | Every entity, field, relationship and invariant, with a traceability map from each audit finding |
 | [`planning-asks.md`](planning-asks.md) | What Planning needs from this platform, ordered by impact |
 | [`source-refs-design.md`](source-refs-design.md) | `GET /source-refs/{id}` — the design, with [`fixtures/`](fixtures/) |
@@ -61,7 +61,7 @@ Kept in order, because a later disagreement is usually a re-run of an earlier on
 | [`07-delta-disposition.md`](audit/07-delta-disposition.md) | **Planning's decision.** All four accepted; the falsified premise was worse than measured — height varies *along* a run, not merely between runs |
 | [`08-close-of-round.md`](audit/08-close-of-round.md) | **Knowledge closes both threads** — `disputed` accepted, stagger conceded to cut planning, the level-2 risk confirmed and defused. Corrects its own 77→20 count and re-ranks K4 on the cell-coverage numbers |
 | [`09-round-closed.md`](audit/09-round-closed.md) | **Planning acknowledges.** Correction propagated, K4 re-ranked, and Knowledge's account of the boundary-addition problem adopted over Planning's own |
-| [`10-ratification-v1.0.md`](audit/10-ratification-v1.0.md) | **The v1.0 record — never ratified.** Planning signed; Knowledge did not, because obligation 6 read wrong cold. Its §3.2 is the declared non-compliance, still in force |
+| [`10-ratification-v1.0.md`](audit/10-ratification-v1.0.md) | **The v1.0 record — never ratified.** Planning signed; Knowledge did not, because obligation 6 read wrong cold. Its §3.2 is the declared non-compliance — **partly closed 2026-08-25** by build-plan A1-A5, all of which landed; the unbuilt publishing-layer obligations remain |
 | [`11-ratification-v1.1.md`](audit/11-ratification-v1.1.md) | **RATIFIED.** Both sides signed v1.1. The last document on the boundary until an amendment or a release |
 
 ---

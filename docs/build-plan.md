@@ -1,14 +1,16 @@
 # Build plan — what this component builds next
 
 ```text
-Status:   The starting point for implementation. Written at the close of the
-          integration rounds, 2026-08-25, with contract v1.1 ratified by both teams.
+Status:   Written at the close of the integration rounds, 2026-08-25, with contract
+          v1.1 ratified by both teams. **Phase A is complete (A1-A5). Phase B is
+          next** — and the review verb belongs with it, see §2 Phase B.
 Authority: Advisory on sequencing. The authorities are unchanged —
           docs/mvp-implementation-spec.md for how this platform works, and
           docs/integration/contract.md (FROZEN v1.1) for what crosses the boundary.
 Read first: docs/state-and-gaps.md (what is measured and true today), then
-          docs/integration/audit/10-ratification-v1.0.md §3.2 (what we declared
-          we cannot yet satisfy, signed and still in force).
+          docs/phase-checkpoints.md "Phase A" for what closing it actually taught,
+          then docs/integration/audit/10-ratification-v1.0.md §3.2 (what we
+          declared we cannot yet satisfy — now partly closed, see §0).
 ```
 
 ## 0. Where the work stands
@@ -18,17 +20,27 @@ contract both teams have signed, and `docs/integration/` needs no more design wo
 open items are work items, not agreements.
 
 **What exists:** a source-preserving evidence store over 144 documents / 2,147 pages /
-81,794 elements, with FTS5 retrieval, a fact layer, supersession relations and a
-regenerable projection. 256 tests pass.
+81,794 elements, with FTS5 retrieval, a fact layer (1,706 facts, 12 types), supersession
+relations, a regenerable projection — and, since 2026-08-25, **a first published
+snapshot**: 62 `source_docs`, 282 `warnings`, 63 `gaps`, hashed and stored write-once.
+419 tests pass.
 
-**What does not exist:** the publishing layer. Nothing this platform holds crosses the
-boundary yet — there is no snapshot, no `ParameterTable`, no `Gap`, no part-type spine, no
-API surface at all. Twelve of the eighteen obligations describe that layer, and we declared
-all twelve unbuilt at signature.
+**Phase A is closed.** All five items landed, and each was a promise already made in
+writing at ratification. The level-2 population is zero, which is the honest number:
+`reviewer` is NULL on all 1,225 readings. What closing it *taught* is in
+`docs/phase-checkpoints.md` — several items turned out to rest on a premise that did not
+hold, and two of them found defects in code written the same day.
 
-**The one live violation**, also declared: `cross_family_verified` sits in
-`table_review.PROMOTABLE`, so two agent readings promote a fact with no person involved.
-324 facts are promoted that way, and `reviewer` is NULL on all 1,225 readings.
+**What does not exist:** most of the publishing layer. No `ParameterTable`, no `Part`, no
+part-type spine, no HTTP surface. And **no way for a person to accept or correct a
+reading** — the review loop is implemented on both sides of the human decision and has a
+hole where the decision goes. That hole, not the publisher, is the critical path: A1 made
+human review the only route back to curation level 2.
+
+**Two things are waiting on the other team**, logged rather than filed:
+`docs/integration/amendments/CANDIDATES.md` C1 (`curation_level` 0 vs 1 is never defined,
+and three binding mechanisms read it), C2 (`Warning.attaches_to.ref` is untyped) and C3
+(whether a `PanelSpec` member edge is a "value" — the L4 carve-out depends on it).
 
 ## 1. What must not move
 
@@ -65,14 +77,19 @@ Small, mechanical, and every one of them is a promise already made in writing.
 
 | | Obligation | What |
 |---|---|---|
-| A1 | 6 | **Revoke `cross_family_verified` from `table_review.PROMOTABLE`** (K1). Takes the level-2 population to zero, which is the honest number until a person reviews something. Do not soften it. |
-| A2 | 15 | Move `_applicability_basis` **out of** `conditions` — 324 facts carry it as an underscore-prefixed free-text key inside a field that publishes as condition dimensions. Add `condition_basis: stated \| assumed`. |
-| A3 | 4 | Represent a **disagreeing second unit**. 48 distinct dual-unit statements across 12 documents (`4 inch (101 mm)`, where 4″ is 101.600 mm). The schema holds one `value_original`/`unit_original` pair and cannot express them. |
-| A4 | 10 | Record `lang` on text. No language field exists anywhere in the store; publishing `en` by assertion is an assumption, and obligation 10 exists to keep those visible. |
-| A5 | 14 | Extract `stock_length`. *"Standard rails are supplied in 16 foot lengths"* is text, not a fact. Note it varies by colour — 12 ft for Blend — so it is conditional, not a scalar. |
+| A1 | 6 | ~~**Revoke `cross_family_verified` from `table_review.PROMOTABLE`** (K1).~~ **DONE 2026-08-25.** Level-2 population is zero. Facts 1,976 → 1,652; all 1,225 readings retained with crops via `revoke_machine_promotions()`. The signal survives as the new platform warning code `CURATION_MACHINE_CONSENSUS` (`integration/planning-asks.md` §3.3) — a registry addition, no amendment. |
+| A2 | 15 | ~~Move `_applicability_basis` **out of** `conditions`~~ **DONE 2026-08-25.** `facts.condition_basis` + `condition_basis_note`; the writers in `promote_tables.py` and `table_review.py` were fixed too, not just the rows. The enum has a **third** internal value, `unexamined` (nobody looked), publishing as `assumed`. Today: 117 assumed / 1,538 unexamined / 59 stated. Original item text: — an underscore-prefixed free-text key inside a field that publishes as condition dimensions. Add `condition_basis: stated \| assumed`. **Note: A1 changed this item's premise.** The 324 facts that carried the key were the machine-promoted ones, so the store now holds **0**. The defect is *latent, not gone* — `promote_tables.promote_verified()` still writes `conditions["_applicability_basis"]`, so it returns the moment human review starts promoting. Fix the writer, not the rows. |
+| A3 | 4 | ~~Represent a **disagreeing second unit**.~~ **DONE 2026-08-25** — `facts.value_alternates`, JSON, beside the primary pair. The declared gap is closed: the schema can now express a disagreeing second unit. **Only 3 facts carry one**, because coverage is bounded by what the extractor extracts — 431 elements across 34 documents contain a dual-unit statement and only 6 of them produce any fact at all. Populating it broadly needs component-dimension extraction, which does not exist. Original item text: 48 distinct dual-unit statements across 12 documents (`4 inch (101 mm)`, where 4″ is 101.600 mm). The schema holds one `value_original`/`unit_original` pair and cannot express them. |
+| A4 | 10 | ~~Record `lang` on text.~~ **DONE 2026-08-25** — `elements.lang` + `elements.lang_basis`, all 81,794 tagged: 58,033 `en`, 22,453 `und`, 674 `es`, 634 `fr` — **zero `zh`**, and nothing `measured`. Language is *not* derived from `corpus_track`: that shortcut would have been wrong on every row, because the China-track documents are English-language export catalogues and the corpus has zero CJK. Nothing claims `measured`. Original item text: No language field exists anywhere in the store; publishing `en` by assertion is an assumption, and obligation 10 exists to keep those visible. |
+| A5 | 14 | ~~Extract `stock_length`.~~ **DONE 2026-08-25.** 54 facts, 51 with a `stated` colour or part condition. **The case obligation 14 names is in the store: 192 in for White, 144 in for Blend.** Two seams: the prose *"Standard rails are supplied in 16 foot lengths for White (12 foot rails for Blend products)"*, and SKU dimension triples (`1-1/2" x 5-1/2" x 16' Rail`), which is where the data actually is. Neither *"stock length"* nor *"standard length"* occurs anywhere in the corpus — the build plan's example phrasing is not the corpus's. A naive `N ft <part>` pattern measures at **18.6% precision** (127 of 156 wrong, dominated by 89 hits of `8' Picket`, a gate width followed by the field name "Picket Style"), so every guard is a measured false-positive class. Original item text: *"Standard rails are supplied in 16 foot lengths"* is text, not a fact. Note it varies by colour — 12 ft for Blend — so it is conditional, not a scalar. |
 
 **Done when:** every item above is measurable in the store and `docs/state-and-gaps.md`
 records the new numbers.
+
+**Phase A is complete** (2026-08-25) — A1 through A5. `schema_version` moved 1 → 3, and
+`store.ensure_columns()` now applies additive migrations so an existing store no longer
+meets a new column as `no such column`. The new state is visible in
+`workspace/reports/facts-report.md` and recorded as G32-G37 in `state-and-gaps.md`.
 
 ### Phase B — `GET /source-refs/{id}`
 
@@ -87,11 +104,27 @@ implementation**.
 - **No rotation transform.** `pdftotext -bbox-layout` already reports word boxes in display
   space. That bug was found and removed once.
 - 73,894 of 81,794 boxed elements have no crop, so this renders on demand rather than
-  serving a cache. **K3 is open: cold render cost is unmeasured.** Measure it before a queue
-  is built on it.
+  serving a cache. ~~**K3 is open: cold render cost is unmeasured.**~~ **K3 CLOSED
+  2026-08-25** — `workspace/reports/k3-crop-render-cost.md`. 24.8 ms p50, 308 ms p95, 5.6 s
+  p99; windowing costs a tenth of a full page; the p99 is nine large scanned documents, two
+  of them the Showtech China catalogs. **Render on demand; cache the page, not the element;
+  no pre-render pass.** The review queue's 504 readings sit on **10 pages** — a 50-row
+  screen is 1.3 s cold. `fence_evidence/crops.py` implements the §4.1 transform and is the
+  foundation Phase B builds on.
 - The ten `SOURCE_*` warning codes are final and already published to Planning.
 
-**Done when:** the seven fixtures round-trip against the live endpoint byte-for-byte.
+**And the review verb belongs here, not later.** `table_review.PROMOTABLE` is
+`("accepted", "corrected")` and **nothing in the package writes either one** — the only
+places they are set are test fixtures simulating a reviewer who does not exist. So
+`promote-tables --apply` can only ever be a no-op today, and `worklist`'s instruction
+*"confirm or correct, then promote"* names nothing runnable. What is missing, precisely:
+a verb like `table-review --accept ID --reviewer NAME [--value CORRECTED]` writing
+`review_status`, `reviewed_value`, `reviewer` and `reviewed_at`; and a way to *see* the
+crop beside the reading while deciding, which is what this phase's endpoint provides.
+`mark_cross_family_verified` also exists and is orphaned — no CLI verb reaches it.
+
+**Done when:** the seven fixtures round-trip against the live endpoint byte-for-byte,
+and a person can accept a reading and see it become a fact.
 
 ### Phase C — what Planning is waiting on
 
