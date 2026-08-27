@@ -617,7 +617,7 @@ retaining an edition while any un-tombstoned snapshot cites it. ~31 MB per
 edition on a 69 MB store. Designed in `docs/four-layer-model-design.md` §5.1;
 plan 2 of `docs/four-layer-plan-1-refs.md`'s sequence.
 
-### G39 — `snapshot --build --dry-run` stores anyway — DETECTED, NOT FIXED
+### G39 — `snapshot --build --dry-run` stores anyway — FIXED
 
 `cli.py`'s snapshot dispatch is:
 
@@ -640,18 +640,49 @@ delete one. An operator who reaches for `--dry-run` specifically to preview a
 build without committing it instead adds a permanent row to a store that has
 no way to undo the mistake.
 
-**No published artifact was harmed.** The one committed snapshot,
+**No published artifact was harmed** at the time this was written. The one
+committed snapshot,
 `02a8833be1f0da2048b039e4e42a5c81de8fba2b4851d5e12c7662d14d43ceac.json`
 (md5 `67188296dc37d6e11c66d23203320297`), was built with plain `--build`; this
-gap was found by reading the dispatch logic, not by triggering it, and
-`snapshot --build`/`--dry-run` were not run against the live store while
-diagnosing it.
+gap was found by reading the dispatch logic, not by triggering it.
 
-**Not fixed here.** The fix is a one-line change —
-`sub.add_parser("snapshot", ...)`'s `--build` and `--dry-run` arguments need
-`add_mutually_exclusive_group()` so the two cannot both be true — but that is
-a CLI *behaviour* change, out of scope for the branch that found it, and is
-deferred to its own commit.
+**Fixed 2026-08-27.** Not with `add_mutually_exclusive_group()` as this entry
+originally proposed. That would raise `SystemExit` from argparse rather than
+returning a code, breaking the pattern `tests/test_refs.py` established for the
+sibling branch — `main(argv)` returns, the test asserts on the return value and
+on `"choose one of"` in stdout. The landed fix mirrors `refs` instead: count the
+four modes, and refuse unless exactly one is set.
+
+```python
+modes = (bool(args.build), bool(args.dry_run), bool(args.list),
+         args.get is not None)
+if sum(modes) != 1:
+    _print({"error": "choose one of --build, --dry-run, --list, --get"})
+    return 2
+```
+
+Requiring exactly one mode is what makes the storage gate sound: with `--build`
+and `--dry-run` mutually exclusive, `if args.build:` can no longer fire on a run
+the caller asked to be dry. It also closes the bare-`snapshot` exit-0 case in the
+same guard, so the two defects in this entry have one fix.
+
+**The fix cost one accidental artifact, and the record should say so.** Verifying
+that the new tests actually fail against the old code meant running
+`snapshot --build --dry-run` against the real store with the fix stashed — which
+is the defect, so it stored. `workspace/snapshots/9a5fdebb…156d0d.json`, tenant
+`default`, 62 source docs / 282 warnings / 63 gaps, exists because of that run.
+It is **not corrupt or spurious**: a subsequent `--dry-run` under the fix
+rebuilds the identical `snapshot_id`, so the bytes are exactly what a legitimate
+`--build` for the `default` tenant produces. It was never published and no run
+stamped its hash. Disposition is open — deleting it contradicts the store's
+write-once discipline, and tombstoning it would record an excision that never
+happened.
+
+The general lesson is cheap and worth keeping: **a red-green check against a
+destructive defect reproduces the destruction.** Where the defect writes to a
+store with no delete, prove the test fails against a copy or a temporary root,
+not against the live one. `put_snapshot` already takes `root`; the test did not
+use it because it drives the CLI, which does not expose it.
 
 **A second, related instance.** `refs`'s own usage-error branch (added by the
 same plan, `cli refs` with neither or both of `--verify`/`--index`) was found
@@ -988,6 +1019,61 @@ question was verified or what a past review covered; rewriting them would falsif
 the record. They no longer describe a runnable command. (`docs/superpowers/plans/`
 carried the same stale invocation and was removed on 2026-08-25 — the plan it held
 was complete and its outcome is recorded in `docs/distribution-design.md`.)
+
+### G40 — every published `would_close` is a template constant — DETECTED, NOT FIXED
+
+`contract.md` §1.2.1 makes `would_close` BINDING and says why: *"A gap that only
+says something is missing sends a curator hunting; one that says 'a footing row
+for exposure C, non-HVHZ, at 6 ft' is a work item."*
+
+Measured against the snapshot on disk: **63 gaps carry 4 distinct `would_close`
+sentences**, and 51 of them share one — *"this warning is cut off mid-clause; a
+person should read the page image and record it whole."* They are string
+literals in `snapshot.py`, not sentences about the gap they are attached to.
+
+The particulars are all in scope and simply not interpolated (`snapshot.py:285-345`):
+the row carries `document_id`, `page_no`, `element_id`, `text_source` and
+`ocr_confidence`, and the truncated body is a local. One site does interpolate a
+lexeme; it emitted zero gaps in this snapshot, so all four live sentences are
+constants.
+
+**Why it matters beyond tidiness.** 51 identical sentences cannot be ranked,
+batched, or triaged. Planning's §1 throughput argument — binary accept/reject
+beats search-then-judge by roughly an order of magnitude — applies to the gap
+list exactly as it applies to the review queue, and a generic `would_close`
+forces search-then-judge on every item.
+
+**Not closed because** it is a Phase 1 fix and Phase 1 has not run. Cheap when it
+comes: the data is already in hand at the point of construction.
+
+---
+
+### G41 — `table_cells.rowspan`/`colspan` are never populated — DETECTED, NOT FIXED
+
+The columns exist in the schema (`store.py:131-132`) and **no code path sets
+them**. All three `Cell(...)` construction sites — `extract.py:555`,
+`tables.py:71`, `tables.py:339` — omit both, so every one of the **18,472** cells
+in the store carries the default of 1.
+
+Measured consequence, found while answering Planning on the footing table: the
+Bufftech *Maximum Post Spacing and Footing Dimensions* table has a fourth column
+whose cells are **merged across each pair of rows**, and that column is what
+scopes exposure B to non-HVHZ. Extracted, `NON HVHZ` is attributed to the 30″ row
+alone and the 24″ row appears unannotated. Five separate documents carry this
+table and all five extract it identically, so the merge is unrecoverable from
+canonical data anywhere in the corpus.
+
+The merge was recovered only by rendering the page image and looking at it —
+which is a machine reading, curation level 1 at best, not the level 2
+obligation 6 requires for a `structural_parameter`. That makes this a concrete
+argument for G17's review loop rather than a defect that can be fixed around.
+
+**Not closed because** the fix is not simply "write the field". `pdfplumber:lines`
+is the detector on this table and it reports a grid, not a span map; recovering
+merges means inferring them from the ruling lines. Worth doing, and worth
+measuring before promising.
+
+---
 
 ---
 

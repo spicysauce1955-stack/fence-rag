@@ -279,11 +279,26 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "snapshot":
         from .snapshot import build_snapshot
         from .snapshot_store import get_snapshot, list_snapshots, put_snapshot
+        # G39. Two defects, one guard. `--build` and `--dry-run` were
+        # independent store_true flags and only `--build` gated storage, so
+        # `--build --dry-run` stored anyway -- the single combination whose
+        # entire purpose is that it must not, against a write-once store with
+        # no delete. And a bare `snapshot` printed an error and exited 0, the
+        # vacuous-green class the refs branch below already refuses. Both are
+        # usage errors; both exit 2, matching refs and argparse's convention.
+        # Requiring exactly one mode makes the storage gate below sound: with
+        # --build and --dry-run exclusive, `if args.build` can no longer fire
+        # on a run the caller asked to be dry.
+        modes = (bool(args.build), bool(args.dry_run), bool(args.list),
+                 args.get is not None)
+        if sum(modes) != 1:
+            _print({"error": "choose one of --build, --dry-run, --list, --get"})
+            return 2
         if args.get:
             _print(get_snapshot(args.get))
         elif args.list:
             _print(list_snapshots())
-        elif args.build or args.dry_run:
+        else:
             snap = build_snapshot(tenant=args.tenant, regime=args.regime)
             summary = {"snapshot_id": snap["snapshot_id"],
                        "tenant": snap["tenant"], "regime": snap["regime"],
@@ -296,21 +311,19 @@ def main(argv: list[str] | None = None) -> int:
                 put_snapshot(snap)
                 summary["stored"] = True
             _print(summary)
-        else:
-            _print({"error": "choose one of --build, --dry-run, --list, --get"})
     elif args.cmd == "refs":
         from .refs import build_index, verify_snapshots
         from .store import connect
         # Require a choice and refuse to silently resolve the combination,
         # rather than the previous `if args.verify: ... else:
         # build_index(...)`, under which a bare `cli refs` silently rebuilt
-        # the index and `--verify --index` silently ignored `--index`. This
-        # deliberately does NOT mirror snapshot's sibling branch, which
-        # falls through to exit 0 on the same kind of usage error: for a CI
-        # guard, an error on stdout with a green exit is the vacuous-green
+        # the index and `--verify --index` silently ignored `--index`. For a
+        # CI guard, an error on stdout with a green exit is the vacuous-green
         # failure class refs --verify exists to close, so this exits 2 --
         # argparse's own convention for a usage error, distinct from 1 ("the
-        # guard fired"). See G39 in docs/state-and-gaps.md.
+        # guard fired"). See G39 in docs/state-and-gaps.md. The snapshot
+        # branch above was the sibling that still fell through to exit 0 on
+        # this same class; it no longer does, and both now agree.
         if args.verify == args.index:
             _print({"error": "choose one of --verify, --index"})
             return 2

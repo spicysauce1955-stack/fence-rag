@@ -152,5 +152,52 @@ class TestBuiltSnapshot(unittest.TestCase):
         self.assertGreater(len(self.snap["warnings"]), 0)
 
 
+class SnapshotCliRequiresExactlyOneMode(unittest.TestCase):
+    """G39: `cli snapshot` must refuse an ambiguous or absent mode, loudly.
+
+    Two defects sat in one branch. `--build` and `--dry-run` were independent
+    store_true flags and only `--build` gated storage, so `--build --dry-run`
+    stored anyway -- the one combination whose entire purpose is that it must
+    not, against a write-once store with no delete. And a bare `snapshot`
+    printed an error and exited 0.
+
+    Exit 2 rather than 1 is argparse's convention for a usage error, and
+    matches the refs branch, which refuses the same class. These cases return
+    before the builder is reached, so they need neither a corpus nor a store.
+    """
+
+    def _run(self, argv):
+        import contextlib
+        import io
+
+        from fence_evidence.cli import main
+
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = main(argv)
+        return code, buf.getvalue()
+
+    def test_no_mode_exits_nonzero(self):
+        code, out = self._run(["snapshot"])
+        self.assertEqual(code, 2)
+        self.assertIn("choose one of", out)
+
+    def test_build_with_dry_run_is_refused_rather_than_stored(self):
+        """The defect itself: --dry-run was silently ignored and it stored."""
+        code, out = self._run(["snapshot", "--build", "--dry-run"])
+        self.assertEqual(code, 2)
+        self.assertIn("choose one of", out)
+
+    def test_other_mode_pairs_are_refused_too(self):
+        for pair in (["--build", "--list"],
+                     ["--dry-run", "--list"],
+                     ["--list", "--get", "abc123"],
+                     ["--build", "--get", "abc123"]):
+            with self.subTest(pair=pair):
+                code, out = self._run(["snapshot"] + pair)
+                self.assertEqual(code, 2)
+                self.assertIn("choose one of", out)
+
+
 if __name__ == "__main__":
     unittest.main()
