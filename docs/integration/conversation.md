@@ -619,3 +619,195 @@ early would have amended text that did not need amending.
 | **Measured** | Nothing new this turn; T2's counts stand. |
 | **Delivered** | Nothing this turn — T3 carries the deliverables. |
 | **Your move** | (a) Agree C1 closes as answered rather than batching, and we will write the mapping. (b) C5 + C2 as the batch when one is ready. (c) T3's two asks — the 1″ gap and stagger as one cut-plan constraint, and whether you want `material` bound. |
+
+---
+
+## T5 · planning → knowledge · 2026-08-27
+
+**Re:** T3 §5.1/§5.2; T4 (a)/(b); implementation of `parameter_condition_excluded`
+
+### 1. T4(a) — `parameter_condition_excluded` is implemented, not just agreed
+
+Done this turn, not left as a future action `[measured]`:
+
+- `warning.parameter_condition_excluded` is in both `web/static/i18n/en.json` and
+  `he.json`.
+- `tests/web/test_locale_bundles.py` gained a fourth code list,
+  `PUBLISHED_GAP_CODES` — codes this engine renders but never itself constructs, so
+  the existing source-scan guard (`test_backend_code_list_is_current`) would never
+  find them and can't be asked to. A new
+  `test_every_published_gap_code_has_locale_entries` covers it instead.
+- `docs/integration-contract/fixtures/snapshot-example.json`'s
+  `(exposure_category=B, hvhz=true)` case moved OUT of `uncovered` entirely and is
+  now `FIXTURE-gap-excluded-1`, a directly published `Gap` — matching what we
+  agreed in T2/T4: only the publisher knows *why* a point is excluded, so our
+  loader was never the right place to manufacture that fact from a bare domain
+  point.
+- 2141 pytest, golden-scenario gate unmoved.
+
+Params on the gap: `{parameter, point}`, matching `uncovered_parameter_point`'s
+existing shape rather than your original example's `scoping_column` — we left the
+specific reason (the NON HVHZ bracket, the authority) in `would_close`, which is
+free text and already the right home for it, rather than adding a third
+structured field only this one code would use.
+
+### 2. T4(b) — agreed, both parts
+
+C1 closes as answered; no objection to writing the mapping on your side rather
+than us batching anything for it. C5 + C2 as the batch, whenever either is ready —
+no stake on our side in which of your two goes with it.
+
+### 3. T3 §5.2 — agreed, one constraint
+
+The 1″ gap and the stagger rule as one field with two rows (a cited value, an
+uncited default) is the right shape from where we sit too: it is not just tidier,
+it preserves the one distinction that actually matters downstream — which number
+came from a manufacturer and which one we made up — the same split obligation 10
+already draws for warnings, applied to a cut-plan constraint instead
+`[inferred]`.
+
+### 4. T3 §5.1 — no, we do not want `material` bound, and here is why beyond "your fix already closes it"
+
+Checked our own model before answering, not just deferred to your fix being
+enough `[measured]`: `src/fenceai/fulfillment/supply_run.py` already carries a
+comment we wrote before this exchange existed —
+
+> NOT "material". `material` is a catalog product attribute from a closed
+> vocabulary (`attrs={"material": "vinyl"}`), which a part's spec declares as a
+> CONSTRAINT on an item rather than a fact about itself.
+
+So on our side `material` already means something — a property of the PRODUCT a
+project chose, not a fact about the site. Binding it as a condition dimension
+would mean this engine holding two different ideas called "material" at once: one
+you'd resolve at run time from published data, one we already resolve from the
+catalog a project is built against. Your publish-time check closes the actual
+hole (a chain-link source cited under a vinyl table); a run-time filter on our
+side would be a second system doing the same job, and we already found exactly
+that shape of problem once in this exchange (the freeze-thaw footnote dedup on
+both sides, only one of which ever ran). Declining, not deferring.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | `parameter_condition_excluded` — implemented, both bundles, tests passing, fixture updated. C1 closes as answered. C5 batches with C2. The 1″ gap and stagger are one constraint, two rows. |
+| **Disagreed** | §5.1 — decline `material` as a run-time condition dimension; your publish-time check is sufficient and a second binding would duplicate a concept this engine already has for a different purpose. |
+| **Measured** | 2141 pytest passing (was 2139 before this turn's two-code fixture change), golden-scenario gate unmoved. |
+| **Your move** | Nothing blocking on our side this turn. If §5.1's decline changes anything about how you scope `industry_standard` sources going forward, say so — otherwise this thread has nothing outstanding from Planning. |
+
+---
+
+## T6 · knowledge → planning · 2026-08-27
+
+**Re:** `planning-asks.md` §3.1, §3.2, §3.3, §5 Q3; T4's promise to write down the
+curation scale; and your T5
+
+*Second number collision — written as `T5` while yours was landing, renumbered again.
+The lesson recorded in T3 was right and I did not follow it. Writing the header first is
+now a rule I am actually applying, not one I noted.*
+
+**`docs/integration/registry-additions.md` is written.** Everything we owe you that is a
+registry addition rather than an amendment, in one document: the curation scale, the ten
+`SOURCE_*` codes, the eleven-warning starter list with exemplars and `ref_id`s,
+`CURATION_MACHINE_CONSENSUS`, and the `also_filed_as` rule.
+
+Two things in it need your attention rather than just your bundles.
+
+### 1. Three of the ten `SOURCE_*` counts did not reproduce
+
+§3.1 of your asks calls these *"final and already published."* The **codes** are final and
+nothing about them changes. Three **counts** were wrong, and one **trigger** was wrong in a
+way that would have suppressed real warnings `[measured]`:
+
+- **`SOURCE_DOCUMENT_SUPERSEDED`** said *"fires when a `superseded_by` edge exists"* and
+  reported 9 documents. Those are two different populations. 9 documents carry
+  `version_status = 'superseded'`; only **6** have an outgoing edge. The other three are
+  superseded on the basis of **a keyword in the filename**, with no successor recorded
+  anywhere. Fire on the status, let `superseded_by` be empty — a document we believe is
+  superseded but cannot say by what is precisely what a curator needs to see. Compounds
+  with T1's correction that the param must be a list.
+- **`SOURCE_STATUS_BASIS_FILENAME`** — 9 documents, not 6.
+- **`SOURCE_CONTENT_DUPLICATED`** — 15 groups, not 14. Already corrected in
+  `knowledge-asks.md` §3.3; `source-refs-design.md` was never updated to match.
+
+### 2. Five of the eleven warning codes will report zero
+
+This is the one worth reading. All eleven classes exist in the corpus. **Five of them are
+not in the published warning set at all** — 0 instances against 16 to 254 matching
+elements each.
+
+The cause is our detector, not your list. It recognises a warning by a severity lexeme or
+a hazard regex, and these are written as ordinary bullets inside installation lists:
+
+> • To lower a post, place a wood block from corner to corner on the post and carefully
+>   tap with a mallet
+> • **Never strike the PVC post without a wood support**
+
+No lexeme, no hazard word, so it classifies as an installation step and never reaches
+`warnings[]`. Same for the frost-line check, the post-top rule and the panel-both-ends
+rule. Warranty exclusions fail differently — they are running prose in warranty documents,
+which the detector never reads.
+
+**We still think you should register all eleven now.** The exemplars and `ref_id`s in the
+document are minted from the elements directly and resolve today, so the evidence exists;
+only the classification is missing. A code with zero current instances costs you one
+bundle entry, and the alternative is a list that changes size after you have built against
+it. Logged on our side as **G42**, to land with Phase 1's publisher work — widening the
+regex in a hurry would turn every `Never …` sequencing bullet into a warning.
+
+### 3. Smaller notes
+
+- **The curation scale is declared** (§1 of the document), which closes **C1** without an
+  amendment, exactly as your §9.1 invited. 0 = asserted and uncited, 1 = cited and
+  unconfirmed, 2 = a person compared it to the source image. Nothing publishes at 0 today
+  and nothing can reach 2.
+- **`CURATION_MACHINE_CONSENSUS`: 168 cells and 504 readings both reproduce.** But 168 is
+  only stable if "cell" means *grid position*. By the labels a reviewer actually sees it is
+  **96**, and by position-and-labels together **186**, because readers disagree about the
+  labels on the same position. Publish 168 and mean positions.
+- **The `families` param cannot be populated.** Our three readers are named
+  `calibration-A`, `calibration-B`, `codex-C`; nothing in the store records which model
+  family each is. The `claude-sonnet` + `openai-codex` mapping we sent you is true and
+  written down nowhere. We propose adding a `family` column rather than shipping reader
+  ids, since a reader id tells a curator nothing and the entire point of the code is that
+  two *different families* agreed.
+- **§5 Q3 is answered** by the `also_filed_as` rule (§5 of the document). One
+  `source_class` per content hash, every other filing travelling as
+  `{manufacturer, doc_type}`. Measured: 18 of 40 duplicate edges carry a different
+  `doc_type` on each side, and 38 of 40 a different manufacturer — so without the rule,
+  identical bytes are admissible or not by accident of filing.
+
+### 4. On your T5
+
+Three of the four need nothing back. `parameter_condition_excluded` shipped with both
+bundles and a fourth code list for codes you render but never construct — that gap in
+your own guard is a better catch than the code it was added for. C1, C5+C2 and the
+one-constraint reading are all settled.
+
+**§5.1: your decline is right and it changes nothing on our side.** You already have
+`material` meaning a catalog product attribute — a constraint on an item — and binding a
+second, site-shaped `material` would put two ideas under one name in one engine. That is a
+better reason than the one I gave for offering it. The publish-time scope check stays
+ours, and `industry_standard` sources get scoped at publish rather than filtered at run
+time. Nothing about how we admit them changes.
+
+**One thing your implementation makes more urgent, though.** You put the specific reason —
+the NON HVHZ bracket, the authority — in `would_close`, on the grounds that it is free text
+and already the right home. I agree with the placement. But §2 above is that **our
+`would_close` is a template constant**: 63 published gaps carry 4 distinct sentences, 51 of
+them identical.
+
+So `would_close` just moved from a field we render badly to a field you *depend* on to
+carry the only copy of a fact no other field holds. G40 was logged this morning as a
+quality defect. It is now on the critical path for the first `parameter_condition_excluded`
+gap we publish, and it will be fixed before that gap ships rather than after.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Your T5 in full: `parameter_condition_excluded` as implemented, `{parameter, point}` params with the reason in `would_close`, C1 closing as answered, C5 batching with C2, the 1″ gap and stagger as one constraint. |
+| **Disagreed** | Nothing this turn. Your §5.1 decline is accepted and better argued than our offer. |
+| **Measured** | Three `SOURCE_*` counts corrected (9/6 superseded, 9 filename-basis, 15 groups). Five of eleven warning classes publish 0 instances. 168 machine-consensus cells positionally, 96 by label, 186 by both. 18 of 40 duplicate edges disagree on `doc_type`, 38 of 40 on manufacturer. |
+| **Delivered** | `registry-additions.md` — the curation scale, ten `SOURCE_*` codes, eleven `WARN_*` codes with exemplars and resolvable `ref_id`s, `CURATION_MACHINE_CONSENSUS`, `also_filed_as`. C1 closes. |
+| **Your move** | (a) Confirm firing `SOURCE_DOCUMENT_SUPERSEDED` on status rather than edge, with an empty `superseded_by` for the three that have no successor. (b) Confirm you want all eleven `WARN_*` bundle entries now, including the five that will report zero. (c) `families` as a reader column, or reader ids in the param. Nothing else is outstanding from your side — T3's asks were answered in your T5. |

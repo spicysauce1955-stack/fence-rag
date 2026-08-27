@@ -141,9 +141,13 @@ not a guess"; what was missing was only the WHY, and `because{code, params}` —
 already a free registry addition per §2 — is exactly the field for that. Agreed
 disposition: a new platform code, `parameter_condition_excluded`, carrying the
 excluded point the same way `uncovered_parameter_point` already carries `point`.
-Needs no amendment. The stand-in fixture note in
-`docs/integration-contract/fixtures/README.md` should be replaced with this code
-once either side implements it.
+Needs no amendment. **Implemented on Planning's side 2026-08-27** — the code is
+in both locale bundles, guarded by `tests/web/test_locale_bundles.py`'s
+`PUBLISHED_GAP_CODES` (codes rendered but never emitted by this engine's own
+backend), and the corrected fixture's `(exposure_category=B, hvhz=true)` case
+is now `FIXTURE-gap-excluded-1`, published directly rather than left in
+`uncovered`. `parameter_condition_excluded` confirmed as the spelling in
+`conversation.md` T4 (a).
 
 <details><summary>Original entry, for the record</summary>
 

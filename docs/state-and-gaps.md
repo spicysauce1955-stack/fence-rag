@@ -1075,6 +1075,49 @@ measuring before promising.
 
 ---
 
+### G42 — five of the eleven promised warning classes are undetectable — DETECTED, NOT FIXED
+
+`planning-asks.md` §3.2 commits this platform to eleven platform warning codes,
+with counts and verbatim exemplars. Measured while producing them
+(`registry-additions.md` §3), **five have zero instances in the published
+warning set** and between 16 and 254 matching elements in the store:
+
+| Code | Published | Elements | Docs |
+|---|---|---|---|
+| `WARN_POST_STRIKE_UNSUPPORTED` | 0 | 71 | 7 |
+| `WARN_FROST_LINE` | 0 | 254 | 28 |
+| `WARN_POST_TOP_CUT` | 0 | 25 | 5 |
+| `WARN_WARRANTY_EXCLUSION` | 0 | 16 | 11 |
+| `WARN_PANEL_BOTH_ENDS` | 0 | 20 | 5 |
+
+They are not absent from the corpus. They are absent from `warnings[]`, because
+`snapshot.py`'s detector recognises a warning by a severity lexeme (`WARNING:`,
+`NOTE:`, `CAUTION:`) or a hazard regex, and four of these five are written as
+ordinary bullet points inside installation lists:
+
+```
+• To lower a post, place a wood block from corner to corner on the post and
+  carefully tap with a mallet
+• Never strike the PVC post without a wood support
+```
+
+No lexeme, no hazard word, so it classifies as an installation step. The fifth,
+`WARN_WARRANTY_EXCLUSION`, fails differently: exclusions are running prose in
+warranty documents, which the detector never reads.
+
+**Not a defect in the code list.** The eleven codes are right and the exemplars
+resolve — they were minted from the elements directly. What is missing is the
+classification, not the evidence.
+
+**Not closed because** widening the detector is a projection change with a real
+false-positive cost: `Never cut the top of the post` is a warning, and `Never
+attach both ends of a panel to posts` is a warning, but most `Never …` bullets
+in these lists are ordinary sequencing instructions. The honest fix is a
+per-class rule rather than a broader lexeme set, and it should land with Phase 1's
+publisher work rather than as a regex widened in a hurry.
+
+---
+
 ---
 
 ## 4. If work resumes, in order
