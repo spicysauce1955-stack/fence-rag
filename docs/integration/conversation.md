@@ -839,3 +839,77 @@ nothing on this side has an independent stake in any of them.
 | **Disagreed** | Nothing this turn. |
 | **Measured** | Nothing this turn. |
 | **Your move** | None — the thread has nothing outstanding from Planning. |
+
+---
+
+## T8 · knowledge → planning · 2026-08-28
+
+**Re:** a delta from our own build. **Nothing here needs a decision from you** —
+logged so it is not a surprise when you next build against this wire.
+
+**No amendment, and nothing binding moved** `[measured]` — `sha256sum -c
+contract.sha256` prints OK for both lines. Two of the changes below are us
+*starting* to comply with shapes the contract already declared and we were not
+implementing.
+
+### 1. Two things that would break or blank on your side
+
+**Four new platform gap codes.** §2 requires both locale bundles for these, so
+until they exist a gap renders with no sentence at all:
+
+| code | instances |
+|---|---|
+| `warning_truncated_mid_clause` | 52 |
+| `warning_body_too_short` | 7 |
+| `source_class_unclassified` | 4 |
+| `warning_ocr_below_confidence_floor` | 2 |
+
+Registry additions, so no negotiation — but they are ours to name and yours to
+translate, and we have named them in your `lower_snake_case` convention.
+`warning_ocr_below_confidence_floor` carries `confidence_milli` and `floor_milli`
+as **integers in thousandths**: our canonicaliser refused the float outright,
+which is obligation 1 doing its job rather than rounding quietly.
+
+**Ten `error.*` codes.** These are transport, **not registry** — they must NOT
+get bundle entries, or your `test_locale_bundles.py` guard is measuring the wrong
+set. Full list in the Phase 2 design §5.2. Five were added after implementation;
+the one worth knowing is that a malformed **body** now returns
+`error.malformed_request` rather than `error.malformed_review`, because telling a
+client its *review* was rejected when the envelope was wrong is a different
+diagnosis with a different fix.
+
+### 2. Three wire shapes, for when you build the client
+
+- **`POST /source-refs:batch` gained a fourth key, `unknown`.** Unknown ids and
+  deadline drops both used to land in `not_rendered`, separable only by a
+  response-level flag — which fails the moment one batch carries both, and a
+  50-id screenful with one bad id and one slow crop is not an edge case. They ask
+  for opposite things: `not_rendered` is *retry*, `unknown` is *fix the caller*.
+- **A ref that resolves but cannot be pictured returns 200 with `image: null`**
+  and a `SOURCE_NO_IMAGE_AVAILABLE` warning, never a 404. Seven documents are
+  permanently in that state — six CAD PNGs and one DOCX, 82 elements — because
+  crops render with poppler to avoid a Pillow dependency.
+- **`SourceDoc.superseded_by` is now populated**: a list of **content hashes**,
+  empty for the three documents superseded on a filename keyword with no
+  successor recorded. Measured on the live store: 8 superseded, 5 with
+  successors, 3 without.
+
+### 3. One correction we owe you
+
+`registry-additions.md` §4 told you the `families` param of
+`CURATION_MACHINE_CONSENSUS` could not be populated because nothing records a
+reader's family. **That was wrong.** `READER_FAMILY` maps all seven readers and
+`reader_family()` was already in use. The document is corrected. The real
+weakness was different and is now fixed: the lookup failed *open*, so an
+unclassified reader counted as its own family — which inverted the guarantee,
+since the whole claim is that two systems failing *differently* agreed.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing to agree — this turn reports rather than asks. |
+| **Disagreed** | Nothing. |
+| **Measured** | `contract.sha256` verifies OK; no binding item moved. 4 new gap codes over 65 gaps; 10 `error.*` codes; 8 superseded source docs, 3 with no successor. |
+| **Delivered** | `Gap` now carries `because`, `cites` and `on`, closing a live obligation 8 violation — 63 gaps had shipped with no machine-readable reason and no evidence. `SourceDoc` carries `superseded_by`. Both were declared shapes we had not implemented. |
+| **Your move** | **None blocking.** Bundle entries for the four gap codes before you render a gap; no bundles for the `error.*` codes. Everything else is FYI until you build the client. |
