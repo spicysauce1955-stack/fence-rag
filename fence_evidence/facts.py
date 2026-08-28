@@ -93,6 +93,76 @@ SELF_CONDITION = {"wind_speed_mph": "wind_speed_mph",
 _DIAM_TOOL_CONTEXT = re.compile(r"\b(?:auger|drill|bit)\b", re.I)
 _DIAM_TOOL_CONTEXT_WINDOW = 50
 
+# `6 in. (152 mm) diameter 24 in. (609.6 mm) deep` binds 24 to "diameter" on its
+# left as readily as 6 binds to it on its right, and the store held exactly that
+# -- `diameter 24 in.` twice, both of them the hole's DEPTH. Harmless while the
+# blanking hid the real 6, self-contradictory once it does not. So a number that
+# sits *after* the diameter word is refused when the words immediately following
+# it say it is a depth. Only the diameter-first form is checked: `8 inches in
+# diameter by 30 inches deep` is a true diameter whose sentence also ends in
+# "deep", and the number-first pattern already binds it correctly.
+_DIAM_FIRST = re.compile(rf"^{_DIAM_WORD}", re.I)
+_DEPTH_TRAILER = re.compile(r"^\s*(?:deep|depth|embedment|below\s+grade)\b", re.I)
+_DEPTH_TRAILER_WINDOW = 30
+
+
+# --------------------------------------------------------------- G34 cause 1
+# The parenthetical sits between the number and the keyword every pattern needs.
+# `6 in. (152 mm) diameter` is a footing diameter that no pattern could ever see,
+# because `(152 mm)` breaks the adjacency; so is `[6 inches (152 mm) below
+# grade]`, and so is `24 in. (609.6 mm) deep`.
+#
+# The fix blanks the restatement **in place**: the parenthetical is replaced by
+# exactly as many spaces as it occupied, so `len(blanked) == len(text)` and every
+# character outside it keeps its index. Offsets are the one thing that must not
+# move -- `_scan_text` reports `start`/`end` into the element's own text, the
+# stored `match_text`, `evidence_text` and the obligation-4 alternate are all
+# sliced back out of the *untouched* text at those offsets, and anything
+# downstream that resolves an element span to a box would be resolving a
+# different box if they shifted. Deleting the parenthetical instead of blanking
+# it would shift every later offset in the element.
+#
+# Only *unit restatements* are blanked, never parentheticals in general. Blanking
+# every `(...)` was measured against the corpus and is strictly worse: it gains
+# nothing beyond what this gains and loses 40 facts, because the corpus states
+# `(90 MPH)`, `(30" Deep)` and `(68in o.c. posts)` inside parentheses -- there,
+# the parenthesis *is* the statement.
+_PARENTHETICAL = re.compile(r"\([^()\n]{0,60}\)")
+_METRIC_RESTATEMENT = re.compile(
+    r"""^\(\s*\d+(?:[.,]\d+)?\s*
+         (?:millimet(?:er|re)s?|centimet(?:er|re)s?|met(?:er|re)s?|mm|cm|m)
+         \s*\.?\s*\)$""", re.IGNORECASE | re.VERBOSE)
+
+
+def blank_unit_parentheticals(text: str) -> str:
+    """Replace `(152 mm)` with spaces of the same length; leave everything else.
+
+    Length-preserving by construction, so every offset into the result is a
+    valid offset into ``text`` naming the same character. `dual_units` still
+    reads the original, which is where the second unit obligation 4 wants lives.
+    """
+    return _PARENTHETICAL.sub(
+        lambda m: " " * (m.end() - m.start()) if _METRIC_RESTATEMENT.match(m.group(0))
+        else m.group(0), text)
+
+
+# `on center` states the spacing of whatever noun governs it, and in this corpus
+# that noun is usually not a post. Of the six `post_spacing_in` matches the
+# blanking above recovers, five are hog-ring, carriage-bolt or tension-bar-hole
+# spacings from one CSI masterspec; only "Line posts installed at intervals not
+# exceeding 10 ft. (3.05 m) on center" is about posts. G34 names the same error
+# from the other side -- a gate *opening* is a leaf width, not a spacing.
+#
+# A blocklist, not an allowlist, and checked as a window like the auger guard
+# above: two of the three spacings the store already held are OCR'd NOA table
+# rows (`YARROW SEMI PRIVACY ALTERNATING 4 4 84 48 ON CENTER`) that never say
+# "post" at all, so requiring one would throw them away.
+_SPACING_NOT_A_POST = re.compile(
+    r"\b(?:bolts?|screws?|rivets?|nuts?|washers?|hog\s*rings?|rings?|ties?"
+    r"|clips?|bands?|holes?|fasteners?|staples?|nails?|brackets?|clamps?"
+    r"|hinges?|rails?|mesh|fabric|openings?)\b", re.I)
+_SPACING_WINDOW = 60
+
 
 def _to_float(raw: str) -> float | None:
     raw = raw.strip()
@@ -165,24 +235,43 @@ def _scan_text(text: str) -> list[dict]:
     """
     results: list[dict] = []
     seen: set[tuple] = set()
+    # Patterns run against the blanked copy; everything reported comes back out
+    # of `text`. The two are the same length, so an offset means the same thing
+    # in both -- see `blank_unit_parentheticals`.
+    scanned = blank_unit_parentheticals(text)
     for fact_type, rx, unit in PATTERNS:
-        for m in rx.finditer(text):
+        for m in rx.finditer(scanned):
             raw = m.group(1)
             key = (fact_type, raw.strip().lower())
             if key in seen:
                 continue
             seen.add(key)
+            # The source's own wording, parenthetical included -- prohibition 7.
+            # `m.group(0)` here would store the blanked text as if the document
+            # had written it.
+            match_text = text[m.start():m.end()]
             if fact_type == "footing_diameter_in":
                 w = _DIAM_TOOL_CONTEXT_WINDOW
                 window = text[max(0, m.start() - w):m.end() + w]
                 if _DIAM_TOOL_CONTEXT.search(window):
                     continue   # a boring tool's diameter, not a footing's
-            norm, norm_unit = _normalise(fact_type, raw, m.group(0))
+                # `diameter 24 in. (609.6 mm) deep` -- that number is the depth.
+                # Read the trailer off `scanned`, so a blanked restatement does
+                # not fill the window before the keyword arrives.
+                if _DIAM_FIRST.match(match_text) and _DEPTH_TRAILER.match(
+                        scanned[m.end():m.end() + _DEPTH_TRAILER_WINDOW]):
+                    continue
+            if fact_type == "post_spacing_in":
+                w = _SPACING_WINDOW
+                before = text[max(0, m.start() - w):m.start()]
+                if _SPACING_NOT_A_POST.search(before + match_text):
+                    continue   # something other than a post is what is spaced
+            norm, norm_unit = _normalise(fact_type, raw, match_text)
             lo_hi = PLAUSIBLE.get(fact_type)
             if lo_hi and norm is not None and not (lo_hi[0] <= norm <= lo_hi[1]):
                 continue   # not credible for this quantity
             results.append({"fact_type": fact_type, "unit_original": unit,
-                            "match_text": m.group(0).strip(), "raw": raw,
+                            "match_text": match_text.strip(), "raw": raw,
                             "value_normalized": norm, "unit_normalized": norm_unit,
                             "start": m.start(), "end": m.end()})
     return results
@@ -257,6 +346,20 @@ def dual_units(text: str | None) -> dict | None:
                 "value_normalized": float(m.group("num")),
                 "unit_normalized": unit}
     return None
+
+
+ALTERNATE_WINDOW = 40
+
+
+def alternate_for(text: str, match: dict) -> dict | None:
+    """Obligation 4's second unit for one `_scan_text` match, or None.
+
+    A3's rule: look inside the value's own window, not the whole element, or a
+    `(mm)` elsewhere on the page binds to the wrong number. The window is sliced
+    from the **original** text -- the blanking `_scan_text` matches against is
+    never seen here, which is the whole reason it preserves offsets.
+    """
+    return dual_units(text[match["start"]:match["end"] + ALTERNATE_WINDOW])
 
 
 # --------------------------------------------------------------- A5, obligation 14
@@ -510,7 +613,7 @@ def extract_facts(*, document_id: str | None = None,
                 # A3. Look for the second unit inside the value's own window,
                 # not the whole element, or a `(mm)` elsewhere on the page binds
                 # to the wrong number.
-                alt = dual_units(text[match["start"]:match["end"] + 40])
+                alt = alternate_for(text, match)
                 conn.execute("""INSERT INTO facts(document_id, version_id, page_no,
                     element_id, fact_type, subject, value_original, value_normalized,
                     unit_original, unit_normalized, conditions, condition_basis,

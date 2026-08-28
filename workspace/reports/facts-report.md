@@ -8,7 +8,7 @@ page whose mean word confidence is below 80 is created as `flagged`, not
 
 | Measure | Value |
 |---|---|
-| facts | 1714 |
+| facts | 1718 |
 | with conditions attached | 176 |
 | facts without a source element | 0 |
 
@@ -16,7 +16,7 @@ page whose mean word confidence is below 80 is created as `flagged`, not
 
 | Status | Count |
 |---|---|
-| extracted | 1448 |
+| extracted | 1452 |
 | flagged | 266 |
 
 ## By type
@@ -26,15 +26,15 @@ page whose mean word confidence is below 80 is created as `flagged`, not
 | reinforcement | 656 | 91 | 210 |
 | approval_id | 271 | 78 | 265 |
 | wind_speed_mph | 269 | 55 | 160 |
-| footing_depth_in | 149 | 4 | 24 |
-| depth_below_grade_in | 100 | 0 | 16 |
+| footing_depth_in | 151 | 4 | 24 |
+| depth_below_grade_in | 101 | 0 | 16 |
 | effective_date | 84 | 20 | 84 |
 | expiration_date | 75 | 10 | 75 |
 | stock_length_in | 62 | 0 | 0 |
 | footing_diameter_in | 25 | 5 | 11 |
 | exposure_category | 15 | 0 | 0 |
 | racking_degrees | 5 | 2 | 5 |
-| post_spacing_in | 3 | 1 | 2 |
+| post_spacing_in | 4 | 1 | 2 |
 
 ## Where the conditions came from
 
@@ -47,15 +47,15 @@ not assert an inference it never made.
 
 | condition basis | Count | Means |
 |---|---|---|
-| unexamined | 1538 | no conditions, and nothing looked for any |
+| unexamined | 1542 | no conditions, and nothing looked for any |
 | assumed | 117 | captured by regex proximity, not asserted by the document |
 | stated | 59 | the document said so |
 
 ## Second units, where a source states one
 
 Obligation 4: where a source states two units and they disagree, publish both.
-**3** of 1714 facts carry an alternate lexeme in `value_alternates`,
-of which **0 disagree** with the primary value.
+**7** of 1718 facts carry an alternate lexeme in `value_alternates`,
+of which **3 disagree** with the primary value.
 
 **Read that second number carefully.** The schema can now represent a disagreeing
 second unit -- that is the gap obligation 4 declared, and it is closed. But the
