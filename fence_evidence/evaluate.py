@@ -294,12 +294,25 @@ def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
 # The one real difference is what "support" is measured against. Search returns
 # a *unit*, so `evidence_support` asks whether that unit carries the answer
 # terms. Resolution and the fact layer return *documents and records*, so the
-# graded number here is `document_support`: are the annotated answer terms in the
-# text of the documents the interface handed back? That is the analogue of
-# `page_evidence_support`, not of `evidence_support`, and the two must not be
-# averaged together. `record_support` — terms visible in the returned record
-# itself — is reported beside it, because a resolution answer that names the
-# right document is not the same as one that quotes the page.
+# graded number is `answer_support`: are the annotated answer terms in the text
+# of the ONE document the interface asserts as its answer?
+#
+# It used to be `document_support`, measured over the concatenated text of every
+# document returned, and that was an overclaim. `resolve` hands back a whole
+# supersession chain, so a term printed in a *superseded* member counted as
+# support for the current one: gq-011 scored 1.0 over its four-document union
+# and the pass rule inherited it. The union figure is still reported, under a
+# name that says what it is (`returned_documents_support`), and nothing is
+# graded on it. On the tightened measure gq-011 still scores 1.0 — every one of
+# its five terms is in the active NOA itself — which is the point: the number
+# now means what its label says.
+#
+# `record_support` — terms visible in the returned record itself — is reported
+# beside both, because a resolution answer that names the right document is not
+# the same as one that quotes the page.
+#
+# `page_rank` is reported only by an interface that actually knows a page. See
+# `_grade_returned_documents`.
 # ---------------------------------------------------------------------------
 
 def _expected_documents(q: dict, conn) -> tuple[set[str], set[str], dict[str, list[int]]]:
@@ -326,54 +339,95 @@ def _document_text(conn, source_paths: list[str]) -> str:
     return "\n".join(parts)
 
 
+NO_PAGE = ("not reported: this interface answers with documents, not pages")
+
+
 def _grade_returned_documents(q: dict, conn, candidates: list[dict],
-                              record_text: str) -> dict:
+                              record_text: str,
+                              answer_paths: list[str] | None = None) -> dict:
     """Shared grading tail for the interfaces that return documents.
 
     ``candidates`` is the interface's answer as an ordered list of
     ``{"source_path": ..., "page": ...}`` — most-confident first, so rank means
-    the same thing it means for search.
+    the same thing it means for search.  A candidate whose ``page`` is None is
+    saying it does not know a page, and is skipped for ``page_rank``.
+
+    ``answer_paths`` is the document (or documents) the interface *asserts* as
+    the answer, which is what ``answer_support`` is measured over.  It defaults
+    to the highest-ranked candidate, because that is the interface's answer
+    unless it says otherwise.
+
+    Two things this deliberately no longer does:
+
+    * It does not report a ``page_rank`` an interface did not measure.  Resolve
+      used to stamp page 1 on every member of a chain, so ``page_rank`` recorded
+      only whether the annotation happened to name page 1 — a tautology dressed
+      as a measurement.  Absent, with the reason in ``page_rank_basis``, is the
+      honest form.
+    * It does not grade on the union of every returned document.  See the block
+      comment above.
     """
     declared, expected, expected_pages = _expected_documents(q, conn)
     terms = [t for t in (q.get("expected_answer_terms") or []) if t]
 
     doc_rank = next((i + 1 for i, c in enumerate(candidates)
                      if c["source_path"] in expected), None)
+    paged = [c for c in candidates if c.get("page") is not None]
     page_rank = None
     for i, c in enumerate(candidates):
+        if c.get("page") is None:
+            continue
         wanted = expected_pages.get(c["source_path"])
-        if wanted and c.get("page") in wanted:
+        if wanted and c["page"] in wanted:
             page_rank = i + 1
             break
+    page_rank_basis = ("the page the interface cited" if paged
+                       else NO_PAGE)
 
     returned_paths: list[str] = []
     for c in candidates:
         if c["source_path"] not in returned_paths:
             returned_paths.append(c["source_path"])
 
+    if answer_paths is None:
+        answer_paths = returned_paths[:1]
+    answer_paths = [p for p in answer_paths if p]
+
     record_joined = _norm(record_text)
     record_found = [t for t in terms if _norm(t) in record_joined]
     record_support = (len(record_found) / len(terms)) if terms else None
 
-    doc_joined = _document_text(conn, returned_paths)
-    doc_found = [t for t in terms if _norm(t) in doc_joined]
-    document_support = (len(doc_found) / len(terms)) if terms else None
+    answer_joined = _document_text(conn, answer_paths)
+    answer_found = [t for t in terms if _norm(t) in answer_joined]
+    answer_support = (len(answer_found) / len(terms)) if terms else None
 
-    passed = doc_rank is not None and (document_support is None
-                                       or document_support >= 0.5)
+    union_joined = _document_text(conn, returned_paths)
+    union_found = [t for t in terms if _norm(t) in union_joined]
+    union_support = (len(union_found) / len(terms)) if terms else None
+
+    passed = doc_rank is not None and (answer_support is None
+                                       or answer_support >= 0.5)
     return {
         "id": q.get("id"), "category": q.get("category"), "set": q.get("_set"),
         "question": q.get("question"),
         "answerable": q.get("answerable", True),
         "n_results": len(candidates),
-        "doc_rank": doc_rank, "page_rank": page_rank,
+        "doc_rank": doc_rank,
+        "page_rank": page_rank, "page_rank_basis": page_rank_basis,
         "expected_documents": sorted(declared),
         "equivalent_documents": sorted(expected - declared),
         "returned_documents": returned_paths,
+        "answer_documents": answer_paths,
         "record_support": None if record_support is None else round(record_support, 3),
-        "document_support": None if document_support is None else round(document_support, 3),
-        "found_terms": doc_found,
-        "missing_terms": [t for t in terms if t not in doc_found],
+        # graded: the terms in the document the interface asserts as the answer
+        "answer_support": None if answer_support is None else round(answer_support, 3),
+        # reported, never graded: the same terms anywhere in ANY document
+        # returned, which for `resolve` is the whole supersession chain
+        "returned_documents_support": (None if union_support is None
+                                       else round(union_support, 3)),
+        "found_terms": answer_found,
+        "missing_terms": [t for t in terms if t not in answer_found],
+        "found_terms_anywhere_returned": union_found,
         "passed": passed,
     }
 
@@ -403,7 +457,7 @@ def _evaluate_resolve(q: dict, *, conn) -> dict:
     answer = resolve_document_version(identifier, at=ii.get("at"),
                                       as_of=ii.get("as_of"), conn=conn)
     if answer is None:
-        row = _grade_returned_documents(q, conn, [], "")
+        row = _grade_returned_documents(q, conn, [], "", answer_paths=[])
         row.update({"interface": "resolve", "identifier": identifier,
                     "active_document": None, "active_basis": None,
                     "chain_length": 0,
@@ -420,16 +474,25 @@ def _evaluate_resolve(q: dict, *, conn) -> dict:
         if not path or path in seen:
             continue
         seen.add(path)
-        candidates.append({"source_path": path, "page": 1, "member": member})
+        # `page` is None on purpose: resolution answers with a document, and a
+        # stamped page 1 made `page_rank` a tautology (see the grading tail).
+        candidates.append({"source_path": path, "page": None, "member": member})
 
     record_text = json.dumps(answer, default=str)
-    row = _grade_returned_documents(q, conn, candidates, record_text)
     active = answer.get("active") or {}
+    # The chain is the evidence; the ACTIVE member is the answer, and it is the
+    # only document `answer_support` may be measured over.
+    row = _grade_returned_documents(q, conn, candidates, record_text,
+                                    answer_paths=[active.get("source_path")]
+                                    if active.get("source_path") else [])
     row.update({
         "interface": "resolve",
         "identifier": identifier,
         "active_document": active.get("source_path"),
         "active_basis": answer.get("active_basis"),
+        # the machine-readable half of the same statement; G3 exists to provide
+        # it, and dropping it left only the prose
+        "active_basis_kind": answer.get("active_basis_kind"),
         "chain_length": len(answer.get("chain") or []),
         "chain": [{"source_path": m.get("source_path"),
                    "version_status": m.get("version_status")}
@@ -458,7 +521,11 @@ def _evaluate_facts(q: dict, *, k: int, conn) -> dict:
                  ("value_original", "value_normalized", "unit", "title",
                   "source_path", "review_status"))
         + " " + json.dumps(r.get("conditions") or {}) for r in rows)
-    row = _grade_returned_documents(q, conn, candidates, record_text)
+    # A fact cites one document and one page. The highest-ranked one is the
+    # layer's answer; the rest are its other matches.
+    row = _grade_returned_documents(q, conn, candidates, record_text,
+                                    answer_paths=[candidates[0]["source_path"]]
+                                    if candidates else [])
     row.update({
         "interface": "facts",
         "fact_type": fact_type,
@@ -505,10 +572,15 @@ def _routed_metrics(rows: list[dict]) -> dict:
         "passed": sum(1 for r in rows if r["passed"]),
         "doc_recall": _mean([1.0 if r["doc_rank"] else 0.0 for r in rows]),
         "mrr": _mean([1 / r["doc_rank"] if r["doc_rank"] else 0.0 for r in rows]),
-        "document_support": _mean([r["document_support"] for r in rows
-                                   if r["document_support"] is not None]),
+        "answer_support": _mean([r["answer_support"] for r in rows
+                                 if r["answer_support"] is not None]),
+        "returned_documents_support": _mean(
+            [r["returned_documents_support"] for r in rows
+             if r["returned_documents_support"] is not None]),
         "record_support": _mean([r["record_support"] for r in rows
                                  if r["record_support"] is not None]),
+        "page_rank_reported": sum(1 for r in rows
+                                  if r.get("page_rank_basis") != NO_PAGE),
     }
 
 
@@ -530,7 +602,10 @@ def _routed_summary(routed_rows: list[dict], search_rows: list[dict]) -> dict:
             "id": r["id"], "category": r["category"], "interface": r["interface"],
             "doc_rank": r["doc_rank"],
             "record_support": r["record_support"],
-            "document_support": r["document_support"],
+            "answer_support": r["answer_support"],
+            "returned_documents_support": r["returned_documents_support"],
+            "answer_documents": r["answer_documents"],
+            "page_rank": r["page_rank"], "page_rank_basis": r["page_rank_basis"],
             "missing_terms": r["missing_terms"],
             "passed": r["passed"], "note": r.get("note") or "",
             "search": {
@@ -545,27 +620,44 @@ def _routed_summary(routed_rows: list[dict], search_rows: list[dict]) -> dict:
                            for name, rs in sorted(by_interface.items())}
     out["questions"] = questions
     out["comparability"] = (
-        "document_support is the analogue of page_evidence_support (terms "
-        "anywhere in the documents the interface returned), not of "
-        "evidence_support (terms in one retrieved unit). The pass rule is the "
-        "same one the search harness uses. These numbers are NOT part of the "
-        "headline metrics and are not averaged into them.")
+        "answer_support is the graded number: the annotated answer terms in "
+        "the text of the ONE document the interface asserts as its answer -- "
+        "the active member for `resolve`, the top-ranked fact's document for "
+        "`facts`. It is narrower than page_evidence_support (a document, not a "
+        "page) and wider than evidence_support (a document, not a unit), so it "
+        "is the analogue of neither and must not be averaged with either. "
+        "returned_documents_support is the same terms anywhere in ANY document "
+        "returned -- for `resolve` that is the whole supersession chain, so a "
+        "term printed only in a superseded member counts. It is reported and "
+        "never graded. page_rank is reported only where the interface knows a "
+        "page; `resolve` answers with documents and reports none. The pass rule "
+        "is the search harness's own, applied to answer_support. These numbers "
+        "are NOT part of the headline metrics and are not averaged into them.")
     return out
 
 
 def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
                    only_ingested: bool = False, report_name: str = "evaluation",
-                   second_stage: bool = False) -> dict:
+                   second_stage: bool = False, db_path: Path | None = None,
+                   write: bool = True) -> dict:
     """Run the gold set.
 
     ``only_ingested`` restricts the run to questions whose expected documents are
     all present in the store, which is what makes the Phase 4 gate meaningful
     against the ten-document pilot before the full corpus is processed.
+
+    ``db_path`` measures a store other than ``workspace/indexes/evidence.db``,
+    and ``write=False`` suppresses the results JSON and the report. Both exist
+    so a projection experiment can be measured on a copy without overwriting
+    the committed numbers for the projection that is actually shipped.
     """
     questions = load_gold(gold_paths)
     if not questions:
         raise SystemExit("no gold questions found in eval/gold-questions-*.json")
-    conn = connect()
+    # An experiment copy lives outside workspace/, which the write guard refuses,
+    # and migrating a store that is not this repository's would be wrong anyway.
+    # The harness only reads, so measuring a named store opens it as a reader.
+    conn = connect(db_path, read_only=db_path is not None)
     skipped: list[str] = []
     try:
         if only_ingested:
@@ -658,9 +750,10 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
         "A4b_false_unsupported_le_0.20": (summary["false_unsupported_rate"] or 1.0) <= 0.20,
     }
     out = {"summary": summary, "results": rows, "routed_results": routed_rows}
-    with open_write(TESTS_DIR / f"{report_name}-results.json") as f:
-        json.dump(out, f, indent=2)
-    _write_report(out, report_name)
+    if write:
+        with open_write(TESTS_DIR / f"{report_name}-results.json") as f:
+            json.dump(out, f, indent=2)
+        _write_report(out, report_name)
     return out
 
 
@@ -747,28 +840,40 @@ def _routed_section(out: dict) -> list[str]:
         return lines
     lines += [
         f"{routed['n']} question(s) are additionally answered through the "
-        f"interface they declare. `document_support` is the analogue of page "
-        f"evidence support — the annotated answer terms present in the "
-        f"documents the interface returned — not of unit-level evidence "
-        f"support; the pass rule is the search harness's own "
-        f"(`doc_rank` found and support ≥ 0.5).", "",
-        "| Interface | n | doc recall | MRR | document support | record support | passed |",
-        "|---|---|---|---|---|---|---|",
+        f"interface they declare. The graded number is **`answer_support`**: "
+        f"the annotated answer terms in the text of the *one* document the "
+        f"interface asserts as its answer — the active member for `resolve`, "
+        f"the top-ranked fact's document for `facts`. It is the analogue of "
+        f"neither headline support metric (narrower than a page, wider than a "
+        f"unit) and is averaged with neither. `returned documents support` is "
+        f"the same terms anywhere in **any** document returned — for `resolve` "
+        f"that is the whole supersession chain, so a term printed only in a "
+        f"superseded member counts — and it is reported, never graded. The "
+        f"pass rule is the search harness's own (`doc_rank` found and "
+        f"`answer_support` ≥ 0.5).", "",
+        f"`page_rank` is reported only by an interface that knows a page "
+        f"({routed['page_rank_reported']} of {routed['n']} routed question(s) "
+        f"here). `resolve` answers with a document and reports none: it used to "
+        f"stamp page 1 on every chain member, which measured only whether the "
+        f"annotation happened to name page 1.", "",
+        "| Interface | n | doc recall | MRR | answer support | returned-docs support | "
+        "record support | passed |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     for name, m in routed["by_interface"].items():
         lines.append(f"| {name} | {m['n']} | {m['doc_recall']} | {m['mrr']} | "
-                     f"{m['document_support']} | {m['record_support']} | "
-                     f"{m['passed']}/{m['n']} |")
+                     f"{m['answer_support']} | {m['returned_documents_support']} | "
+                     f"{m['record_support']} | {m['passed']}/{m['n']} |")
     lines += ["", "### Before and after, question by question", "",
               "| id | category | interface | doc rank search → routed | "
-              "support search unit → routed document | passed search → routed |",
+              "support search unit → routed answer document | passed search → routed |",
               "|---|---|---|---|---|---|"]
     for r in routed["questions"]:
         b = r["search"]
         lines.append(
             f"| {r['id']} | {r['category']} | {r['interface']} | "
             f"{b['doc_rank']} → {r['doc_rank']} | "
-            f"{b['support']} → {r['document_support']} | "
+            f"{b['support']} → {r['answer_support']} | "
             f"{'PASS' if b['passed'] else 'FAIL'} → "
             f"{'PASS' if r['passed'] else 'FAIL'} |")
     lines += ["",
@@ -781,7 +886,12 @@ def _routed_section(out: dict) -> list[str]:
         lines += [f"#### {r['id']} — resolved `{r.get('identifier')}`", "",
                   f"- active: {r.get('active_document') or '(none)'}",
                   f"- basis: {r.get('active_basis') or '—'}",
-                  f"- chain: {r.get('chain_length')} member(s)"]
+                  f"- basis kind: `{r.get('active_basis_kind') or '—'}`",
+                  f"- chain: {r.get('chain_length')} member(s)",
+                  f"- answer support is measured over the active member alone; "
+                  f"terms found there {r.get('answer_support')}, terms found "
+                  f"anywhere in the chain {r.get('returned_documents_support')}",
+                  f"- page rank: {r.get('page_rank_basis')}"]
         for m in (r.get("chain") or []):
             lines.append(f"    - {m['version_status']}  {m['source_path']}")
         if r.get("note"):

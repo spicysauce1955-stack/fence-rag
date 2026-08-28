@@ -1,9 +1,12 @@
 """Ingestion is idempotent and the retrieval projection is rebuildable."""
+import os
 import shutil
 import unittest
+from unittest import mock
 
 from context import requires_store, store_snapshot
-from fence_evidence.store import (build_retrieval_units, connect, stats,
+from fence_evidence.store import (HEADING_FALLBACK_ENV, build_retrieval_units,
+                                  connect, heading_fallback_enabled, stats,
                                   tool_fingerprint, version_exists)
 from fence_evidence.tools import tool_versions
 
@@ -58,6 +61,29 @@ class TestIdempotency(unittest.TestCase):
         self.assertEqual(n, len(before), "rebuild produced a different unit count")
         self.assertEqual([tuple(r) for r in before], [tuple(r) for r in after],
                          "rebuilding the projection changed its contents")
+
+    def test_the_heading_fallback_is_off_unless_asked_for(self):
+        """R1 exists behind a switch; the default projection must not change.
+
+        The audit's F1 remedy adds a unit for every heading no unit on its page
+        carries. It is measured, not adopted (`docs/state-and-gaps.md`), so the
+        rebuild above has to be the pre-R1 rebuild.
+        """
+        env = dict(os.environ)
+        env.pop(HEADING_FALLBACK_ENV, None)
+        with mock.patch.dict(os.environ, env, clear=True):
+            self.assertFalse(heading_fallback_enabled())
+            before = self.conn.execute("""SELECT document_id, page_no, element_id,
+                text FROM retrieval_units ORDER BY unit_id""").fetchall()
+            n = build_retrieval_units(self.conn, heading_fallback=False)
+            after = self.conn.execute("""SELECT document_id, page_no, element_id,
+                text FROM retrieval_units ORDER BY unit_id""").fetchall()
+            self.assertEqual(n, len(before))
+            self.assertEqual([tuple(r) for r in before], [tuple(r) for r in after],
+                             "an explicit heading_fallback=False moved the rows")
+            headings = self.conn.execute("SELECT COUNT(*) FROM retrieval_units "
+                                         "WHERE element_type='heading'").fetchone()[0]
+            self.assertEqual(headings, 0, "headings reached the default projection")
 
     def test_fts_row_count_matches_units(self):
         units = self.conn.execute("SELECT COUNT(*) FROM retrieval_units").fetchone()[0]

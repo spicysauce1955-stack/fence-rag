@@ -37,15 +37,17 @@ Every metric above is the **search** harness over every gold question, routed on
 
 Declared interfaces: `resolve` 1, `search` 77
 
-1 question(s) are additionally answered through the interface they declare. `document_support` is the analogue of page evidence support — the annotated answer terms present in the documents the interface returned — not of unit-level evidence support; the pass rule is the search harness's own (`doc_rank` found and support ≥ 0.5).
+1 question(s) are additionally answered through the interface they declare. The graded number is **`answer_support`**: the annotated answer terms in the text of the *one* document the interface asserts as its answer — the active member for `resolve`, the top-ranked fact's document for `facts`. It is the analogue of neither headline support metric (narrower than a page, wider than a unit) and is averaged with neither. `returned documents support` is the same terms anywhere in **any** document returned — for `resolve` that is the whole supersession chain, so a term printed only in a superseded member counts — and it is reported, never graded. The pass rule is the search harness's own (`doc_rank` found and `answer_support` ≥ 0.5).
 
-| Interface | n | doc recall | MRR | document support | record support | passed |
-|---|---|---|---|---|---|---|
-| resolve | 1 | 1.0 | 1.0 | 1.0 | 0.4 | 1/1 |
+`page_rank` is reported only by an interface that knows a page (0 of 1 routed question(s) here). `resolve` answers with a document and reports none: it used to stamp page 1 on every chain member, which measured only whether the annotation happened to name page 1.
+
+| Interface | n | doc recall | MRR | answer support | returned-docs support | record support | passed |
+|---|---|---|---|---|---|---|---|
+| resolve | 1 | 1.0 | 1.0 | 1.0 | 1.0 | 0.4 | 1/1 |
 
 ### Before and after, question by question
 
-| id | category | interface | doc rank search → routed | support search unit → routed document | passed search → routed |
+| id | category | interface | doc rank search → routed | support search unit → routed answer document | passed search → routed |
 |---|---|---|---|---|---|
 | gq-011 | current_version | resolve | None → 1 | 0.2 → 1.0 | FAIL → PASS |
 
@@ -55,7 +57,10 @@ The search rows for these questions are unchanged and still appear in the by-cat
 
 - active: manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf
 - basis: no member is marked active; inferred in force from an agreed expiration date 2029-03-13 still ahead of 2026-08-28, and nothing in the chain supersedes it
+- basis kind: `inferred_in_force`
 - chain: 4 member(s)
+- answer support is measured over the active member alone; terms found there 1.0, terms found anywhere in the chain 1.0
+- page rank: not reported: this interface answers with documents, not pages
     - superseded  manuals/certainteed-bufftech/structural/NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf
     - superseded  manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf
     - superseded  manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf

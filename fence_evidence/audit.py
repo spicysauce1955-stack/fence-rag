@@ -18,8 +18,8 @@ from .store import connect
 TINY_UNIT_CHARS = 40
 
 
-def _ro_connect() -> sqlite3.Connection:
-    conn = sqlite3.connect(f"file:{EVIDENCE_DB}?mode=ro", uri=True)
+def _ro_connect(db_path=None) -> sqlite3.Connection:
+    conn = sqlite3.connect(f"file:{db_path or EVIDENCE_DB}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -190,8 +190,15 @@ def within_page_ceiling(conn: sqlite3.Connection, k: int = 10) -> dict:
     }
 
 
-def run_audit(k: int = 10) -> dict:
-    conn = _ro_connect()
+def run_audit(k: int = 10, *, db_path=None, write: bool = True) -> dict:
+    """Measure the projection.
+
+    ``db_path`` audits a store other than the live one and ``write=False``
+    suppresses the JSON, so an experimental projection can be measured without
+    overwriting `workspace/tests/projection-audit.json` -- which is a tracked
+    file describing the projection this repository actually ships.
+    """
+    conn = _ro_connect(db_path)
     try:
         out = {
             "coverage": coverage(conn),
@@ -201,8 +208,9 @@ def run_audit(k: int = 10) -> dict:
         }
     finally:
         conn.close()
-    with open_write(TESTS_DIR / "projection-audit.json") as f:
-        json.dump(out, f, indent=2)
+    if write:
+        with open_write(TESTS_DIR / "projection-audit.json") as f:
+            json.dump(out, f, indent=2)
     return out
 
 
