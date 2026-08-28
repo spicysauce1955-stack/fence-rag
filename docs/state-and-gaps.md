@@ -583,7 +583,7 @@ table and a fresh one agree on the *set* of columns but not their **order**
 but `dict(row)` key order is store-history-dependent, so never byte-compare
 serialised rows between a migrated and a re-ingested store.
 
-### G38 — a toolchain upgrade silently breaks published citations — DETECTED, NOT FIXED
+### G38 — a toolchain upgrade silently breaks published citations — FIXED
 
 `ref_id` is `sha256(content_hash:page_no:bbox)[:16]`. Two of those three inputs
 are permanent; `bbox` is a measurement produced by `pdftotext -bbox-layout`.
@@ -611,11 +611,51 @@ one.
 across re-extraction because the rectangle it names is itself produced by
 extraction.
 
-**Not closed because** the fix is extraction *editions* — putting the toolchain
-fingerprint into the version's identity so re-extraction is additive, and
-retaining an edition while any un-tombstoned snapshot cites it. ~31 MB per
-edition on a 69 MB store. Designed in `docs/four-layer-model-design.md` §5.1;
-plan 2 of `docs/four-layer-plan-1-refs.md`'s sequence.
+**Fixed 2026-08-28** with extraction editions. `document_versions` gains
+`tool_fingerprint` and `edition`, and `UNIQUE(document_id, sha256)` widens to
+`UNIQUE(document_id, sha256, tool_fingerprint)` — the fingerprint has to be a
+column because the constraint is what admits a second edition, and a constraint
+cannot reach through a join. `SCHEMA_VERSION` 4 → 5.
+
+**Edition 1 keeps exactly the id it always had.** Only editions 2..n take a
+`~<fingerprint>` suffix. That asymmetry is the whole point: `element_id` derives
+from `page_id` derives from `version_id`, so suffixing edition 1 would re-key
+2,147 pages and 81,794 elements and break every published citation — the failure
+being fixed.
+
+**The counterfactual is the proof.** On two copies of the real store, the 71
+versions the published snapshot cites were re-extracted with every bbox shifted
+by 0.02pt under a new fingerprint:
+
+| | cites | resolved | dangling |
+|---|---|---|---|
+| with editions | 431 | **431** | **0** |
+| at the previous HEAD | 431 | 423 | **8** |
+
+Eight citations stopped resolving while the store's row counts looked unchanged
+— the silent failure, reproduced. The old path also aborted partway with
+`FOREIGN KEY constraint failed`, because `facts.element_id` references
+`elements`, so a destructive re-extraction could additionally leave the store
+half-deleted.
+
+`ensure_edition_unique` rebuilds the table by SQLite's documented procedure,
+deriving the DDL from live `sqlite_master.sql` rather than retyping it, and
+compares row count and the full `version_id` set before and after inside the
+transaction, rolling back if either moved. Applied to the live store: 144
+versions, 81,794 elements, `integrity_check ok`, 519 of 519 citations resolving,
+and `migrate()` idempotent on a second run.
+
+`delete_version_rows` survives for two genuine deletes — retiring an uncited
+edition, and rewriting an edition over itself — and is unreachable by accident:
+`write_extracted` calls it only when the computed `version_id` already exists and
+its fingerprint matches, so the rows deleted are always the rows about to be
+re-created. A different toolchain gets a different id and finds nothing.
+
+**Two things this does not close.** There is no command that *retires* an
+uncited edition, and each retained edition costs roughly 31 MB. And once a real
+second edition exists, `refs.build_index` will attach elements from both editions
+to any ref whose bbox did not move between them — everything still resolves, but
+it widens the §5.2 non-injectivity that is already recorded there.
 
 ### G39 — `snapshot --build --dry-run` stores anyway — FIXED
 
