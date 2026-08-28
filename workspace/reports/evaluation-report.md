@@ -1,6 +1,6 @@
 # Evaluation report — gold question set against the full corpus
 
-Questions: **59** (41 answerable, 18 no-answer) · k = 10
+Questions: **78** (41 answerable, 37 no-answer) · k = 10
 
 Every gold question was runnable.
 
@@ -11,7 +11,7 @@ Every gold question was runnable.
 | MRR | 0.552 | reported |
 | Evidence support (terms in the retrieved unit) | 0.623 | A3 ≥ 0.70 — FAIL |
 | Page evidence support (terms anywhere on a retrieved page) | 0.769 | reported |
-| No-answer precision | 0.333 | A4 ≥ 0.66 — FAIL |
+| No-answer precision | 0.324 | A4 ≥ 0.66 — FAIL |
 | False-unsupported rate (answerable questions wrongly declared unsupported) | 0.146 | A4b ≤ 0.20 — PASS |
 
 ## By category
@@ -25,7 +25,7 @@ Every gold question was runnable.
 | exact_identifier | 3 | 3 | 3 | 1.0 | — |
 | exact_product | 4 | 4 | 1 | 0.333 | gq-102, gq-103, gq-104 |
 | historical_version | 2 | 2 | 2 | 1.0 | — |
-| no_answer | 18 | 0 | 6 | None | gq-116, gq-117, gq-118, gq-201, gq-202, gq-203, gq-204, gq-206, gq-207, gq-208, gq-210, gq-215 |
+| no_answer | 37 | 0 | 12 | None | gq-116, gq-117, gq-118, gq-201, gq-202, gq-203, gq-204, gq-206, gq-207, gq-208, gq-210, gq-215, gq-222, gq-223, gq-224, gq-225, gq-226, gq-227, gq-228, gq-229, gq-230, gq-231, gq-232, gq-233, gq-234 |
 | paraphrase | 5 | 3 | 2 | 0.467 | gq-106, gq-108, gq-109 |
 | source_verification | 4 | 4 | 4 | 0.734 | — |
 | table_retrieval | 4 | 3 | 2 | 0.85 | gq-009, gq-010 |
@@ -35,7 +35,7 @@ Every gold question was runnable.
 
 Every metric above is the **search** harness over every gold question, routed ones included — same denominators, same values as before routing existed. The block below is separate and is not averaged into it.
 
-Declared interfaces: `resolve` 1, `search` 58
+Declared interfaces: `resolve` 1, `search` 77
 
 1 question(s) are additionally answered through the interface they declare. `document_support` is the analogue of page evidence support — the annotated answer terms present in the documents the interface returned — not of unit-level evidence support; the pass rule is the search harness's own (`doc_rank` found and support ≥ 0.5).
 
@@ -77,9 +77,9 @@ Only categories that actually failed appear here. Nothing below is built.
 - **Experiment**: Conflict surfacing: return every source that states a value for the same condition, with its version status.
 - **Acceptance**: Both conflicting sources appear in the top 10 with their statuses.
 
-### no_answer — 12 of 18 failing
+### no_answer — 25 of 37 failing
 
-- **Problem**: no_answer questions fail lexical retrieval (failing ids: gq-116, gq-117, gq-118, gq-201, gq-202, gq-203, gq-204, gq-206, gq-207, gq-208, gq-210, gq-215).
+- **Problem**: no_answer questions fail lexical retrieval (failing ids: gq-116, gq-117, gq-118, gq-201, gq-202, gq-203, gq-204, gq-206, gq-207, gq-208, gq-210, gq-215, gq-222, gq-223, gq-224, gq-225, gq-226, gq-227, gq-228, gq-229, gq-230, gq-231, gq-232, gq-233, gq-234).
 - **Experiment**: Rarest-term coverage plus a calibrated score floor, reported as an explicit unsupported-answer response.
 - **Acceptance**: No-answer precision >=0.66 with no loss of answerable recall.
 
@@ -272,6 +272,110 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 - expected: (nothing — no-answer question)
 - doc rank: None · unit support: None · page support: None · missing terms: []
 - top hit: manuals/barrette-outdoor-living/install-picket-closedtop-semiprivacy-panel-kit.pdf p3 score 14.5058
+
+### gq-222 — no_answer
+*For how many hours of ASTM B117 salt-spray exposure is the galvanized steel rail reinforcement tested?*
+
+- query: `salt spray ASTM B117 hours galvanized steel rail reinforcement how many hours salt spray test fence steel insert B117 corrosion test duration fence hardware`
+- expected: (nothing — no-answer question)
+- doc rank: None · unit support: None · page support: None · missing terms: []
+- top hit: manuals/industry-standards/ASTM-Standards-for-Fence-Materials-and-Products_Compilation-FENCE21.pdf p1 score 30.558
+
+### gq-223 — no_answer
+*What ground snow load, in pounds per square foot, is a 6 ft vinyl privacy fence panel rated to withstand?*
+
+- query: `vinyl fence panel ground snow load psf snow load rating privacy fence pounds per square foot how much snow can a vinyl fence panel take`
+- expected: (nothing — no-answer question)
+- doc rank: None · unit support: None · page support: None · missing terms: []
+- top hit: manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf p48 score 17.8727
+
+### gq-224 — no_answer
+*What maximum allowable rail deflection, in inches, applies to a vinyl fence rail at its rated design wind pressure?*
+
+- query: `maximum allowable rail deflection inches design wind pressure vinyl fence vinyl fence rail deflection limit under wind load allowable deflection fence rail span inches`
+- expected: (nothing — no-answer question)
+- doc rank: None · unit support: None · page support: None · missing terms: []
+- top hit: manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf p32 score 19.3158
+
+### gq-225 — no_answer
+*What clearance, in inches, must be kept between the two 1/2" rebar pieces and the inside wall of a concrete-filled vinyl post?*
+
+- query: `rebar clearance from post wall separator clip inches how far apart rebar in vinyl fence post rebar cover concrete filled fence post`
+- expected: (nothing — no-answer question)
+- doc rank: None · unit support: None · page support: None · missing terms: []
+- top hit: manuals/certainteed-bufftech/bufftech-install-semiprivate.pdf p1 score 20.3832
+
+### gq-226 — no_answer
+*At what wind speed, in mph, must fence panels be temporarily braced or removed during installation?*
+
+- query: `wind speed mph temporary bracing fence panels during installation brace fence panels high wind while installing maximum wind during fence installation mph`
+- expected: (nothing — no-answer question)
+- doc rank: None · unit support: None · page support: None · missing terms: []
+- top hit: manuals/certainteed-bufftech/structural/NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf p3 score 18.3744
+
+### gq-227 — no_answer
+*What minimum edge distance, in inches, is required for the 3/8" wedge anchors that fasten a Wam Bam surface mount to a concrete slab?*
+
+- query: `wedge anchor minimum edge distance concrete surface mount how close to slab edge can I set the fence surface mount anchors 3/8 wedge anchor edge distance vinyl fence post mount`
+- expected: (nothing — no-answer question)
+- doc rank: None · unit support: None · page support: None · missing terms: []
+- top hit: manuals/wam-bam/vinyl-surface-mount-SB61000-install-guide.pdf p6 score 31.4941
+
+### gq-228 — no_answer
+*What Sound Transmission Class (STC) rating does a Bufftech Imperial privacy fence achieve under ASTM E90?*
+
+- query: `Bufftech Imperial STC sound transmission loss rating Imperial privacy fence sound transmission class CertainTeed Bufftech ASTM E 90 sound transmission test Imperial`
+- expected: (nothing — no-answer question)
+- doc rank: None · unit support: None · page support: None · missing terms: []
+- top hit: manuals/certainteed-bufftech/bufftech-catalog-2014.pdf p29 score 47.8546
+
+### gq-229 — no_answer
+*What ASTM D4216 cell classification does the PVC compound used in Weatherables fence profiles meet?*
+
+- query: `Weatherables ASTM D4216 cell classification PVC Weatherables vinyl cell class rigid PVC compound TriWest PVC cell classification D1784`
+- expected: (nothing — no-answer question)
+- doc rank: None · unit support: None · page support: None · missing terms: []
+- top hit: manuals/industry-standards/ASTM-Info-Flyer_Illusions-F964-D4216-Summary.pdf p1 score 36.0823
+
+### gq-230 — no_answer
+*What titanium dioxide UV-inhibitor loading does the Illusions PVC compound use?*
+
+- query: `Illusions titanium dioxide UV inhibitor PVC compound Illusions TiO2 content vinyl fence material titanium dioxide UV inhibitor Illusions fence specification`
+- expected: (nothing — no-answer question)
+- doc rank: None · unit support: None · page support: None · missing terms: []
+- top hit: china/manuals/showtech/PVC-fence-catalog-2022.pdf p3 score 34.8826
+
+### gq-231 — no_answer
+*What maximum gate weight, in pounds, is the Bufftech adjustable nylon gate hinge rated to support?*
+
+- query: `Bufftech adjustable nylon gate hinge gate weight lbs CertainTeed vinyl gate hinge weight capacity pounds how heavy a gate will the nylon hinge support`
+- expected: (nothing — no-answer question)
+- doc rank: None · unit support: None · page support: None · missing terms: []
+- top hit: manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf p106 score 23.3331
+
+### gq-232 — no_answer
+*Which Miami-Dade County NOA covers Weatherables vinyl privacy fence, and what is its expiration date?*
+
+- query: `Weatherables Miami-Dade NOA number expiration date Weatherables notice of acceptance hurricane approval Weatherables Florida product approval expiration`
+- expected: (nothing — no-answer question)
+- doc rank: None · unit support: None · page support: None · missing terms: []
+- top hit: manuals/illusions-vinyl-fence/75mph-wind-kit-noa-miami-dade.pdf p1 score 24.443
+
+### gq-233 — no_answer
+*To what depth below grade must the posts of a Showtech ST101 full privacy PVC fence be set?*
+
+- query: `Showtech PVC privacy fence post embedment depth below grade Showtech vinyl fence footing depth post hole how deep to set posts Showtech privacy fence`
+- expected: (nothing — no-answer question)
+- doc rank: None · unit support: None · page support: None · missing terms: []
+- top hit: manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf p7 score 21.725
+
+### gq-234 — no_answer
+*What withdrawal (pull-out) strength, in pounds, does the #8 x 3/4" screw that locks a Bufftech top rail into the post develop?*
+
+- query: `#8 x 3/4 screw pulled out load lbf rail post vinyl fence rail locking screw strength pounds how much load will the rail screw hold before the threads pulled out`
+- expected: (nothing — no-answer question)
+- doc rank: None · unit support: None · page support: None · missing terms: []
+- top hit: manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf p17 score 30.2774
 
 ### gq-004 — conditional_table_lookup
 *I'm installing Bufftech Chesterfield fence in Miami-Dade in Exposure C. If I pour a 36 inch deep footing, what is the maximum post spacing the NOA allows?*

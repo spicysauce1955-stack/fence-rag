@@ -34,6 +34,11 @@
     },
     "answerable": {"type": "boolean",
       "description": "false for no_answer questions: the corpus must NOT contain this"},
+    "no_answer_class": {
+      "type": "string",
+      "enum": ["absent-subject", "adjacent-vocabulary", "near-miss"],
+      "description": "G7: which kind of unanswerable a no_answer question is. absent-subject = the manufacturer, standard or material is genuinely nowhere in the corpus. adjacent-vocabulary = every word of the question occurs, often on one page, but nothing answers it. near-miss = the corpus covers the topic AND the product, and documents the asked-for property for OTHER product families. Optional and meaningful only when answerable is false; absent means the question predates the field and is unclassified. The three classes exist because no lexical feature separates them, so no_answer_precision must always be read per class and always alongside false_unsupported_rate."
+    },
     "expected_documents": {
       "type": "array",
       "description": "repo-relative source paths; >1 for comparison/conflict questions",

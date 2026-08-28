@@ -7,6 +7,7 @@
       "category": "no_answer",
       "question": "What footing depth and maximum post spacing does Bufftech specify for a Danbury picket fence in Wind Exposure C?",
       "answerable": false,
+      "no_answer_class": "near-miss",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -27,6 +28,7 @@
       "category": "no_answer",
       "question": "What is the notched Izod impact strength (ASTM D256), in ft-lb per inch of notch, of the PVC compound used in Illusions vinyl fence profiles?",
       "answerable": false,
+      "no_answer_class": "near-miss",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -47,6 +49,7 @@
       "category": "no_answer",
       "question": "How many pounds of gate weight is the Illusions Extra Strong Hinge rated to support?",
       "answerable": false,
+      "no_answer_class": "near-miss",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -67,6 +70,7 @@
       "category": "no_answer",
       "question": "What aluminum alloy and wall thickness are the Weatherables aluminum post and rail inserts (stiffeners) made from?",
       "answerable": false,
+      "no_answer_class": "near-miss",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -87,6 +91,7 @@
       "category": "no_answer",
       "question": "How much can a Weatherables tongue-and-groove privacy fence panel rack, in inches over an 8 ft span?",
       "answerable": false,
+      "no_answer_class": "near-miss",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -107,6 +112,7 @@
       "category": "no_answer",
       "question": "What is the minimum ambient temperature at which a Bufftech vinyl fence may be installed?",
       "answerable": false,
+      "no_answer_class": "adjacent-vocabulary",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -127,6 +133,7 @@
       "category": "no_answer",
       "question": "What is the coefficient of linear thermal expansion of Illusions vinyl fence PVC, in inches per inch per degree F?",
       "answerable": false,
+      "no_answer_class": "adjacent-vocabulary",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -147,6 +154,7 @@
       "category": "no_answer",
       "question": "How many inches below the frost line must a vinyl fence post footing extend?",
       "answerable": false,
+      "no_answer_class": "adjacent-vocabulary",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -167,6 +175,7 @@
       "category": "no_answer",
       "question": "What is the ASTM E84 flame spread index of Illusions vinyl fence PVC material?",
       "answerable": false,
+      "no_answer_class": "adjacent-vocabulary",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -187,6 +196,7 @@
       "category": "no_answer",
       "question": "Which ASCE 7 wind exposure category does the Weatherables 130 mph wind-gust rating apply to?",
       "answerable": false,
+      "no_answer_class": "adjacent-vocabulary",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -207,6 +217,7 @@
       "category": "no_answer",
       "question": "What is the Texas Department of Insurance (TDI) windstorm product evaluation number for these vinyl fence panels?",
       "answerable": false,
+      "no_answer_class": "absent-subject",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -227,6 +238,7 @@
       "category": "no_answer",
       "question": "Which GB or GB/T standard number does the Showtech PVC fence catalog cite for its PVC compound?",
       "answerable": false,
+      "no_answer_class": "absent-subject",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -247,6 +259,7 @@
       "category": "no_answer",
       "question": "What is the maximum post spacing for a Ply Gem 6 ft vinyl privacy fence?",
       "answerable": false,
+      "no_answer_class": "absent-subject",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -267,6 +280,7 @@
       "category": "no_answer",
       "question": "What wall thickness and material spec apply to the HDPE (high-density polyethylene) fence panels in this product range?",
       "answerable": false,
+      "no_answer_class": "absent-subject",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -287,6 +301,7 @@
       "category": "no_answer",
       "question": "Is there a pet door / dog door insert available for a vinyl privacy fence panel, and what size opening does it need?",
       "answerable": false,
+      "no_answer_class": "absent-subject",
       "expected_documents": [],
       "expected_pages": {},
       "expected_answer": null,
@@ -300,6 +315,407 @@
         "method": "sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); dumped every elements.text||elements.ocr_text row (81794 rows, incl. OCR for all 22 scanned + 6 mojibake docs) and every table_cells.text row (18472) to scratch files, then grepped those: grep -icE 'pet door|dog door|doggie' -> 0 in the element dump and 0 in the table_cells dump. pdftotext -layout over all 137 corpus PDFs into a scratch dir, then grep -rilE over it for 'pet door|dog door|doggie' -> 0 of 137 files. python3 -c \"import zipfile,re; strip tags from word/document.xml\" on manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx, then counted each term: 'pet door' 0, 'dog door' 0. Checked neighbouring accessory vocabulary so the absence is not a naming problem: the corpus documents post caps (including solar/LED caps), gate hardware kits, hinges, latches (Magna/Lokk/hatchet/gravity), drop rods, transition brackets, u-mount rail brackets, rail-end brackets, gate sockets, post stiffeners/inserts, wall and surface mounts, lattice and picket accents, pergola kits and vinyl adhesive; but 'privacy screen' 0, 'gate closer' 0, 'electric fence' 0, 'razor' 0, 'windscreen' 1 (incidental). 'dog ear' occurs only as a picket cap profile.",
         "confirmed": true,
         "notes": "class: absent-subject -- An accessory-type absence. Panel cut-down and field-modification instructions DO exist (Freedom RTA cut-down instructions, picket removal for scalloped panels), and 'pet' style safety language appears in gate warnings, so a retriever will surface plausible-looking cut-and-modify pages. No pet/dog door product or opening dimension exists in the corpus."
+      }
+    },
+    {
+      "id": "gq-216",
+      "category": "no_answer",
+      "question": "What maximum post spacing does Trex Seclusions composite fencing allow for a 6 ft privacy panel?",
+      "answerable": false,
+      "no_answer_class": "absent-subject",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Trex Seclusions post spacing",
+        "Trex composite fence maximum post spacing 6 ft",
+        "Seclusions composite fence panel span"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. grep -icE '\\btrex\\b' -> 0 element rows and 0 table cells; grep -icE 'seclusions' -> 0 and 0. The bare word 'seclusion' does occur 4 times, but only as marketing prose ('Multi-dimensional design balances seclusion with openness' in weatherables-fencing-brochure.pdf p10 and weatherables-full-line-catalog-2026.pdf p10; 'offers both seclusion and sophistication' in weatherables-privacy-fencing-specsheet.pdf p1; 'the perfect mix of style and seclusion' in the Digger Specialties racking brochure p13) - never as the Trex product name. No Trex document, manufacturer row or documents[] entry exists: SELECT DISTINCT manufacturer FROM documents has no Trex. End-to-end: cli search \"Trex Seclusions composite fence post spacing\" -k 3 returns china/manuals/installation-technical/unifloor-composite-fencing-installation-guide.pdf p1 at score 10.6, matching on the single term 'composite'.",
+        "confirmed": true,
+        "notes": "class: absent-subject -- Trex Seclusions is the best-known composite fence system in the US market and the corpus is dense in post-spacing tables, so the question is entirely natural for a planner to ask. The manufacturer is simply not here. The one composite-fence document in the corpus is a Chinese WPC installation guide that is image-only and carries no dimensions at all - the retriever falls back to it on the word 'composite'."
+      }
+    },
+    {
+      "id": "gq-217",
+      "category": "no_answer",
+      "question": "What design wind load is the Ameristar Montage Plus ornamental steel fence rated for?",
+      "answerable": false,
+      "no_answer_class": "absent-subject",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Ameristar Montage wind load rating",
+        "Montage Plus ornamental steel fence design wind",
+        "Ameristar fence wind rating psf"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. grep -icE 'ameristar' -> 0 element rows, 0 table cells; grep -icE '\\bmontage\\b' -> 0 and 0; grep -icE 'jerith' (the other common ornamental brand) -> 0 and 0. 'wrought iron' occurs 7 times, all as a description of a vinyl or aluminium *look*. End-to-end: cli search \"Ameristar Montage steel fence wind load rating\" -k 3 returns manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf p7 at score 14.8 on the terms 'wind', 'load', 'rating' - the OCR of a NOA drawing whose title block literally reads 'WIND LOAD RATING'.",
+        "confirmed": true,
+        "notes": "class: absent-subject -- The corpus documents wind-load ratings extensively, but only for vinyl fencing. Ameristar/Montage is a steel ornamental system from a manufacturer that appears nowhere. The top hit is a genuine wind-load-rating table belonging to a different manufacturer and a different material, which is exactly the failure the negative set is meant to catch."
+      }
+    },
+    {
+      "id": "gq-218",
+      "category": "no_answer",
+      "question": "Which ISO 9001 quality-management certificate number does the fence extrusion plant hold?",
+      "answerable": false,
+      "no_answer_class": "absent-subject",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "ISO 9001 certificate number fence factory",
+        "fence manufacturer ISO 9001 registration",
+        "quality management system certification vinyl fence plant"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. grep -icE 'iso ?9001' -> 0 element rows, 0 table cells; the broader grep -icE '\\biso[ -]?[0-9]{3,5}\\b' (any ISO standard number at all) -> 0 and 0. Quality-assurance text does exist - bufftech-catalog-2014.pdf p29 has a 'Quality Assurance' block listing dimensional checks, wall thickness, cap stock thickness, colour/gloss, impact, flex, tensile strength and accelerated weathering, and the Illusions flyers describe testing 'at least every two hours' - but no ISO registration anywhere. End-to-end: cli search \"ISO 9001 certificate number fence factory\" -k 3 returns NOA cover sheets matching only on 'certificate' ('2. Certificate of a name change.'), score 6.7.",
+        "confirmed": true,
+        "notes": "class: absent-subject -- Quality-system vocabulary is present and so is the idea of third-party certification (Miami-Dade NOAs, ICC-ES ESR-1555, CCRR numbers), but the ISO 9001 regime is not in the corpus at all. The distractor is a NOA administrative note about a name-change certificate."
+      }
+    },
+    {
+      "id": "gq-219",
+      "category": "no_answer",
+      "question": "Which CSA standard do Barrette's Canadian-market vinyl fence panels certify to?",
+      "answerable": false,
+      "no_answer_class": "absent-subject",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "CSA standard vinyl fence Canada certification",
+        "Barrette Canada CSA certified fence",
+        "Canadian standard vinyl fencing CSA number"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. grep -oE '\\bCSA\\b' -> 0 element rows, 0 table cells (case-sensitive, so this is not swamped by ordinary words). Barrette is a Canadian manufacturer and IS heavily represented (21,347 element rows) and prints French on many pages, so the question is plausible; the standards it cites are ASTM, ASCE 7 and the Florida Building Code, never CSA. End-to-end: cli search \"CSA standard vinyl fence Canada certification\" -k 3 returns Miami-Dade NOA cover pages matching only on 'certification' ('2. Certification of a name change.'), score 7.5.",
+        "confirmed": true,
+        "notes": "class: absent-subject -- A whole standards regime that the corpus does not contain, asked of a manufacturer the corpus knows very well. Compare gq-212, which does the same for GB/GB-T: this platform's standards axis is ASTM plus the Florida Building Code and nothing else, and a retriever cannot tell the difference from the words alone."
+      }
+    },
+    {
+      "id": "gq-220",
+      "category": "no_answer",
+      "question": "Does the Showtech PVC fence carry a CE mark under EN 13241, and what performance class is declared?",
+      "answerable": false,
+      "no_answer_class": "absent-subject",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Showtech CE marking EN 13241 declared performance",
+        "EN 13241 vinyl fence CE mark class",
+        "European standard fence gate CE declaration of performance"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. grep -icE 'en ?13241' -> 0 element rows, 0 table cells; grep -icE '\\bCE[- ]mark' -> 0 and 0; grep -icE 'declaration of performance' -> 0 and 0. The three Showtech catalogues (2,807 element rows across PVC-fence-catalog-2022.pdf, PVC-fence-catalog-2024.pdf and Showtech-WPC-fence-decking-catalog-2024.pdf) name no certification scheme of any kind. End-to-end: cli search \"Showtech CE marking EN 13241 declared performance\" -k 3 returns bufftech-catalog-2014.pdf p5 at score 10.7, matching the two-letter tokens 'CE' and 'EN' inside OCR fragments of the colour name 'Select Cedar' ('ect Ce da Sie r rra Bl en d').",
+        "confirmed": true,
+        "notes": "class: absent-subject -- Showtech is an export manufacturer, so a European conformity question is realistic, and the China track is exactly where a reader would expect to find it. The scheme is absent. Note the tokenisation trap: 'CE' and 'EN' are two-letter tokens that match OCR noise, so a rarest-term-present heuristic sees the query terms as covered."
+      }
+    },
+    {
+      "id": "gq-221",
+      "category": "no_answer",
+      "question": "How many years is the Kroy Building Products vinyl fence limited warranty?",
+      "answerable": false,
+      "no_answer_class": "absent-subject",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Kroy vinyl fence limited warranty years",
+        "Kroy Building Products fence warranty term",
+        "Kroy fence lifetime warranty"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. grep -icE '\\bkroy\\b' -> 0 element rows, 0 table cells; 'kroy building' -> 0 and 0. Warranty documents are plentiful (illusions-vinyl-fence/product-warranty.pdf, weatherables-limited-warranty.pdf, the Bufftech SureStart lifetime language, the ARCAT MasterSpec 'Lifetime Limited, Non-Prorated Warranty ... 5 Year Prorated Labor Warranty'), so the shape of the answer is well represented. End-to-end: cli search \"Kroy vinyl fence limited warranty years\" -k 3 returns illusions-vinyl-fence/product-warranty.pdf p1 at score 15.9 with a real, specific warranty term ('the limited warranty period will be twenty (20) years'), for the wrong manufacturer.",
+        "confirmed": true,
+        "notes": "class: absent-subject -- Kroy is a real vinyl fence manufacturer that this corpus simply does not cover. Every content word of the question except the brand name is dense in the corpus, and the top hit states a warranty length with total confidence - for Illusions."
+      }
+    },
+    {
+      "id": "gq-222",
+      "category": "no_answer",
+      "question": "For how many hours of ASTM B117 salt-spray exposure is the galvanized steel rail reinforcement tested?",
+      "answerable": false,
+      "no_answer_class": "adjacent-vocabulary",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "salt spray ASTM B117 hours galvanized steel rail reinforcement",
+        "how many hours salt spray test fence steel insert",
+        "B117 corrosion test duration fence hardware"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. Every content word occurs, and B117 and 'salt spray' occur on the same page. grep -icE '\\bb ?-?117\\b' -> 1 element row, on manuals/industry-standards/ASTM-Standards-for-Fence-Materials-and-Products_Compilation-FENCE21.pdf p1, where the whole entry is the standard's title: 'B117 Practice for Operating Salt Spray (Fog) Apparatus'. grep -icE 'salt spray' -> 2 pages (that one and grand-illusions-advantage-brochure.pdf p2). grep -icE 'galvani' -> 129 pages across 36 documents. grep -icE '\\bhours?\\b' -> 124 pages across 27 documents. I then read every 'hours' occurrence: they are the 72-hour concrete set time repeated across the Bufftech guides, and the Illusions QC line 'tests ... at least every two hours'. No salt-spray duration, and no corrosion test result, appears anywhere. End-to-end: cli search returns the ASTM compilation p1 at rank 1, score 25.0, matching B117, salt, spray, galvanized and steel simultaneously - the highest term coverage of any question in this batch.",
+        "confirmed": true,
+        "quote": "B117 Practice for Operating Salt Spray (Fog) Apparatus",
+        "notes": "class: adjacent-vocabulary -- The single most lexically deceptive question here: the rarest term in the query ('B117') IS in the corpus, on the same page as 'salt spray', 'galvanized' and 'steel'. What that page contains is a bibliography of ASTM titles, not a test result. This is the exact failure mode G7 describes - term presence measured against the best result is higher for the unanswerable question than for the average answerable one."
+      }
+    },
+    {
+      "id": "gq-223",
+      "category": "no_answer",
+      "question": "What ground snow load, in pounds per square foot, is a 6 ft vinyl privacy fence panel rated to withstand?",
+      "answerable": false,
+      "no_answer_class": "adjacent-vocabulary",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "vinyl fence panel ground snow load psf",
+        "snow load rating privacy fence pounds per square foot",
+        "how much snow can a vinyl fence panel take"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. Every word occurs; the load case does not. grep -icE 'snow[ -]?load' -> 0 element rows, 0 table cells. grep -icE '\\bsnow\\b' -> 10 rows, all of which I read: eight are the Weatherables gate instruction 'Be sure the gate will be high enough to clear obstructions such as snow' and two are the Wam Bam simile 'like snowflakes and fingerprints, your property is one-of-a-kind'. Meanwhile 'psf' is dense and specific - grep -ioE '[0-9.,]+ ?psf' returns 54.1, 46.7, 44.7, 39.8, 38.5, 36.5, 32.8, 30, 26.60 and 2500 psf - and every one of them is a wind pressure or a soil bearing pressure. grep -icE 'drift|ice load|dead load' -> 0. End-to-end: cli search \"vinyl fence panel ground snow load psf\" -k 3 returns manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf p22 at score 13.0, matching 'psf', on the line '46.7 psf wind 46.7 psf wind 46.7 psf wind'.",
+        "confirmed": true,
+        "notes": "class: adjacent-vocabulary -- The corpus is full of structural loads expressed in psf and contains not one snow load. A retriever returns a page of psf figures with high confidence and a term-overlap scorer sees the unit and the magnitude it expects. Snow is a load case this industry does not design fences for, which is precisely why no document says so."
+      }
+    },
+    {
+      "id": "gq-224",
+      "category": "no_answer",
+      "question": "What maximum allowable rail deflection, in inches, applies to a vinyl fence rail at its rated design wind pressure?",
+      "answerable": false,
+      "no_answer_class": "adjacent-vocabulary",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "maximum allowable rail deflection inches design wind pressure vinyl fence",
+        "vinyl fence rail deflection limit under wind load",
+        "allowable deflection fence rail span inches"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. grep -icE 'deflect' -> 2 pages only, neither an answer: manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf p13 (a chain-link cantilever-gate roller-design spec listing) and manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf p13 (the verb, about replacing notches in a bottom rail). grep -icE 'L/180|L/240|span/[0-9]' -> 0 and 0. 'maximum allowable' occurs, 'design pressure'/'psf' occurs (the Barrette PE report tabulates 54.1, 46.7, 44.7, 39.8, 38.5, 36.5 and 32.8 psf), 'inches' and 'rail' are everywhere. End-to-end: cli search returns CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf p11 at score 14.8 on 'maximum', 'allowable' and 'wind' - a sentence about allowable *stress*, not deflection.",
+        "confirmed": true,
+        "notes": "class: adjacent-vocabulary -- A serviceability limit is the natural companion to the design pressures the corpus does publish, and a reader would reasonably expect the PE reports to state one. They state stresses and pressures and never a deflection criterion. The retrieved page discusses 'a higher maximum allowable stress' under wind loading, which reads like an answer to anything scoring on term overlap."
+      }
+    },
+    {
+      "id": "gq-225",
+      "category": "no_answer",
+      "question": "What clearance, in inches, must be kept between the two 1/2\" rebar pieces and the inside wall of a concrete-filled vinyl post?",
+      "answerable": false,
+      "no_answer_class": "adjacent-vocabulary",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "rebar clearance from post wall separator clip inches",
+        "how far apart rebar in vinyl fence post",
+        "rebar cover concrete filled fence post"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. The whole vocabulary is on one page, many times over: grep -icE 'separator clip' -> 162 pages across 7 documents, always in the form 'Use two pieces of 1/2\" rebar in each hinge, latch and end post ... Position rebar in opposing corners of each post with rebar separator clips'. The corpus gives the rebar diameter (1/2\"), the count (two), the arrangement (opposing corners), the accessory (separator clip) and the vertical extent ('from the bottom of the hole to approximately 12\" from the top of the post') - and no clearance or cover dimension. grep -icE 'rebar.{0,60}(clearance|cover|from the (inside )?wall)' -> 0 and 0. End-to-end: cli search returns bufftech-installation-guide-afence.pdf p13 at score 17.8, matching 'rebar', 'clearance', 'post', 'separator' AND 'clip' - five of six query terms - because the same page carries the unrelated instruction 'ALLOW CLEARANCE FOR GATE SWING'.",
+        "confirmed": true,
+        "notes": "class: adjacent-vocabulary -- Term coverage 5/6 on a question with no answer. The word 'clearance' is present on the winning page and means something else entirely (room for the gate to swing). This is the adjacent-vocabulary trap in its purest form."
+      }
+    },
+    {
+      "id": "gq-226",
+      "category": "no_answer",
+      "question": "At what wind speed, in mph, must fence panels be temporarily braced or removed during installation?",
+      "answerable": false,
+      "no_answer_class": "adjacent-vocabulary",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "wind speed mph temporary bracing fence panels during installation",
+        "brace fence panels high wind while installing",
+        "maximum wind during fence installation mph"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. grep -icE 'brac(e|ing)' -> 59 pages across 25 documents; grep -icE '\\bmph\\b' -> present throughout the NOAs, the CLFMI wind guide and the Weatherables literature; 'installation' is corpus-wide. A page-level co-occurrence scan for pages carrying both a bracing word and any of wind|mph|storm returns 7 pages, and I read all 7: five are the Bufftech HVHZ note about a 'mid-brace' fastened with (2) #8 x 1-1/2\" screws, one is 'COLUMBIA GATES HAVE BRACES ON BOTH SIDES OF GATE', and one is the Barrette privacy-railing PE report p17, where a corner post 'is braced in four directions' inside a 115 MPH wind calculation. None is a construction-stage rule. A further grep -icE 'temporar(y|ily).{0,40}brac|brac.{0,40}until' returns 4 rows, all false positives ('Temporarily remove bottom rail and install bracket', 'brackets until they hit the bottom rail'). End-to-end: cli search returns CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf p11 at score 15.8, matching 'wind', 'speed', 'mph', 'fence' and 'installation', on a passage about ASCE 7-22 wind speed maps (105-170 MPH).",
+        "confirmed": true,
+        "notes": "class: adjacent-vocabulary -- The corpus is rich in mph figures and rich in bracing instructions, and connects them nowhere. Five of six query terms match on the top hit and it returns a range of wind speeds - a plausible-looking answer to a question about a construction-stage limit that no document sets."
+      }
+    },
+    {
+      "id": "gq-227",
+      "category": "no_answer",
+      "question": "What minimum edge distance, in inches, is required for the 3/8\" wedge anchors that fasten a Wam Bam surface mount to a concrete slab?",
+      "answerable": false,
+      "no_answer_class": "adjacent-vocabulary",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "wedge anchor minimum edge distance concrete surface mount",
+        "how close to slab edge can I set the fence surface mount anchors",
+        "3/8 wedge anchor edge distance vinyl fence post mount"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. grep -icE 'edge distance|distance from the edge' -> 0 element rows, 0 table cells. Every other word is present and concentrated on the two pages the question is about: manuals/wam-bam/vinyl-surface-mount-SB61000-install-guide.pdf p4 ('For Concrete: Secure the surface mount to the concrete with 3/8\" x 3\" long wedge or sleeve anchors. Do not use concrete or blue screws.') and p6 ('Use (4) 3/8\" x 3\" long concrete wedge anchors (not included) to secure the surface mount.'). The anchor diameter, length, count and type are all specified; the edge distance is not, here or in the five Bufftech/Barrette surface-mount pages that also name wedge anchors. End-to-end: cli search returns that exact document, p6, at rank 1 with score 22.3, matching 'wedge', 'anchor', 'edge', 'concrete', 'surface' and 'mount' - six of seven terms, including 'edge'.",
+        "confirmed": true,
+        "notes": "class: adjacent-vocabulary -- The right document, the right page, six of seven terms matched, and the word 'edge' matches only because it appears in unrelated text. Anchor edge distance is a real installation constraint that these consumer guides leave to the anchor manufacturer, and no evidence-blind scorer can tell that from the retrieved page."
+      }
+    },
+    {
+      "id": "gq-228",
+      "category": "no_answer",
+      "question": "What Sound Transmission Class (STC) rating does a Bufftech Imperial privacy fence achieve under ASTM E90?",
+      "answerable": false,
+      "no_answer_class": "near-miss",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Bufftech Imperial STC sound transmission loss rating",
+        "Imperial privacy fence sound transmission class",
+        "CertainTeed Bufftech ASTM E 90 sound transmission test Imperial"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. The corpus DOES publish an STC number, once. grep -oE '\\bSTC\\b' -> 2 pages: manuals/certainteed-bufftech/bufftech-catalog-2014.pdf p29, which reads 'e ASTM E 90 Sound Transmission Loss Test' followed by the heading 'STC 21**', and manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf p10, where 'STC' is OCR noise inside a drawing title block ('STC Oe} ae ON CENTER ARE IN COMPLIANCE WITH 2007 FLORIDA'). On p29 the footnote that binds the number is three elements away: '** Certification applies to Chesterfield and Galveston'. A page-level co-occurrence scan for 'Imperial' with 'STC' -> 0 pages; FTS '\"Imperial\" AND \"STC\"' -> 0 units. grep -icE 'sound transmission' -> 1 page, the same p29. End-to-end: cli search \"Bufftech Imperial STC sound transmission loss rating\" -k 3 returns bufftech-catalog-2014.pdf p29 at rank 1, score 31.7, on the element '* Gates load tested for 300lbs e ASTM E 90 Sound Transmission Loss Test'; rank 2 is the OCR-noise 'STC' on the Barrette NOA drawing, score 13.1. Query-term constraint: the evaluator concatenates every string in query_terms into one query and declares 'unsupported' if ANY content token of that query has zero document frequency in retrieval_fts. A near-miss question whose paraphrase smuggles in a corpus-absent word therefore passes for the wrong reason, so every content token of this question's query_terms was checked to have a non-zero document frequency before it was accepted.",
+        "confirmed": true,
+        "quote": "** Certification applies to Chesterfield and Galveston",
+        "notes": "class: near-miss -- The corpus covers the topic (ASTM E90), the manufacturer (Bufftech), the property (STC) and even gives the value (21) - for two named styles, neither of which is Imperial. Imperial is otherwise one of the best-documented styles in the corpus: it is the style on p17 of the 2024 installation guide that carries the wind-exposure footing table. The retriever returns the right page and the correct answer is 'Bufftech publishes STC only for Chesterfield and Galveston'. The scoping footnote is a separate element from the value, so evidence-grounded checking has to read the whole page, not the retrieved unit."
+      }
+    },
+    {
+      "id": "gq-229",
+      "category": "no_answer",
+      "question": "What ASTM D4216 cell classification does the PVC compound used in Weatherables fence profiles meet?",
+      "answerable": false,
+      "no_answer_class": "near-miss",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Weatherables ASTM D4216 cell classification PVC",
+        "Weatherables vinyl cell class rigid PVC compound",
+        "TriWest PVC cell classification D1784"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. The property is published in the corpus five different ways, never for Weatherables. grep -icE 'cell class|D4216' -> 9 documents: the Illusions ASTM flyer and its industry-standards twin (cell Class 3-30233-23), the Illusions 75 mph wind-kit instructions and assembled-panel instructions (1-32333-3), classic-product-brochure.pdf p22 (1-21333-22), the 186-page price catalog, and the Barrette/Freedom Miami-Dade NOA drawings (ASTM Cell Classification 1-40323-13-0101). Restricting the same grep to Weatherables and TriWest rows -> 0 hits for 'cell class', 'D4216' or 'D1784'. FTS: '\"Weatherables\" AND \"D4216\"' -> 0; '\"Weatherables\" AND \"cell\"' -> 0; '\"TriWest\" AND \"D4216\"' -> 0; '\"Weatherables\" AND \"classification\"' -> 1, which is the warranty sentence 'Depending on the owner classification'. A page-level scan for 'tensile' with 'weatherables' -> 0 pages, so the brand publishes no PVC material data at all. End-to-end: cli search \"Weatherables ASTM D4216 cell classification PVC\" -k 3 returns ASTM-Info-Flyer_Illusions-F964-D4216-Summary.pdf p1 at score 30.5 - the highest score in this batch - stating a cell class for Illusions. Query-term constraint: the evaluator concatenates every string in query_terms into one query and declares 'unsupported' if ANY content token of that query has zero document frequency in retrieval_fts. A near-miss question whose paraphrase smuggles in a corpus-absent word therefore passes for the wrong reason, so every content token of this question's query_terms was checked to have a non-zero document frequency before it was accepted.",
+        "confirmed": true,
+        "notes": "class: near-miss -- Weatherables is a well-covered manufacturer (4,189 element rows, six CAD sheets, a 2026 full-line catalog) and cell classification is the standard way a vinyl fence maker states its compound grade. Weatherables never does. The top hit is an unambiguous cell-class statement at a very high score, for a different manufacturer, and it even boasts that 'Illusions compounds have higher cell classification' - so the answer is confidently wrong rather than absent."
+      }
+    },
+    {
+      "id": "gq-230",
+      "category": "no_answer",
+      "question": "What titanium dioxide UV-inhibitor loading does the Illusions PVC compound use?",
+      "answerable": false,
+      "no_answer_class": "near-miss",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Illusions titanium dioxide UV inhibitor PVC compound",
+        "Illusions TiO2 content vinyl fence material",
+        "titanium dioxide UV inhibitor Illusions fence specification"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. grep -icE 'titanium|TiO ?2' -> 43 element rows. Grouped by source_path they are exclusively Barrette-family Miami-Dade NOA drawing sheets: noa-10-1217.01-vinyl-fencing-legacy.pdf, noa-10-1217.02-vinyl-fencing-legacy.pdf and MiamiDade-NOA-22-0217.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf, each repeating the material-table row 'TiO2 - Titanium Dioxide UV Inhibitor 10/100' on every drawing sheet. Restricting the same grep to manuals/illusions-* rows -> 0 hits. Illusions does publish a dense material block (cell class 3-30233-23 / 1-32333-3 / 1-21333-22, ASTM F964 weathering, D638 tensile, D635 rate of burning, D2843 smoke density, D1929 self-ignition) and its own UV language, but never a TiO2 loading. End-to-end: cli search \"Illusions titanium dioxide UV inhibitor PVC compound\" -k 3 returns MiamiDade-NOA-22-0217.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf p11 at score 21.9, matching 'titanium', 'dioxide', 'UV' and 'inhibitor', on the OCR line 'Ti02 - Titanium Dioxide UV Inhibitor 10/100'. Query-term constraint: the evaluator concatenates every string in query_terms into one query and declares 'unsupported' if ANY content token of that query has zero document frequency in retrieval_fts. A near-miss question whose paraphrase smuggles in a corpus-absent word therefore passes for the wrong reason, so every content token of this question's query_terms was checked to have a non-zero document frequency before it was accepted.",
+        "confirmed": true,
+        "notes": "class: near-miss -- A material property that one manufacturer in the corpus documents on every one of its NOA drawing sheets and another - the manufacturer with the deepest material-data coverage in the whole corpus - never mentions. Four of the five content words match on a page that literally states a TiO2 loading. Sister question to gq-202 (Izod for Illusions), which fails the same way in the same direction."
+      }
+    },
+    {
+      "id": "gq-231",
+      "category": "no_answer",
+      "question": "What maximum gate weight, in pounds, is the Bufftech adjustable nylon gate hinge rated to support?",
+      "answerable": false,
+      "no_answer_class": "near-miss",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Bufftech adjustable nylon gate hinge gate weight lbs",
+        "CertainTeed vinyl gate hinge weight capacity pounds",
+        "how heavy a gate will the nylon hinge support"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. Counted every element row from manuals/certainteed-bufftech/* and manuals/barrette-outdoor-living/* that mentions 'hinge': 669 rows. Of those, the number that also mention lbs, pounds, weight, rated or capacity: 0. Corpus-wide, the number of element rows containing both 'hinge' and a digit followed by lbs/pounds is exactly 1, and it is manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf p106, the 'GATE HARDWARE' table whose 'Support Gates Up To' column reads Heavy-Duty Strap 75 lbs, Standard Strap 35 lbs, Heavy-Duty Modern Wrap 150 lbs, Heavy-Duty Contemporary Wrap 150 lbs, Standard Wrap 75 lbs, Heavy-Duty Butterfly 100 lbs, Standard Butterfly 75 lbs, Compact Butterfly 35 lbs. grep -icF 'Support Gates Up To' -> 1 row, that one. The Bufftech guides name the part ('ADJUSTABLE NYLON HINGE', 6 pages) and give only geometry ('1\" ON EACH SIDE FOR HINGE'). End-to-end: cli search returns bufftech-installation-guide-afence.pdf p3 at rank 1 (score 18.5, the right part on the right page, no number) and the Freedom p106 hinge table at rank 2 (score 15.8, real ratings, wrong hinge and wrong brand). Query-term constraint: the evaluator concatenates every string in query_terms into one query and declares 'unsupported' if ANY content token of that query has zero document frequency in retrieval_fts. A near-miss question whose paraphrase smuggles in a corpus-absent word therefore passes for the wrong reason, so every content token of this question's query_terms was checked to have a non-zero document frequency before it was accepted.",
+        "confirmed": true,
+        "notes": "class: near-miss -- Freedom and Bufftech are both Barrette Outdoor Living brands, so the two documents look like one product line to a retriever, and rank 1 and rank 2 between them hand a scorer a part name and a pounds figure. Sister question to gq-203 (Illusions Extra Strong Hinge), and the same trap from the other side: there the brand had a brochure and no number, here the number exists for a sibling brand's different hinges."
+      }
+    },
+    {
+      "id": "gq-232",
+      "category": "no_answer",
+      "question": "Which Miami-Dade County NOA covers Weatherables vinyl privacy fence, and what is its expiration date?",
+      "answerable": false,
+      "no_answer_class": "near-miss",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Weatherables Miami-Dade NOA number expiration date",
+        "Weatherables notice of acceptance hurricane approval",
+        "Weatherables Florida product approval expiration"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. Restricting the corpus dump to manuals/weatherables/* rows and grepping -icE 'miami|dade|\\bNOA\\b|notice of acceptance' -> 0 hits. FTS confirms: '\"Weatherables\" AND \"Miami\"' -> 0 units, '\"Weatherables\" AND \"NOA\"' -> 0, '\"Weatherables\" AND \"Dade\"' -> 0. The corpus holds 15 Miami-Dade NOAs with numbers and expiration dates for Barrette, CertainTeed/Bufftech, Illusions and VEKA, and documents.expiration_date is populated for them. Weatherables does make wind claims - gq-210 covers its 130 mph gust rating - which makes an approval question natural. End-to-end: cli search \"Weatherables Miami-Dade NOA number expiration date\" -k 3 returns NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf p7 (score 14.9, an OCR'd NOA title block containing 'Acceptance.No' and 'Expiration Datco') and 75mph-wind-kit-noa-miami-dade.pdf p1 (score 14.1, matching 'Miami-Dade', 'NOA', 'number', 'expiration' and 'date' in the standard NOA boilerplate about displaying the number and expiration date). Query-term constraint: the evaluator concatenates every string in query_terms into one query and declares 'unsupported' if ANY content token of that query has zero document frequency in retrieval_fts. A near-miss question whose paraphrase smuggles in a corpus-absent word therefore passes for the wrong reason, so every content token of this question's query_terms was checked to have a non-zero document frequency before it was accepted.",
+        "confirmed": true,
+        "notes": "class: near-miss -- This is the version of gq-118 (Wam Bam NOA) with a manufacturer the corpus covers deeply rather than thinly, and it is harder for it: rank 2 matches four query terms including the exact phrase pair 'NOA number' and 'expiration date', on a sentence that explains what an NOA number and expiration date are. The correct answer is that Weatherables holds no NOA in this corpus at all."
+      }
+    },
+    {
+      "id": "gq-233",
+      "category": "no_answer",
+      "question": "To what depth below grade must the posts of a Showtech ST101 full privacy PVC fence be set?",
+      "answerable": false,
+      "no_answer_class": "near-miss",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "Showtech PVC privacy fence post embedment depth below grade",
+        "Showtech vinyl fence footing depth post hole",
+        "how deep to set posts Showtech privacy fence"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. The three Showtech catalogues (2,807 element rows) give panel geometry and bills of material and nothing about installation: PVC-fence-catalog-2022.pdf p4 and PVC-fence-catalog-2024.pdf p10 carry 'RECOMMENDED SIZE : 6' HIGH X 8' WIDE' with dimension callouts 96\" [2438mm], 72\" [1829mm] and 30\" [762mm] and a PROFILE/QUANTITY/SIZE table (Line Post 5X5\", Hollow Rail, Middle Rail, Picket, Post Cap, Aluminum Insert). Restricting the dump to china/manuals/showtech/* and grepping -icE 'concrete|footing|dig|bury|below grade|frost' -> the only hits are the heading 'SINGLE GATE ON CONCRETE' (2022 p14) and marketing lines about being 'easy to install'; no depth, no footing, no frost line. Every US-track brand states one (30\" or to the frost line for Bufftech; 36\"-42\" for Illusions; 48\" for the tall SimTek styles). End-to-end: cli search \"Showtech PVC privacy fence post embedment depth below grade\" -k 3 returns CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf p7 at score 15.4, matching 'fence', 'post', 'embedment', 'depth', 'below' and 'grade' on the variable definition 'D = Post footing embedment depth below finish grade'. Query-term constraint: the evaluator concatenates every string in query_terms into one query and declares 'unsupported' if ANY content token of that query has zero document frequency in retrieval_fts. A near-miss question whose paraphrase smuggles in a corpus-absent word therefore passes for the wrong reason, so every content token of this question's query_terms was checked to have a non-zero document frequency before it was accepted.",
+        "confirmed": true,
+        "notes": "class: near-miss -- Confirmed distractor inside the correct document as well as outside it: the Showtech style page carries the figure 30\" [762mm], which is a picket/rail dimension on a fence elevation, and 30\" is also the exact footing depth every Bufftech guide states. A reader who finds the Showtech page and a reader who finds the Bufftech rule will both produce '30 inches', and neither is supported. The corpus-wide top hit is a chain-link design formula that defines the quantity being asked for without giving a value."
+      }
+    },
+    {
+      "id": "gq-234",
+      "category": "no_answer",
+      "question": "What withdrawal (pull-out) strength, in pounds, does the #8 x 3/4\" screw that locks a Bufftech top rail into the post develop?",
+      "answerable": false,
+      "no_answer_class": "near-miss",
+      "expected_documents": [],
+      "expected_pages": {},
+      "expected_answer": null,
+      "query_terms": [
+        "#8 x 3/4 screw pulled out load lbf rail post",
+        "vinyl fence rail locking screw strength pounds",
+        "how much load will the rail screw hold before the threads pulled out"
+      ],
+      "expects_image_evidence": false,
+      "verification": {
+        "method": "Corpus dump used throughout: sqlite3.connect('file:workspace/indexes/evidence.db?mode=ro',uri=True); wrote every elements.text||elements.ocr_text row (81,794 rows, which includes the OCR text of all 22 scanned and 6 mojibake documents) to one scratch file and every table_cells.text row (18,472) to another, then grepped both. The fastener is named literally and repeatedly: grep -icE '#8 ?x ?3/4' -> 105 pages across 16 documents ('Secure top rail inside post with a #8 x 3/4\" screw'). No strength value is attached to it: grep -icE 'pull ?-?out|withdrawal|pullout' -> 0 element rows and 0 table cells. But the property IS measured in the corpus, for a different product: grep -inE 'pulled out|lbf' finds manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf p17, which reports four physical tests - 'Loaded to 463lbf when the front two mounting screw threads pulled out', 462lbf, 544lbf (screw heads broke) and 526lbf - for the mounting screws of a privacy-railing post plate, not for the rail-locking screw. The only other fastener strength figure is a shear requirement for a different connection: 'Install concrete mounts to concrete with fasteners with at least 4,000 lbs. shear strength' (bufftech-fence-installation-guide-2024.pdf p45). End-to-end: cli search \"#8 x 3/4 screw pulled out load lbf rail post\" -k 3 returns the PE report p17 at rank 1, score 21.1, matching 'screw', 'pulled', 'out', 'load', 'lbf' and 'post' on 'Loaded to 463lbf when the front two mounting screw threads pulled out of post.' - a real pull-out load, for the wrong connection. The Bufftech phrasing \"#8 x 3/4\\\" screw ... rail post\" returns bufftech-install-semiprivate.pdf p1 at score 10.9: the correct fastener, the correct connection, no number. Query-term constraint: the evaluator concatenates every string in query_terms into one query and declares 'unsupported' if ANY content token of that query has zero document frequency in retrieval_fts. A near-miss question whose paraphrase smuggles in a corpus-absent word therefore passes for the wrong reason, so every content token of this question's query_terms was checked to have a non-zero document frequency before it was accepted.",
+        "confirmed": true,
+        "notes": "class: near-miss -- The corpus covers the topic (screw pull-out capacity, measured to the pound), the manufacturer family (Barrette) and the exact fastener asked about (named on 105 pages) - and never joins them. The PE report's 463/462/544/526 lbf figures are for a railing post-mount plate; using them for a fence rail-locking screw would be wrong by an order of magnitude in the unsafe direction. Reclassified from adjacent-vocabulary to near-miss during verification, when the PE report's pull-out tests were found."
       }
     }
   ]
