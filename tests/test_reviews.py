@@ -169,15 +169,40 @@ class TestSubmitReview(unittest.TestCase):
             "SELECT candidate_id FROM table_read_candidates ORDER BY candidate_id")]
         self.assertEqual(stored, ids)
 
-    def test_review_id_is_the_hash_of_crop_reviewer_and_time(self):
-        import hashlib
+    def test_two_different_reviews_in_one_second_are_two_reviews(self):
+        """`now()` is second-resolution, so who/what/when is not unique.
+
+        The id was `sha256(crop:reviewer:reviewed_at)` with INSERT OR REPLACE,
+        so a double-submit, a client retry, or an accept-then-immediately-correct
+        dropped the first review outright, including its `from_candidates` link.
+        A differential fuzz over 3,000 interleavings found ten distinct
+        projection-drift shapes and every one traced here.
+        """
         at = "2026-08-27T12:00:00+00:00"
-        out = submit_review(self.conn, crop_sha256=CROP, reviewer="alice",
-                            verdict="accepted", grid=full_grid(), spans=[],
-                            reviewed_at=at)
-        self.assertEqual(out["review_id"], hashlib.sha256(
-            f"{CROP}:alice:{at}".encode()).hexdigest()[:16])
-        self.assertEqual(len(out["review_id"]), 16)
+        first = submit_review(self.conn, crop_sha256=CROP, reviewer="alice",
+                              verdict="accepted",
+                              grid=[{"row": 0, "col": 0, "value": "B"}],
+                              spans=[], reviewed_at=at)
+        second = submit_review(self.conn, crop_sha256=CROP, reviewer="alice",
+                               verdict="accepted",
+                               grid=[{"row": 0, "col": 1, "value": '99"'}],
+                               spans=[], reviewed_at=at)
+        self.assertNotEqual(first["review_id"], second["review_id"])
+        self.assertEqual(len(first["review_id"]), 16)
+        self.assertEqual(
+            self.conn.execute("SELECT COUNT(*) FROM table_reviews").fetchone()[0], 2,
+            "a review was silently dropped by an id collision")
+
+    def test_an_identical_resubmission_is_the_same_review(self):
+        """A retry should land on itself rather than accumulate."""
+        at = "2026-08-27T12:00:00+00:00"
+        kw = dict(crop_sha256=CROP, reviewer="alice", verdict="accepted",
+                  grid=full_grid(), spans=[], reviewed_at=at)
+        a = submit_review(self.conn, **kw)
+        b = submit_review(self.conn, **kw)
+        self.assertEqual(a["review_id"], b["review_id"])
+        self.assertEqual(
+            self.conn.execute("SELECT COUNT(*) FROM table_reviews").fetchone()[0], 1)
 
     def test_the_record_and_the_projection_land_together(self):
         """Acceptance 1: one transaction, so neither can exist without the other."""
