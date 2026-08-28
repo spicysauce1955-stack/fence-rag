@@ -153,6 +153,18 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--notes")
     p.add_argument("--rebuild", action="store_true",
                    help="regenerate the candidate annotations from table_reviews")
+    p.add_argument("--export", action="store_true",
+                   help="write every review -- table and fact -- to the committed "
+                        "ledger under workspace/catalog/. A review is the one "
+                        "thing here that cannot be rebuilt from the corpus (G49)")
+    p.add_argument("--out", metavar="PATH",
+                   help="write the ledger somewhere other than the committed path")
+    p.add_argument("--import", dest="import_path", metavar="PATH",
+                   help="replay a ledger into this store. Dry run without --apply; "
+                        "refuses the whole file if any line disagrees with a "
+                        "review already recorded here")
+    p.add_argument("--apply", action="store_true",
+                   help="with --import: actually write")
 
     p = sub.add_parser("fact-review",
                        help="the human review loop for regex-extracted facts "
@@ -416,9 +428,11 @@ def main(argv: list[str] | None = None) -> int:
         # exit 2 on a usage error rather than printing an error and exiting 0.
         # Checked before the imports, so a usage error does not depend on a
         # module being importable.
-        modes = (bool(args.queue), args.accept is not None, bool(args.rebuild))
+        modes = (bool(args.queue), args.accept is not None, bool(args.rebuild),
+                 bool(args.export), args.import_path is not None)
         if sum(modes) != 1:
-            _print({"error": "choose one of --queue, --accept, --rebuild"})
+            _print({"error": "choose one of --queue, --accept, --rebuild, "
+                             "--export, --import"})
             return 2
         import json as _json
         from pathlib import Path as _P
@@ -431,6 +445,21 @@ def main(argv: list[str] | None = None) -> int:
                         "summary": reviews.review_summary(conn)})
             elif args.rebuild:
                 _print(reviews.rebuild_projection(conn))
+            elif args.export:
+                _print(reviews.export_reviews(conn, args.out))
+            elif args.import_path is not None:
+                try:
+                    out = reviews.import_reviews(conn, args.import_path,
+                                                 dry_run=not args.apply)
+                except reviews.ReviewRefused as e:
+                    _print({"error": e.code, "message": str(e)})
+                    return 1
+                _print(out)
+                # A conflict is a person's decision disagreeing with another
+                # person's, not a bad argument: report it and exit non-zero so a
+                # script cannot mistake a refused replay for an applied one.
+                if out["refused"]:
+                    return 1
             else:
                 if not args.reviewer:
                     _print({"error": "--accept requires --reviewer: the name is the "

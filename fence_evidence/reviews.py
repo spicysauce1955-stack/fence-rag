@@ -37,7 +37,10 @@ import json
 import re
 import sqlite3
 
-from .paths import REPO_ROOT
+from pathlib import Path
+
+from .canonical import canonical_bytes
+from .paths import CATALOG_DIR, REPO_ROOT, open_write, rel
 from .store import now
 from .table_review import PROMOTABLE, normalise
 
@@ -937,3 +940,464 @@ def fact_review_summary(conn: sqlite3.Connection) -> dict:
             "SELECT DISTINCT reviewer FROM fact_reviews ORDER BY 1")],
         "unaccountable": reviewed_without_a_reviewer(conn),
     }
+
+
+# ============================================================================
+# Re-attachment — a review outlives the row id it was written against.
+# ============================================================================
+#
+# `facts.extract_facts` deletes every `regex-%` fact and re-inserts it, so the
+# `fact_id` a review names does not survive a re-extraction. Two things follow.
+#
+# **`fact_id` is a pointer, and the evidence is the identity.** A review already
+# records everything needed to find its fact again without one: the element it
+# cites, the fact type, and `value_before` -- the value the person was looking
+# at. That triple is the anchor, and it is the same triple the ledger below is
+# keyed on. `fact_review_id` is not, because its formula folds in `fact_id`.
+#
+# **Nothing is guessed.** If the new extraction produces no fact carrying that
+# evidence, or more than one, the review keeps the binding it had and is
+# reported. A review silently attached to the wrong fact is worse than one left
+# unbound: it launders a person's signature onto a value they never saw, and
+# `reviewed_without_a_reviewer` cannot see that, because there *is* a reviewer.
+#
+# One property makes this safe rather than merely careful: `facts.fact_id` is
+# `INTEGER PRIMARY KEY AUTOINCREMENT`, so SQLite never reuses an id even after a
+# delete. A re-extraction therefore cannot hand an old review a *different*
+# fact under its old id; the binding is either intact or plainly missing.
+# `tests/test_review_ledger.py` asserts that too.
+
+
+def _fact_anchor(row) -> tuple[str, str, str]:
+    """The evidence a fact review is really about: element, type, value seen."""
+    return (row["element_id"], row["fact_type"], row["value_before"])
+
+
+def _facts_matching(conn: sqlite3.Connection, element_id: str, fact_type: str,
+                    value: str, *, exclude=()) -> tuple[list[int], list[str]]:
+    """(fact ids carrying exactly this evidence, other values now extracted).
+
+    The second half is the signal G49 asks for: a review whose value the new
+    extraction no longer produces means the extractor changed its mind about a
+    number a person checked, and that is worth printing rather than counting as
+    a plain miss.
+    """
+    exclude = set(exclude)
+    rows = conn.execute("""SELECT fact_id, value_original FROM facts
+                            WHERE element_id = ? AND fact_type = ?
+                            ORDER BY fact_id""", (element_id, fact_type)).fetchall()
+    rows = [r for r in rows if r["fact_id"] not in exclude]
+    match = [r["fact_id"] for r in rows if r["value_original"] == value]
+    others = sorted({r["value_original"] for r in rows if r["value_original"] != value})
+    return match, others
+
+
+def reattach_fact_reviews(conn: sqlite3.Connection, *, superseded=None,
+                          dry_run: bool = False) -> dict:
+    """Re-bind fact reviews to the facts a re-extraction produced.
+
+    A review needs a decision when the `fact_id` it names is not in `facts` at
+    all -- a store written before `foreign_keys=ON` could reach that -- or when
+    the caller has named that row in `superseded`: a reviewed fact `extract_facts`
+    kept alive across the delete precisely so the review would not dangle, and
+    which the new extraction may have reproduced under a new id.
+
+    Reviews are decided in groups sharing one anchor, because every review of
+    one fact shares it (`value_before` is that fact's `value_original`, which no
+    review changes). A group is re-bound only when **exactly one** fact now
+    carries its evidence *and* the group came from exactly one old fact. Two
+    old facts collapsing onto one new row is ambiguous even though the candidate
+    is unique: two people signed two rows and only one row remains, so binding
+    either signature to it asserts something neither person did.
+
+    Returns counts and, in `detail`, the rows behind each of them. Counted per
+    review, not per group, so `reattached + still_orphaned == considered`.
+    """
+    ensure_fact_reviews(conn)
+    superseded = set(superseded or ())
+    live = {r[0] for r in conn.execute("SELECT fact_id FROM facts")}
+    rows = conn.execute("SELECT * FROM fact_reviews ORDER BY rowid").fetchall()
+    need = [r for r in rows
+            if r["fact_id"] not in live or r["fact_id"] in superseded]
+    need_ids = {r["fact_review_id"] for r in need}
+    # A fact some *other* review already binds is not available to be claimed
+    # here; taking it would merge two facts' review histories.
+    claimed = {r["fact_id"] for r in rows if r["fact_review_id"] not in need_ids}
+
+    groups: dict[tuple, list] = {}
+    for r in need:
+        groups.setdefault(_fact_anchor(r), []).append(r)
+
+    out = {"considered": len(need), "reattached": 0, "still_orphaned": 0,
+           "ambiguous": 0, "value_changed": 0,
+           "detail": {"reattached": [], "ambiguous": [], "value_changed": [],
+                      "orphaned": []},
+           "dry_run": bool(dry_run)}
+
+    started_here = not conn.in_transaction and not dry_run
+    if started_here:
+        conn.execute("BEGIN IMMEDIATE")
+    try:
+        for anchor in sorted(groups):
+            element_id, fact_type, value_before = anchor
+            grp = groups[anchor]
+            old_ids = sorted({r["fact_id"] for r in grp})
+            candidates, others = _facts_matching(
+                conn, element_id, fact_type, value_before,
+                exclude=superseded | claimed)
+            entry = {"element_id": element_id, "fact_type": fact_type,
+                     "value_before": value_before,
+                     "fact_review_ids": sorted(r["fact_review_id"] for r in grp),
+                     "reviewers": sorted({r["reviewer"] for r in grp}),
+                     "was_fact_id": old_ids}
+            if len(candidates) == 1 and len(old_ids) == 1:
+                new = candidates[0]
+                out["reattached"] += len(grp)
+                out["detail"]["reattached"].append({**entry, "now_fact_id": new})
+                if not dry_run:
+                    for r in grp:
+                        conn.execute(
+                            "UPDATE fact_reviews SET fact_id = ? WHERE fact_review_id = ?",
+                            (new, r["fact_review_id"]))
+                    old = old_ids[0]
+                    if old in superseded and old != new:
+                        # The retained copy has done its job: the review now
+                        # names the row the current extractor stands behind.
+                        conn.execute("DELETE FROM facts WHERE fact_id = ?", (old,))
+                continue
+            out["still_orphaned"] += len(grp)
+            if candidates:
+                out["ambiguous"] += len(grp)
+                out["detail"]["ambiguous"].append({
+                    **entry, "candidates": candidates,
+                    "why": ("more than one fact now carries this evidence"
+                            if len(candidates) > 1 else
+                            "two reviewed facts shared this evidence and one row "
+                            "remains, so no signature can be placed on it")})
+            elif others:
+                out["value_changed"] += len(grp)
+                out["detail"]["value_changed"].append({
+                    **entry, "now_extracted": others,
+                    "why": ("the extractor no longer produces the value a person "
+                            "checked; it now reads this element differently")})
+            else:
+                out["detail"]["orphaned"].append({
+                    **entry, "why": ("nothing in the store carries this evidence "
+                                     "any more")})
+        if started_here:
+            conn.commit()
+    except Exception:
+        if started_here:
+            conn.rollback()
+        raise
+    return out
+
+
+# ============================================================================
+# The ledger — G49. The one artifact in this repository that is authored.
+# ============================================================================
+#
+# Everything else regenerates: `cli ingest` rebuilds elements, `cli facts
+# --extract` rebuilds assertions, `cli rebuild-index` rebuilds the projection
+# byte-identically. A review is a judgement a person made looking at a page
+# image, and it lived only in `workspace/indexes/evidence.db`, which is
+# git-ignored, has no backup, and is deleted by any clean rebuild. Obligation 6
+# was therefore backed by the least durable artifact in the repository.
+#
+# Four decisions, each of them the reason a line looks the way it does.
+#
+# * **JSONL, canonical, sorted.** One review per line so a diff shows a decision
+#   rather than a reflowed document, `canonical.canonical_bytes` for the bytes
+#   so two exports over identical state are identical, and a sort key made only
+#   of fields that do not move. No clock reading of the export itself appears
+#   anywhere in the file.
+# * **The table half keeps `crop_sha256`.** It is the bytes of the crop, not a
+#   row id, so a table review survives re-extraction by construction. That
+#   property is preserved here rather than re-derived.
+# * **The fact half carries no `fact_id` at all.** A fact id moves on every
+#   re-extraction, so writing one into a committed file would make the ledger
+#   un-replayable within a day. The line carries the anchor instead --
+#   `element_id`, `fact_type`, `value_before` -- and import resolves it against
+#   whatever ids the target store minted, using the same rule
+#   `reattach_fact_reviews` uses and refusing in the same places.
+# * **Import never overwrites a decision.** A line whose id is already in the
+#   store and whose content matches is a no-op, which is what makes replay
+#   idempotent. A line whose content *differs* is a conflict between two
+#   people's records, and the whole import is refused: last-write-wins on a
+#   human sign-off is the failure obligation 6 exists to prevent.
+#
+# What this does NOT establish. A ledger is a record, not an attestation: it
+# says a store held these reviews, never that the named person made them.
+# `reviewer` is asserted by the caller and unverifiable here, exactly as §4 of
+# the Phase 2 design says of a table review. See G46.
+
+LEDGER_PATH = CATALOG_DIR / "review-ledger.jsonl"
+LEDGER_SCHEMA = 1
+LEDGER_HEADER_KIND = "ledger"
+KIND_TABLE_REVIEW = "table_review"
+KIND_FACT_REVIEW = "fact_review"
+
+_TABLE_REVIEW_COLUMNS = ("review_id", "crop_sha256", "document_id", "page_no",
+                         "reviewer", "reviewed_at", "verdict", "grid", "spans",
+                         "from_candidates", "notes")
+_TABLE_REVIEW_JSON = ("grid", "spans", "from_candidates")
+# `fact_id` is deliberately absent: it is the one column that moves.
+_FACT_REVIEW_COLUMNS = ("fact_review_id", "ref_id", "document_id", "page_no",
+                        "element_id", "fact_type", "reviewer", "reviewed_at",
+                        "verdict", "value_before", "status_before",
+                        "reviewed_value", "notes")
+
+
+def _table_review_record(row) -> dict:
+    rec = {"kind": KIND_TABLE_REVIEW}
+    for col in _TABLE_REVIEW_COLUMNS:
+        rec[col] = row[col]
+    for col in _TABLE_REVIEW_JSON:
+        # Parsed, not carried as an escaped string: a ledger nobody can read is
+        # not an audit trail. Re-serialising through `canonical_bytes` on the
+        # way out is what makes the representation single-valued, so two stores
+        # that spell the same grid differently still export identical bytes.
+        rec[col] = json.loads(row[col] or "[]")
+    return rec
+
+
+def _fact_review_record(row) -> dict:
+    rec = {"kind": KIND_FACT_REVIEW}
+    for col in _FACT_REVIEW_COLUMNS:
+        rec[col] = row[col]
+    return rec
+
+
+def _ledger_sort_key(rec):
+    if rec["kind"] == KIND_TABLE_REVIEW:
+        return (rec["kind"], rec["crop_sha256"], rec["reviewed_at"], rec["review_id"])
+    return (rec["kind"], rec["element_id"], rec["fact_type"],
+            rec["value_before"] or "", rec["reviewed_at"], rec["fact_review_id"])
+
+
+def build_ledger(conn: sqlite3.Connection) -> list[dict]:
+    """Every review in this store, as the lines of its ledger.
+
+    Line 0 is a header. An empty ledger is then one line saying so, rather than
+    an empty file -- a zero-byte artifact reads as an oversight, and *"no review
+    has been recorded in this store"* is a statement worth committing.
+    """
+    ensure_fact_reviews(conn)
+    body = [_table_review_record(r) for r in
+            conn.execute("SELECT * FROM table_reviews")]
+    facts = [_fact_review_record(r) for r in
+             conn.execute("SELECT * FROM fact_reviews")]
+    body.extend(facts)
+    body.sort(key=_ledger_sort_key)
+    header = {"kind": LEDGER_HEADER_KIND, "schema": LEDGER_SCHEMA,
+              "fact_reviews": len(facts), "table_reviews": len(body) - len(facts)}
+    return [header] + body
+
+
+def ledger_bytes(records: list[dict]) -> bytes:
+    """The one serialisation of a ledger: canonical JSON, one object per line."""
+    return b"".join(canonical_bytes(r) + b"\n" for r in records)
+
+
+def export_reviews(conn: sqlite3.Connection, path=None) -> dict:
+    """Write the ledger and report what was written.
+
+    `path` defaults to the committed location; a caller -- a test, or a build
+    that wants to inspect the output before it lands -- can point it anywhere
+    inside `workspace/`. The write goes through `paths.open_write`, so a path
+    outside raises `CorpusWriteError` and nothing is written. Same treatment as
+    `distribution.write_manifest`, for the same reason.
+    """
+    target = Path(path) if path is not None else LEDGER_PATH
+    records = build_ledger(conn)
+    payload = ledger_bytes(records)
+    with open_write(target, "wb") as fh:
+        fh.write(payload)
+    header = records[0]
+    return {"path": rel(target), "bytes": len(payload),
+            "sha256": hashlib.sha256(payload).hexdigest(),
+            "table_reviews": header["table_reviews"],
+            "fact_reviews": header["fact_reviews"]}
+
+
+def read_ledger(path) -> tuple[dict, list[dict]]:
+    """Parse a ledger, refusing anything that is not one.
+
+    The header's counts are checked against the body. They are redundant with
+    it, which is the point: a hand-edited ledger that dropped a line says so
+    here rather than importing quietly.
+    """
+    p = Path(path)
+    if not p.is_file():
+        raise ReviewRefused("error.malformed_ledger", f"no ledger at {p}")
+    lines = [l for l in p.read_text(encoding="utf-8").splitlines() if l.strip()]
+    if not lines:
+        raise ReviewRefused("error.malformed_ledger",
+                            f"{p} is empty; even a store with no reviews has a "
+                            f"header line")
+    try:
+        parsed = [json.loads(l) for l in lines]
+    except json.JSONDecodeError as e:
+        raise ReviewRefused("error.malformed_ledger", f"{p}: {e}") from None
+    header = parsed[0]
+    if not isinstance(header, dict) or header.get("kind") != LEDGER_HEADER_KIND:
+        raise ReviewRefused("error.malformed_ledger",
+                            f"{p} does not begin with a ledger header")
+    if header.get("schema") != LEDGER_SCHEMA:
+        raise ReviewRefused(
+            "error.malformed_ledger",
+            f"{p} is schema {header.get('schema')!r}; this build reads "
+            f"{LEDGER_SCHEMA}")
+    body = parsed[1:]
+    counts = {KIND_TABLE_REVIEW: 0, KIND_FACT_REVIEW: 0}
+    for i, rec in enumerate(body, start=2):
+        if not isinstance(rec, dict):
+            raise ReviewRefused("error.malformed_ledger",
+                                f"{p} line {i} is not an object")
+        kind = rec.get("kind")
+        if kind not in counts:
+            raise ReviewRefused("error.malformed_ledger",
+                                f"{p} line {i} has kind {kind!r}")
+        required = (_TABLE_REVIEW_COLUMNS if kind == KIND_TABLE_REVIEW
+                    else _FACT_REVIEW_COLUMNS)
+        missing = [c for c in required if c not in rec]
+        if missing:
+            raise ReviewRefused("error.malformed_ledger",
+                                f"{p} line {i} is missing {', '.join(missing)}")
+        if kind == KIND_FACT_REVIEW and "fact_id" in rec:
+            raise ReviewRefused(
+                "error.malformed_ledger",
+                f"{p} line {i} carries a fact_id. A fact id moves on every "
+                f"re-extraction and is resolved from the evidence on import; "
+                f"a ledger that names one is describing a store, not a review")
+        counts[kind] += 1
+    for kind, key in ((KIND_TABLE_REVIEW, "table_reviews"),
+                      (KIND_FACT_REVIEW, "fact_reviews")):
+        if header.get(key) != counts[kind]:
+            raise ReviewRefused(
+                "error.malformed_ledger",
+                f"{p} header says {header.get(key)!r} {key} and the body holds "
+                f"{counts[kind]}")
+    return header, body
+
+
+def _differences(ledger_rec: dict, store_rec: dict) -> dict:
+    return {k: {"ledger": ledger_rec.get(k), "store": store_rec.get(k)}
+            for k in sorted(set(ledger_rec) | set(store_rec))
+            if ledger_rec.get(k) != store_rec.get(k)}
+
+
+def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> dict:
+    """Replay a ledger into this store. Dry run unless told otherwise.
+
+    Three outcomes per line, and only the first writes anything:
+
+    * **new** -- the id is not in this store. A table review lands as it is; a
+      fact review's `fact_id` is resolved from its anchor, by the rule
+      `reattach_fact_reviews` uses. An anchor naming no fact, or more than one,
+      is `unresolvable`: reported, skipped, never guessed at.
+    * **identical** -- the id is here and says the same thing. Skipped, which is
+      what makes a replay idempotent.
+    * **conflict** -- the id is here and says something *else*. Two records of
+      one person's decision disagree, and that is for a person to resolve. The
+      whole import is refused; nothing at all is written, including the lines
+      that would have been fine.
+
+    On success the projections are rebuilt from the records, so the store's
+    `facts` and `table_read_candidates` annotations follow the reviews rather
+    than being asserted twice.
+    """
+    header, body = read_ledger(path)
+    ensure_fact_reviews(conn)
+
+    inserts: list[tuple[str, dict, int | None]] = []
+    identical = conflicts = unresolvable = 0
+    detail: dict[str, list] = {"conflicts": [], "unresolvable": []}
+
+    for rec in body:
+        if rec["kind"] == KIND_TABLE_REVIEW:
+            existing = conn.execute("SELECT * FROM table_reviews WHERE review_id = ?",
+                                    (rec["review_id"],)).fetchone()
+            if existing is not None:
+                differs = _differences(rec, _table_review_record(existing))
+                if differs:
+                    conflicts += 1
+                    detail["conflicts"].append({"kind": rec["kind"],
+                                                "id": rec["review_id"],
+                                                "differs": differs})
+                else:
+                    identical += 1
+                continue
+            inserts.append((KIND_TABLE_REVIEW, rec, None))
+            continue
+
+        existing = conn.execute("SELECT * FROM fact_reviews WHERE fact_review_id = ?",
+                                (rec["fact_review_id"],)).fetchone()
+        if existing is not None:
+            differs = _differences(rec, _fact_review_record(existing))
+            if differs:
+                conflicts += 1
+                detail["conflicts"].append({"kind": rec["kind"],
+                                            "id": rec["fact_review_id"],
+                                            "differs": differs})
+            else:
+                identical += 1
+            continue
+        candidates, others = _facts_matching(conn, rec["element_id"],
+                                             rec["fact_type"], rec["value_before"])
+        if len(candidates) != 1:
+            unresolvable += 1
+            detail["unresolvable"].append({
+                "kind": rec["kind"], "id": rec["fact_review_id"],
+                "element_id": rec["element_id"], "fact_type": rec["fact_type"],
+                "value_before": rec["value_before"], "candidates": candidates,
+                "now_extracted": others,
+                "why": ("no fact in this store carries that evidence"
+                        if not candidates else
+                        "more than one fact carries that evidence, and binding "
+                        "the review to either would assert what the reviewer "
+                        "did not")})
+            continue
+        inserts.append((KIND_FACT_REVIEW, rec, candidates[0]))
+
+    out = {"records": len(body), "inserted": len(inserts), "identical": identical,
+           "conflicts": conflicts, "unresolvable": unresolvable,
+           "applied": False, "refused": bool(conflicts), "detail": detail,
+           "projection": None, "dry_run": bool(dry_run)}
+    if dry_run or conflicts:
+        return out
+
+    started_here = not conn.in_transaction
+    if started_here:
+        conn.execute("BEGIN IMMEDIATE")
+    try:
+        for kind, rec, fact_id in inserts:
+            if kind == KIND_TABLE_REVIEW:
+                conn.execute("""INSERT INTO table_reviews
+                    (review_id, crop_sha256, document_id, page_no, reviewer,
+                     reviewed_at, verdict, grid, spans, from_candidates, notes)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+                    (rec["review_id"], rec["crop_sha256"], rec["document_id"],
+                     rec["page_no"], rec["reviewer"], rec["reviewed_at"],
+                     rec["verdict"], json.dumps(rec["grid"]),
+                     json.dumps(rec["spans"]), json.dumps(rec["from_candidates"]),
+                     rec["notes"]))
+            else:
+                conn.execute("""INSERT INTO fact_reviews
+                    (fact_review_id, fact_id, ref_id, document_id, page_no,
+                     element_id, fact_type, reviewer, reviewed_at, verdict,
+                     value_before, status_before, reviewed_value, notes)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (rec["fact_review_id"], fact_id, rec["ref_id"],
+                     rec["document_id"], rec["page_no"], rec["element_id"],
+                     rec["fact_type"], rec["reviewer"], rec["reviewed_at"],
+                     rec["verdict"], rec["value_before"], rec["status_before"],
+                     rec["reviewed_value"], rec["notes"]))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    out["applied"] = True
+    out["projection"] = {"tables": rebuild_projection(conn),
+                         "facts": rebuild_fact_projection(conn)}
+    return out

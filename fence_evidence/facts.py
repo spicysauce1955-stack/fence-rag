@@ -554,11 +554,40 @@ def extract_facts(*, document_id: str | None = None,
         # the FACT names the candidate, so deleting a fact takes its link with
         # it and nothing can dangle -- which is why the column was inverted.
         # See docs/layering.md §3.
+        #
+        # One class of regex fact is NOT deleted: one a person has reviewed.
+        # `fact_reviews.fact_id` is `NOT NULL REFERENCES facts(fact_id)` and
+        # `store.connect` sets `PRAGMA foreign_keys=ON`, so the unqualified
+        # DELETE raised `FOREIGN KEY constraint failed` and aborted the whole
+        # re-extraction the moment one fact had been reviewed. Dropping the
+        # constraint instead would have orphaned the review -- the reviewed
+        # population silently falling to zero on a routine command, which is
+        # G49's first consequence.
+        #
+        # So a reviewed fact is kept across the delete and *superseded* rather
+        # than destroyed: `reattach_fact_reviews` below re-binds its review to
+        # whatever row the new extraction produced carrying the same evidence,
+        # and removes the retained copy. Where the new extraction produces no
+        # such row, or more than one, the retained fact and its review both
+        # stand and are reported. A person's signature is not deleted by a
+        # regex regression.
+        from . import reviews as _reviews   # deferred: reviews reaches back here
+        _reviews.ensure_fact_reviews(conn)
+        keep = "AND fact_id NOT IN (SELECT fact_id FROM fact_reviews)"
         if document_id:
-            conn.execute("DELETE FROM facts WHERE document_id=? AND extractor LIKE 'regex-%'",
-                        (document_id,))
+            superseded = {r[0] for r in conn.execute(
+                """SELECT DISTINCT r.fact_id FROM fact_reviews r
+                     JOIN facts f ON f.fact_id = r.fact_id
+                    WHERE f.extractor LIKE 'regex-%' AND f.document_id = ?""",
+                (document_id,))}
+            conn.execute(f"DELETE FROM facts WHERE document_id=? AND "
+                         f"extractor LIKE 'regex-%' {keep}", (document_id,))
         else:
-            conn.execute("DELETE FROM facts WHERE extractor LIKE 'regex-%'")
+            superseded = {r[0] for r in conn.execute(
+                """SELECT DISTINCT r.fact_id FROM fact_reviews r
+                     JOIN facts f ON f.fact_id = r.fact_id
+                    WHERE f.extractor LIKE 'regex-%'""")}
+            conn.execute(f"DELETE FROM facts WHERE extractor LIKE 'regex-%' {keep}")
         counts: dict[str, int] = {}
         flagged = 0
         total = 0
@@ -638,7 +667,16 @@ def extract_facts(*, document_id: str | None = None,
                 total += 1
                 flagged += 1 if review == "flagged" else 0
         conn.commit()
-        return {"facts": total, "flagged_for_review": flagged, "by_type": counts}
+        # In the library, not in the CLI: `POST /facts:extract`, a test, and any
+        # future caller re-extract through this function, and a re-extraction
+        # that loses a human review through one path and not another is not a
+        # property anybody can rely on. The projection is rebuilt from
+        # `fact_reviews` afterwards so a re-bound review reaches its new fact.
+        reattached = _reviews.reattach_fact_reviews(conn, superseded=superseded)
+        projected = _reviews.rebuild_fact_projection(conn)
+        return {"facts": total, "flagged_for_review": flagged, "by_type": counts,
+                "review_reattachment": reattached,
+                "review_projection": projected}
     finally:
         if own:
             conn.close()
