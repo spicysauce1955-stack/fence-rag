@@ -1652,6 +1652,55 @@ with no tenant in scope at all. Mapping a token to a tenant is a separate
 decision with its own failure mode. Today every document is shared so the two
 questions have the same answer; they will not once the first upload lands.
 
+### G49 — the only irreplaceable data in this system lives in a git-ignored file
+
+`docs/integration/conversation.md` T9, sent to Planning on 2026-08-28, reports as
+`[measured]`: *"We reviewed 34 of the 44 queue crops, promoted 94 facts, and
+built parameter tables from them. Four tables published … curation level 2
+reached for the first time in this store."*
+
+**None of that is present in this repository or in the store.** Measured
+2026-08-28:
+
+| | |
+|---|---|
+| `table_reviews` rows | **0** |
+| `table_read_candidates` with a non-NULL `reviewer` | **0** of 1,225 |
+| facts with `from_candidate_id` (i.e. promoted from a reading) | **0** |
+| `build_parameter_tables()` output | **0 tables, 0 gaps** |
+| snapshot `parameters` | `[]` |
+
+This is not a claim that the review did not happen. It is a claim that **nothing
+in the repository can show that it did**, and that is a structural problem rather
+than an accident of one session.
+
+**Why it is structural.** Everything else in this system is rebuildable from the
+read-only corpus: `cli ingest` regenerates elements, `cli facts --extract`
+regenerates assertions, `cli rebuild-index` regenerates the projection
+byte-identically. **A human review is the one thing that is not.** It is a
+judgement a person made while looking at a page image, it exists only as rows in
+`workspace/indexes/evidence.db`, and that file is git-ignored, has no backup, and
+is deleted by any clean rebuild. Obligation 6 — *"nothing reaches level 2 without
+a person having compared it to the source image"* — is therefore backed by the
+least durable artifact in the repository.
+
+The G17/A1 revocation is the same shape seen from the other side: 324 facts were
+un-promoted because agent agreement had been laundered into level 2. What makes
+the level honest is the reviewer's name and timestamp, and those live nowhere a
+second party can check.
+
+**What would close it.** `table_reviews` is already keyed on `crop_sha256` — the
+bytes of the crop, not an element id — so a review survives re-extraction by
+construction. Exporting the ledger to a committed, sorted JSONL under
+`workspace/catalog/` and being able to replay it into a fresh store would make
+review decisions durable, diffable and auditable, and would let anyone verify a
+claim like T9's from a clean checkout. Nothing else in the store needs this,
+because nothing else is authored.
+
+**Not done here, and not to be papered over.** Recording reviews that this
+session cannot verify would be exactly the failure obligation 6 exists to
+prevent. The discrepancy is recorded rather than resolved.
+
 ### Also in this session
 
 `docs/build-plan.md` Phase E is now built rather than pending. Closed or
