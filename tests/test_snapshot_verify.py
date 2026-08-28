@@ -29,7 +29,10 @@ def _ok():
         "policy_version": "0.1.0", "retain_until": "2028-01-01",
         "source_docs": [{"content_hash": "h1", "source_class": "spec_sheet",
                          "version_status": "unknown", "version_status_basis": None,
-                         "issue_date": None, "expiration_date": None}],
+                         "issue_date": None, "expiration_date": None,
+                         # C2: required, not optional. An absent key is
+                         # indistinguishable from "these bytes are filed once".
+                         "also_filed_as": []}],
         "warnings": [{"text_raw": "CAUTION: wear eye protection at all times.",
                       "lang": "en", "severity_lexeme": "CAUTION",
                       "attaches_to": {"kind": "document", "ref": "h1"},
@@ -201,3 +204,87 @@ class TestGapCarriesItsReasonAndEvidence(unittest.TestCase):
         snap["gaps"] = [_gap(kind="disputed", on="conditions")]
         verify(snap)
 
+
+
+# A sentinel: "the key is not there at all", which is a different failure from
+# "the key is there and empty" and is the one §5 has to refuse.
+_ABSENT = object()
+
+
+class TestAlsoFiledAsIsGated(unittest.TestCase):
+    """registry-additions.md §5: one `source_class` per content hash.
+
+    A gate rather than a report, and for the reason §1.4 gives: Planning ranks
+    on `source_class`, so where identical bytes are filed twice under different
+    `doc_type` values -- 18 of the 40 `same_content_as` edges here -- the same
+    evidence is admissible or not according to which record the SourceDoc was
+    built from. Nothing downstream can notice, which is what makes it worth a
+    refusal rather than a warning.
+
+    What this cannot check is stated in `_also_filed_as`'s docstring and tested
+    on the builder side instead: `SourceDoc` publishes no `manufacturer` and no
+    `doc_type` of its own, so a finished snapshot carries nothing to compare an
+    entry against to see whether it repeats the doc's own filing.
+    """
+
+    def _fails(self, also, fragment):
+        s = _ok()
+        if also is _ABSENT:
+            del s["source_docs"][0]["also_filed_as"]
+        else:
+            s["source_docs"][0]["also_filed_as"] = also
+        with self.assertRaises(VerificationFailed) as caught:
+            verify(s)
+        self.assertIn(fragment, str(caught.exception))
+
+    def test_an_empty_list_passes(self):
+        """Bytes filed once. Empty is the normal case, not a degenerate one."""
+        verify(_ok())
+
+    def test_a_well_formed_list_passes(self):
+        s = _ok()
+        s["source_docs"][0]["also_filed_as"] = [
+            {"manufacturer": "Barrette Outdoor Living", "doc_type": "hvhz_noa"},
+            {"manufacturer": "Freedom Outdoor Living", "doc_type": "unspecified"}]
+        verify(s)
+
+    def test_an_absent_field_is_refused(self):
+        self._fails(_ABSENT, "Publish [] rather than omitting it")
+
+    def test_an_entry_is_exactly_manufacturer_and_doc_type(self):
+        self._fails([{"manufacturer": "Barrette"}], "exactly")
+        self._fails([{"manufacturer": "Barrette", "doc_type": "hvhz_noa",
+                      "source_path": "manuals/x.pdf"}], "exactly")
+        self._fails(["Barrette"], "exactly")
+
+    def test_an_empty_string_is_neither_a_name_nor_a_null(self):
+        self._fails([{"manufacturer": "", "doc_type": "hvhz_noa"}],
+                    "a filing names it or says null")
+
+    def test_a_doc_type_with_no_source_class_is_refused(self):
+        """The defect in miniature: a filing nobody can rank cannot be
+        reconciled against the class that was published."""
+        self._fails([{"manufacturer": "Barrette", "doc_type": "vibes"}],
+                    "maps to no source_class")
+
+    def test_the_same_filing_listed_twice_is_refused(self):
+        """The document id is not published, so a repeated pair carries nothing
+        and reads as two filings that disagree."""
+        pair = {"manufacturer": "Barrette", "doc_type": "hvhz_noa"}
+        self._fails([pair, dict(pair)], "listed twice")
+
+    def test_an_unstable_order_is_refused(self):
+        """`canonical_bytes` hashes this list as given, so its order is part of
+        the snapshot id and is not free."""
+        self._fails([{"manufacturer": "Freedom", "doc_type": "unspecified"},
+                     {"manufacturer": "Barrette", "doc_type": "hvhz_noa"}],
+                    "is not in (manufacturer, doc_type) order")
+
+    def test_a_null_manufacturer_is_allowed_and_sorts_first(self):
+        """Both fields are nullable in the store; a catalogue that does not say
+        who filed something is a gap in the catalogue, not a malformed field."""
+        s = _ok()
+        s["source_docs"][0]["also_filed_as"] = [
+            {"manufacturer": None, "doc_type": "spec_sheet"},
+            {"manufacturer": "Barrette", "doc_type": "hvhz_noa"}]
+        verify(s)

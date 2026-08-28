@@ -99,10 +99,43 @@ def spans_from(table, tol: float = 1.0) -> dict[tuple[int, int], tuple[int, int]
     return out
 
 
+def cell_bboxes_from(table) -> dict[tuple[int, int], BBox]:
+    """`(row, col) -> (x0, top, x1, bottom)` in PDF points, off the same rects.
+
+    C3. `planning-asks.md` §1 calls this "the one above everything else": without
+    it a reviewer is told *which table* a reading came from and has to find the
+    cell before judging it, which is what makes a review queue unbounded. The
+    OCR word-grid path has always set `Cell.bbox`; the pdfplumber path never did,
+    so 17,499 of 18,472 stored cells carry none.
+
+    Nothing has to be inferred. :func:`spans_from` already walks
+    `table.rows[i].cells[j]`, and that rect *is* the cell box -- for a merged
+    cell it is the whole merged region, which is the region a reviewer should be
+    shown. Continuation cells report `None` and simply have no box, exactly as
+    they have no text.
+
+    Rounded to 2dp to match the OCR path in :func:`detect_ocr_tables` and the
+    table bbox in :func:`detect_page_tables_and_figures`; two sources that
+    disagreed on rounding would be worse than one source missing.
+    """
+    out: dict[tuple[int, int], BBox] = {}
+    for i, r in enumerate(table.rows):
+        for j, c in enumerate(r.cells):
+            if c is None:
+                continue
+            try:
+                out[(i, j)] = tuple(round(float(v), 2) for v in c)  # x0, top, x1, bottom
+            except (TypeError, ValueError):  # geometry we cannot read is not a box
+                continue
+    return out
+
+
 def _grid_to_cells(grid: list[list[str | None]], bbox: BBox,
-                   spans: dict[tuple[int, int], tuple[int, int]] | None = None) -> list[Cell]:
+                   spans: dict[tuple[int, int], tuple[int, int]] | None = None,
+                   bboxes: dict[tuple[int, int], BBox] | None = None) -> list[Cell]:
     cells: list[Cell] = []
     spans = spans or {}
+    bboxes = bboxes or {}
     for r, row in enumerate(grid):
         for c, val in enumerate(row):
             if val is None:
@@ -111,7 +144,8 @@ def _grid_to_cells(grid: list[list[str | None]], bbox: BBox,
             if not text:
                 continue
             rs, cs = spans.get((r, c), (1, 1))
-            cells.append(Cell(row=r, col=c, text=text, rowspan=rs, colspan=cs))
+            cells.append(Cell(row=r, col=c, text=text, rowspan=rs, colspan=cs,
+                              bbox=bboxes.get((r, c))))
     return cells
 
 
@@ -201,10 +235,11 @@ def detect_page_tables_and_figures(pdf: Path, page_no: int, *, _doc=None,
                 bbox = tuple(round(float(v), 2) for v in t.bbox)  # x0, top, x1, bottom
                 try:
                     spans = spans_from(t)
+                    boxes = cell_bboxes_from(t)
                 except Exception as e:   # geometry we cannot read is not a merge
                     notes.append(f"span read failed: {e.__class__.__name__}")
-                    spans = {}
-                cells = _grid_to_cells(grid, bbox, spans)
+                    spans, boxes = {}, {}
+                cells = _grid_to_cells(grid, bbox, spans, boxes)
                 if len(cells) < MIN_CELLS:
                     continue
                 tables.append(Table(n_rows=len(grid),
@@ -482,6 +517,120 @@ def backfill_spans(conn, *, dry_run: bool = True) -> dict:
                         "UPDATE table_cells SET rowspan=?, colspan=? "
                         " WHERE table_id=? AND row=? AND col=?",
                         (rs, cs, r["table_id"], i, j))
+                    out["cells_updated"] += cur.rowcount
+    if not dry_run:
+        conn.commit()
+    return out
+
+
+def backfill_cell_bboxes(conn, *, dry_run: bool = True) -> dict:
+    """Populate `bbox` on pdfplumber cells already in the store.
+
+    Same shape, and the same safety argument, as :func:`backfill_spans`: C3's
+    fix lands in extraction, but the store holds 17,499 pdfplumber cells
+    extracted before `cell_bboxes_from` existed and re-ingesting them is not an
+    option. Re-extraction moves element bboxes, `ref_id` is
+    `sha256(content_hash:page:bbox)`, and `delete_version_rows()` removes the
+    rows the old ids named -- G38 -- so a re-ingest would retract published
+    citations to fill in a column.
+
+    So this writes `table_cells.bbox` and nothing else. No element bbox, no
+    table bbox, no id of any kind, and therefore `cli refs --verify` cannot be
+    affected. It fills only cells whose bbox is NULL, which makes it re-runnable
+    and means it can never overwrite a box that extraction itself produced (the
+    973 OCR-word-grid cells are outside the query entirely).
+
+    Two guards against writing a box onto the wrong cell:
+
+    * the stored table is re-found by its own bbox, under the *same* detector
+      settings it was found with -- `pdfplumber:text-alignment` tables do not
+      exist under the lines strategy at all, so matching them with the default
+      settings would silently skip 1,199 cells;
+    * the re-found grid must have the stored `n_rows`/`n_cols`. Row and column
+      indices are the only thing joining a stored cell to a rect, so a table
+      whose shape has drifted is counted and skipped, not guessed at.
+    """
+    from .paths import REPO_ROOT
+    rows = conn.execute("""
+        SELECT t.table_id, t.bbox, t.detector, t.n_rows, t.n_cols,
+               e.page_no, d.source_path
+          FROM tables t
+          JOIN elements e   ON e.element_id = t.element_id
+          JOIN documents d  ON d.document_id = e.document_id
+         WHERE t.detector LIKE 'pdfplumber:%'
+         ORDER BY d.source_path, e.page_no""").fetchall()
+    out = {"tables_considered": len(rows), "tables_matched": 0,
+           "tables_unmatched": 0, "tables_shape_mismatch": 0,
+           "boxes_found": 0, "cells_updated": 0,
+           "pdf_open_failures": 0, "dry_run": dry_run}
+    if not rows:
+        return out
+    if not have_pdfplumber():
+        # The rects are pdfplumber's; without it there is nothing to read them
+        # from. Degrade to a no-op rather than failing the command.
+        out["error"] = "pdfplumber not available"
+        return out
+    import pdfplumber
+    settings_for = {"pdfplumber:lines": TABLE_SETTINGS_LINES,
+                    "pdfplumber:text-alignment": TABLE_SETTINGS_TEXT}
+    by_pdf: dict[str, list] = {}
+    for r in rows:
+        by_pdf.setdefault(r["source_path"], []).append(r)
+    for src, group in by_pdf.items():
+        path = REPO_ROOT / src
+        if not path.exists():
+            out["pdf_open_failures"] += 1
+            continue
+        try:
+            pdf = pdfplumber.open(str(path))
+        except Exception:
+            out["pdf_open_failures"] += 1
+            continue
+        with pdf:
+            # find_tables() is the expensive call and several stored tables can
+            # share one page and detector, so memoise per (page, detector).
+            found: dict[tuple[int, str], list] = {}
+            for r in group:
+                key = (r["page_no"], r["detector"])
+                try:
+                    if key not in found:
+                        page = pdf.pages[r["page_no"] - 1]
+                        found[key] = page.find_tables(
+                            table_settings=settings_for.get(r["detector"],
+                                                            TABLE_SETTINGS_LINES))
+                    want = [round(float(v), 2) for v in json.loads(r["bbox"] or "null")]
+                    match = next((t for t in found[key]
+                                  if [round(float(v), 2) for v in t.bbox] == want), None)
+                except Exception:
+                    match = None
+                if match is None:
+                    out["tables_unmatched"] += 1
+                    continue
+                try:
+                    boxes = cell_bboxes_from(match)
+                    shape = (len(match.rows),
+                             max((len(x.cells) for x in match.rows), default=0))
+                except Exception:
+                    out["tables_unmatched"] += 1
+                    continue
+                if shape != (r["n_rows"], r["n_cols"]):
+                    out["tables_shape_mismatch"] += 1
+                    continue
+                out["tables_matched"] += 1
+                out["boxes_found"] += len(boxes)
+                for (i, j), box in boxes.items():
+                    if dry_run:
+                        # Counted with the same predicate the UPDATE uses, so a
+                        # dry run reports the number of cells it would fill.
+                        out["cells_updated"] += conn.execute(
+                            "SELECT COUNT(*) FROM table_cells"
+                            " WHERE table_id=? AND row=? AND col=? AND bbox IS NULL",
+                            (r["table_id"], i, j)).fetchone()[0]
+                        continue
+                    cur = conn.execute(
+                        "UPDATE table_cells SET bbox=?"
+                        " WHERE table_id=? AND row=? AND col=? AND bbox IS NULL",
+                        (json.dumps(list(box)), r["table_id"], i, j))
                     out["cells_updated"] += cur.rowcount
     if not dry_run:
         conn.commit()

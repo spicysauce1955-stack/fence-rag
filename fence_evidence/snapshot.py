@@ -249,6 +249,20 @@ class SourceDoc:
     # on a filename keyword with no successor recorded anywhere; suppressing the
     # field there would hide the weakest three of the nine.
     superseded_by: tuple = ()
+    # C2, registry-additions.md §5. `source_class` is a property of the BYTES;
+    # the filing is a property of the catalogue. 14 groups of byte-identical
+    # files are filed under more than one document record here, and 18 of the 40
+    # `same_content_as` edges disagree about `doc_type` across the two sides --
+    # the same Miami-Dade NOA is `hvhz_noa` under CertainTeed and `unspecified`
+    # under Freedom Outdoor Living. Now that Planning applies the source policy,
+    # that is not untidiness: identical evidence is admissible or not according
+    # to which record this SourceDoc happened to be built from, silently and
+    # with no error anywhere. So ONE class per content hash, and every OTHER
+    # filing travels here, where a reviewer can see the disagreement instead of
+    # inheriting it. `{manufacturer, doc_type}` pairs, in a stable order, since
+    # the whole object is hashed. Empty tuple where the bytes are filed once --
+    # empty is a statement, absent would read as an oversight.
+    also_filed_as: tuple = ()
 
 
 @dataclass(frozen=True)
@@ -320,7 +334,12 @@ class SnapshotBuilder:
                 version_status_basis=row["version_status_basis"],
                 issue_date=row["issue_date"],
                 expiration_date=row["expiration_date"],
-                superseded_by=self._successors(row["document_id"]))
+                superseded_by=self._successors(row["document_id"]),
+                # The class published above came from THIS record, which is the
+                # first filing of these bytes that a citation reached. The other
+                # filings travel beside it rather than being dropped.
+                also_filed_as=self._other_filings(row["sha256"],
+                                                  row["document_id"]))
             if row["doc_type"] in UNCLASSIFIED:
                 self.gap(kind="missing_value", subject=row["document_id"],
                          code="source_class_unclassified",
@@ -351,6 +370,49 @@ class SnapshotBuilder:
              WHERE r.from_document_id = ? AND r.relation_type = 'superseded_by'
              ORDER BY v.sha256""", (document_id,)).fetchall()
         return tuple(r["sha256"] for r in rows)
+
+    def _other_filings(self, sha256: str, own_document_id: str) -> tuple:
+        """`{manufacturer, doc_type}` for every other record filing these bytes.
+
+        Grouped on `document_versions.sha256`, not on the `same_content_as`
+        edges, and the two are not the same set. One of the 40 edges joins two
+        documents with *different* content hashes -- identical extracted text,
+        different bytes -- and that pair is two SourceDocs, not two filings of
+        one. `also_filed_as` is defined per content hash and cannot express it;
+        following the edges instead would attach a filing to bytes it is not a
+        filing of, which is a worse error than the omission. Registry §5 names
+        that pair as the hard one and leaves it to curation.
+
+        Distinct PAIRS, not distinct rows, and the doc's own pair seeds the set
+        it is deduplicated against. The document id is not published -- it is an
+        internal handle Planning cannot resolve, the same reason `superseded_by`
+        publishes content hashes -- so two records agreeing on both fields are
+        indistinguishable once it is dropped, and a repeat of the doc's own
+        filing says nothing at all. What is left is exactly what a reviewer
+        needs: the filings that DISAGREE with the one published.
+        """
+        rows = self.conn.execute("""
+            SELECT DISTINCT d.document_id, d.manufacturer, d.doc_type
+              FROM document_versions v
+              JOIN documents d ON d.document_id = v.document_id
+             WHERE v.sha256 = ?
+             ORDER BY d.document_id""", (sha256,)).fetchall()
+        own = next((r for r in rows if r["document_id"] == own_document_id), None)
+        seen = {(own["manufacturer"], own["doc_type"])} if own is not None else set()
+        keep = []
+        for r in rows:
+            pair = (r["manufacturer"], r["doc_type"])
+            if r["document_id"] == own_document_id or pair in seen:
+                continue
+            seen.add(pair)
+            keep.append((pair, r["document_id"]))
+        # Ordered on the fields that are published, with the document id only as
+        # a tie-break. Both fields are nullable in the store, so a NULL sorts as
+        # "" rather than raising; and without the tie-break two filings whose
+        # sort keys collide would be left in whatever order SQLite returned,
+        # which is a store-history dependence -- and this list is hashed.
+        keep.sort(key=lambda e: (e[0][0] or "", e[0][1] or "", e[1]))
+        return tuple({"manufacturer": m, "doc_type": t} for (m, t), _ in keep)
 
     def source_docs(self) -> list[SourceDoc]:
         return sorted(self._docs.values(), key=lambda d: d.content_hash)
@@ -581,6 +643,71 @@ class VerificationFailed(RuntimeError):
 
 
 _CODE = re.compile(r"^[a-z][a-z0-9_]*$")
+_FILING_KEYS = frozenset({"manufacturer", "doc_type"})
+
+
+def _also_filed_as(doc: dict, fail: list) -> None:
+    """Registry §5 as a gate: one source class per content hash, others named.
+
+    The rule is load-bearing because Planning ranks on `source_class`, and the
+    failure it prevents is silent — identical bytes admissible under one filing
+    and not under another, with no error raised anywhere. So the field is
+    required, not optional: **an absent key is indistinguishable from "these
+    bytes are filed once"**, which is the same silence in a new place. Empty is
+    a statement; missing is an oversight.
+
+    One half of the rule is not checkable here, and saying so is better than a
+    check that looks like it covers it. `SourceDoc` publishes no `manufacturer`
+    and no `doc_type` of its own — only the `source_class` derived from one —
+    so nothing in a finished snapshot can tell whether an entry repeats the
+    doc's own filing. The builder drops it; `tests/test_snapshot_build.py`
+    asserts that it did. What is checkable from here is shape, vocabulary,
+    distinctness and order.
+    """
+    at = f"source_docs[{str(doc.get('content_hash'))[:12]}...]"
+    also = doc.get("also_filed_as")
+    if also is None:
+        fail.append(f"{at}: `also_filed_as` is absent. Publish [] rather than "
+                    f"omitting it: absent is indistinguishable from 'filed "
+                    f"once', and one source class per content hash is only a "
+                    f"guarantee if the other filings are visible.")
+        return
+    if not isinstance(also, (list, tuple)):
+        fail.append(f"{at}: `also_filed_as` is {type(also).__name__}, not a list")
+        return
+
+    pairs = []
+    for j, f in enumerate(also):
+        where = f"{at}.also_filed_as[{j}]"
+        if not isinstance(f, dict) or set(f) != _FILING_KEYS:
+            fail.append(f"{where}: a filing is exactly "
+                        f"{{manufacturer, doc_type}}; got {f!r}")
+            continue
+        for k in ("manufacturer", "doc_type"):
+            if f[k] is not None and not (isinstance(f[k], str) and f[k]):
+                fail.append(f"{where}: {k} is {f[k]!r}; a filing names it or "
+                            f"says null, and an empty string says neither")
+        # An unmapped doc_type is the defect in miniature: a filing whose class
+        # nobody can compute cannot be reconciled against the one published,
+        # which is the whole purpose of listing it.
+        if isinstance(f["doc_type"], str) and f["doc_type"] not in SOURCE_CLASS:
+            fail.append(f"{where}: doc_type {f['doc_type']!r} maps to no "
+                        f"source_class, so the filing it names cannot be "
+                        f"ranked against the one published")
+        pair = (f["manufacturer"], f["doc_type"])
+        if pair in pairs:
+            fail.append(f"{where}: {pair} is listed twice. A filing is a "
+                        f"(manufacturer, doc_type) pair here — the document id "
+                        f"is not published — so a repeat carries nothing.")
+        pairs.append(pair)
+
+    # Order is part of the payload: `canonical_bytes` hashes this list as given,
+    # so an unstable order would move the snapshot id between two builds over
+    # identical knowledge. Nulls sort as "" for the same reason the builder
+    # sorts them that way.
+    if pairs != sorted(pairs, key=lambda p: (p[0] or "", p[1] or "")):
+        fail.append(f"{at}: `also_filed_as` is not in (manufacturer, doc_type) "
+                    f"order; the list is hashed, so its order is not free")
 
 
 def verify(snapshot: dict) -> None:
@@ -613,6 +740,7 @@ def verify(snapshot: dict) -> None:
         if d.get("version_status") not in VERSION_STATUSES:
             fail.append(f"version_status {d.get('version_status')!r} is not "
                         f"active|superseded|unknown")
+        _also_filed_as(d, fail)
 
     def walk(node, path="$"):
         if isinstance(node, dict):

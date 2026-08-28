@@ -270,5 +270,234 @@ class SnapshotCliRequiresExactlyOneMode(unittest.TestCase):
                 self.assertIn("choose one of", out)
 
 
+# -- C2, also_filed_as -----------------------------------------------------
+# registry-additions.md §5: one `source_class` per content hash, every other
+# filing named beside it. Load-bearing rather than tidy, because Planning ranks
+# on the class: 18 of the 40 `same_content_as` edges here disagree about
+# `doc_type` across their two sides, so identical bytes were admissible or not
+# according to which record the SourceDoc happened to be built from -- silently,
+# with no error anywhere.
+
+SHA_A = "a" * 64
+SHA_B = "b" * 64
+
+
+def _filings_store(*records, sha=SHA_A):
+    """A store where one content hash is filed under several document records.
+
+    Built in memory because the behaviour under test is about the *catalogue*,
+    not about any PDF: the interesting shapes -- a four-way group, two records
+    agreeing on both published fields, a NULL manufacturer -- either do not
+    occur in this corpus or occur once, and a test that can only run where the
+    corpus does is not a guard on the logic.
+    """
+    import sqlite3
+
+    from fence_evidence.store import SCHEMA
+
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.executescript(SCHEMA)
+    conn.execute("""INSERT INTO extraction_runs(run_id, started_at, tool_versions,
+                        tool_fingerprint, pipeline_version)
+                    VALUES ('r1', '2026-08-20T00:00:00+00:00', '{}', 'fp', '1')""")
+    for i, (doc_id, manufacturer, doc_type) in enumerate(records):
+        conn.execute("""INSERT INTO documents(document_id, source_path, file_type,
+                            corpus_track, manufacturer, doc_type, version_status,
+                            version_status_basis)
+                        VALUES (?, ?, 'pdf', 'us', ?, ?, 'unknown', NULL)""",
+                     (doc_id, f"manuals/x/{doc_id}.pdf", manufacturer, doc_type))
+        conn.execute("""INSERT INTO document_versions(version_id, document_id,
+                            sha256, ingested_at, extraction_run_id)
+                        VALUES (?, ?, ?, '2026-08-20T00:00:00+00:00', 'r1')""",
+                     (f"v{i}", doc_id, sha))
+        conn.execute("""INSERT INTO pages(page_id, version_id, page_no, width,
+                            height, extraction_method, page_image_dpi)
+                        VALUES (?, ?, 1, 612, 792, 'pdf_text_layer', 200)""",
+                     (f"p{i}", f"v{i}"))
+        conn.execute("""INSERT INTO elements(element_id, page_id, version_id,
+                            document_id, page_no, ordinal, element_type, text,
+                            text_source, bbox)
+                        VALUES (?, ?, ?, ?, 1, 0, 'paragraph', 'x',
+                                'pdf_text_layer', '[1.0, 2.0, 3.0, 4.0]')""",
+                     (f"e{i}", f"p{i}", f"v{i}", doc_id))
+    conn.commit()
+    return conn
+
+
+class TestAlsoFiledAsIsBuilt(unittest.TestCase):
+    def _doc(self, conn, element_id):
+        b = SnapshotBuilder(conn, tenant="t", regime="us_astm")
+        b.source_ref(element_id)
+        return b.source_docs()[0]
+
+    def test_bytes_filed_once_carry_an_empty_tuple(self):
+        """Empty is a statement. Omitting the field would read as an oversight
+        and, worse, would be indistinguishable from 'filed once'."""
+        conn = _filings_store(("doc-1", "CertainTeed", "hvhz_noa"))
+        try:
+            self.assertEqual(self._doc(conn, "e0").also_filed_as, ())
+        finally:
+            conn.close()
+
+    def test_the_other_filings_of_the_same_bytes_are_named(self):
+        conn = _filings_store(("doc-1", "CertainTeed", "hvhz_noa"),
+                              ("doc-2", "Freedom Outdoor Living", "unspecified"))
+        try:
+            self.assertEqual(
+                self._doc(conn, "e0").also_filed_as,
+                ({"manufacturer": "Freedom Outdoor Living",
+                  "doc_type": "unspecified"},))
+        finally:
+            conn.close()
+
+    def test_the_docs_own_filing_is_never_repeated(self):
+        """The half of §5's rule that `verify()` cannot see.
+
+        A finished snapshot publishes no `manufacturer` and no `doc_type` for
+        the doc itself -- only the `source_class` derived from one -- so the
+        gate cannot tell whether an entry repeats the doc's own filing. It is
+        asserted here instead, from both sides of the same group.
+        """
+        conn = _filings_store(("doc-1", "CertainTeed", "hvhz_noa"),
+                              ("doc-2", "Freedom Outdoor Living", "unspecified"))
+        try:
+            self.assertNotIn({"manufacturer": "CertainTeed",
+                              "doc_type": "hvhz_noa"},
+                             self._doc(conn, "e0").also_filed_as)
+            self.assertNotIn({"manufacturer": "Freedom Outdoor Living",
+                              "doc_type": "unspecified"},
+                             self._doc(conn, "e1").also_filed_as)
+        finally:
+            conn.close()
+
+    def test_a_second_record_with_the_same_pair_is_not_listed_twice(self):
+        """The document id is not published, so a repeated pair carries nothing
+        -- and it would read to a reviewer as two disagreeing filings."""
+        conn = _filings_store(("doc-1", "Barrette", "installation_manual"),
+                              ("doc-2", "Barrette", "installation_manual"),
+                              ("doc-3", "Freedom", "installation_manual"))
+        try:
+            self.assertEqual(
+                self._doc(conn, "e0").also_filed_as,
+                ({"manufacturer": "Freedom", "doc_type": "installation_manual"},))
+        finally:
+            conn.close()
+
+    def test_the_order_does_not_depend_on_insertion_order(self):
+        """The list is hashed. Two stores holding the same catalogue in a
+        different row order must produce the same snapshot id."""
+        forward = (("doc-1", "CertainTeed", "hvhz_noa"),
+                   ("doc-2", "Freedom", "unspecified"),
+                   ("doc-3", "Barrette", "engineering_approval"))
+        a = _filings_store(*forward)
+        b = _filings_store(forward[0], *reversed(forward[1:]))
+        try:
+            self.assertEqual(self._doc(a, "e0").also_filed_as,
+                             self._doc(b, "e0").also_filed_as)
+            self.assertEqual(
+                [f["manufacturer"] for f in self._doc(a, "e0").also_filed_as],
+                ["Barrette", "Freedom"])
+        finally:
+            a.close()
+            b.close()
+
+    def test_a_null_manufacturer_sorts_rather_than_raising(self):
+        """Both fields are nullable in the store. A catalogue that does not say
+        who filed something is a gap, not a crash in the publisher."""
+        conn = _filings_store(("doc-1", "CertainTeed", "hvhz_noa"),
+                              ("doc-2", None, "spec_sheet"),
+                              ("doc-3", "Barrette", "spec_sheet"))
+        try:
+            self.assertEqual(
+                [f["manufacturer"] for f in self._doc(conn, "e0").also_filed_as],
+                [None, "Barrette"])
+        finally:
+            conn.close()
+
+    def test_bytes_that_differ_are_not_filings_of_one_document(self):
+        """One of the 40 `same_content_as` edges joins two DIFFERENT content
+        hashes -- identical extracted text, different bytes. Those are two
+        SourceDocs, and `also_filed_as` is defined per content hash, so it
+        must not reach across. Registry §5 leaves that pair to curation."""
+        conn = _filings_store(("doc-1", "CertainTeed", "hvhz_noa"))
+        conn.execute("""INSERT INTO documents(document_id, source_path, file_type,
+                            corpus_track, manufacturer, doc_type, version_status)
+                        VALUES ('doc-9', 'manuals/x/9.pdf', 'pdf', 'us',
+                                'Freedom', 'unspecified', 'unknown')""")
+        conn.execute("""INSERT INTO document_versions(version_id, document_id,
+                            sha256, ingested_at, extraction_run_id)
+                        VALUES ('v9', 'doc-9', ?, '2026-08-20T00:00:00+00:00',
+                                'r1')""", (SHA_B,))
+        conn.execute("""INSERT INTO relations(relation_id, from_document_id,
+                            to_document_id, relation_type, basis)
+                        VALUES (1, 'doc-1', 'doc-9', 'same_content_as',
+                                'test')""")
+        conn.commit()
+        try:
+            self.assertEqual(self._doc(conn, "e0").also_filed_as, ())
+        finally:
+            conn.close()
+
+
+@requires_store
+class TestAlsoFiledAsOverTheCorpus(unittest.TestCase):
+    """The measured shape, against the real catalogue."""
+
+    @classmethod
+    def setUpClass(cls):
+        from fence_evidence.store import connect
+        cls.snap = build_snapshot(tenant="acme", regime="us_astm")
+        cls.conn = connect()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.conn.close()
+
+    def test_every_source_doc_declares_the_field(self):
+        for d in self.snap["source_docs"]:
+            self.assertIn("also_filed_as", d, d["content_hash"])
+
+    def test_the_duplicate_filings_actually_publish(self):
+        """11 of the 14 byte-identical groups in this store have a cited member;
+        a build that named none of them would pass every other check here."""
+        nonempty = [d for d in self.snap["source_docs"] if d["also_filed_as"]]
+        self.assertGreater(len(nonempty), 0)
+
+    def test_each_list_is_the_group_minus_exactly_one_filing(self):
+        """One class per content hash: the group's OTHER filings are published,
+        and the one that is not is the one whose class was."""
+        for d in self.snap["source_docs"]:
+            group = {(r["manufacturer"], r["doc_type"]) for r in self.conn.execute(
+                """SELECT d.manufacturer, d.doc_type
+                     FROM document_versions v
+                     JOIN documents d ON d.document_id = v.document_id
+                    WHERE v.sha256 = ?""", (d["content_hash"],))}
+            published = {(f["manufacturer"], f["doc_type"])
+                         for f in d["also_filed_as"]}
+            with self.subTest(content_hash=d["content_hash"][:12]):
+                self.assertTrue(published <= group, "a filing of other bytes")
+                missing = group - published
+                self.assertEqual(len(missing), 1,
+                                 "exactly one filing is the published one")
+                self.assertEqual(SOURCE_CLASS[missing.pop()[1]],
+                                 d["source_class"],
+                                 "the withheld filing is not the one whose "
+                                 "class was published")
+
+    def test_a_group_disagreeing_on_doc_type_still_publishes_one_class(self):
+        """The failure the rule exists to prevent, in the corpus that has it: a
+        Miami-Dade NOA filed as `hvhz_noa` under one manufacturer and
+        `unspecified` under another maps to `sealed_approval` and `marketing` --
+        admissible for a structural parameter, and inadmissible."""
+        disagreeing = [
+            d for d in self.snap["source_docs"]
+            if any(SOURCE_CLASS[f["doc_type"]] != d["source_class"]
+                   for f in d["also_filed_as"])]
+        self.assertTrue(disagreeing, "no group disagrees; the fixture moved")
+        for d in disagreeing:
+            self.assertIsInstance(d["source_class"], str)
+
+
 if __name__ == "__main__":
     unittest.main()
