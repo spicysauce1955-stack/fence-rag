@@ -69,7 +69,14 @@ rather than widening `active`. Four kinds of answer, never conflated:
     answer from an explicit mark so a caller can weigh it differently.
 ``assumed_newest``
     The old positional fallback — newest in the chain and not marked superseded
-    — kept, but named for what it is: no version evidence at all.
+    — kept, but named for what it is: no *expiration* evidence and no explicit
+    status marker. Deliberately not "no version evidence at all" unless that is
+    what was measured. 31 of the 125 documents that land here print an edition
+    stamp which `enrich_chain` attaches to the very member the answer describes,
+    so the basis names the stamp it saw rather than denying it exists. The
+    decision is unaffected — an edition is which printing this is, not whether
+    it is in force — but "we found nothing" and "we found this and it does not
+    answer the question" are different statements, and only one of them is true.
 ``conflict`` / ``withdrawn`` / ``none``
     No value is asserted. Two members in force, two explicit marks, or
     expiration facts that disagree all produce ``conflict`` with the candidates
@@ -411,6 +418,50 @@ def _correction_note(member: dict) -> str:
     return f"; that date was corrected at review from {', '.join(was)}"
 
 
+def _edition_note(member: dict) -> str:
+    """What the positional fallback saw of this document's printed edition.
+
+    The earlier wording said `assumed_newest` rests on "no version evidence --
+    the document states no date and carries no marker". Measured, that is false
+    for 31 of the 125 documents this branch answers for: they print an edition
+    stamp, `document_edition` reads it, and `enrich_chain` attaches it as
+    `member["edition"]` in the very call whose answer then denies it. A basis
+    string must not claim the absence of something the member it describes is
+    carrying -- a reader cannot otherwise tell "we looked and found nothing"
+    from "we found a stamp and decided it was not a status".
+
+    The DECISION is unchanged and stays right: an edition names which printing
+    this is, never whether it is in force, and `document_edition` refuses to
+    turn one into a `version_status`. Only the sentence changes, and it changes
+    to name what was actually seen.
+
+    Three cases, because a false claim of absence is exactly what this is
+    fixing and the conflict case would otherwise inherit one:
+
+    * a stamp was read -- name it, and say why it does not answer;
+    * the document prints two -- say that, since "no stamp" would be wrong;
+    * no stamp at all -- and *only* here is "no version evidence" true, which is
+      the claim the answer was making unconditionally before.
+
+    A member with no `edition` key is treated as one carrying no stamp.
+    `enrich_chain` always sets the key, so the only members in that state are
+    built by hand.
+    """
+    edition = member.get("edition")
+    none_at_all = (", and no printed edition stamp, so there is no version "
+                   "evidence at all")
+    if not edition:
+        return none_at_all
+    if edition.get("value"):
+        return (f"; it prints edition {edition['value']}, which says which "
+                f"printing this is and not whether it is in force")
+    if edition.get("agreement") == "conflict":
+        return ("; it prints more than one edition stamp, reported as a conflict "
+                "-- and an edition says which printing this is rather than "
+                "whether it is in force, so neither would answer this question")
+    return none_at_all
+
+
 def _no_answer(kind: str, basis: str, candidates: list[str] | None = None) -> dict:
     out = {"active": None, "active_basis_kind": kind, "active_basis": basis}
     if candidates is not None:
@@ -472,20 +523,9 @@ def select_active(chain: list[dict], as_of: str | None = None) -> dict:
                      "the chain supersedes it" + _correction_note(selected))
         else:
             selected, kind = candidates[-1], "assumed_newest"
-            # The earlier wording said this rests on "no version evidence -- the
-            # document states no date and carries no marker". Measured, that is
-            # false for 31 of the 125 documents this branch answers for: they
-            # print an edition stamp, `document_edition` reads it at 33/33
-            # precision, and `enrich_chain` attaches it right here. The DECISION
-            # is still right -- an edition says which printing this is, not
-            # whether it is in force, and §G3 measures that no supersession is
-            # inferable from one in this corpus -- but a basis string must not
-            # deny something the member it describes is carrying.
-            edition = (selected.get("edition") or {}).get("value")
-            seen = (f"; it prints edition {edition}, which says which printing "
-                    f"this is and not whether it is in force" if edition else "")
             basis = ("newest member of the chain and not marked superseded; this rests "
-                     "on no EXPIRATION evidence and no explicit status marker" + seen)
+                     "on no expiration evidence and no explicit status marker"
+                     + _edition_note(selected))
 
     # Disagreeing evidence asserts nothing, whatever the positional reading says.
     expiration = (selected.get("dates") or {}).get("expiration") or {}

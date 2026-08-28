@@ -261,13 +261,7 @@ class TestSelectActive(unittest.TestCase):
         got = select_active(chain, as_of="2026-08-28")
         self.assertEqual(got["active"]["document_id"], "only")
         self.assertEqual(got["active_basis_kind"], "assumed_newest")
-        # The claim narrowed from "no version evidence" to "no EXPIRATION
-        # evidence and no explicit status marker", because the broader wording
-        # was false for the 31 documents in this branch that print an edition
-        # stamp. What the test is pinning is unchanged: this answer must say
-        # out loud that it is positional.
-        self.assertIn("no EXPIRATION evidence", got["active_basis"])
-        self.assertIn("no explicit status marker", got["active_basis"])
+        self.assertIn("no version evidence", got["active_basis"])
 
     def test_two_members_in_force_is_a_conflict_not_a_pick(self):
         chain = [_m("x", "unknown", "in_force", "2029-03-13"),
@@ -736,7 +730,8 @@ class TestTheBasisStringDoesNotDenyWhatTheMemberCarries(unittest.TestCase):
         got = select_active([self._member()])
         self.assertEqual(got["active_basis_kind"], "assumed_newest")
         self.assertNotIn("carries no marker", got["active_basis"])
-        self.assertIn("no EXPIRATION evidence", got["active_basis"])
+        self.assertIn("no expiration evidence", got["active_basis"])
+        self.assertIn("no explicit status marker", got["active_basis"])
 
     def test_an_edition_is_named_and_explicitly_not_treated_as_a_status(self):
         got = select_active([self._member(
@@ -747,9 +742,106 @@ class TestTheBasisStringDoesNotDenyWhatTheMemberCarries(unittest.TestCase):
         self.assertEqual(got["active_basis_kind"], "assumed_newest",
                          "an edition must not promote the answer to evidence")
 
-    def test_a_member_with_no_edition_says_nothing_about_one(self):
+    def test_a_member_with_no_edition_never_names_one(self):
+        """It may state the absence -- that is the one case where "no version
+        evidence" is true -- but it must never name a stamp that is not there."""
         got = select_active([self._member()])
         self.assertNotIn("prints edition", got["active_basis"])
+        self.assertIn("no printed edition stamp", got["active_basis"])
+        self.assertIn("no version evidence", got["active_basis"])
+
+    def test_a_member_carrying_a_stamp_never_claims_it_has_none(self):
+        """The defect, stated as the property that would have caught it."""
+        got = select_active([self._member(
+            edition={"value": "2024-04", "agreement": "unanimous",
+                     "is_version_status": False})])
+        self.assertNotIn("no version evidence", got["active_basis"])
+        self.assertNotIn("no printed edition stamp", got["active_basis"])
+
+    def test_two_stamps_are_reported_as_two_not_as_none(self):
+        """`document_edition` returns a conflict with a null value when a
+        document prints more than one stamp. Reading only `value` collapses
+        that into "no stamp", which is the same false absence one branch
+        over."""
+        got = select_active([self._member(edition={
+            "value": None, "agreement": "conflict",
+            "reason": "the document prints more than one edition stamp",
+            "candidates": [{"value": "2021-03", "sources": []},
+                           {"value": "2024-04", "sources": []}],
+            "sources": []})])
+        self.assertEqual(got["active_basis_kind"], "assumed_newest")
+        self.assertNotIn("no printed edition stamp", got["active_basis"])
+        self.assertNotIn("no version evidence", got["active_basis"])
+        self.assertIn("more than one edition stamp", got["active_basis"])
+
+    def test_the_prose_is_not_shouting(self):
+        """Capitals are this repo's convention for emphasis in comments, not in
+        a string that is published to a caller and printed into a report. No
+        other basis string in `ACTIVE_BASIS_KINDS` uses them."""
+        for edition in (None, {"value": "2024-04", "agreement": "unanimous"}):
+            basis = select_active([self._member(edition=edition)])["active_basis"]
+            shouted = [w for w in basis.split() if len(w) > 3 and w.isupper()]
+            self.assertEqual(shouted, [], f"published prose is shouting: {basis!r}")
+
+
+@requires_store
+class TestNoBasisDeniesWhatTheChainCarries(unittest.TestCase):
+    """The property the `assumed_newest` defect violated, over the real corpus.
+
+    The synthetic tests above pin the wording. This one pins the thing that
+    actually went wrong: `enrich_chain` attached an edition stamp to a member
+    and the answer describing that same member said it had none. A string
+    asserting the absence of something the object it describes is carrying is
+    wrong however it is phrased, so this checks the claim against the member
+    rather than against an expected sentence.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.conn = connect()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.conn.close()
+
+    def test_no_answer_denies_an_edition_its_own_member_carries(self):
+        checked = with_stamp = 0
+        for row in self.conn.execute("SELECT document_id FROM documents"):
+            chain = chain_for(self.conn, row["document_id"], as_of="2026-08-28")
+            got = select_active(chain, as_of="2026-08-28")
+            member = got.get("active")
+            if member is None:
+                continue
+            checked += 1
+            basis = got["active_basis"]
+            edition = member.get("edition") or {}
+            if edition.get("value"):
+                with_stamp += 1
+                # The invariant, and it holds for every kind: no answer may
+                # deny evidence its own member is carrying.
+                self.assertNotIn(
+                    "no version evidence", basis,
+                    f"{member['document_id']} prints edition "
+                    f"{edition['value']} and the basis denies any version "
+                    f"evidence: {basis!r}")
+                self.assertNotIn("no printed edition stamp", basis)
+                # Naming it is required only where the answer rests on an
+                # ABSENCE of evidence. `marked` and `inferred_in_force` rest on
+                # something positive and owe the stamp no mention.
+                if got["active_basis_kind"] == "assumed_newest":
+                    self.assertIn(
+                        edition["value"], basis,
+                        f"{member['document_id']} prints edition "
+                        f"{edition['value']}, the answer rests on there being no "
+                        f"version evidence, and the basis never names it")
+            elif edition.get("agreement") == "conflict":
+                self.assertNotIn("no printed edition stamp", basis)
+                self.assertNotIn("no version evidence", basis)
+        self.assertGreater(checked, 100, "the corpus resolved almost nothing")
+        self.assertGreater(with_stamp, 0,
+                           "no resolved member carries an edition stamp, so this "
+                           "test proved nothing; the corpus measured 31 under "
+                           "`assumed_newest` alone")
 
 
 if __name__ == "__main__":
