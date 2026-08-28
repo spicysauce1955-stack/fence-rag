@@ -642,3 +642,56 @@ cross-family compared: 709 `unreviewed`, 504 `cross_family_verified`, 12
 on every row — and after A1 none is promotable, which is the honest state rather
 than a contradiction. The 504 are the front of a review queue that has no
 interface yet, and building that interface is the critical path (Phase B).
+
+### Phase E — tenancy, 2026-08-28
+
+**What the phase said to do**, in `docs/build-plan.md`: *"decide where the tenant
+axis lives before the snapshot format is fixed, because retrofitting it
+afterwards means re-cutting every published object."* Decided, built, and the
+re-cut did not happen — the rebuild reproduces the stored snapshot's id
+`83a227d4` byte-for-byte, and all 519 published citations still resolve.
+
+**The decision.** `documents.owner_tenant`, nullable, and nowhere else. NULL is
+shared knowledge, which is all 144 corpus documents. Everything above L1 derives
+ownership by pointing down, per `docs/layering.md`'s rule, so a copy on
+`elements` or `facts` could only ever disagree with the first — the same
+reasoning that makes `current_editions` a view rather than a flag column.
+
+**What building it taught, and none of it was in the design.**
+
+1. **A gate on the obvious choke point misses two fields.** `source_ref` is where
+   every published value's provenance is minted, so it looked like the whole
+   boundary. It is not: `also_filed_as` and `superseded_by` publish facts about
+   *other* documents — a manufacturer, a doc_type, a content hash — and neither
+   goes through a ref. Pointing either at an upload ships tenant B's data inside
+   tenant A's snapshot with nothing raised.
+2. **Gating without scoping converts a leak into an outage.** An unscoped
+   `warnings()` scan would have hit the gate mid-build and raised, rather than
+   producing a snapshot that simply does not contain the other tenant's warning.
+   Both layers now call one `visible_sql`, so the query that chooses and the
+   check that refuses cannot drift.
+3. **The order of two statements is the whole gate.** Raising *after*
+   `self._docs[...]` was written leaves the foreign document in a builder whose
+   `source_docs()` is read at the end of the build — so a caller that catches the
+   exception ships the leak. The check precedes registration, and a test asserts
+   the builder is empty after a refused mint.
+4. **The migration is the likeliest way to violate the obligation.** The column
+   lands on 144 existing rows. A `DEFAULT` of any kind hands the entire corpus to
+   one tenant as private property, with no diff anywhere to show it. That is
+   obligation 7 inverted, arriving through a migration rather than a leak, and
+   `tests/test_migration.py` now pins the absence of a default.
+5. **The weaker half was the one on the network.** The builder refused to publish
+   a cross-tenant citation while `GET /source-refs/{id}` would render anyone's
+   crop to any allowlisted token. Fixed to fail closed, with the refusal made
+   byte-identical to "no such ref_id" — telling a caller that an id exists but is
+   not theirs is the leak in miniature.
+6. **SQLite rewrites your schema text.** `ALTER TABLE ... DROP COLUMN` edits the
+   stored `CREATE TABLE` source, and a multi-line comment block above a column
+   survives an edit the column does not, leaving a schema that no longer parses.
+   The migration test found it. The comment is one line now.
+
+**Left undone deliberately.** No token-to-tenant mapping. The bearer allowlist
+authenticates a caller, not a tenant, so an owned document is unreachable through
+the API by anyone including its owner — honest while every document is shared,
+inadequate the day the first upload lands, and a product decision rather than an
+engineering one.
