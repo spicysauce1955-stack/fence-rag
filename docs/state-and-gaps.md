@@ -1029,10 +1029,31 @@ evaluation report states what each would have to prove.
   and never touched. An unparseable snapshot, or a failing root query, sets
   `unsafe`, deletes nothing and exits 1: an unrepairable obligation-3 break is
   worth more than any disk. Measured on the real tree, stable across three runs:
-  40,199 files / 5.17 GB, of which 9,888 are in scope, and **175 orphans /
+  40,200 files / 5.17 GB, of which 9,889 are in scope, and **176 orphans /
   145.0 MB** — 120 stale region crops whose element ordinals moved in a
-  re-extraction, 55 uncited crop-cache renders, zero page images and zero
+  re-extraction, 56 uncited crop-cache renders, zero page images and zero
   table-candidate crops. `--apply` has not been run against the real store.
+
+  **Four ways it could have deleted something it should not**, found by an
+  adversarial pass on the day it landed and closed the same day. (i) It **raced a
+  running ingest**: `ingest` renders every page image and region crop in a worker
+  and commits the rows only when the parent consumes the future, so with 10
+  workers there are always ~9 documents' worth of PNGs that no row names yet —
+  and while a page image self-heals, a **region crop does not**, because
+  `retrieval.search` and `get_region` return `region_image_path` verbatim and
+  re-crop only when the column is NULL. Closed three ways: `--apply` refuses
+  while `extraction_runs` holds a row with no `finished_at`; a file whose mtime
+  is newer than the moment the roots were read is kept as `too_young_to_judge`;
+  and the path and digest roots are re-read before the first delete, so a row
+  committed *during* the walk still rescues its file (`became_reachable`).
+  (ii) `remove_derived_file`'s guard was "inside `workspace/`", not "inside the
+  derived tree", and a `..` satisfies the first while walking out of the second —
+  `workspace/derived/../indexes/evidence.db` deleted the store, and
+  `workspace/snapshots/` was equally reachable. (iii) `workspace/tests/` was not a
+  text root, and the 44 `table-candidates` crops the seven tracked
+  `agent-read-*.json` files name were surviving on **one** other root.
+  (iv) An absent `workspace/snapshots/` read as "no snapshots exist" rather than
+  as a tree this collector cannot judge; it now goes unsafe.
 
 ---
 
