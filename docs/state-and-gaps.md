@@ -607,9 +607,9 @@ What it cannot check, stated in the module itself: **structural validity is
 testable, semantic correspondence is not.** Every check passes on a snapshot that
 attributes the wrong depth to the wrong post.
 
-### G37 — `stock_length` extracted — CLOSED (A5, obligation 14)
+### G37 — `stock_length` extracted — EXTRACTION closed (A5), PUBLICATION open
 
-54 facts. **The conditional case obligation 14 names is in the store**: 192 in for
+62 facts. **The conditional case obligation 14 names is in the store**: 192 in for
 White, 144 in for Blend, which at a 97" maximum spacing is the difference between
 a rail running continuously through an intermediate post and one cut per bay.
 
@@ -622,6 +622,32 @@ name *"Picket Style"*.
 
 **No stock length is stated for a picket, board or plank anywhere in the corpus.**
 Obligation 14's continuity derivation applies to rails, and to nothing else here.
+
+**Obligation 14 is not closed, and the entry title used to say it was.** The
+obligation reads *"A **part publishes** its manufactured `stock_length` where a
+document states one."* Extraction is done; publication is not, and the store is
+now the only place that data exists. Measured 2026-08-28: `stock_length_in` is the
+**only** fact type in the store carrying `condition_basis = 'stated'` — all 59
+conditioned rows of it, against 0 stated rows for every other type — so it is the
+best-curated knowledge this platform holds, and it reaches the wire in no form at
+all. Not as a value and not as a gap.
+
+The route is `Part.nominal_length_mm` (`knowledge-datamodel.md` §9.2: *"every
+catalogue prints it and it is true"* — publish it, but it does not yet constrain
+layout). It cannot travel as a `ParameterTable` row instead: `PARAMETER_OF` maps
+three parameters (`footing_depth_in`, `footing_diameter_in`, `post_spacing_in`)
+and `stock_length_in` is not one, and §3.8.1's unconditioned-fallback tier does
+not apply either — measured, **0** facts in this store are `stated` *and*
+unconditioned *and* mapped to a published parameter, so there is no legal
+unconditioned row to publish today. `Part` is blocked twice over: on candidate C3
+(whether a `PanelSpec` member edge is a "value"), and on the absence of any
+part-type spine, which obligation 5 requires every published part type to resolve
+through.
+
+Recorded rather than worked around. Emitting a `Gap` for it was considered and
+rejected: a `Gap`'s subject is knowledge missing for a *planning decision*, and
+"this platform has not built `Part` yet" is a roadmap item, which belongs in
+`docs/integration/conversation.md` and not in a data channel.
 
 ### G32 — `lang` is recorded, and none of it is measured — CLOSED (A4)
 
