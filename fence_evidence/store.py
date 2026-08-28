@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,7 +18,7 @@ from typing import Iterable
 from .ids import element_id_for, page_id_for, version_id_for
 from .model import ExtractedDocument
 from .lang import detect_lang
-from .tenancy import TenantLeak, validate_tenant
+from .tenancy import TenantLeak, validate_owner
 from .paths import EVIDENCE_DB, ensure_writable
 
 SCHEMA_VERSION = 7
@@ -985,7 +986,7 @@ def upsert_document(conn: sqlite3.Connection, manifest_row: dict) -> str:
     doc_id = manifest_row["doc_id"]
     owner = manifest_row.get("owner_tenant")
     if owner is not None:
-        validate_tenant(owner)
+        validate_owner(owner)
 
     # Obligation 7. Ownership is the one field this upsert will not update.
     # Nine fields are refreshed from the manifest on conflict because a
@@ -1275,12 +1276,41 @@ MERGE_TYPES = {"paragraph", "list", "caption", "table_text", "drawing_label"}
 # tables and OCR paragraphs that actually hold the answer.
 UNIT_EXCLUDED_TYPES = {"heading"}
 
+# --- R1, the heading fallback (OFF by default) ------------------------------
+#
+# `workspace/reports/projection-relevance-audit.md` F1 measured the unintended
+# consequence of the exclusion above: heading text reaches the index ONLY
+# through the heading_path column of units beneath the heading, so a heading
+# with no unit under it on its own page is unreachable by any route, and a page
+# whose every element is a heading or a figure is absent from the index
+# entirely.
+#
+# R1 is the audit's narrow remedy: project a heading as a unit *only* when no
+# other unit on that page would carry it in `heading_path`.  A fallback, not a
+# re-admission -- the BM25 problem the exclusion fixed comes back only for the
+# headings that are otherwise invisible.
+#
+# It is off by default and stays off until the measurement says otherwise; see
+# `docs/state-and-gaps.md`.  Set `heading_fallback=True`, or the environment
+# variable below, to build the projection with it.  The keyword wins over the
+# environment.  There is deliberately no CLI flag.
+HEADING_FALLBACK_ENV = "FENCE_HEADING_FALLBACK"
+_TRUTHY = {"1", "true", "yes", "on"}
+
+
+def heading_fallback_enabled(explicit: bool | None = None) -> bool:
+    """Resolve the R1 switch: keyword first, then environment, then off."""
+    if explicit is not None:
+        return bool(explicit)
+    return os.environ.get(HEADING_FALLBACK_ENV, "").strip().lower() in _TRUTHY
+
 
 def _unit_text(row: sqlite3.Row) -> str:
     return (row["text"] or "").strip() or (row["ocr_text"] or "").strip()
 
 
-def build_retrieval_units(conn: sqlite3.Connection, *, document_id: str | None = None) -> int:
+def build_retrieval_units(conn: sqlite3.Connection, *, document_id: str | None = None,
+                          heading_fallback: bool | None = None) -> int:
     """(Re)build the searchable projection from canonical elements.
 
     Safe to run at any time: it derives everything from ``elements`` and never
@@ -1301,7 +1331,13 @@ def build_retrieval_units(conn: sqlite3.Connection, *, document_id: str | None =
     every version row and this join changes nothing; measured on the live store,
     all 10,886 units rebuild byte-identically. `tests/test_idempotency.py` is
     the standing guard.
+
+    ``heading_fallback`` is the audit's R1, off unless asked for -- see
+    ``heading_fallback_enabled``.  With it on, a second pass over the same
+    current-edition elements adds one unit per heading that no unit on its own
+    page carries in ``heading_path``.  With it off not a byte changes.
     """
+    fallback = heading_fallback_enabled(heading_fallback)
     if document_id:
         old = [r[0] for r in conn.execute(
             "SELECT unit_id FROM retrieval_units WHERE document_id=?", (document_id,))]
@@ -1379,8 +1415,63 @@ def build_retrieval_units(conn: sqlite3.Connection, *, document_id: str | None =
                     flush()
             buffer.append(row)
         flush()
+        if fallback:
+            total += _project_uncarried_headings(conn, doc_id, meta, built)
     conn.commit()
     return total
+
+
+def _project_uncarried_headings(conn: sqlite3.Connection, doc_id: str,
+                                meta: sqlite3.Row, built: str) -> int:
+    """R1: one unit per heading that no unit on its own page carries.
+
+    Runs after the document's ordinary units exist, because "carried" is a
+    property of the finished page: a heading is reachable when some unit on the
+    same (version, page) lists its text in ``heading_path``.  Judged per page,
+    which is R1 as written -- a heading whose only body text sits on the next
+    page is projected, because nothing on *its* page names it.
+
+    The unit's own ``heading_path`` drops the trailing entry, which is the
+    heading itself: an element's path includes it, and leaving it in would put
+    the same words in both FTS columns.  That double count is precisely the
+    defect that argued against R2, and it does not become acceptable just
+    because the unit is the heading.
+    """
+    carried: dict[tuple[str, int], set[str]] = {}
+    for row in conn.execute("""SELECT version_id, page_no, heading_path
+                                 FROM retrieval_units WHERE document_id=?""",
+                            (doc_id,)):
+        key = (row["version_id"], row["page_no"])
+        carried.setdefault(key, set()).update(json.loads(row["heading_path"] or "[]"))
+
+    rows = conn.execute("""SELECT e.* FROM elements e
+                           JOIN document_versions v ON v.version_id = e.version_id
+                           WHERE e.document_id=? AND e.element_type='heading' AND """
+                        + CURRENT_EDITION_PREDICATE
+                        + " ORDER BY e.version_id, e.page_no, e.ordinal",
+                        (doc_id,)).fetchall()
+    added = 0
+    for el in rows:
+        text = _unit_text(el)
+        if not text:
+            continue
+        if text in carried.get((el["version_id"], el["page_no"]), ()):
+            continue
+        path = json.loads(el["heading_path"] or "[]")
+        if path and path[-1] == text:
+            path = path[:-1]
+        cur = conn.execute("""INSERT INTO retrieval_units(document_id, version_id,
+            page_no, element_id, element_ids, element_type, text, text_source,
+            heading_path, bbox, built_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+            (doc_id, el["version_id"], el["page_no"], el["element_id"],
+             json.dumps([el["element_id"]]), el["element_type"], text,
+             el["text_source"], json.dumps(path), el["bbox"], built))
+        conn.execute("""INSERT INTO retrieval_fts(rowid, text, heading_path, title,
+            manufacturer, doc_type) VALUES (?,?,?,?,?,?)""",
+            (cur.lastrowid, text, " > ".join(path), meta["title"] or "",
+             meta["manufacturer"] or "", meta["doc_type"] or ""))
+        added += 1
+    return added
 
 
 def stats(conn: sqlite3.Connection) -> dict:

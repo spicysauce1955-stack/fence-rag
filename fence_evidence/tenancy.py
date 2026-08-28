@@ -81,6 +81,19 @@ SHARED = None
 RESERVED_NAMES = frozenset({"shared"})
 RESERVED_PREFIXES = ("mfr/",)
 
+# `default` is a THIRD reserved name, but only on the ownership side, and the
+# asymmetry is deliberate. `cli.py` builds the operator's global snapshot with
+# `--tenant default`, and the one published snapshot -- 83a227d4 -- carries
+# `"tenant": "default"` inside its hashed members. Renaming it would change that
+# id and break obligation 1's continuity for a naming tidy-up, so `default`
+# stays legal to BUILD as.
+#
+# What must not happen is a real tenant OWNING documents under that name: its
+# private uploads would then appear in the build everybody reads as the shared
+# one, which is the same collision `shared` is reserved to prevent. So the name
+# is refused where ownership is recorded and allowed where snapshots are built.
+RESERVED_OWNERS = RESERVED_NAMES | {"default"}
+
 
 class TenantLeak(RuntimeError):
     """One tenant's data was about to reach another's. Raised, never logged.
@@ -107,6 +120,21 @@ def validate_tenant(tenant) -> str:
         if tenant.startswith(prefix):
             raise ValueError(f"tenant {tenant!r} is in the reserved "
                              f"{prefix!r} namespace (contract.md §2.1)")
+    return tenant
+
+
+def validate_owner(tenant) -> str:
+    """The tenant id, for the OWNERSHIP side. Stricter than `validate_tenant`.
+
+    See `RESERVED_OWNERS`: `default` may build a snapshot and may not own a
+    document, because the operator's global build already answers to that name.
+    """
+    validate_tenant(tenant)
+    if tenant in RESERVED_OWNERS:
+        raise ValueError(
+            f"tenant {tenant!r} may not own a document: it is the name the "
+            f"operator's global snapshot is built under, so an upload owned by "
+            f"it would appear in the build everyone reads as shared")
     return tenant
 
 

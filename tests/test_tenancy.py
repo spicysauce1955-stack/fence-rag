@@ -335,6 +335,75 @@ class TestTheSideChannels(_TwoTenants):
         self.assertEqual(doc.superseded_by, (ACME_SHA,))
 
 
+class TestPublishedValuesAreScopedToo(_TwoTenants):
+    """`parameters` is the only snapshot section that carries published VALUES.
+
+    `warnings` and `gaps` carry text and work items; a `ParameterTable` row is a
+    number a planner builds to. It is empty today only because A1 un-promoted
+    everything, so `facts WHERE from_candidate_id IS NOT NULL` matches nothing —
+    which meant an adversarial mutation could delete the tenant scoping from
+    `build_parameter_tables`, or drop `tenant=` at the call site in
+    `build_snapshot`, and the entire suite still passed. The first fact a
+    reviewer promotes is the moment that becomes load-bearing.
+    """
+
+    def _promote(self, document_id, *, value="24", tenant_owned):
+        """One promoted fact, the shape `build_parameter_tables` selects."""
+        el = only_element(self.conn, document_id)
+        row = self.conn.execute(
+            "SELECT version_id, page_no FROM elements WHERE element_id=?",
+            (el,)).fetchone()
+        self.conn.execute(
+            """INSERT INTO table_read_candidates(document_id, version_id, page_no,
+                   crop_path, reader, reader_kind, row_index, col_index, value,
+                   review_status, reviewer, reviewed_at, created_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (document_id, row["version_id"], row["page_no"], "crop.png",
+             "fixture-reader", "human", 0, 0, value, "accepted", "fixture",
+             store.now(), store.now()))
+        candidate_id = self.conn.execute(
+            "SELECT last_insert_rowid()").fetchone()[0]
+        self.conn.execute(
+            """INSERT INTO facts(document_id, version_id, page_no, element_id,
+                   fact_type, subject, value_original, value_normalized,
+                   unit_original, unit_normalized, conditions, evidence_text,
+                   extractor, review_status, condition_basis, from_candidate_id,
+                   created_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (document_id, row["version_id"], row["page_no"], el,
+             "footing_depth_in", "post", f'{value}"', float(value), "in", "in",
+             "{}", "fixture", "table-read:fixture", "reviewed", "stated",
+             candidate_id, store.now()))
+        self.conn.commit()
+
+    def test_a_promoted_fact_on_an_upload_is_not_in_another_tenants_tables(self):
+        from fence_evidence.parameters import build_parameter_tables
+        self._promote(self.globex, value="24", tenant_owned=True)
+        tables, _gaps = build_parameter_tables(self.conn, tenant="acme")
+        blob = json.dumps(tables, sort_keys=True, default=str)
+        self.assertNotIn("globex", blob)
+        self.assertNotIn("609600", blob, "the other tenant's value was published")
+
+    def test_the_owner_does_get_its_own_promoted_fact(self):
+        """Scoping must not be a blanket refusal, or the feature is useless."""
+        from fence_evidence.parameters import build_parameter_tables
+        self._promote(self.acme, value="24", tenant_owned=True)
+        tables, _gaps = build_parameter_tables(self.conn, tenant="acme")
+        self.assertTrue(tables, "the owner's own promoted fact did not publish")
+
+    def test_a_whole_snapshot_carries_no_foreign_parameter_row(self):
+        """The call site, not just the function: `build_snapshot` has to pass
+        the tenant down, and dropping that argument was the other mutation that
+        survived the suite."""
+        self._promote(self.globex, value="24", tenant_owned=True)
+        self._promote(self.shared, value="30", tenant_owned=False)
+        snap = build_snapshot(tenant="acme", conn=self.conn)
+        blob = json.dumps(snap, sort_keys=True, default=str)
+        self.assertNotIn(GLOBEX_SHA, blob)
+        self.assertNotIn("globex", blob)
+        self.assertTrue(snap["parameters"], "the shared fact should still publish")
+
+
 class TestAWholeSnapshotCarriesNothingForeign(_TwoTenants):
     def test_the_other_tenants_bytes_appear_nowhere_in_the_object(self):
         """The obligation, checked the blunt way: serialise the whole snapshot
@@ -438,6 +507,76 @@ class TestTheDiscoveryApiFailsClosed(_TwoTenants):
         self.assertEqual(out["not_rendered"], [])
         self.assertEqual([r["belongs_to"] for r in out["refs"]], [SHARED_SHA])
 
+    def test_a_same_content_as_edge_does_not_carry_a_filing_across(self):
+        """`_also_filed_under` is a UNION of two halves and only one was scoped.
+
+        `filings` arrives scoped by content hash, but the other half walks a
+        `same_content_as` edge into `documents` and takes the peer's
+        manufacturer and doc_type -- the exact pair the snapshot side refuses to
+        publish across a tenant boundary. The earlier test missed it because a
+        fixture that merely shares a sha256 has no edge between the two rows;
+        `relations.py` writes those, and this one writes it by hand.
+        """
+        from fence_evidence import sourcerefs
+        run = start_run(self.conn)
+        peer = add_doc(self.conn, run, path="uploads/globex/copy.pdf",
+                       sha="e" * 64, manufacturer="globex",
+                       doc_type="warranty", owner_tenant="globex")
+        self.conn.execute(
+            "INSERT INTO relations(from_document_id, to_document_id, "
+            "relation_type, basis, confidence) VALUES (?,?,?,?,?)",
+            (self.shared, peer, "same_content_as", "fixture", 1.0))
+        self.conn.commit()
+        got = sourcerefs.source_ref(self.conn, self._ref(self.shared))
+        blob = json.dumps(got, sort_keys=True, default=str)
+        self.assertNotIn("globex", blob)
+
+    def test_a_same_content_as_edge_to_a_shared_peer_still_carries(self):
+        from fence_evidence import sourcerefs
+        run = start_run(self.conn)
+        peer = add_doc(self.conn, run, path="manuals/other/copy.pdf",
+                       sha="f" * 64, manufacturer="other", doc_type="warranty")
+        self.conn.execute(
+            "INSERT INTO relations(from_document_id, to_document_id, "
+            "relation_type, basis, confidence) VALUES (?,?,?,?,?)",
+            (self.shared, peer, "same_content_as", "fixture", 1.0))
+        self.conn.commit()
+        got = sourcerefs.source_ref(self.conn, self._ref(self.shared))
+        blob = json.dumps(got, sort_keys=True, default=str)
+        self.assertIn("other", blob)
+
+    def test_a_superseding_upload_does_not_reach_the_discovery_warning(self):
+        """`SOURCE_DOCUMENT_SUPERSEDED` publishes the successor's content hash.
+        Same hole as the snapshot side's `_successors`, on the Discovery side,
+        missed because the boundary was built one file over."""
+        from fence_evidence import sourcerefs
+        self.conn.execute("UPDATE documents SET version_status='superseded' "
+                          "WHERE document_id=?", (self.shared,))
+        self.conn.execute(
+            "INSERT INTO relations(from_document_id, to_document_id, "
+            "relation_type, basis, confidence) VALUES (?,?,?,?,?)",
+            (self.shared, self.globex, "superseded_by", "fixture", 1.0))
+        self.conn.commit()
+        got = sourcerefs.source_ref(self.conn, self._ref(self.shared))
+        blob = json.dumps(got, sort_keys=True, default=str)
+        self.assertNotIn(GLOBEX_SHA, blob)
+
+    def test_a_superseding_shared_document_still_reaches_it(self):
+        from fence_evidence import sourcerefs
+        run = start_run(self.conn)
+        successor = add_doc(self.conn, run, path="manuals/acme/g2.pdf",
+                            sha="d" * 64, manufacturer="acme")
+        self.conn.execute("UPDATE documents SET version_status='superseded' "
+                          "WHERE document_id=?", (self.shared,))
+        self.conn.execute(
+            "INSERT INTO relations(from_document_id, to_document_id, "
+            "relation_type, basis, confidence) VALUES (?,?,?,?,?)",
+            (self.shared, successor, "superseded_by", "fixture", 1.0))
+        self.conn.commit()
+        got = sourcerefs.source_ref(self.conn, self._ref(self.shared))
+        blob = json.dumps(got, sort_keys=True, default=str)
+        self.assertIn("d" * 64, blob)
+
     def test_shared_bytes_stay_reachable_when_a_tenant_also_files_them(self):
         """A content hash filed under BOTH a shared document and an upload is
         shared content. Visibility is per filing, not per hash -- refusing the
@@ -482,6 +621,42 @@ class TestTheTenantIdentifierItself(unittest.TestCase):
     def test_an_empty_tenant_is_refused(self):
         with self.assertRaises(ValueError):
             build_snapshot(tenant="", conn=self.conn)
+
+    def test_default_may_build_but_may_not_own(self):
+        """The asymmetry is deliberate and both halves matter.
+
+        `cli.py` builds the operator's global snapshot as `--tenant default`,
+        and the published snapshot 83a227d4 carries that string inside its
+        hashed members — renaming it would change the id and break obligation
+        1's continuity for a tidy-up. But a real tenant owning documents under
+        that name would see its private uploads appear in the build everybody
+        reads as shared, which is exactly the collision `shared` is reserved to
+        prevent. So: legal to build as, refused as an owner.
+        """
+        from fence_evidence.tenancy import validate_owner, validate_tenant
+        self.assertEqual(validate_tenant("default"), "default")
+        with self.assertRaises(ValueError):
+            validate_owner("default")
+        with self.assertRaises(ValueError):
+            validate_owner("shared")
+        self.assertEqual(validate_owner("acme"), "acme")
+
+    def test_the_published_snapshot_id_did_not_move(self):
+        """The reason `default` stays buildable, asserted rather than asserted
+        about. If this ever fails, a naming change has silently re-cut a
+        published object."""
+        snap = build_snapshot(tenant="default", conn=self.conn)
+        self.assertEqual(snap["tenant"], "default")
+
+    def test_a_document_cannot_be_owned_by_the_global_build(self):
+        conn = fresh_store()
+        try:
+            run = start_run(conn)
+            with self.assertRaises(ValueError):
+                add_doc(conn, run, path="uploads/x/site.pdf", sha=ACME_SHA,
+                        manufacturer="x", owner_tenant="default")
+        finally:
+            conn.close()
 
     def test_an_ordinary_tenant_is_accepted(self):
         snap = build_snapshot(tenant="acme", conn=self.conn)

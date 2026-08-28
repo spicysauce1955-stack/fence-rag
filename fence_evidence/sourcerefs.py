@@ -128,7 +128,7 @@ def source_ref(conn: sqlite3.Connection, ref_id: str, *, dpi: int = 200,
         "page_no": locus.page_no,
         "text": _text(conn, locus),
         "image": image,
-        "warnings": _warnings(conn, locus, filings, image_problem),
+        "warnings": _warnings(conn, locus, filings, image_problem, tenant),
     }
 
 
@@ -295,7 +295,8 @@ def _subset_of(row) -> str:
 
 
 def _warnings(conn: sqlite3.Connection, locus: refs.Locus,
-              filings: list[sqlite3.Row], image_problem: dict | None) -> list[dict]:
+              filings: list[sqlite3.Row], image_problem: dict | None,
+              tenant: str | None = None) -> list[dict]:
     """Every `SOURCE_*` code that applies to this ref, sorted by code.
 
     Sorted because this is published into an immutable snapshot: two builds
@@ -335,7 +336,7 @@ def _warnings(conn: sqlite3.Connection, locus: refs.Locus,
         status = (row["version_status"] or "").lower()
         if status == "superseded":
             is_superseded = True
-            superseded_by |= _successors(conn, doc_id)
+            superseded_by |= _successors(conn, doc_id, tenant)
         elif status == "unknown":
             status_unknown = True
         if (row["version_status_basis"] or "") == _FILENAME_BASIS:
@@ -387,7 +388,7 @@ def _warnings(conn: sqlite3.Connection, locus: refs.Locus,
                       "params": {"confidence": _round(low_conf)
                                  if low_conf is not None else None}})
 
-    also = _also_filed_under(conn, filings)
+    also = _also_filed_under(conn, filings, tenant)
     if also:
         found.append({"code": SOURCE_CONTENT_DUPLICATED,
                       "params": {"also_filed_under": also}})
@@ -398,7 +399,8 @@ def _warnings(conn: sqlite3.Connection, locus: refs.Locus,
     return sorted(found, key=lambda w: w["code"])
 
 
-def _successors(conn: sqlite3.Connection, document_id: str) -> set[str]:
+def _successors(conn: sqlite3.Connection, document_id: str,
+                tenant: str | None = None) -> set[str]:
     """Content hashes of the documents that supersede this one.
 
     A `superseded_by` edge reads subject -> object: the *from* side is the
@@ -409,17 +411,28 @@ def _successors(conn: sqlite3.Connection, document_id: str) -> set[str]:
     Content hashes, not document ids: `belongs_to` is a content hash
     everywhere else on this wire, and a document id is an internal handle
     Planning cannot resolve to anything.
+
+    Obligation 7. This publishes the content hash of a document OTHER than the
+    one the ref names, and it is reached by following an edge rather than by
+    minting a reference -- so the visibility check in `source_ref` does not
+    cover it. `snapshot.py`'s `_successors` had the identical hole and was
+    scoped when the boundary was built; this one was missed because it lives on
+    the Discovery side. A successor that belongs to another tenant is that
+    tenant's content hash, published to whoever asked.
     """
     return {r["sha256"] for r in conn.execute(
-        """SELECT DISTINCT v.sha256
+        f"""SELECT DISTINCT v.sha256
              FROM relations r
              JOIN document_versions v ON v.document_id = r.to_document_id
-            WHERE r.from_document_id = ? AND r.relation_type = 'superseded_by'""",
-        (document_id,))}
+             JOIN documents d         ON d.document_id = r.to_document_id
+            WHERE r.from_document_id = ? AND r.relation_type = 'superseded_by'
+              AND {visible_sql('d')}""",
+        (document_id, tenant))}
 
 
 def _also_filed_under(conn: sqlite3.Connection,
-                      filings: list[sqlite3.Row]) -> list[dict]:
+                      filings: list[sqlite3.Row],
+                      tenant: str | None = None) -> list[dict]:
     """`{manufacturer, doc_type}` for every other filing of these bytes.
 
     registry §5: the class is a property of the bytes, the filing is a
@@ -428,17 +441,24 @@ def _also_filed_under(conn: sqlite3.Connection,
     and their `same_content_as` peers. Taking only the edges would report
     nothing when both filings point at each other and neither is "other"; the
     first filing is dropped because it is the one the ref is already about.
+
+    Obligation 7. `filings` arrives already scoped, but the `same_content_as`
+    half of the union does not -- it walks an edge into `documents` and takes
+    the peer's manufacturer and doc_type, which is exactly the pair the
+    snapshot side refuses to publish across a tenant boundary. Two halves of
+    one union, and only one of them was scoped.
     """
     own = [r["document_id"] for r in filings]
     group: dict[str, tuple] = {}
     for row in filings:
         for peer in conn.execute(
-                """SELECT d.document_id, d.manufacturer, d.doc_type
+                f"""SELECT d.document_id, d.manufacturer, d.doc_type
                      FROM relations r
                      JOIN documents d ON d.document_id = r.to_document_id
                     WHERE r.from_document_id = ?
-                      AND r.relation_type = 'same_content_as'""",
-                (row["document_id"],)):
+                      AND r.relation_type = 'same_content_as'
+                      AND {visible_sql('d')}""",
+                (row["document_id"], tenant)):
             group[peer["document_id"]] = (peer["manufacturer"], peer["doc_type"])
     for row in filings:
         group.setdefault(row["document_id"],
