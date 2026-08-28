@@ -54,6 +54,7 @@ def _schema(conn: sqlite3.Connection) -> None:
         CREATE TABLE table_read_candidates (
             candidate_id TEXT PRIMARY KEY, crop_path TEXT, crop_sha256 TEXT);
         CREATE TABLE table_reviews (review_id TEXT PRIMARY KEY, crop_sha256 TEXT);
+        CREATE TABLE extraction_runs (run_id TEXT PRIMARY KEY, finished_at TEXT);
     """)
     conn.commit()
 
@@ -316,6 +317,102 @@ class TestGuards(GCFixture):
         with self.assertRaises(CorpusWriteError):
             gcmod.remove_derived_file(victim)
         self.assertTrue(victim.is_file())
+
+    def test_a_dotdot_out_of_the_derived_tree_is_refused(self):
+        """`ensure_writable` is necessary and not sufficient. It asserts only
+        "somewhere under workspace/", which a `..` satisfies while walking
+        straight out of the derived store — into `workspace/indexes/evidence.db`
+        or, worse, `workspace/snapshots/`, the one thing here that cannot be
+        regenerated. Verified before the fix: this deleted the store."""
+        victim = _write(self.tmp / "indexes" / "evidence.db")
+        escape = self.derived / ".." / "indexes" / "evidence.db"
+        with self.assertRaises(CorpusWriteError):
+            gcmod.remove_derived_file(escape, self.derived)
+        self.assertTrue(victim.is_file())
+
+    def test_a_snapshot_beside_the_derived_tree_is_refused(self):
+        victim = _write(self.snapshots / "deadbeef.json")
+        with self.assertRaises(CorpusWriteError):
+            gcmod.remove_derived_file(victim, self.derived)
+        self.assertTrue(victim.is_file())
+
+    def test_a_file_inside_the_derived_tree_is_deleted(self):
+        """The guard must not be a blanket refusal."""
+        doomed = _write(self.derived / "doc-aaaa" / "pages" / "0001.png")
+        gcmod.remove_derived_file(doomed, self.derived)
+        self.assertFalse(doomed.exists())
+
+    def test_an_unfinished_extraction_run_stops_the_collection(self):
+        """`ingest` renders every page image and region crop in a worker and
+        commits the rows only when the parent consumes the future, so with 10
+        workers there are always ~9 documents' worth of PNGs on disk that no
+        row names yet. Deleting a region crop is not recoverable: `get_region`
+        re-crops only when the column is NULL, never when it names a file that
+        is gone."""
+        orphan = _write(self.derived / "doc-aaaa" / "regions" / "p1-0-x.png")
+        self.conn.execute(
+            "INSERT INTO extraction_runs(run_id, finished_at) VALUES ('run-1', NULL)")
+        self.conn.commit()
+        report = self.scan(apply=True)
+        self.assertTrue(report["unsafe"])
+        self.assertEqual(report["runs_in_flight"], ["run-1"])
+        self.assertEqual(report["deleted_files"], 0)
+        self.assertTrue(orphan.is_file())
+
+    def test_a_finished_run_does_not_stop_it(self):
+        _write(self.derived / "doc-aaaa" / "regions" / "p1-0-x.png")
+        self.conn.execute("INSERT INTO extraction_runs(run_id, finished_at) "
+                          "VALUES ('run-1', '2026-01-01T00:00:00Z')")
+        self.conn.commit()
+        report = self.scan(apply=True)
+        self.assertFalse(report["unsafe"])
+        self.assertEqual(report["deleted_files"], 1)
+
+    def test_a_file_written_after_the_roots_were_read_is_kept(self):
+        """The clock half of the race. A file younger than the root read cannot
+        be judged against roots that predate it."""
+        import time as _t
+        fresh = _write(self.derived / "doc-aaaa" / "regions" / "p1-0-x.png")
+        os.utime(fresh, (_t.time() + 3600, _t.time() + 3600))
+        report = self.scan(apply=True)
+        self.assertEqual(report["too_young_to_judge"], 1)
+        self.assertEqual(report["orphan_files"], 0)
+        self.assertTrue(fresh.is_file())
+
+    def test_a_row_committed_during_the_walk_saves_its_file(self):
+        """The half a clock cannot cover. `collect` re-reads the path roots
+        before deleting, so a row that landed mid-walk still rescues its file."""
+        victim = _write(self.derived / "doc-aaaa" / "regions" / "p1-0-x.png")
+        real_walk = gcmod.os.walk
+        conn = self.conn
+        rel = self.rel
+
+        def walk_then_commit(*a, **kw):
+            out = list(real_walk(*a, **kw))
+            conn.execute("INSERT INTO elements(element_id, region_image_path) "
+                         "VALUES ('e1', ?)", (rel(victim),))
+            conn.commit()
+            return iter(out)
+
+        gcmod.os.walk = walk_then_commit
+        try:
+            report = self.scan(apply=True)
+        finally:
+            gcmod.os.walk = real_walk
+        self.assertEqual(report["orphan_files"], 1)
+        self.assertEqual(report["became_reachable"], 1)
+        self.assertEqual(report["deleted_files"], 0)
+        self.assertTrue(victim.is_file())
+
+    def test_a_missing_snapshot_directory_is_unsafe_not_empty(self):
+        """Absent is not "no snapshots exist": `workspace/snapshots/` is tracked
+        in git, so its absence means a sparse or partial tree — and then every
+        cached crop of every published citation reads as an orphan."""
+        _write(self.derived / "crops" / "aa" / "aaaaaaaaaaaaaaaa-200-ff.png")
+        shutil.rmtree(self.snapshots)
+        report = self.scan(apply=True)
+        self.assertTrue(report["unsafe"])
+        self.assertEqual(report["deleted_files"], 0)
 
     def test_an_empty_derived_store_is_a_no_op(self):
         report = self.scan(apply=True)

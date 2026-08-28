@@ -51,10 +51,11 @@ import hashlib
 import os
 import re
 import sqlite3
+import time
 from pathlib import Path
 
 from .paths import (CATALOG_DIR, DERIVED_DIR, REPO_ROOT, REPORTS_DIR,
-                    CorpusWriteError, ensure_writable, rel)
+                    TESTS_DIR, CorpusWriteError, ensure_writable, rel)
 
 # The four subtrees this pipeline writes and can re-derive. `extract.py` writes
 # the first two (`ddir / "pages"`, `ddir / "regions"`), `noa_tables.export_crops`
@@ -140,6 +141,22 @@ def referenced_digests(conn: sqlite3.Connection) -> tuple[set, list]:
     return out, problems
 
 
+def unfinished_runs(conn: sqlite3.Connection) -> list:
+    """Extraction runs with no `finished_at`. A running ingest is one of these.
+
+    `--apply` refuses while any exists. The store already holds the state, so
+    this needs no lock file: an ingest opens a run row first and closes it last.
+    A crashed run leaves one open forever, which is the right bias -- a person
+    then has to look, and looking is cheap next to an unrecoverable region crop.
+    """
+    try:
+        return [r[0] for r in conn.execute(
+            "SELECT run_id FROM extraction_runs WHERE finished_at IS NULL "
+            "ORDER BY run_id")]
+    except sqlite3.Error:
+        return []
+
+
 def _resolve(value: str) -> Path:
     """A stored path -- always repo-relative -- as an absolute path."""
     p = Path(value)
@@ -161,6 +178,15 @@ def published_cites(snapshot_dir: Path) -> tuple[set, list]:
     unreadable: list[dict] = []
     base = Path(snapshot_dir)
     if not base.is_dir():
+        # NOT the same as "no snapshots exist". `workspace/snapshots/` is
+        # tracked in git, so its absence means the tree is not the one this
+        # collector assumes -- a sparse checkout, a partial copy -- and every
+        # cached crop of every published citation would then read as an orphan.
+        # Report it the same way an unparseable snapshot is reported, so the
+        # run goes unsafe and deletes nothing.
+        unreadable.append({"path": rel(base),
+                           "error": "the snapshot directory does not exist; "
+                                    "published citations cannot be checked"})
         return refs, unreadable
 
     def walk(node, in_cites=False):
@@ -249,18 +275,35 @@ def _sha256_file(path: Path) -> str:
 
 
 # ------------------------------------------------------------------- deleting
-def remove_derived_file(path) -> Path:
-    """Unlink one file, through the read-only-corpus guard.
+def remove_derived_file(path, base=None) -> Path:
+    """Unlink one file, inside the derived tree, through the corpus guard.
 
-    `paths.ensure_writable` is the guard every write in this package goes
-    through, and its refusal semantics are exactly right for a delete: a path
-    that resolves outside `workspace/` raises `CorpusWriteError` and nothing
-    happens. Deletion therefore needed no new guard, only this caller.
+    `paths.ensure_writable` is necessary and NOT sufficient, and an earlier
+    version of this docstring claimed otherwise. It asserts only that the
+    resolved path is somewhere under `workspace/`, which a `..` component
+    satisfies while walking straight out of the derived store:
+
+        remove_derived_file("workspace/derived/../indexes/evidence.db")
+
+    deleted the store. `workspace/snapshots/*.json` -- the one thing here that
+    cannot be regenerated -- is equally reachable that way. `collect()`'s own
+    `os.walk` cannot produce such a path, so this was blast radius rather than
+    a live loss, but the function is module-public and the only test covered
+    the outside-`workspace/` case.
+
+    So the target must be under `base` as well: the corpus guard for "not the
+    read-only corpus", and this one for "not some other part of the workspace".
     """
+    root = Path(base) if base is not None else DERIVED_DIR
+    root = root.resolve()
     p = Path(path)
     if p.is_symlink():
         raise CorpusWriteError(f"refusing to delete through a symlink: {p}")
     target = ensure_writable(p)
+    if root != target and root not in target.parents:
+        raise CorpusWriteError(
+            f"refusing to delete {target}: it is not inside the derived store "
+            f"({root}). This collector removes derived images and nothing else.")
     target.unlink()
     return target
 
@@ -299,19 +342,34 @@ def collect(conn: sqlite3.Connection, *, apply: bool = False,
     ensure_writable(base)
     snaps = Path(snapshot_dir) if snapshot_dir is not None else SNAPSHOT_DIR
     if text_roots is None:
-        text_roots = (CATALOG_DIR, REPORTS_DIR, snaps)
+        # `TESTS_DIR` is here for the same stated reason as catalog and
+        # reports -- it records the provenance of the runs that produced the
+        # images -- and it is not optional. The seven tracked
+        # `agent-read-*.json` files name 44 `table-candidates` crops, and NONE
+        # of the 44 is in `table_read_candidates.crop_path` since G46's
+        # realign. Measured: all 44 survive on exactly one root, the text scan
+        # of `catalog/noa-table-candidates.jsonl`. Regenerate that catalog file
+        # any narrower and a database-only collector eats the images the
+        # calibration records point at.
+        text_roots = (CATALOG_DIR, REPORTS_DIR, TESTS_DIR, snaps)
 
+    # The moment the roots were read. Anything written after it is invisible to
+    # them by definition, so it cannot be judged an orphan. See `_RACE` below.
+    roots_read_at = time.time()
     paths_root, path_problems = referenced_paths(conn)
     digests, digest_problems = referenced_digests(conn)
     cites, unreadable = published_cites(snaps)
     from_text = text_references(base, text_roots)
+    in_flight = unfinished_runs(conn)
 
     report = {
         "derived_dir": rel(base),
         "applied": bool(apply),
-        "unsafe": bool(unreadable or path_problems or digest_problems),
+        "unsafe": bool(unreadable or path_problems or digest_problems
+                       or in_flight),
         "unreadable_snapshots": unreadable,
         "unreadable_roots": path_problems + digest_problems,
+        "runs_in_flight": in_flight,
         "roots": {
             "pages.page_image_path": 0,
             "elements.region_image_path": 0,
@@ -330,6 +388,8 @@ def collect(conn: sqlite3.Connection, *, apply: bool = False,
         "orphans": [],
         "by_kind": {},
         "symlinks_skipped": [],
+        "too_young_to_judge": 0,
+        "became_reachable": 0,
         "deleted_files": 0, "deleted_bytes": 0,
         "dirs_pruned": 0,
         "errors": [],
@@ -368,6 +428,29 @@ def collect(conn: sqlite3.Connection, *, apply: bool = False,
             report["in_scope_files"] += 1
             report["in_scope_bytes"] += size
 
+            # _RACE. `ingest` renders every page image and region crop inside a
+            # worker and the rows are inserted only when the parent consumes
+            # the future, so with 10 workers there are always ~9 documents'
+            # worth of PNGs on disk that no committed row names yet. Any of
+            # them rendered before the roots were read and committed after
+            # would be classified as an orphan here. A page image self-heals --
+            # `paths.resolve_asset` re-renders it -- but a REGION crop does
+            # not: `retrieval.search` and `get_region` return
+            # `region_image_path` verbatim and only re-crop when the column is
+            # NULL, never when it names a file that is gone. A search result
+            # would silently point at nothing.
+            #
+            # A file younger than the root read cannot be judged against roots
+            # that predate it. Keep it, and say so.
+            try:
+                if path.stat().st_mtime > roots_read_at:
+                    report["too_young_to_judge"] += 1
+                    report["reachable_files"] += 1
+                    report["reachable_bytes"] += size
+                    continue
+            except OSError:
+                pass
+
             resolved = path.resolve()
             reachable = resolved in paths_root or resolved in from_text
             if not reachable and cites:
@@ -392,10 +475,37 @@ def collect(conn: sqlite3.Connection, *, apply: bool = False,
         report["orphans"].append({"path": rel(path), "kind": kind, "bytes": size})
 
     if apply and not report["unsafe"]:
+        # Second half of _RACE, and the half a clock cannot cover: a row
+        # committed WHILE the walk ran makes a file reachable that was not when
+        # we looked. Re-read the path and digest roots and drop anything that
+        # has since acquired a claim. Four queries, against an unrecoverable
+        # region crop.
+        fresh_paths, fresh_problems = referenced_paths(conn)
+        fresh_digests, fresh_digest_problems = referenced_digests(conn)
+        if fresh_problems or fresh_digest_problems:
+            report["unsafe"] = True
+            report["unreadable_roots"] += fresh_problems + fresh_digest_problems
+        else:
+            still: list = []
+            for path, kind, size in orphans:
+                if path.resolve() in fresh_paths:
+                    report["became_reachable"] += 1
+                    continue
+                try:
+                    if fresh_digests and _sha256_file(path) in fresh_digests:
+                        report["became_reachable"] += 1
+                        continue
+                except OSError:
+                    report["became_reachable"] += 1
+                    continue
+                still.append((path, kind, size))
+            orphans = still
+
+    if apply and not report["unsafe"]:
         emptied: set[Path] = set()
         for path, _kind, size in orphans:
             try:
-                remove_derived_file(path)
+                remove_derived_file(path, base)
             except (OSError, CorpusWriteError) as exc:
                 report["errors"].append({"path": rel(path), "error": str(exc)})
                 continue
