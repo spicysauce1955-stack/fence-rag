@@ -108,6 +108,7 @@ python3 -m fence_evidence.cli snapshot --verify-stored   # do PUBLISHED snapshot
 python3 -m fence_evidence.cli backfill-spans --apply     # recover merged cells (G41)
 python3 -m fence_evidence.cli serve --token TOK  # the API behind Planning's screens
 python3 -m fence_evidence.cli promote-tables --revoke --apply  # un-promote what no person reviewed
+python3 -m fence_evidence.cli gc --derived       # orphaned derived images; --apply to delete
 python3 tests/run_tests.py                    # whole suite, stdlib only
 
 # the pre-existing dataset builders (they own their outputs; see below)
@@ -200,7 +201,7 @@ three Showtech China catalogs.
 ```
 corpus (read-only)          workspace/ (every output)
 manuals/ china/manuals/     catalog/   corpus-manifest.jsonl (one row per file)
-data/                       derived/   page images + region crops (4.9 GB, git-ignored)
+data/                       derived/   page images + region crops (5.0 GB, git-ignored)
         |                   indexes/   evidence.db (git-ignored)
         v                   reports/   audits, coverage, evaluation, review
    extract.py               tests/     evaluation results
@@ -233,6 +234,8 @@ rather than delete) · `dataset.py` (the hand-researched dataset's SHA-256 basel
 `crops.py` (the normative source-ref transform, **wired 2026-08-28** — `cropcache.py`
 renders through it and `sourcerefs.py` builds the Discovery read model on top) ·
 `reviews.py` (the human review loop) · `parameters.py` (the `ParameterTable` builder) ·
+`tenancy.py` (obligation 7 — one nullable column and one visibility rule; **added 2026-08-28**) ·
+`gc.py` (what in `workspace/derived/` nothing claims any more) ·
 `api.py` (`GET /source-refs/{id}`, `POST /source-refs:batch`, `POST /reviews`, behind a
 bearer allowlist) ·
 `refs.py` (the evidence identifier and its rebuildable inverse — one owner; the
@@ -275,6 +278,12 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   reach it, and `promote-tables --apply` is no longer a no-op. What remains true is that
   **`reviewer` is NULL on all 1,225 readings** — the mechanism exists and nobody has used
   it. Do not read "the loop exists" as "anything has been reviewed".
+- **Tenant isolation is enforced at the ref minter, not by a filter.** `documents.owner_tenant`
+  is the whole axis — NULL is shared, which is all 144 corpus documents — and
+  `SnapshotBuilder.source_ref` refuses to mint a citation into another tenant's document, so a
+  cross-tenant value is unpublishable rather than filtered. Two fields leak WITHOUT a ref:
+  `also_filed_as` and `superseded_by` publish facts about *other* documents. Both are scoped;
+  if you add a third such field, scope it. `docs/state-and-gaps.md` G48.
 - **`ref_id` embeds a bbox, and a re-extraction can move it.** A 0.02pt shift
   changes the id completely and `delete_version_rows()` removes the rows the old
   id named, so a toolchain upgrade breaks published citations retroactively and

@@ -27,7 +27,7 @@ Naming the layers is cheap. The rule in §2 is the part that earns its keep.
 |---|---|---|---|
 | **L1** | Raw | the corpus — 144 files, read-only, content-addressed | `cli fetch` |
 | **L2** | Canonical | what each page contained — 81,794 elements, boxes, images | `cli ingest` |
-| **L3** | Assertions | a value, its conditions, and where it was read — 1,714 facts | `cli facts --extract` |
+| **L3** | Assertions | a value, its conditions, and where it was read — 1,718 facts | `cli facts --extract` |
 | **L4** | Entities | the things a bill of materials names — parts, panels, slots | *nothing* |
 | **L5** | Published | the contract shapes, hashed and immutable | `cli snapshot --build` |
 
