@@ -11,7 +11,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from context import (ROOT, requires_facts,  # noqa: F401
+from context import (ROOT, requires_facts, requires_store,  # noqa: F401
                      requires_full_store)
 from fence_evidence.evaluate import (DEFAULT_INTERFACE, INTERFACES,
                                      evaluate_question,
@@ -213,6 +213,53 @@ class TestRoutedBlockIsSeparate(unittest.TestCase):
         self.assertEqual(s["questions"], 2)
         self.assertEqual(s["answerable"], 2)
         self.assertNotIn("gq-011", [r["id"] for r in out["results"] if r["passed"]])
+
+
+class TestARoutedQuestionIsNotJudgedAgainstTheClock(unittest.TestCase):
+    """A version question graded against `today` is not a benchmark.
+
+    `resolve` echoes the date it judged expiry against, so without a pinned
+    `as_of` two things go wrong at once: `workspace/reports/evaluation-report.md`
+    is a committed artifact that would change every day for no reason (G28), and
+    `gq-011` would silently start FAILING on 2029-03-14, when NOA 24-0117.05
+    expires and the correct answer stops being the answer the gold set records.
+    """
+
+    def _gq011(self):
+        from fence_evidence.evaluate import load_gold
+        for q in load_gold():
+            if q["id"] == "gq-011":
+                return q
+        self.fail("gq-011 is not in the gold set")
+
+    def test_the_resolve_question_pins_the_date_it_is_judged_against(self):
+        as_of = self._gq011().get("interface_input", {}).get("as_of")
+        self.assertTrue(as_of, "gq-011 routes to `resolve` and must pin `as_of`")
+        import re
+        self.assertRegex(as_of, r"^\d{4}-\d{2}-\d{2}$")
+
+    def test_the_pinned_date_is_before_the_expiry_the_answer_depends_on(self):
+        """The pin is only correct while it precedes 2029-03-13. Moving it past
+        that date changes the right answer, and this says so out loud."""
+        self.assertLess(self._gq011()["interface_input"]["as_of"], "2029-03-13")
+
+    @requires_store
+    def test_the_pin_actually_reaches_the_resolver(self):
+        """A pin nothing reads is decoration. Two different dates must give two
+        different verdicts, or the field is not plumbed through."""
+        from fence_evidence.retrieval import resolve_document_version
+        from fence_evidence.store import connect
+        conn = connect()
+        try:
+            pinned = resolve_document_version("23-0314.05", as_of="2026-08-28",
+                                              conn=conn)
+            later = resolve_document_version("23-0314.05", as_of="2029-06-01",
+                                             conn=conn)
+        finally:
+            conn.close()
+        self.assertEqual(pinned["active_basis_kind"], "inferred_in_force")
+        self.assertEqual(later["active_basis_kind"], "withdrawn")
+        self.assertIsNone(later["active"])
 
 
 if __name__ == "__main__":

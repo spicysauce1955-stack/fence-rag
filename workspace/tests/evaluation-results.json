@@ -5256,7 +5256,7 @@
       "interface": "resolve",
       "identifier": "23-0314.05",
       "active_document": "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf",
-      "active_basis": "newest member of the chain and not marked superseded",
+      "active_basis": "no member is marked active; inferred in force from an agreed expiration date 2029-03-13 still ahead of 2026-08-28, and nothing in the chain supersedes it",
       "chain_length": 4,
       "chain": [
         {

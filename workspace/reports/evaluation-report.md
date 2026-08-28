@@ -54,7 +54,7 @@ The search rows for these questions are unchanged and still appear in the by-cat
 #### gq-011 — resolved `23-0314.05`
 
 - active: manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf
-- basis: newest member of the chain and not marked superseded
+- basis: no member is marked active; inferred in force from an agreed expiration date 2029-03-13 still ahead of 2026-08-28, and nothing in the chain supersedes it
 - chain: 4 member(s)
     - superseded  manuals/certainteed-bufftech/structural/NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf
     - superseded  manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf
