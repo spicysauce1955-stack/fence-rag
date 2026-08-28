@@ -1987,6 +1987,109 @@ string that embedded `today` reached `evaluation-report.md` and was closed by
 pinning `gq-011.interface_input.as_of`, which also stopped the benchmark
 silently failing on 2029-03-14.
 
+### G51 — the audit's F1 heading fallback: measured and REJECTED
+
+R1 of `workspace/reports/projection-relevance-audit.md` — *project a heading as a
+unit only when no other unit on that page carries it in `heading_path`* — was
+built behind an opt-in, measured on a copy of the full-corpus store, and
+rejected. G1 named it *"the lever that could actually close A3"*. It moves
+evidence support **0.115 in the wrong direction**.
+
+`store.build_retrieval_units(conn, heading_fallback=True)`, or
+`FENCE_HEADING_FALLBACK=1`. Default off, and deliberately no CLI flag.
+`tests/test_heading_fallback.py` pins the mechanism;
+`tests/test_idempotency.py` pins the default — flag off, the rebuild reproduces
+all 10,886 rows byte-identically, `unit_id`s included.
+
+78 gold questions (41 answerable, 37 no-answer), k = 10, full corpus.
+
+| Metric | Baseline | R1 on | Required |
+|---|---|---|---|
+| recall@10 | 0.805 | 0.805 | not reduced — met |
+| page recall@10 | 0.659 | 0.659 | not reduced — met |
+| MRR | 0.552 | 0.534 | — |
+| **evidence support** | **0.623** | **0.508** | ≥ 0.70 — **not met, and worse** |
+| page evidence support | 0.769 | 0.765 | not reduced — **not met** |
+| no-answer precision | 0.324 | 0.324 | not reduced — met |
+| false-unsupported rate | 0.146 | 0.146 | not reduced — met |
+| questions passing | 33 | 28 | — |
+
+Five newly fail (`gq-003`, `gq-005`, `gq-021`, `gq-112`, `gq-115`); none newly
+passes. The no-answer pair is unchanged to three decimals in every configuration
+measured, so this is **not** the trade-off the audit warned about — it is a
+straight loss.
+
+**What it does structurally.** 11,112 units added, index 10,886 → 21,998. Pages
+with elements but no unit **27 → 6**, and the 6 remaining hold only `figure`
+elements, so R1 reaches every page that had any text. That is the whole win.
+Against it: median unit length 99 → 27 characters, units under 80 characters
+45.0% → 72.5%, duplicate-text units 46.5% → 59.1%, and top-10 slots under 40
+characters **11.1% → 22.8%** — 156 of 780 slots become heading units. The
+within-page ceiling moves 0.769 → 0.765, so the headroom the second stage works
+in *grows*, 0.147 → 0.258.
+
+**Why, in one result.** Under R1 the top ten for `gq-102` is `1`, `2`, `4`, `5`,
+`6`, `7`, `8`, `TOOLS/MATERIALS NEEDED:`, `BARRETTE OUTDOOR LIVING`,
+`7830 FREEWAY CIRCLE` — ten single-token fragments from the right page,
+displacing every unit that carried an answer. This is the BM25
+length-normalisation failure the heading exclusion was introduced to fix,
+returning through the fallback.
+
+**A correction to F1 itself.** The audit cites `gq-102` and `gq-103` as tracing
+directly to the heading hole. They do not, as the store stands: all 16 units on
+page 1 of the Wellington sheet carry `Wellington 6x6 Semi-Privacy Panel` in
+`heading_path`, and all 4 on page 1 of the pergola sheet carry `Pergola Kits`.
+The grader reads `heading_path`, so that term already *is* the 0.333 they score;
+their missing terms — `Coarse Gravel`, `on-center`, `8" x 8" Vinyl Posts`,
+`Shade Tubing` — are body text. Both headings are carried, so R1 cannot add a
+unit for either **by construction**, and neither question moved. (The per-page
+uncarried-heading population is 11,112; the audit's 7,097 *global* figure
+reproduces exactly.)
+
+**Variants measured along the way**, none of which recovers the metric:
+
+| Variant | heading units | recall@10 | evidence support | passed |
+|---|---|---|---|---|
+| R1 as specified | 11,112 | 0.805 | 0.508 | 28 |
+| only pages with no unit at all (F6) | 109 | 0.780 | 0.598 | 32 |
+| only globally-uncarried headings | 7,097 | **0.829** | 0.526 | 29 |
+| R1 with a ≥ 20-character floor | 3,804 | 0.805 | 0.533 | 29 |
+
+109 added units already cost 0.025 of evidence support, which is how tight a
+ten-result list is. The one signal worth carrying forward: the
+globally-uncarried variant lifts recall@10 0.805 → 0.829, MRR 0.552 → 0.580 and
+page support 0.769 → 0.789 **together**. Heading text carries retrievable signal;
+projecting it at unit granularity destroys more than it finds.
+
+**Decision: not accepted, and not recommended behind the flag either** — unlike
+the second stage, which was neutral on everything but its threshold. G1's
+identification of R1 as the lever for A3 is **falsified**. The first-stage recall
+deficit stays the dominant residual, and the audit's own R3/R5 (duplicate
+suppression and a per-page cap, worth 29.5% and 20.2% of top-10 slots) should be
+measured before anything that adds units.
+
+### G52 — two routed metrics said more than they measured
+
+Both introduced by the same day's G14 work and found by an adversarial pass.
+
+**`page_rank` on a document-returning interface was a tautology.**
+`_evaluate_resolve` stamped `"page": 1` on every candidate, so the metric measured
+only whether the question's annotation happened to list page 1 — which `gq-011`'s
+does, for all four documents. It is now absent for such an interface, with
+`page_rank_basis` recording why. An absent metric with a reason is honest; a
+tautological one is not. A `facts` question still reports a real page.
+
+**`document_support` was scored over the union of every returned document.** A
+term appearing in a *different chain member* than the answer counted as support,
+and `passed` inherited it — which is why routing showed FAIL → PASS. It is now
+**`answer_support`**, scoped to the one document the interface asserts; the union
+survives as `returned_documents_support` and is never graded. `gq-011` still
+passes and the pass now means something: all five annotated terms are in NOA
+24-0117.05 itself, and the superseded members carry only two of them. A test
+proves the tighter scope fails when a term lives only in a superseded member.
+
+Headline metrics unmoved: 0.805 / 0.623 / 0.324 / 0.146, 33 of 78.
+
 ### Also in this session
 
 `docs/build-plan.md` Phase E is now built rather than pending. Closed or
