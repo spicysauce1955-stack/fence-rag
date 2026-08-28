@@ -71,7 +71,7 @@ plus 81 whose text layer decoded to mojibake and was rejected.
 | A2 retrieval contract | all fields, images resolve | all | pass |
 | A3 document recall@10 | ≥ 0.80 | 0.805 | pass |
 | A3 evidence support | ≥ 0.70 | **0.623** (0.672 with the second stage) | **fail** |
-| A4 no-answer precision | ≥ 0.66 | **0.333** on 18 negatives | **fail** |
+| A4 no-answer precision | ≥ 0.66 | **0.324** on 37 negatives | **fail** |
 | A4b false-unsupported rate | ≤ 0.20 | 0.146 | pass |
 | A5 full-corpus coverage report | no silent skips | 0 skipped, 0 failures | pass |
 | A6 idempotency and rebuildability | tests pass | pass | pass |
@@ -301,14 +301,24 @@ population. See G49.
 
 ### G7 — No-answer detection does not work, and now we know why
 
-The negative set was expanded from 3 to 18 questions, deliberately built in three
-classes: 5 **absent-subject** (a manufacturer, standard or material genuinely not
-in the corpus), 5 **adjacent-vocabulary** (every word occurs, often on one page,
-but nothing answers the question) and 5 **near-miss** (the corpus covers the
-topic *and* the product, and documents the asked-for property for other product
-families — e.g. Bufftech Danbury footing depth, where the exposure table appears
-four times in the same PDF but only on the Imperial, Breezewood, Brookline and
-Chesterfield pages).
+The negative set was expanded from 3 to 18, and on **2026-08-28 from 18 to 37**,
+deliberately built in three classes: **11 absent-subject** (a manufacturer,
+standard or material genuinely not in the corpus — Trex, Ameristar, Kroy, ISO
+9001, CSA, EN 13241), **11 adjacent-vocabulary** (every word occurs, often on one
+page, but nothing answers the question — ASTM B117 salt-spray hours, ground snow
+load, allowable rail deflection, rebar clearance inside a filled post,
+wedge-anchor edge distance) and **12 near-miss** (the corpus covers the topic
+*and* the product and documents the asked-for property for other families — e.g.
+Bufftech Danbury footing depth; STC 21, which the 2014 catalog certifies only for
+Chesterfield and Galveston; the ASTM D4216 cell class Illusions and Barrette both
+publish and Weatherables never does). `eval/gold-question-schema.json` carries an
+optional `no_answer_class` recording which; it is meaningless on an answerable
+question and `tests/test_gold_set.py` enforces that.
+
+Every question added in the 2026-08-28 batch was verified against the store
+before it was accepted — 81,794 element rows including the OCR of all 22 scanned
+and 6 mojibake documents, 18,472 table cells, and FTS `MATCH` counts — because a
+"negative" question that turns out to be answerable is worse than no question.
 
 On that set no lexical feature separates the classes. Mean values, answerable vs
 unanswerable: rarest query term present in the best result 0.244 vs 0.444 (the
@@ -321,13 +331,36 @@ Worse, the previous rule was one-sided. Combining a score floor with rarest-term
 presence reached 0.611 precision while declaring **24 of 41 answerable
 questions** unsupported. The rule now keeps only what fires for a checkable
 reason — a query term absent from the entire corpus, or no results at all —
-scoring 0.333 precision at a 0.146 false-unsupported rate, and both numbers are
-reported together from now on.
+scoring **0.324 precision at a 0.146 false-unsupported rate**, and both numbers
+are reported together from now on.
+
+**The expansion barely moved the headline (0.333 → 0.324) and settled the
+per-class question completely:**
+
+| class | 18-question set | 37-question set |
+|---|---|---|
+| absent-subject | 4/5 = 0.800 | 10/11 = **0.909** |
+| adjacent-vocabulary | 1/5 = 0.200 | 1/11 = **0.091** |
+| near-miss | 1/5 = 0.200 | 1/12 = **0.083** |
+
+Read that as: **the rule is an absent-token detector, not a no-answer detector.**
+And the old 0.200 figures were not detection at all. The evaluator concatenates
+every `query_terms` string into one query and flags the question if *any* content
+token has zero document frequency in `retrieval_fts`, so a near-miss question
+written with a careless synonym passes for the wrong reason — `gq-205` fired on
+"accommodation", `gq-209` on "e84". The first draft of the new batch had the same
+leak and scored an illusory 0.583 on near-miss; every content token was then
+checked for non-zero document frequency and the paraphrases rewritten, which is
+why both hard classes **fell** rather than rose. Nothing was tuned.
 
 **Not closed because** it needs evidence-grounded checking rather than a
-threshold: does a retrieved element actually state a value *for the subject
-asked about*. The fact layer, with its subject and conditions columns, is the
-foundation for that; a per-class breakdown of where it fails is in
+threshold: does a retrieved element actually state a value *for the subject asked
+about*. `gq-234` is the clearest case in the corpus — the store contains a screw
+pull-out load measured to the pound (463/462/544/526 lbf, in the Barrette
+privacy-railing PE report), for the **wrong connection**, and the retriever
+returns it at rank 1 with six matched terms. No threshold distinguishes that from
+an answer. The fact layer, with its subject and conditions columns, is the
+foundation for that check; a per-class breakdown of where it fails is in
 `workspace/reports/evaluation-report.md`.
 
 ### G8 — One known-bad gold annotation, left in place
