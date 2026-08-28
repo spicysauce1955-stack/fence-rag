@@ -241,16 +241,40 @@ class SourceDoc:
     version_status_basis: str | None
     issue_date: str | None
     expiration_date: str | None
+    # Defect 2. In contract.md §1.1's shape and absent here, while `relations`
+    # already held the edges. A LIST because doc-8727ba0fd4d4 fans out to seven
+    # successors, and CONTENT HASHES because `belongs_to` is a content hash
+    # everywhere else on this wire -- a `doc-...` id is an internal handle
+    # Planning cannot resolve. Empty for the three documents that are superseded
+    # on a filename keyword with no successor recorded anywhere; suppressing the
+    # field there would hide the weakest three of the nine.
+    superseded_by: tuple = ()
 
 
 @dataclass(frozen=True)
 class Gap:
+    """contract.md §1.2.1's shape, which this dataclass did not carry.
+
+    `because` and `cites` were absent, so 63 gaps published with no machine-
+    readable reason and no evidence at all -- a live obligation 8 violation on an
+    already-shipped snapshot. `because` is `code + params` because §1.2.1 says it
+    "renders in both locales", which a prose sentence cannot; `would_close` stays
+    the human sentence beside it.
+
+    `on` exists for exactly one kind. §1.2.1 writes `disputed{ on: value |
+    conditions }` and no other kind takes a parameter. Planning serialises it as
+    a sibling key rather than nested inside `kind`, confirmed against their own
+    model in conversation.md T2, so both sides already agree on the shape.
+    """
     id: str
     kind: str
     subject: str
+    because: dict          # {"code": str, "params": dict}
+    cites: list            # [SourceRef], empty where there is no region to point at
     would_close: str
     closes_by: str
     severity: str
+    on: str | None = None  # `disputed` only
 
 
 class SnapshotBuilder:
@@ -295,9 +319,13 @@ class SnapshotBuilder:
                 version_status=row["version_status"],
                 version_status_basis=row["version_status_basis"],
                 issue_date=row["issue_date"],
-                expiration_date=row["expiration_date"])
+                expiration_date=row["expiration_date"],
+                superseded_by=self._successors(row["document_id"]))
             if row["doc_type"] in UNCLASSIFIED:
                 self.gap(kind="missing_value", subject=row["document_id"],
+                         code="source_class_unclassified",
+                         params={"doc_type": row["doc_type"],
+                                 "content_hash": row["sha256"]},
                          would_close=f"classify the source class of {_label(row)} "
                                      f"(filed as {row['doc_type']!r}); it is "
                                      f"published at the weakest class, so it cannot "
@@ -309,19 +337,44 @@ class SnapshotBuilder:
         self._refs[element_id] = ref
         return ref
 
+    def _successors(self, document_id: str) -> tuple:
+        """Content hashes of what supersedes this document, in a stable order.
+
+        Reads the `superseded_by` edge subject-to-object: its *from* side is the
+        superseded document. Marking the wrong side once labelled every current
+        NOA superseded, which is why tests/test_versions.py guards the direction.
+        """
+        rows = self.conn.execute("""
+            SELECT DISTINCT v.sha256
+              FROM relations r
+              JOIN document_versions v ON v.document_id = r.to_document_id
+             WHERE r.from_document_id = ? AND r.relation_type = 'superseded_by'
+             ORDER BY v.sha256""", (document_id,)).fetchall()
+        return tuple(r["sha256"] for r in rows)
+
     def source_docs(self) -> list[SourceDoc]:
         return sorted(self._docs.values(), key=lambda d: d.content_hash)
 
     # -- gaps ---------------------------------------------------------------
-    def gap(self, *, kind: str, subject: str, would_close: str,
-            closes_by: str, severity: str = "warns_line") -> None:
+    def gap(self, *, kind: str, subject: str, code: str, would_close: str,
+            closes_by: str, severity: str = "warns_line",
+            params: dict | None = None, cites: list | None = None,
+            on: str | None = None) -> None:
+        if kind == "disputed" and on not in ("value", "conditions"):
+            raise ValueError("a `disputed` gap must say what is disputed: "
+                             "on='value' or on='conditions'")
+        if kind != "disputed" and on is not None:
+            raise ValueError(f"`on` is only meaningful on `disputed`, not {kind!r}")
         key = f"{kind}:{subject}"
         if key in self._gap_keys:      # one gap per subject per kind
             return
         self._gap_keys.add(key)
         self._gaps.append(Gap(id=hashlib.sha256(key.encode()).hexdigest()[:16],
-                              kind=kind, subject=subject, would_close=would_close,
-                              closes_by=closes_by, severity=severity))
+                              kind=kind, subject=subject,
+                              because={"code": code, "params": params or {}},
+                              cites=[asdict(c) for c in (cites or [])],
+                              would_close=would_close, closes_by=closes_by,
+                              severity=severity, on=on))
 
     def gaps(self) -> list[Gap]:
         return sorted(self._gaps, key=lambda g: g.id)
@@ -388,6 +441,9 @@ class SnapshotBuilder:
                     text = f"{text}\n{body}"
                 else:
                     self.gap(kind="unquantified", subject=r["element_id"],
+                             code="warning_lexeme_without_body",
+                             params={"lexeme": lexeme, "page_no": r["page_no"]},
+                             cites=[self.source_ref(r["element_id"])],
                              would_close=f"{_where(r)} prints {lexeme!r} with no "
                                          f"instruction after it; a person should "
                                          f"read the page image and record what it says",
@@ -410,6 +466,10 @@ class SnapshotBuilder:
 
             if len(body) < MIN_BODY_CHARS:
                 self.gap(kind="unquantified", subject=r["element_id"],
+                         code="warning_body_too_short",
+                         params={"lexeme": lexeme, "chars": len(body),
+                                 "minimum": MIN_BODY_CHARS},
+                         cites=[self.source_ref(r["element_id"])],
                          would_close=f"{_where(r)} prints "
                                      f"{(lexeme or 'a severity word')!r} followed "
                                      f"only by {_tail(body)!r}; read the page image "
@@ -420,6 +480,10 @@ class SnapshotBuilder:
                 # ends on a function word or starts mid-sentence: the column or
                 # the page cut it. Verbatim-but-truncated is worse than absent.
                 self.gap(kind="illegible_source", subject=r["element_id"],
+                         code="warning_truncated_mid_clause",
+                         params={"ends_with": _tail(body, 30),
+                                 "page_no": r["page_no"]},
+                         cites=[self.source_ref(r["element_id"])],
                          would_close=f"the warning on {_where(r)} breaks after "
                                      f"{_tail(body)!r}; a person should read the "
                                      f"page image and record the sentence whole",
@@ -428,6 +492,13 @@ class SnapshotBuilder:
             if (r["text_source"] in ("ocr", "image_ocr")
                     and (r["ocr_confidence"] or 0) < OCR_TRUST_FLOOR):
                 self.gap(kind="illegible_source", subject=r["element_id"],
+                         code="warning_ocr_below_confidence_floor",
+                         # Integers in thousandths: obligation 1 forbids a
+                         # float in either direction, and canonical_bytes()
+                         # refuses one rather than rounding it silently.
+                         params={"confidence_milli": round(r["ocr_confidence"] * 1000),
+                                 "floor_milli": round(OCR_TRUST_FLOOR * 1000)},
+                         cites=[self.source_ref(r["element_id"])],
                          would_close=f"OCR read the warning on {_where(r)} at "
                                      f"{r['ocr_confidence']:.1f}% against a "
                                      f"{OCR_TRUST_FLOOR:.0f}% floor and produced "
@@ -443,6 +514,9 @@ class SnapshotBuilder:
             lang, lang_basis = detect_lang(text)
             if lang == "und":
                 self.gap(kind="missing_value", subject=r["element_id"],
+                         code="warning_language_undetermined",
+                         params={"page_no": r["page_no"]},
+                         cites=[self.source_ref(r["element_id"])],
                          would_close=f"the warning on {_where(r)} has no "
                                      f"determinable language ({_tail(text)!r}); "
                                      f"obligation 10 requires lang on published text",
@@ -504,6 +578,9 @@ class VerificationFailed(RuntimeError):
     pins a hash and computes numbers, and nothing downstream is positioned to
     notice. The gate is the only place it can be caught.
     """
+
+
+_CODE = re.compile(r"^[a-z][a-z0-9_]*$")
 
 
 def verify(snapshot: dict) -> None:
@@ -576,6 +653,28 @@ def verify(snapshot: dict) -> None:
             fail.append(f"{at}: obligation 8 - a gap declares who can close it")
         if g.get("kind") not in GAP_KINDS:
             fail.append(f"{at}: gap kind {g.get('kind')!r} is not one of the eight")
+        # Defect 1. `because` is what renders in both locales; `would_close` is
+        # the sentence beside it, not a substitute. A gap that carries only prose
+        # cannot be shown to a Hebrew-speaking curator at all.
+        code = (g.get("because") or {}).get("code")
+        if not code:
+            fail.append(f"{at}: §1.2.1 - a gap carries `because` as code + params, "
+                        f"so it renders in both locales")
+        elif not _CODE.match(code):
+            fail.append(f"{at}: because.code {code!r} is not lower_snake_case; the "
+                        f"registry convention is Planning's four existing gap codes")
+        # Obligation 8's evidence half. `cites` may be empty -- §1.2.1 says
+        # "evidence, where there is any" -- but a gap about a REGION of a page
+        # has evidence by construction, and publishing it without is the defect
+        # this check was added for.
+        if g.get("cites") is None:
+            fail.append(f"{at}: `cites` is absent; publish [] rather than omitting it")
+        elif not g["cites"] and str(g.get("subject", "")).startswith("element-"):
+            fail.append(f"{at}: obligation 8 - an element-scoped gap names a region "
+                        f"and so has evidence; cite it")
+        if (g.get("kind") == "disputed") != (g.get("on") is not None):
+            fail.append(f"{at}: §1.2.1 - `on` belongs to `disputed` and to nothing "
+                        f"else; it is value|conditions")
 
     if fail:
         raise VerificationFailed(

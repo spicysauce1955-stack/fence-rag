@@ -132,3 +132,72 @@ class TestTheRealBuildPasses(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _gap(**over):
+    """A well-formed gap, for tests that break exactly one thing about it."""
+    g = {"id": "g1", "kind": "illegible_source", "subject": "element-x-0001",
+         "because": {"code": "warning_truncated_mid_clause", "params": {}},
+         "cites": [{"id": "r1", "belongs_to": "h1"}],
+         "would_close": "read the page image and record the sentence whole",
+         "closes_by": "knowledge", "severity": "warns_line", "on": None}
+    g.update(over)
+    return g
+
+
+class TestGapCarriesItsReasonAndEvidence(unittest.TestCase):
+    """Defect 1: 63 gaps shipped with no `because` and no `cites`.
+
+    `would_close` alone is a sentence in one language. §1.2.1 requires
+    `because` as code + params precisely so a gap "renders in both locales",
+    and obligation 8 wants the evidence beside it. A snapshot had already been
+    published without either, which is why this is a gate and not a report.
+    """
+
+    def _fails(self, gap, fragment):
+        snap = _ok()
+        snap["gaps"] = [gap]
+        with self.assertRaises(VerificationFailed) as caught:
+            verify(snap)
+        self.assertIn(fragment, str(caught.exception))
+
+    def test_a_well_formed_gap_passes(self):
+        snap = _ok()
+        snap["gaps"] = [_gap()]
+        verify(snap)
+
+    def test_a_gap_without_because_is_refused(self):
+        self._fails(_gap(because={}), "renders in both locales")
+        self._fails(_gap(because={"code": "", "params": {}}), "renders in both locales")
+
+    def test_because_code_must_be_lower_snake_case(self):
+        """Planning's four existing gap codes set the convention."""
+        self._fails(_gap(because={"code": "WARNING_TRUNCATED", "params": {}}),
+                    "lower_snake_case")
+
+    def test_an_element_scoped_gap_must_cite_its_region(self):
+        """It names a rectangle of a page, so it has evidence by construction."""
+        self._fails(_gap(cites=[]), "names a region")
+
+    def test_a_document_scoped_gap_may_cite_nothing(self):
+        """There is no region to point at, and §1.2.1 says "where there is any"."""
+        snap = _ok()
+        snap["gaps"] = [_gap(subject="doc-abc123", cites=[])]
+        verify(snap)
+
+    def test_absent_cites_is_refused_even_though_empty_is_allowed(self):
+        g = _gap(subject="doc-abc123")
+        del g["cites"]
+        self._fails(g, "publish [] rather than omitting it")
+
+    def test_disputed_must_say_what_is_disputed(self):
+        self._fails(_gap(kind="disputed", on=None), "`on` belongs to `disputed`")
+
+    def test_only_disputed_carries_on(self):
+        self._fails(_gap(on="value"), "`on` belongs to `disputed`")
+
+    def test_a_disputed_gap_with_on_passes(self):
+        snap = _ok()
+        snap["gaps"] = [_gap(kind="disputed", on="conditions")]
+        verify(snap)
+
