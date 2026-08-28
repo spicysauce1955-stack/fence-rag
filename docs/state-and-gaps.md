@@ -188,13 +188,26 @@ by an agreed expiration date was indistinguishable from a positional guess.
 `versions.select_active` now labels the answer in `active_basis_kind`: `marked`
 (an explicit marker), `inferred_in_force` (no marker, but exactly one
 unsuperseded member has an agreed expiration date still ahead of the stated day),
-`assumed_newest` (the old positional fallback, now naming itself as resting on no
-version evidence), `conflict`, `withdrawn`, `none`. `marked` and
+`assumed_newest` (the old positional fallback, now naming itself), `conflict`,
+`withdrawn`, `none`. `marked` and
 `inferred_in_force` are never conflated, so a caller that must not act on an
 inference can tell them apart without parsing prose. Over the corpus at
 2026-08-28: **3 `marked`, 11 `inferred_in_force`, 125 `assumed_newest`, 2
 `withdrawn`, 3 `none`.** The CertainTeed→Barrette chain now answers 24-0117.05 on
 the evidence of its own 2029-03-13 expiry rather than on chain position.
+
+**And the fallback's own basis string had to be corrected once.** It first
+claimed the answer rests on *"no version evidence — the document states no date
+and carries no marker"*, which is false for **31 of the 125** documents it
+answers for: they print an edition stamp, `document_edition` reads it, and
+`enrich_chain` attaches it to the very member being described. A reader could not
+tell *"we looked and found nothing"* from *"we found a stamp and decided it was
+not a status"* — which is the entire reason `document_edition` exists. The
+sentence is now conditional: a stamp is named and explained, two stamps are
+reported as two, and only where there is genuinely none does the basis say "no
+version evidence at all". Guarded by a property test over the real corpus — *no
+answer of any kind may deny evidence its own member carries* — rather than by an
+expected sentence.
 
 **"They have no dates to find" — falsified in the letter, confirmed in
 substance.** 7 of the 132 `unknown` documents have parseable date facts (all
