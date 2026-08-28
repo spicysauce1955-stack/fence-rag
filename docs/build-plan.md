@@ -132,7 +132,7 @@ Ordered as Planning re-ranked them after the cell-coverage measurement.
 
 | | What | Note |
 |---|---|---|
-| C1 | **The eleven-warning starter list** | With `params` and verbatim exemplars, from the 226 distinct warnings. Planning needs entries in two locale bundles. |
+| C1 | ~~**The eleven-warning starter list**~~ **DONE 2026-08-27.** | Delivered in `docs/integration/registry-additions.md` §3, with counts, citation counts, verbatim exemplars and a resolvable `ref_id` each. Producing it exposed G42: five of the eleven had **zero** published instances against 16–254 matching elements, because the detector wants a severity lexeme and those five are ordinary bullets in installation lists. All eleven now publish non-zero. Planning still needs the two locale bundles — sent as `conversation.md` T8. |
 | C2 | **`also_filed_as`** — one source class per content hash | 18 of 40 `same_content_as` pairs carry a different `doc_type` on each side. Load-bearing now that Planning applies the policy. Committed and relied upon. |
 | C3 | **Cell bounding boxes** (K4) | 973 of 18,472 cells have one — 100% of `ocr-word-grid`, **0 of 17,499** from either pdfplumber detector, which discards geometry pdfplumber already returns. ~594 tables to re-extract. Bounds the text-layer queue; does **not** bound the structural queue, where 73 pages have no reconstructed grid to box at all. |
 
