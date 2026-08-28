@@ -52,7 +52,7 @@ review responses), `docs/mvp-implementation-spec.md` (the contract),
 | facts: condition basis (stated / assumed / unexamined) | 59 / 117 / 1,538 — A2, A5 |
 | facts carrying a second unit lexeme / of which disagree | 7 / **4** — A3 plus G34 cause 1 |
 | elements: lang (en / und / es / fr, all `assumed` or `unknown`) | 58,033 / 22,453 / 674 / 634 — A4, see G32 |
-| schema_version | 6 |
+| schema_version | 7 |
 | quality issues | 374 |
 | derived image data on disk | 5.0 GB (git-ignored, reproducible); 145 MB of it collectable — see G11 |
 
