@@ -72,6 +72,7 @@ from fractions import Fraction
 
 from .canonical import canonical_bytes
 from .refs import ref_id
+from .reviews import effective_fact_value
 from .tenancy import visible_sql
 
 # --------------------------------------------------------------------------
@@ -191,6 +192,14 @@ SELECT f.fact_id, f.document_id, f.page_no, f.element_id, f.fact_type,
        f.value_original, f.unit_original, f.unit_normalized, f.value_alternates,
        f.conditions, f.condition_basis, f.condition_basis_note,
        f.review_status, f.from_candidate_id,
+       -- G44 at the publishing layer. `curation_level` is set from
+       -- `review_status`, so a fact a person CORRECTED publishes at level 2 --
+       -- "a person compared this to the source image" -- and without these two
+       -- columns it would publish the machine's value under that stamp. That
+       -- is the inversion obligation 6 forbids, arriving through the one
+       -- section of a snapshot that carries numbers. Every read of a value
+       -- below goes through `reviews.effective_fact_value`.
+       f.reviewed_value, f.reviewed_value_normalized,
        d.doc_type, d.manufacturer, d.product_family, d.title,
        d.version_status, d.issue_date, d.expiration_date
   FROM facts f
@@ -242,7 +251,7 @@ def _unit_of(row) -> str | None:
     for candidate in (row["unit_normalized"], row["unit_original"]):
         if candidate and str(candidate).strip().lower() in _UNIT_ALIASES:
             return _UNIT_ALIASES[str(candidate).strip().lower()]
-    text = row["value_original"] or ""
+    text = effective_fact_value(row) or ""
     if '"' in text:
         return "in"
     if "'" in text:
@@ -279,7 +288,11 @@ def _value_raw(row) -> list[str]:
     holds the second pair where a document printed one; the primary lexeme stays
     first. Never sorted -- printed order is the thing the field preserves.
     """
-    out = [(row["value_original"] or "").strip()]
+    # The person's value leads where there is one: `value_raw` is what the
+    # published `Quantity` was read from, and publishing the machine's lexeme
+    # beside a corrected magnitude would show a reader two different numbers
+    # and call one of them the source.
+    out = [(effective_fact_value(row) or "").strip()]
     try:
         alternates = json.loads(row["value_alternates"] or "[]")
     except (TypeError, ValueError):
@@ -299,7 +312,7 @@ def quantity(row) -> dict | None:
     deliberately not the input here. The lexeme is.
     """
     unit = _unit_of(row)
-    magnitude = _magnitude(row["value_original"])
+    magnitude = _magnitude(effective_fact_value(row))
     if unit is None or magnitude is None:
         return None
     return {"amount_milli": _round_half_up(magnitude * MILLI_PER_UNIT[unit]),
@@ -627,7 +640,7 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
                          code="applicability_bracket_unresolved",
                          params={"parameter": parameter,
                                  "page_no": fact["page_no"],
-                                 "value_raw": (fact["value_original"] or "").strip()},
+                                 "value_raw": (effective_fact_value(fact) or "").strip()},
                          cites=cites,
                          would_close=f"readers did not independently agree whether "
                                      f"{(fact['value_original'] or '').strip()} on "
@@ -657,7 +670,7 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
             gaps.add(kind="unquantified", subject=f"fact:{fact['fact_id']}",
                      code="value_not_a_quantity",
                      params={"parameter": parameter, "page_no": fact["page_no"],
-                             "value_raw": (fact["value_original"] or "").strip()},
+                             "value_raw": (effective_fact_value(fact) or "").strip()},
                      cites=cites,
                      would_close=f"{(fact['value_original'] or '').strip()!r} on page "
                                  f"{fact['page_no']} of "

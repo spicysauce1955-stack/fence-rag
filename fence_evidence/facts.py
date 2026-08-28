@@ -695,7 +695,14 @@ def query_facts(fact_type: str | None = None, *, conditions: dict | None = None,
                    FROM facts f
                    JOIN documents d ON d.document_id = f.document_id
               LEFT JOIN pages p ON p.version_id = f.version_id AND p.page_no = f.page_no
-                  WHERE 1=1"""
+                  WHERE f.review_status <> 'rejected'"""
+        # A rejected fact is one a person looked at and said the machine was
+        # wrong about. It was still being returned here, and therefore by
+        # `retrieval.facts_for` and by the evaluation harness -- `include_flagged`
+        # narrows to ('extracted','reviewed') but the DEFAULT path had no
+        # exclusion at all, so the one status a human decision produces was the
+        # one nothing filtered. `parameters.FACT_QUERY` already excluded it;
+        # this is the same rule at the query layer.
         params: list = []
         if fact_type:
             sql += " AND f.fact_type = ?"

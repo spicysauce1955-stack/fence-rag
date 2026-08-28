@@ -226,18 +226,29 @@ def _withdraw_stale(conn: sqlite3.Connection, *, dry_run: bool) -> dict:
     or its crop.
     """
     out = {"verdict_withdrawn": 0, "value_changed": 0}
+    # `f.reviewed_value` is here because the FACT review loop can correct a row
+    # this loop also owns. Comparing the candidate's effective value against
+    # `f.value_original` on a fact somebody has since corrected compares against
+    # a value neither side believes any more, and the two review loops end up
+    # fighting over one row -- each seeing the other's decision as drift.
     linked = conn.execute("""
-        SELECT f.fact_id, f.value_original, c.candidate_id, c.review_status,
-               c.value, c.reviewed_value
+        SELECT f.fact_id, f.value_original, f.reviewed_value,
+               c.candidate_id, c.review_status,
+               c.value, c.reviewed_value AS candidate_reviewed_value
           FROM facts f
           JOIN table_read_candidates c ON c.candidate_id = f.from_candidate_id
          WHERE f.from_candidate_id IS NOT NULL""").fetchall()
     doomed: list[int] = []
     for r in linked:
+        cell = {"value": r["value"],
+                "reviewed_value": r["candidate_reviewed_value"],
+                "review_status": r["review_status"]}
+        published = (r["reviewed_value"] if r["reviewed_value"] is not None
+                     else r["value_original"])
         if r["review_status"] not in PROMOTABLE:
             out["verdict_withdrawn"] += 1
             doomed.append(r["fact_id"])
-        elif normalise(effective_value(r)) != normalise(r["value_original"]):
+        elif normalise(effective_value(cell)) != normalise(published):
             out["value_changed"] += 1
             doomed.append(r["fact_id"])
     if doomed and not dry_run:

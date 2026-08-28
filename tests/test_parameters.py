@@ -573,5 +573,61 @@ class TestItPassesTheSnapshotGate(unittest.TestCase):
         conn.close()
 
 
+class TestAPersonsCorrectionIsWhatPublishes(unittest.TestCase):
+    """G44 at the publishing layer, and it is the worst place for it.
+
+    `curation_level` is set from `review_status`, so a `corrected` fact
+    publishes at level 2 — *"a person compared this to the source image"*. If
+    the value beside that stamp is the machine's, the snapshot asserts a number
+    under a person's authority that the person explicitly rejected. That is the
+    exact inversion obligation 6 exists to prevent, in the one section of a
+    snapshot that carries numbers rather than text.
+    """
+
+    def _corrected(self, machine='24"', person='36"'):
+        conn = make_store()
+        add_document(conn)
+        add_fact(conn, value=machine, review_status="corrected",
+                 conditions=non_hvhz("C"))
+        conn.execute("UPDATE facts SET reviewed_value=?, "
+                     "reviewed_value_normalized=? WHERE 1",
+                     (person, float(person.strip('"'))))
+        conn.commit()
+        return conn
+
+    def test_the_published_quantity_is_the_persons_number(self):
+        conn = self._corrected()
+        tables, _ = build_parameter_tables(conn)
+        self.assertEqual(len(tables), 1)
+        row = tables[0]["rows"][0]
+        # 36" = 914.4 mm = 914400 thousandths; 24" would be 609600.
+        self.assertEqual(row["value"]["amount_milli"], 914400)
+
+    def test_value_raw_leads_with_the_persons_lexeme(self):
+        """Publishing the machine's lexeme beside a corrected magnitude shows a
+        reader two different numbers and calls one of them the source."""
+        conn = self._corrected()
+        tables, _ = build_parameter_tables(conn)
+        self.assertEqual(tables[0]["rows"][0]["value"]["value_raw"][0], '36"')
+
+    def test_it_still_publishes_at_curation_level_2(self):
+        """The level is right — a person did look. It is the value that had to
+        catch up with it."""
+        conn = self._corrected()
+        tables, _ = build_parameter_tables(conn)
+        prov = tables[0]["rows"][0]["provenance"]
+        self.assertEqual(prov["curation_level"], 2)
+
+    def test_an_uncorrected_fact_is_untouched(self):
+        conn = make_store()
+        add_document(conn)
+        add_fact(conn, value='24"', review_status="accepted",
+                 conditions=non_hvhz("C"))
+        tables, _ = build_parameter_tables(conn)
+        row = tables[0]["rows"][0]
+        self.assertEqual(row["value"]["amount_milli"], 609600)
+        self.assertEqual(row["value"]["value_raw"], ['24"'])
+
+
 if __name__ == "__main__":
     unittest.main()
