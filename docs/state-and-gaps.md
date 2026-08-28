@@ -233,14 +233,71 @@ The 6 Weatherables CAD PNGs yield 76 `drawing_label` elements between them.
 are still dropped and at least one dimension is misread. Those pages are
 reachable by page image; their text is not reliable.
 
-### G6 — Facts extraction is regex-only and thin in places
+### G6 — Facts extraction is regex-only and thin in places (review half CLOSED)
 
 `extractor='regex-v1'`. It finds values stated in prose or in a recovered table
-cell and nothing else. 266 of 1,714 facts are `flagged` because they came from
-OCR below 80% confidence, and no promotion path from `flagged` to `reviewed`
-exists — there is no review UI or workflow, only the column. `post_spacing_in`
-(3) and `racking_degrees` (5) are thin for the reason in G2. `exposure_category`
-(15) is low because exposure appears mostly inside unreconstructed tables.
+cell and nothing else. `post_spacing_in` (4) and `racking_degrees` (5) are thin
+for the reason in G2. `exposure_category` (15) is low because exposure appears
+mostly inside unreconstructed tables. **That half is still open.**
+
+**The review half closed 2026-08-28.** 266 of 1,718 facts are `flagged` because
+they came from OCR below 80% mean word confidence — a misread digit in a footing
+depth being a structural error rather than a typo. `store.SCHEMA` has described
+`reviewed` as *"a person accepted or corrected it"* since the facts table
+shipped, and nothing in the package could write it for a regex fact. There was a
+column and no loop. There is now one, deliberately the same shape as the table
+loop:
+
+- **`fact_reviews`** is the record — one person, one fact, one verdict, at
+  `SCHEMA_VERSION = 7`. It carries `ref_id`, `value_before` and `status_before`,
+  so it is self-contained enough to put a fact back exactly as it was.
+- **`facts.reviewed_value`, `reviewed_value_normalized`, `reviewer`,
+  `reviewed_at`** are a *projection* of that record and of nothing else,
+  regenerable by `reviews.rebuild_fact_projection()`.
+- **`cli fact-review --queue / --show / --accept / --correct / --reject /
+  --rebuild`**, with `--reviewer` and `--ref` required. `--show` resolves the
+  fact's `SourceRef` through `refs` → `sourcerefs` → `cropcache` → `crops`, so
+  the reviewer sees the same artifact Planning's screens serve rather than a
+  second cropping path.
+- The echo is the `ref_id`, checked against the id this store mints for that
+  element **today**: a re-extraction that moved the bbox by 0.02pt (G38)
+  invalidates it. Like `crop_sha256` it detects staleness and authenticates
+  nothing — G46's caveat applies verbatim. `ref_id`'s formula is untouched.
+- Nothing is one-way, which G47 had to fix once already: a rejection is undone by
+  a later review, and withdrawing the record and rebuilding restores
+  `status_before`. A correction never overwrites `value_original` (G44), and
+  `reviews.effective_fact_value()` is the one place that decides which answers.
+
+**Obligation 6 holds by construction, not by discipline.** `FACT_VERDICTS` is
+three human verdicts and no machine one — `cross_family_verified` is refused as a
+verdict with a message naming G17. No function takes a set of readings and
+returns a verdict. A blank reviewer is refused with nothing written. And because
+the columns are a projection with exactly one source, a rebuild over zero review
+records reviews nothing **and clears a forged annotation**: a status written
+straight onto `facts` by a SQL client with no record behind it goes back to
+`flagged`. `reviews.reviewed_without_a_reviewer()` is the standing query for any
+level-2 fact that neither `from_candidate_id` nor a `fact_reviews` row accounts
+for; it returns `[]` on the live store. No column carries a `DEFAULT` — a default
+would stamp a signature onto 1,718 facts nobody has looked at, which is A1's
+defect arriving through a migration.
+
+**Measured 2026-08-28, after the loop landed: queue 266, `reviewer` NULL on all
+1,718 facts, `fact_reviews` empty, `reviewed_without_a_reviewer()` empty.** The
+mechanism exists and nobody has used it. Read that the way G17 needs it read.
+Queue by type: reinforcement 91, approval_id 78, wind_speed_mph 55,
+`effective_date` 20, `expiration_date` 10, `footing_diameter_in` 5,
+`footing_depth_in` 4, `racking_degrees` 2, `post_spacing_in` 1. All 266 resolve
+to a `ref_id`; the weakest sit at ~30% OCR confidence.
+
+**Three things the loop does not yet reach**, each in a different module:
+`parameters.FACT_QUERY` selects `WHERE from_candidate_id IS NOT NULL`, so a
+reviewed *regex* fact still appears in no `ParameterTable` — closing this half
+does not by itself grow the published level-2 population; `versions.py` and
+`reports.py` read `value_original` directly and would miss a correction; and
+`facts --extract` re-inserts every regex fact, orphaning the reviews that named
+them. That last one fails safe — the records survive and the rebuild reports them
+as `orphaned` — but a routine re-extraction silently zeroes the reviewed
+population. See G49.
 
 ### G7 — No-answer detection does not work, and now we know why
 
