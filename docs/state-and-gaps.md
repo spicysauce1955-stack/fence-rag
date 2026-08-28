@@ -1804,6 +1804,7 @@ reached for the first time in this store."*
 | facts with `from_candidate_id` (i.e. promoted from a reading) | **0** |
 | `build_parameter_tables()` output | **0 tables, 0 gaps** |
 | snapshot `parameters` | `[]` |
+| stored snapshot `83a227d4` | 75 source_docs, 289 warnings, **65** gaps, **0** parameters — not the "4 tables / 46 gaps" T9 reports |
 
 This is not a claim that the review did not happen. It is a claim that **nothing
 in the repository can show that it did**, and that is a structural problem rather
