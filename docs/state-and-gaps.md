@@ -1765,6 +1765,20 @@ un-promoted because agent agreement had been laundered into level 2. What makes
 the level honest is the reviewer's name and timestamp, and those live nowhere a
 second party can check.
 
+**And the rest of the queue *is* reproducible, which isolates the problem
+precisely.** Measured 2026-08-28 against a scratch copy of the store: deleting
+every row of `table_read_candidates` and re-running `table_review.load_directory`
+over the seven committed `workspace/tests/agent-read-*.json` files restores all
+**1,225** readings, and `mark_cross_family_verified` over the seven readers
+reproduces exactly **504 `cross_family_verified`** — the same figure the live
+store holds. So the *machine* half of the review queue regenerates from git. Only
+the human decisions do not.
+
+(One gap on that path: `mark_cross_family_verified` is reachable from no CLI verb.
+`table-review --load-dir` and `--mark-agreed` exist; the N-reader cross-family
+classifier does not, so reproducing the 504 currently takes a Python one-liner.
+Build-plan Phase B already noted the function as orphaned.)
+
 **What would close it.** `table_reviews` is already keyed on `crop_sha256` — the
 bytes of the crop, not an element id — so a review survives re-extraction by
 construction. Exporting the ledger to a committed, sorted JSONL under
