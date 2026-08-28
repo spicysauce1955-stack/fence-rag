@@ -22,6 +22,19 @@ from .store import connect, stats
 from .tools import tool_versions
 
 
+# Millimetres per unit, for the one place two lexemes are compared. Small and
+# local on purpose: this is a report's arithmetic, not a unit system, and the
+# store already holds `value_normalized` in whatever unit the row declares.
+_MM_PER = {"mm": 1.0, "cm": 10.0, "m": 1000.0, "in": 25.4, "ft": 304.8}
+
+
+def _to_mm(value, unit):
+    """`value` in millimetres, or None when it is not a length."""
+    if value is None or unit not in _MM_PER:
+        return None
+    return value * _MM_PER[unit]
+
+
 def _table(headers: list[str], rows: list[list]) -> str:
     out = ["| " + " | ".join(headers) + " |",
            "|" + "|".join("---" for _ in headers) + "|"]
@@ -501,15 +514,25 @@ def facts_report(conn: sqlite3.Connection) -> str:
         "SELECT COUNT(*) FROM facts WHERE value_alternates IS NOT NULL").fetchone()[0]
     # Whether the two lexemes actually DISAGREE is the whole point of obligation
     # 4, so count it rather than let `with_alts` quietly imply it.
+    #
+    # Both sides go through one length scale rather than an in/mm special case.
+    # The special case silently skipped `10 ft. (3.05 m) on center` -- a real
+    # disagreement, 3048 mm against 3050 -- and reported 3 where the truth was
+    # 4, which is the failure mode a count of disagreements must not have.
+    # Non-length units (mph, deg) never pair, so they fall out as `None`.
     disagreeing = 0
     for _r in conn.execute("""SELECT value_normalized, unit_normalized, value_alternates
                                 FROM facts WHERE value_alternates IS NOT NULL"""):
-        if _r["value_normalized"] is None or _r["unit_normalized"] != "in":
+        primary = _to_mm(_r["value_normalized"], _r["unit_normalized"])
+        if primary is None:
             continue
         for _a in json.loads(_r["value_alternates"] or "[]"):
-            if _a.get("unit_normalized") != "mm":
-                continue
-            if abs(_r["value_normalized"] * 25.4 - (_a.get("value_normalized") or 0)) > 0.05:
+            alt = _to_mm(_a.get("value_normalized"), _a.get("unit_normalized"))
+            # Tolerance is 0.05 mm: below that the two lexemes are the same
+            # measurement written twice, and the corpus's real disagreements are
+            # 0.1-0.6 mm roundings. Comparing in the SMALLER unit matters --
+            # 3.05 m vs 120 in differ by 2 mm, which is invisible in metres.
+            if alt is not None and abs(primary - alt) > 0.05:
                 disagreeing += 1
                 break
     by_lang = conn.execute("""SELECT COALESCE(lang,'(untagged)') lang,
@@ -576,14 +599,16 @@ def facts_report(conn: sqlite3.Connection) -> str:
         f"of which **{disagreeing} disagree** with the primary value.",
         "",
         "**Read that second number carefully.** The schema can now represent a disagreeing",
-        "second unit -- that is the gap obligation 4 declared, and it is closed. But the",
-        "corpus's disagreeing statements are not reaching it. Measured: 64 real disagreeing",
-        "statements across 201 occurrences in 15 unique-content documents, and **none of",
-        "them is reachable by this extractor**. Two causes, the second much larger:",
+        "second unit -- that is the gap obligation 4 declared, and it is closed. Most of",
+        "the corpus's disagreeing statements still do not reach it. Measured: 64 real",
+        "disagreeing statements across 201 occurrences in 15 unique-content documents.",
+        "Two causes, the first now closed and the second much larger:",
         "",
-        "1. An adjacency defect worth 3 statements. The parenthetical sits between the",
-        "   number and the keyword a pattern needs -- `6 inches (152 mm) below grade`",
-        "   never matches `depth_below_grade_in`.",
+        "1. An adjacency defect worth 3 statements -- **fixed**. The parenthetical sat",
+        "   between the number and the keyword a pattern needs, so",
+        "   `6 inches (152 mm) below grade` never matched `depth_below_grade_in`.",
+        "   `facts.blank_unit_parentheticals` blanks a metric restatement in place,",
+        "   preserving every offset, and all 3 statements now reach a fact.",
         "2. Missing fact types, worth the other 61. Every dual-unit disagreement in this",
         "   corpus is about *product geometry* -- fence height, mesh opening, picket gap,",
         "   member section, stock length -- and this extractor covers footing, spacing,",

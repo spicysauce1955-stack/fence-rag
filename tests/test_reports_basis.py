@@ -43,5 +43,32 @@ class TestFactsReportShowsBasis(unittest.TestCase):
         self.assertIn("alternate", self.md.lower())
 
 
+class TestDisagreementIsCountedInOneScale(unittest.TestCase):
+    """Obligation 4 turns on whether two lexemes DISAGREE, so the count of
+    disagreements is the number that carries the obligation. It compared
+    `in` against `mm` and nothing else, which silently skipped every pair
+    stated in feet and metres -- `10 ft. (3.05 m)` disagrees by 2 mm and was
+    reported as agreement, so the report printed 3 where the truth was 4."""
+
+    def test_a_foot_metre_pair_is_a_disagreement(self):
+        from fence_evidence.reports import _to_mm
+        self.assertAlmostEqual(_to_mm(120.0, "in"), 3048.0)
+        self.assertAlmostEqual(_to_mm(3.05, "m"), 3050.0)
+        self.assertGreater(abs(_to_mm(120.0, "in") - _to_mm(3.05, "m")), 0.05)
+
+    def test_an_exact_restatement_is_not_a_disagreement(self):
+        from fence_evidence.reports import _to_mm
+        self.assertLessEqual(
+            abs(_to_mm(24.0, "in") - _to_mm(609.6, "mm")), 0.05)
+
+    def test_a_non_length_never_pairs(self):
+        """mph and deg have no second unit in this corpus. Returning None keeps
+        them out of the comparison rather than giving them a bogus scale."""
+        from fence_evidence.reports import _to_mm
+        self.assertIsNone(_to_mm(90.0, "mph"))
+        self.assertIsNone(_to_mm(15.0, "deg"))
+        self.assertIsNone(_to_mm(None, "in"))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -55,17 +55,19 @@ not assert an inference it never made.
 
 Obligation 4: where a source states two units and they disagree, publish both.
 **7** of 1718 facts carry an alternate lexeme in `value_alternates`,
-of which **3 disagree** with the primary value.
+of which **4 disagree** with the primary value.
 
 **Read that second number carefully.** The schema can now represent a disagreeing
-second unit -- that is the gap obligation 4 declared, and it is closed. But the
-corpus's disagreeing statements are not reaching it. Measured: 64 real disagreeing
-statements across 201 occurrences in 15 unique-content documents, and **none of
-them is reachable by this extractor**. Two causes, the second much larger:
+second unit -- that is the gap obligation 4 declared, and it is closed. Most of
+the corpus's disagreeing statements still do not reach it. Measured: 64 real
+disagreeing statements across 201 occurrences in 15 unique-content documents.
+Two causes, the first now closed and the second much larger:
 
-1. An adjacency defect worth 3 statements. The parenthetical sits between the
-   number and the keyword a pattern needs -- `6 inches (152 mm) below grade`
-   never matches `depth_below_grade_in`.
+1. An adjacency defect worth 3 statements -- **fixed**. The parenthetical sat
+   between the number and the keyword a pattern needs, so
+   `6 inches (152 mm) below grade` never matched `depth_below_grade_in`.
+   `facts.blank_unit_parentheticals` blanks a metric restatement in place,
+   preserving every offset, and all 3 statements now reach a fact.
 2. Missing fact types, worth the other 61. Every dual-unit disagreement in this
    corpus is about *product geometry* -- fence height, mesh opening, picket gap,
    member section, stock length -- and this extractor covers footing, spacing,

@@ -12,7 +12,7 @@
 | assets (page + region images) | 9624 |
 | relations | 102 |
 | retrieval units | 10886 |
-| facts | 1714 |
+| facts | 1718 |
 | quality issues | 374 |
 
 Every ingestable file in the manifest is present in the store.
