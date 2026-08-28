@@ -154,6 +154,36 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--rebuild", action="store_true",
                    help="regenerate the candidate annotations from table_reviews")
 
+    p = sub.add_parser("fact-review",
+                       help="the human review loop for regex-extracted facts "
+                            "flagged by low-confidence OCR (G6)")
+    p.add_argument("--queue", action="store_true",
+                   help="the flagged facts waiting for a person, weakest OCR first")
+    p.add_argument("--show", metavar="FACT_ID", type=int,
+                   help="resolve the SourceRef for one fact -- the crop, the text "
+                        "and the warnings a reviewer needs before deciding")
+    p.add_argument("--accept", metavar="FACT_ID", type=int,
+                   help="the value is what the source says")
+    p.add_argument("--correct", metavar="FACT_ID", type=int,
+                   help="the source says something else; give it with --value. "
+                        "The original is kept, never overwritten")
+    p.add_argument("--reject", metavar="FACT_ID", type=int,
+                   help="the fact is wrong and no corrected value replaces it")
+    p.add_argument("--value", help="the person's value, required with --correct")
+    p.add_argument("--reviewer",
+                   help="who reviewed it; required for accept/correct/reject")
+    p.add_argument("--ref", metavar="REF_ID",
+                   help="the ref_id of the region that was looked at, as printed "
+                        "by --queue. Must still be the one this store mints for "
+                        "that fact: a re-extraction that moved the bbox (G38) "
+                        "makes the echo stale and the review is refused")
+    p.add_argument("--notes")
+    p.add_argument("--type", dest="fact_type",
+                   help="restrict --queue to one fact_type")
+    p.add_argument("--limit", type=int, default=25)
+    p.add_argument("--rebuild", action="store_true",
+                   help="regenerate the fact annotations from fact_reviews")
+
     p = sub.add_parser("serve",
                        help="the read/write API behind Planning's screens")
     p.add_argument("--host", default="127.0.0.1")
@@ -413,6 +443,65 @@ def main(argv: list[str] | None = None) -> int:
                         conn, crop_sha256=args.accept, reviewer=args.reviewer,
                         verdict=args.verdict, grid=load(args.grid),
                         spans=load(args.spans), notes=args.notes))
+                except reviews.ReviewRefused as e:
+                    _print({"error": e.code, "message": str(e)})
+                    return 1
+        finally:
+            conn.close()
+    elif args.cmd == "fact-review":
+        # Same guard shape as `review`: exactly one mode, exit 2 on a usage
+        # error, checked before the imports so a usage error does not depend on
+        # a module importing.
+        verbs = {"accepted": args.accept, "corrected": args.correct,
+                 "rejected": args.reject}
+        chosen = [(v, fid) for v, fid in verbs.items() if fid is not None]
+        modes = (bool(args.queue), args.show is not None, bool(args.rebuild),
+                 bool(chosen))
+        if sum(modes) != 1 or len(chosen) > 1:
+            _print({"error": "choose one of --queue, --show, --accept, --correct, "
+                             "--reject, --rebuild"})
+            return 2
+        from . import reviews
+        from .store import connect as _c
+        conn = _c()
+        try:
+            if args.queue:
+                _print({"queue": reviews.fact_review_queue(
+                            conn, limit=args.limit, fact_type=args.fact_type),
+                        "summary": reviews.fact_review_summary(conn)})
+            elif args.show is not None:
+                try:
+                    _print(reviews.fact_source_ref(conn, args.show))
+                except reviews.ReviewRefused as e:
+                    _print({"error": e.code, "message": str(e)})
+                    return 1
+                except Exception as e:          # CropUnavailable and friends
+                    _print({"error": "error.no_image", "message": str(e)})
+                    return 1
+            elif args.rebuild:
+                _print(reviews.rebuild_fact_projection(conn))
+            else:
+                verdict, fact_id = chosen[0]
+                # Refused here as well as in `submit_fact_review`, so the usage
+                # error is a usage error rather than a caught exception. The
+                # library refusal is the one that actually binds -- `POST
+                # /reviews` and any future caller go through it, not through
+                # argparse.
+                if not args.reviewer:
+                    _print({"error": "--reviewer is required: the name is the only "
+                                     "thing separating 'software read this' from "
+                                     "'a person compared it to the source image'"})
+                    return 2
+                if not args.ref:
+                    _print({"error": "--ref is required: echo the ref_id --queue "
+                                     "printed for this fact, which is the region "
+                                     "you looked at"})
+                    return 2
+                try:
+                    _print(reviews.submit_fact_review(
+                        conn, fact_id=fact_id, reviewer=args.reviewer,
+                        verdict=verdict, ref_id=args.ref, value=args.value,
+                        notes=args.notes))
                 except reviews.ReviewRefused as e:
                     _print({"error": e.code, "message": str(e)})
                     return 1

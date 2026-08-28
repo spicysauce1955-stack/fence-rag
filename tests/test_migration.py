@@ -74,7 +74,30 @@ class TestSchemaDeclaration(unittest.TestCase):
             # schema_version 5 -- G38, extraction editions
             "document_versions.tool_fingerprint", "document_versions.edition",
             # schema_version 6 -- obligation 7, tenant isolation
-            "documents.owner_tenant"})
+            "documents.owner_tenant",
+            # schema_version 7 -- G6, the fact review loop
+            "facts.reviewed_value", "facts.reviewed_value_normalized",
+            "facts.reviewer", "facts.reviewed_at"})
+
+    def test_the_fact_review_columns_carry_no_default(self):
+        """Obligation 6 arriving through the migration is the same defect A1 cost
+        324 facts to. `reviewer NOT NULL` is what marks a fact as having been
+        compared to its source image; a DEFAULT of any kind would stamp that on
+        1,714 facts nobody has looked at, with no diff anywhere to show it.
+        """
+        ddl = {f"{t}.{c}": d for t, c, d in ADDED_COLUMNS}
+        for col in ("facts.reviewed_value", "facts.reviewer", "facts.reviewed_at"):
+            self.assertEqual(ddl[col].strip(), "TEXT")
+        self.assertEqual(ddl["facts.reviewed_value_normalized"].strip(), "REAL")
+
+    def test_the_fact_review_record_is_a_table_not_only_columns(self):
+        """`connect()` runs `ensure_columns` but never `executescript(SCHEMA)`,
+        so a new TABLE reaches an existing store only through `migrate()`.
+        `reviews.ensure_fact_reviews` applies this one fragment for the stores
+        that have not run it yet."""
+        from fence_evidence.store import FACT_REVIEWS_DDL
+        self.assertIn("CREATE TABLE IF NOT EXISTS fact_reviews", FACT_REVIEWS_DDL)
+        self.assertIn(FACT_REVIEWS_DDL, SCHEMA)
 
     def test_the_tenant_column_carries_no_default(self):
         """Obligation 7 inverted would arrive through the migration, not a leak.

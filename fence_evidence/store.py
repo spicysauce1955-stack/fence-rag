@@ -20,7 +20,7 @@ from .lang import detect_lang
 from .tenancy import TenantLeak, validate_tenant
 from .paths import EVIDENCE_DB, ensure_writable
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 
 SCHEMA = """
 PRAGMA journal_mode=WAL;
@@ -338,10 +338,82 @@ CREATE TABLE IF NOT EXISTS facts (
     -- reviewed         : a person accepted or corrected it
     -- rejected         : checked and wrong
     review_status   TEXT NOT NULL DEFAULT 'extracted',
+    -- The projection of `fact_reviews` onto the row it judges, mirroring the
+    -- four columns `table_read_candidates` already carries for the table loop.
+    -- The record is `fact_reviews`; these are regenerable by
+    -- `reviews.rebuild_fact_projection`, which is what stops the two storage
+    -- forms drifting.
+    --
+    -- `reviewed_value` never overwrites `value_original`. G44 is the whole
+    -- reason: promotion read the machine's transcription out of a row whose
+    -- status was `corrected` and published it at curation level 2, wearing the
+    -- badge of having been checked. Both values stay, and
+    -- `reviews.effective_fact_value` decides which one answers.
+    -- `reviewed_value_normalized` exists for the same reason one column up:
+    -- a corrected `36"` sitting next to the machine's `24.0` would display the
+    -- person's value and publish the machine's.
+    reviewed_value  TEXT,
+    reviewed_value_normalized REAL,
+    reviewer        TEXT,               -- asserted by the caller; unverifiable here
+    reviewed_at     TEXT,
     created_at      TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS ix_facts_doc ON facts(document_id, fact_type);
+CREATE INDEX IF NOT EXISTS ix_facts_review ON facts(review_status);
 """
+
+# One person's verdict on one regex-extracted fact -- the half of G6 that was a
+# column and no workflow. 266 facts sit at `flagged` because the OCR they came
+# off scored below 80% mean word confidence, and until this table existed
+# `flagged` was a dead end: nothing in the package could move one anywhere.
+#
+# Same shape as `table_reviews`, deliberately. The unit differs -- a table review
+# judges one crop and projects onto every reading of it, a fact review judges one
+# fact -- but the vocabulary does not: `reviewer`, `reviewed_at`, `verdict`,
+# `reviewed_value`, and a record that the annotations on the judged row are a
+# projection of.
+#
+# `ref_id` is the region the reviewer says they looked at, minted by
+# `refs.ref_id` from the fact's element. It is the one checkable claim
+# available here, exactly as `crop_sha256` is for a table review: it proves the
+# echo names the rectangle this store holds TODAY, so a re-extraction that
+# moved the bbox (G38) invalidates it. It does not authenticate -- a ref id is
+# not a secret. See G46.
+#
+# `value_before` and `status_before` are what the fact said when the person
+# looked. They make the record self-contained: a rebuild can put a fact back
+# exactly as it was before anybody touched it, which is what makes a rejection
+# reversible (G47) rather than a one-way door.
+#
+# Pointers run DOWN: a review names the fact it judges, and nothing on `facts`
+# names a review. `tests/test_pointer_direction.py` forbids the reverse.
+FACT_REVIEWS_DDL = """
+CREATE TABLE IF NOT EXISTS fact_reviews (
+    fact_review_id  TEXT PRIMARY KEY,
+    fact_id         INTEGER NOT NULL REFERENCES facts(fact_id),
+    ref_id          TEXT NOT NULL,
+    document_id     TEXT NOT NULL,
+    page_no         INTEGER NOT NULL,
+    element_id      TEXT NOT NULL,
+    fact_type       TEXT NOT NULL,
+    reviewer        TEXT NOT NULL,
+    reviewed_at     TEXT NOT NULL,
+    verdict         TEXT NOT NULL,      -- accepted | corrected | rejected
+    value_before    TEXT NOT NULL,
+    status_before   TEXT NOT NULL,
+    reviewed_value  TEXT,               -- the person's value, on a `corrected`
+    notes           TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_fact_reviews_fact ON fact_reviews(fact_id);
+CREATE INDEX IF NOT EXISTS ix_fact_reviews_ref ON fact_reviews(ref_id);
+"""
+
+# Appended rather than written inline so `reviews.ensure_fact_reviews` can apply
+# this one fragment. `connect()` runs `ensure_columns` but never
+# `executescript(SCHEMA)`, so a store that predates a new TABLE meets it as
+# `no such table` in whatever command runs next -- the table-shaped version of
+# the silent no-op ADDED_COLUMNS exists for.
+SCHEMA = SCHEMA + FACT_REVIEWS_DDL
 
 
 def now() -> str:
@@ -387,6 +459,17 @@ ADDED_COLUMNS = [
     # 144 shared corpus documents to the operator's tenant would hand the whole
     # corpus to one tenant as private property, which is obligation 7 inverted.
     ("documents", "owner_tenant", "TEXT"),
+    # schema_version 7 -- G6, the fact review loop. The projection of
+    # `fact_reviews` onto the fact it judges. Every one is NULL on every
+    # existing row and none carries a DEFAULT, for the reason obligation 6
+    # gives: a migration must not invent a reviewer. `reviewer NOT NULL` is the
+    # marker that a person handled a fact, so a default of any kind would hand
+    # 1,714 unreviewed facts a signature nobody wrote -- build-plan A1's defect
+    # arriving through the migration instead of through a promotion rule.
+    ("facts", "reviewed_value", "TEXT"),
+    ("facts", "reviewed_value_normalized", "REAL"),
+    ("facts", "reviewer", "TEXT"),
+    ("facts", "reviewed_at", "TEXT"),
 ]
 
 # The rule, once. `CURRENT_EDITIONS_VIEW` below and every internal query that
