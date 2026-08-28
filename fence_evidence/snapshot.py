@@ -857,6 +857,22 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
         b = SnapshotBuilder(conn, tenant=tenant, regime=regime)
         warnings = b.warnings()            # mints refs, registers docs, raises gaps
 
+        # Parameter tables are built through the SAME ref minter, so §1.2.1's
+        # closure rule stays STRUCTURAL rather than merely checked: minting a
+        # reference registers its SourceDoc, so a table that cited a document
+        # outside `source_docs` could not be produced in the first place.
+        from .parameters import build_parameter_tables
+        # `b.source_ref` returns the SourceRef dataclass; the wire wants a dict,
+        # and `canonical_bytes` refuses anything else. Minting still goes through
+        # the builder, so the closure rule stays structural.
+        parameters, parameter_gaps = build_parameter_tables(
+            conn, source_ref=lambda eid: asdict(b.source_ref(eid)))
+        for g in parameter_gaps:
+            b.gap(kind=g["kind"], subject=g["subject"],
+                  code=g["because"]["code"], params=g["because"].get("params") or {},
+                  would_close=g["would_close"], closes_by=g["closes_by"],
+                  severity=g.get("severity", "warns_line"), on=g.get("on"))
+
         # The hashed part is the CONTENT plus the coordinates that change its
         # meaning. `retain_until` is deliberately outside it: it moves with the
         # clock, and hashing it would mean two builds over identical knowledge
@@ -873,7 +889,7 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
             # declared and empty rather than absent: an absent key reads as an
             # oversight, an empty list reads as "we publish none of these yet".
             "part_types": [], "parts": [], "models": [], "procedures": [],
-            "parameters": [], "combinations": [], "rules": [],
+            "parameters": parameters, "combinations": [], "rules": [],
         }
         canonical_bytes(members)           # refuses floats, sets, unsortable keys
         verify(members)                    # the gate: a failure is never returned
