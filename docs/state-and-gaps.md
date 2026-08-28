@@ -517,9 +517,10 @@ benchmark to make a metric pass destroys it — covers routing too, and a test
 asserts a routed question keeps every annotation it had.
 
 **Grading note, carried in the report itself:** for a document-returning
-interface the graded support is `document_support`, the analogue of
-`page_evidence_support` and *not* of `evidence_support`. The two are never
-averaged.
+interface the graded support is **`answer_support`** — terms in the text of the
+one document the interface asserts. It is never averaged with `evidence_support`.
+(It shipped as `document_support`, scored over the union of *every* returned
+document, which counted a term appearing in a different chain member; see G52.)
 
 ### G15 — OCR loses the numbers, and now it is measured
 

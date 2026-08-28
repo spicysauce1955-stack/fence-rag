@@ -1,15 +1,15 @@
 {
   "summary": {
     "k": 10,
-    "questions": 59,
+    "questions": 78,
     "answerable": 41,
-    "no_answer": 18,
+    "no_answer": 37,
     "recall_at_k": 0.805,
     "page_recall_at_k": 0.659,
     "mrr": 0.552,
     "evidence_support": 0.672,
     "page_evidence_support": 0.769,
-    "no_answer_precision": 0.333,
+    "no_answer_precision": 0.324,
     "false_unsupported_rate": 0.146,
     "false_unsupported_ids": [
       "gq-108",
@@ -19,7 +19,7 @@
       "gq-015",
       "gq-019"
     ],
-    "passed": 32,
+    "passed": 38,
     "by_category": {
       "comparison": {
         "n": 4,
@@ -86,9 +86,9 @@
         "mean_support": 1.0
       },
       "no_answer": {
-        "n": 18,
+        "n": 37,
         "doc_hits": 0,
-        "passed": 6,
+        "passed": 12,
         "failures": [
           "gq-116",
           "gq-117",
@@ -101,7 +101,20 @@
           "gq-207",
           "gq-208",
           "gq-210",
-          "gq-215"
+          "gq-215",
+          "gq-222",
+          "gq-223",
+          "gq-224",
+          "gq-225",
+          "gq-226",
+          "gq-227",
+          "gq-228",
+          "gq-229",
+          "gq-230",
+          "gq-231",
+          "gq-232",
+          "gq-233",
+          "gq-234"
         ],
         "mean_support": null
       },
@@ -146,23 +159,27 @@
     "search_scope": "every gold question, routed ones included; the metrics above are the search harness and nothing else",
     "interfaces": {
       "resolve": 1,
-      "search": 58
+      "search": 77
     },
     "routed": {
       "n": 1,
       "passed": 1,
       "doc_recall": 1.0,
       "mrr": 1.0,
-      "document_support": 1.0,
+      "answer_support": 1.0,
+      "returned_documents_support": 1.0,
       "record_support": 0.4,
+      "page_rank_reported": 0,
       "by_interface": {
         "resolve": {
           "n": 1,
           "passed": 1,
           "doc_recall": 1.0,
           "mrr": 1.0,
-          "document_support": 1.0,
-          "record_support": 0.4
+          "answer_support": 1.0,
+          "returned_documents_support": 1.0,
+          "record_support": 0.4,
+          "page_rank_reported": 0
         }
       },
       "questions": [
@@ -172,7 +189,13 @@
           "interface": "resolve",
           "doc_rank": 1,
           "record_support": 0.4,
-          "document_support": 1.0,
+          "answer_support": 1.0,
+          "returned_documents_support": 1.0,
+          "answer_documents": [
+            "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf"
+          ],
+          "page_rank": null,
+          "page_rank_basis": "not reported: this interface answers with documents, not pages",
           "missing_terms": [],
           "passed": true,
           "note": "",
@@ -185,10 +208,10 @@
           }
         }
       ],
-      "comparability": "document_support is the analogue of page_evidence_support (terms anywhere in the documents the interface returned), not of evidence_support (terms in one retrieved unit). The pass rule is the same one the search harness uses. These numbers are NOT part of the headline metrics and are not averaged into them."
+      "comparability": "answer_support is the graded number: the annotated answer terms in the text of the ONE document the interface asserts as its answer -- the active member for `resolve`, the top-ranked fact's document for `facts`. It is narrower than page_evidence_support (a document, not a page) and wider than evidence_support (a document, not a unit), so it is the analogue of neither and must not be averaged with either. returned_documents_support is the same terms anywhere in ANY document returned -- for `resolve` that is the whole supersession chain, so a term printed only in a superseded member counts. It is reported and never graded. page_rank is reported only where the interface knows a page; `resolve` answers with documents and reports none. The pass rule is the search harness's own, applied to answer_support. These numbers are NOT part of the headline metrics and are not averaged into them."
     },
     "second_stage": true,
-    "second_stage_attachments": 354,
+    "second_stage_attachments": 447,
     "acceptance": {
       "A3_recall_at_10_ge_0.80": true,
       "A3_evidence_support_ge_0.70": false,
@@ -3241,6 +3264,1567 @@
       ]
     },
     {
+      "id": "gq-216",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "What maximum post spacing does Trex Seclusions composite fencing allow for a 6 ft privacy panel?",
+      "query": "Trex Seclusions post spacing Trex composite fence maximum post spacing 6 ft Seclusions composite fence panel span",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 16.186,
+      "second_stage_attachments": 2,
+      "element_types": [
+        "paragraph",
+        "list",
+        "list",
+        "list",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph"
+      ],
+      "reported_unsupported": true,
+      "unsupported_reason": "term(s) absent from the whole corpus: trex, seclusions",
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/weatherables/weatherables-3-rail-fence-installation-2024.pdf",
+          "page": 6,
+          "element_type": "paragraph",
+          "score": 16.1857,
+          "matched_terms": [
+            "fence",
+            "ft",
+            "panel",
+            "span"
+          ],
+          "snippet": "This fence panel can rack up to 6\u201d over\nan 8 ft. span. If more material is\nneeded, please call 1-888-743-3673."
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf",
+          "page": 24,
+          "element_type": "list",
+          "score": 14.8859,
+          "matched_terms": [
+            "6 ft",
+            "post",
+            "ft",
+            "panel"
+          ],
+          "snippet": " \u2026 6 ft panel includes vertical steel insert in center of panel."
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
+          "page": 24,
+          "element_type": "list",
+          "score": 14.8859,
+          "matched_terms": [
+            "6 ft",
+            "post",
+            "ft",
+            "panel"
+          ],
+          "snippet": " \u2026 6 ft panel includes vertical steel insert in center of panel."
+        }
+      ]
+    },
+    {
+      "id": "gq-217",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "What design wind load is the Ameristar Montage Plus ornamental steel fence rated for?",
+      "query": "Ameristar Montage wind load rating Montage Plus ornamental steel fence design wind Ameristar fence wind rating psf",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 18.835,
+      "second_stage_attachments": 0,
+      "element_types": [
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph"
+      ],
+      "reported_unsupported": true,
+      "unsupported_reason": "term(s) absent from the whole corpus: ameristar, montage",
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf",
+          "page": 22,
+          "element_type": "paragraph",
+          "score": 18.8355,
+          "matched_terms": [
+            "wind",
+            "psf"
+          ],
+          "snippet": "46.7 psf wind\n46.7 psf wind\n46.7 psf wind\n46.7 psf wind\n46.7 psf wind\n46.7 psf wind"
+        },
+        {
+          "source_path": "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf",
+          "page": 23,
+          "element_type": "paragraph",
+          "score": 18.8355,
+          "matched_terms": [
+            "wind",
+            "psf"
+          ],
+          "snippet": "44.7 psf wind\n44.7 psf wind\n44.7 psf wind\n44.7 psf wind\n44.7 psf wind\n44.7 psf wind"
+        },
+        {
+          "source_path": "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf",
+          "page": 23,
+          "element_type": "paragraph",
+          "score": 18.8355,
+          "matched_terms": [
+            "wind",
+            "psf"
+          ],
+          "snippet": "54.1 psf wind\n54.1 psf wind\n54.1 psf wind\n54.1 psf wind\n54.1 psf wind\n54.1 psf wind"
+        }
+      ]
+    },
+    {
+      "id": "gq-218",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "Which ISO 9001 quality-management certificate number does the fence extrusion plant hold?",
+      "query": "ISO 9001 certificate number fence factory fence manufacturer ISO 9001 registration quality management system certification vinyl fence plant",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 10.102,
+      "second_stage_attachments": 6,
+      "element_types": [
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "list",
+        "paragraph"
+      ],
+      "reported_unsupported": true,
+      "unsupported_reason": "term(s) absent from the whole corpus: 9001, iso, management, plant",
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-fence-limited-lifetime-warranty.pdf",
+          "page": 2,
+          "element_type": "paragraph",
+          "score": 10.1023,
+          "matched_terms": [
+            "fence",
+            "registration",
+            "vinyl"
+          ],
+          "snippet": " \u2026 ActiveYards fence products, and Bufftech vinyl fence products are covered by PerformancePlus for a period of five (5) years following the date\nthe installation has been completed. Under \u2026 "
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/catalyst-vinyl-molded-composite-fence-warranty.pdf",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 9.7644,
+          "matched_terms": [],
+          "snippet": "no other brand can match,"
+        },
+        {
+          "source_path": "china/manuals/showtech/PVC-fence-catalog-2024.pdf",
+          "page": 2,
+          "element_type": "paragraph",
+          "score": 9.7393,
+          "matched_terms": [
+            "fence",
+            "factory",
+            "quality",
+            "vinyl"
+          ],
+          "snippet": "promoting the development of China's vinyl fence industry over 18 years.\nAs the market leader, Showtech is devoted to supplying top-quality PVC\nproducts with the most \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-219",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "Which CSA standard do Barrette's Canadian-market vinyl fence panels certify to?",
+      "query": "CSA standard vinyl fence Canada certification Barrette Canada CSA certified fence Canadian standard vinyl fencing CSA number",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 9.023,
+      "second_stage_attachments": 6,
+      "element_types": [
+        "paragraph",
+        "paragraph",
+        "list",
+        "list",
+        "paragraph",
+        "list",
+        "list",
+        "paragraph",
+        "list",
+        "paragraph"
+      ],
+      "reported_unsupported": true,
+      "unsupported_reason": "term(s) absent from the whole corpus: csa, canadian",
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf",
+          "page": 4,
+          "element_type": "paragraph",
+          "score": 9.0228,
+          "matched_terms": [
+            "vinyl",
+            "fence",
+            "certification",
+            "certified"
+          ],
+          "snippet": " \u2026 We will certify Illusions \u00ae Vinyl Fences when properly installed per 75\nMPH Wind Kit TM Installation Instructions using the \u201c75 MPH WIND ILLUSIONS \u00ae VINYL FENCE CERTIFIED ADAPTOR KIT \u2026 "
+        },
+        {
+          "source_path": "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf",
+          "page": 3,
+          "element_type": "paragraph",
+          "score": 8.4891,
+          "matched_terms": [
+            "certification",
+            "number"
+          ],
+          "snippet": " \u2026 g| Ullo2\u00ab License Number:_57350\nProfessional Certification. I hereby certify that these\u2019\ndocuments were prepared or approved by me, .\nand that I am a duly licensed professional engineer \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf",
+          "page": 5,
+          "element_type": "list",
+          "score": 8.3431,
+          "matched_terms": [
+            "certification"
+          ],
+          "snippet": " \u2026 letter to FBC, 2017 Edition, prepared by PPMF, Inc., dated March 08,\n2018, signed and sealed by Pedro De Figueiredo, P.E.\n2. Certification of a name change.\n~"
+        }
+      ]
+    },
+    {
+      "id": "gq-220",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "Does the Showtech PVC fence carry a CE mark under EN 13241, and what performance class is declared?",
+      "query": "Showtech CE marking EN 13241 declared performance EN 13241 vinyl fence CE mark class European standard fence gate CE declaration of performance",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 11.136,
+      "second_stage_attachments": 5,
+      "element_types": [
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "list",
+        "paragraph",
+        "paragraph",
+        "paragraph"
+      ],
+      "reported_unsupported": true,
+      "unsupported_reason": "term(s) absent from the whole corpus: 13241, declared, european, declaration",
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/industry-standards/Wheatland-Fence-SpecCheck_ASTM-AASHTO-Federal-Specs_Jan2025.pdf",
+          "page": 2,
+          "element_type": "paragraph",
+          "score": 11.1355,
+          "matched_terms": [
+            "CE",
+            "EN",
+            "EN",
+            "vinyl",
+            "fence",
+            "CE",
+            "class",
+            "standard",
+            "gate",
+            "CE"
+          ],
+          "snippet": " \u2026 Standard Terminology Relating to Chain Link Fencing\u201d\nF567-23 Chain link installation: \u201cStandard Practice for Installation of Chain Link\nFence\u201d\nF626-14(2025) Chain link fittings: \u201cStandard Specification \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-catalog-2014.pdf",
+          "page": 5,
+          "element_type": "paragraph",
+          "score": 10.6852,
+          "matched_terms": [
+            "CE",
+            "EN",
+            "EN",
+            "CE",
+            "CE"
+          ],
+          "snippet": "ect\nCe\nda\nSie\nr\nrra\nBl\nen\nd S\nele\nct\nCe\nda\nr"
+        },
+        {
+          "source_path": "manuals/illusions-vinyl-fence/astm-info-flyer.pdf",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 10.5536,
+          "matched_terms": [
+            "CE",
+            "EN",
+            "EN",
+            "vinyl",
+            "fence",
+            "CE",
+            "class",
+            "standard",
+            "CE"
+          ],
+          "snippet": "Illusions Vinyl Fence Products are manu-\nfactured to meet cell Class 3\u201330233\u201323 as\ndefined in Specification D4216. Illusions\ncompounds have higher cell classification\nbecause one or \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-221",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "How many years is the Kroy Building Products vinyl fence limited warranty?",
+      "query": "Kroy vinyl fence limited warranty years Kroy Building Products fence warranty term Kroy fence lifetime warranty",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 25.283,
+      "second_stage_attachments": 4,
+      "element_types": [
+        "list",
+        "paragraph",
+        "list",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph"
+      ],
+      "reported_unsupported": true,
+      "unsupported_reason": "term(s) absent from the whole corpus: kroy",
+      "passed": true,
+      "top_hits": [
+        {
+          "source_path": "manuals/freedom-outdoor-living/structural/2023_Conway-Sell-Sheet.pdf",
+          "page": 1,
+          "element_type": "list",
+          "score": 25.2828,
+          "matched_terms": [
+            "vinyl",
+            "limited",
+            "warranty",
+            "years",
+            "Building",
+            "Products",
+            "lifetime"
+          ],
+          "snippet": " \u2026 vinyl material\n\u2022 Pool Code Approved panels meet\nICC requirements*\n\u2022 Limited Lifetime Warranty\nTransferable up to one transfer\n*Check your local building regulations for details\nPool Code\nApproved\nLimited \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-catalog-brochure-2009.pdf",
+          "page": 2,
+          "element_type": "paragraph",
+          "score": 25.1341,
+          "matched_terms": [
+            "fence",
+            "limited",
+            "warranty",
+            "years",
+            "Products",
+            "lifetime"
+          ],
+          "snippet": " \u2026 Warranty Protection\nAll Bufftech fence products are backed by a lifetime\nlimited transferable warranty with exclusive SureStart \u2122\nprotection, which covers warrantied repair and replacement\ncosts for five years \u2026 "
+        },
+        {
+          "source_path": "manuals/freedom-outdoor-living/2023_Emblem_Sell-Sheet.pdf",
+          "page": 1,
+          "element_type": "list",
+          "score": 23.5838,
+          "matched_terms": [
+            "vinyl",
+            "fence",
+            "limited",
+            "warranty",
+            "years",
+            "Building",
+            "Products",
+            "lifetime"
+          ],
+          "snippet": " \u2026 Approved panels meet\nICC requirements*\n\u2022 Limited Lifetime Warranty\nTransferable up to one transfer\nPool Code\nApproved\nLimited Lifetime\nWarranty\n*Check your local building regulations for details\nTo Contact \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-222",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "For how many hours of ASTM B117 salt-spray exposure is the galvanized steel rail reinforcement tested?",
+      "query": "salt spray ASTM B117 hours galvanized steel rail reinforcement how many hours salt spray test fence steel insert B117 corrosion test duration fence hardware",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 30.558,
+      "second_stage_attachments": 5,
+      "element_types": [
+        "paragraph",
+        "paragraph",
+        "list",
+        "paragraph",
+        "paragraph",
+        "list",
+        "list",
+        "paragraph",
+        "paragraph",
+        "list"
+      ],
+      "reported_unsupported": false,
+      "unsupported_reason": "",
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/industry-standards/ASTM-Standards-for-Fence-Materials-and-Products_Compilation-FENCE21.pdf",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 30.558,
+          "matched_terms": [
+            "B117",
+            "B117",
+            "salt",
+            "spray",
+            "B117",
+            "galvanized",
+            "steel",
+            "test",
+            "fence",
+            "B117"
+          ],
+          "snippet": " \u2026 Fence Fabric and Marcelled Tension\nWire\nA824\nSpecification for Metallic-Coated Steel Marcelled Tension Wire for Use With Chain Link Fence\nB117\nPractice for Operating Salt Spray (Fog \u2026 "
+        },
+        {
+          "source_path": "manuals/illusions-vinyl-fence/grand-illusions-advantage-brochure.pdf",
+          "page": 2,
+          "element_type": "paragraph",
+          "score": 16.126,
+          "matched_terms": [
+            "salt",
+            "spray",
+            "many",
+            "test",
+            "fence"
+          ],
+          "snippet": " \u2026 Grand Illusions Advantage products solve the color challenges\nmany fence products face. The unique substrate formulation\nhas been tried and tested in a variety of PVC products all \u2026 "
+        },
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf",
+          "page": 11,
+          "element_type": "list",
+          "score": 14.5808,
+          "matched_terms": [
+            "ASTM",
+            "galvanized",
+            "steel",
+            "fence",
+            "insert"
+          ],
+          "snippet": " \u2026 Galvanized steel\nwelded fabrication in compliance with ASTM F900. Gate frame members 1.900 in.\nOD (48.3 mm) <insert pipe specification> [ASTM F1043 Group IA F1083\nschedule \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-223",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "What ground snow load, in pounds per square foot, is a 6 ft vinyl privacy fence panel rated to withstand?",
+      "query": "vinyl fence panel ground snow load psf snow load rating privacy fence pounds per square foot how much snow can a vinyl fence panel take",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 17.873,
+      "second_stage_attachments": 9,
+      "element_types": [
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph"
+      ],
+      "reported_unsupported": false,
+      "unsupported_reason": "",
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 48,
+          "element_type": "paragraph",
+          "score": 17.8727,
+          "matched_terms": [
+            "load",
+            "per",
+            "square",
+            "foot"
+          ],
+          "snippet": " \u2026 1 pound per square foot = 0.0479 kPa, 1 pound per square foot per foot = 0.157 kPa/m.\na. Coefficient to be multiplied by the dead load \u2026 "
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf",
+          "page": 7,
+          "element_type": "paragraph",
+          "score": 14.6882,
+          "matched_terms": [
+            "load",
+            "rating"
+          ],
+          "snippet": "CONE RATION NOM NT Ne A B WIND LOAD RATING"
+        },
+        {
+          "source_path": "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf",
+          "page": 22,
+          "element_type": "paragraph",
+          "score": 14.2121,
+          "matched_terms": [
+            "psf"
+          ],
+          "snippet": "46.7 psf wind\n46.7 psf wind\n46.7 psf wind\n46.7 psf wind\n46.7 psf wind\n46.7 psf wind"
+        }
+      ]
+    },
+    {
+      "id": "gq-224",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "What maximum allowable rail deflection, in inches, applies to a vinyl fence rail at its rated design wind pressure?",
+      "query": "maximum allowable rail deflection inches design wind pressure vinyl fence vinyl fence rail deflection limit under wind load allowable deflection fence rail span inches",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 19.316,
+      "second_stage_attachments": 3,
+      "element_types": [
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "list",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "table",
+        "paragraph"
+      ],
+      "reported_unsupported": false,
+      "unsupported_reason": "",
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 32,
+          "element_type": "paragraph",
+          "score": 19.3158,
+          "matched_terms": [
+            "allowable",
+            "design",
+            "wind",
+            "pressure",
+            "load"
+          ],
+          "snippet": " \u2026 Per Section 2.4 of the ASCE 7-22, Load Combination 5a, a factor of 0.6 converts the resulting wind\nforces to the Allowable Stress Design (ASD \u2026 "
+        },
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 14,
+          "element_type": "paragraph",
+          "score": 18.5453,
+          "matched_terms": [
+            "allowable",
+            "pressure"
+          ],
+          "snippet": "Allowable lateral soil bearing pressure (S 1 ) for silty sand = 150 psf*,\nas determined from the 2009 International Building Code Table 1806.2\n10"
+        },
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 11,
+          "element_type": "paragraph",
+          "score": 17.8162,
+          "matched_terms": [
+            "maximum",
+            "allowable",
+            "wind",
+            "load"
+          ],
+          "snippet": " \u2026 The user may also want to consider using a higher maximum\nallowable stress, as wind loadings may not be a sustained condition.\n7"
+        }
+      ]
+    },
+    {
+      "id": "gq-225",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "What clearance, in inches, must be kept between the two 1/2\" rebar pieces and the inside wall of a concrete-filled vinyl post?",
+      "query": "rebar clearance from post wall separator clip inches how far apart rebar in vinyl fence post rebar cover concrete filled fence post",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 20.383,
+      "second_stage_attachments": 9,
+      "element_types": [
+        "list",
+        "list",
+        "drawing",
+        "list",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "list",
+        "list",
+        "list"
+      ],
+      "reported_unsupported": false,
+      "unsupported_reason": "",
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-install-semiprivate.pdf",
+          "page": 1,
+          "element_type": "list",
+          "score": 20.3832,
+          "matched_terms": [
+            "rebar",
+            "post",
+            "clip",
+            "concrete",
+            "filled"
+          ],
+          "snippet": " \u2026 to be filled\nwith concrete to prevent concrete seepage\n- Use two pieces of 1/2\" rebar in each hinge, latch and\nend-post\n\u2022 Depress bullet clip and insert \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-install-semiprivate.pdf",
+          "page": 3,
+          "element_type": "list",
+          "score": 18.6443,
+          "matched_terms": [
+            "rebar",
+            "post",
+            "clip",
+            "concrete",
+            "filled"
+          ],
+          "snippet": " \u2026 Concrete and rebar\n- Use two pieces of 1/2\" rebar in each hinge, latch and\nend post\n\u2022 Bullet clip will drop down and hold rail in post\n- Rebar \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+          "page": 13,
+          "element_type": "drawing",
+          "score": 17.7506,
+          "matched_terms": [
+            "rebar",
+            "clearance",
+            "post",
+            "separator",
+            "clip"
+          ],
+          "snippet": " \u2026 CAPS AND WASHERS ALLOW CLEARANCE FOR GATE SWING POST SUPPORT OPTIONS: REBAR \u2018SEPARATOR CLIP. 1/2\" REBAR INSERT ALUMINUM GATE POST STIFFENER INSIDE POST FOR FASTER, CLEANER INSTALLATION \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-226",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "At what wind speed, in mph, must fence panels be temporarily braced or removed during installation?",
+      "query": "wind speed mph temporary bracing fence panels during installation brace fence panels high wind while installing maximum wind during fence installation mph",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 18.374,
+      "second_stage_attachments": 6,
+      "element_types": [
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph"
+      ],
+      "reported_unsupported": false,
+      "unsupported_reason": "",
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf",
+          "page": 3,
+          "element_type": "paragraph",
+          "score": 18.3744,
+          "matched_terms": [
+            "wind",
+            "speed",
+            "mph",
+            "fence",
+            "high",
+            "maximum"
+          ],
+          "snippet": " \u2026 THIS FENCE AND IT\u2019S SUPPORTS ARE DESIGNED FOR Date: 10/18/07\n75 MPH FASTEST MILE WIND SPEED OR 90 MPH \u00a23 SEC. GUST), i l Scale \u2026 "
+        },
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 13,
+          "element_type": "paragraph",
+          "score": 17.8304,
+          "matched_terms": [
+            "wind",
+            "speed",
+            "mph",
+            "fence",
+            "installation",
+            "high",
+            "maximum"
+          ],
+          "snippet": " \u2026 Assume the fence is located in an open terrain where the Wind Exposure Category is \"C\" and the\ncode listed maximum wind speed is 115 MPH. Icing effects \u2026 "
+        },
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 12,
+          "element_type": "paragraph",
+          "score": 17.6435,
+          "matched_terms": [
+            "wind",
+            "speed",
+            "mph",
+            "fence",
+            "installation",
+            "high",
+            "maximum"
+          ],
+          "snippet": " \u2026 From Table 1, Wind Speed 105 MPH, for a 4.0\u201d outside diameter pipe, the listed\n\u201cS\u201d value for a 10\u2019 high fence is 7.8 feet.\nFrom \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-227",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "What minimum edge distance, in inches, is required for the 3/8\" wedge anchors that fasten a Wam Bam surface mount to a concrete slab?",
+      "query": "wedge anchor minimum edge distance concrete surface mount how close to slab edge can I set the fence surface mount anchors 3/8 wedge anchor edge distance vinyl fence post mount",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 31.494,
+      "second_stage_attachments": 1,
+      "element_types": [
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "drawing",
+        "paragraph",
+        "paragraph",
+        "list",
+        "paragraph",
+        "paragraph"
+      ],
+      "reported_unsupported": false,
+      "unsupported_reason": "",
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/wam-bam/vinyl-surface-mount-SB61000-install-guide.pdf",
+          "page": 6,
+          "element_type": "paragraph",
+          "score": 31.4941,
+          "matched_terms": [
+            "wedge",
+            "anchor",
+            "edge",
+            "concrete",
+            "surface",
+            "mount",
+            "anchors",
+            "3/8"
+          ],
+          "snippet": " \u2026 Use (4) 3/8\u201d x 3\u201d\nlong concrete wedge anchors (not included) to secure the\nsurface mount.\nWood: Drill holes through the pre-drilled holes in the\nSurface \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+          "page": 51,
+          "element_type": "paragraph",
+          "score": 22.8405,
+          "matched_terms": [
+            "wedge",
+            "anchor",
+            "minimum",
+            "edge",
+            "concrete",
+            "mount",
+            "fence",
+            "anchors"
+          ],
+          "snippet": " \u2026 concrete wall or\non flat concrete by using\nconcrete mounting brackets\nMinimum Bolt\nsize 1/2\" x 4.5\"\n\u2014~| 10\"\nUse epoxy anchors\ninstead of wedge\nanchors for \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf",
+          "page": 51,
+          "element_type": "paragraph",
+          "score": 19.4728,
+          "matched_terms": [
+            "wedge",
+            "anchor",
+            "minimum",
+            "edge",
+            "concrete",
+            "mount",
+            "fence",
+            "anchors"
+          ],
+          "snippet": " \u2026 concrete wall or\non flat concrete by using\nconcrete mounting brackets\nMinimum Bolt\nsize 1/2\" x 4.5\"\n10\"\nUse epoxy anchors\ninstead of wedge\nanchors for \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-228",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "What Sound Transmission Class (STC) rating does a Bufftech Imperial privacy fence achieve under ASTM E90?",
+      "query": "Bufftech Imperial STC sound transmission loss rating Imperial privacy fence sound transmission class CertainTeed Bufftech ASTM E 90 sound transmission test Imperial",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 47.855,
+      "second_stage_attachments": 7,
+      "element_types": [
+        "list",
+        "paragraph",
+        "paragraph",
+        "list",
+        "paragraph",
+        "list",
+        "paragraph",
+        "list",
+        "list",
+        "paragraph"
+      ],
+      "reported_unsupported": false,
+      "unsupported_reason": "",
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-catalog-2014.pdf",
+          "page": 29,
+          "element_type": "list",
+          "score": 47.8546,
+          "matched_terms": [
+            "sound",
+            "transmission",
+            "loss",
+            "ASTM",
+            "90",
+            "test"
+          ],
+          "snippet": "* Gates load tested for 300lbs\ne ASTM E 90 Sound Transmission Loss Test"
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf",
+          "page": 3,
+          "element_type": "paragraph",
+          "score": 14.187,
+          "matched_terms": [
+            "rating",
+            "privacy",
+            "ASTM",
+            "90"
+          ],
+          "snippet": " \u2026 CHESTERFIELD W/ PRIVACY MODEL: CHESTERFIELD 07-315\nPRODUCT RATING: LATTICE . SHEET: 6 of 8\n75 MPH FASTED MILE WIND SPEED : SHEET: 5 0f8 Sheet\nOR 90 MPH 3 \u2026 "
+        },
+        {
+          "source_path": "manuals/industry-standards/Wheatland-Fence-SpecCheck_ASTM-AASHTO-Federal-Specs_Jan2025.pdf",
+          "page": 7,
+          "element_type": "paragraph",
+          "score": 13.9374,
+          "matched_terms": [
+            "fence",
+            "class",
+            "ASTM",
+            "90"
+          ],
+          "snippet": " \u2026 Electrically operated gates must\ncomply with ASTM F2200.\nRR-F-191/3E (2006 & 2007 Amendment) Fence posts and rails\nClass 1 - Steel pipe\nGrade A- ASTM F1083, hot \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-229",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "What ASTM D4216 cell classification does the PVC compound used in Weatherables fence profiles meet?",
+      "query": "Weatherables ASTM D4216 cell classification PVC Weatherables vinyl cell class rigid PVC compound TriWest PVC cell classification D1784",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 36.082,
+      "second_stage_attachments": 4,
+      "element_types": [
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph"
+      ],
+      "reported_unsupported": false,
+      "unsupported_reason": "",
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/industry-standards/ASTM-Info-Flyer_Illusions-F964-D4216-Summary.pdf",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 36.0823,
+          "matched_terms": [
+            "D4216",
+            "D4216",
+            "cell",
+            "classification",
+            "vinyl",
+            "class",
+            "compound"
+          ],
+          "snippet": "Illusions Vinyl Fence Products are manu-\nfactured to meet cell Class 3\u201330233\u201323 as\ndefined in Specification D4216. Illusions\ncompounds have higher cell classification\nbecause one or \u2026 "
+        },
+        {
+          "source_path": "manuals/illusions-vinyl-fence/installation-instructions-assembled-panel.pdf",
+          "page": 4,
+          "element_type": "paragraph",
+          "score": 35.5581,
+          "matched_terms": [
+            "D4216",
+            "D1784",
+            "ASTM",
+            "D4216",
+            "cell",
+            "classification",
+            "PVC",
+            "vinyl",
+            "class",
+            "rigid",
+            "PVC",
+            "compound",
+            "PVC",
+            "D1784"
+          ],
+          "snippet": " \u2026 Intended for Outdoor Applications\nD4216 \u2013 Material Class Number1-32333-3.\nTo establish Cell Classification of PVC\nmaterial. Illusions compounds have higher cell\nclassification because one or more properties \u2026 "
+        },
+        {
+          "source_path": "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf",
+          "page": 4,
+          "element_type": "paragraph",
+          "score": 35.2393,
+          "matched_terms": [
+            "D4216",
+            "D1784",
+            "ASTM",
+            "D4216",
+            "cell",
+            "classification",
+            "PVC",
+            "vinyl",
+            "class",
+            "rigid",
+            "PVC",
+            "compound",
+            "PVC",
+            "D1784"
+          ],
+          "snippet": " \u2026 Intended for Outdoor Applications\nD4216 \u2013 Material Class Number1-32333-3.\nTo establish Cell Classification of PVC\nmaterial. Illusions compounds have higher cell\nclassification because one or more properties \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-230",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "What titanium dioxide UV-inhibitor loading does the Illusions PVC compound use?",
+      "query": "Illusions titanium dioxide UV inhibitor PVC compound Illusions TiO2 content vinyl fence material titanium dioxide UV inhibitor Illusions fence specification",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 34.883,
+      "second_stage_attachments": 1,
+      "element_types": [
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph"
+      ],
+      "reported_unsupported": false,
+      "unsupported_reason": "",
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "china/manuals/showtech/PVC-fence-catalog-2022.pdf",
+          "page": 3,
+          "element_type": "paragraph",
+          "score": 34.8826,
+          "matched_terms": [
+            "titanium",
+            "dioxide",
+            "UV",
+            "PVC",
+            "TiO2",
+            "material",
+            "UV",
+            "specification"
+          ],
+          "snippet": "VOnly use 100% virgin material to produce\nhigh quality products, meet ASTM F964 and\nD1748 specification.\nV Add in 10 parts titanium dioxide (TiO2),\nmaking PVC products UV \u2026 "
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf",
+          "page": 10,
+          "element_type": "paragraph",
+          "score": 26.3297,
+          "matched_terms": [
+            "titanium",
+            "dioxide",
+            "UV",
+            "inhibitor",
+            "PVC",
+            "TiO2",
+            "fence",
+            "UV",
+            "specification"
+          ],
+          "snippet": " \u2026 SECTION DTUL@264 PSI, Degrees Celsius 72\u00b0 D-\u2014648\n\\_ a TiO2 \u2014 Titanium Dioxide UV Inhibitor 10/100 -\n6.000\u201d aa\na PVC FENCE (ON SITE KIT ASSEMBLED STYLE)"
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf",
+          "page": 5,
+          "element_type": "paragraph",
+          "score": 25.6681,
+          "matched_terms": [
+            "titanium",
+            "dioxide",
+            "UV",
+            "inhibitor",
+            "TiO2",
+            "UV",
+            "specification"
+          ],
+          "snippet": " \u2026 FOR PICKETS Flexural Modulas, PSI 410,000 0-790\nTYPICAL | H DTUL@264 PSI, Degrees Celsius _ 72 D-648\nSECTION I { Tio2 Titanium Dioxide UV Inhibitor 10/100 ~\n|"
+        }
+      ]
+    },
+    {
+      "id": "gq-231",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "What maximum gate weight, in pounds, is the Bufftech adjustable nylon gate hinge rated to support?",
+      "query": "Bufftech adjustable nylon gate hinge gate weight lbs CertainTeed vinyl gate hinge weight capacity pounds how heavy a gate will the nylon hinge support",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 23.333,
+      "second_stage_attachments": 8,
+      "element_types": [
+        "table",
+        "drawing",
+        "table",
+        "table",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph"
+      ],
+      "reported_unsupported": false,
+      "unsupported_reason": "",
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf",
+          "page": 106,
+          "element_type": "table",
+          "score": 23.3331,
+          "matched_terms": [
+            "gate",
+            "hinge",
+            "lbs",
+            "heavy",
+            "support"
+          ],
+          "snippet": "Product Description | Available Materials | Support Gates Up To\nHinges\nA Heavy-Duty Strap Hinge Steel 75 lbs\nB | Standard Strap Hinge | Steel | 35 lbs\nC Heavy-Duty Modern \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+          "page": 3,
+          "element_type": "drawing",
+          "score": 19.0045,
+          "matched_terms": [
+            "adjustable",
+            "nylon",
+            "gate",
+            "hinge"
+          ],
+          "snippet": " \u2026 Rail End/Gate Post Gate 1\" ON EACH SIDE FOR HINGE 3/4\" FOR LATCH 1\" ON EACH SIDE FOR HINGE ADJUSTABLE NYLON HINGE END/GATE POST or \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf",
+          "page": 7,
+          "element_type": "table",
+          "score": 18.2889,
+          "matched_terms": [
+            "gate",
+            "lbs",
+            "pounds"
+          ],
+          "snippet": "Concrete Usage for Posts\nEnd Line or End Posts Fence Corner Filled with Post Size Height Posts Concrete Gate P\n4x4 3' 100 lbs 145 lbs 160\n4x4 \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-232",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "Which Miami-Dade County NOA covers Weatherables vinyl privacy fence, and what is its expiration date?",
+      "query": "Weatherables Miami-Dade NOA number expiration date Weatherables notice of acceptance hurricane approval Weatherables Florida product approval expiration",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 24.443,
+      "second_stage_attachments": 7,
+      "element_types": [
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "paragraph"
+      ],
+      "reported_unsupported": false,
+      "unsupported_reason": "",
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/illusions-vinyl-fence/75mph-wind-kit-noa-miami-dade.pdf",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 24.443,
+          "matched_terms": [
+            "Miami-Dade",
+            "NOA",
+            "number",
+            "expiration",
+            "date",
+            "notice",
+            "acceptance",
+            "hurricane",
+            "approval",
+            "Florida",
+            "product"
+          ],
+          "snippet": " \u2026 Dixon, P.E.,\nbearing the Miami-Dade County Product Control revision stamp with the Notice of Acceptance number and\nexpiration date by the Miami-Dade County Product Control \u2026 "
+        },
+        {
+          "source_path": "manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 22.9631,
+          "matched_terms": [
+            "Miami-Dade",
+            "NOA",
+            "number",
+            "expiration",
+            "date",
+            "notice",
+            "acceptance",
+            "hurricane",
+            "approval",
+            "Florida",
+            "product"
+          ],
+          "snippet": " \u2026 Dixon, P.E.,\nbearing the Miami-Dade County Product Control revision stamp with the Notice of Acceptance number and\nexpiration date by the Miami-Dade County Product Control \u2026 "
+        },
+        {
+          "source_path": "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-22-0217.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 21.45,
+          "matched_terms": [
+            "Miami-Dade",
+            "NOA",
+            "number",
+            "expiration",
+            "date",
+            "notice",
+            "acceptance",
+            "approval",
+            "Florida",
+            "product"
+          ],
+          "snippet": " \u2026 2022, bearing the Miami-Dade County Product Control Revision stamp with the Notice of Acceptance\nnumber and the expiration date by Miami-Dade County Product Control Section.\nMISSILE \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-233",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "To what depth below grade must the posts of a Showtech ST101 full privacy PVC fence be set?",
+      "query": "Showtech PVC privacy fence post embedment depth below grade Showtech vinyl fence footing depth post hole how deep to set posts Showtech privacy fence",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 21.725,
+      "second_stage_attachments": 8,
+      "element_types": [
+        "paragraph",
+        "list",
+        "list",
+        "list",
+        "paragraph",
+        "paragraph",
+        "list",
+        "list",
+        "list",
+        "list"
+      ],
+      "reported_unsupported": false,
+      "unsupported_reason": "",
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+          "page": 7,
+          "element_type": "paragraph",
+          "score": 21.725,
+          "matched_terms": [
+            "fence",
+            "post",
+            "embedment",
+            "depth",
+            "below",
+            "grade",
+            "footing"
+          ],
+          "snippet": " \u2026 of footing at which \u201cP\u201d is applied to post\nD = Post footing embedment depth below finish grade\nS1 = Allowable lateral soil-bearing pressure\nH = Fence post height above \u2026 "
+        },
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf",
+          "page": 14,
+          "element_type": "list",
+          "score": 20.7281,
+          "matched_terms": [
+            "fence",
+            "post",
+            "depth",
+            "below",
+            "grade",
+            "footing",
+            "deep",
+            "set",
+            "posts"
+          ],
+          "snippet": " \u2026 depth, fence height and wind load may require larger\ndiameter or deeper footings] Top of post concrete footing to be [at grade ] [6\ninches (152 mm) below grade \u2026 "
+        },
+        {
+          "source_path": "manuals/illusions-vinyl-fence/installation-instructions-assembled-panel.pdf",
+          "page": 3,
+          "element_type": "list",
+          "score": 18.6233,
+          "matched_terms": [
+            "fence",
+            "post",
+            "depth",
+            "below",
+            "grade",
+            "hole",
+            "deep",
+            "posts"
+          ],
+          "snippet": " \u2026 The\nhole should be as deep as the post depending on\ngrade. No less than 30\u201d below grade for 5\u201d x 5\u201d\nposts and 32\u201d for 8\u201d x \u2026 "
+        }
+      ]
+    },
+    {
+      "id": "gq-234",
+      "category": "no_answer",
+      "set": "no-answer",
+      "question": "What withdrawal (pull-out) strength, in pounds, does the #8 x 3/4\" screw that locks a Bufftech top rail into the post develop?",
+      "query": "#8 x 3/4 screw pulled out load lbf rail post vinyl fence rail locking screw strength pounds how much load will the rail screw hold before the threads pulled out",
+      "answerable": false,
+      "n_results": 10,
+      "doc_rank": null,
+      "page_rank": null,
+      "expected_documents": [],
+      "equivalent_documents": [],
+      "support": null,
+      "page_support": null,
+      "found_terms": [],
+      "missing_terms": [],
+      "element_type_ok": null,
+      "image_evidence_ok": null,
+      "top_score": 30.277,
+      "second_stage_attachments": 2,
+      "element_types": [
+        "paragraph",
+        "paragraph",
+        "paragraph",
+        "list",
+        "paragraph",
+        "drawing",
+        "list",
+        "list",
+        "list",
+        "paragraph"
+      ],
+      "reported_unsupported": false,
+      "unsupported_reason": "",
+      "passed": false,
+      "top_hits": [
+        {
+          "source_path": "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf",
+          "page": 17,
+          "element_type": "paragraph",
+          "score": 30.2774,
+          "matched_terms": [
+            "screw",
+            "pulled",
+            "out",
+            "load",
+            "lbf",
+            "post",
+            "threads"
+          ],
+          "snippet": " \u2026 Loaded to 463lbf when the front two mounting screw threads pulled\nout of post.\nSecond Setup:\nMixed material corner post point loaded @ 42\u201d using newly designed 3/8 \u2026 "
+        },
+        {
+          "source_path": "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf",
+          "page": 14,
+          "element_type": "paragraph",
+          "score": 17.019,
+          "matched_terms": [
+            "load",
+            "lbf",
+            "strength"
+          ],
+          "snippet": " \u2026 In addition to this design load, loads representing factors of safety of 2.5 (125\nlbf) and 4.0 (200lbf) shall be tested.\nTest was performed and indicates \u2026 "
+        },
+        {
+          "source_path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
+          "page": 3,
+          "element_type": "paragraph",
+          "score": 14.0549,
+          "matched_terms": [
+            "out",
+            "pounds"
+          ],
+          "snippet": "THAN 50 MILLION POUNDS OF PLASTIC OUT OF LANDFILLS."
+        }
+      ]
+    },
+    {
       "id": "gq-001",
       "category": "exact_identifier",
       "set": "structural",
@@ -5222,7 +6806,8 @@
       "answerable": true,
       "n_results": 4,
       "doc_rank": 1,
-      "page_rank": 1,
+      "page_rank": null,
+      "page_rank_basis": "not reported: this interface answers with documents, not pages",
       "expected_documents": [
         "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
         "manuals/certainteed-bufftech/structural/NOA-24-0117.05-Barrette-successor-extruded-pvc-fencing-post-CertainTeed-transfer-2029.pdf",
@@ -5236,8 +6821,12 @@
         "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf",
         "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
       ],
+      "answer_documents": [
+        "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf"
+      ],
       "record_support": 0.4,
-      "document_support": 1.0,
+      "answer_support": 1.0,
+      "returned_documents_support": 1.0,
       "found_terms": [
         "revises NOA #23-0314.05",
         "04/24/2025",
@@ -5246,11 +6835,19 @@
         "Extruded PVC Vinyl Fencing"
       ],
       "missing_terms": [],
+      "found_terms_anywhere_returned": [
+        "revises NOA #23-0314.05",
+        "04/24/2025",
+        "Egg Harbor City",
+        "Robert Nieminen",
+        "Extruded PVC Vinyl Fencing"
+      ],
       "passed": true,
       "interface": "resolve",
       "identifier": "23-0314.05",
       "active_document": "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf",
-      "active_basis": "newest member of the chain and not marked superseded",
+      "active_basis": "no member is marked active; inferred in force from an agreed expiration date 2029-03-13 still ahead of 2026-08-28, and nothing in the chain supersedes it",
+      "active_basis_kind": "inferred_in_force",
       "chain_length": 4,
       "chain": [
         {

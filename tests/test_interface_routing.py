@@ -262,5 +262,39 @@ class TestARoutedQuestionIsNotJudgedAgainstTheClock(unittest.TestCase):
         self.assertIsNone(later["active"])
 
 
+class TestTheTwoConfigurationsDoNotShareAnArtifact(unittest.TestCase):
+    """`cli evaluate --second-stage` used to overwrite `evaluation-report.md`.
+
+    Both are committed artifacts and they measure different things — 0.623 unit
+    support against 0.672 — so a shared path means the file on disk says
+    whichever run happened last, and a reader has no way to tell which. That is
+    the same class as a report embedding today's date, and it is worse, because
+    the number is plausible either way.
+    """
+
+    def test_the_default_name_follows_the_configuration(self):
+        from fence_evidence.evaluate import default_report_name
+        self.assertEqual(default_report_name(None, False), "evaluation")
+        self.assertEqual(default_report_name(None, True),
+                         "evaluation-second-stage")
+
+    def test_an_explicit_name_still_wins(self):
+        from fence_evidence.evaluate import default_report_name
+        self.assertEqual(default_report_name("scratch", True), "scratch")
+        self.assertEqual(default_report_name("scratch", False), "scratch")
+
+    def test_the_two_committed_reports_disagree_about_support(self):
+        """If these ever match, one run has overwritten the other."""
+        import json
+        base = json.loads((ROOT / "workspace" / "tests"
+                           / "evaluation-results.json").read_text())
+        second = json.loads((ROOT / "workspace" / "tests"
+                             / "evaluation-second-stage-results.json").read_text())
+        self.assertFalse(base["summary"]["second_stage"])
+        self.assertTrue(second["summary"]["second_stage"])
+        self.assertNotEqual(base["summary"]["evidence_support"],
+                            second["summary"]["evidence_support"])
+
+
 if __name__ == "__main__":
     unittest.main()

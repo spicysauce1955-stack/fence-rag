@@ -87,7 +87,15 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("evaluate", help="Phase 4: run the gold evaluation set")
     p.add_argument("-k", type=int, default=10)
     p.add_argument("--second-stage", action="store_true")
-    p.add_argument("--name", default="evaluation")
+    # Left as None so `--second-stage` can pick its own default below. Two
+    # different measurements sharing one artifact path is not a naming nicety:
+    # `cli evaluate --second-stage` used to overwrite `evaluation-report.md`
+    # with the second-stage numbers, so a committed baseline said 0.672 unit
+    # support where the default configuration measures 0.623, and whichever run
+    # happened last was the one on disk.
+    p.add_argument("--name", default=None,
+                   help="report basename (default: `evaluation`, or "
+                        "`evaluation-second-stage` with --second-stage)")
 
     p = sub.add_parser("audit", help="relevance audit of the retrieval projection (read-only)")
     p.add_argument("-k", type=int, default=10)
@@ -344,9 +352,11 @@ def main(argv: list[str] | None = None) -> int:
             _print(query_facts(args.type, manufacturer=args.manufacturer, limit=args.limit))
     elif args.cmd == "evaluate":
         _warn_unfetched()
-        from .evaluate import run_evaluation
-        _print(run_evaluation(k=args.k, second_stage=args.second_stage,
-                              report_name=args.name)["summary"])
+        from .evaluate import run_evaluation, default_report_name
+        _print(run_evaluation(
+            k=args.k, second_stage=args.second_stage,
+            report_name=default_report_name(args.name,
+                                            args.second_stage))["summary"])
     elif args.cmd == "audit":
         _warn_unfetched()
         from .audit import run_audit

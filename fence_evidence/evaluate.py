@@ -900,6 +900,19 @@ def _routed_section(out: dict) -> list[str]:
     return lines
 
 
+def default_report_name(explicit: str | None, second_stage: bool) -> str:
+    """Where a run's artifacts land, when the caller did not say.
+
+    The two configurations measure different things -- 0.623 unit support
+    against 0.672 -- and both are committed artifacts, so sharing a path means
+    the file says whatever the last run happened to be. An explicit `--name`
+    still wins; this only supplies the default nobody should have to remember.
+    """
+    if explicit:
+        return explicit
+    return "evaluation-second-stage" if second_stage else "evaluation"
+
+
 def _write_report(out: dict, report_name: str = "evaluation") -> None:
     s = out["summary"]
     scope = ("the ten-document pilot" if s.get("skipped_not_ingested")
