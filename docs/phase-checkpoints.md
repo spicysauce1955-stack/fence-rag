@@ -695,3 +695,40 @@ authenticates a caller, not a tenant, so an owned document is unreachable throug
 the API by anyone including its owner — honest while every document is shared,
 inadequate the day the first upload lands, and a product decision rather than an
 engineering one.
+
+### The adversarial pass, 2026-08-28 — and what it says about same-day code
+
+Six gaps were closed in one session and then handed to a reader whose only
+instruction was to break them. It found **three defects in code committed that
+morning**, two of which could destroy data that does not come back, and it
+falsified a claim in the audit that three documents had been repeating.
+
+What it caught, and why each was missed by the person who wrote it:
+
+| Found | Why the author missed it |
+|---|---|
+| `gc --apply` races a running ingest and deletes region crops that never come back | The author reasoned about the roots and the walk, and not about the interval between them. Ten workers guarantee that interval is never empty. |
+| `remove_derived_file`'s guard is "inside `workspace/`", not "inside the derived tree" | The docstring asserted the guard was sufficient. Writing that sentence is what stopped the author checking it. `..` satisfies it. |
+| `sourcerefs._successors` and `_also_filed_under` leak across tenants | The same two fields were scoped on the snapshot side an hour earlier. The author fixed the shape where he found it and did not grep for the shape. |
+| The `parameters` tenant scoping had no test at all | It is the only snapshot section carrying values, and it is empty today, so nothing failed when the scoping was deleted. Emptiness hid the one that matters most. |
+| The audit's F1 evidence (gq-102, gq-103) does not reproduce | Cited from a document rather than re-measured. Both headings turn out to be carried already. |
+
+Three lessons worth keeping:
+
+1. **Mutation-test the guard, not the feature.** Every tenancy assertion looked
+   fine; the useful question was *"which line can I delete and still be green?"*
+   Two survived, and both were in the section that publishes numbers.
+2. **A defect fixed in one file is a defect to grep for.** `superseded_by` and
+   `also_filed_as` leak *identically* in `snapshot.py` and `sourcerefs.py`, and
+   only the first was found by thinking.
+3. **An empty table hides its own bug.** `parameters` publishes nothing because
+   nothing is promoted, so the section's scoping, its correction handling and its
+   curation level were all untested and two of the three were wrong. The first
+   review will make three latent defects live at once.
+
+The same session also closed the same defect class three times over — a
+committed artifact embedding a value that moves for reasons unrelated to its
+content: today's date in a version basis, free disk space in the environment
+report, and two different measurements writing to one evaluation report. G28
+recorded the cost of a permanently dirty tree once; it recurs because the value
+always looks like information at the moment it is added.
