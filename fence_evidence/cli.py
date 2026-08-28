@@ -119,6 +119,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--get", metavar="ID", help="fetch one by hash")
     p.add_argument("--dry-run", action="store_true",
                    help="build and report without storing")
+    p.add_argument("--verify-stored", action="store_true",
+                   help="re-run the obligations over every snapshot already on "
+                        "disk; exits non-zero if any fails. The build-time gate "
+                        "cannot see an artifact published before it existed")
 
     p = sub.add_parser("refs",
                        help="the evidence identifier: rebuild the index, or "
@@ -325,10 +329,23 @@ def main(argv: list[str] | None = None) -> int:
         # --build and --dry-run exclusive, `if args.build` can no longer fire
         # on a run the caller asked to be dry.
         modes = (bool(args.build), bool(args.dry_run), bool(args.list),
-                 args.get is not None)
+                 args.get is not None, bool(args.verify_stored))
         if sum(modes) != 1:
-            _print({"error": "choose one of --build, --dry-run, --list, --get"})
+            _print({"error": "choose one of --build, --dry-run, --list, --get, "
+                             "--verify-stored"})
             return 2
+        if args.verify_stored:
+            from .snapshot_store import verify_stored
+            res = verify_stored()
+            _print(res)
+            if res["failed"] or res["unreadable"]:
+                # Same convention as `refs --verify`: a guard that reports a
+                # failure on stdout and exits 0 is the vacuous-green class.
+                print(f"FAILED: {res['failed']} stored snapshot(s) do not meet "
+                      f"the obligations they were published under.",
+                      file=sys.stderr)
+                return 1
+            return 0
         if args.get:
             _print(get_snapshot(args.get))
         elif args.list:

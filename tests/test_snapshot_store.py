@@ -10,11 +10,15 @@ it by hash returns the same bytes until `retain_until`.
 So the store below is write-once and refuses to overwrite. That refusal is the
 whole point: a snapshot that can be silently rewritten is a hash that lies.
 """
+import json
+import shutil
+import tempfile
+from pathlib import Path
 import unittest
 
 import context  # noqa: F401  -- puts the repo root on sys.path
 from context import requires_store
-from fence_evidence.snapshot_store import (SnapshotExists, SnapshotMissing,
+from fence_evidence.snapshot_store import (verify_stored, SnapshotExists, SnapshotMissing,
                                            get_snapshot, list_snapshots,
                                            put_snapshot, tombstone)
 
@@ -154,3 +158,69 @@ class TestRoundTripFromARealBuild(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestVerifyStored(unittest.TestCase):
+    """The gate ran at build time only, so a published artifact could rot.
+
+    Measured: the first stored snapshot failed today's `verify()` with 188
+    failures -- 63 gaps with neither `because` nor `cites`, and no `SourceDoc`
+    declaring its other filings -- while `cli refs --verify` passed it, because
+    that command asks whether citations resolve, not whether the object is
+    well formed, and `snapshot --list` showed it as an ordinary member. That is
+    how G40 came to be recorded FIXED while the shipped object still carried the
+    defect.
+    """
+
+    def setUp(self):
+        self._dir = tempfile.mkdtemp(prefix="fence-verify-stored-")
+        self.root = Path(self._dir)
+
+    def tearDown(self):
+        shutil.rmtree(self._dir, ignore_errors=True)
+
+    def _write(self, name, payload):
+        (self.root / f"{name}.json").write_text(json.dumps(payload))
+
+    def test_an_empty_store_is_vacuously_clean(self):
+        out = verify_stored(root=self.root)
+        self.assertEqual((out["checked"], out["failed"]), (0, 0))
+
+    def test_a_non_compliant_snapshot_is_reported(self):
+        bad = {"snapshot_id": "b" * 64, "tenant": "t", "regime": "us_astm",
+               "source_docs": [], "warnings": [], "part_types": [], "parts": [],
+               "models": [], "procedures": [], "parameters": [],
+               "combinations": [], "rules": [],
+               "gaps": [{"id": "g", "kind": "illegible_source",
+                         "subject": "element-x", "would_close": "read it",
+                         "closes_by": "knowledge", "severity": "warns_line"}]}
+        self._write("b" * 64, bad)
+        out = verify_stored(root=self.root)
+        self.assertEqual(out["failed"], 1)
+        self.assertIn("b" * 16, out["failures"])
+        self.assertTrue(out["failures"]["b" * 16]["count"] >= 1)
+
+    def test_a_tombstoned_snapshot_is_skipped_not_failed(self):
+        """It must use the same key `refs.verify_snapshots` uses.
+
+        Two guards disagreeing about what a withdrawn snapshot looks like means
+        one of them silently checks a different population than the other.
+        """
+        self._write("c" * 64, {"snapshot_id": "c" * 64, "tombstoned": True,
+                               "reason": "excised"})
+        out = verify_stored(root=self.root)
+        self.assertEqual((out["checked"], out["tombstoned_skipped"]), (0, 1))
+        self.assertEqual(out["failed"], 0)
+
+    def test_unparseable_json_is_reported_not_raised(self):
+        (self.root / "broken.json").write_text("{not json")
+        out = verify_stored(root=self.root)
+        self.assertEqual(len(out["unreadable"]), 1)
+
+    def test_a_malformed_payload_does_not_escape_as_an_exception(self):
+        """`verify()` raises rather than returning on some malformed input."""
+        self._write("d" * 64, {"snapshot_id": "d" * 64, "source_docs": [{}],
+                               "warnings": [], "gaps": []})
+        out = verify_stored(root=self.root)      # must not raise
+        self.assertEqual(out["failed"], 1)
+

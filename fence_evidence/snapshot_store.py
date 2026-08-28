@@ -134,3 +134,60 @@ def list_snapshots(*, root: Path | None = None) -> list[dict]:
                     "gaps": len(d.get("gaps", [])),
                     "bytes": p.stat().st_size})
     return out
+
+
+def verify_stored(*, root: Path | None = None) -> dict:
+    """Re-run the obligations over every snapshot already on disk.
+
+    The gate ran at build time only, so a snapshot published before an obligation
+    was implemented stayed non-compliant with nothing able to say so. Measured on
+    the first stored snapshot: it fails today's `verify()` with 188 failures --
+    63 gaps carrying neither `because` nor `cites`, and every `SourceDoc` missing
+    `also_filed_as` -- while `cli refs --verify` passed it happily, because that
+    command checks whether citations resolve, not whether the object is
+    well-formed. `cli snapshot --list` showed it as an ordinary member.
+
+    A stored snapshot is immutable, so this cannot repair anything. What it can
+    do is stop the gap between "the builder was fixed" and "the published
+    artifact is fixed" from being invisible, which is how G40 came to be recorded
+    as FIXED while the shipped object still carried the defect.
+
+    Exits are the caller's business; this returns the findings. `verify()` is
+    total over well-formed JSON but raises rather than returning on malformed
+    input, so a snapshot that cannot even be parsed is reported, not fatal.
+    """
+    from .snapshot import VerificationFailed, verify
+
+    out = {"checked": 0, "passed": 0, "failed": 0, "tombstoned_skipped": 0,
+           "unreadable": [], "failures": {}}
+    base = (root or SNAPSHOT_DIR)
+    if not base.exists():
+        return out
+    for path in sorted(base.glob("*.json")):
+        try:
+            payload = json.loads(path.read_text())
+        except Exception as exc:
+            out["unreadable"].append({"file": path.name,
+                                      "error": exc.__class__.__name__})
+            continue
+        # `tombstoned`, matching what tombstone() writes and what
+        # refs.verify_snapshots reads. The two guards must agree about what a
+        # withdrawn snapshot looks like, or one of them silently checks a
+        # different population than the other.
+        if payload.get("tombstoned"):
+            out["tombstoned_skipped"] += 1
+            continue
+        out["checked"] += 1
+        try:
+            verify(payload)
+            out["passed"] += 1
+        except VerificationFailed as exc:
+            out["failed"] += 1
+            lines = [ln.strip(" -") for ln in str(exc).split("\n")[1:] if ln.strip()]
+            out["failures"][payload.get("snapshot_id", path.stem)[:16]] = {
+                "count": len(lines), "first": lines[:5]}
+        except Exception as exc:      # verify() is not total over malformed input
+            out["failed"] += 1
+            out["failures"][payload.get("snapshot_id", path.stem)[:16]] = {
+                "count": 1, "first": [f"verify() raised {exc.__class__.__name__}: {exc}"]}
+    return out
