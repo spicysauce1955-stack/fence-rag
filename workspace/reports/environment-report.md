@@ -10,8 +10,17 @@ probed, not assumed.
 | python | 3.12.3 |
 | platform | Linux-6.17.0-20-generic-x86_64-with-glibc2.39 |
 | cpu count | 24 |
-| disk free | 669 GB of 1006 GB |
+| disk needed for a full run | ~6 GB writable under `workspace/` |
 | pipeline version | 1.0.0 |
+
+Free space is stated as a requirement, not probed. This file is committed, and a
+`disk free` reading rewrote that row on every `cli report` run -- a tree that is
+dirty for no content reason invites the tidy-up G28 measured, where `git checkout .`
+reverts 137 PDFs to LFS pointers. The requirement is the half a reader needs and the
+half that does not move: ~6 GB for `workspace/derived` (page images and region
+crops) plus the SQLite store and its FTS5 index, and ~0.4 GB for the fetched
+corpus. Whether this machine has that room is a question for `df -h .` now, not
+for this file as of whenever it was last written.
 
 ## Extraction tools
 

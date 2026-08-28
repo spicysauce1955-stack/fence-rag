@@ -13,16 +13,47 @@ status so a caller can see what it rests on.
 
 Conservative rules, in order:
 
-1. A fact marked `rejected` is ignored.
-2. If the facts of one type disagree, no value is returned — the candidates are
+1. A fact marked `rejected` is ignored — a person looked at it and said the
+   machine was wrong, so resolving on it is worse than having no date. The
+   count of rejected facts is still reported, because a document whose only
+   date was struck out is a different situation from one that never had a date.
+2. Where a person corrected a fact, the *person's* value is what resolves.
+   `reviews.effective_fact_value` is the single place that decides this; reading
+   `facts.value_original` here would repeat G44 one layer out, and this reader
+   is the one that decides whether an approval is in force.
+3. If the facts of one type disagree, no value is returned — the candidates are
    reported as a conflict. Guessing which scan was read correctly is exactly the
    failure this system exists to avoid.
-3. A value derived from a `flagged` (unreviewed OCR) fact is returned, but
-   labelled `review_required`.
-4. An expiry verdict is only given when the date is agreed and parseable, and
+4. Every date is labelled with what it rests on, in `confidence`
+   (`DATE_CONFIDENCE`), and the label is the *weakest* of its sources:
+
+   ``review_required``
+       At least one source is `flagged` — read off OCR below 80% confidence and
+       still unreviewed. Unchanged from before the review loop existed.
+   ``extracted``
+       Machine extraction that nothing flagged and nobody checked.
+   ``reviewed``
+       Every source was accepted or corrected by a named person, which is
+       curation level 2. This is a *stronger* claim than `extracted` and is
+       kept distinct from it for the same reason `marked` and
+       `inferred_in_force` are kept distinct below: "a person looked" and
+       "a regex matched" are different evidence, and flattening them is how a
+       corrected fact came to read as confidently as an unreviewed one.
+
+   Being reviewed is not the same as being confident, and the vocabulary says
+   so: a `reviewed` date beside an `extracted` one reports `extracted`, and a
+   single unreviewed `flagged` source keeps the whole date `review_required`.
+5. An expiry verdict is only given when the date is agreed and parseable, and
    the date it was evaluated against is always reported.
-5. If the member otherwise selected as active has an agreed expiration date in
+6. If the member otherwise selected as active has an agreed expiration date in
    the past, the active answer is withdrawn rather than asserted.
+
+Where a value came from a correction, the machine's wording stays visible:
+each source carries `original` (what the extractor read) beside `corrected`
+(what the person read) and the `reviewer` who read it, and the date itself
+carries `corrected_from` so a caller that never opens `sources` still cannot
+act on a corrected date without knowing it was corrected. `expiry_status`
+echoes that field through, because its verdict is the one a caller acts on.
 
 `select_active` applies the same discipline to the "which member is in force?"
 question, and — this is the point of it — labels *what the answer rests on*
@@ -67,6 +98,18 @@ from datetime import date, datetime
 
 DATE_FACT_TYPES = ("effective_date", "expiration_date")
 
+#: Every value `document_dates` can put in a date's ``confidence``, weakest
+#: first. See rule 4 in the module docstring for what each one claims.
+DATE_CONFIDENCE = ("review_required", "extracted", "reviewed")
+
+#: The `facts.review_status` values that mean *a person compared this to the
+#: source image*. `reviews.FACT_STATUS_FOR_VERDICT` writes `reviewed` for both
+#: an acceptance and a correction; `promote_tables` writes `accepted` and
+#: `corrected` for a fact promoted out of a reviewed table cell. The authority
+#: on the set is `parameters.CURATION_LEVEL` — anything it scores at level 2
+#: belongs here, and `tests/test_versions.py` fails if the two drift apart.
+REVIEWED_FACT_STATUSES = ("accepted", "corrected", "reviewed")
+
 #: Every value `select_active` can put in ``active_basis_kind``.  "marked" and
 #: "inferred_in_force" both carry an answer and must stay distinguishable; the
 #: rest carry none.
@@ -79,6 +122,17 @@ _ISO = re.compile(r"\b(\d{4})-(\d{2})-(\d{2})\b")
 _MONTHS = {m: i for i, m in enumerate(
     ["january", "february", "march", "april", "may", "june", "july", "august",
      "september", "october", "november", "december"], start=1)}
+
+
+def _distinct(values: list[str]) -> list[str]:
+    """Order-preserving dedupe, so two sources quoting one wording say it once."""
+    seen: set[str] = set()
+    out = []
+    for v in values:
+        if v not in seen:
+            seen.add(v)
+            out.append(v)
+    return out
 
 
 def parse_date(text: str) -> str | None:
@@ -110,35 +164,89 @@ def parse_date(text: str) -> str | None:
     return None
 
 
+def date_confidence(sources: list[dict]) -> str:
+    """What a date rests on, taken from its WEAKEST source.
+
+    Three labels, and the point of the third is that it is not the second.
+    Before the fact review loop there were two — a `flagged` source meant
+    `review_required` and everything else meant `extracted` — which was fine
+    while nothing could be reviewed. It stops being fine the moment a person
+    can accept or correct a fact: an accepted date and a date no human has ever
+    looked at would report the same word, and a *corrected* one would report it
+    while carrying a number the machine never read.
+
+    Weakest-first is deliberate. A date agreed by two sources, one reviewed and
+    one not, rests on the unreviewed one just as much; claiming `reviewed`
+    there would assert a person checked something nobody checked.
+    """
+    statuses = {s.get("review_status") for s in sources}
+    if "flagged" in statuses:
+        return "review_required"
+    if statuses and statuses <= set(REVIEWED_FACT_STATUSES):
+        return "reviewed"
+    return "extracted"
+
+
 def document_dates(conn: sqlite3.Connection, document_id: str) -> dict:
-    """Effective and expiration dates for one document, with provenance."""
+    """Effective and expiration dates for one document, with provenance.
+
+    The value a date resolves on is `reviews.effective_fact_value` — the
+    person's wording where a review supplied one, the extractor's otherwise.
+    The extractor's wording is never dropped: it stays on the source as
+    `original`, and the date carries `corrected_from` so it is visible without
+    opening `sources`.
+    """
+    from .reviews import effective_fact_value
+
     out: dict[str, dict] = {}
     for fact_type in DATE_FACT_TYPES:
-        rows = conn.execute("""SELECT fact_id, value_original, review_status, page_no,
-                    element_id, ocr_derived FROM facts
+        # Both value columns and both reviewed-value columns, so the row
+        # satisfies `effective_fact_value` AND `effective_fact_normalized`.
+        # Only the first is used here -- a date has no numeric scale -- but a
+        # row that answers one helper and KeyErrors on the other is a trap.
+        rows = conn.execute("""SELECT fact_id, value_original, value_normalized,
+                    reviewed_value, reviewed_value_normalized, reviewer,
+                    review_status, page_no, element_id, ocr_derived FROM facts
                    WHERE document_id=? AND fact_type=? AND review_status != 'rejected'
                    ORDER BY page_no""", (document_id, fact_type)).fetchall()
+        # A date a person struck out is not the same as a date that was never
+        # found, and a caller cannot tell the two apart from an empty answer.
+        rejected = conn.execute(
+            """SELECT COUNT(*) FROM facts
+                WHERE document_id=? AND fact_type=? AND review_status='rejected'""",
+            (document_id, fact_type)).fetchone()[0]
         candidates: dict[str, list[dict]] = {}
         unparsed: list[str] = []
         for r in rows:
-            iso = parse_date(r["value_original"])
+            text = effective_fact_value(r)
+            iso = parse_date(text)
             if iso is None:
-                unparsed.append(r["value_original"])
+                unparsed.append(text)
                 continue
-            candidates.setdefault(iso, []).append({
+            source = {
                 "element_id": r["element_id"], "page": r["page_no"],
                 "original": r["value_original"], "review_status": r["review_status"],
                 "ocr_derived": bool(r["ocr_derived"]),
-            })
+            }
+            if r["reviewed_value"] is not None:
+                # `original` above is what the extractor read; these two say who
+                # disagreed with it and what they read instead. G44 is what
+                # happens when only one of the pair survives.
+                source["corrected"] = r["reviewed_value"]
+                source["reviewer"] = r["reviewer"]
+            candidates.setdefault(iso, []).append(source)
         key = fact_type.split("_")[0]          # effective | expiration
         if not candidates:
-            out[key] = {"value": None, "agreement": "none",
-                        "reason": ("no parseable date fact for this document"
-                                   if not unparsed else
-                                   f"{len(unparsed)} date fact(s) present but unparseable"),
+            if unparsed:
+                reason = f"{len(unparsed)} date fact(s) present but unparseable"
+            elif rejected:
+                reason = (f"{rejected} date fact(s) present; every one was "
+                          f"rejected at review")
+            else:
+                reason = "no parseable date fact for this document"
+            out[key] = {"value": None, "agreement": "none", "reason": reason,
                         "unparsed": unparsed, "sources": []}
-            continue
-        if len(candidates) > 1:
+        elif len(candidates) > 1:
             out[key] = {
                 "value": None, "agreement": "conflict",
                 "reason": "date facts disagree; no value asserted",
@@ -146,14 +254,20 @@ def document_dates(conn: sqlite3.Connection, document_id: str) -> dict:
                                sorted(candidates.items())],
                 "sources": [],
             }
-            continue
-        value, sources = next(iter(candidates.items()))
-        flagged = any(s["review_status"] == "flagged" for s in sources)
-        out[key] = {
-            "value": value, "agreement": "unanimous",
-            "confidence": "review_required" if flagged else "extracted",
-            "occurrences": len(sources), "sources": sources,
-        }
+        else:
+            value, sources = next(iter(candidates.items()))
+            entry = {
+                "value": value, "agreement": "unanimous",
+                "confidence": date_confidence(sources),
+                "occurrences": len(sources), "sources": sources,
+            }
+            corrected_from = _distinct([s["original"] for s in sources
+                                        if "corrected" in s])
+            if corrected_from:
+                entry["corrected_from"] = corrected_from
+            out[key] = entry
+        if rejected:
+            out[key]["rejected"] = rejected
     return out
 
 
@@ -168,9 +282,14 @@ def expiry_status(dates: dict, as_of: str | None = None) -> dict:
         return {"status": "unknown", "as_of": as_of,
                 "basis": exp.get("reason") or "no expiration date available"}
     status = "expired" if exp["value"] < as_of else "in_force"
-    return {"status": status, "as_of": as_of, "expiration": exp["value"],
-            "confidence": exp.get("confidence", "extracted"),
-            "basis": f"expiration {exp['value']} compared with {as_of}"}
+    verdict = {"status": status, "as_of": as_of, "expiration": exp["value"],
+               "confidence": exp.get("confidence", "extracted"),
+               "basis": f"expiration {exp['value']} compared with {as_of}"}
+    # This dict is what a caller acts on, and most callers never open `sources`.
+    # A verdict resting on a date a person rewrote must say so where it is read.
+    if exp.get("corrected_from"):
+        verdict["corrected_from"] = list(exp["corrected_from"])
+    return verdict
 
 
 def enrich_chain(conn: sqlite3.Connection, chain: list[dict],
@@ -277,6 +396,21 @@ def document_edition(conn: sqlite3.Connection, document_id: str) -> dict | None:
 # Which member of a chain is in force
 # --------------------------------------------------------------------------
 
+def _correction_note(member: dict) -> str:
+    """A clause naming the correction an expiry answer rests on, or "".
+
+    Empty while nothing is reviewed, which is why the basis strings over the
+    live corpus are byte-identical to what they were. Once a date IS corrected,
+    the prose that says why a member is in force must not quietly present a
+    person's rewrite as the machine's reading.
+    """
+    exp = (member.get("dates") or {}).get("expiration") or {}
+    was = exp.get("corrected_from")
+    if not was:
+        return ""
+    return f"; that date was corrected at review from {', '.join(was)}"
+
+
 def _no_answer(kind: str, basis: str, candidates: list[str] | None = None) -> dict:
     out = {"active": None, "active_basis_kind": kind, "active_basis": basis}
     if candidates is not None:
@@ -335,12 +469,23 @@ def select_active(chain: list[dict], as_of: str | None = None) -> dict:
             exp = selected["expiry"].get("expiration")
             basis = ("no member is marked active; inferred in force from an agreed "
                      f"expiration date {exp} still ahead of {as_of}, and nothing in "
-                     "the chain supersedes it")
+                     "the chain supersedes it" + _correction_note(selected))
         else:
             selected, kind = candidates[-1], "assumed_newest"
+            # The earlier wording said this rests on "no version evidence -- the
+            # document states no date and carries no marker". Measured, that is
+            # false for 31 of the 125 documents this branch answers for: they
+            # print an edition stamp, `document_edition` reads it at 33/33
+            # precision, and `enrich_chain` attaches it right here. The DECISION
+            # is still right -- an edition says which printing this is, not
+            # whether it is in force, and §G3 measures that no supersession is
+            # inferable from one in this corpus -- but a basis string must not
+            # deny something the member it describes is carrying.
+            edition = (selected.get("edition") or {}).get("value")
+            seen = (f"; it prints edition {edition}, which says which printing "
+                    f"this is and not whether it is in force" if edition else "")
             basis = ("newest member of the chain and not marked superseded; this rests "
-                     "on no version evidence — the document states no date and carries "
-                     "no marker")
+                     "on no EXPIRATION evidence and no explicit status marker" + seen)
 
     # Disagreeing evidence asserts nothing, whatever the positional reading says.
     expiration = (selected.get("dates") or {}).get("expiration") or {}
@@ -357,7 +502,7 @@ def select_active(chain: list[dict], as_of: str | None = None) -> dict:
             "withdrawn",
             f"withdrawn: the member otherwise selected ({selected['document_id']}, "
             f"{kind}) expired on {verdict.get('expiration')} as of "
-            f"{verdict.get('as_of', as_of)}")
+            f"{verdict.get('as_of', as_of)}" + _correction_note(selected))
 
     return {"active": selected, "active_basis_kind": kind, "active_basis": basis}
 

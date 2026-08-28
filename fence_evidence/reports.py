@@ -8,16 +8,19 @@ from __future__ import annotations
 
 import json
 import platform
-import shutil
 import sqlite3
 from collections import Counter, defaultdict
 from pathlib import Path
 
 from . import __version__
 from .manifest import (SCAN_CHARS_PER_PAGE, TEXT_LAYER_MIN_CHARS, load_manifest)
-from .paths import (CORPUS_ROOTS, REPO_ROOT, REPORTS_DIR, WORKSPACE, open_write)
+from .paths import CORPUS_ROOTS, REPORTS_DIR, WORKSPACE, open_write
 from .pilot import NO_HEADING_EXEMPT, PILOT
 from .quality import (ASCII_TOKEN_RATIO_LIMIT, CONTROL_RATIO_LIMIT)
+# One place decides which of `value_original` / `reviewed_value` answers. A
+# report that reached for the column directly would print the machine's number
+# under a row a person had already corrected -- G44, in a document.
+from .reviews import effective_fact_normalized, effective_fact_value
 from .store import connect, stats
 from .tools import tool_versions
 
@@ -43,10 +46,35 @@ def _table(headers: list[str], rows: list[list]) -> str:
     return "\n".join(out)
 
 
+# What a full run needs on disk, in GB: `workspace/derived` is 5.0 GB of page
+# images and region crops, `workspace/indexes` is 0.07 GB of store and FTS5, and
+# the fetched corpus is 0.4 GB. Measured, rounded up, and stated as a constant
+# rather than probed -- see `environment_report` for why.
+WORKSPACE_DISK_BUDGET_GB = 6
+
+
 # ------------------------------------------------------------------ Phase 0
 def environment_report() -> str:
+    """The machine this workspace was produced on.
+
+    Nothing here may vary between two runs on the same machine. This file is a
+    committed artifact, so a value that moves on its own makes `git status`
+    permanently dirty -- and a permanently dirty tree is not a cosmetic problem
+    here: G28 records the tidy-up it invites (`git checkout .`, "discard
+    changes") reverting 137 PDFs to LFS pointers, and the renormalize that
+    fixes *that* staging 376 MB of PDF bytes outside LFS if the filters are not
+    installed. The same class of bug closed today in `evaluation-report.md`,
+    where a version basis embedded the wall clock.
+
+    So free disk space is reported as a **requirement**, not a measurement.
+    `shutil.disk_usage` was true for one instant and rewrote the line on every
+    regeneration; what a reader actually needs is how much room a run takes,
+    which is a property of the pipeline rather than of the moment. The other
+    half of the question -- whether *this* machine has that room -- is answered
+    by `df -h .`, and answered as of now instead of as of whenever this file was
+    last written.
+    """
     tv = tool_versions()
-    total, used, free = shutil.disk_usage(REPO_ROOT)
     lines = [
         "# Environment report",
         "",
@@ -59,9 +87,19 @@ def environment_report() -> str:
             ["python", tv.get("python")],
             ["platform", platform.platform()],
             ["cpu count", len(__import__("os").sched_getaffinity(0))],
-            ["disk free", f"{free / 1e9:.0f} GB of {total / 1e9:.0f} GB"],
+            ["disk needed for a full run",
+             f"~{WORKSPACE_DISK_BUDGET_GB} GB writable under `workspace/`"],
             ["pipeline version", __version__],
         ]),
+        "",
+        "Free space is stated as a requirement, not probed. This file is committed, and a",
+        "`disk free` reading rewrote that row on every `cli report` run -- a tree that is",
+        "dirty for no content reason invites the tidy-up G28 measured, where `git checkout .`",
+        "reverts 137 PDFs to LFS pointers. The requirement is the half a reader needs and the",
+        f"half that does not move: ~{WORKSPACE_DISK_BUDGET_GB} GB for `workspace/derived` (page images and region",
+        "crops) plus the SQLite store and its FTS5 index, and ~0.4 GB for the fetched",
+        "corpus. Whether this machine has that room is a question for `df -h .` now, not",
+        "for this file as of whenever it was last written.",
         "",
         "## Extraction tools",
         "",
@@ -501,6 +539,21 @@ def coverage_report(conn: sqlite3.Connection) -> str:
 
 
 # ------------------------------------------------------------------ Phase 6
+def _sample_value(row) -> str:
+    """The wording that answers, with the machine's reading beside it.
+
+    The column is headed "Original" and stays the original *wording* column, as
+    against the normalised one next to it. For a corrected row the wording that
+    answers is the person's, and the extractor's is printed after it rather
+    than replaced: a report that showed only one of the two would be G44 in a
+    document instead of in a fact.
+    """
+    shown = f"`{(effective_fact_value(row) or '')[:40]}`"
+    if row["reviewed_value"] is not None:
+        shown += f" (was `{row['value_original'][:40]}`)"
+    return shown
+
+
 def facts_report(conn: sqlite3.Connection) -> str:
     total = conn.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
     if total == 0:
@@ -521,9 +574,13 @@ def facts_report(conn: sqlite3.Connection) -> str:
     # 4, which is the failure mode a count of disagreements must not have.
     # Non-length units (mph, deg) never pair, so they fall out as `None`.
     disagreeing = 0
-    for _r in conn.execute("""SELECT value_normalized, unit_normalized, value_alternates
+    for _r in conn.execute("""SELECT value_original, value_normalized, unit_normalized,
+                                     value_alternates, reviewed_value,
+                                     reviewed_value_normalized
                                 FROM facts WHERE value_alternates IS NOT NULL"""):
-        primary = _to_mm(_r["value_normalized"], _r["unit_normalized"])
+        # The primary of the pair is whatever answers -- a corrected primary is
+        # the one obligation 4 asks about, not the number the machine read.
+        primary = _to_mm(effective_fact_normalized(_r), _r["unit_normalized"])
         if primary is None:
             continue
         for _a in json.loads(_r["value_alternates"] or "[]"):
@@ -546,12 +603,62 @@ def facts_report(conn: sqlite3.Connection) -> str:
             LEFT JOIN elements e ON e.element_id=f.element_id
             WHERE e.element_id IS NULL""").fetchone()[0]
     samples = conn.execute("""SELECT f.fact_type, f.value_original, f.value_normalized,
+            f.reviewed_value, f.reviewed_value_normalized, f.reviewer,
             f.unit_normalized, f.conditions, f.review_status, d.source_path, f.page_no,
             f.element_id FROM facts f JOIN documents d ON d.document_id=f.document_id
             WHERE f.fact_type IN ('footing_depth_in','post_spacing_in','wind_speed_mph',
                                   'racking_degrees','approval_id')
               AND f.conditions != '{}'
             ORDER BY f.fact_type LIMIT 25""").fetchall()
+    # What review actually changed. Emitted only when there is something to
+    # say: the live store holds 1,718 facts and zero reviews, and a section
+    # that printed "0 corrections" would move the committed report for no
+    # reason. `reviewed_value` is the marker, not `review_status` -- an
+    # acceptance leaves the value alone, and saying it was corrected would
+    # misreport what review found.
+    corrections = conn.execute("""SELECT f.fact_type, f.value_original,
+            f.value_normalized, f.reviewed_value, f.reviewed_value_normalized,
+            f.reviewer, f.unit_normalized, d.source_path, f.page_no
+            FROM facts f JOIN documents d ON d.document_id=f.document_id
+            WHERE f.reviewed_value IS NOT NULL
+            ORDER BY f.fact_type, d.source_path, f.page_no""").fetchall()
+    rejected = conn.execute(
+        "SELECT COUNT(*) FROM facts WHERE review_status='rejected'").fetchone()[0]
+    review_lines: list[str] = []
+    if corrections or rejected:
+        review_lines = [
+            "## What review changed",
+            "",
+            "A correction writes `reviewed_value` and never overwrites `value_original`,",
+            "so both are here: the sample table above prints the value that *answers* and",
+            "names the machine's reading beside it. G44 is what happens when only one of",
+            "the pair survives -- a reviewer's corrected footing depth was stored, ignored",
+            "at promotion, and published at curation level 2 wearing the badge of having",
+            "been checked.",
+            "",
+        ]
+        if corrections:
+            review_lines += [
+                _table(["Type", "Machine read", "Person read", "Reviewer", "Source",
+                        "Page"],
+                       [[c["fact_type"], f"`{c['value_original'][:40]}`",
+                         f"`{c['reviewed_value'][:40]}`", c["reviewer"],
+                         f"`{Path(c['source_path']).name[:40]}`", c["page_no"]]
+                        for c in corrections]),
+                "",
+            ]
+        else:
+            review_lines += ["No fact has been corrected.", ""]
+        review_lines += [
+            f"**{rejected}** fact(s) are `rejected`: a person compared the row to the "
+            "page and",
+            "said the machine was wrong. A rejected fact answers nothing -- version",
+            "resolution ignores it rather than resolving on a value already known to be",
+            "wrong -- and it is kept, not deleted, because withdrawing the review must put",
+            "the fact back where it started.",
+            "",
+        ]
+
     lines = [
         "# Structured technical facts (Phase 6)",
         "",
@@ -571,6 +678,7 @@ def facts_report(conn: sqlite3.Connection) -> str:
         "",
         _table(["Status", "Count"], [[r["review_status"], r["n"]] for r in by_status]),
         "",
+        *review_lines,
         "## By type",
         "",
         _table(["Fact type", "Count", "Flagged for review", "OCR-derived"],
@@ -636,8 +744,8 @@ def facts_report(conn: sqlite3.Connection) -> str:
         "## Sample, with provenance",
         "",
         _table(["Type", "Original", "Normalised", "Conditions", "Status", "Source", "Page"],
-               [[r["fact_type"], f"`{r['value_original'][:40]}`",
-                 f"{r['value_normalized']} {r['unit_normalized'] or ''}".strip(),
+               [[r["fact_type"], _sample_value(r),
+                 f"{effective_fact_normalized(r)} {r['unit_normalized'] or ''}".strip(),
                  f"`{r['conditions']}`", r["review_status"],
                  f"`{Path(r['source_path']).name[:40]}`", r["page_no"]]
                 for r in samples]),

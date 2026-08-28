@@ -1,12 +1,15 @@
 """Date-aware, conservative version resolution."""
+import sqlite3
 import unittest
 
 from context import requires_facts, requires_store
 from fence_evidence.retrieval import resolve_document_version
-from fence_evidence.store import connect
-from fence_evidence.versions import (ACTIVE_BASIS_KINDS, chain_for, document_dates,
-                                     document_edition, effective_at, expiry_status,
-                                     parse_date, parse_edition, select_active)
+from fence_evidence.store import SCHEMA, connect
+from fence_evidence.versions import (ACTIVE_BASIS_KINDS, DATE_CONFIDENCE,
+                                     REVIEWED_FACT_STATUSES, chain_for,
+                                     document_dates, document_edition, effective_at,
+                                     expiry_status, parse_date, parse_edition,
+                                     select_active)
 
 CURRENT_NOA = "23-0314.05"
 LEGACY_NOA = "12-1106.11"
@@ -258,7 +261,13 @@ class TestSelectActive(unittest.TestCase):
         got = select_active(chain, as_of="2026-08-28")
         self.assertEqual(got["active"]["document_id"], "only")
         self.assertEqual(got["active_basis_kind"], "assumed_newest")
-        self.assertIn("no version evidence", got["active_basis"])
+        # The claim narrowed from "no version evidence" to "no EXPIRATION
+        # evidence and no explicit status marker", because the broader wording
+        # was false for the 31 documents in this branch that print an edition
+        # stamp. What the test is pinning is unchanged: this answer must say
+        # out loud that it is positional.
+        self.assertIn("no EXPIRATION evidence", got["active_basis"])
+        self.assertIn("no explicit status marker", got["active_basis"])
 
     def test_two_members_in_force_is_a_conflict_not_a_pick(self):
         chain = [_m("x", "unknown", "in_force", "2029-03-13"),
@@ -436,6 +445,311 @@ class TestActiveOverTheCertainTeedChain(unittest.TestCase):
         self.assertIsNone(got["active"])
         self.assertIn(got["active_basis_kind"], ("withdrawn", "none", "conflict"))
 
+
+
+# --------------------------------------------------------------------------
+# What a review does to a date
+# --------------------------------------------------------------------------
+#
+# The fact review loop writes `facts.reviewed_value` and never touches
+# `value_original` (G44 is what happens when a reader ignores that). Version
+# resolution is the highest-stakes reader in the package -- it decides whether
+# an approval is in force -- so it must answer on the person's value, keep the
+# machine's visible, and refuse to answer at all on a fact a person rejected.
+#
+# Everything below runs against a store built from `store.SCHEMA` in memory:
+# no corpus, no ingested database, nothing that can be damaged.
+
+SYNTH_SHA = "b" * 64
+
+
+def _date_store():
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.executescript(SCHEMA)
+    conn.execute("""INSERT INTO documents(document_id, source_path, file_type,
+        corpus_track, version_status) VALUES
+        ('doc-1','manuals/x/noa.pdf','pdf','us','unknown')""")
+    conn.execute("""INSERT INTO document_versions(version_id, document_id, sha256,
+        ingested_at) VALUES ('v1','doc-1',?,'2026-08-28T00:00:00+00:00')""",
+                 (SYNTH_SHA,))
+    conn.execute("""INSERT INTO pages(page_id, version_id, page_no, width, height,
+        extraction_method) VALUES ('p1','v1',1,612.0,792.0,'ocr')""")
+    for eid, ordinal in (("e1", 1), ("e2", 2)):
+        conn.execute("""INSERT INTO elements(element_id, page_id, version_id,
+            document_id, page_no, ordinal, element_type, text, text_source,
+            ocr_confidence, bbox) VALUES (?, 'p1','v1','doc-1',1,?,'paragraph',
+            'expiration date', 'ocr', 41.0, '[72.0, 100.0, 300.0, 120.0]')""",
+                     (eid, ordinal))
+    conn.commit()
+    return conn
+
+
+def _date_fact(conn, *, fact_type="expiration_date", value="03/13/2019",
+               status="flagged", reviewed_value=None, reviewer=None,
+               element_id="e1", page_no=1):
+    """One date fact, with the review projection set the way `reviews` sets it.
+
+    `reviews._project_fact` writes exactly these columns: `review_status`,
+    `reviewed_value`, `reviewed_value_normalized`, `reviewer`, `reviewed_at`.
+    A rejection is `review_status='rejected'` with `reviewed_value` NULL --
+    checked against `reviews.FACT_STATUS_FOR_VERDICT`, not assumed.
+    """
+    cur = conn.execute("""INSERT INTO facts(document_id, version_id, page_no,
+        element_id, fact_type, value_original, value_normalized, conditions,
+        evidence_text, extractor, ocr_derived, review_status, created_at,
+        reviewed_value, reviewer, reviewed_at)
+        VALUES ('doc-1','v1',?,?,?,?,NULL,'{}','...','regex-v1',1,?,
+                '2026-08-28T00:00:00+00:00',?,?,?)""",
+        (page_no, element_id, fact_type, value, status, reviewed_value, reviewer,
+         "2026-08-28T00:00:00+00:00" if reviewer else None))
+    conn.commit()
+    return cur.lastrowid
+
+
+class TestReviewedDateFacts(unittest.TestCase):
+    def setUp(self):
+        self.conn = _date_store()
+
+    def tearDown(self):
+        self.conn.close()
+
+    # ---------------------------------------------------------- the value
+    def test_a_corrected_expiration_resolves_on_the_persons_value(self):
+        """G44, one reader out. The machine read 2019; the person read 2029."""
+        _date_fact(self.conn, value="Expires 03/13/2019", status="reviewed",
+                   reviewed_value="Expires 03/13/2029", reviewer="J. Curator")
+        exp = document_dates(self.conn, "doc-1")["expiration"]
+        self.assertEqual(exp["value"], "2029-03-13")
+        self.assertEqual(exp["agreement"], "unanimous")
+
+    def test_the_correction_flips_the_expiry_verdict(self):
+        _date_fact(self.conn, value="Expires 03/13/2019", status="reviewed",
+                   reviewed_value="Expires 03/13/2029", reviewer="J. Curator")
+        verdict = expiry_status(document_dates(self.conn, "doc-1"),
+                                as_of="2026-08-28")
+        self.assertEqual(verdict["status"], "in_force")
+        self.assertEqual(verdict["expiration"], "2029-03-13")
+
+    def test_an_accepted_fact_answers_exactly_as_it_did_before_review(self):
+        before = _date_store()
+        _date_fact(before, value="Expires 03/13/2029", status="flagged")
+        _date_fact(self.conn, value="Expires 03/13/2029", status="reviewed",
+                   reviewer="J. Curator")
+        was = document_dates(before, "doc-1")["expiration"]
+        now = document_dates(self.conn, "doc-1")["expiration"]
+        before.close()
+        self.assertEqual(was["value"], now["value"])
+        self.assertNotIn("corrected_from", now,
+                         "an acceptance corrects nothing and must not claim to")
+        self.assertNotIn("corrected", now["sources"][0])
+
+    # ------------------------------------------------- the original survives
+    def test_the_machine_value_is_still_reachable_after_a_correction(self):
+        _date_fact(self.conn, value="Expires 03/13/2019", status="reviewed",
+                   reviewed_value="Expires 03/13/2029", reviewer="J. Curator")
+        exp = document_dates(self.conn, "doc-1")["expiration"]
+        src = exp["sources"][0]
+        self.assertEqual(src["original"], "Expires 03/13/2019")
+        self.assertEqual(src["corrected"], "Expires 03/13/2029")
+        self.assertEqual(src["reviewer"], "J. Curator")
+
+    def test_the_correction_is_visible_without_opening_the_sources(self):
+        """A caller reading only the verdict must still see that the date it is
+        acting on is not the one the machine read."""
+        _date_fact(self.conn, value="Expires 03/13/2019", status="reviewed",
+                   reviewed_value="Expires 03/13/2029", reviewer="J. Curator")
+        dates = document_dates(self.conn, "doc-1")
+        self.assertEqual(dates["expiration"]["corrected_from"],
+                         ["Expires 03/13/2019"])
+        verdict = expiry_status(dates, as_of="2026-08-28")
+        self.assertEqual(verdict["corrected_from"], ["Expires 03/13/2019"])
+
+    # -------------------------------------------------------- the rejection
+    def test_a_rejected_date_does_not_answer(self):
+        _date_fact(self.conn, value="Expires 03/13/2019", status="rejected",
+                   reviewer="J. Curator")
+        exp = document_dates(self.conn, "doc-1")["expiration"]
+        self.assertIsNone(exp["value"])
+        self.assertEqual(exp["agreement"], "none")
+        self.assertEqual(exp["rejected"], 1)
+        self.assertIn("reject", exp["reason"])
+
+    def test_a_rejection_is_never_silent_when_another_fact_answers(self):
+        _date_fact(self.conn, value="Expires 03/13/2019", status="rejected",
+                   reviewer="J. Curator")
+        _date_fact(self.conn, value="Expires 03/13/2029", status="extracted",
+                   element_id="e2")
+        exp = document_dates(self.conn, "doc-1")["expiration"]
+        self.assertEqual(exp["value"], "2029-03-13")
+        self.assertEqual(exp["rejected"], 1)
+
+    def test_a_rejected_date_never_makes_a_member_active(self):
+        _date_fact(self.conn, value="Expires 03/13/2029", status="rejected",
+                   reviewer="J. Curator")
+        chain = chain_for(self.conn, "doc-1", as_of="2026-08-28")
+        got = select_active(chain, as_of="2026-08-28")
+        self.assertEqual(got["active_basis_kind"], "assumed_newest",
+                         "a rejected date must not be evidence of being in force")
+
+    def test_rejection_is_the_status_reviews_actually_writes(self):
+        from fence_evidence import reviews
+        self.assertEqual(reviews.FACT_STATUS_FOR_VERDICT["rejected"], "rejected")
+        self.assertEqual(reviews.FACT_STATUS_FOR_VERDICT["accepted"], "reviewed")
+        self.assertEqual(reviews.FACT_STATUS_FOR_VERDICT["corrected"], "reviewed")
+
+    # -------------------------------------------------------- the confidence
+    def test_flagged_still_means_review_required(self):
+        _date_fact(self.conn, value="Expires 03/13/2029", status="flagged")
+        self.assertEqual(document_dates(self.conn, "doc-1")["expiration"]["confidence"],
+                         "review_required")
+
+    def test_extracted_still_means_extracted(self):
+        _date_fact(self.conn, value="Expires 03/13/2029", status="extracted")
+        self.assertEqual(document_dates(self.conn, "doc-1")["expiration"]["confidence"],
+                         "extracted")
+
+    def test_a_reviewed_date_is_not_merely_extracted(self):
+        """`reviewed` is a person having compared it to the source image. It is
+        a different claim from `extracted`, and flattening the two is what let a
+        corrected fact read as confident on the machine's number."""
+        for reviewed_value in (None, "Expires 03/13/2030"):
+            with self.subTest(reviewed_value=reviewed_value):
+                conn = _date_store()
+                _date_fact(conn, value="Expires 03/13/2029", status="reviewed",
+                           reviewed_value=reviewed_value, reviewer="J. Curator")
+                self.assertEqual(
+                    document_dates(conn, "doc-1")["expiration"]["confidence"],
+                    "reviewed")
+                conn.close()
+
+    def test_one_unreviewed_flagged_source_keeps_the_whole_date_review_required(self):
+        _date_fact(self.conn, value="Expires 03/13/2029", status="reviewed",
+                   reviewer="J. Curator")
+        _date_fact(self.conn, value="Expires 03/13/2029", status="flagged",
+                   element_id="e2")
+        self.assertEqual(document_dates(self.conn, "doc-1")["expiration"]["confidence"],
+                         "review_required")
+
+    def test_a_reviewed_source_beside_an_unreviewed_one_is_not_reviewed(self):
+        _date_fact(self.conn, value="Expires 03/13/2029", status="reviewed",
+                   reviewer="J. Curator")
+        _date_fact(self.conn, value="Expires 03/13/2029", status="extracted",
+                   element_id="e2")
+        self.assertEqual(document_dates(self.conn, "doc-1")["expiration"]["confidence"],
+                         "extracted",
+                         "the weakest source is what the whole date rests on")
+
+    def test_confidence_is_always_from_the_declared_vocabulary(self):
+        for status in ("extracted", "flagged", "reviewed", "accepted", "corrected",
+                       "unreviewed"):
+            with self.subTest(status=status):
+                conn = _date_store()
+                _date_fact(conn, value="Expires 03/13/2029", status=status)
+                got = document_dates(conn, "doc-1")["expiration"]["confidence"]
+                conn.close()
+                self.assertIn(got, DATE_CONFIDENCE)
+
+    def test_the_reviewed_statuses_match_curation_level_two(self):
+        """`parameters.CURATION_LEVEL` is the authority on which statuses mean a
+        person looked. If a status is added there and not here, a level-2 fact
+        would be reported as machine-extracted."""
+        from fence_evidence.parameters import CURATION_LEVEL
+        self.assertEqual(set(REVIEWED_FACT_STATUSES),
+                         {s for s, lvl in CURATION_LEVEL.items() if lvl >= 2})
+
+    def test_the_expiry_verdict_echoes_the_reviewed_confidence(self):
+        _date_fact(self.conn, value="Expires 03/13/2029", status="reviewed",
+                   reviewer="J. Curator")
+        verdict = expiry_status(document_dates(self.conn, "doc-1"), as_of="2026-08-28")
+        self.assertEqual(verdict["confidence"], "reviewed")
+
+    # ------------------------------------------------------------ no clocks
+    def test_no_basis_string_embeds_todays_date(self):
+        """A version basis that carries `date.today()` makes every committed
+        artifact churn daily. `as_of` is passed in for exactly that reason."""
+        from datetime import date as _date
+        today = _date.today().isoformat()
+        _date_fact(self.conn, value="Expires 03/13/2029", status="reviewed",
+                   reviewed_value="Expires 03/13/2030", reviewer="J. Curator")
+        # A stated day that is deliberately not today, so a wall-clock leak has
+        # nowhere to hide.
+        stated = "2026-01-15"
+        self.assertNotEqual(stated, today, "pick a stated day that is not today")
+        chain = chain_for(self.conn, "doc-1", as_of=stated)
+        got = select_active(chain, as_of=stated)
+        blob = repr(got) + repr(chain)
+        self.assertNotIn(today, blob, "a resolution basis embedded the wall clock")
+
+    def test_a_correction_is_named_in_the_active_basis(self):
+        _date_fact(self.conn, value="Expires 03/13/2019", status="reviewed",
+                   reviewed_value="Expires 03/13/2029", reviewer="J. Curator")
+        chain = chain_for(self.conn, "doc-1", as_of="2026-08-28")
+        got = select_active(chain, as_of="2026-08-28")
+        self.assertEqual(got["active_basis_kind"], "inferred_in_force")
+        self.assertIn("corrected", got["active_basis"].lower())
+        self.assertIn("Expires 03/13/2019", got["active_basis"])
+
+
+class TestUnreviewedStoreIsUntouched(unittest.TestCase):
+    """Nothing is reviewed today, and the routing must be invisible until it is."""
+
+    def test_the_shape_of_an_unreviewed_date_is_exactly_what_it_was(self):
+        conn = _date_store()
+        _date_fact(conn, value="Expires 03/13/2029", status="flagged")
+        exp = document_dates(conn, "doc-1")["expiration"]
+        conn.close()
+        self.assertEqual(set(exp), {"value", "agreement", "confidence",
+                                    "occurrences", "sources"})
+        self.assertEqual(set(exp["sources"][0]),
+                         {"element_id", "page", "original", "review_status",
+                          "ocr_derived"})
+
+    def test_the_shape_of_an_absent_date_is_exactly_what_it_was(self):
+        conn = _date_store()
+        exp = document_dates(conn, "doc-1")["expiration"]
+        conn.close()
+        self.assertEqual(set(exp), {"value", "agreement", "reason", "unparsed",
+                                    "sources"})
+        self.assertEqual(exp["reason"], "no parseable date fact for this document")
+
+
+class TestTheBasisStringDoesNotDenyWhatTheMemberCarries(unittest.TestCase):
+    """`assumed_newest`'s basis used to say the choice rests on "no version
+    evidence -- the document states no date and carries no marker".
+
+    Measured, that is false for 31 of the 125 documents this branch answers
+    for: they print an edition stamp, `document_edition` reads it at 33/33
+    precision, and `enrich_chain` attaches it to the very member being
+    described. The decision is still right -- an edition says which printing
+    this is, not whether it is in force -- but a published basis must not deny
+    something the object it describes is carrying.
+    """
+
+    def _member(self, **kw):
+        member = {"document_id": "doc-x", "version_status": "unknown",
+                  "expiry": {"status": "unknown"}, "dates": {}}
+        member.update(kw)
+        return member
+
+    def test_it_no_longer_claims_the_document_carries_no_marker(self):
+        got = select_active([self._member()])
+        self.assertEqual(got["active_basis_kind"], "assumed_newest")
+        self.assertNotIn("carries no marker", got["active_basis"])
+        self.assertIn("no EXPIRATION evidence", got["active_basis"])
+
+    def test_an_edition_is_named_and_explicitly_not_treated_as_a_status(self):
+        got = select_active([self._member(
+            edition={"value": "2025-12", "agreement": "unanimous",
+                     "is_version_status": False})])
+        self.assertIn("2025-12", got["active_basis"])
+        self.assertIn("not whether it is in force", got["active_basis"])
+        self.assertEqual(got["active_basis_kind"], "assumed_newest",
+                         "an edition must not promote the answer to evidence")
+
+    def test_a_member_with_no_edition_says_nothing_about_one(self):
+        got = select_active([self._member()])
+        self.assertNotIn("prints edition", got["active_basis"])
 
 
 if __name__ == "__main__":
