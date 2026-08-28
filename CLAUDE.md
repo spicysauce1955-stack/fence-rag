@@ -104,6 +104,9 @@ python3 -m fence_evidence.cli refs --verify     # every published citation still
 python3 -m fence_evidence.cli refs --index      # rebuild the ref index and report it
 python3 -m fence_evidence.cli review --queue     # what is waiting for a person
 python3 -m fence_evidence.cli review --accept CROP --reviewer NAME   # record a review
+python3 -m fence_evidence.cli review --export    # the durable review ledger (G49)
+python3 -m fence_evidence.cli review --import PATH --apply   # replay it into this store
+python3 -m fence_evidence.cli fact-review --queue    # 266 OCR-flagged facts waiting
 python3 -m fence_evidence.cli snapshot --verify-stored   # do PUBLISHED snapshots still pass?
 python3 -m fence_evidence.cli backfill-spans --apply     # recover merged cells (G41)
 python3 -m fence_evidence.cli serve --token TOK  # the API behind Planning's screens
@@ -273,6 +276,14 @@ Things that will bite you if you don't know them (all measured, see the corpus a
 - **`crops.py` is wired as of 2026-08-28.** `cropcache.py` renders through it,
   `sourcerefs.py` builds the Discovery read model on top, and `api.py` serves
   `GET /source-refs/{id}` and `POST /source-refs:batch` behind a bearer allowlist.
+- **A human review is the ONLY thing here that does not regenerate, and it now has a
+  file.** Elements, facts, the projection and even the 1,225 table readings all rebuild
+  from the corpus or from committed inputs; a person's judgement does not.
+  `workspace/catalog/review-ledger.jsonl` is the committed, deterministic export
+  (`cli review --export` / `--import`), keyed on evidence — `crop_sha256` for a table
+  review, the (element, fact type, value) anchor for a fact review — and never on a row
+  id, because a `fact_id` moves on every re-extraction. It is empty today, and a test
+  fails the build if somebody records a review and does not export it. See G49.
 - **The review loop exists as of 2026-08-28; the level-2 population is still zero.**
   `reviews.py` writes `accepted` and `corrected`, `cli review --accept` and `POST /reviews`
   reach it, and `promote-tables --apply` is no longer a no-op. What remains true is that
