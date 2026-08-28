@@ -1646,11 +1646,30 @@ reserves both namespaces).
 `83a227d4` **byte-for-byte**, `snapshot --verify-stored` passes 1/1, and all 519
 published citations still resolve — nothing published moved. 25 tests.
 
-**Not built, and recorded rather than guessed.** `api.py`'s bearer allowlist is
-authentication, not authorisation: `GET /source-refs/{id}` resolves a `ref_id`
-with no tenant in scope at all. Mapping a token to a tenant is a separate
-decision with its own failure mode. Today every document is shared so the two
-questions have the same answer; they will not once the first upload lands.
+**The Discovery side fails closed.** The builder's refusal and the endpoint's
+behaviour disagreed at first, and the weaker one was the one on the network:
+`GET /source-refs/{id}` resolved any `ref_id` in the store to its text, crop,
+source path and manufacturer for anyone holding any allowlisted bearer token.
+`sourcerefs._filings` is now scoped, so with no tenant in hand only shared
+documents resolve, and a ref every filing of which belongs to someone else
+raises the **same refusal, with the same message**, as an id nothing produces —
+two refusals that differ let a caller enumerate another tenant's refs by watching
+the error text, or in a batch by watching whether an id lands in `unknown` or
+`not_rendered`. Visibility is per *filing*, not per content hash: a hash filed
+under both a shared document and an upload stays resolvable through the shared
+filing, because refusing the hash would let a tenant's private copy censor
+everyone else's evidence — while the upload's manufacturer and doc_type, which
+reach the wire through `SOURCE_CONTENT_DUPLICATED`, do not travel.
+
+**Still not built, and recorded rather than guessed.** `api.py`'s bearer
+allowlist is authentication, not **authorisation**: it identifies a caller and
+maps to no tenant, so `tenant` is `None` on every request and a tenant-owned
+document is unreachable through the API by anyone, *including its owner*. That is
+honest while the corpus is entirely shared (144 of 144) and the branch is
+unreachable in practice. It stops being adequate the day the first upload lands,
+because obligation 3 then requires the owner to resolve their own citation.
+`source_ref` already takes the tenant; what is missing is only the mapping, which
+is a product decision with its own failure mode.
 
 ### G49 — the only irreplaceable data in this system lives in a git-ignored file
 
