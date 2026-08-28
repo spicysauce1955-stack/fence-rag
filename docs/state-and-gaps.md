@@ -617,7 +617,7 @@ retaining an edition while any un-tombstoned snapshot cites it. ~31 MB per
 edition on a 69 MB store. Designed in `docs/four-layer-model-design.md` §5.1;
 plan 2 of `docs/four-layer-plan-1-refs.md`'s sequence.
 
-### G39 — `snapshot --build --dry-run` stores anyway — DETECTED, NOT FIXED
+### G39 — `snapshot --build --dry-run` stores anyway — FIXED
 
 `cli.py`'s snapshot dispatch is:
 
@@ -640,18 +640,54 @@ delete one. An operator who reaches for `--dry-run` specifically to preview a
 build without committing it instead adds a permanent row to a store that has
 no way to undo the mistake.
 
-**No published artifact was harmed.** The one committed snapshot,
+**No published artifact was harmed** at the time this was written. The one
+committed snapshot,
 `02a8833be1f0da2048b039e4e42a5c81de8fba2b4851d5e12c7662d14d43ceac.json`
 (md5 `67188296dc37d6e11c66d23203320297`), was built with plain `--build`; this
-gap was found by reading the dispatch logic, not by triggering it, and
-`snapshot --build`/`--dry-run` were not run against the live store while
-diagnosing it.
+gap was found by reading the dispatch logic, not by triggering it.
 
-**Not fixed here.** The fix is a one-line change —
-`sub.add_parser("snapshot", ...)`'s `--build` and `--dry-run` arguments need
-`add_mutually_exclusive_group()` so the two cannot both be true — but that is
-a CLI *behaviour* change, out of scope for the branch that found it, and is
-deferred to its own commit.
+**Fixed 2026-08-27.** Not with `add_mutually_exclusive_group()` as this entry
+originally proposed. That would raise `SystemExit` from argparse rather than
+returning a code, breaking the pattern `tests/test_refs.py` established for the
+sibling branch — `main(argv)` returns, the test asserts on the return value and
+on `"choose one of"` in stdout. The landed fix mirrors `refs` instead: count the
+four modes, and refuse unless exactly one is set.
+
+```python
+modes = (bool(args.build), bool(args.dry_run), bool(args.list),
+         args.get is not None)
+if sum(modes) != 1:
+    _print({"error": "choose one of --build, --dry-run, --list, --get"})
+    return 2
+```
+
+Requiring exactly one mode is what makes the storage gate sound: with `--build`
+and `--dry-run` mutually exclusive, `if args.build:` can no longer fire on a run
+the caller asked to be dry. It also closes the bare-`snapshot` exit-0 case in the
+same guard, so the two defects in this entry have one fix.
+
+**The fix cost one accidental artifact, and the record should say so.** Verifying
+that the new tests actually fail against the old code meant running
+`snapshot --build --dry-run` against the real store with the fix stashed — which
+is the defect, so it stored. `workspace/snapshots/9a5fdebb…156d0d.json`, tenant
+`default`, 62 source docs / 282 warnings / 63 gaps, exists because of that run.
+It is **not corrupt or spurious**: a subsequent `--dry-run` under the fix
+rebuilds the identical `snapshot_id`, so the bytes are exactly what a legitimate
+`--build` for the `default` tenant produces. It was never published and no run
+stamped its hash.
+
+**Deleted 2026-08-27**, on the reasoning that it was minted by a defect rather
+than by an operator: no consumer holds the hash, no run stamped it, and the
+write-once discipline exists to protect artifacts someone may have cited. A
+tombstone was rejected as the worse option — it would record an excision of
+something that was never published, making the store's own history less true
+rather than more.
+
+The general lesson is cheap and worth keeping: **a red-green check against a
+destructive defect reproduces the destruction.** Where the defect writes to a
+store with no delete, prove the test fails against a copy or a temporary root,
+not against the live one. `put_snapshot` already takes `root`; the test did not
+use it because it drives the CLI, which does not expose it.
 
 **A second, related instance.** `refs`'s own usage-error branch (added by the
 same plan, `cli refs` with neither or both of `--verify`/`--index`) was found
@@ -988,6 +1024,176 @@ question was verified or what a past review covered; rewriting them would falsif
 the record. They no longer describe a runnable command. (`docs/superpowers/plans/`
 carried the same stale invocation and was removed on 2026-08-25 — the plan it held
 was complete and its outcome is recorded in `docs/distribution-design.md`.)
+
+### G40 — every published `would_close` is a template constant — FIXED
+
+`contract.md` §1.2.1 makes `would_close` BINDING and says why: *"A gap that only
+says something is missing sends a curator hunting; one that says 'a footing row
+for exposure C, non-HVHZ, at 6 ft' is a work item."*
+
+Measured against the snapshot on disk: **63 gaps carry 4 distinct `would_close`
+sentences**, and 51 of them share one — *"this warning is cut off mid-clause; a
+person should read the page image and record it whole."* They are string
+literals in `snapshot.py`, not sentences about the gap they are attached to.
+
+The particulars are all in scope and simply not interpolated (`snapshot.py:285-345`):
+the row carries `document_id`, `page_no`, `element_id`, `text_source` and
+`ocr_confidence`, and the truncated body is a local. One site does interpolate a
+lexeme; it emitted zero gaps in this snapshot, so all four live sentences are
+constants.
+
+**Why it matters beyond tidiness.** 51 identical sentences cannot be ranked,
+batched, or triaged. Planning's §1 throughput argument — binary accept/reject
+beats search-then-judge by roughly an order of magnitude — applies to the gap
+list exactly as it applies to the review queue, and a generic `would_close`
+forces search-then-judge on every item.
+
+**Fixed 2026-08-27.** Two helpers — `_where(row)` renders `p12 of "<title>"`, and
+`_tail(text)` shows where a truncated warning stops — and `d.title` added to the
+two queries that lacked it. All six construction sites interpolate.
+
+Measured after: **63 gaps, 63 distinct `would_close`.** Every gap names its own
+work item, with the page, the document, the break point, and for an OCR gap the
+confidence against the floor. Titles are capped at 64 characters because several
+are curation notes rather than titles.
+
+`tests/test_snapshot_build.py::test_would_close_names_the_gap_it_belongs_to`
+asserts distinctness at 90% of gap count rather than 100% — two gaps could
+legitimately coincide, but four constants across sixty-three cannot.
+
+It stopped being a tidiness defect partway through: Planning's implementation of
+`parameter_condition_excluded` carries the excluded-point reason in `would_close`,
+so the field now holds the only copy of a fact no other field has.
+
+---
+
+### G41 — `table_cells.rowspan`/`colspan` are never populated — DETECTED, NOT FIXED
+
+The columns exist in the schema (`store.py:131-132`) and **no code path sets
+them**. All three `Cell(...)` construction sites — `extract.py:555`,
+`tables.py:71`, `tables.py:339` — omit both, so every one of the **18,472** cells
+in the store carries the default of 1.
+
+Measured consequence, found while answering Planning on the footing table: the
+Bufftech *Maximum Post Spacing and Footing Dimensions* table has a fourth column
+whose cells are **merged across each pair of rows**, and that column is what
+scopes exposure B to non-HVHZ. Extracted, `NON HVHZ` is attributed to the 30″ row
+alone and the 24″ row appears unannotated. Five separate documents carry this
+table and all five extract it identically, so the merge is unrecoverable from
+canonical data anywhere in the corpus.
+
+The merge was recovered only by rendering the page image and looking at it —
+which is a machine reading, curation level 1 at best, not the level 2
+obligation 6 requires for a `structural_parameter`. That makes this a concrete
+argument for G17's review loop rather than a defect that can be fixed around.
+
+**Not closed because** the fix is not simply "write the field". `pdfplumber:lines`
+is the detector on this table and it reports a grid, not a span map; recovering
+merges means inferring them from the ruling lines. Worth doing, and worth
+measuring before promising.
+
+---
+
+### G42 — five of the eleven promised warning classes are undetectable — FIXED
+
+`planning-asks.md` §3.2 commits this platform to eleven platform warning codes,
+with counts and verbatim exemplars. Measured while producing them
+(`registry-additions.md` §3), **five have zero instances in the published
+warning set** and between 16 and 254 matching elements in the store:
+
+| Code | Published | Elements | Docs |
+|---|---|---|---|
+| `WARN_POST_STRIKE_UNSUPPORTED` | 0 | 71 | 7 |
+| `WARN_FROST_LINE` | 0 | 254 | 28 |
+| `WARN_POST_TOP_CUT` | 0 | 25 | 5 |
+| `WARN_WARRANTY_EXCLUSION` | 0 | 16 | 11 |
+| `WARN_PANEL_BOTH_ENDS` | 0 | 20 | 5 |
+
+They are not absent from the corpus. They are absent from `warnings[]`, because
+`snapshot.py`'s detector recognises a warning by a severity lexeme (`WARNING:`,
+`NOTE:`, `CAUTION:`) or a hazard regex, and four of these five are written as
+ordinary bullet points inside installation lists:
+
+```
+• To lower a post, place a wood block from corner to corner on the post and
+  carefully tap with a mallet
+• Never strike the PVC post without a wood support
+```
+
+No lexeme, no hazard word, so it classifies as an installation step. The fifth,
+`WARN_WARRANTY_EXCLUSION`, fails differently: exclusions are running prose in
+warranty documents, which the detector never reads.
+
+**Not a defect in the code list.** The eleven codes are right and the exemplars
+resolve — they were minted from the elements directly. What is missing is the
+classification, not the evidence.
+
+**Fixed 2026-08-27, narrowly.** Not by widening the lexeme set — the general
+form is measured at 248 hits and dominated by ordinary sequencing steps, which is
+why `_HAZARD` excludes it. `_RULE_WARNING` names the four bullet rules
+individually, and warranty exclusions are matched on the phrasing the warranty
+documents actually use (`not covered under this warranty`), which `_HAZARD` missed
+by one preposition.
+
+Two things fell out of doing it:
+
+- **A rule publishes as its bullet, not the list it sits in.** These bullets live
+  in installation lists carrying a dozen steps, and a reader shown all twelve has
+  not been warned. `_bullet_containing()` extracts the matched fragment; the
+  citation still resolves to the containing element, which is where the bbox is.
+- **Deduplication only works once the bullet glyph is stripped.** OCR renders it
+  as `¢` or `«` often enough that one rule arrived as three warnings that did not
+  dedupe. `Never strike the PVC post without a wood support` is now **one warning
+  with five citations**.
+
+One deliberate non-fix: a table of contents can carry the warranty phrase and
+split into fragments of dot leaders and page numbers, so a fragment must now look
+like prose — no dot leaders, ≥85% letters. Publishing a contents line as a safety
+warning is worse than missing the warning.
+
+Warnings moved 282 → 289. Two tests pin it, including one asserting a rule
+publishes its bullet rather than the whole list.
+
+---
+
+### G43 — promotion multiplies every fact by the number of readers — DETECTED, NOT FIXED
+
+Found by the first end-to-end run of the Phase 2 review loop, against a **copy**
+of the store. Reviewing one `wind_exposure_footing` crop and running
+`promote_verified(dry_run=False)`:
+
+```
+promote --apply   : 36 facts created from 6 rows
+distinct (fact_type, value_original, conditions) : 12 of 36
+```
+
+**Three identical facts per cell, one per reader.** `promote_tables.promote_verified`
+groups by `(document_id, page_no, row_index)` and iterates the promotable
+*readings* in that group. A footing crop carries 18 cells read by 3 readers = 54
+readings, so each distinct value promotes three times.
+
+**Pre-existing, not caused by Phase 2.** It was unreachable while `PROMOTABLE`
+was `("accepted", "corrected")` and nothing wrote either — the defect has been
+in the code since A1 revoked `cross_family_verified`, hidden behind a no-op.
+Closing the no-op is what made it observable.
+
+**Why it matters now.** These rows are what a `ParameterTable` is built from. Three
+identical rows at one domain point violate `hit_policy: unique` mechanically, and
+the contract's §1.3 check would fire on data this platform generated itself —
+independently of the real design-point pairing that C5 is about. A reviewer would
+also see each value three times in any queue built on `facts`.
+
+**Not fixed here** because it belongs to `promote_tables.py` and wants its own
+tests; Phase 2's acceptance is about the loop existing, and it does. The likely fix
+is to reduce each `(row_index, col_index)` to one reading before promoting — the
+readers agree on values (§2 of the Phase 2 spec measured 6 disagreements in 174
+multi-read positions, all of them merged-cell artifacts), so any consistent choice
+works and the disagreement cases are exactly what the human verdict already settled.
+
+**This must land before anything publishes**, since a promoted fact is what reaches
+`ParameterTable.rows`.
+
+---
 
 ---
 

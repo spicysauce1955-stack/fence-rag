@@ -129,6 +129,35 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--index", action="store_true",
                    help="rebuild the ref index and report its shape")
 
+    p = sub.add_parser("review",
+                       help="the human review loop: accept or correct a machine "
+                            "reading of a scanned table")
+    p.add_argument("--queue", action="store_true",
+                   help="what is waiting for a person")
+    p.add_argument("--accept", metavar="CROP_SHA256",
+                   help="record a review of one table crop")
+    p.add_argument("--reviewer", help="who reviewed it (required with --accept)")
+    p.add_argument("--verdict", default="accepted",
+                   choices=["accepted", "rejected", "bracket_unclear"],
+                   help="bracket_unclear is not a rejection: the values can be "
+                        "right while the applicability is unreadable")
+    p.add_argument("--grid", metavar="FILE",
+                   help="JSON [{row,col,value}] -- the confirmed cells")
+    p.add_argument("--spans", metavar="FILE",
+                   help="JSON [{row_from,row_to,col,text}] -- merged cells, which "
+                        "is the structure the readers cannot see")
+    p.add_argument("--notes")
+    p.add_argument("--rebuild", action="store_true",
+                   help="regenerate the candidate annotations from table_reviews")
+
+    p = sub.add_parser("serve",
+                       help="the read/write API behind Planning's screens")
+    p.add_argument("--host", default="127.0.0.1")
+    p.add_argument("--port", type=int, default=8765)
+    p.add_argument("--token", action="append", default=[],
+                   help="bearer token on the allowlist; repeatable. Falls back to "
+                        "FENCE_API_TOKENS (comma-separated) in the environment")
+
     p = sub.add_parser("dataset",
                        help="baseline and verify the hand-researched dataset")
     p.add_argument("--write", action="store_true", help="write the SHA-256 baseline")
@@ -279,11 +308,26 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "snapshot":
         from .snapshot import build_snapshot
         from .snapshot_store import get_snapshot, list_snapshots, put_snapshot
+        # G39. Two defects, one guard. `--build` and `--dry-run` were
+        # independent store_true flags and only `--build` gated storage, so
+        # `--build --dry-run` stored anyway -- the single combination whose
+        # entire purpose is that it must not, against a write-once store with
+        # no delete. And a bare `snapshot` printed an error and exited 0, the
+        # vacuous-green class the refs branch below already refuses. Both are
+        # usage errors; both exit 2, matching refs and argparse's convention.
+        # Requiring exactly one mode makes the storage gate below sound: with
+        # --build and --dry-run exclusive, `if args.build` can no longer fire
+        # on a run the caller asked to be dry.
+        modes = (bool(args.build), bool(args.dry_run), bool(args.list),
+                 args.get is not None)
+        if sum(modes) != 1:
+            _print({"error": "choose one of --build, --dry-run, --list, --get"})
+            return 2
         if args.get:
             _print(get_snapshot(args.get))
         elif args.list:
             _print(list_snapshots())
-        elif args.build or args.dry_run:
+        else:
             snap = build_snapshot(tenant=args.tenant, regime=args.regime)
             summary = {"snapshot_id": snap["snapshot_id"],
                        "tenant": snap["tenant"], "regime": snap["regime"],
@@ -296,21 +340,71 @@ def main(argv: list[str] | None = None) -> int:
                 put_snapshot(snap)
                 summary["stored"] = True
             _print(summary)
-        else:
-            _print({"error": "choose one of --build, --dry-run, --list, --get"})
+    elif args.cmd == "review":
+        # Same shape as snapshot's and refs' guards: require exactly one mode and
+        # exit 2 on a usage error rather than printing an error and exiting 0.
+        # Checked before the imports, so a usage error does not depend on a
+        # module being importable.
+        modes = (bool(args.queue), args.accept is not None, bool(args.rebuild))
+        if sum(modes) != 1:
+            _print({"error": "choose one of --queue, --accept, --rebuild"})
+            return 2
+        import json as _json
+        from pathlib import Path as _P
+        from . import reviews
+        from .store import connect as _c
+        conn = _c()
+        try:
+            if args.queue:
+                _print({"queue": reviews.review_queue(conn),
+                        "summary": reviews.review_summary(conn)})
+            elif args.rebuild:
+                _print(reviews.rebuild_projection(conn))
+            else:
+                if not args.reviewer:
+                    _print({"error": "--accept requires --reviewer: the name is the "
+                                     "only thing separating 'software read this' "
+                                     "from 'a person confirmed it'"})
+                    return 2
+                load = lambda f: _json.loads(_P(f).read_text()) if f else []
+                try:
+                    _print(reviews.submit_review(
+                        conn, crop_sha256=args.accept, reviewer=args.reviewer,
+                        verdict=args.verdict, grid=load(args.grid),
+                        spans=load(args.spans), notes=args.notes))
+                except reviews.ReviewRefused as e:
+                    _print({"error": e.code, "message": str(e)})
+                    return 1
+        finally:
+            conn.close()
+    elif args.cmd == "serve":
+        import os
+        from . import api
+        tokens = set(args.token) or {
+            t.strip() for t in os.environ.get("FENCE_API_TOKENS", "").split(",")
+            if t.strip()}
+        if not tokens:
+            # An open write endpoint is worse than no endpoint. contract.md 1.5's
+            # Authoring surface is proxied from one backend, never a browser.
+            _print({"error": "no bearer token configured; pass --token or set "
+                             "FENCE_API_TOKENS"})
+            return 2
+        print(f"serving on {args.host}:{args.port} "
+              f"({len(tokens)} token(s) on the allowlist)", file=sys.stderr)
+        api.serve(args.host, args.port, tokens=tokens)
     elif args.cmd == "refs":
         from .refs import build_index, verify_snapshots
         from .store import connect
         # Require a choice and refuse to silently resolve the combination,
         # rather than the previous `if args.verify: ... else:
         # build_index(...)`, under which a bare `cli refs` silently rebuilt
-        # the index and `--verify --index` silently ignored `--index`. This
-        # deliberately does NOT mirror snapshot's sibling branch, which
-        # falls through to exit 0 on the same kind of usage error: for a CI
-        # guard, an error on stdout with a green exit is the vacuous-green
+        # the index and `--verify --index` silently ignored `--index`. For a
+        # CI guard, an error on stdout with a green exit is the vacuous-green
         # failure class refs --verify exists to close, so this exits 2 --
         # argparse's own convention for a usage error, distinct from 1 ("the
-        # guard fired"). See G39 in docs/state-and-gaps.md.
+        # guard fired"). See G39 in docs/state-and-gaps.md. The snapshot
+        # branch above was the sibling that still fell through to exit 0 on
+        # this same class; it no longer does, and both now agree.
         if args.verify == args.index:
             _print({"error": "choose one of --verify, --index"})
             return 2

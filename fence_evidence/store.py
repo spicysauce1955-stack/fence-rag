@@ -19,7 +19,7 @@ from .model import ExtractedDocument
 from .lang import detect_lang
 from .paths import EVIDENCE_DB, ensure_writable
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 SCHEMA = """
 PRAGMA journal_mode=WAL;
@@ -231,6 +231,35 @@ CREATE TABLE IF NOT EXISTS table_read_candidates (
 );
 CREATE INDEX IF NOT EXISTS ix_trc_page ON table_read_candidates(document_id, page_no);
 CREATE INDEX IF NOT EXISTS ix_trc_status ON table_read_candidates(review_status);
+
+-- One human review of one table crop. The record; the annotations on
+-- table_read_candidates are a projection of it, written in the same transaction
+-- and regenerable by `cli review --rebuild`.
+--
+-- `spans` is the field the queue never had. The HVHZ applicability bracket and a
+-- merged row-label band ("Up to 48\"" covering two rows) are the same shape -- a
+-- value covering a range of rows -- and neither a per-cell nor a per-table column
+-- can hold one honestly. It is what G41 discards: rowspan/colspan are never
+-- written, so every one of the 18,472 cells claims to be 1x1.
+--
+-- `from_candidates` points DOWN, at the readings this was derived from. Nothing
+-- on table_read_candidates points back up; that was `promoted_fact_id`, and
+-- tests/test_pointer_direction.py forbids it.
+CREATE TABLE IF NOT EXISTS table_reviews (
+    review_id       TEXT PRIMARY KEY,
+    crop_sha256     TEXT NOT NULL,
+    document_id     TEXT NOT NULL REFERENCES documents(document_id),
+    page_no         INTEGER NOT NULL,
+    reviewer        TEXT NOT NULL,          -- asserted by Planning; unverifiable here
+    reviewed_at     TEXT NOT NULL,
+    verdict         TEXT NOT NULL,          -- accepted | rejected | bracket_unclear
+    grid            TEXT NOT NULL,          -- JSON [{row, col, value}]
+    spans           TEXT NOT NULL,          -- JSON [{row_from, row_to, col, text}]
+    from_candidates TEXT NOT NULL,          -- JSON [candidate_id]
+    notes           TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_treviews_crop ON table_reviews(crop_sha256);
+CREATE INDEX IF NOT EXISTS ix_treviews_page ON table_reviews(document_id, page_no);
 
 -- ------------------------------------------------------------- phase 6
 CREATE TABLE IF NOT EXISTS facts (
