@@ -370,6 +370,91 @@ class TestAWholeSnapshotCarriesNothingForeign(_TwoTenants):
             conn.close()
 
 
+class TestTheDiscoveryApiFailsClosed(_TwoTenants):
+    """`GET /source-refs/{id}` resolves a `ref_id` with NO tenant in scope.
+
+    `api.py`'s bearer allowlist authenticates a caller and maps to no tenant, so
+    the resolver is called with `tenant=None`. That is a real hole the moment a
+    tenant uploads a document: the snapshot builder would refuse to publish a
+    citation into it, but the Discovery endpoint would happily render the crop
+    to anyone holding any allowlisted token.
+
+    So it fails CLOSED — with `tenant=None` only shared documents resolve — and
+    the refusal is byte-identical to "no such ref_id", because telling a caller
+    that an id exists but is not theirs is itself the leak in miniature.
+    """
+
+    def _ref(self, document_id):
+        from fence_evidence import refs
+        row = self.conn.execute(
+            """SELECT v.sha256, e.page_no, e.bbox FROM elements e
+                 JOIN document_versions v ON v.version_id = e.version_id
+                WHERE e.document_id = ? AND e.bbox IS NOT NULL
+                ORDER BY e.ordinal LIMIT 1""", (document_id,)).fetchone()
+        return refs.ref_id(row["sha256"], row["page_no"], row["bbox"])
+
+    def test_a_shared_ref_resolves_with_no_tenant(self):
+        from fence_evidence import sourcerefs
+        got = sourcerefs.source_ref(self.conn, self._ref(self.shared))
+        self.assertEqual(got["belongs_to"], SHARED_SHA)
+
+    def test_an_owned_ref_does_not_resolve_for_a_caller_with_no_tenant(self):
+        from fence_evidence import sourcerefs
+        from fence_evidence.cropcache import CropUnavailable
+        with self.assertRaises(CropUnavailable):
+            sourcerefs.source_ref(self.conn, self._ref(self.acme))
+
+    def test_the_refusal_is_indistinguishable_from_an_unknown_id(self):
+        """Existence is information. Two refusals that differ let a caller
+        enumerate another tenant's refs by watching the error text."""
+        from fence_evidence import sourcerefs
+        from fence_evidence.cropcache import CropUnavailable
+        real = self._ref(self.globex)
+        fake = "0" * 16
+        messages = []
+        for rid in (real, fake):
+            with self.assertRaises(CropUnavailable) as caught:
+                sourcerefs.source_ref(self.conn, rid)
+            messages.append(str(caught.exception).replace(rid, "<id>"))
+        self.assertEqual(messages[0], messages[1])
+
+    def test_an_owned_ref_resolves_for_its_owner(self):
+        """The gate is about visibility, not a blanket refusal -- so that when a
+        token-to-tenant mapping does arrive, the resolver already works."""
+        from fence_evidence import sourcerefs
+        got = sourcerefs.source_ref(self.conn, self._ref(self.acme),
+                                    tenant="acme")
+        self.assertEqual(got["belongs_to"], ACME_SHA)
+
+    def test_a_batch_puts_a_foreign_ref_in_unknown_not_not_rendered(self):
+        """`unknown` means 'fix the caller' and `not_rendered` means 'retry'.
+        A foreign ref must land in the same list an unknown id does, or the two
+        lists become an existence oracle."""
+        from fence_evidence import sourcerefs
+        foreign = self._ref(self.globex)
+        out = sourcerefs.source_refs_batch(
+            self.conn, [self._ref(self.shared), foreign, "0" * 16])
+        self.assertEqual(sorted(out["unknown"]), sorted([foreign, "0" * 16]))
+        self.assertEqual(out["not_rendered"], [])
+        self.assertEqual([r["belongs_to"] for r in out["refs"]], [SHARED_SHA])
+
+    def test_shared_bytes_stay_reachable_when_a_tenant_also_files_them(self):
+        """A content hash filed under BOTH a shared document and an upload is
+        shared content. Visibility is per filing, not per hash -- refusing the
+        hash would make the tenant's copy censor everyone else's evidence."""
+        from fence_evidence import sourcerefs
+        run = start_run(self.conn)
+        add_doc(self.conn, run, path="uploads/globex/copy.pdf", sha=SHARED_SHA,
+                manufacturer="globex", doc_type="warranty",
+                owner_tenant="globex")
+        got = sourcerefs.source_ref(self.conn, self._ref(self.shared))
+        self.assertEqual(got["belongs_to"], SHARED_SHA)
+        blob = json.dumps(got, sort_keys=True, default=str)
+        self.assertNotIn("globex", blob,
+                         "the other tenant's filing reached the wire through "
+                         "a SOURCE_CONTENT_DUPLICATED warning")
+
+
 class TestTheTenantIdentifierItself(unittest.TestCase):
     """`contract.md` §2.1 reserves two namespaces: `shared` and `mfr/<x>`.
 

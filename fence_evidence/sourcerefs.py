@@ -49,6 +49,7 @@ import time
 from . import refs
 from .cropcache import CropUnavailable, ensure_crop, relative_url
 from .paths import REPO_ROOT, is_lfs_pointer
+from .tenancy import visible_sql
 
 # registry-additions.md §2. Named rather than inlined so a test can assert the
 # set this module can emit is a subset of the registry's ten.
@@ -83,7 +84,7 @@ _FILENAME_BASIS = "keyword in title/filename"
 
 
 def source_ref(conn: sqlite3.Connection, ref_id: str, *, dpi: int = 200,
-               index=None) -> dict:
+               index=None, tenant: str | None = None) -> dict:
     """The §5.1 shape for one ref. Raises `CropUnavailable` only if unknown.
 
     `index` is `refs.build_index`'s output; pass it from a batch, because the
@@ -99,7 +100,26 @@ def source_ref(conn: sqlite3.Connection, ref_id: str, *, dpi: int = 200,
         raise CropUnavailable(
             f"no such ref_id: {ref_id}; nothing in this store produces it")
 
-    filings = _filings(conn, locus.sha256)
+    filings = _filings(conn, locus.sha256, tenant)
+    if not filings:
+        # Obligation 7, failing CLOSED. Every filing of these bytes belongs to
+        # some other tenant, so this caller may not see the text, the crop, the
+        # path or the manufacturer -- and must not learn that the id exists
+        # either, which is why this is the same refusal, with the same message,
+        # as an id nothing produces. Existence is itself information.
+        #
+        # This is a placeholder for authorisation, and it is deliberately the
+        # strict end of the range: `api.py`'s bearer allowlist authenticates a
+        # CALLER and maps to no tenant, so `tenant` is None on every request
+        # today and a tenant-owned document is unreachable through the API by
+        # anyone, including its owner. That is honest while every document in
+        # the corpus is shared (144 of 144) and this branch is unreachable in
+        # practice. It stops being adequate the day the first upload lands:
+        # obligation 3 then requires the OWNER to resolve their own citation,
+        # which needs a token-to-tenant mapping that does not exist. See
+        # docs/state-and-gaps.md G48.
+        raise CropUnavailable(
+            f"no such ref_id: {ref_id}; nothing in this store produces it")
     image, image_problem = _image(conn, ref_id, locus, dpi=dpi, index=idx,
                                   filings=filings)
     return {
@@ -114,7 +134,7 @@ def source_ref(conn: sqlite3.Connection, ref_id: str, *, dpi: int = 200,
 
 def source_refs_batch(conn: sqlite3.Connection, ref_ids: list[str], *,
                       dpi: int = 200, deadline_s: float = 10.0,
-                      cap: int = 50) -> dict:
+                      cap: int = 50, tenant: str | None = None) -> dict:
     """`{"refs": [...], "not_rendered": [...], "deadline_exceeded": bool}`.
 
     Two refusals, and only one of them is an exception.
@@ -162,10 +182,15 @@ def source_refs_batch(conn: sqlite3.Connection, ref_ids: list[str], *,
             not_rendered.append(rid)
             continue
         try:
-            out.append(source_ref(conn, rid, dpi=dpi, index=index))
+            out.append(source_ref(conn, rid, dpi=dpi, index=index,
+                                  tenant=tenant))
         except CropUnavailable:
-            # Only an unresolvable id reaches here: a ref that resolves but
-            # cannot be pictured is answered normally with `image: null`.
+            # An unresolvable id, or one every filing of which belongs to
+            # another tenant -- `source_ref` refuses both identically and on
+            # purpose, so a batch cannot be used to probe for the existence of
+            # somebody else's ref by watching which list an id lands in. A ref
+            # that resolves but cannot be pictured is answered normally with
+            # `image: null`.
             unknown.append(rid)
     return {"refs": out, "not_rendered": not_rendered, "unknown": unknown,
             "deadline_exceeded": exceeded}
@@ -173,22 +198,31 @@ def source_refs_batch(conn: sqlite3.Connection, ref_ids: list[str], *,
 
 # --------------------------------------------------------------- assembly
 
-def _filings(conn: sqlite3.Connection, sha256: str) -> list[sqlite3.Row]:
-    """Every document record filed against these bytes, deterministically ordered.
+def _filings(conn: sqlite3.Connection, sha256: str,
+             tenant: str | None = None) -> list[sqlite3.Row]:
+    """Every VISIBLE document record filed against these bytes, in order.
 
     Usually one. 14 groups here have more, one of them four, and
     `documents.version_status_basis` already differs across one such pair --
     which is why the warnings below union over all of them instead of electing
     a primary.
+
+    Obligation 7. A content hash can be filed under a shared document *and* a
+    tenant's upload, so visibility is per filing rather than per hash: the
+    bytes stay resolvable through the shared filing, and the upload's
+    manufacturer, path and doc_type -- all of which reach the wire through
+    `_warnings` and `also_filed_under` -- do not. `tenant=None` is the caller
+    with no tenant in hand and sees only SHARED documents, which is the whole
+    corpus today; see the note in `source_ref`.
     """
     return conn.execute(
-        """SELECT d.document_id, d.source_path, d.file_type, d.manufacturer,
+        f"""SELECT d.document_id, d.source_path, d.file_type, d.manufacturer,
                   d.doc_type, d.version_status, d.version_status_basis,
                   d.structural, v.version_id
              FROM document_versions v
              JOIN documents d ON d.document_id = v.document_id
-            WHERE v.sha256 = ?
-            ORDER BY d.document_id""", (sha256,)).fetchall()
+            WHERE v.sha256 = ? AND {visible_sql('d')}
+            ORDER BY d.document_id""", (sha256, tenant)).fetchall()
 
 
 def _text(conn: sqlite3.Connection, locus: refs.Locus) -> str | None:
