@@ -188,6 +188,19 @@ def main(argv: list[str] | None = None) -> int:
                             "bbox, so published citations are unaffected")
     p.add_argument("--apply", action="store_true", help="write them (default is a dry run)")
 
+    p = sub.add_parser("gc",
+                       help="collect orphaned derived images (G11): delete files "
+                            "under workspace/derived/ that no live row, review "
+                            "digest, workspace record or published citation "
+                            "claims. Dry run unless --apply")
+    p.add_argument("--derived", action="store_true",
+                   help="collect the derived image store (workspace/derived/); "
+                        "required -- there is no default store to sweep")
+    p.add_argument("--apply", action="store_true",
+                   help="actually delete them (default is a dry run)")
+    p.add_argument("--show", type=int, default=50,
+                   help="how many orphan paths to list (0 for all; default 50)")
+
     sub.add_parser("rebuild-index", help="rebuild the retrieval projection from canonical rows")
     sub.add_parser("stats", help="store statistics")
     sub.add_parser("report", help="regenerate the workspace reports")
@@ -436,6 +449,37 @@ def main(argv: list[str] | None = None) -> int:
             _print(backfill_spans(conn, dry_run=not args.apply))
         finally:
             conn.close()
+    elif args.cmd == "gc":
+        from .gc import collect
+        from .store import connect as _c
+        if not args.derived:
+            # No default store. `gc` with no target that quietly swept
+            # workspace/derived/ would be a delete verb whose blast radius the
+            # operator never named; exit 2, argparse's usage-error convention,
+            # the same way `refs` refuses an unstated choice.
+            _print({"error": "choose a store to collect: --derived"})
+            return 2
+        # Read-only on the store: the collector reads reachability and writes
+        # nothing back. Only the filesystem changes, and only under --apply.
+        conn = _c(read_only=True)
+        try:
+            report = collect(conn, apply=args.apply)
+        finally:
+            conn.close()
+        shown = report["orphans"] if args.show == 0 else report["orphans"][:args.show]
+        _print({**report, "orphans": shown,
+                "orphans_listed": len(shown),
+                "orphans_omitted": report["orphan_files"] - len(shown)})
+        if report["unsafe"]:
+            print("REFUSING to collect: a root set could not be read, so a file "
+                  "that looks unreferenced may still be cited.\n"
+                  "         See `unreadable_snapshots` / `unreadable_roots` "
+                  "above. Nothing was deleted.", file=sys.stderr)
+            return 1
+        if not args.apply and report["orphan_files"]:
+            print(f"dry run: {report['orphan_files']} orphaned file(s), "
+                  f"{report['orphan_bytes'] / 1e9:.3f} GB. Re-run with --apply "
+                  f"to delete them.", file=sys.stderr)
     elif args.cmd == "refs":
         from .refs import build_index, verify_snapshots
         from .store import connect
