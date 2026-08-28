@@ -190,7 +190,18 @@ def mark_cross_family_verified(conn: sqlite3.Connection, readers: list[str]) -> 
     verified = skipped = 0
     for r in rows:
         present = {x for x in (r["readers"] or "").split(",")}
-        if len({families.get(x, "unknown") for x in present}) < 2:
+        # Exclude "unknown" HERE too, not only at the entry guard above. The
+        # entry guard checks the readers you asked for; this checks the readers
+        # who actually read THIS cell, and they are not the same set -- a reader
+        # can be absent from a page. Counting an unclassified reader as a family
+        # inverts the claim the flag makes: the evidence is that two systems
+        # which fail DIFFERENTLY agreed, and an unmapped name is not evidence of
+        # anything. Measured: with readers [calibration-A, codex-C, gemini-Z] and
+        # codex-C absent from a page, four cells were stamped
+        # cross_family_verified on the strength of one real family plus an
+        # unclassified one.
+        seen_families = {families.get(x, "unknown") for x in present}
+        if len(seen_families - {"unknown"}) < 2:
             skipped += 1
             continue
         values = {normalise(x["value"]) for x in conn.execute(f"""

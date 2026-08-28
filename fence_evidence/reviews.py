@@ -148,17 +148,35 @@ def _check_spans(spans, grid_map: dict[tuple[int, int], str]) -> None:
 
 
 # ------------------------------------------------------------------ projection
-def _candidates(conn: sqlite3.Connection, crop_sha256: str) -> list[sqlite3.Row]:
-    return conn.execute("""SELECT candidate_id, document_id, page_no, row_index,
-                                  col_index, value
-                             FROM table_read_candidates
-                            WHERE crop_sha256 = ?
-                            ORDER BY candidate_id""", (crop_sha256,)).fetchall()
+def _candidates(conn: sqlite3.Connection, crop_sha256: str,
+                only: list[int] | None = None) -> list[sqlite3.Row]:
+    """Readings of one crop; `only` restricts to a review's own candidate ids.
+
+    The restriction is what stops a replay from signing readings the reviewer
+    never saw. `submit_review` sees the readings that exist when it runs;
+    without `only`, `rebuild_projection` would see the readings that exist
+    *now*, and the real queue is loaded incrementally by `load_directory` --
+    seven readers, arriving at different times. A reading loaded after a review
+    would be stamped with that reviewer's name and become PROMOTABLE, which is
+    a human sign-off record for something no human looked at, and PROMOTABLE is
+    the only gate between a reading and a curation-level-2 fact.
+    """
+    if only is not None and not only:
+        return []
+    sql = """SELECT candidate_id, document_id, page_no, row_index, col_index, value
+               FROM table_read_candidates
+              WHERE crop_sha256 = ?"""
+    args: list = [crop_sha256]
+    if only is not None:
+        sql += f" AND candidate_id IN ({','.join('?' * len(only))})"
+        args += list(only)
+    return conn.execute(sql + " ORDER BY candidate_id", args).fetchall()
 
 
 def _project(conn: sqlite3.Connection, *, crop_sha256: str, verdict: str,
              grid_map: dict[tuple[int, int], str], reviewer: str,
-             reviewed_at: str) -> tuple[list[int], int, int]:
+             reviewed_at: str, only: list[int] | None = None
+             ) -> tuple[list[int], int, int]:
     """Write the candidate annotations for one review. Returns (ids, cells, promotable).
 
     Both `submit_review` and `rebuild_projection` go through here, over the same
@@ -174,7 +192,7 @@ def _project(conn: sqlite3.Connection, *, crop_sha256: str, verdict: str,
     """
     touched: list[int] = []
     promotable = 0
-    for row in _candidates(conn, crop_sha256):
+    for row in _candidates(conn, crop_sha256, only):
         if verdict == "accepted":
             # row_index -1 is a page-level verdict with no grid, not a cell.
             if row["row_index"] is None or row["row_index"] < 0:
@@ -266,10 +284,16 @@ def submit_review(conn: sqlite3.Connection, *, crop_sha256: str, reviewer: str,
 def rebuild_projection(conn: sqlite3.Connection) -> dict:
     """Regenerate the candidate annotations from `table_reviews` alone.
 
-    Replay order is `(reviewed_at, review_id)` — the order the reviews claim to
-    have happened in, not the order they arrived. A review backdated behind one
-    already applied therefore lands *before* it here, which is the record's own
-    order and the one we treat as authoritative.
+    Replay order is arrival order (`rowid`), which is the order `submit_review`
+    actually applied them in. Ordering by `reviewed_at` instead diverges the
+    moment a backdated review is submitted after a later-stamped one: the live
+    projection holds the backdated review's values and the rebuild holds the
+    other's, so the projection disagrees with its own source.
+
+    Each review is replayed only over the readings it was derived from
+    (`from_candidates`), never over a live query. A reading loaded after a
+    review is one the reviewer never saw, and stamping it would fabricate a
+    human sign-off for a machine reading.
     """
     started_here = not conn.in_transaction
     if started_here:
@@ -291,9 +315,14 @@ def rebuild_projection(conn: sqlite3.Connection) -> dict:
         # resubmission IS the most recent arrival.
         for r in conn.execute("""SELECT * FROM table_reviews
                                   ORDER BY rowid""").fetchall():
+            # Scoped to the readings this review was actually derived from.
+            # `from_candidates` already records exactly that; replaying against a
+            # live query instead let a reading loaded AFTER the review acquire
+            # the reviewer's name and a PROMOTABLE status.
             n, p = _project(conn, crop_sha256=r["crop_sha256"], verdict=r["verdict"],
                             grid_map=_grid_map(json.loads(r["grid"])),
-                            reviewer=r["reviewer"], reviewed_at=r["reviewed_at"])[1:]
+                            reviewer=r["reviewer"], reviewed_at=r["reviewed_at"],
+                            only=json.loads(r["from_candidates"]))[1:]
             replayed += 1
             cells += n
             promotable += p

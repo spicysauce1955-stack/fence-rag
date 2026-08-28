@@ -266,6 +266,38 @@ class TestRebuildProjection(unittest.TestCase):
     def tearDown(self):
         self.conn.close()
 
+    def test_a_reading_loaded_after_a_review_is_never_signed_by_it(self):
+        """The replay must not stamp readings the reviewer never saw.
+
+        `_project` queried candidates live, so `rebuild_projection` saw the
+        readings that exist NOW rather than the ones the review was derived
+        from. The real queue is loaded incrementally -- seven readers arriving
+        at different times -- so a reading loaded after a review acquired that
+        reviewer's name and a PROMOTABLE status. That is a human sign-off
+        record for something no human looked at, and PROMOTABLE is the only
+        gate between a reading and a curation-level-2 fact (obligation 6).
+
+        `table_reviews.from_candidates` already records the right scope; the
+        replay now uses it.
+        """
+        submit_review(self.conn, crop_sha256=CROP, reviewer="alice",
+                      verdict="accepted",
+                      grid=[{"row": 0, "col": 0, "value": "B"}], spans=[])
+        before = {r[0] for r in self.conn.execute(
+            "SELECT candidate_id FROM table_read_candidates")}
+        add_reading(self.conn, reader="coverage-1")       # arrives afterwards
+        q = ("SELECT candidate_id, review_status, reviewer FROM"
+             " table_read_candidates ORDER BY candidate_id")
+        live = [tuple(r) for r in self.conn.execute(q)]
+        rebuild_projection(self.conn)
+        after = [tuple(r) for r in self.conn.execute(q)]
+        self.assertEqual(live, after, "the replay diverged from what was written")
+        late = [r for r in after if r[0] not in before]
+        self.assertTrue(late, "the fixture added no late readings")
+        for cid, status, reviewer in late:
+            self.assertIsNone(reviewer, f"candidate {cid} was signed by a reviewer")
+            self.assertEqual(status, "unreviewed")
+
     def test_a_backdated_review_replays_in_arrival_order(self):
         """Replaying by `reviewed_at` diverges from what submit_review did.
 

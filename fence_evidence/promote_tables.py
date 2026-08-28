@@ -96,8 +96,11 @@ def _row_applicability(readings: list[sqlite3.Row], exposure: str) -> tuple[str,
         # make -- "unknown" + "claude-sonnet" reads as two families agreeing when
         # the second one is simply a reader nobody classified, and two unmapped
         # readers of the SAME model would read as one family rather than as an
-        # error. table_review.mark_cross_family_verified already excludes it;
-        # this path did not. The bracket is the HVHZ applicability, so a false
+        # error. An earlier version of this comment claimed
+        # table_review.mark_cross_family_verified already excluded it; that was
+        # only true of its ENTRY guard, and its per-cell check counted "unknown"
+        # as a family until the same fix landed there. The bracket is HVHZ
+        # applicability, so a false
         # cross-family claim here promotes a footing row into the wrong
         # regulatory regime.
         if v and family != "unknown":
@@ -175,10 +178,20 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
             by_cell[(r["document_id"], r["page_no"],
                      r["row_index"], r["col_index"])].append(r)
         groups: dict[tuple, list[sqlite3.Row]] = defaultdict(list)
+        # Every reading of the row, kept beside the deduped one. `conditions` and
+        # the fact want ONE reading per cell (G43), but `_row_applicability` is a
+        # cross-family test and needs them ALL: deduping first leaves the
+        # survivors almost always from a single reader, because candidate_id is
+        # monotonic per load, so the two-family check could never pass and every
+        # row published `hvhz_applicability: "unresolved"` with a note claiming
+        # readers had disagreed -- a false statement about the store's own data.
+        # It failed closed on the value and published a wrong reason.
+        all_by_row: dict[tuple, list[sqlite3.Row]] = defaultdict(list)
         for (doc, page, row_i, _col), cell_rows in by_cell.items():
             if any(c["candidate_id"] in promoted for c in cell_rows):
                 continue
             groups[(doc, page, row_i)].extend(one_reading_per_cell(cell_rows))
+            all_by_row[(doc, page, row_i)].extend(cell_rows)
 
         created = skipped = unresolved = 0
         by_type: dict[str, int] = defaultdict(int)
@@ -190,7 +203,8 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
                 if key and val and val.strip():
                     conditions[key] = val.strip()
             exposure = conditions.get("exposure_category", "")
-            applicability, basis = _row_applicability(cells, exposure)
+            applicability, basis = _row_applicability(
+                all_by_row[(doc, page, row_i)], exposure)
             if applicability == "unresolved":
                 unresolved += 1
             conditions["hvhz_applicability"] = applicability

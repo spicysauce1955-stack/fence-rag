@@ -104,6 +104,32 @@ class TestApplicabilityFailsClosed(unittest.TestCase):
     def test_unknown_exposure_letter(self):
         self.assertIsNone(hvhz_for_exposure("NON HVHZ for the B rows", "Z"))
 
+    def test_applicability_reads_every_reading_not_the_deduped_survivor(self):
+        """G43's dedup starved the cross-family test of its evidence.
+
+        `one_reading_per_cell` keeps the lowest candidate_id per column, and
+        candidate_id is monotonic per load, so the survivors are almost always
+        all from one reader. Handing those to `_row_applicability` meant the
+        two-family check could never pass: every row published
+        `hvhz_applicability: "unresolved"` with a note asserting that readers
+        had disagreed -- a false statement about the store's own data. It failed
+        closed on the value and published a wrong reason.
+        """
+        note = "NON HVHZ spans the two B rows."
+        readings = [{"reader": "calibration-A", "notes": note, "candidate_id": 1,
+                     "col_index": 0, "value": "B", "review_status": "accepted",
+                     "reviewed_value": None, "col_label": "WIND EXPOSURE"},
+                    {"reader": "codex-C", "notes": note, "candidate_id": 2,
+                     "col_index": 0, "value": "B", "review_status": "accepted",
+                     "reviewed_value": None, "col_label": "WIND EXPOSURE"}]
+        over_all, basis = _row_applicability(readings, "B")
+        self.assertEqual(over_all, "non-HVHZ only")
+        self.assertIn("cross-family", basis)
+        # and the deduped survivors alone cannot reach that answer
+        kept = one_reading_per_cell(readings)
+        self.assertEqual(len(kept), 1)
+        self.assertEqual(_row_applicability(kept, "B")[0], "unresolved")
+
     def test_an_unmapped_reader_does_not_count_as_a_family(self):
         """`reader_family` fails OPEN, returning "unknown" for a name it lacks.
 
