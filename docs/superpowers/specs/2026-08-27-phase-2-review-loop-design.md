@@ -79,7 +79,8 @@ row model cannot express it.
 
 **So review's job is to confirm values against the image and recover the structure
 the machines cannot see** — which is exactly what G41 discards, since `rowspan` and
-`colspan` are never written and all 18,472 cells claim to be 1×1.
+`colspan` were never written, so all 18,472 cells claimed to be 1×1 when this was
+written; G41 has since recovered 779 of them.
 
 ### 2.2 Honest limits of §2
 

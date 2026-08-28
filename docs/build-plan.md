@@ -20,10 +20,10 @@ contract both teams have signed, and `docs/integration/` needs no more design wo
 open items are work items, not agreements.
 
 **What exists:** a source-preserving evidence store over 144 documents / 2,147 pages /
-81,794 elements, with FTS5 retrieval, a fact layer (1,706 facts, 12 types), supersession
+81,794 elements, with FTS5 retrieval, a fact layer (1,714 facts, 12 types), supersession
 relations, a regenerable projection — and, since 2026-08-25, **a first published
 snapshot**: 62 `source_docs`, 282 `warnings`, 63 `gaps`, hashed and stored write-once.
-419 tests pass.
+721 tests pass.
 
 **Phase A is closed.** All five items landed, and each was a promise already made in
 writing at ratification. The level-2 population is zero, which is the honest number:
@@ -31,11 +31,16 @@ writing at ratification. The level-2 population is zero, which is the honest num
 `docs/phase-checkpoints.md` — several items turned out to rest on a premise that did not
 hold, and two of them found defects in code written the same day.
 
-**What does not exist:** most of the publishing layer. No `ParameterTable`, no `Part`, no
-part-type spine, no HTTP surface. And **no way for a person to accept or correct a
-reading** — the review loop is implemented on both sides of the human decision and has a
-hole where the decision goes. That hole, not the publisher, is the critical path: A1 made
-human review the only route back to curation level 2.
+**What does not exist** *(rewritten 2026-08-28 — most of this list was closed and the
+paragraph was not moved with it)*: no `Part`, no part-type spine. `ParameterTable` has a
+builder (`parameters.py`) but publishes nothing yet, because nothing is promoted.
+
+**The review loop now exists on both sides of the human decision and in the middle.**
+`cli review --accept`, `POST /reviews`, `GET /source-refs/{id}` and
+`POST /source-refs:batch` are built and tested; `promote-tables --apply` is no longer a
+no-op. What has *not* happened is anybody using it: **`reviewer` is NULL on all 1,225
+readings**, so the curation-level-2 population is still zero. Read "the loop exists" as
+"the mechanism is there", never as "something has been reviewed".
 
 **Two things are waiting on the other team**, logged rather than filed:
 `docs/integration/amendments/CANDIDATES.md` C1 (`curation_level` 0 vs 1 is never defined,
@@ -81,7 +86,7 @@ Small, mechanical, and every one of them is a promise already made in writing.
 | A2 | 15 | ~~Move `_applicability_basis` **out of** `conditions`~~ **DONE 2026-08-25.** `facts.condition_basis` + `condition_basis_note`; the writers in `promote_tables.py` and `table_review.py` were fixed too, not just the rows. The enum has a **third** internal value, `unexamined` (nobody looked), publishing as `assumed`. Today: 117 assumed / 1,538 unexamined / 59 stated. Original item text: — an underscore-prefixed free-text key inside a field that publishes as condition dimensions. Add `condition_basis: stated \| assumed`. **Note: A1 changed this item's premise.** The 324 facts that carried the key were the machine-promoted ones, so the store now holds **0**. The defect is *latent, not gone* — `promote_tables.promote_verified()` still writes `conditions["_applicability_basis"]`, so it returns the moment human review starts promoting. Fix the writer, not the rows. |
 | A3 | 4 | ~~Represent a **disagreeing second unit**.~~ **DONE 2026-08-25** — `facts.value_alternates`, JSON, beside the primary pair. The declared gap is closed: the schema can now express a disagreeing second unit. **Only 3 facts carry one**, because coverage is bounded by what the extractor extracts — 431 elements across 34 documents contain a dual-unit statement and only 6 of them produce any fact at all. Populating it broadly needs component-dimension extraction, which does not exist. Original item text: 48 distinct dual-unit statements across 12 documents (`4 inch (101 mm)`, where 4″ is 101.600 mm). The schema holds one `value_original`/`unit_original` pair and cannot express them. |
 | A4 | 10 | ~~Record `lang` on text.~~ **DONE 2026-08-25** — `elements.lang` + `elements.lang_basis`, all 81,794 tagged: 58,033 `en`, 22,453 `und`, 674 `es`, 634 `fr` — **zero `zh`**, and nothing `measured`. Language is *not* derived from `corpus_track`: that shortcut would have been wrong on every row, because the China-track documents are English-language export catalogues and the corpus has zero CJK. Nothing claims `measured`. Original item text: No language field exists anywhere in the store; publishing `en` by assertion is an assumption, and obligation 10 exists to keep those visible. |
-| A5 | 14 | ~~Extract `stock_length`.~~ **DONE 2026-08-25.** 54 facts, 51 with a `stated` colour or part condition. **The case obligation 14 names is in the store: 192 in for White, 144 in for Blend.** Two seams: the prose *"Standard rails are supplied in 16 foot lengths for White (12 foot rails for Blend products)"*, and SKU dimension triples (`1-1/2" x 5-1/2" x 16' Rail`), which is where the data actually is. Neither *"stock length"* nor *"standard length"* occurs anywhere in the corpus — the build plan's example phrasing is not the corpus's. A naive `N ft <part>` pattern measures at **18.6% precision** (127 of 156 wrong, dominated by 89 hits of `8' Picket`, a gate width followed by the field name "Picket Style"), so every guard is a measured false-positive class. Original item text: *"Standard rails are supplied in 16 foot lengths"* is text, not a fact. Note it varies by colour — 12 ft for Blend — so it is conditional, not a scalar. |
+| A5 | 14 | ~~Extract `stock_length`.~~ **DONE 2026-08-25.** 62 facts, 51 with a `stated` colour or part condition. **The case obligation 14 names is in the store: 192 in for White, 144 in for Blend.** Two seams: the prose *"Standard rails are supplied in 16 foot lengths for White (12 foot rails for Blend products)"*, and SKU dimension triples (`1-1/2" x 5-1/2" x 16' Rail`), which is where the data actually is. Neither *"stock length"* nor *"standard length"* occurs anywhere in the corpus — the build plan's example phrasing is not the corpus's. A naive `N ft <part>` pattern measures at **18.6% precision** (127 of 156 wrong, dominated by 89 hits of `8' Picket`, a gate width followed by the field name "Picket Style"), so every guard is a measured false-positive class. Original item text: *"Standard rails are supplied in 16 foot lengths"* is text, not a fact. Note it varies by colour — 12 ft for Blend — so it is conditional, not a scalar. |
 
 **Done when:** every item above is measurable in the store and `docs/state-and-gaps.md`
 records the new numbers.
@@ -114,7 +119,7 @@ implementation**.
 - The ten `SOURCE_*` warning codes are final and already published to Planning.
 
 **And the review verb belongs here, not later.** `table_review.PROMOTABLE` is
-`("accepted", "corrected")` and **nothing in the package writes either one** — the only
+`("accepted", "corrected")`, and `reviews.py` writes both as of 2026-08-28 (nothing did when this was written) — the only
 places they are set are test fixtures simulating a reviewer who does not exist. So
 `promote-tables --apply` can only ever be a no-op today, and `worklist`'s instruction
 *"confirm or correct, then promote"* names nothing runnable. What is missing, precisely:

@@ -33,9 +33,13 @@ gate ordinal and the §1.4 tie-break resolves by higher level before `issue_date
 - **A level is a claim about process, not about confidence.** A regex that reads a number
   correctly and a model that reads it correctly both publish at 1. Machine agreement does
   not raise the level — that is what §4's code exists for.
-- **The level-2 population of this store is zero and cannot change** until the review loop
-  exists. `PROMOTABLE` is `("accepted", "corrected")` and nothing in the package writes
-  either; `reviewer` is NULL on all 1,225 readings `[measured]`.
+- **The level-2 population of this store is zero.** *(Corrected 2026-08-28: an earlier
+  revision said it "cannot change until the review loop exists". The loop exists —
+  `cli review --accept` and `POST /reviews` write both promotable statuses, and
+  `promote-tables --apply` is no longer a no-op.)* What remains true, and is the half that
+  matters to you: **`reviewer` is NULL on all 1,225 readings** `[measured]`. The mechanism
+  is built and nobody has used it, so nothing has been reviewed and nothing publishes at
+  level 2.
 
 ---
 

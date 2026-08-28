@@ -102,6 +102,11 @@ python3 -m fence_evidence.cli snapshot --build   # publish source_docs + warning
 python3 -m fence_evidence.cli snapshot --list
 python3 -m fence_evidence.cli refs --verify     # every published citation still resolves
 python3 -m fence_evidence.cli refs --index      # rebuild the ref index and report it
+python3 -m fence_evidence.cli review --queue     # what is waiting for a person
+python3 -m fence_evidence.cli review --accept CROP --reviewer NAME   # record a review
+python3 -m fence_evidence.cli snapshot --verify-stored   # do PUBLISHED snapshots still pass?
+python3 -m fence_evidence.cli backfill-spans --apply     # recover merged cells (G41)
+python3 -m fence_evidence.cli serve --token TOK  # the API behind Planning's screens
 python3 -m fence_evidence.cli promote-tables --revoke --apply  # un-promote what no person reviewed
 python3 tests/run_tests.py                    # whole suite, stdlib only
 
@@ -195,14 +200,14 @@ three Showtech China catalogs.
 ```
 corpus (read-only)          workspace/ (every output)
 manuals/ china/manuals/     catalog/   corpus-manifest.jsonl (one row per file)
-data/                       derived/   page images + region crops (4.4 GB, git-ignored)
+data/                       derived/   page images + region crops (4.9 GB, git-ignored)
         |                   indexes/   evidence.db (git-ignored)
         v                   reports/   audits, coverage, evaluation, review
    extract.py               tests/     evaluation results
         |
         v
    canonical store  ---->  retrieval_units + FTS5  ---->  search result
-   (13 tables)      |      (derived, rebuildable)         + page image + bbox
+   (18 tables)      |      (derived, rebuildable)         + page image + bbox
                     |
                     +----->  canonical.py -> snapshot.py -> snapshot_store.py
                              a published Snapshot: hashed, verified, write-once
@@ -225,8 +230,11 @@ projection, additive migration) · `ingest.py` (orchestration) · `relations.py`
 Publishing, added 2026-08-25: `canonical.py` (deterministic bytes — obligation 1 lives here) ·
 `snapshot.py` (the builder and the `verify()` gate) · `snapshot_store.py` (write-once, tombstone
 rather than delete) · `dataset.py` (the hand-researched dataset's SHA-256 baseline) ·
-`crops.py` (the normative source-ref transform — **built, measured, and deliberately unwired**
-until Phase B's endpoint exists) ·
+`crops.py` (the normative source-ref transform, **wired 2026-08-28** — `cropcache.py`
+renders through it and `sourcerefs.py` builds the Discovery read model on top) ·
+`reviews.py` (the human review loop) · `parameters.py` (the `ParameterTable` builder) ·
+`api.py` (`GET /source-refs/{id}`, `POST /source-refs:batch`, `POST /reviews`, behind a
+bearer allowlist) ·
 `refs.py` (the evidence identifier and its rebuildable inverse — one owner; the
 `sref_` scheme in source-refs-design.md §1 is superseded)
 
