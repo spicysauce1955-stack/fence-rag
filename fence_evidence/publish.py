@@ -12,8 +12,8 @@ import urllib.request
 from pathlib import Path
 
 from .config import R2Config
-from .distribution import object_key
-from .paths import CATALOG_DIR, REPO_ROOT, open_write
+from .distribution import manifest_bytes, object_key, write_manifest
+from .paths import REPO_ROOT
 from .sigv4 import sign_request
 
 CONTENT_TYPES = {".pdf": "application/pdf", ".png": "image/png",
@@ -79,12 +79,19 @@ def publish_objects(cfg: R2Config, rows: list[dict], dry_run: bool = True) -> di
     return out
 
 
-def publish_manifest(cfg: R2Config, manifest: dict, dry_run: bool = True) -> dict:
-    payload = json.dumps(manifest, indent=1, sort_keys=True).encode("utf-8")
-    local = CATALOG_DIR / "distribution-manifest.json"
-    with open_write(local) as fh:
-        fh.write(payload.decode("utf-8"))
+def publish_manifest(cfg: R2Config, manifest: dict, dry_run: bool = True,
+                     path: Path | str | None = None) -> dict:
+    """Write the manifest locally, and upload it unless this is a dry run.
+
+    G25. The encoding and the guarded write live in `distribution`, which owns
+    the manifest's shape; this function owns only the upload. They were the same
+    six lines in two places, and the local half was untestable because it wrote
+    to the committed artifact whatever a test did -- so `publish_manifest` had
+    no test at all. `path` exists for that: it defaults to the committed
+    location and a caller can point it at a scratch directory instead.
+    """
+    payload = manifest_bytes(manifest)
+    out = write_manifest(manifest, path)
     if not dry_run:
         _request(cfg, "PUT", "distribution-manifest.json", payload, "application/json")
-    return {"bytes": len(payload), "local": str(local.relative_to(REPO_ROOT)),
-            "dry_run": dry_run}
+    return {"bytes": out["bytes"], "local": out["local"], "dry_run": dry_run}
