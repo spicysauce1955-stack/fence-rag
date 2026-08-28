@@ -90,8 +90,18 @@ def _row_applicability(readings: list[sqlite3.Row], exposure: str) -> tuple[str,
     by_family: dict[str, set] = defaultdict(set)
     for r in readings:
         v = hvhz_for_exposure(r["notes"] or "", exposure)
-        if v:
-            by_family[reader_family(r["reader"])].add(v)
+        family = reader_family(r["reader"])
+        # `reader_family` fails OPEN: an unmapped reader name returns "unknown".
+        # Counting that as a family inverts the guarantee this test exists to
+        # make -- "unknown" + "claude-sonnet" reads as two families agreeing when
+        # the second one is simply a reader nobody classified, and two unmapped
+        # readers of the SAME model would read as one family rather than as an
+        # error. table_review.mark_cross_family_verified already excludes it;
+        # this path did not. The bracket is the HVHZ applicability, so a false
+        # cross-family claim here promotes a footing row into the wrong
+        # regulatory regime.
+        if v and family != "unknown":
+            by_family[family].add(v)
     agreed = {next(iter(v)) for v in by_family.values() if len(v) == 1}
     if len(by_family) >= 2 and len(agreed) == 1:
         return agreed.pop(), "cross-family agreement on the bracket label"

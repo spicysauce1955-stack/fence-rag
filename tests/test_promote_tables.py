@@ -6,7 +6,8 @@ import shutil
 
 from context import requires_store, store_snapshot
 from fence_evidence.promote_tables import (_inches, _match, KEY_COLUMNS,
-                                           VALUE_COLUMNS, effective_value,
+                                           VALUE_COLUMNS, _row_applicability,
+                                           effective_value,
                                            hvhz_for_exposure, one_reading_per_cell)
 from fence_evidence.table_review import PROMOTABLE
 from fence_evidence.store import connect
@@ -102,6 +103,31 @@ class TestApplicabilityFailsClosed(unittest.TestCase):
 
     def test_unknown_exposure_letter(self):
         self.assertIsNone(hvhz_for_exposure("NON HVHZ for the B rows", "Z"))
+
+    def test_an_unmapped_reader_does_not_count_as_a_family(self):
+        """`reader_family` fails OPEN, returning "unknown" for a name it lacks.
+
+        Counting that as a family inverts the guarantee the test exists to make:
+        "unknown" plus a real family reads as two families agreeing when the
+        second is merely a reader nobody classified, and two unmapped readers of
+        the SAME model would read as one family rather than as an error.
+        `table_review.mark_cross_family_verified` already excluded it; this path
+        did not, and the bracket it decides is HVHZ applicability -- so a false
+        cross-family claim promotes a footing row into the wrong regulatory
+        regime.
+        """
+        note = "HVHZ AND NON HVHZ spans the two C rows."
+        rows = [{"reader": "calibration-A", "notes": note},
+                {"reader": "mystery-reader", "notes": note}]
+        verdict, _ = _row_applicability(rows, "C")
+        self.assertEqual(verdict, "unresolved")
+
+    def test_two_real_families_still_resolve(self):
+        note = "HVHZ AND NON HVHZ spans the two C rows."
+        rows = [{"reader": "calibration-A", "notes": note},
+                {"reader": "codex-C", "notes": note}]
+        verdict, _ = _row_applicability(rows, "C")
+        self.assertEqual(verdict, "HVHZ and non-HVHZ")
 
 
 @requires_store

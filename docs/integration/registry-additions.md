@@ -174,13 +174,22 @@ because readers disagree about the labels on the same grid position. That 96 / 1
 spread is the same defect §5.1 of the design spec measured from the other side, and it is
 Phase 2's problem, not this document's. Publish 168 and mean *positions*.
 
-**`families` cannot be populated from the store.** The three readers are named
-`calibration-A`, `calibration-B` and `codex-C` `[measured]`; nothing records which model
-family each belongs to. The mapping asserted in §3.3 — `claude-sonnet` + `openai-codex` —
-is true and lives only in the heads of the people who ran the readings. Either the reader
-table grows a `family` column or the param ships as a list of reader ids and Planning
-renders those. **We propose the column**, since a reader id is meaningless to a curator and
-the whole point of the code is that *two different families* agreed.
+**`families` is populatable, and this document said otherwise. Correction.** An earlier
+revision claimed nothing records which family each reader belongs to. That is wrong:
+`table_review.READER_FAMILY` maps `calibration-A` and `calibration-B` to `claude-sonnet`
+and `codex-C` to `openai-codex`, and `reader_family()` is already used when writing a
+fact's evidence text. The mapping is in code, not in the store, but it exists.
+
+The real weakness is its default. `READER_FAMILY.get(reader, "unknown")` **fails open**: a
+reader loaded under a name nobody added to the dict becomes `"unknown"` silently, and two
+readers both mapping to `"unknown"` would satisfy a naive cross-family test while being the
+same model. For a code whose entire claim is that *two different families* agreed, that
+default inverts the guarantee.
+
+So the param ships from `reader_family()`, and the fix owed is not a schema change but a
+closed one: an unmapped reader must refuse to count toward cross-family consensus rather
+than counting as its own family. Logged on our side; no action needed from Planning, per
+T7.
 
 Unchanged from §3.3: this does not affect admissibility. These rows publish at level 1 and
 Planning's policy rejects them for structural tasks. The code ranks a review queue; it never

@@ -1227,6 +1227,36 @@ could fire. Closing the no-op is what made them observable — and reachable.
 
 ---
 
+### G45 — cross-family agreement counted an unclassified reader as a family — FIXED
+
+`reader_family()` is `READER_FAMILY.get(reader, "unknown")` — it **fails open**.
+`table_review.mark_cross_family_verified` already excluded `"unknown"` before
+counting families; `promote_tables._row_applicability` did not.
+
+So a reading by any reader name absent from the dict counted as its own family:
+`"unknown"` plus `claude-sonnet` satisfied the two-family test, and two unmapped
+readers of the *same* model would have collapsed into one family rather than
+raising an error. Both directions are wrong, and the second is the dangerous one —
+the guarantee the test exists to make is that two systems which *fail differently*
+agreed.
+
+**What it decides makes it matter.** `_row_applicability` resolves the HVHZ
+applicability bracket, which is the field that says whether a footing row applies
+in Miami-Dade and Broward at all. A false cross-family claim there promotes a row
+into the wrong regulatory regime with `condition_basis: stated`.
+
+**Fixed 2026-08-28** by excluding `"unknown"` before the family count, matching
+the sibling path. Verified: one mapped plus one unmapped reader now returns
+`unresolved`; two real families still resolve. Two tests.
+
+Related but not the same defect: the `families` param of
+`CURATION_MACHINE_CONSENSUS` is populatable after all — `registry-additions.md` §4
+said otherwise and has been corrected. The mapping lives in code rather than in the
+store, which is a fragility worth revisiting when a reader is next added, but it is
+not the hole that entry claimed.
+
+---
+
 ---
 
 ## 4. If work resumes, in order
