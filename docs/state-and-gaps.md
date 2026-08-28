@@ -158,29 +158,64 @@ specified but not built.
 Status is derived conservatively — `active`/`superseded` only when the filename,
 curated title, or another document's text says so. Most install guides and
 catalogs carry no version marker at all, and that part is unchanged: 132
-`unknown`, 9 `superseded`, 3 `active`.
+`unknown`, 9 `superseded`, 3 `active`. Stored classification is still never
+written from resolution, so this respects the audit review gate.
 
 **What was fixed.** Integrating the date facts surfaced an inverted edge: the
 status update marked the `to` side of a `superseded_by` edge, which is the
 *newer* approval. Every current NOA was therefore labelled superseded and the
 whole CertainTeed→Barrette chain resolved with no active member. Corrected, with
-a regression test asserting the direction: the current Barrette NOA 24-0117.05
-and its three duplicate filings are no longer superseded, and the 2006 approval
-06-1019.01 now correctly is.
+a regression test asserting the direction — and `versions.select_active` now
+repeats the guard at the inference site: a member marked `superseded` is never
+selected, whatever its dates say.
 
-**What was added.** `resolve_document_version` now reads the Phase 6
-`effective_date` and `expiration_date` facts at query time (see
-`fence_evidence/versions.py`). They cover all 17 NOA documents. Every date
-carries its element, page and review status; disagreeing facts produce a
-`conflict` and no asserted value rather than a guess; an expiry verdict always
-echoes the date it was judged against; and a member whose approval has expired is
-never offered as active. Stored classification is not written from resolution, so
-this respects the audit review gate.
+**What was added.** `resolve_document_version` reads the Phase 6 `effective_date`
+and `expiration_date` facts at query time (`fence_evidence/versions.py`). They
+cover all 17 NOA documents. Every date carries its element, page and review
+status; disagreeing facts produce a `conflict` and no asserted value rather than
+a guess; an expiry verdict always echoes the date it was judged against; and a
+member whose approval has expired is never offered as active.
 
-**Still open.** The 132 `unknown` documents are unaffected — they have no dates
-to find. And the `active` answer is often `None` even for a chain whose newest
-member is demonstrably in force, because "active" still requires an explicit
-marker; the expiry verdict now carries that information instead.
+**The `active` answer, and what it rests on — 2026-08-28.** This entry used to
+say `active` "is often `None` even for a chain whose newest member is
+demonstrably in force". Measured, the defect was the inverse and worse: `active`
+was **set for 136 of 144 documents**, 132 of which are alone in their chain and
+state nothing about their own version, and all 136 carried the identical prose
+basis *"newest member of the chain and not marked superseded"*. An answer backed
+by an agreed expiration date was indistinguishable from a positional guess.
+
+`versions.select_active` now labels the answer in `active_basis_kind`: `marked`
+(an explicit marker), `inferred_in_force` (no marker, but exactly one
+unsuperseded member has an agreed expiration date still ahead of the stated day),
+`assumed_newest` (the old positional fallback, now naming itself as resting on no
+version evidence), `conflict`, `withdrawn`, `none`. `marked` and
+`inferred_in_force` are never conflated, so a caller that must not act on an
+inference can tell them apart without parsing prose. Over the corpus at
+2026-08-28: **3 `marked`, 11 `inferred_in_force`, 125 `assumed_newest`, 2
+`withdrawn`, 3 `none`.** The CertainTeed→Barrette chain now answers 24-0117.05 on
+the evidence of its own 2029-03-13 expiry rather than on chain position.
+
+**"They have no dates to find" — falsified in the letter, confirmed in
+substance.** 7 of the 132 `unknown` documents have parseable date facts (all
+NOAs, now served by the expiry verdict), and 31 print an edition stamp — `REV
+1.21`, `WEB REV 3.21`, `Revised 2/2026` — read by `versions.document_edition` at
+33/33 manual precision. But an edition says which *printing* this is, not whether
+it is in force, and no supersession is inferable from it here: pairing editions
+by `same_content_as`/`same_product_as` finds 13 multi-member clusters and **0**
+with differing editions, and pairing by manufacturer plus printed title finds 2
+groups, **both false** (footer stamps with no title, grouping unrelated sheets).
+So the edition is reported as evidence with its element and page, carries
+`is_version_status: False`, and `select_active` ignores it. Of the 125 unknown
+documents with no date fact, 47 carry no year, revision or supersession token at
+all and 30 carry only a bare or copyright year. **No further extractor is
+justified**, and that question is closed by measurement rather than left open by
+assumption.
+
+**Still open.** Whether `assumed_newest` should return an answer at all is a
+decision nobody has taken; it is now at least honest about resting on nothing.
+And two probable supersession pairs are visible but unassertable — a Barrette →
+Catalyst brand rename plus a fuzzy title match, which the title-grouping
+experiment above scored at 0/2. That needs curated input, not an extractor.
 
 ### G4 — A DOCX has no page image or bounding boxes
 
@@ -244,13 +279,62 @@ which does not appear anywhere in the document it names. It costs roughly 0.02
 of unit support. Editing a benchmark to make a metric pass would destroy its
 value, so it stays as authored and is recorded instead.
 
-### G9 — Latent correctness fixes that were never exercised
+### G9 — Latent correctness fixes, now exercised — CLOSED (2026-08-28)
 
-Two review findings were real but latent, so the fixes are unproven against real
-data: no corpus page has both a non-zero `/Rotate` and a text layer (the rotation
-path), and no document currently has two versions (the version-scoping path in
-the projection, `get_page`, `get_element_context` and facts). Both are covered by
-unit tests only.
+Two review findings were real but latent, because the corpus contains neither
+input: no corpus page has both a non-zero `/Rotate` and a text layer, and no
+document in the store has two byte-versions. Unit tests covered the functions;
+nothing had ever driven the paths. `tests/test_latent_paths.py` manufactures the
+missing inputs and puts them through the production code — not mocks, not
+re-implementations.
+
+**Rotation.** A one-page PDF is assembled in the standard library with a real
+`/Rotate` entry and a real Type1 text layer, at 0/90/180/270, and run through
+`extract.extract_pdf`. The assertions compare reported geometry against
+**rendered ink**: each page is rasterised with the production `tools.render_page`
+and the dark pixels located with a stdlib PNG reader, so the test measures where
+poppler actually painted the glyphs rather than agreeing with the extractor about
+its own arithmetic. Boxes match ink to within 6pt at every rotation, the page
+rectangle is the swapped display rectangle for 90/270, and `crops.render_crop`
+cuts the right rectangle out of a rotated page — the first test of `crops.py`'s
+trap 2. The guard is provably non-vacuous:
+`test_the_removed_word_transform_would_now_be_caught` re-applies the transform
+that was found wrong and removed and shows it lands >60pt off the ink.
+Mutation-checked both ways — dropping the page-rectangle swap fails 11
+assertions, re-adding the transform fails 5.
+
+**Two versions.** Two different PDFs written to one source path in turn, both
+through `store.write_extracted`: one document, two `document_versions`. Every
+scoping path that was unproven is asserted — the projection carries both versions
+with no unit straddling them, `get_page` and `get_element_context` never cross
+the boundary, facts are asserted only from the newest version, and
+`delete_version_rows` on version 1 leaves version 2's rows and its `ref_id`s
+intact. Scope note: this is the *byte-version* axis, not G38's toolchain-edition
+axis, and the fixture pages are simple single-column Letter pages with no tables.
+
+**What running it found, and did not fix.** `extract.derived_dir` keys the
+derived cache on `doc_id`, so two byte-versions of one document render their page
+image to the **same path** and the second ingest overwrites the first: version
+1's `pages.page_image_path` then names a picture of version 2.
+`TestPerVersionEvidenceImages` records it as an `expectedFailure` with the patch
+in its docstring. Not fixed here for two reasons: the path fix renames every
+entry in a 5.0 GB cache and every stored image path, and it is only half a fix —
+`assets.render_page_image` re-renders from the document-level `source_path`, so
+once the file behind that path is replaced the old version's image is
+unrecoverable by any route. Faithful per-version evidence images need
+content-addressed retention of the old source bytes, which a read-only corpus
+does not provide.
+
+**Fixed on the way past.** `retrieval.get_page` and `facts._iter_candidates` both
+picked "newest version" by `ingested_at` with no tie-break, while
+`store.CURRENT_EDITION_PREDICATE` deliberately has one because `now()` is
+second-resolution. Two versions written in the same second could have made the
+two readers disagree about which version a page belongs to. Both now tie-break on
+`version_id`.
+
+Also noted: `retrieval.SearchResult` carries no `version_id`, so with two
+versions of one document a hit identifies its version only indirectly, through
+`element_id`.
 
 ### G12 — The retrieval projection has measured relevance defects
 
@@ -286,33 +370,52 @@ picket line-work. On one page it clipped the real table off the bottom of the
 crop, so the preserved crop is always the full page and the band is recorded only
 as a hint.
 
-### G14 — The benchmark only grades one of the six interfaces
+### G14 — the benchmark routes to more than one interface — CLOSED (2026-08-28)
 
-Every gold question is issued to `search_evidence` and graded on the returned
-units, including questions whose natural interface is a different function. The
-clearest case is `gq-011`, "which Miami-Dade NOA is currently in force for the
-Columbia / Imperial / Chesterfield family?". It is scored as a failure —
-`doc_rank=None`, support 0.2 — while `resolve_document_version("23-0314.05")`
-answers it correctly and completely:
+Every gold question went to `search_evidence`, including the ones whose natural
+interface is a different function. `gq-011` — "which Miami-Dade NOA is currently
+in force for the Columbia / Imperial / Chesterfield family, and which did it
+replace?" — was recorded as `doc_rank=None`, support 0.2, FAIL, while
+`resolve_document_version("23-0314.05")` answers both halves completely. The
+benchmark was understating the version work rather than measuring it.
 
-```text
-active: Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf
-chain:  expired  eff 2008-03-13  exp 2013-03-13   NOA-06-1019.01
-        expired  eff 2013-04-04  exp 2018-03-13   NOA-12-1106.11
-        in_force eff 2023-05-04  exp 2029-03-13   NOA-23-0314.05
-        in_force eff 2025-04-24  exp 2029-03-13   NOA-24-0117.05
-```
+The gold schema now carries an optional `interface` (`search` | `resolve` |
+`facts`) defaulting to `search`, plus `interface_input` for the arguments the
+routed call needs. An unknown value raises at load rather than falling back —
+a typo that silently reverts to the old behaviour is the one failure this field
+must not have.
 
-So the system answers a question the benchmark records as unanswered, and the
-`current_version` and `historical_version` categories understate what the
-version work delivered.
+**Routing is additive, which is what let it land without restating the published
+numbers.** This entry used to say the change "should be an explicit change with
+the before/after recorded, not a quiet adjustment". So every question, routed or
+not, is still issued to `search_evidence` and graded identically: recall@10
+0.805, page_recall@10 0.659, MRR 0.552, evidence_support 0.623,
+page_evidence_support 0.769, no_answer_precision 0.333, false_unsupported_rate
+0.146, 27/59 passed — all unchanged, with all 59 per-question search rows
+byte-identical and `by_category` and `acceptance` untouched. The routed answer is
+graded in a separate `summary["routed"]` block with the search result of the same
+question beside it.
 
-**Not closed because** deciding which interface grades which question changes
-what every published number means, and the current figures were reported against
-the search-only harness. It should be an explicit change with the before/after
-recorded, not a quiet adjustment. The shape of the fix: add an `interface` field
-to the gold schema (`search` | `resolve` | `facts`), default `search`, and route
-each question accordingly.
+**One question re-routed.** `gq-011` → `resolve`, identifier `23-0314.05`:
+`doc_rank` None → 1, support 0.2 → 1.0 on all five annotated answer terms.
+`gq-012`, `gq-013` and `gq-014` were considered and left on search — resolve
+answers at most half of each and all three already pass, so routing them would
+have moved a metric without improving an answer.
+
+**Nothing routed to `facts`,** and the reason is measured: of 1,714 facts only
+176 carry conditions, and none matches the condition sets the seven
+`conditional_table_lookup` questions declare. The route is implemented and tested
+against the real store with a synthetic question; no gold question is an
+unambiguous facts question yet.
+
+No expected answer, term, document or page was edited. G8's principle — editing a
+benchmark to make a metric pass destroys it — covers routing too, and a test
+asserts a routed question keeps every annotation it had.
+
+**Grading note, carried in the report itself:** for a document-returning
+interface the graded support is `document_support`, the analogue of
+`page_evidence_support` and *not* of `evidence_support`. The two are never
+averaged.
 
 ### G15 — OCR loses the numbers, and now it is measured
 
@@ -523,42 +626,68 @@ place in the codebase where that is true, because a promoted fact's conditions
 are the table's own printed row and column labels — and put the applicability
 reasoning in `condition_basis_note`.
 
-### G34 — obligation 4's disagreement clause is at **0% coverage** — schema CLOSED (A3), population OPEN
+### G34 — obligation 4's disagreement clause — schema CLOSED (A3), cause 1 CLOSED, cause 2 OPEN
 
 `facts` held exactly one `value_original`/`unit_original` pair and could not
-represent a disagreeing second. `facts.value_alternates` closes that: the
-declared gap was representational and the schema now expresses it.
+represent a disagreeing second. `facts.value_alternates` closes the schema half:
+the declared gap was representational and the schema now expresses it. This entry
+tracks the *population*.
 
-**Coverage is another matter, and the honest number is zero.** 3 facts carry an
-alternate, and **all three are the same *agreeing* statement** — `24 in.
-(609.6 mm)`, where 24″ is 609.6 mm exactly. Not one disagreeing statement has
-ever reached a fact row.
+**Cause 1 — the adjacency defect — FIXED 2026-08-28.** The parenthetical sat
+between the number and the keyword a pattern needs, so `6 in. (152 mm) diameter`
+never matched `footing_diameter_in` and `[6 inches (152 mm) below grade]` never
+matched `depth_below_grade_in`. `facts.blank_unit_parentheticals()` replaces a
+**metric restatement** with exactly as many spaces as it occupied —
+length-preserving, so every offset `_scan_text` reports still names the same
+character — and `match_text`, the normalisation input, the context windows and
+`alternate_for()` all slice back out of the untouched text, so `value_original`
+keeps the source wording and `dual_units` still sees the parenthetical.
 
-Measured: **64 real disagreeing statements across 201 occurrences in 15
-unique-content documents** (40 of them sub-millimetre rounding disagreements;
-the ratification's "36 in the two CSI masterspecs" reproduces exactly). **None
-is reachable by the current extractor.** Two causes:
+Measured on the full store: **1,714 → 1,718 facts.** `footing_depth_in` 149→151,
+`depth_below_grade_in` 100→101, `post_spacing_in` 3→4, `footing_diameter_in`
+25→25 (**+2 recovered, −2 corrected** — `diameter 24 in.` twice, both of them the
+hole's *depth*, now refused by a depth-trailer guard). `value_alternates` **3 → 7
+rows**, of which **4 rows across 3 distinct statements disagree, against 0
+before**. Every gain is in `doc-a0aeec19ffaa`, the CSI chain-link masterspec —
+the only document in the corpus that writes dual units in that position. Cause
+1's ceiling really is that small.
 
-1. **An adjacency defect, worth 3 statements.** The parenthetical sits between
-   the number and the keyword a pattern needs: `[6 inches (152 mm) below grade]`
-   never matches `depth_below_grade_in`, and `6 in. (152 mm) diameter` never
-   matches `footing_diameter_in`. Blanking parentheticals in place — preserving
-   offsets, so `dual_units` still sees them — recovers these plus four agreeing
-   statements, at the cost of at least one known false positive (`gate openings
-   up to and including 10 ft. (3.05 m)` → `post_spacing_in`).
-2. **Missing fact types, worth the other 61.** Every dual-unit disagreement in
-   this corpus is about *product geometry* — fence height (~12, the largest
-   single bucket and with no fact type at all), mesh opening (~8), member and
-   post section (~10), stock length (~5, which is A5's obligation 14), picket
-   gap (~3), clearance (~2). This extractor covers footing, spacing, wind and
-   approval metadata. The two populations barely intersect: of the elements
-   carrying a paired dual-unit statement, **6** produce any fact at all, and all
-   6 are footing sentences in one document.
+**Two things this entry previously got wrong, both measured while closing it:**
 
-Closing the clause is a **fact-type expansion**, not a dual-unit-parsing
-problem. Deliberately not done here: new fact types change what the store
-asserts and carry false-positive risk, which is its own decision rather than a
-rider on a schema change.
+- **"Blanking parentheticals" cannot mean all of them.** Blanking every `(...)`
+  gains nothing extra and **loses 40 facts**: the corpus states `(90 MPH)`,
+  `(30" Deep)`, `(… aluminum insert …)` and `6ft (68in o.c. posts)` inside
+  parentheses, where the parenthesis *is* the statement. Only metric restatements
+  are blanked.
+- **The named false positive does not exist.** `gate openings up to and including
+  10 ft. (3.05 m) shall be 2.875 in OD (73 mm)` yields no `post_spacing_in`
+  before *or* after blanking — there is no `on center` or `o.c.` within the
+  pattern's reach. The real cost is a larger class: blanking takes
+  `post_spacing_in` from 3 to 9 and **five of the six new ones are fastener
+  spacings** — hog rings, carriage bolts, tension-bar holes, all "on center".
+  `_SPACING_NOT_A_POST` is written from that measured class as a **blocklist, not
+  an allowlist**, because two of the three spacings the store already held are
+  OCR'd NOA table rows that never say "post" at all. With the guard: 4 spacings,
+  all posts, nothing pre-existing lost.
+
+**Cause 2 — missing fact types, worth the other 61 — still open.** Measured: **64
+real disagreeing statements across 201 occurrences in 15 unique-content
+documents** (40 of them sub-millimetre rounding disagreements; the ratification's
+"36 in the two CSI masterspecs" reproduces exactly). Every remaining one is about
+*product geometry* — fence height (~12, the largest single bucket and with no
+fact type at all), member and post section (~10), mesh opening (~8), stock length
+(~5, which is A5's obligation 14), picket gap (~3), clearance (~2) — and this
+extractor covers footing, spacing, wind and approval metadata. The two
+populations barely intersect: of the elements carrying a paired dual-unit
+statement, **6** produce any fact at all. Closing the rest is a **fact-type
+expansion**, which changes what the store asserts and carries false-positive
+risk, so it is its own decision rather than a rider on a parsing fix.
+
+Two smaller things the fix surfaced and did not address: the recovered
+`depth_below_grade_in` 6.0 is one branch of a spec-writer's bracketed choice
+(`[at grade] [6 inches (152 mm) below grade]`), a text class this extractor has
+no notion of; and `_scan_text` dedups per element on `(fact_type, raw)`, so two
+distinct statements of the same value inside one element collapse into one fact.
 
 ### G35 — the store can migrate itself — CLOSED
 
@@ -760,7 +889,33 @@ evaluation report states what each would have to prove.
 - 3 pages produce no elements. All three were checked against their rendered
   page image and are genuinely blank apart from a page number.
 - Full-corpus ingestion takes ~33 minutes with 10 workers and writes 4.4 GB.
-  There is no incremental cleanup of orphaned derived images from a prior run.
+  **Cleanup of orphaned derived images now exists (2026-08-28):** `cli gc
+  --derived` lists every file under `workspace/derived/` that no live row, review
+  digest, workspace record or published citation claims, and `--apply` deletes
+  them. Dry run by default, as `promote-tables --revoke` and `backfill-spans`
+  are; deletion goes through `paths.ensure_writable`, so a target outside
+  `workspace/` is refused before a single file is listed, and symlinks are
+  recorded and never followed. Reachability is read from four path columns
+  (`pages.page_image_path`, `elements.region_image_path`, `assets.path`,
+  `table_read_candidates.crop_path`), the crop **digests** in `table_reviews` and
+  `table_read_candidates` (which name bytes and no path), the 515 distinct
+  `ref_id`s cited by published snapshots — every dpi and fingerprint of a cited
+  ref is retained, because the cache key carries both and a citation carries
+  neither — and a text scan of `workspace/catalog/`, `reports/` and `snapshots/`.
+  That last root is load-bearing rather than belt-and-braces:
+  `noa-table-candidates.jsonl` and `unresolved-worklist.jsonl` name the 44
+  `table-candidates/` crops that no table column has held since G46's realign, so
+  a database-only collector deletes 60 MB of provenance-backed crops on its first
+  run. Scope is a whitelist of four subtrees, not "anything unreferenced" — the
+  `visualization-tools/` checkout under `derived/` is 30,311 files and 400 MB,
+  76% of the file count, and a naive sweep eats it; it is reported as unmanaged
+  and never touched. An unparseable snapshot, or a failing root query, sets
+  `unsafe`, deletes nothing and exits 1: an unrepairable obligation-3 break is
+  worth more than any disk. Measured on the real tree, stable across three runs:
+  40,199 files / 5.17 GB, of which 9,888 are in scope, and **175 orphans /
+  145.0 MB** — 120 stale region crops whose element ordinals moved in a
+  re-extraction, 55 uncited crop-cache renders, zero page images and zero
+  table-candidate crops. `--apply` has not been run against the real store.
 
 ---
 
@@ -903,9 +1058,21 @@ budget on the recall deficit rather than bank it.
 `builds/<run_id>/evidence.db.zst` appear in early drafts of
 `docs/distribution-design.md` and were **descoped**: zstd is not in the standard
 library before Python 3.14, so hosting a compressed build would require a
-vendored dependency. `publish_manifest` remains untested — testing it would
-rewrite the committed manifest as a side effect, so it needs an injectable output
-path first.
+vendored dependency.
+
+**The testability half closed 2026-08-28.** `distribution.manifest_bytes` and
+`distribution.write_manifest(manifest, path=None)` now hold the manifest's one
+encoding and its one guarded write, with the output path injectable, and
+`publish_manifest` keeps only the upload and takes the same argument. It had no
+test because testing it rewrote a committed file whatever the test did. 20 tests
+cover determinism, round-trip, the write guard's refusal outside `workspace/`,
+`build_manifest`'s unhashed-row `ValueError`, and `publish_manifest` itself under
+both a dry run and a stubbed upload. One of them reads the committed 47,621-byte
+manifest, reparses and re-encodes it, and asserts equality — so an encoding drift
+fails a test instead of quietly rewriting the artifact. Collapsing the duplicate
+also pinned something that had only happened to be true: the local file and the
+uploaded object were serialised twice from the same dict, and are now the same
+bytes by construction. The build items above stay descoped.
 
 Probe artifacts retained deliberately on disk, git-ignored: `workspace/pylibs/_ocr_probe`
 (383 MB, RapidOCR) and `~/.paddlex` (133 MB, PaddleOCR models), kept because
@@ -1416,6 +1583,84 @@ Base idempotence was never the bug — three consecutive runs already produced n
 drift. It was the update and withdraw path that did not exist.
 
 ---
+
+## 3c. Update, 2026-08-28 — obligation 7, and six gaps closed
+
+### G48 — tenant isolation is enforced in code — NEW CAPABILITY (obligation 7)
+
+At ratification this was declared unbuilt in the bluntest terms
+`10-ratification-v1.0.md` §3.2 uses about anything: *"There is no tenant concept
+anywhere in this store — one corpus, no boundary to enforce in code. Enforced by
+convention would be a generous description of something that does not exist at
+all."* `build_snapshot(tenant=…)` took a tenant, stamped it into the hashed
+members, and nothing read it.
+
+**Ownership lives on `documents` and nowhere else** — one nullable column,
+`owner_tenant`, at `SCHEMA_VERSION = 6`. NULL is shared knowledge, which is all
+144 corpus documents; a non-NULL value names the one tenant that owns the row,
+which is how a tenant upload (`POST /documents`) would arrive. Every layer above
+derives ownership by pointing down, per `docs/layering.md`'s rule, so a second
+copy on `elements` or `facts` could only ever disagree with the first — the same
+reasoning that makes `current_editions` a view rather than a flag column. The
+migration lands on 144 rows with **no default**: defaulting them to the
+operator's tenant would hand the whole corpus to one tenant as private property,
+obligation 7 inverted, arriving through a migration rather than a leak.
+`tests/test_migration.py` pins the absence of that default.
+
+**The gate is the ref minter, not a filter.** Closure already works that way —
+minting a `SourceRef` registers its `SourceDoc`, so a snapshot citing a document
+it does not carry cannot be built. Tenancy reuses the same choke point, and the
+check *precedes* registration: raising after `self._docs[…]` was written would
+leave the foreign document in a builder whose `source_docs()` is read at the end
+of the build, so the exception would be caught and the leak would ship anyway.
+
+**Two leak paths do not go through a ref at all**, and a gate on `source_ref`
+alone would have missed both. `also_filed_as` publishes the manufacturer and
+doc_type of every *other* record filing the same bytes — 14 groups of
+byte-identical files here — and `superseded_by` publishes a successor's content
+hash. Point either at an upload and tenant B's data ships inside tenant A's
+snapshot with nothing raised. Both are now scoped, and both directions are
+tested: a *shared* second filing and a *shared* successor still publish.
+
+**Selection is scoped as well as gated,** so the gate is a backstop that should
+never fire. An unscoped `warnings()` scan would have turned another tenant's
+warning text into an exception in the middle of a build rather than into a
+snapshot that simply does not contain it — a leak converted into an outage.
+`warnings()` and `parameters.build_parameter_tables` both filter, and both call
+the same `tenancy.visible_sql`, so the query that chooses and the check that
+refuses cannot drift apart about what "visible" means.
+
+`upsert_document` refreshes nine fields on conflict and **ownership is not one of
+them**: a manifest that moves a document between tenants is a re-parenting, not
+an update, and is refused in both directions — claiming a shared document is as
+much a re-parenting as moving an owned one. An absent `owner_tenant` claims
+nothing, because the corpus manifest carries none and re-running `ingest` must
+not free an upload.
+
+`shared` and the `mfr/` prefix are refused as tenant names (contract §2.1
+reserves both namespaces).
+
+**Measured after `cli migrate` on the live store:** 144 documents, 0 owned,
+`schema_version` 6. The snapshot rebuild reproduces the stored object's id
+`83a227d4` **byte-for-byte**, `snapshot --verify-stored` passes 1/1, and all 519
+published citations still resolve — nothing published moved. 25 tests.
+
+**Not built, and recorded rather than guessed.** `api.py`'s bearer allowlist is
+authentication, not authorisation: `GET /source-refs/{id}` resolves a `ref_id`
+with no tenant in scope at all. Mapping a token to a tenant is a separate
+decision with its own failure mode. Today every document is shared so the two
+questions have the same answer; they will not once the first upload lands.
+
+### Also in this session
+
+`docs/build-plan.md` Phase E is now built rather than pending. Closed or
+advanced alongside it: **G3** (`active_basis_kind` — 11 answers that were
+positional guesses are now evidence), **G9** (both latent paths driven end to
+end; one new defect found and recorded), **G11** (`cli gc --derived`), **G14**
+(gold-set interface routing), **G25** (the testability half), **G34** (cause 1).
+`refs.py` and `CLAUDE.md` said "431 published cites" in four places; the measured
+figure is 519, and 61 of them are in `gaps[].cites[]` rather than all in
+`warnings`.
 
 ---
 

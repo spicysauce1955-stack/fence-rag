@@ -2,8 +2,11 @@
 
 ```text
 Status:   Written at the close of the integration rounds, 2026-08-25, with contract
-          v1.1 ratified by both teams. **Phase A is complete (A1-A5). Phase B is
-          next** — and the review verb belongs with it, see §2 Phase B.
+          v1.1 ratified by both teams. **Phases A, B, C and E are built.** Phase D
+          — the publishing layer — is the only one left, and it is partly done:
+          source_docs, warnings, gaps and parameters publish; part_types, parts,
+          models, procedures, combinations and rules are declared and empty.
+          Updated 2026-08-28.
 Authority: Advisory on sequencing. The authorities are unchanged —
           docs/mvp-implementation-spec.md for how this platform works, and
           docs/integration/contract.md (FROZEN v1.1) for what crosses the boundary.
@@ -161,13 +164,26 @@ content-hashed, with `retain_until` and a tombstone path.
   policy; this platform does not, and does not select a winner (obligation 6, as amended).
 - A `Gap` is a first-class publication. Silence must never read as coverage.
 
-### Phase E — tenancy
+### Phase E — tenancy — **BUILT 2026-08-28**
 
-Obligation 7 binds tenant isolation **in code, not by convention**, and there is no tenant
-concept anywhere in this store today. One corpus, no boundary to enforce. This is a design
-decision to take deliberately in the next session rather than a thing to discover late:
-decide where the tenant axis lives before the snapshot format is fixed, because retrofitting
-it afterwards means re-cutting every published object.
+Obligation 7 binds tenant isolation **in code, not by convention**. This phase said to
+decide where the tenant axis lives *before* the snapshot format is fixed, because
+retrofitting it afterwards means re-cutting every published object. It was decided and
+built, and the re-cut did not happen: the snapshot rebuild reproduces the stored object's
+id `83a227d4` byte-for-byte.
+
+The axis is **`documents.owner_tenant`, nullable, and nowhere else** — NULL is shared
+knowledge, which is all 144 corpus documents. Everything above L1 derives ownership by
+pointing down. The enforcement point is the ref minter, the same choke point the closure
+rule uses, plus scoped selection so the gate is a backstop rather than the mechanism; and
+the two fields that publish facts about *other* documents — `also_filed_as` and
+`superseded_by` — are scoped too, because neither passes through a `SourceRef`. Full entry:
+`docs/state-and-gaps.md` G48.
+
+**Still open on this phase:** `api.py`'s bearer allowlist is authentication, not
+authorisation. `GET /source-refs/{id}` resolves a `ref_id` with no tenant in scope. Every
+document is shared today, so the two questions have the same answer; they will not once the
+first upload lands.
 
 ## 3. Constraints that still bind
 
