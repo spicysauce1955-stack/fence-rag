@@ -1367,6 +1367,41 @@ unit *is*, not a patch — and it should be decided with Phase 3's scope.
 
 ---
 
+### G47 — promotion was one-way, so a rejected reading kept its fact — FIXED
+
+`promote_verified` skipped any cell that already had a fact, permanently:
+
+```python
+if any(c["candidate_id"] in promoted for c in cell_rows):
+    continue
+```
+
+Two consequences, both demonstrated by an adversarial pass:
+
+* **A later correction never reached `facts`.** A reviewer changed `24"` to
+  `36"`, the candidate became `('corrected', reviewed_value='36"')`, and the
+  published fact stayed `24"`. This is G44's shape one layer out — G44 was the
+  INSERT reading the wrong column, this is the row never being revisited.
+* **A later rejection never reached `facts`.** A reviewer rejected the whole
+  crop; every candidate became `rejected`; the facts survived, still stamped
+  `review_status='accepted'`. A published value at **curation level 2 — which
+  asserts that a person compared it to the source image — resting on a reading a
+  person explicitly refused.** `--revoke` would clear it, but `cli.py` makes
+  `--revoke` and promote mutually exclusive branches, so `promote-tables --apply`
+  alone could never withdraw anything.
+
+**Fixed 2026-08-28** with a withdrawal step that runs before promotion:
+`_withdraw_stale` removes any fact whose reading has left `PROMOTABLE`, or whose
+effective value no longer matches what was published. The normal promote loop
+then re-creates it in the same run, so one place still decides what a fact says.
+Verified: correct `24"`→`36"` and the published value follows; reject and the
+fact is gone; an unchanged review withdraws nothing; a dry run deletes nothing.
+
+Base idempotence was never the bug — three consecutive runs already produced no
+drift. It was the update and withdraw path that did not exist.
+
+---
+
 ---
 
 ## 4. If work resumes, in order

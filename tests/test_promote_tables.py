@@ -1,16 +1,18 @@
 """Promotion attaches row conditions, and fails closed on applicability."""
 import json
+import sqlite3
 import unittest
 
 import shutil
 
 from context import requires_store, store_snapshot
-from fence_evidence.promote_tables import (_inches, _match, KEY_COLUMNS,
+from fence_evidence.promote_tables import (promote_verified,
+                                           _inches, _match, KEY_COLUMNS,
                                            VALUE_COLUMNS, _row_applicability,
                                            effective_value,
                                            hvhz_for_exposure, one_reading_per_cell)
 from fence_evidence.table_review import PROMOTABLE
-from fence_evidence.store import connect
+from fence_evidence.store import SCHEMA, connect
 
 
 class TestColumnMapping(unittest.TestCase):
@@ -301,3 +303,87 @@ class TestRevokeMachinePromotions(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@requires_store
+class TestPromotionIsNotOneWay(unittest.TestCase):
+    """A later correction or rejection must reach `facts`.
+
+    Promotion skipped any cell that already had a fact, forever. So a reviewer
+    who CORRECTED a value left the machine's number published, and a reviewer
+    who REJECTED the crop left a curation-level-2 fact standing on a reading a
+    person had explicitly refused. Level 2 asserts that a person checked it, so
+    that is worse than publishing nothing.
+    """
+
+    def _store(self):
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript(SCHEMA)
+        conn.execute("""INSERT INTO documents(document_id, source_path, file_type,
+                        corpus_track) VALUES('d','manuals/x/a.pdf','pdf','us')""")
+        conn.execute("""INSERT INTO document_versions(version_id, document_id, sha256,
+                        file_size_bytes, page_count, ingested_at)
+                        VALUES('v','d','abc',1,1,'2026-01-01')""")
+        conn.execute("""INSERT INTO pages(page_id, version_id, page_no, width, height,
+                        extraction_method) VALUES('p','v',1,100,100,'x')""")
+        conn.execute("""INSERT INTO elements(element_id, page_id, version_id, document_id,
+                        page_no, ordinal, element_type, text, text_source)
+                        VALUES('e','p','v','d',1,0,'paragraph','x','pdf_text_layer')""")
+        for cid, col, lab, val in ((1, 0, "WIND EXPOSURE", "B"),
+                                   (2, 1, "FOOTING DEPTH", '24"')):
+            conn.execute("""INSERT INTO table_read_candidates(candidate_id, document_id,
+                version_id, page_no, crop_path, crop_sha256, reader, reader_kind,
+                row_index, col_index, col_label, value, review_status, created_at)
+                VALUES(?,'d','v',1,'c.png','CROP','calibration-A','agent',0,?,?,?,
+                       'accepted','2026-01-01')""", (cid, col, lab, val))
+        conn.commit()
+        return conn
+
+    def _values(self, conn):
+        return [r[0] for r in conn.execute("SELECT value_original FROM facts")]
+
+    def test_a_later_correction_replaces_the_published_value(self):
+        conn = self._store()
+        promote_verified(conn, dry_run=False)
+        self.assertEqual(self._values(conn), ['24"'])
+        conn.execute("""UPDATE table_read_candidates SET review_status='corrected',
+                        reviewed_value='36"' WHERE candidate_id=2""")
+        conn.commit()
+        res = promote_verified(conn, dry_run=False)
+        self.assertEqual(res["facts_withdrawn"]["value_changed"], 1)
+        self.assertEqual(self._values(conn), ['36"'])
+        conn.close()
+
+    def test_a_later_rejection_withdraws_the_fact(self):
+        conn = self._store()
+        promote_verified(conn, dry_run=False)
+        self.assertTrue(self._values(conn))
+        conn.execute("UPDATE table_read_candidates SET review_status='rejected'")
+        conn.commit()
+        res = promote_verified(conn, dry_run=False)
+        self.assertEqual(res["facts_withdrawn"]["verdict_withdrawn"], 1)
+        self.assertEqual(self._values(conn), [],
+                         "a level-2 fact survived the reading being rejected")
+        conn.close()
+
+    def test_an_unchanged_review_withdraws_nothing(self):
+        conn = self._store()
+        promote_verified(conn, dry_run=False)
+        before = self._values(conn)
+        res = promote_verified(conn, dry_run=False)
+        self.assertEqual(res["facts_withdrawn"],
+                         {"verdict_withdrawn": 0, "value_changed": 0})
+        self.assertEqual(self._values(conn), before)
+        conn.close()
+
+    def test_a_dry_run_withdraws_nothing(self):
+        conn = self._store()
+        promote_verified(conn, dry_run=False)
+        conn.execute("UPDATE table_read_candidates SET review_status='rejected'")
+        conn.commit()
+        res = promote_verified(conn, dry_run=True)
+        self.assertEqual(res["facts_withdrawn"]["verdict_withdrawn"], 1)
+        self.assertTrue(self._values(conn), "a dry run deleted a fact")
+        conn.close()
+

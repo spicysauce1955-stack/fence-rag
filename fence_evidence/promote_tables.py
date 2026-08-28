@@ -155,6 +155,46 @@ def one_reading_per_cell(cells: list) -> list:
     return [best[k] for k in sorted(best)]
 
 
+def _withdraw_stale(conn: sqlite3.Connection, *, dry_run: bool) -> dict:
+    """Remove facts whose reading is no longer what they were promoted from.
+
+    Two cases, both measured as live defects:
+
+    * **The verdict was withdrawn.** A later `rejected` or `bracket_unclear`
+      review leaves the reading outside `PROMOTABLE`, but the fact it produced
+      stays published, still stamped `review_status='accepted'`. A published
+      value at curation level 2 resting on a reading a person refused is worse
+      than no value: level 2 asserts that a person checked it.
+    * **The value changed.** A later correction writes `reviewed_value`, and the
+      already-published fact still carries the old number.
+
+    Withdrawing rather than editing keeps promotion a single path: the fact is
+    removed here and re-created by the normal promote loop in the same run, so
+    there is one place that decides what a fact says. That mirrors
+    `revoke_machine_promotions`, which un-promotes without deleting the reading
+    or its crop.
+    """
+    out = {"verdict_withdrawn": 0, "value_changed": 0}
+    linked = conn.execute("""
+        SELECT f.fact_id, f.value_original, c.candidate_id, c.review_status,
+               c.value, c.reviewed_value
+          FROM facts f
+          JOIN table_read_candidates c ON c.candidate_id = f.from_candidate_id
+         WHERE f.from_candidate_id IS NOT NULL""").fetchall()
+    doomed: list[int] = []
+    for r in linked:
+        if r["review_status"] not in PROMOTABLE:
+            out["verdict_withdrawn"] += 1
+            doomed.append(r["fact_id"])
+        elif normalise(effective_value(r)) != normalise(r["value_original"]):
+            out["value_changed"] += 1
+            doomed.append(r["fact_id"])
+    if doomed and not dry_run:
+        conn.executemany("DELETE FROM facts WHERE fact_id = ?",
+                         [(f,) for f in doomed])
+    return out
+
+
 def promote_verified(conn: sqlite3.Connection | None = None, *,
                      dry_run: bool = False) -> dict:
     own = conn is None
@@ -171,6 +211,13 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
         # per-reading NOT IN would re-promote that cell's other N-1 readings on
         # the next run -- turning G43's duplication into a slow leak instead of
         # fixing it. Skip the whole cell when any of its readings is linked.
+        # Withdraw first, then promote. Promotion used to be one-way: once a cell
+        # had a fact it was skipped forever, so a reviewer who later CORRECTED a
+        # value left the machine's number published, and a reviewer who REJECTED
+        # the crop left a curation-level-2 fact standing on a reading a person
+        # had explicitly refused. Both were demonstrated. G44 was this same shape
+        # one layer in; this is the layer out.
+        withdrawn = _withdraw_stale(conn, dry_run=dry_run)
         promoted = {r[0] for r in conn.execute(
             "SELECT from_candidate_id FROM facts WHERE from_candidate_id IS NOT NULL")}
         by_cell: dict[tuple, list[sqlite3.Row]] = defaultdict(list)
@@ -250,6 +297,7 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
         if not dry_run:
             conn.commit()
         return {"rows_considered": len(groups), "facts_created": created,
+                "facts_withdrawn": withdrawn,
                 "cells_not_value_columns": skipped,
                 "rows_with_unresolved_applicability": unresolved,
                 "by_type": dict(by_type), "dry_run": dry_run}
