@@ -3,8 +3,13 @@
 Everything here runs against a store built from `store.SCHEMA` in memory, so it
 needs neither the corpus nor an ingested database and cannot damage either.
 """
+import atexit
+import hashlib
 import json
+import os
+import shutil
 import sqlite3
+import tempfile
 import unittest
 
 import context  # noqa: F401  -- puts the repo root on sys.path
@@ -14,8 +19,25 @@ from fence_evidence.reviews import (REVIEW_STATUSES, ReviewRefused,
 from fence_evidence.store import SCHEMA
 from fence_evidence.table_review import PROMOTABLE
 
-CROP = "a" * 64          # the crop the reviewer echoes back
-OTHER = "b" * 64
+# The echoed digest is now checked against the crop ON DISK, not against the
+# stored column -- that column is a constant, and one committed to git, so
+# quoting it demonstrated nothing. The fixture therefore writes real crop files
+# and derives the digests from their bytes, which means these tests exercise the
+# check rather than route around it.
+_TMP = tempfile.mkdtemp(prefix="fence-review-crops-")
+atexit.register(shutil.rmtree, _TMP, True)
+
+
+def _write_crop(name: str, payload: bytes) -> tuple[str, str]:
+    path = os.path.join(_TMP, name)
+    with open(path, "wb") as fh:
+        fh.write(payload)
+    return hashlib.sha256(payload).hexdigest(), path
+
+
+CROP, CROP_PATH = _write_crop("crop-a.png", b"\x89PNG fixture crop A")
+OTHER, OTHER_PATH = _write_crop("crop-b.png", b"\x89PNG fixture crop B")
+_CROP_PATHS = {CROP: CROP_PATH, OTHER: OTHER_PATH}
 
 
 def make_store() -> sqlite3.Connection:
@@ -37,7 +59,7 @@ def add_reading(conn, *, reader="calibration-A", crop=CROP, page_no=6,
                  reader_kind, is_table, row_index, col_index, row_label, col_label,
                  value, created_at)
                 VALUES (?,?,?,?,?,?,'agent',1,?,?,?,?,?,'2026-08-27T00:00:00+00:00')""",
-                (document_id, "v1", page_no, f"workspace/derived/{crop[:8]}.png", crop,
+                (document_id, "v1", page_no, _CROP_PATHS.get(crop, f"/nonexistent/{crop[:8]}.png"), crop,
                  reader, r_i, c_i, label,
                  "WIND EXPOSURE" if c_i == 0 else "FOOTING DEPTH", cell))
     conn.commit()
@@ -424,3 +446,56 @@ class TestQueueAndSummary(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheEchoIsCheckedAgainstTheArtifact(unittest.TestCase):
+    """§4.3's one control, which as first written checked nothing.
+
+    It compared the echoed digest to `table_read_candidates.crop_sha256` -- a
+    stored constant, and one committed to git in
+    `workspace/catalog/noa-table-candidates.jsonl`. Quoting a public constant is
+    not evidence of having seen anything, so the check was inert.
+
+    What recomputation CAN establish is that the digest matches the artifact
+    this store holds today. It detects staleness. It is not authentication: a
+    digest is not a secret. See G46.
+    """
+
+    def setUp(self):
+        self.conn = make_store()
+        add_reading(self.conn)
+
+    def tearDown(self):
+        self.conn.close()
+
+    def test_the_current_digest_is_accepted(self):
+        out = submit_review(self.conn, crop_sha256=CROP, reviewer="alice",
+                            verdict="accepted",
+                            grid=[{"row": 0, "col": 0, "value": "B"}], spans=[])
+        self.assertTrue(out["review_id"])
+
+    def test_a_digest_for_a_re_rendered_crop_is_refused(self):
+        with open(CROP_PATH, "wb") as fh:      # the crop is rendered again
+            fh.write(b"\x89PNG fixture crop A, second edition")
+        try:
+            with self.assertRaises(ReviewRefused) as caught:
+                submit_review(self.conn, crop_sha256=CROP, reviewer="alice",
+                              verdict="accepted",
+                              grid=[{"row": 0, "col": 0, "value": "B"}], spans=[])
+            self.assertEqual(caught.exception.code, "error.crop_mismatch")
+            self.assertEqual(
+                self.conn.execute("SELECT COUNT(*) FROM table_reviews").fetchone()[0], 0)
+        finally:
+            with open(CROP_PATH, "wb") as fh:
+                fh.write(b"\x89PNG fixture crop A")
+
+    def test_a_crop_we_cannot_read_fails_closed(self):
+        """A reading whose image we cannot serve cannot be reviewed."""
+        self.conn.execute("UPDATE table_read_candidates SET crop_path = ?",
+                          ("/nonexistent/gone.png",))
+        with self.assertRaises(ReviewRefused) as caught:
+            submit_review(self.conn, crop_sha256=CROP, reviewer="alice",
+                          verdict="accepted",
+                          grid=[{"row": 0, "col": 0, "value": "B"}], spans=[])
+        self.assertEqual(caught.exception.code, "error.crop_mismatch")
+

@@ -36,6 +36,7 @@ import hashlib
 import json
 import sqlite3
 
+from .paths import REPO_ROOT
 from .store import now
 from .table_review import PROMOTABLE, normalise
 
@@ -221,7 +222,52 @@ def _project(conn: sqlite3.Connection, *, crop_sha256: str, verdict: str,
     return touched, len(touched), promotable
 
 
-# ---------------------------------------------------------------------- submit
+def _check_echo_is_current(conn: sqlite3.Connection, crop_sha256: str) -> None:
+    """Refuse a review whose echoed digest is not the image on disk NOW.
+
+    §4.3 names this the one control that survives `reviewer` being unverifiable:
+    *"a review must echo the `crop_sha256` of the image we served."* As first
+    written it compared the echo against `table_read_candidates.crop_sha256` --
+    a stored constant, and one that is committed to git in
+    `workspace/catalog/noa-table-candidates.jsonl`. Quoting a public constant
+    demonstrates nothing, so the check verified nothing.
+
+    Recomputing from the file makes it a real check of the one property it can
+    actually establish: **the digest matches the artifact this store holds
+    today**. If the crop were re-rendered after the reading was taken, a review
+    echoing the old digest is a review of an image that no longer exists, and
+    that is worth refusing.
+
+    Be clear about what this is NOT. A digest is not a secret, so echoing it
+    proves the caller *had the digest*, never that a person looked at the
+    picture. It detects staleness; it does not authenticate. Forgery is held off
+    by the bearer allowlist and by Planning's own auth, and the honesty of
+    `reviewer` rests on Planning, exactly as §4 says. See G46.
+
+    Fails closed: a crop we cannot read is a crop we cannot claim was reviewed.
+    """
+    row = conn.execute("SELECT crop_path FROM table_read_candidates "
+                       " WHERE crop_sha256 = ? AND crop_path IS NOT NULL LIMIT 1",
+                       (crop_sha256,)).fetchone()
+    path = REPO_ROOT / row["crop_path"] if row and row["crop_path"] else None
+    if path is None or not path.exists():
+        raise ReviewRefused(
+            "error.crop_mismatch",
+            f"the crop for {crop_sha256} is not on disk, so the echo cannot be "
+            f"checked; a reading whose image we cannot serve cannot be reviewed")
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    actual = h.hexdigest()
+    if actual != crop_sha256:
+        raise ReviewRefused(
+            "error.crop_mismatch",
+            f"the echoed digest is not the image on disk: {crop_sha256} echoed, "
+            f"{actual} held. The crop was re-rendered after this reading, so the "
+            f"review is of a picture that no longer exists")
+
+
 def submit_review(conn: sqlite3.Connection, *, crop_sha256: str, reviewer: str,
                   verdict: str, grid: list[dict], spans: list[dict],
                   notes: str | None = None, reviewed_at: str | None = None) -> dict:
@@ -243,6 +289,7 @@ def submit_review(conn: sqlite3.Connection, *, crop_sha256: str, reviewer: str,
         raise ReviewRefused("error.crop_mismatch",
                             f"no reading in this store came from crop {crop_sha256}; "
                             f"the echoed image is not one we served")
+    _check_echo_is_current(conn, crop_sha256)
     # 14 groups of corpus files are byte-identical under different
     # manufacturers, so identical crop bytes can appear under more than one
     # document. The review names the lowest (document_id, page_no) for its own

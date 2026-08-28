@@ -65,8 +65,8 @@ order, and `audit/10-ratification-v1.0.md` §3.2 is the non-compliance this plat
 signature — **partly closed as of 2026-08-25**. Its live violation (obligation 6) and its
 three representational gaps (obligations 4, 15, 10) closed with build-plan A1-A5, all
 five of which landed 2026-08-25. Still in force: the unbuilt publishing-layer
-obligations — and note that nothing is published at curation level 2, nor can be,
-because no interface exists for a person to accept a reading.
+obligations — and note that nothing is published at curation level 2 — the interface now exists
+(`cli review`, `POST /reviews`) and nobody has used it yet.
 
 Nothing in `docs/integration/` displaces the documents above. Those govern how this platform
 works; the contract governs only what it exposes.
@@ -259,12 +259,14 @@ Things that will bite you if you don't know them (all measured, see the corpus a
 - **`retain_until` is deliberately outside the snapshot hash.** It moves with the clock, so
   hashing it would mean two builds over identical knowledge never matched. What exactly belongs
   in "the canonical member list" is not fully specified; that is a reading, not a quote.
-- **`crops.py` is built, measured and unwired on purpose.** Only tests and
-  `scripts/measure_crop_cost.py` call it. It backs `GET /source-refs/{id}`, which is Phase B.
-- **There is no way for a person to accept or correct a reading.** `PROMOTABLE` is
-  `("accepted", "corrected")` and nothing in the package writes either — so
-  `promote-tables --apply` is a no-op today. The review loop is a hole in the middle, not a
-  missing tail, and it is the critical path.
+- **`crops.py` is wired as of 2026-08-28.** `cropcache.py` renders through it,
+  `sourcerefs.py` builds the Discovery read model on top, and `api.py` serves
+  `GET /source-refs/{id}` and `POST /source-refs:batch` behind a bearer allowlist.
+- **The review loop exists as of 2026-08-28; the level-2 population is still zero.**
+  `reviews.py` writes `accepted` and `corrected`, `cli review --accept` and `POST /reviews`
+  reach it, and `promote-tables --apply` is no longer a no-op. What remains true is that
+  **`reviewer` is NULL on all 1,225 readings** — the mechanism exists and nobody has used
+  it. Do not read "the loop exists" as "anything has been reviewed".
 - **`ref_id` embeds a bbox, and a re-extraction can move it.** A 0.02pt shift
   changes the id completely and `delete_version_rows()` removes the rows the old
   id named, so a toolchain upgrade breaks published citations retroactively and

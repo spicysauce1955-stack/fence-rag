@@ -41,6 +41,7 @@ BATCH_CAP = 50
 
 # A request body larger than this is refused unread. A review of the largest
 # table in the queue is a few kilobytes; nothing legitimate approaches this.
+SOCKET_TIMEOUT_S = 30.0   # a silent client must not hold a thread
 MAX_BODY_BYTES = 1 << 20
 
 # The one mapping table. Spec §5.2 fixes the five middle rows; `not_found`,
@@ -252,6 +253,11 @@ def _handler_class(tokens: "set[str]"):
     class Handler(http.server.BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"  # Content-Length is set on every reply
         server_version = "fence-evidence"
+        # StreamRequestHandler.timeout is None by default, so setup() never
+        # calls settimeout and every read blocks forever. Measured: 120 sockets
+        # sending ZERO bytes pinned 114 daemon threads for as long as the client
+        # chose, unauthenticated, at a cost of one socket each.
+        timeout = SOCKET_TIMEOUT_S
 
         def log_message(self, fmt, *args):  # noqa: D102 -- silence, not logging
             """The default writes a request line per request to stderr.
@@ -275,6 +281,16 @@ def _handler_class(tokens: "set[str]"):
             return value.strip() if scheme.lower() == "bearer" and value.strip() else None
 
         def _read_body(self) -> "tuple[bool, dict | None]":
+            # RFC 9112 §6.3: a message carrying Transfer-Encoding must not be
+            # framed by Content-Length. We honour only Content-Length, and the
+            # deployment REQUIRES a fronting proxy (frontend -> Planning ->
+            # here), so a front end that honours chunked while this server
+            # honours Content-Length is a TE.CL desync: the declared body gets
+            # re-parsed as the next request on a kept-alive connection.
+            # Demonstrated -- a smuggled GET rode in behind a 401'd POST and was
+            # answered 200. Refuse the combination rather than guess at framing.
+            if self.headers.get("Transfer-Encoding"):
+                return "unsupported", None
             try:
                 length = int(self.headers.get("Content-Length") or 0)
             except ValueError:
@@ -293,6 +309,12 @@ def _handler_class(tokens: "set[str]"):
         def _handle(self, method: str) -> None:
             token = self._bearer()
             ok, body = self._read_body()
+            if ok == "unsupported":
+                self.close_connection = True     # never keep-alive a desync
+                self._respond(*_error("error.malformed_request",
+                                      "Transfer-Encoding is not supported; frame "
+                                      "the body with Content-Length"))
+                return
             if not ok:
                 self._respond(*_error("error.request_too_large",
                                       f"request body exceeds {MAX_BODY_BYTES} bytes"))

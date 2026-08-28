@@ -1289,6 +1289,44 @@ not the hole that entry claimed.
 
 ---
 
+### G46 — the `crop_sha256` echo verified nothing — PARTLY FIXED
+
+`unblocking-planning-design.md` §4.3 names one mitigation for a `reviewer` this
+platform cannot verify: *"a review must echo the `crop_sha256` of the image we
+served. That is verifiable without knowing who the reviewer is."*
+
+**As written it verified nothing.** `submit_review` compared the echo against
+`table_read_candidates.crop_sha256` — a stored constant, and one **committed to
+git** in `workspace/catalog/noa-table-candidates.jsonl`, which carries all 44
+distinct crop digests in the store. An adversarial pass demonstrated a full
+forged review: read a digest out of git, POST 143 cells of
+`"18 INCHES (forged)"`, and the store recorded
+`('Jane Q. Curator', 'corrected', '18 INCHES (forged)')` on every one.
+
+**Fixed 2026-08-28** by recomputing the digest from the crop file at submit
+time. Verified: the current digest is accepted, a digest for a re-rendered crop
+is refused, and a crop we cannot read fails closed — a reading whose image we
+cannot serve cannot be reviewed.
+
+**Partly, because a digest is not a secret.** Recomputation establishes the one
+property it can: the echo matches the artifact this store holds *today*, so a
+review of a stale render is caught. It does **not** authenticate. Echoing a
+digest proves the caller had the digest, never that a person looked at the
+picture. Forgery is held off by the bearer allowlist and by Planning's own auth,
+and the honesty of `reviewer` rests on Planning — which is what §4 actually
+says, and §4.3 overstated what the echo adds.
+
+**Still open: the two digest spaces are disjoint.** `table_read_candidates`
+digests are of Pillow full-page copies written by `noa_tables.export_crops`;
+`GET /source-refs/{id}` serves pdftoppm element crops from `cropcache`.
+Measured intersection over a session that rendered 1,024 crops: **zero**. So a
+reviewer working through the API cannot produce an acceptable echo at all, and
+the review queue and the evidence endpoint are showing different pictures. That
+wants the queue to serve through `cropcache`, which is a change to what a review
+unit *is*, not a patch — and it should be decided with Phase 3's scope.
+
+---
+
 ---
 
 ## 4. If work resumes, in order
