@@ -23,10 +23,10 @@ contract both teams have signed, and `docs/integration/` needs no more design wo
 open items are work items, not agreements.
 
 **What exists:** a source-preserving evidence store over 144 documents / 2,147 pages /
-81,794 elements, with FTS5 retrieval, a fact layer (1,714 facts, 12 types), supersession
-relations, a regenerable projection — and, since 2026-08-25, **a first published
-snapshot**: 62 `source_docs`, 282 `warnings`, 63 `gaps`, hashed and stored write-once.
-721 tests pass.
+81,794 elements, with FTS5 retrieval, a fact layer (1,718 facts, 12 types), supersession
+relations, a regenerable projection — and, since 2026-08-25, **a published snapshot**,
+hashed and stored write-once. A rebuild today produces 75 `source_docs`, 289 `warnings`
+and 65 `gaps` at id `83a227d4`. **891 tests pass** (735 at the start of 2026-08-28).
 
 **Phase A is closed.** All five items landed, and each was a promise already made in
 writing at ratification. The level-2 population is zero, which is the honest number:
@@ -36,7 +36,13 @@ hold, and two of them found defects in code written the same day.
 
 **What does not exist** *(rewritten 2026-08-28 — most of this list was closed and the
 paragraph was not moved with it)*: no `Part`, no part-type spine. `ParameterTable` has a
-builder (`parameters.py`) but publishes nothing yet, because nothing is promoted.
+builder (`parameters.py`) but publishes nothing yet, because nothing is promoted — and
+nothing can be promoted until a person reviews something, which is not a build item.
+`part_types`, `parts`, `models`, `procedures`, `combinations` and `rules` are declared and
+empty in every snapshot. `Part` in particular is **blocked on the other team**: candidate
+C3 asks whether a `PanelSpec` member edge is a "value" under invariant 8, and
+`docs/layering.md` §5's carve-out — the only route to a `Part` at all — depends on the
+answer.
 
 **The review loop now exists on both sides of the human decision and in the middle.**
 `cli review --accept`, `POST /reviews`, `GET /source-refs/{id}` and
