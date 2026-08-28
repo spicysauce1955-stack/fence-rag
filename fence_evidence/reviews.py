@@ -298,8 +298,22 @@ def submit_review(conn: sqlite3.Connection, *, crop_sha256: str, reviewer: str,
     document_id, page_no = min((r["document_id"], r["page_no"]) for r in rows)
 
     reviewed_at = reviewed_at or now()
+    # The verdict and its content are in the id, not just who/what/when.
+    # `now()` is second-resolution, so crop+reviewer+timestamp collided on a
+    # double-submit, a client retry, or an accept-then-immediately-correct --
+    # and `INSERT OR REPLACE` then dropped the first review outright, including
+    # its `from_candidates` link. A differential fuzz over 3,000 interleavings
+    # found ten distinct projection-drift shapes and every one traced to this.
+    #
+    # Folding the payload in keeps the good half of that behaviour: an identical
+    # resubmission still lands on the same id and replaces itself, which is what
+    # a retry should do, while two genuinely different reviews in one second stay
+    # two rows.
+    payload = json.dumps({"verdict": verdict, "grid": grid or [],
+                          "spans": spans or [], "notes": notes},
+                         sort_keys=True, separators=(",", ":"))
     review_id = hashlib.sha256(
-        f"{crop_sha256}:{reviewer}:{reviewed_at}".encode()).hexdigest()[:16]
+        f"{crop_sha256}:{reviewer}:{reviewed_at}:{payload}".encode()).hexdigest()[:16]
 
     # One transaction for the record and its projection, so the store is never
     # left holding a review whose annotations did not land. sqlite3 defers BEGIN

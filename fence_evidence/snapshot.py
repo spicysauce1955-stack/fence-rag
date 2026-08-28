@@ -625,6 +625,13 @@ SOURCE_CLASSES = frozenset({
 VERSION_STATUSES = frozenset({"active", "superseded", "unknown"})
 ATTACHES_TO_KINDS = frozenset({
     "step", "procedure", "document", "product", "model", "warranty", "maintenance"})
+SEVERITIES = frozenset({"warns_line", "informational"})
+# §1.2.1 BINDING: "Two of the eight kinds -- `unmodellable_entity` and
+# `unmapped_part_kind` -- close by a schema change in the Planning repo, not by
+# anything a curator can do. A review queue that shows a curator work only an
+# engineer can perform is a queue whose items are not actionable, which is the
+# one property it has to have."
+CLOSED_BY_PLANNING = frozenset({"unmodellable_entity", "unmapped_part_kind"})
 GAP_KINDS = frozenset({
     "unmodellable_entity", "uncovered_condition", "unsatisfiable_requirement",
     "unquantified", "missing_value", "unmapped_part_kind", "disputed",
@@ -742,11 +749,29 @@ def verify(snapshot: dict) -> None:
                         f"active|superseded|unknown")
         _also_filed_as(d, fail)
 
+    # Content hashes do not only travel inside a {id, belongs_to} pair. §1.2.1
+    # names `contributing_sources` as a roll-up of the same source_docs, and
+    # `superseded_by` was added precisely because "a doc-... id is an internal
+    # handle Planning cannot resolve" -- so it is exactly the field the closure
+    # rule exists for. `attaches_to.ref` is a content hash for every published
+    # warning today. All of them were invisible to a walk keyed on the pair.
+    HASH_BEARING = {"superseded_by", "contributing_sources"}
+
     def walk(node, path="$"):
         if isinstance(node, dict):
-            if "belongs_to" in node and "id" in node and node["belongs_to"] not in held:
-                fail.append(f"{path}: closure - SourceRef {node['id']} belongs_to "
-                            f"{node['belongs_to'][:12]}..., not in source_docs")
+            if "belongs_to" in node and node["belongs_to"] not in held:
+                fail.append(f"{path}: closure - SourceRef {node.get('id')} belongs_to "
+                            f"{str(node['belongs_to'])[:12]}..., not in source_docs")
+            ref = node.get("ref")
+            if (node.get("kind") in ("document", "warranty")
+                    and isinstance(ref, str) and ref not in held):
+                fail.append(f"{path}.ref: closure - attaches_to names "
+                            f"{ref[:12]}..., not in source_docs")
+            for key in HASH_BEARING:
+                for i, h in enumerate(node.get(key) or []):
+                    if isinstance(h, str) and h not in held:
+                        fail.append(f"{path}.{key}[{i}]: closure - {h[:12]}... is "
+                                    f"not in source_docs")
             for k, v in node.items():
                 walk(v, f"{path}.{k}")
         elif isinstance(node, list):
@@ -800,6 +825,19 @@ def verify(snapshot: dict) -> None:
         elif not g["cites"] and str(g.get("subject", "")).startswith("element-"):
             fail.append(f"{at}: obligation 8 - an element-scoped gap names a region "
                         f"and so has evidence; cite it")
+        if g.get("severity") not in SEVERITIES:
+            fail.append(f"{at}: severity {g.get('severity')!r} is not "
+                        f"warns_line|informational")
+        # BINDING, and the gate is the only thing standing between a future
+        # emitter and a queue item no curator can action.
+        if g.get("kind") in CLOSED_BY_PLANNING and g.get("closes_by") != "planning":
+            fail.append(f"{at}: §1.2.1 - {g['kind']!r} closes by a schema change in "
+                        f"the Planning repo, so closes_by must be 'planning', not "
+                        f"{g.get('closes_by')!r}")
+        if not g.get("subject"):
+            fail.append(f"{at}: §1.2.1 - a gap names its subject addressably")
+        if not isinstance((g.get("because") or {}).get("params", {}), dict):
+            fail.append(f"{at}: because.params must be an object")
         if (g.get("kind") == "disputed") != (g.get("on") is not None):
             fail.append(f"{at}: §1.2.1 - `on` belongs to `disputed` and to nothing "
                         f"else; it is value|conditions")

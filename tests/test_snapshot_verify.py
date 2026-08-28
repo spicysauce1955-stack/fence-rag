@@ -288,3 +288,72 @@ class TestAlsoFiledAsIsGated(unittest.TestCase):
             {"manufacturer": None, "doc_type": "spec_sheet"},
             {"manufacturer": "Barrette", "doc_type": "hvhz_noa"}]
         verify(s)
+
+
+class TestTheGateEnforcesWhatTheContractBinds(unittest.TestCase):
+    """Holes an adversarial contract pass found in `verify()`.
+
+    Each was a check the contract states and the gate did not make. They are
+    not live defects today -- the builder emits neither kind, and every stored
+    hash happens to close -- but "happens to" is the distinction a gate exists
+    to remove, and the seven unpopulated lists mean the gate passes for the
+    wrong reason until the day they are filled.
+    """
+
+    def _fails(self, mutate, fragment):
+        snap = _ok()
+        mutate(snap)
+        with self.assertRaises(VerificationFailed) as caught:
+            verify(snap)
+        self.assertIn(fragment, str(caught.exception))
+
+    def test_a_kind_that_closes_by_a_planning_schema_change_must_say_so(self):
+        """§1.2.1 BINDING, and the property a review queue has to have."""
+        for kind in ("unmodellable_entity", "unmapped_part_kind"):
+            with self.subTest(kind=kind):
+                self._fails(lambda s, k=kind: s.__setitem__(
+                    "gaps", [_gap(kind=k, closes_by="knowledge")]),
+                    "closes by a schema change")
+
+    def test_that_kind_passes_when_it_does_say_so(self):
+        snap = _ok()
+        snap["gaps"] = [_gap(kind="unmodellable_entity", closes_by="planning")]
+        verify(snap)
+
+    def test_severity_is_a_closed_set(self):
+        self._fails(lambda s: s.__setitem__("gaps", [_gap(severity="critical")]),
+                    "warns_line|informational")
+
+    def test_severity_is_required(self):
+        g = _gap()
+        del g["severity"]
+        self._fails(lambda s: s.__setitem__("gaps", [g]), "warns_line|informational")
+
+    def test_closure_sees_a_hash_carried_as_a_string(self):
+        """`superseded_by` exists BECAUSE a doc- id is unresolvable to Planning.
+
+        A walk keyed on the {id, belongs_to} pair could not see it, nor
+        `attaches_to.ref`, which is a content hash on every published warning.
+        """
+        self._fails(lambda s: s["source_docs"][0].__setitem__(
+            "superseded_by", ["deadbeef" * 8]), "not in source_docs")
+
+    def test_closure_sees_attaches_to(self):
+        self._fails(lambda s: s["warnings"][0]["attaches_to"].__setitem__(
+            "ref", "deadbeef" * 8), "attaches_to names")
+
+    def test_closure_sees_contributing_sources(self):
+        """§1.2.1 names it as a roll-up of the same source_docs."""
+        self._fails(lambda s: s.__setitem__(
+            "parts", [{"contributing_sources": ["deadbeef" * 8]}]),
+            "not in source_docs")
+
+    def test_a_gap_names_its_subject(self):
+        self._fails(lambda s: s.__setitem__("gaps", [_gap(subject="")]),
+                    "names its subject")
+
+    def test_because_params_must_be_an_object(self):
+        self._fails(lambda s: s.__setitem__(
+            "gaps", [_gap(because={"code": "c", "params": "not a dict"})]),
+            "must be an object")
+
