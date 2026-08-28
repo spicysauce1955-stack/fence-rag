@@ -311,14 +311,19 @@ class TestPublishManifestDelegates(_ScratchDir):
         They were serialised twice from the same dict, which happened to agree;
         one encoding is now the only encoding, and this pins it."""
         from unittest import mock
+        from fence_evidence import distribution as distmod
         from fence_evidence import publish
         m = build_manifest(_ROWS, "https://x/", "2026-01-01T00:00:00Z")
+        # The DEFAULT path is redirected rather than an injected one passed:
+        # `path=` with `dry_run=False` is refused, because that combination
+        # writes the local copy somewhere else while uploading under the fixed
+        # key. Redirecting the default keeps the call shape a real publish has.
         target = self.scratch() / "distribution-manifest.json"
         calls = []
-        with mock.patch.object(publish, "_request",
+        with mock.patch.object(distmod, "DIST_MANIFEST_PATH", target), \
+             mock.patch.object(publish, "_request",
                                lambda *a, **k: calls.append(a) or 200):
-            out = publish.publish_manifest(self._cfg(), m, dry_run=False,
-                                           path=target)
+            out = publish.publish_manifest(self._cfg(), m, dry_run=False)
         self.assertEqual(len(calls), 1)
         _cfg, method, key, payload, content_type = calls[0]
         self.assertEqual(method, "PUT")
@@ -326,6 +331,22 @@ class TestPublishManifestDelegates(_ScratchDir):
         self.assertEqual(content_type, "application/json")
         self.assertEqual(payload, target.read_bytes())
         self.assertFalse(out["dry_run"])
+
+    def test_a_real_publish_with_an_injected_path_is_refused(self):
+        """The one combination that silently diverges the committed artifact
+        from the bucket: local copy to `path`, object under the fixed key."""
+        from unittest import mock
+        from fence_evidence import publish
+        m = build_manifest(_ROWS, "https://x/", "2026-01-01T00:00:00Z")
+        target = self.scratch() / "distribution-manifest.json"
+        calls = []
+        with mock.patch.object(publish, "_request",
+                               lambda *a, **k: calls.append(a) or 200):
+            with self.assertRaises(ValueError):
+                publish.publish_manifest(self._cfg(), m, dry_run=False,
+                                         path=target)
+        self.assertEqual(calls, [], "it uploaded before refusing")
+        self.assertFalse(target.exists(), "it wrote before refusing")
 
     def test_the_default_path_is_still_the_committed_manifest(self):
         """The injected path is an addition, not a change of default: `cli

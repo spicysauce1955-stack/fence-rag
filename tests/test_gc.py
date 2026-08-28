@@ -59,13 +59,27 @@ def _schema(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+def _rmdir_if_empty(path: Path) -> None:
+    """Remove the shared container once the last case has cleaned up its own."""
+    try:
+        path.rmdir()
+    except OSError:
+        pass
+
+
 class GCFixture(unittest.TestCase):
     """A throwaway derived tree, store and snapshot dir inside workspace/."""
 
     def setUp(self):
+        # Inside workspace/ because `ensure_writable` refuses anything outside
+        # it -- the guard applies to tests too. `workspace/tests/` is TRACKED,
+        # so the container directory is removed as well when this run empties
+        # it: leaving `workspace/tests/gc/` behind dirties a tracked tree for
+        # no content reason, which is the G28 failure in miniature.
         base = TESTS_DIR / "gc"
         base.mkdir(parents=True, exist_ok=True)
         self.tmp = Path(tempfile.mkdtemp(prefix="gc-", dir=base))
+        self.addCleanup(_rmdir_if_empty, base)
         self.derived = self.tmp / "derived"
         self.derived.mkdir()
         self.snapshots = self.tmp / "snapshots"

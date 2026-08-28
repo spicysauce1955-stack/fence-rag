@@ -90,6 +90,19 @@ def publish_manifest(cfg: R2Config, manifest: dict, dry_run: bool = True,
     no test at all. `path` exists for that: it defaults to the committed
     location and a caller can point it at a scratch directory instead.
     """
+    if path is not None and not dry_run:
+        # `path` exists so a test can inspect the bytes without rewriting the
+        # committed artifact. Combined with a real upload it does the opposite
+        # of what it looks like: the local copy goes to `path` while the object
+        # goes to the fixed `distribution-manifest.json` key, so the committed
+        # file and the bucket silently disagree from then on. Refuse rather than
+        # pick one -- there is no reading of this call that is what the caller
+        # meant.
+        raise ValueError(
+            "publish_manifest(path=..., dry_run=False) would upload under the "
+            "fixed key while writing the local copy somewhere else, leaving the "
+            "committed manifest and the bucket disagreeing. Use path= with a "
+            "dry run, or a real publish with the default path.")
     payload = manifest_bytes(manifest)
     out = write_manifest(manifest, path)
     if not dry_run:
