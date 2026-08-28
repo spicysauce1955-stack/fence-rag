@@ -1329,7 +1329,7 @@ not the hole that entry claimed.
 
 ---
 
-### G46 — the `crop_sha256` echo verified nothing — PARTLY FIXED
+### G46 — the `crop_sha256` echo verified nothing — FIXED
 
 `unblocking-planning-design.md` §4.3 names one mitigation for a `reviewer` this
 platform cannot verify: *"a review must echo the `crop_sha256` of the image we
@@ -1356,14 +1356,29 @@ picture. Forgery is held off by the bearer allowlist and by Planning's own auth,
 and the honesty of `reviewer` rests on Planning — which is what §4 actually
 says, and §4.3 overstated what the echo adds.
 
-**Still open: the two digest spaces are disjoint.** `table_read_candidates`
-digests are of Pillow full-page copies written by `noa_tables.export_crops`;
-`GET /source-refs/{id}` serves pdftoppm element crops from `cropcache`.
-Measured intersection over a session that rendered 1,024 crops: **zero**. So a
-reviewer working through the API cannot produce an acceptable echo at all, and
-the review queue and the evidence endpoint are showing different pictures. That
-wants the queue to serve through `cropcache`, which is a change to what a review
-unit *is*, not a patch — and it should be decided with Phase 3's scope.
+**The two digest spaces are now one** *(2026-08-28)*. They were disjoint:
+`table_read_candidates` digests were of Pillow full-page copies from
+`noa_tables.export_crops`, while `GET /source-refs/{id}` served poppler element
+crops, and the measured intersection over 1,024 rendered crops was **zero** — so
+a reviewer working through the API could not produce an acceptable echo at all.
+
+The cause was a refusal in `cropcache`: a page ref raised
+`CropUnavailable("names a page, not a rectangle")`, on the reasoning that
+"cropping the whole page would answer a question nobody asked with an image that
+is not the evidence." That is backwards for the cases that matter most. Every
+queue crop is a whole page, and on the 73 `table_not_reconstructed` pages there
+is no grid to draw a rectangle around — `CLAUDE.md` says plainly that there **the
+page image is the evidence**. The endpoint that exists to serve evidence was
+refusing exactly the pages a reviewer cannot judge without.
+
+`crops.render_crop` now renders a full page for a `None` bbox, `cropcache` serves
+page refs, and `cli realign-review-crops` points the queue at the artifact the API
+returns. Measured after: **44 of 44 queue crops carry the digest of what the
+endpoint serves**, 1,225 rows realigned, 431 → 519 citations still resolving.
+
+The original digests remain in `workspace/catalog/noa-table-candidates.jsonl` as
+the provenance of the reading run that produced them, which is the record they
+belong to.
 
 ---
 

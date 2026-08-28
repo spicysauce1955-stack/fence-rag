@@ -85,6 +85,57 @@ def hvhz_for_exposure(notes: str, exposure: str) -> str | None:
     return verdicts.pop() if len(verdicts) == 1 else None
 
 
+def bracket_from_span(text: str) -> str | None:
+    """Read an applicability bracket out of a span a REVIEWER transcribed.
+
+    `table_reviews.spans` was write-only: D2 of the Phase 2 design calls
+    recovering the merge structure "review's job", and nothing read the field
+    back. Meanwhile `_row_applicability` went on inferring the bracket from
+    reader notes -- machine guesses -- while a person's transcription of the
+    same cell sat unread in the next table.
+
+    A human span outranks every reader note, because it is the only reading in
+    this store that obligation 6 recognises. Where a reviewer recorded one, the
+    cross-family test is not consulted at all.
+    """
+    if not text:
+        return None
+    if _HVHZ_BOTH.search(text):
+        return "HVHZ and non-HVHZ"
+    if _NON_HVHZ.search(text):
+        return "non-HVHZ only"
+    return None
+
+
+def reviewed_brackets(conn: sqlite3.Connection, crop_sha256: str) -> dict:
+    """`row_index -> bracket`, from the most recent review of this crop.
+
+    Arrival order, matching `reviews.rebuild_projection`: the last review to
+    arrive is the one in force.
+    """
+    row = conn.execute("""SELECT spans FROM table_reviews
+                           WHERE crop_sha256 = ?
+                           ORDER BY rowid DESC LIMIT 1""", (crop_sha256,)).fetchone()
+    if not row or not row["spans"]:
+        return {}
+    out: dict[int, str] = {}
+    try:
+        spans = json.loads(row["spans"])
+    except (TypeError, json.JSONDecodeError):
+        return {}
+    for span in spans:
+        bracket = bracket_from_span(str(span.get("text") or ""))
+        if bracket is None:
+            continue
+        try:
+            lo, hi = int(span["row_from"]), int(span["row_to"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        for r in range(lo, hi + 1):
+            out[r] = bracket
+    return out
+
+
 def _row_applicability(readings: list[sqlite3.Row], exposure: str) -> tuple[str, str]:
     """Cross-family agreement on the bracket, or 'unresolved'."""
     by_family: dict[str, set] = defaultdict(set)
@@ -240,6 +291,10 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
             groups[(doc, page, row_i)].extend(one_reading_per_cell(cell_rows))
             all_by_row[(doc, page, row_i)].extend(cell_rows)
 
+        brackets_by_crop = {
+            c: reviewed_brackets(conn, c)
+            for (c,) in conn.execute(
+                "SELECT DISTINCT crop_sha256 FROM table_reviews")}
         created = skipped = unresolved = 0
         by_type: dict[str, int] = defaultdict(int)
         for (doc, page, row_i), cells in sorted(groups.items()):
@@ -250,8 +305,17 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
                 if key and val and val.strip():
                     conditions[key] = val.strip()
             exposure = conditions.get("exposure_category", "")
-            applicability, basis = _row_applicability(
-                all_by_row[(doc, page, row_i)], exposure)
+            # A reviewer's transcription first. It is the only reading in this
+            # store that obligation 6 recognises, so consulting a cross-family
+            # machine agreement ahead of it would rank guesses above the answer.
+            human = brackets_by_crop.get(
+                (cells[0]["crop_sha256"] if cells else None), {}).get(row_i)
+            if human:
+                applicability = human
+                basis = "transcribed by a reviewer from the page image"
+            else:
+                applicability, basis = _row_applicability(
+                    all_by_row[(doc, page, row_i)], exposure)
             if applicability == "unresolved":
                 unresolved += 1
             conditions["hvhz_applicability"] = applicability

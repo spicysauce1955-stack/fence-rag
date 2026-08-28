@@ -9,6 +9,7 @@ skips cleanly without one.
 import shutil
 import sqlite3
 import unittest
+from pathlib import Path
 
 import context  # noqa: F401  -- puts the repo root on sys.path
 from context import requires_store
@@ -197,9 +198,19 @@ class TestRenderThrough(unittest.TestCase):
         with self.assertRaises(CropUnavailable):
             ensure_crop(self.conn, "f" * 16, index=self.index)
 
-    def test_a_page_ref_has_no_rectangle_and_is_unavailable(self):
-        """`ref_id` omits `kind`, so a page ref is a real, resolvable id with
-        no bbox. Cropping the whole page would answer a different question."""
+    def test_a_page_ref_renders_the_whole_page(self):
+        """This used to refuse, on the grounds that cropping a whole page
+        "would answer a different question".
+
+        It was backwards for the cases that matter most. On the 73
+        `table_not_reconstructed` pages there is no grid and no rectangle, and
+        CLAUDE.md is explicit that there the page image IS the evidence -- so
+        the endpoint that exists to serve evidence refused precisely the pages
+        a reviewer cannot judge without. It also left the review queue and the
+        source-ref endpoint serving different artifacts, with a measured digest
+        intersection of zero, which is what made obligation 6's crop echo
+        unsatisfiable through the API. See G46.
+        """
         row = self.conn.execute(
             """SELECT p.page_no, v.sha256 FROM pages p
                  JOIN document_versions v ON v.version_id = p.version_id
@@ -208,8 +219,11 @@ class TestRenderThrough(unittest.TestCase):
         locus = refs.resolve(self.index, rid)
         if locus is None or locus.bbox is not None:
             self.skipTest("no bbox-less page ref in this store")
-        with self.assertRaises(CropUnavailable):
-            ensure_crop(self.conn, rid, index=self.index)
+        out = ensure_crop(self.conn, rid, index=self.index)
+        self.assertEqual(len(out["sha256"]), 64)
+        self.assertTrue(Path(out["path"]).exists())
+        with open(out["path"], "rb") as fh:
+            self.assertEqual(fh.read(4), b"\x89PNG")
 
     def test_a_source_poppler_cannot_read_is_unavailable(self):
         """The six CAD PNGs and the DOCX. crops.py §4.2 will not take a Pillow

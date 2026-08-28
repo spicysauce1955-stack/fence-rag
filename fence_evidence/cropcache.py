@@ -191,19 +191,26 @@ def ensure_crop(conn: sqlite3.Connection, ref_id: str, *, dpi: int = 200,
         raise CropUnavailable(
             f"no such ref_id: {ref_id}. Nothing in this store produces it, so "
             f"there is no rectangle to render.")
-    if locus.bbox is None:
-        # A whole-page ref. It is not an error in the store -- `ref_id` omits
-        # `kind`, so a bbox-less element mints its page's id -- but there is no
-        # rectangle, and cropping the whole page would answer a question
-        # nobody asked with an image that is not the evidence.
-        raise CropUnavailable(
-            f"ref {ref_id} names a page, not a rectangle: it carries no bbox. "
-            f"See refs.Locus -- the id omits `kind`.")
-    try:
-        bbox = json.loads(locus.bbox)
-    except (json.JSONDecodeError, TypeError) as exc:
-        raise CropUnavailable(f"ref {ref_id} carries an unreadable bbox: "
-                              f"{locus.bbox!r}") from exc
+    # A whole-page ref renders the whole page. `ref_id` omits `kind`, so a
+    # bbox-less element mints its page's id, and this used to refuse on the
+    # grounds that "cropping the whole page would answer a question nobody
+    # asked with an image that is not the evidence."
+    #
+    # That was backwards for the cases that matter most. On the 73
+    # `table_not_reconstructed` pages there is no grid and no rectangle, and
+    # CLAUDE.md is explicit that there "the page image IS the evidence" -- so
+    # the endpoint that exists to serve evidence was refusing precisely the
+    # pages a reviewer cannot judge without. It also left the review queue and
+    # the source-ref endpoint serving different artifacts, with a measured
+    # digest intersection of zero, which is what made the crop echo in
+    # obligation 6's mitigation unsatisfiable. See G46.
+    bbox = None
+    if locus.bbox is not None:
+        try:
+            bbox = json.loads(locus.bbox)
+        except (json.JSONDecodeError, TypeError) as exc:
+            raise CropUnavailable(f"ref {ref_id} carries an unreadable bbox: "
+                                  f"{locus.bbox!r}") from exc
 
     src = _render_source(conn, locus)
     if (src["file_type"] or "").lower() != "pdf":
@@ -266,3 +273,63 @@ def _sha256_file(path: Path) -> str:
         for chunk in iter(lambda: fh.read(1 << 16), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def realign_review_crops(conn, *, dry_run: bool = True) -> dict:
+    """Point the review queue at the artifact the API actually serves.
+
+    G46. `table_read_candidates.crop_sha256` was the digest of a Pillow
+    full-page copy written by `noa_tables.export_crops`; `GET /source-refs/{id}`
+    serves a poppler render from this cache. Measured intersection over a
+    session that rendered 1,024 crops: **zero**. So obligation 6's one
+    mitigation -- "a review must echo the `crop_sha256` of the image we served"
+    -- was unsatisfiable by anyone actually working through the API, while the
+    digest it did accept sat in a git-tracked file.
+
+    Every queue crop is a whole page, and a whole page has a ref
+    (`ref_id(sha256, page_no, None)`). Rendering that ref gives one artifact
+    with one digest that both the queue and the endpoint agree on.
+
+    Rewrites `crop_path` and `crop_sha256` only. The original digests remain in
+    `workspace/catalog/noa-table-candidates.jsonl` as the provenance of the
+    reading run that produced them, which is the record they belong to.
+    """
+    from .refs import build_index, ref_id as _ref_id
+
+    out = {"pages": 0, "realigned": 0, "unrenderable": [], "rows_updated": 0,
+           "dry_run": dry_run}
+    rows = conn.execute("""
+        SELECT DISTINCT c.document_id, c.page_no, c.crop_sha256, c.crop_path, v.sha256
+          FROM table_read_candidates c
+          JOIN document_versions v ON v.document_id = c.document_id
+         ORDER BY c.document_id, c.page_no""").fetchall()
+    index = build_index(conn)
+    for r in rows:
+        out["pages"] += 1
+        rid = _ref_id(r["sha256"], r["page_no"], None)
+        try:
+            served = ensure_crop(conn, rid, index=index)
+        except CropUnavailable as exc:
+            out["unrenderable"].append({"document_id": r["document_id"],
+                                        "page_no": r["page_no"],
+                                        "why": str(exc)[:120]})
+            continue
+        want_path = str(Path(served["path"]).resolve().relative_to(REPO_ROOT))
+        if served["sha256"] == r["crop_sha256"] and want_path == r["crop_path"]:
+            continue
+        if served["sha256"] != r["crop_sha256"]:
+            out["realigned"] += 1
+        if dry_run:
+            continue
+        cur = conn.execute(
+            "UPDATE table_read_candidates SET crop_sha256 = ?, crop_path = ? "
+            " WHERE document_id = ? AND page_no = ?",
+            # A repo-relative path, matching what `crop_path` has always held
+            # and what `table_review.promote` and `reviews` resolve against.
+            # `relative_url` is for the WIRE -- relative to workspace/derived --
+            # and writing that here silently broke both.
+            (served["sha256"], want_path, r["document_id"], r["page_no"]))
+        out["rows_updated"] += cur.rowcount
+    if not dry_run:
+        conn.commit()
+    return out

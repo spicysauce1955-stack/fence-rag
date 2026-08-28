@@ -116,7 +116,13 @@ def render_crop(source_path: str | Path, page_no: int, bbox, *,
         raise CropError(f"source document is not on disk: {source_path}. "
                         "An unfetched checkout is the usual cause — run `cli fetch`.")
 
-    win = window_px(bbox, page_w_pt=page_w_pt, page_h_pt=page_h_pt, dpi=dpi)
+    # A bbox of None means the whole page, not an error. `refs.ref_id` omits
+    # `kind`, so a page ref is a first-class reference -- and for the 73
+    # `table_not_reconstructed` pages the page image IS the evidence, which is
+    # exactly what a reviewer has to be shown. Refusing it here left the
+    # endpoint that serves evidence unable to serve the hardest cases.
+    win = None if bbox is None else window_px(
+        bbox, page_w_pt=page_w_pt, page_h_pt=page_h_pt, dpi=dpi)
 
     tmpdir = None
     if out_path is None:
@@ -129,10 +135,11 @@ def render_crop(source_path: str | Path, page_no: int, bbox, *,
         prefix = out_path.with_suffix("")
 
     cmd = ["pdftoppm", "-png", "-r", str(dpi),
-           "-f", str(page_no), "-l", str(page_no),
-           "-x", str(win.x0), "-y", str(win.y0),
-           "-W", str(win.w), "-H", str(win.h),
-           str(src), str(prefix)]
+           "-f", str(page_no), "-l", str(page_no)]
+    if win is not None:
+        cmd += ["-x", str(win.x0), "-y", str(win.y0),
+                "-W", str(win.w), "-H", str(win.h)]
+    cmd += [str(src), str(prefix)]
     try:
         proc = subprocess.run(cmd, capture_output=True, timeout=120)
     except FileNotFoundError as exc:

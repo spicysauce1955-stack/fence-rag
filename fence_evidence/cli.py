@@ -177,6 +177,11 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("noa-table-crops",
                    help="export source crops for the pages whose tables OCR could not rebuild")
 
+    p = sub.add_parser("realign-review-crops",
+                       help="point the review queue at the artifact the API serves "
+                            "(G46); rewrites crop_path and crop_sha256 only")
+    p.add_argument("--apply", action="store_true", help="write them (default is a dry run)")
+
     p = sub.add_parser("backfill-spans",
                        help="recover merged-cell rowspan/colspan for tables already "
                             "in the store (G41); writes two integer columns and no "
@@ -415,6 +420,14 @@ def main(argv: list[str] | None = None) -> int:
         print(f"serving on {args.host}:{args.port} "
               f"({len(tokens)} token(s) on the allowlist)", file=sys.stderr)
         api.serve(args.host, args.port, tokens=tokens)
+    elif args.cmd == "realign-review-crops":
+        from .cropcache import realign_review_crops
+        from .store import connect as _c
+        conn = _c()
+        try:
+            _print(realign_review_crops(conn, dry_run=not args.apply))
+        finally:
+            conn.close()
     elif args.cmd == "backfill-spans":
         from .tables import backfill_spans
         from .store import connect as _c
