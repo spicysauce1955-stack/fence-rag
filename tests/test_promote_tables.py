@@ -6,7 +6,8 @@ import shutil
 
 from context import requires_store, store_snapshot
 from fence_evidence.promote_tables import (_inches, _match, KEY_COLUMNS,
-                                           VALUE_COLUMNS, hvhz_for_exposure)
+                                           VALUE_COLUMNS, effective_value,
+                                           hvhz_for_exposure, one_reading_per_cell)
 from fence_evidence.table_review import PROMOTABLE
 from fence_evidence.store import connect
 
@@ -26,6 +27,63 @@ class TestColumnMapping(unittest.TestCase):
         self.assertEqual(_inches('96 1/8"'), 96.125)
         self.assertEqual(_inches('30"'), 30.0)
         self.assertIsNone(_inches(""))
+
+
+class TestOneReadingPerCell(unittest.TestCase):
+    """G43 and G44, the two defects the first end-to-end review run exposed.
+
+    Both were unreachable while PROMOTABLE was written by nothing, so they sat
+    in the code from A1 until the review loop made promotion possible at all.
+    These run on plain dicts -- no store, no corpus.
+    """
+
+    @staticmethod
+    def _cell(cid, col, value, status="accepted", reviewed=None):
+        return {"candidate_id": cid, "col_index": col, "value": value,
+                "review_status": status, "reviewed_value": reviewed}
+
+    def test_three_readers_of_one_cell_collapse_to_one(self):
+        """G43: promotion iterated readings, so N readers made N identical facts."""
+        cells = [self._cell(1, 0, '30"'), self._cell(2, 0, '30"'),
+                 self._cell(3, 0, '30"')]
+        self.assertEqual([c["candidate_id"] for c in one_reading_per_cell(cells)], [1])
+
+    def test_distinct_columns_all_survive(self):
+        cells = [self._cell(1, 0, "B"), self._cell(2, 1, '30"'),
+                 self._cell(3, 2, '97"')]
+        self.assertEqual(len(one_reading_per_cell(cells)), 3)
+
+    def test_a_corrected_reading_wins_over_an_accepted_one(self):
+        """The human verdict outranks arrival order, whatever the candidate_id."""
+        cells = [self._cell(1, 0, '30"'),
+                 self._cell(2, 0, '30"', status="corrected", reviewed='99"'),
+                 self._cell(3, 0, '30"')]
+        picked = one_reading_per_cell(cells)
+        self.assertEqual(len(picked), 1)
+        self.assertEqual(picked[0]["candidate_id"], 2)
+
+    def test_the_choice_is_deterministic(self):
+        cells = [self._cell(9, 0, "x"), self._cell(4, 0, "x"), self._cell(7, 0, "x")]
+        for _ in range(3):
+            self.assertEqual(one_reading_per_cell(cells)[0]["candidate_id"], 4)
+
+    def test_a_correction_is_what_gets_published(self):
+        """G44: the fix was stored in reviewed_value and then discarded.
+
+        The published fact carried the reader's number under curation level 2,
+        which asserts a person checked it. Maximum claimed authority over
+        unreviewed content -- what obligation 6 exists to prevent.
+        """
+        self.assertEqual(
+            effective_value(self._cell(1, 0, '30"', status="corrected", reviewed='99"')),
+            '99"')
+
+    def test_an_accepted_reading_publishes_what_the_reader_read(self):
+        self.assertEqual(effective_value(self._cell(1, 0, '30"')), '30"')
+
+    def test_a_corrected_row_with_no_reviewed_value_falls_back(self):
+        self.assertEqual(
+            effective_value(self._cell(1, 0, '30"', status="corrected")), '30"')
 
 
 class TestApplicabilityFailsClosed(unittest.TestCase):

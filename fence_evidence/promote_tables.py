@@ -99,6 +99,49 @@ def _row_applicability(readings: list[sqlite3.Row], exposure: str) -> tuple[str,
                           "bracket; see the page crop")
 
 
+def effective_value(cell) -> str | None:
+    """The value a promotion should carry: the person's, where there is one.
+
+    G44. The INSERT below used `cell["value"]` -- the reader's transcription --
+    even for a row whose `review_status` is `corrected`, so a reviewer's fix was
+    stored in `reviewed_value` and then silently discarded at promotion. The
+    published fact carried the machine's number under curation level 2, which
+    claims a person checked it. Maximum asserted authority over unreviewed
+    content is the worst combination this store can produce, and it is exactly
+    what obligation 6 exists to prevent.
+    """
+    if cell["review_status"] == "corrected" and cell["reviewed_value"] is not None:
+        return cell["reviewed_value"]
+    return cell["value"]
+
+
+def one_reading_per_cell(cells: list) -> list:
+    """Collapse N readers' readings of one grid position to a single row.
+
+    G43. Promotion grouped by (document, page, row) and then iterated the
+    *readings* in that group, so three readers produced three identical facts:
+    measured, 36 facts from one reviewed footing crop of which 12 were distinct.
+    Three identical rows at one domain point violate `hit_policy: unique` in
+    contract.md 1.3 -- on data this platform generated itself, independently of
+    the real design-point pairing that candidate amendment C5 is about.
+
+    Choosing one is safe because the readers agree: across 174 independently
+    multi-read positions there were 6 value disagreements, every one of them a
+    merged-cell artifact rather than a misread number (Phase 2 design 2). A
+    `corrected` reading wins regardless, because that is the human verdict, and
+    ties break on the lowest candidate_id so the choice is deterministic.
+    """
+    best: dict[int, object] = {}
+    for c in sorted(cells, key=lambda r: r["candidate_id"]):
+        col = c["col_index"]
+        if col not in best:
+            best[col] = c
+        elif (c["review_status"] == "corrected"
+              and best[col]["review_status"] != "corrected"):
+            best[col] = c
+    return [best[k] for k in sorted(best)]
+
+
 def promote_verified(conn: sqlite3.Connection | None = None, *,
                      dry_run: bool = False) -> dict:
     own = conn is None
@@ -108,13 +151,24 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
             SELECT * FROM table_read_candidates
              WHERE review_status IN ({','.join('?' * len(PROMOTABLE))})
                AND row_index >= 0
-               AND candidate_id NOT IN (SELECT from_candidate_id FROM facts
-                                         WHERE from_candidate_id IS NOT NULL)
              ORDER BY document_id, page_no, row_index, col_index""",
             PROMOTABLE).fetchall()
-        groups: dict[tuple, list[sqlite3.Row]] = defaultdict(list)
+        # Already-promoted is a property of the CELL, not of the reading. Only
+        # one of a cell's N readings carries the from_candidate_id, so a
+        # per-reading NOT IN would re-promote that cell's other N-1 readings on
+        # the next run -- turning G43's duplication into a slow leak instead of
+        # fixing it. Skip the whole cell when any of its readings is linked.
+        promoted = {r[0] for r in conn.execute(
+            "SELECT from_candidate_id FROM facts WHERE from_candidate_id IS NOT NULL")}
+        by_cell: dict[tuple, list[sqlite3.Row]] = defaultdict(list)
         for r in rows:
-            groups[(r["document_id"], r["page_no"], r["row_index"])].append(r)
+            by_cell[(r["document_id"], r["page_no"],
+                     r["row_index"], r["col_index"])].append(r)
+        groups: dict[tuple, list[sqlite3.Row]] = defaultdict(list)
+        for (doc, page, row_i, _col), cell_rows in by_cell.items():
+            if any(c["candidate_id"] in promoted for c in cell_rows):
+                continue
+            groups[(doc, page, row_i)].extend(one_reading_per_cell(cell_rows))
 
         created = skipped = unresolved = 0
         by_type: dict[str, int] = defaultdict(int)
@@ -122,8 +176,9 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
             conditions: dict[str, str] = {}
             for cell in cells:
                 key = _match(cell["col_label"], KEY_COLUMNS)
-                if key and cell["value"] and cell["value"].strip():
-                    conditions[key] = cell["value"].strip()
+                val = effective_value(cell)
+                if key and val and val.strip():
+                    conditions[key] = val.strip()
             exposure = conditions.get("exposure_category", "")
             applicability, basis = _row_applicability(cells, exposure)
             if applicability == "unresolved":
@@ -136,7 +191,8 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
 
             for cell in cells:
                 fact_type = _match(cell["col_label"], VALUE_COLUMNS)
-                if not fact_type or not (cell["value"] or "").strip():
+                value = effective_value(cell)
+                if not fact_type or not (value or "").strip():
                     skipped += 1
                     continue
                 if dry_run:
@@ -153,8 +209,8 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
                            ?,?,?,?,?,?,?,?,?,?,?,0,?,?,?""",
                     (cell["document_id"], cell["version_id"], cell["page_no"],
                      cell["document_id"], cell["page_no"], fact_type,
-                     cell["col_label"], cell["value"], _inches(cell["value"]),
-                     'in' if '"' in (cell["value"] or "") else None, "in",
+                     cell["col_label"], value, _inches(value),
+                     'in' if '"' in (value or "") else None, "in",
                      json.dumps(conditions),
                      # `stated`: these conditions are the table's own row and
                      # column labels. The document printed them in a grid, which

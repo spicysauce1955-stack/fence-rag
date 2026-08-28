@@ -1156,7 +1156,7 @@ publishes its bullet rather than the whole list.
 
 ---
 
-### G43 — promotion multiplies every fact by the number of readers — DETECTED, NOT FIXED
+### G43 — promotion multiplies every fact by the number of readers — FIXED
 
 Found by the first end-to-end run of the Phase 2 review loop, against a **copy**
 of the store. Reviewing one `wind_exposure_footing` crop and running
@@ -1183,15 +1183,47 @@ the contract's §1.3 check would fire on data this platform generated itself —
 independently of the real design-point pairing that C5 is about. A reviewer would
 also see each value three times in any queue built on `facts`.
 
-**Not fixed here** because it belongs to `promote_tables.py` and wants its own
-tests; Phase 2's acceptance is about the loop existing, and it does. The likely fix
-is to reduce each `(row_index, col_index)` to one reading before promoting — the
-readers agree on values (§2 of the Phase 2 spec measured 6 disagreements in 174
-multi-read positions, all of them merged-cell artifacts), so any consistent choice
-works and the disagreement cases are exactly what the human verdict already settled.
+**Fixed 2026-08-28.** `one_reading_per_cell()` collapses a cell's N readings to
+one before promotion: a `corrected` reading wins, ties break on the lowest
+`candidate_id`. Verified on a copy — 36 facts became 12, and 12 distinct.
 
-**This must land before anything publishes**, since a promoted fact is what reaches
-`ParameterTable.rows`.
+**A second defect had to be fixed with it, or the first fix would have leaked.**
+"Already promoted" was tested per *reading* (`candidate_id NOT IN (SELECT
+from_candidate_id …)`), but only one of a cell's readings carries that link. Once
+promotion writes one fact per cell, the cell's other N−1 readings stay eligible
+and promote on the next run — turning the duplication into a slow leak rather than
+closing it. The check is now per cell: skip the cell when any of its readings is
+linked. A second `promote --apply` creates 0.
+
+---
+
+### G44 — a reviewer's correction was discarded at promotion — FIXED
+
+Found while fixing G43, and worse than it.
+
+`promote_verified` wrote `cell["value"]` — the reader's transcription — into the
+fact, **even for a row whose `review_status` is `corrected`**. The person's value
+was stored in `reviewed_value` and never read. Measured on a copy: a reviewer
+corrected `30"` to `99"`, the candidate rows recorded
+`('corrected', '30"', '99"')`, and the promoted facts contained no `99"` at all.
+
+**Why this is the worst combination available.** The fact publishes at curation
+level 2, which asserts *a person compared this to the source image*. Carrying the
+machine's number under that claim is maximum asserted authority over unreviewed
+content — precisely what obligation 6 exists to prevent, inverted. A wrong footing
+depth that a reviewer had already caught would have crossed the boundary wearing
+the badge of having been checked.
+
+**Fixed** by `effective_value()`, which prefers `reviewed_value` on a `corrected`
+row and falls back to `value` otherwise. Applied to the fact, to `_inches`, to the
+unit sniff and to the row's `conditions`, since a corrected *condition* would have
+been dropped the same way.
+
+Both were unreachable until the review loop existed: `PROMOTABLE` became
+`("accepted", "corrected")` at A1 and nothing wrote either, so neither defect
+could fire. Closing the no-op is what made them observable — and reachable.
+
+---
 
 ---
 
