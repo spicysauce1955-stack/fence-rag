@@ -15,17 +15,48 @@ from pathlib import Path
 from typing import Any
 
 from .paths import REPO_ROOT, REPORTS_DIR, TESTS_DIR, open_write, resolve_asset
+from .relations import APPROVAL_RE
 from .retrieval import (STOPWORDS, UNIT_WORDS, build_match_expression,
-                        search_evidence)
+                        resolve_document_version, search_evidence)
 from .store import connect
 
 DEFAULT_K = 10
+
+# G14 — which interface answers a question natively.
+#
+# The field is optional and defaults to "search", because every published
+# number was measured with the search-only harness and a routing change must not
+# move it silently. So routing is *additive*: a question that declares an
+# interface is still issued to `search_evidence` and graded exactly as before —
+# same denominators, same values — and the routed answer is graded separately in
+# `summary["routed"]`, carrying the search result for the same question beside
+# it so the before/after is on the page rather than in a commit message.
+INTERFACES = ("search", "resolve", "facts")
+DEFAULT_INTERFACE = "search"
 # Relevance floor below which a result is reported as unsupported rather than as
 # an answer.  Calibrated on the pilot: the three no-answer questions topped out
 # at 12.2-14.2 while every answerable question scored >=20.0.  Three negatives
 # is a thin basis, so this is a reported, tunable threshold rather than a claim
 # about the corpus, and it is re-checked in the full-corpus evaluation.
 NO_ANSWER_SCORE_FLOOR = 17.0
+
+
+def question_interface(q: dict) -> str:
+    """Which interface answers this question. Absent means ``search``.
+
+    An unrecognised value is a loud failure rather than a silent fallback: a
+    typo'd interface would otherwise quietly drop the question back into the
+    search harness and the routed block would under-report by one, which is
+    exactly the kind of drift G14 exists to prevent.
+    """
+    raw = q.get("interface")
+    if raw is None:
+        return DEFAULT_INTERFACE
+    if raw not in INTERFACES:
+        raise ValueError(
+            f"{q.get('id') or '<unidentified question>'}: unknown interface "
+            f"{raw!r}; expected one of {', '.join(INTERFACES)}")
+    return raw
 
 
 def load_gold(paths: list[Path] | None = None) -> list[dict]:
@@ -36,6 +67,7 @@ def load_gold(paths: list[Path] | None = None) -> list[dict]:
             data = json.load(f)
         for q in data.get("questions", []):
             q["_set"] = data.get("set", p.stem)
+            question_interface(q)  # reject an unknown interface at load time
             questions.append(q)
     return questions
 
@@ -248,6 +280,279 @@ def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
     }
 
 
+# ---------------------------------------------------------------------------
+# G14 — the non-search interfaces
+#
+# Two things have to be true of these graders at once. They must be *separate*
+# from the search harness, so that no published search number moves; and they
+# must be *comparable* to it, so that "resolve answers what search missed" is a
+# measurement rather than an assertion. They are therefore graded with the same
+# formulas — document rank, term support, and the same pass rule
+# (`doc_rank is not None and support >= 0.5`) — over what the interface actually
+# returns.
+#
+# The one real difference is what "support" is measured against. Search returns
+# a *unit*, so `evidence_support` asks whether that unit carries the answer
+# terms. Resolution and the fact layer return *documents and records*, so the
+# graded number here is `document_support`: are the annotated answer terms in the
+# text of the documents the interface handed back? That is the analogue of
+# `page_evidence_support`, not of `evidence_support`, and the two must not be
+# averaged together. `record_support` — terms visible in the returned record
+# itself — is reported beside it, because a resolution answer that names the
+# right document is not the same as one that quotes the page.
+# ---------------------------------------------------------------------------
+
+def _expected_documents(q: dict, conn) -> tuple[set[str], set[str], dict[str, list[int]]]:
+    declared = set(q.get("expected_documents") or [])
+    expected = _equivalent_paths(conn, declared)
+    pages: dict[str, list[int]] = dict(q.get("expected_pages") or {})
+    for _declared, page_nos in list(pages.items()):
+        for equivalent in expected - declared:
+            pages.setdefault(equivalent, page_nos)
+    return declared, expected, pages
+
+
+def _document_text(conn, source_paths: list[str]) -> str:
+    """All extracted text of the named documents, normalised for term matching."""
+    if conn is None or not source_paths:
+        return ""
+    parts = []
+    for path in source_paths:
+        for row in conn.execute(
+                """SELECT e.text, e.ocr_text FROM elements e
+                     JOIN documents d ON d.document_id = e.document_id
+                    WHERE d.source_path = ?""", (path,)):
+            parts.append(_norm((row["text"] or "") + " " + (row["ocr_text"] or "")))
+    return "\n".join(parts)
+
+
+def _grade_returned_documents(q: dict, conn, candidates: list[dict],
+                              record_text: str) -> dict:
+    """Shared grading tail for the interfaces that return documents.
+
+    ``candidates`` is the interface's answer as an ordered list of
+    ``{"source_path": ..., "page": ...}`` — most-confident first, so rank means
+    the same thing it means for search.
+    """
+    declared, expected, expected_pages = _expected_documents(q, conn)
+    terms = [t for t in (q.get("expected_answer_terms") or []) if t]
+
+    doc_rank = next((i + 1 for i, c in enumerate(candidates)
+                     if c["source_path"] in expected), None)
+    page_rank = None
+    for i, c in enumerate(candidates):
+        wanted = expected_pages.get(c["source_path"])
+        if wanted and c.get("page") in wanted:
+            page_rank = i + 1
+            break
+
+    returned_paths: list[str] = []
+    for c in candidates:
+        if c["source_path"] not in returned_paths:
+            returned_paths.append(c["source_path"])
+
+    record_joined = _norm(record_text)
+    record_found = [t for t in terms if _norm(t) in record_joined]
+    record_support = (len(record_found) / len(terms)) if terms else None
+
+    doc_joined = _document_text(conn, returned_paths)
+    doc_found = [t for t in terms if _norm(t) in doc_joined]
+    document_support = (len(doc_found) / len(terms)) if terms else None
+
+    passed = doc_rank is not None and (document_support is None
+                                       or document_support >= 0.5)
+    return {
+        "id": q.get("id"), "category": q.get("category"), "set": q.get("_set"),
+        "question": q.get("question"),
+        "answerable": q.get("answerable", True),
+        "n_results": len(candidates),
+        "doc_rank": doc_rank, "page_rank": page_rank,
+        "expected_documents": sorted(declared),
+        "equivalent_documents": sorted(expected - declared),
+        "returned_documents": returned_paths,
+        "record_support": None if record_support is None else round(record_support, 3),
+        "document_support": None if document_support is None else round(document_support, 3),
+        "found_terms": doc_found,
+        "missing_terms": [t for t in terms if t not in doc_found],
+        "passed": passed,
+    }
+
+
+def _resolve_identifier(q: dict) -> str:
+    """What to hand `resolve_document_version`.
+
+    Explicit `interface_input.identifier` wins. The fallback reads an approval
+    number out of the question text, which is enough for the NOA questions but
+    is deliberately a fallback: a routed question should say what it resolves.
+    """
+    given = (q.get("interface_input") or {}).get("identifier")
+    if given:
+        return str(given)
+    haystack = " ".join([q.get("question") or ""] + list(q.get("query_terms") or []))
+    m = APPROVAL_RE.search(haystack)
+    if m:
+        return m.group(1)
+    raise ValueError(
+        f"{q.get('id')}: interface 'resolve' needs interface_input.identifier "
+        f"(a document id, source path, or approval number)")
+
+
+def _evaluate_resolve(q: dict, *, conn) -> dict:
+    ii = q.get("interface_input") or {}
+    identifier = _resolve_identifier(q)
+    answer = resolve_document_version(identifier, at=ii.get("at"),
+                                      as_of=ii.get("as_of"), conn=conn)
+    if answer is None:
+        row = _grade_returned_documents(q, conn, [], "")
+        row.update({"interface": "resolve", "identifier": identifier,
+                    "active_document": None, "active_basis": None,
+                    "chain_length": 0,
+                    "note": f"resolution returned nothing for {identifier!r}"})
+        return row
+
+    # Order the answer the way a reader reads it: the member the interface says
+    # is in force, then the rest of the chain oldest-first.
+    candidates: list[dict] = []
+    seen: set[str] = set()
+    for member in ([answer["active"]] if answer.get("active") else []) + \
+                  list(answer.get("chain") or []):
+        path = member.get("source_path")
+        if not path or path in seen:
+            continue
+        seen.add(path)
+        candidates.append({"source_path": path, "page": 1, "member": member})
+
+    record_text = json.dumps(answer, default=str)
+    row = _grade_returned_documents(q, conn, candidates, record_text)
+    active = answer.get("active") or {}
+    row.update({
+        "interface": "resolve",
+        "identifier": identifier,
+        "active_document": active.get("source_path"),
+        "active_basis": answer.get("active_basis"),
+        "chain_length": len(answer.get("chain") or []),
+        "chain": [{"source_path": m.get("source_path"),
+                   "version_status": m.get("version_status")}
+                  for m in (answer.get("chain") or [])],
+        "note": "",
+    })
+    return row
+
+
+def _evaluate_facts(q: dict, *, k: int, conn) -> dict:
+    from .facts import query_facts
+
+    ii = q.get("interface_input") or {}
+    fact_type = ii.get("fact_type")
+    if not fact_type:
+        raise ValueError(f"{q.get('id')}: interface 'facts' needs "
+                         f"interface_input.fact_type")
+    conditions = ii.get("conditions") or q.get("required_conditions") or None
+    rows = query_facts(fact_type, conditions=conditions,
+                       manufacturer=ii.get("manufacturer"),
+                       limit=int(ii.get("limit") or k), conn=conn)
+    candidates = [{"source_path": r["source_path"], "page": r.get("page_no")}
+                  for r in rows if r.get("source_path")]
+    record_text = "\n".join(
+        " ".join(str(r.get(field) or "") for field in
+                 ("value_original", "value_normalized", "unit", "title",
+                  "source_path", "review_status"))
+        + " " + json.dumps(r.get("conditions") or {}) for r in rows)
+    row = _grade_returned_documents(q, conn, candidates, record_text)
+    row.update({
+        "interface": "facts",
+        "fact_type": fact_type,
+        "conditions": conditions or {},
+        "values": [{"value": r.get("value_original"),
+                    "normalized": r.get("value_normalized"),
+                    "review_status": r.get("review_status"),
+                    "source_path": r.get("source_path"),
+                    "page": r.get("page_no")} for r in rows[:5]],
+        "note": "" if rows else f"no {fact_type} facts matched",
+    })
+    return row
+
+
+def evaluate_routed_question(q: dict, *, k: int = DEFAULT_K, conn=None) -> dict:
+    """Answer one question through the interface it declares.
+
+    Never called for a `search` question — those go through `evaluate_question`,
+    unchanged. Asking for a routed grading of a search question is a caller bug
+    and says so.
+    """
+    interface = question_interface(q)
+    if interface == "search":
+        raise ValueError(
+            f"{q.get('id')}: interface 'search' is graded by evaluate_question")
+    own = conn is None
+    conn = conn or connect()
+    try:
+        if interface == "resolve":
+            return _evaluate_resolve(q, conn=conn)
+        return _evaluate_facts(q, k=k, conn=conn)
+    finally:
+        if own:
+            conn.close()
+
+
+def _mean(values: list[float]) -> float | None:
+    return round(statistics.mean(values), 3) if values else None
+
+
+def _routed_metrics(rows: list[dict]) -> dict:
+    return {
+        "n": len(rows),
+        "passed": sum(1 for r in rows if r["passed"]),
+        "doc_recall": _mean([1.0 if r["doc_rank"] else 0.0 for r in rows]),
+        "mrr": _mean([1 / r["doc_rank"] if r["doc_rank"] else 0.0 for r in rows]),
+        "document_support": _mean([r["document_support"] for r in rows
+                                   if r["document_support"] is not None]),
+        "record_support": _mean([r["record_support"] for r in rows
+                                 if r["record_support"] is not None]),
+    }
+
+
+def _routed_summary(routed_rows: list[dict], search_rows: list[dict]) -> dict:
+    """The separately-labelled block, with the search result of the same
+    question beside every routed one.
+
+    Deliberately compact: `cli evaluate` prints the summary, so the full routed
+    rows live in `out["routed_results"]` and only the before/after is here.
+    """
+    search_by_id = {r["id"]: r for r in search_rows}
+    by_interface: dict[str, list[dict]] = defaultdict(list)
+    for r in routed_rows:
+        by_interface[r["interface"]].append(r)
+    questions = []
+    for r in routed_rows:
+        before = search_by_id.get(r["id"]) or {}
+        questions.append({
+            "id": r["id"], "category": r["category"], "interface": r["interface"],
+            "doc_rank": r["doc_rank"],
+            "record_support": r["record_support"],
+            "document_support": r["document_support"],
+            "missing_terms": r["missing_terms"],
+            "passed": r["passed"], "note": r.get("note") or "",
+            "search": {
+                "doc_rank": before.get("doc_rank"),
+                "page_rank": before.get("page_rank"),
+                "support": before.get("support"),
+                "page_support": before.get("page_support"),
+                "passed": before.get("passed"),
+            }})
+    out = _routed_metrics(routed_rows)
+    out["by_interface"] = {name: _routed_metrics(rs)
+                           for name, rs in sorted(by_interface.items())}
+    out["questions"] = questions
+    out["comparability"] = (
+        "document_support is the analogue of page_evidence_support (terms "
+        "anywhere in the documents the interface returned), not of "
+        "evidence_support (terms in one retrieved unit). The pass rule is the "
+        "same one the search harness uses. These numbers are NOT part of the "
+        "headline metrics and are not averaged into them.")
+    return out
+
+
 def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
                    only_ingested: bool = False, report_name: str = "evaluation",
                    second_stage: bool = False) -> dict:
@@ -275,6 +580,16 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
             questions = kept
         rows = [evaluate_question(q, k=k, conn=conn, second_stage=second_stage)
                 for q in questions]
+        # The routed pass is a *second* pass over the same questions. Nothing
+        # here feeds back into `rows`; the search harness above is untouched.
+        interface_counts: dict[str, int] = defaultdict(int)
+        routed_rows = []
+        for q in questions:
+            interface = question_interface(q)
+            interface_counts[interface] += 1
+            if interface == DEFAULT_INTERFACE:
+                continue
+            routed_rows.append(evaluate_routed_question(q, k=k, conn=conn))
     finally:
         conn.close()
 
@@ -325,6 +640,13 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
         "passed": sum(1 for r in rows if r["passed"]),
         "by_category": {k2: v for k2, v in sorted(by_cat.items())},
         "skipped_not_ingested": skipped,
+        # G14. Every metric above is the search harness over every question,
+        # routed ones included, which is what keeps them comparable with the
+        # figures published before routing existed.
+        "search_scope": ("every gold question, routed ones included; the metrics "
+                         "above are the search harness and nothing else"),
+        "interfaces": dict(sorted(interface_counts.items())),
+        "routed": _routed_summary(routed_rows, rows),
         "second_stage": second_stage,
         "second_stage_attachments": sum(r.get("second_stage_attachments") or 0 for r in rows),
         "acceptance": {},
@@ -335,7 +657,7 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
         "A4_no_answer_precision_ge_0.66": (summary["no_answer_precision"] or 0) >= 0.66,
         "A4b_false_unsupported_le_0.20": (summary["false_unsupported_rate"] or 1.0) <= 0.20,
     }
-    out = {"summary": summary, "results": rows}
+    out = {"summary": summary, "results": rows, "routed_results": routed_rows}
     with open_write(TESTS_DIR / f"{report_name}-results.json") as f:
         json.dump(out, f, indent=2)
     _write_report(out, report_name)
@@ -406,6 +728,68 @@ def _phase7_section(out: dict) -> list[str]:
     return lines
 
 
+def _routed_section(out: dict) -> list[str]:
+    """The separately-labelled block G14 asks for. Never folded into the table
+    above it."""
+    s = out["summary"]
+    routed = s.get("routed") or {}
+    counts = s.get("interfaces") or {}
+    lines = ["## Routed interfaces", "",
+             "Every metric above is the **search** harness over every gold "
+             "question, routed ones included — same denominators, same values as "
+             "before routing existed. The block below is separate and is not "
+             "averaged into it.", "",
+             "Declared interfaces: "
+             + (", ".join(f"`{name}` {n}" for name, n in counts.items()) or "—"),
+             ""]
+    if not routed.get("n"):
+        lines += ["No question declares a non-search interface.", ""]
+        return lines
+    lines += [
+        f"{routed['n']} question(s) are additionally answered through the "
+        f"interface they declare. `document_support` is the analogue of page "
+        f"evidence support — the annotated answer terms present in the "
+        f"documents the interface returned — not of unit-level evidence "
+        f"support; the pass rule is the search harness's own "
+        f"(`doc_rank` found and support ≥ 0.5).", "",
+        "| Interface | n | doc recall | MRR | document support | record support | passed |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for name, m in routed["by_interface"].items():
+        lines.append(f"| {name} | {m['n']} | {m['doc_recall']} | {m['mrr']} | "
+                     f"{m['document_support']} | {m['record_support']} | "
+                     f"{m['passed']}/{m['n']} |")
+    lines += ["", "### Before and after, question by question", "",
+              "| id | category | interface | doc rank search → routed | "
+              "support search unit → routed document | passed search → routed |",
+              "|---|---|---|---|---|---|"]
+    for r in routed["questions"]:
+        b = r["search"]
+        lines.append(
+            f"| {r['id']} | {r['category']} | {r['interface']} | "
+            f"{b['doc_rank']} → {r['doc_rank']} | "
+            f"{b['support']} → {r['document_support']} | "
+            f"{'PASS' if b['passed'] else 'FAIL'} → "
+            f"{'PASS' if r['passed'] else 'FAIL'} |")
+    lines += ["",
+              "The search rows for these questions are unchanged and still "
+              "appear in the by-category table and the failure list above; a "
+              "routed question is not removed from the search denominator.", ""]
+    for r in out.get("routed_results") or []:
+        if r["interface"] != "resolve":
+            continue
+        lines += [f"#### {r['id']} — resolved `{r.get('identifier')}`", "",
+                  f"- active: {r.get('active_document') or '(none)'}",
+                  f"- basis: {r.get('active_basis') or '—'}",
+                  f"- chain: {r.get('chain_length')} member(s)"]
+        for m in (r.get("chain") or []):
+            lines.append(f"    - {m['version_status']}  {m['source_path']}")
+        if r.get("note"):
+            lines.append(f"- note: {r['note']}")
+        lines.append("")
+    return lines
+
+
 def _write_report(out: dict, report_name: str = "evaluation") -> None:
     s = out["summary"]
     scope = ("the ten-document pilot" if s.get("skipped_not_ingested")
@@ -445,7 +829,8 @@ def _write_report(out: dict, report_name: str = "evaluation") -> None:
     for cat, c in s["by_category"].items():
         lines.append(f"| {cat} | {c['n']} | {c['doc_hits']} | {c['passed']} | "
                      f"{c['mean_support']} | {', '.join(c['failures']) or '—'} |")
-    lines += [""] + _phase7_section(out) + ["## Failures in detail", ""]
+    lines += [""] + _routed_section(out) + _phase7_section(out) + \
+        ["## Failures in detail", ""]
     for r in out["results"]:
         if r["passed"]:
             continue

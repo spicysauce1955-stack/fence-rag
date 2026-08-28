@@ -4,10 +4,11 @@ import unittest
 from pathlib import Path
 
 from context import ROOT
-from fence_evidence.evaluate import load_gold
+from fence_evidence.evaluate import INTERFACES, load_gold, question_interface
 
 SCHEMA = json.load(open(ROOT / "eval" / "gold-question-schema.json"))
 CATEGORIES = set(SCHEMA["properties"]["category"]["enum"])
+SCHEMA_INTERFACES = SCHEMA["properties"]["interface"]["enum"]
 MANIFEST = {json.loads(l)["source_path"]
             for l in open(ROOT / "workspace" / "catalog" / "corpus-manifest.jsonl")}
 
@@ -72,6 +73,39 @@ class TestGoldSet(unittest.TestCase):
         for q in no_answer:
             self.assertEqual(q.get("expected_documents", []), [])
             self.assertIsNone(q.get("expected_answer"))
+
+    def test_interface_is_optional_and_defaults_to_search(self):
+        # G14: the field is a routing declaration, not an annotation. A question
+        # that does not carry it must behave exactly as it did before the field
+        # existed, so the default is asserted here rather than written into the
+        # 58 questions that do not need it.
+        self.assertEqual(SCHEMA["properties"]["interface"]["default"], "search")
+        self.assertEqual(sorted(SCHEMA_INTERFACES), sorted(INTERFACES))
+        self.assertNotIn("interface", SCHEMA["required"])
+        for q in self.questions:
+            if "interface" not in q:
+                self.assertEqual(question_interface(q), "search", q["id"])
+
+    def test_declared_interfaces_are_known_and_carry_their_input(self):
+        for q in self.questions:
+            iface = question_interface(q)
+            self.assertIn(iface, SCHEMA_INTERFACES, q["id"])
+            if iface == "resolve":
+                self.assertTrue((q.get("interface_input") or {}).get("identifier"),
+                                f"{q['id']} routes to resolve with no identifier")
+            if iface == "facts":
+                self.assertTrue((q.get("interface_input") or {}).get("fact_type"),
+                                f"{q['id']} routes to facts with no fact_type")
+
+    def test_routing_did_not_touch_the_expected_answers(self):
+        # G8: never edit an expected answer to make a question pass. A routed
+        # question keeps every annotation a search-graded question has.
+        for q in self.questions:
+            if question_interface(q) == "search":
+                continue
+            self.assertTrue(q.get("expected_documents"), q["id"])
+            self.assertTrue(q.get("expected_answer_terms"), q["id"])
+            self.assertTrue(q.get("expected_answer"), q["id"])
 
     def test_every_question_records_its_verification(self):
         for q in self.questions:

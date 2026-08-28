@@ -13,6 +13,25 @@
                "no_answer", "conflict", "source_verification"]
     },
     "question": {"type": "string"},
+    "interface": {
+      "type": "string",
+      "enum": ["search", "resolve", "facts"],
+      "default": "search",
+      "description": "which of the retrieval interfaces answers this question natively. Optional: absent means \"search\", which is how every question was graded before this field existed. Declaring an interface does NOT remove the question from the search harness — it is still issued to search_evidence and graded identically, and the routed answer is reported in a separate block."
+    },
+    "interface_input": {
+      "type": "object",
+      "description": "arguments for the declared interface. resolve: {\"identifier\": \"23-0314.05\"} (a document id, source path, or approval number). facts: {\"fact_type\": \"expiration_date\", \"conditions\": {...}, \"manufacturer\": \"...\", \"limit\": 50}. Ignored when interface is \"search\". This is routing input, never an expected answer.",
+      "properties": {
+        "identifier": {"type": "string"},
+        "at": {"type": "string", "description": "resolve: which member was effective on this date"},
+        "as_of": {"type": "string", "description": "resolve: the date expiry is judged against"},
+        "fact_type": {"type": "string"},
+        "manufacturer": {"type": "string"},
+        "conditions": {"type": "object"},
+        "limit": {"type": "integer"}
+      }
+    },
     "answerable": {"type": "boolean",
       "description": "false for no_answer questions: the corpus must NOT contain this"},
     "expected_documents": {

@@ -148,6 +148,50 @@
       }
     },
     "skipped_not_ingested": [],
+    "search_scope": "every gold question, routed ones included; the metrics above are the search harness and nothing else",
+    "interfaces": {
+      "resolve": 1,
+      "search": 58
+    },
+    "routed": {
+      "n": 1,
+      "passed": 1,
+      "doc_recall": 1.0,
+      "mrr": 1.0,
+      "document_support": 1.0,
+      "record_support": 0.4,
+      "by_interface": {
+        "resolve": {
+          "n": 1,
+          "passed": 1,
+          "doc_recall": 1.0,
+          "mrr": 1.0,
+          "document_support": 1.0,
+          "record_support": 0.4
+        }
+      },
+      "questions": [
+        {
+          "id": "gq-011",
+          "category": "current_version",
+          "interface": "resolve",
+          "doc_rank": 1,
+          "record_support": 0.4,
+          "document_support": 1.0,
+          "missing_terms": [],
+          "passed": true,
+          "note": "",
+          "search": {
+            "doc_rank": null,
+            "page_rank": null,
+            "support": 0.2,
+            "page_support": 0.2,
+            "passed": false
+          }
+        }
+      ],
+      "comparability": "document_support is the analogue of page_evidence_support (terms anywhere in the documents the interface returned), not of evidence_support (terms in one retrieved unit). The pass rule is the same one the search harness uses. These numbers are NOT part of the headline metrics and are not averaged into them."
+    },
     "second_stage": false,
     "second_stage_attachments": 0,
     "acceptance": {
@@ -5173,6 +5217,66 @@
           "snippet": " \u2026 THIS FENCE IS APPROVED FOR SUSTAINED WIND\nPICKET _ ON CENTER VELOCITY OF 75 MPH (90 MPH FOR 3 SECOND GUST)\n7/8\" X 3 WHEN THE POST CENTERS \u2026 "
         }
       ]
+    }
+  ],
+  "routed_results": [
+    {
+      "id": "gq-011",
+      "category": "current_version",
+      "set": "structural",
+      "question": "Which Miami-Dade NOA is currently in force for the Columbia / Imperial / Chesterfield / Breezewood vinyl fence line, and which NOA did it replace?",
+      "answerable": true,
+      "n_results": 4,
+      "doc_rank": 1,
+      "page_rank": 1,
+      "expected_documents": [
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
+        "manuals/certainteed-bufftech/structural/NOA-24-0117.05-Barrette-successor-extruded-pvc-fencing-post-CertainTeed-transfer-2029.pdf",
+        "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-24-0117.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+        "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf"
+      ],
+      "equivalent_documents": [],
+      "returned_documents": [
+        "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf",
+        "manuals/certainteed-bufftech/structural/NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf",
+        "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf",
+        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+      ],
+      "record_support": 0.4,
+      "document_support": 1.0,
+      "found_terms": [
+        "revises NOA #23-0314.05",
+        "04/24/2025",
+        "Egg Harbor City",
+        "Robert Nieminen",
+        "Extruded PVC Vinyl Fencing"
+      ],
+      "missing_terms": [],
+      "passed": true,
+      "interface": "resolve",
+      "identifier": "23-0314.05",
+      "active_document": "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf",
+      "active_basis": "newest member of the chain and not marked superseded",
+      "chain_length": 4,
+      "chain": [
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf",
+          "version_status": "superseded"
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf",
+          "version_status": "superseded"
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
+          "version_status": "superseded"
+        },
+        {
+          "source_path": "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf",
+          "version_status": "unknown"
+        }
+      ],
+      "note": ""
     }
   ]
 }

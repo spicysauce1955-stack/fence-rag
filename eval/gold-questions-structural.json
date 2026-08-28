@@ -381,6 +381,11 @@
       "id": "gq-011",
       "category": "current_version",
       "question": "Which Miami-Dade NOA is currently in force for the Columbia / Imperial / Chesterfield / Breezewood vinyl fence line, and which NOA did it replace?",
+      "interface": "resolve",
+      "interface_input": {
+        "identifier": "23-0314.05",
+        "_why": "G14. Both halves of this question are supersession-chain questions: which member is in force, and which member it replaced. resolve_document_version walks the chain from the NOA the question itself names as the predecessor. Nothing in the annotation changed - the question, the expected documents, the expected answer and its terms are as first written; only the routing was added, and the search harness still grades this question exactly as it did before."
+      },
       "answerable": true,
       "expected_documents": [
         "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",

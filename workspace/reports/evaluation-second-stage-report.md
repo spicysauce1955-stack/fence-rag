@@ -31,6 +31,36 @@ Every gold question was runnable.
 | table_retrieval | 4 | 3 | 3 | 0.9 | gq-009 |
 | visual_evidence | 4 | 3 | 3 | 0.938 | gq-019 |
 
+## Routed interfaces
+
+Every metric above is the **search** harness over every gold question, routed ones included — same denominators, same values as before routing existed. The block below is separate and is not averaged into it.
+
+Declared interfaces: `resolve` 1, `search` 58
+
+1 question(s) are additionally answered through the interface they declare. `document_support` is the analogue of page evidence support — the annotated answer terms present in the documents the interface returned — not of unit-level evidence support; the pass rule is the search harness's own (`doc_rank` found and support ≥ 0.5).
+
+| Interface | n | doc recall | MRR | document support | record support | passed |
+|---|---|---|---|---|---|---|
+| resolve | 1 | 1.0 | 1.0 | 1.0 | 0.4 | 1/1 |
+
+### Before and after, question by question
+
+| id | category | interface | doc rank search → routed | support search unit → routed document | passed search → routed |
+|---|---|---|---|---|---|
+| gq-011 | current_version | resolve | None → 1 | 0.2 → 1.0 | FAIL → PASS |
+
+The search rows for these questions are unchanged and still appear in the by-category table and the failure list above; a routed question is not removed from the search denominator.
+
+#### gq-011 — resolved `23-0314.05`
+
+- active: manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf
+- basis: newest member of the chain and not marked superseded
+- chain: 4 member(s)
+    - superseded  manuals/certainteed-bufftech/structural/NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf
+    - superseded  manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf
+    - superseded  manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf
+    - unknown  manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf
+
 ## Phase 7 — experiments this evaluation would justify
 
 Only categories that actually failed appear here. Nothing below is built.
