@@ -26,7 +26,8 @@ open items are work items, not agreements.
 81,794 elements, with FTS5 retrieval, a fact layer (1,718 facts, 12 types), supersession
 relations, a regenerable projection — and, since 2026-08-25, **a published snapshot**,
 hashed and stored write-once. A rebuild today produces 75 `source_docs`, 289 `warnings`
-and 65 `gaps` at id `83a227d4`. **891 tests pass** (735 at the start of 2026-08-28).
+and 65 `gaps` at id `83a227d4`. **1,062 tests pass** (735 at the start of
+2026-08-28).
 
 **Phase A is closed.** All five items landed, and each was a promise already made in
 writing at ratification. The level-2 population is zero, which is the honest number:
