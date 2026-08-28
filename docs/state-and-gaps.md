@@ -1067,7 +1067,7 @@ so the field now holds the only copy of a fact no other field has.
 
 ---
 
-### G41 — `table_cells.rowspan`/`colspan` are never populated — DETECTED, NOT FIXED
+### G41 — `table_cells.rowspan`/`colspan` are never populated — FIXED
 
 The columns exist in the schema (`store.py:131-132`) and **no code path sets
 them**. All three `Cell(...)` construction sites — `extract.py:555`,
@@ -1087,10 +1087,42 @@ which is a machine reading, curation level 1 at best, not the level 2
 obligation 6 requires for a `structural_parameter`. That makes this a concrete
 argument for G17's review loop rather than a defect that can be fixed around.
 
-**Not closed because** the fix is not simply "write the field". `pdfplumber:lines`
-is the detector on this table and it reports a grid, not a span map; recovering
-merges means inferring them from the ruling lines. Worth doing, and worth
-measuring before promising.
+**Fixed 2026-08-28, and it needed no inference.** The entry above assumed
+recovering merges meant reading whitespace or guessing from ruling lines. Measured,
+**pdfplumber already knows**: a merged cell's rect covers the row bands beneath it
+and the continuation rows report `None`.
+
+```
+r1 c3: top=653.3 bot=670.5 h=17.2  'NON HVHZ'   <- spans r1 (653.3-662.7) and r2
+r2 c3: None                                      <- the continuation
+r7 c0: width 122.9 = the full table, c1..c3 None <- colspan 4, the footnote
+```
+
+`spans_from()` measures it. One subtlety: a full-width cell contributes its own
+wide band to the candidate column set and would count itself, inflating every
+colspan — only the narrowest bands, those containing no other band, are real
+columns.
+
+**Backfilled without re-extracting**, which mattered more than the recovery. A
+re-ingest would move bboxes, and `ref_id` is `sha256(content_hash:page:bbox)` with
+`delete_version_rows()` removing the rows the old ids named — that is G38, and
+paying it to fix a display defect would be a bad trade. `cli backfill-spans`
+rewrites two integer columns and nothing else: no bbox, no element or table id.
+
+Measured on the live store: 594 tables considered, **563 matched (94.8%)**, 31
+skipped because their stored geometry no longer matches the page — counted rather
+than guessed at. 869 merges found, **779 cells updated** from a starting
+population of zero. The gap between the two is merges at positions where
+`_grid_to_cells` stored no cell because the text was empty. 85 seconds.
+`cli refs --verify` still resolves 431 of 431.
+
+The Bufftech footing table now reads correctly: `NON HVHZ` carries `rowspan=2`
+over both exposure-B rows, and the ASCE footnote carries `colspan=4`.
+
+**What this does not close.** Phase 2 still asks a reviewer to record `spans`, and
+should. This recovers the merges pdfplumber can see on a text-layer table; the 73
+`table_not_reconstructed` pages have no grid at all, and on those the page image
+is still the only evidence.
 
 ---
 

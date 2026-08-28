@@ -204,3 +204,45 @@ class TestQueryBuilder(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestMergedCellSpans(unittest.TestCase):
+    """G41: rowspan/colspan were columns nothing ever wrote.
+
+    The recovery needs no inference -- pdfplumber's own geometry carries it --
+    so these test the arithmetic on a stand-in rather than on a PDF, and run
+    without poppler, pdfplumber or the corpus.
+    """
+
+    class _Row:
+        def __init__(self, bbox, cells):
+            self.bbox, self.cells = bbox, cells
+
+    class _Table:
+        def __init__(self, rows):
+            self.rows = rows
+
+    def test_a_cell_covering_two_row_bands_is_rowspan_2(self):
+        from fence_evidence.tables import spans_from
+        # two rows; the right-hand cell of row 0 covers both bands
+        r0 = self._Row((0, 0, 20, 10), [(0, 0, 10, 10), (10, 0, 20, 20)])
+        r1 = self._Row((0, 10, 20, 20), [(0, 10, 10, 20), None])
+        spans = spans_from(self._Table([r0, r1]))
+        self.assertEqual(spans[(0, 1)], (2, 1))
+        self.assertEqual(spans[(0, 0)], (1, 1))
+        self.assertNotIn((1, 1), spans, "the continuation row reports no cell")
+
+    def test_a_full_width_cell_is_colspan_n_not_n_plus_one(self):
+        """The merged cell contributes its own band and must not count itself."""
+        from fence_evidence.tables import spans_from
+        r0 = self._Row((0, 0, 20, 10), [(0, 0, 10, 10), (10, 0, 20, 10)])
+        r1 = self._Row((0, 10, 20, 20), [(0, 10, 20, 20), None])
+        spans = spans_from(self._Table([r0, r1]))
+        self.assertEqual(spans[(1, 0)], (1, 2))
+
+    def test_an_ordinary_grid_is_all_ones(self):
+        from fence_evidence.tables import spans_from
+        r0 = self._Row((0, 0, 20, 10), [(0, 0, 10, 10), (10, 0, 20, 10)])
+        r1 = self._Row((0, 10, 20, 20), [(0, 10, 10, 20), (10, 10, 20, 20)])
+        self.assertEqual(set(spans_from(self._Table([r0, r1])).values()), {(1, 1)})
+

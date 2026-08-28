@@ -173,6 +173,12 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("noa-table-crops",
                    help="export source crops for the pages whose tables OCR could not rebuild")
 
+    p = sub.add_parser("backfill-spans",
+                       help="recover merged-cell rowspan/colspan for tables already "
+                            "in the store (G41); writes two integer columns and no "
+                            "bbox, so published citations are unaffected")
+    p.add_argument("--apply", action="store_true", help="write them (default is a dry run)")
+
     sub.add_parser("rebuild-index", help="rebuild the retrieval projection from canonical rows")
     sub.add_parser("stats", help="store statistics")
     sub.add_parser("report", help="regenerate the workspace reports")
@@ -392,6 +398,14 @@ def main(argv: list[str] | None = None) -> int:
         print(f"serving on {args.host}:{args.port} "
               f"({len(tokens)} token(s) on the allowlist)", file=sys.stderr)
         api.serve(args.host, args.port, tokens=tokens)
+    elif args.cmd == "backfill-spans":
+        from .tables import backfill_spans
+        from .store import connect as _c
+        conn = _c()
+        try:
+            _print(backfill_spans(conn, dry_run=not args.apply))
+        finally:
+            conn.close()
     elif args.cmd == "refs":
         from .refs import build_index, verify_snapshots
         from .store import connect

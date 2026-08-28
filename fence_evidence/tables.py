@@ -12,6 +12,7 @@ it is never reduced to flowed text alone.
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from .model import BBox, Cell, Table
@@ -59,8 +60,49 @@ def looks_tabular(grid: list[list[str | None]]) -> tuple[bool, str]:
     return True, "ok"
 
 
-def _grid_to_cells(grid: list[list[str | None]], bbox: BBox) -> list[Cell]:
+def spans_from(table, tol: float = 1.0) -> dict[tuple[int, int], tuple[int, int]]:
+    """`(row, col) -> (rowspan, colspan)`, read off the ruling lines.
+
+    G41. `rowspan`/`colspan` were columns nothing ever wrote, so all 18,472 cells
+    in the store claimed to be 1x1 and every merge was silently flattened. That
+    is not a cosmetic loss: on the Bufftech footing table the merged fourth
+    column is the applicability bracket, and flattened it attributes "NON HVHZ"
+    to the 30" row alone, leaving the 24" row reading as unannotated. Five
+    documents carry that table and all five extracted it the same wrong way.
+
+    pdfplumber already knows. A merged cell's rect covers the row bands beneath
+    it and the continuation rows report `None`, so the span is measured rather
+    than guessed -- no inference from whitespace, no heuristic.
+
+    The one subtlety is columns: a cell spanning the full width contributes its
+    own wide band to the candidate set, which would count itself as a column and
+    inflate every colspan. Only the narrowest bands -- those containing no other
+    band -- are real columns.
+    """
+    rows = table.rows
+    bands = [r.bbox for r in rows]
+    tops, bots = [b[1] for b in bands], [b[3] for b in bands]
+    seen = {(round(c[0], 2), round(c[2], 2))
+            for r in rows for c in r.cells if c is not None}
+    cols = sorted(b for b in seen
+                  if not any(o != b and b[0] - tol <= o[0] and o[1] <= b[1] + tol
+                             for o in seen))
+    out: dict[tuple[int, int], tuple[int, int]] = {}
+    for i, r in enumerate(rows):
+        for j, c in enumerate(r.cells):
+            if c is None:
+                continue
+            rs = sum(1 for k in range(len(rows))
+                     if c[1] - tol <= tops[k] and bots[k] <= c[3] + tol)
+            cs = sum(1 for (a, b) in cols if c[0] - tol <= a and b <= c[2] + tol)
+            out[(i, j)] = (max(1, rs), max(1, cs))
+    return out
+
+
+def _grid_to_cells(grid: list[list[str | None]], bbox: BBox,
+                   spans: dict[tuple[int, int], tuple[int, int]] | None = None) -> list[Cell]:
     cells: list[Cell] = []
+    spans = spans or {}
     for r, row in enumerate(grid):
         for c, val in enumerate(row):
             if val is None:
@@ -68,7 +110,8 @@ def _grid_to_cells(grid: list[list[str | None]], bbox: BBox) -> list[Cell]:
             text = " ".join(str(val).split())
             if not text:
                 continue
-            cells.append(Cell(row=r, col=c, text=text))
+            rs, cs = spans.get((r, c), (1, 1))
+            cells.append(Cell(row=r, col=c, text=text, rowspan=rs, colspan=cs))
     return cells
 
 
@@ -156,7 +199,12 @@ def detect_page_tables_and_figures(pdf: Path, page_no: int, *, _doc=None,
                     notes.append(f"rejected {label} candidate: {why}")
                     continue
                 bbox = tuple(round(float(v), 2) for v in t.bbox)  # x0, top, x1, bottom
-                cells = _grid_to_cells(grid, bbox)
+                try:
+                    spans = spans_from(t)
+                except Exception as e:   # geometry we cannot read is not a merge
+                    notes.append(f"span read failed: {e.__class__.__name__}")
+                    spans = {}
+                cells = _grid_to_cells(grid, bbox, spans)
                 if len(cells) < MIN_CELLS:
                     continue
                 tables.append(Table(n_rows=len(grid),
@@ -367,3 +415,74 @@ def detect_ocr_tables(words, page_width: float, page_height: float) -> list[Tabl
             round(max(b[2] for b in boxes), 2), round(max(b[3] for b in boxes), 2))
     return [Table(n_rows=len(grid_rows), n_cols=len(col_x), cells=cells, bbox=bbox,
                   detector="ocr-word-grid")]
+
+
+def backfill_spans(conn, *, dry_run: bool = True) -> dict:
+    """Populate `rowspan`/`colspan` on cells already in the store.
+
+    G41's fix lands in extraction, but the store holds 18,472 cells extracted
+    before it existed and a re-ingest is not an option: re-extraction moves
+    bboxes, `ref_id` is `sha256(content_hash:page:bbox)`, and
+    `delete_version_rows()` removes the rows the old ids named. That is G38, and
+    it would break published citations to fix a display defect.
+
+    So this updates two integer columns and touches nothing else. No bbox is
+    rewritten, no element or table id changes, and `cli refs --verify` is
+    unaffected by construction. Tables are matched back to the page by their
+    stored bbox; a table whose geometry no longer matches is skipped and
+    counted rather than guessed at.
+    """
+    from .paths import REPO_ROOT
+    rows = conn.execute("""
+        SELECT t.table_id, t.bbox, t.detector, e.page_no, d.source_path
+          FROM tables t
+          JOIN elements e   ON e.element_id = t.element_id
+          JOIN documents d  ON d.document_id = e.document_id
+         WHERE t.detector LIKE 'pdfplumber:%'
+         ORDER BY d.source_path, e.page_no""").fetchall()
+    out = {"tables_considered": len(rows), "tables_matched": 0,
+           "tables_unmatched": 0, "cells_updated": 0, "merges_found": 0,
+           "pdf_open_failures": 0, "dry_run": dry_run}
+    if not rows:
+        return out
+    import pdfplumber
+    by_pdf: dict[str, list] = {}
+    for r in rows:
+        by_pdf.setdefault(r["source_path"], []).append(r)
+    for src, group in by_pdf.items():
+        path = REPO_ROOT / src
+        if not path.exists():
+            out["pdf_open_failures"] += 1
+            continue
+        try:
+            pdf = pdfplumber.open(str(path))
+        except Exception:
+            out["pdf_open_failures"] += 1
+            continue
+        with pdf:
+            for r in group:
+                try:
+                    page = pdf.pages[r["page_no"] - 1]
+                    want = [round(float(v), 2) for v in json.loads(r["bbox"])]
+                    match = next((t for t in page.find_tables()
+                                  if [round(float(v), 2) for v in t.bbox] == want), None)
+                except Exception:
+                    match = None
+                if match is None:
+                    out["tables_unmatched"] += 1
+                    continue
+                out["tables_matched"] += 1
+                for (i, j), (rs, cs) in spans_from(match).items():
+                    if rs == 1 and cs == 1:
+                        continue
+                    out["merges_found"] += 1
+                    if dry_run:
+                        continue
+                    cur = conn.execute(
+                        "UPDATE table_cells SET rowspan=?, colspan=? "
+                        " WHERE table_id=? AND row=? AND col=?",
+                        (rs, cs, r["table_id"], i, j))
+                    out["cells_updated"] += cur.rowcount
+    if not dry_run:
+        conn.commit()
+    return out

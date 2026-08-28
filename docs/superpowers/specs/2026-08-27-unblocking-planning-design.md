@@ -381,7 +381,7 @@ products as a `Gap`); §6d (the stagger constraint).
 | 6 | The `unique` check must exclude *disjoint* validity windows — **blocked, same reason as 4** | Overlapping windows are a real collision, and their resolver raises on a tie |
 | 7 | ~~Every `would_close` is a template constant~~ **FIXED (G40)** | 63 published gaps carry 4 distinct sentences; 51 share one. §1.2.1's BINDING clause wants *"a footing row for exposure C, non-HVHZ, at 6 ft"* and warns against the generic form. `document_id`, `page_no`, `ocr_confidence` and the body are all in scope at `snapshot.py:285-345` and none is interpolated |
 | 9 | ~~The warning detector cannot see 5 of the 11 promised warning classes~~ **FIXED (G42)** | It recognises a severity lexeme or a hazard regex. `Never strike the PVC post without a wood support`, the frost-line check, the post-top rule and the panel-both-ends rule are ordinary bullets in installation lists; warranty exclusions are running prose in warranty documents. 0 published instances against 16-254 elements each. `registry-additions.md` §3.1 |
-| 8 | `table_cells.rowspan`/`colspan` are never written | All three `Cell(...)` sites omit them, so all 18,472 cells default to 1. The merged applicability column of the Bufftech footing table is lost corpus-wide across all 5 documents carrying it — the field that scopes exposure B to non-HVHZ is attributed to one row instead of two |
+| 8 | ~~`table_cells.rowspan`/`colspan` are never written~~ **FIXED (G41)** | All three `Cell(...)` sites omit them, so all 18,472 cells default to 1. The merged applicability column of the Bufftech footing table is lost corpus-wide across all 5 documents carrying it — the field that scopes exposure B to non-HVHZ is attributed to one row instead of two |
 
 ---
 
