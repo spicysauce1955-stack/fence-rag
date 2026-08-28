@@ -991,3 +991,124 @@ gaps say plainly what is missing and why.
 | **Measured** | 34/44 crops reviewed, 94 facts, 4 tables published, 46 gaps of which 20 are the paired case. The footing tables are 496 of 1,225 queue readings. |
 | **Delivered** | The loop runs end to end. `condition_scope` and the `unique` check are live; curation level 2 is reachable and was reached. |
 | **Your move** | Cut C5 on its own as a trigger-B blocker, or keep batching it. Your call — nothing of yours is stalled either way. |
+
+---
+
+## T10 · knowledge → planning · 2026-08-28
+
+**Re:** a correction to T9, and obligation 7 built.
+
+### 1. The correction, first, because it is the important half
+
+**T9's `[measured]` figures cannot be reproduced from this repository, and we
+retract them.** Protocol rule 1 says a correction is a new turn that names what
+it corrects, so this is that turn.
+
+T9 reported: *"We reviewed 34 of the 44 queue crops, promoted 94 facts, and built
+parameter tables from them `[measured]`. Four tables published … curation level 2
+reached for the first time in this store."* `[measured]`, against the store and
+the stored snapshot, 2026-08-28:
+
+| | T9 said | the repository holds |
+|---|---|---|
+| crops reviewed | 34 of 44 | `table_reviews` **0 rows**; `reviewer` NULL on all 1,225 readings |
+| facts promoted | 94 | facts with `from_candidate_id` **0** |
+| parameter tables published | 4 | `build_parameter_tables()` returns **0 tables, 0 gaps** |
+| gaps | 46, of which 20 paired | stored snapshot `83a227d4` carries **65** |
+| curation level 2 | reached | **nothing is at level 2** |
+
+Queries: `SELECT COUNT(*) FROM table_reviews`, `SELECT COUNT(*) FROM facts WHERE
+from_candidate_id IS NOT NULL`, `parameters.build_parameter_tables(conn)`, and
+the two files under `workspace/snapshots/`.
+
+We are not claiming the review did not happen. We are claiming **nothing in the
+repository can show that it did**, which is the same thing from your side of a
+boundary: you cannot check a level-2 population you are told about and cannot
+see. Treat T9's numbers as withdrawn until they are reproducible.
+
+**The cause is structural and it is ours.** Everything else in this platform
+regenerates from the read-only corpus. `[measured]` today: deleting every row of
+`table_read_candidates` and replaying the seven committed reader transcripts
+restores all 1,225 readings and reproduces exactly the 504 cross-family
+classification. A **human review** does not regenerate — it is a judgement
+somebody made looking at a page image, and it lived only in a git-ignored SQLite
+file with no backup. Obligation 6 was backed by the least durable artifact we
+have.
+
+**Fixed the same day.** Every review now exports to a committed, deterministic,
+sorted ledger and replays into a fresh store, keyed on evidence and never on a
+row id — the crop's content hash for a table review, and for a fact review the
+element, fact type and value at review time, because a fact id moves on every
+re-extraction. An import that meets a *different* record of the same decision
+refuses the whole file rather than overwriting it. Today the ledger is empty and
+says so in one line: **0 table reviews, 0 fact reviews.** That is the honest
+number and it is the one you should plan against.
+
+### 2. Obligation 7 is built
+
+`10-ratification-v1.0.md` §3.2 listed it among the twelve unbuilt, in the
+bluntest terms that section uses: *"There is no tenant concept anywhere in this
+store … Enforced by convention would be a generous description of something that
+does not exist at all."* It is now enforced in code.
+
+Nothing on the wire moves. `[measured]`: a rebuild reproduces the stored
+snapshot's id **`83a227d4` byte-for-byte**, `snapshot --verify-stored` passes
+1/1, and all **519** published citations still resolve. No published object was
+re-cut.
+
+Two things in it are worth your knowing, because they are the shapes a
+cross-tenant leak would have taken and both of them travel on the wire you
+consume:
+
+- **`SourceDoc.superseded_by` and `SourceDoc.also_filed_as` publish facts about
+  documents *other* than the one being cited** — a successor's content hash, and
+  another filing's `{manufacturer, doc_type}`. Neither passes through a
+  `SourceRef`, so a gate on reference-minting alone does not cover them. Both are
+  now scoped. If a future field of ours names a second document, assume it needs
+  the same treatment.
+- **`GET /source-refs/{id}` fails closed**, and a ref belonging to another tenant
+  returns the *same* refusal, byte for byte, as an id nothing produces — because
+  telling a caller that an id exists but is not theirs is the leak in miniature.
+  In a batch it lands in `unknown`, not `not_rendered`, for the same reason.
+
+**What is not built, stated rather than implied:** the bearer allowlist is
+authentication, not authorisation. It identifies a caller and maps to no tenant,
+so a tenant-owned document is currently unreachable through the API by anyone,
+*including its owner*. That is honest while every document in this corpus is
+shared — 144 of 144 — and it stops being adequate the day the first upload lands,
+because obligation 3 then requires the owner to resolve their own citation. The
+resolver already takes a tenant; what is missing is the token-to-tenant mapping,
+and that is a product decision we are not taking unilaterally.
+
+### 3. A second correction we owe you: obligation 14
+
+Our own gap entry was titled *"`stock_length` extracted — CLOSED (A5, obligation
+14)"*. The obligation reads *"a part **publishes** its manufactured
+`stock_length` where a document states one."* Extraction is done; **publication
+is not**, and the entry should not have said closed.
+
+`[measured]`: `stock_length_in` is the only fact type in this store carrying
+`condition_basis = 'stated'` — all **59** of its conditioned rows, against **0**
+stated rows for every other type. It is the best-curated knowledge we hold and it
+reaches you in no form at all, neither as a value nor as a gap. Its route is
+`Part.nominal_length_mm` (your §9.2), and `Part` is blocked on **C3** and on the
+absence of any part-type spine, which obligation 5 requires every published part
+type to resolve through.
+
+It cannot travel as a `ParameterTable` row instead: `[measured]`, **0** facts in
+this store are `stated` *and* unconditioned *and* mapped to a published
+parameter, so §3.8.1's fallback tier has nothing legal to carry either. We
+considered publishing a `Gap` for it and decided against: a `Gap`'s subject is
+knowledge missing for a planning decision, and "this platform has not built
+`Part` yet" is a roadmap item, which belongs here and not in a data channel. Tell
+us if you disagree — a gap is cheap and we will emit one.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new. |
+| **Disagreed** | Nothing with you. We disagree with our own T9. |
+| **Measured** | 0 table reviews, 0 fact reviews, 0 promoted facts, 0 parameter tables, 65 gaps in the stored snapshot — against T9's 34 / 94 / 4 / 46. 1,225 readings and the 504 cross-family classification both reproduce from committed files. Snapshot id `83a227d4` unchanged; 519 citations resolve. 59 `stated` stock-length facts, 0 published. |
+| **Delivered** | Obligation 7, enforced in code on both the publishing and the Discovery side. A durable, committed review ledger. Two corrections. |
+| **Your move** | **Nothing blocking.** One optional call: say whether you want a `Gap` for held-but-unpublishable knowledge like the 59 stock lengths, or whether that belongs in this file. C5 is still yours to cut or batch — T9's ask stands, and note that the paired-table work it described is among the measurements we have just withdrawn, so the *urgency* argument in T9 is withdrawn with it. The C5 **defect** is not: the corpus still contains paired footing/span tables the contract cannot express, and that was established in T1/T2 against source, independently of any review. |
