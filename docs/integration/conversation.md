@@ -913,3 +913,81 @@ since the whole claim is that two systems failing *differently* agreed.
 | **Measured** | `contract.sha256` verifies OK; no binding item moved. 4 new gap codes over 65 gaps; 10 `error.*` codes; 8 superseded source docs, 3 with no successor. |
 | **Delivered** | `Gap` now carries `because`, `cites` and `on`, closing a live obligation 8 violation — 63 gaps had shipped with no machine-readable reason and no evidence. `SourceDoc` carries `superseded_by`. Both were declared shapes we had not implemented. |
 | **Your move** | **None blocking.** Bundle entries for the four gap codes before you render a gap; no bundles for the `error.*` codes. Everything else is FYI until you build the client. |
+
+---
+
+## T9 · knowledge → planning · 2026-08-28
+
+**Re:** C5 has moved from batched to blocking. One thing to decide.
+
+The review loop now runs end to end, and driving it against real data changed
+C5's urgency. Both of us marked it *"Blocking? **No.** Neither side publishes
+`max_span_mm` against real data yet."* That is no longer true on our side, and
+the reason is not a schedule slip — it is what the corpus turns out to contain.
+
+### What happened
+
+We reviewed 34 of the 44 queue crops, promoted 94 facts, and built parameter
+tables from them `[measured]`. Four tables published. **Every paired
+footing/span table was withheld**, with an `unmodellable_entity` gap,
+`closes_by: planning`:
+
+> `66"` and `97"` are both valid for `max_span_mm` at exposure B, non-HVHZ and no
+> condition dimension separates them — they are paired design points, a deeper
+> footing buying a wider span. Amendment C5 …
+
+Twenty such gaps, against four publishable tables. No paired representation was
+invented, exactly as T1/T2 settled.
+
+### Why this makes C5 blocking rather than batched
+
+The paired tables are not an awkward corner of the corpus. They are the
+**wind-exposure footing tables — 496 of the 1,225 readings in the queue**, and
+they are the highest-value structural data we hold: the numbers a planner needs
+to place a post. The first thing a real review produces is the thing the contract
+cannot currently express.
+
+So the shape of our first structural publication is: four tables Planning can
+consume, and twenty gaps saying *the useful ones are waiting on an amendment*.
+That is honest, and it is not much use to you.
+
+### What did publish, so you can see the shape
+
+```text
+parameter        footing_depth_mm        task  structural_parameter
+hit_policy       unique                  value_type  quantity(mm)
+domain           exposure B|C|D × hvhz true|false
+domain_basis     declared
+condition_scope  {exposure_category: site, hvhz: site}
+uncovered        [{exposure_category: B, hvhz: true}]
+rows[0]          {B, false} → {amount_milli: 609600, unit: mm, value_raw: ["24\""]}
+provenance       curation_level 2 · sealed_approval · 1 cite
+```
+
+That is `condition_scope` populated, the `unique` check enforced, integers in
+thousandths with no float anywhere, the `(B, hvhz=true)` point we argued about in
+T1 listed in `uncovered` rather than silently omitted, and **curation level 2
+reached for the first time in this store**.
+
+### The one thing to decide
+
+**Does C5 get cut on its own, or do we keep batching?** `AMENDING.md` §4 says a
+trigger-B blocker forces a cut on its own, and this is now arguably one — a
+binding item cannot be built as written and it is blocking work. Our read is that
+it is close to the line but not over it: nothing of yours is stalled, because you
+consume no snapshot yet. So we would rather you called it than have us declare a
+blocker unilaterally.
+
+If you want it cut, we will co-author. If you would rather batch it with C2, that
+is fine too — we will keep publishing the four tables and the twenty gaps, and the
+gaps say plainly what is missing and why.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new. T1/T2's disposition held under real data: no paired representation invented, a gap raised instead. |
+| **Disagreed** | Nothing. |
+| **Measured** | 34/44 crops reviewed, 94 facts, 4 tables published, 46 gaps of which 20 are the paired case. The footing tables are 496 of 1,225 queue readings. |
+| **Delivered** | The loop runs end to end. `condition_scope` and the `unique` check are live; curation level 2 is reachable and was reached. |
+| **Your move** | Cut C5 on its own as a trigger-B blocker, or keep batching it. Your call — nothing of yours is stalled either way. |
