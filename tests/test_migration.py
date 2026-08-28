@@ -72,7 +72,20 @@ class TestSchemaDeclaration(unittest.TestCase):
             # schema_version 3 -- pointer direction
             "facts.from_candidate_id",
             # schema_version 5 -- G38, extraction editions
-            "document_versions.tool_fingerprint", "document_versions.edition"})
+            "document_versions.tool_fingerprint", "document_versions.edition",
+            # schema_version 6 -- obligation 7, tenant isolation
+            "documents.owner_tenant"})
+
+    def test_the_tenant_column_carries_no_default(self):
+        """Obligation 7 inverted would arrive through the migration, not a leak.
+
+        `owner_tenant` lands on 144 existing corpus rows. A DEFAULT of any kind
+        would hand every one of them to whichever tenant the string named, as
+        private property, with no diff anywhere to show it. NULL is shared, and
+        an ALTER with no default is how 144 rows stay shared.
+        """
+        ddl = {f"{t}.{c}": d for t, c, d in ADDED_COLUMNS}["documents.owner_tenant"]
+        self.assertEqual(ddl.strip(), "TEXT")
 
     def test_the_inverted_pointer_carries_its_foreign_key(self):
         """A migrated store must get the same declared FK as a fresh one, or the

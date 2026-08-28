@@ -72,6 +72,7 @@ from fractions import Fraction
 
 from .canonical import canonical_bytes
 from .refs import ref_id
+from .tenancy import visible_sql
 
 # --------------------------------------------------------------------------
 # What a promoted fact is a parameter FOR.
@@ -196,8 +197,26 @@ SELECT f.fact_id, f.document_id, f.page_no, f.element_id, f.fact_type,
   JOIN documents d ON d.document_id = f.document_id
  WHERE f.from_candidate_id IS NOT NULL
    AND f.review_status <> 'rejected'
+{tenant_clause}
  ORDER BY f.fact_id
 """
+
+
+def _fact_query(tenant: str | None) -> tuple:
+    """(sql, params). Obligation 7: scope the SELECTION, not just the mint.
+
+    `source_ref` refuses to mint a citation into another tenant's document, so
+    an unscoped scan here would abort a whole build with a `TenantLeak` the
+    first time a tenant upload produced a promoted fact -- a leak turned into an
+    outage. Scoping means the value is simply not in this tenant's snapshot,
+    which is what obligation 7 asks for. `None` is the internal caller that has
+    no tenant in hand (`_default_source_ref`'s standalone path) and sees
+    everything the store holds.
+    """
+    if tenant is None:
+        return FACT_QUERY.format(tenant_clause=""), ()
+    return (FACT_QUERY.format(tenant_clause=f"   AND {visible_sql('d')}"),
+            (tenant,))
 
 
 # --------------------------------------------------------------------------
@@ -548,7 +567,8 @@ def _subject(parameter: str, scope: dict, point: dict | None = None) -> str:
 # the builder
 
 def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
-                           source_ref=None) -> tuple[list[dict], list[dict]]:
+                           source_ref=None,
+                           tenant: str | None = None) -> tuple[list[dict], list[dict]]:
     """Promoted facts -> (`[ParameterTable]`, `[Gap]`), both deterministic.
 
     Only facts with `from_candidate_id IS NOT NULL` are considered: those are
@@ -567,7 +587,8 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
     gaps = _Gaps()
     groups: dict[bytes, dict] = {}
 
-    for fact in conn.execute(FACT_QUERY):
+    sql, params = _fact_query(tenant)
+    for fact in conn.execute(sql, params):
         named = PARAMETER_OF.get(fact["fact_type"])
         if named is None:
             gaps.add(kind="missing_value",

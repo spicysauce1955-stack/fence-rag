@@ -34,6 +34,7 @@ from .canonical import canonical_bytes, content_hash
 from .lang import detect_lang
 from .refs import ref_id
 from .store import connect
+from .tenancy import TenantLeak, validate_tenant, visible_sql, visible_to
 
 CONTRACT_VERSION = "1.1.0"
 SPINE_VERSION = "0.1.0"
@@ -294,7 +295,7 @@ class Gap:
 class SnapshotBuilder:
     def __init__(self, conn: sqlite3.Connection, *, tenant: str, regime: str):
         self.conn = conn
-        self.tenant = tenant
+        self.tenant = validate_tenant(tenant)
         self.regime = regime
         self._docs: dict[str, SourceDoc] = {}
         self._refs: dict[str, SourceRef] = {}
@@ -316,7 +317,7 @@ class SnapshotBuilder:
         row = self.conn.execute("""
             SELECT e.page_no, e.bbox, v.sha256, d.document_id, d.doc_type,
                    d.title, d.version_status, d.version_status_basis,
-                   d.issue_date, d.expiration_date
+                   d.issue_date, d.expiration_date, d.owner_tenant
               FROM elements e
               JOIN document_versions v ON v.version_id = e.version_id
               JOIN documents d         ON d.document_id = e.document_id
@@ -325,6 +326,19 @@ class SnapshotBuilder:
             # Never mint a ref we cannot back. A dangling belongs_to reproduces
             # the exact defect the closure rule was added to close.
             raise KeyError(f"no such element: {element_id}")
+
+        # Obligation 7, at the same choke point as the closure rule and for the
+        # same reason: a cross-tenant value is made *unpublishable* rather than
+        # filtered afterwards. The check precedes registration -- raising after
+        # `self._docs[...]` was written would leave the foreign document in a
+        # builder whose `source_docs()` is read at the end of the build, so the
+        # exception would be caught and the leak would ship anyway.
+        if not visible_to(row["owner_tenant"], self.tenant):
+            raise TenantLeak(
+                f"element {element_id} belongs to a document owned by "
+                f"{row['owner_tenant']!r}; this snapshot is for "
+                f"{self.tenant!r}. Nothing of one tenant's reaches another's "
+                f"snapshot (obligation 7).")
 
         if row["sha256"] not in self._docs:
             self._docs[row["sha256"]] = SourceDoc(
@@ -363,12 +377,14 @@ class SnapshotBuilder:
         superseded document. Marking the wrong side once labelled every current
         NOA superseded, which is why tests/test_versions.py guards the direction.
         """
-        rows = self.conn.execute("""
+        rows = self.conn.execute(f"""
             SELECT DISTINCT v.sha256
               FROM relations r
               JOIN document_versions v ON v.document_id = r.to_document_id
+              JOIN documents d         ON d.document_id = r.to_document_id
              WHERE r.from_document_id = ? AND r.relation_type = 'superseded_by'
-             ORDER BY v.sha256""", (document_id,)).fetchall()
+               AND {visible_sql('d')}
+             ORDER BY v.sha256""", (document_id, self.tenant)).fetchall()
         return tuple(r["sha256"] for r in rows)
 
     def _other_filings(self, sha256: str, own_document_id: str) -> tuple:
@@ -391,12 +407,12 @@ class SnapshotBuilder:
         filing says nothing at all. What is left is exactly what a reviewer
         needs: the filings that DISAGREE with the one published.
         """
-        rows = self.conn.execute("""
+        rows = self.conn.execute(f"""
             SELECT DISTINCT d.document_id, d.manufacturer, d.doc_type
               FROM document_versions v
               JOIN documents d ON d.document_id = v.document_id
-             WHERE v.sha256 = ?
-             ORDER BY d.document_id""", (sha256,)).fetchall()
+             WHERE v.sha256 = ? AND {visible_sql('d')}
+             ORDER BY d.document_id""", (sha256, self.tenant)).fetchall()
         own = next((r for r in rows if r["document_id"] == own_document_id), None)
         seen = {(own["manufacturer"], own["doc_type"])} if own is not None else set()
         keep = []
@@ -472,14 +488,21 @@ class SnapshotBuilder:
         carry different legal weight, so normalising them destroys information a
         reader needs.
         """
-        rows = self.conn.execute("""
+        # Scoped, not merely gated. `source_ref` refuses a foreign element, so
+        # an unscoped scan here would turn another tenant's warning text into a
+        # raised exception in the middle of a build rather than into a snapshot
+        # that simply does not contain it. Both layers use `visible_sql`, so the
+        # query that chooses and the check that refuses cannot disagree.
+        rows = self.conn.execute(f"""
             SELECT e.element_id, e.page_no, e.ordinal, e.text, e.ocr_text,
                    e.text_source, e.ocr_confidence, e.lang, e.heading_path,
                    e.document_id, v.sha256, d.doc_type, d.title
               FROM elements e
               JOIN document_versions v ON v.document_id = e.document_id
               JOIN documents d         ON d.document_id = e.document_id
-             ORDER BY e.document_id, e.page_no, e.ordinal""").fetchall()
+             WHERE {visible_sql('d')}
+             ORDER BY e.document_id, e.page_no, e.ordinal""",
+            (self.tenant,)).fetchall()
 
         def body_of(r):
             return ((r["text"] or "").strip() or (r["ocr_text"] or "").strip())
@@ -851,6 +874,7 @@ def verify(snapshot: dict) -> None:
 def build_snapshot(*, tenant: str, regime: str = "us_astm",
                    conn: sqlite3.Connection | None = None) -> dict:
     """Assemble, canonicalise and hash. Provenance first -- closure needs it."""
+    validate_tenant(tenant)     # before a connection is opened, not after
     own = conn is None
     conn = conn or connect(read_only=True)
     try:
@@ -866,7 +890,8 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
         # and `canonical_bytes` refuses anything else. Minting still goes through
         # the builder, so the closure rule stays structural.
         parameters, parameter_gaps = build_parameter_tables(
-            conn, source_ref=lambda eid: asdict(b.source_ref(eid)))
+            conn, tenant=tenant,
+            source_ref=lambda eid: asdict(b.source_ref(eid)))
         for g in parameter_gaps:
             b.gap(kind=g["kind"], subject=g["subject"],
                   code=g["because"]["code"], params=g["because"].get("params") or {},

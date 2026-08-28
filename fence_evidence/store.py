@@ -17,9 +17,10 @@ from typing import Iterable
 from .ids import element_id_for, page_id_for, version_id_for
 from .model import ExtractedDocument
 from .lang import detect_lang
+from .tenancy import TenantLeak, validate_tenant
 from .paths import EVIDENCE_DB, ensure_writable
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 SCHEMA = """
 PRAGMA journal_mode=WAL;
@@ -45,7 +46,8 @@ CREATE TABLE IF NOT EXISTS documents (
     version_status  TEXT NOT NULL DEFAULT 'unknown',   -- active|superseded|unknown
     version_status_basis TEXT,
     structural      INTEGER NOT NULL DEFAULT 0,
-    in_curated_index INTEGER NOT NULL DEFAULT 0
+    in_curated_index INTEGER NOT NULL DEFAULT 0,
+    owner_tenant    TEXT      -- obligation 7: NULL is shared; see tenancy.py
 );
 
 -- One EDITION of one document: (bytes x toolchain), not bytes alone.
@@ -380,6 +382,11 @@ ADDED_COLUMNS = [
     # correct value differs per row and comes from the run each row names.
     ("document_versions", "tool_fingerprint", "TEXT"),
     ("document_versions", "edition", "INTEGER NOT NULL DEFAULT 1"),
+    # schema_version 6 -- obligation 7. Deliberately NULL on every existing row
+    # and with no default: the migration must not invent ownership. Defaulting
+    # 144 shared corpus documents to the operator's tenant would hand the whole
+    # corpus to one tenant as private property, which is obligation 7 inverted.
+    ("documents", "owner_tenant", "TEXT"),
 ]
 
 # The rule, once. `CURRENT_EDITIONS_VIEW` below and every internal query that
@@ -893,12 +900,39 @@ def finish_run(conn: sqlite3.Connection, run_id: str) -> None:
 
 def upsert_document(conn: sqlite3.Connection, manifest_row: dict) -> str:
     doc_id = manifest_row["doc_id"]
+    owner = manifest_row.get("owner_tenant")
+    if owner is not None:
+        validate_tenant(owner)
+
+    # Obligation 7. Ownership is the one field this upsert will not update.
+    # Nine fields are refreshed from the manifest on conflict because a
+    # re-ingest is how curated metadata reaches the store; ownership among them
+    # would mean a manifest could hand one tenant's document to another, with
+    # the ON CONFLICT clause as the only record that it happened. So a change is
+    # refused rather than applied, in both directions -- claiming a shared
+    # document is as much a re-parenting as moving an owned one. An ABSENT
+    # `owner_tenant` is not a claim of any kind: the corpus manifest carries
+    # none, and re-running `ingest` over a store holding uploads must not
+    # quietly free them.
+    held = conn.execute("SELECT owner_tenant FROM documents WHERE document_id=?",
+                        (doc_id,)).fetchone()
+    if held is not None:
+        current = held[0]
+        if owner is not None and owner != current:
+            raise TenantLeak(
+                f"{doc_id} is owned by {current!r} and the manifest says "
+                f"{owner!r}. Re-parenting a document between tenants is not an "
+                f"update; if it is really intended, do it deliberately and say "
+                f"so, because every value already published from it was "
+                f"published under the old owner.")
+        owner = current
+
     conn.execute("""
         INSERT INTO documents(document_id, source_path, file_type, corpus_track,
             manufacturer, product_family, doc_type, title, source_url, date_or_version,
             issue_date, expiration_date, version_status, version_status_basis,
-            structural, in_curated_index)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            structural, in_curated_index, owner_tenant)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         ON CONFLICT(document_id) DO UPDATE SET
             manufacturer=excluded.manufacturer, product_family=excluded.product_family,
             doc_type=excluded.doc_type, title=excluded.title,
@@ -915,7 +949,7 @@ def upsert_document(conn: sqlite3.Connection, manifest_row: dict) -> str:
           manifest_row.get("version_status") or "unknown",
           manifest_row.get("version_status_basis"),
           int(bool(manifest_row.get("structural_subdir"))),
-          int(bool(manifest_row.get("in_curated_index")))))
+          int(bool(manifest_row.get("in_curated_index"))), owner))
     conn.commit()
     return doc_id
 
