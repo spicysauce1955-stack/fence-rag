@@ -1787,7 +1787,7 @@ because obligation 3 then requires the owner to resolve their own citation.
 `source_ref` already takes the tenant; what is missing is only the mapping, which
 is a product decision with its own failure mode.
 
-### G49 — the only irreplaceable data in this system lives in a git-ignored file
+### G49 — the only irreplaceable data in this system lives in a git-ignored file — PARTLY CLOSED
 
 `docs/integration/conversation.md` T9, sent to Planning on 2026-08-28, reports as
 `[measured]`: *"We reviewed 34 of the 44 queue crops, promoted 94 facts, and
@@ -1839,17 +1839,60 @@ the human decisions do not.
 classifier does not, so reproducing the 504 currently takes a Python one-liner.
 Build-plan Phase B already noted the function as orphaned.)
 
-**What would close it.** `table_reviews` is already keyed on `crop_sha256` — the
-bytes of the crop, not an element id — so a review survives re-extraction by
-construction. Exporting the ledger to a committed, sorted JSONL under
-`workspace/catalog/` and being able to replay it into a fresh store would make
-review decisions durable, diffable and auditable, and would let anyone verify a
-claim like T9's from a clean checkout. Nothing else in the store needs this,
-because nothing else is authored.
+**The durability half closed the same day.** `cli review --export` writes every
+review — `table_reviews` and `fact_reviews` alike — to
+`workspace/catalog/review-ledger.jsonl`, a committed, sorted, canonical-JSON
+ledger, and `cli review --import PATH [--apply]` replays it into a fresh store,
+dry run by default. Four properties, each tested:
 
-**Not done here, and not to be papered over.** Recording reviews that this
-session cannot verify would be exactly the failure obligation 6 exists to
-prevent. The discrepancy is recorded rather than resolved.
+- **Deterministic.** Canonical bytes per line, sorted on fields that do not move,
+  no clock reading of the export itself. Two exports over identical review state
+  are byte-identical.
+- **Keyed on evidence, never on a row id.** The table half keeps `crop_sha256`,
+  the bytes of the crop. The fact half carries **no `fact_id` at all** and
+  `read_ledger` refuses a line that names one — a fact id moves on every
+  re-extraction, so writing it into a committed file makes the ledger
+  un-replayable within a day. Each line carries the `(element_id, fact_type,
+  value_before)` anchor and import resolves it against whatever ids the target
+  store minted. Proven: a ledger exported from a store whose facts start at
+  19,201 replays into one starting at 20,919 and re-exports byte-identically.
+- **Idempotent, and it never overwrites a decision.** A line already in the store
+  saying the same thing is a no-op; a line saying something else refuses the
+  **whole** import, writing nothing. Last-write-wins on a person's sign-off is
+  the failure obligation 6 exists to prevent.
+- **Guarded.** A test fails the build the moment somebody records a review and
+  does not export it, which is exactly the loss this entry is about — and that
+  guard cannot exist unless the file is committed, which is why an empty ledger
+  ships as one header line saying `0` and `0` rather than as nothing.
+
+**And the premise was worse than this entry recorded.** `fact_reviews.fact_id`
+is `NOT NULL REFERENCES facts(fact_id)` and `store.connect` sets
+`PRAGMA foreign_keys=ON`, so `DELETE FROM facts WHERE extractor LIKE 'regex-%'`
+never orphaned anything — it raised `FOREIGN KEY constraint failed` and aborted
+the run. **One fact review would have made `cli facts --extract` permanently
+unrunnable.** `extract_facts` now retains a reviewed fact across the delete and
+`reviews.reattach_fact_reviews` re-binds the review to the row the new extraction
+produced, matched on evidence. It refuses to guess in four places — two facts
+carrying the evidence, two old facts sharing one anchor, a same-element fact with
+a different value, a candidate already claimed by another review — because a
+signature bound to the wrong row asserts something nobody said. When the
+extractor no longer produces the value a person checked, that is surfaced as
+`value_changed` with what it now reads.
+
+**What has NOT closed.** The ledger is empty: 0 table reviews, 0 fact reviews,
+`reviewer` NULL on all 1,225 readings, nothing at curation level 2. The T9
+discrepancy is not resolvable by this work, and recording reviews this session
+cannot verify would be exactly the failure obligation 6 exists to prevent. What
+changed is that from now on a review *can* be shown from a clean checkout.
+
+**Residual.** `table_reviews.from_candidates` holds `table_read_candidates`
+rowids, which move if the readings are reloaded in a different order, and the
+ledger carries them verbatim; the durable form is that table's own UNIQUE key,
+resolved on import, and it belongs in a deliberate `LEDGER_SCHEMA = 2`. And
+`fact_review_id`'s formula folds in `fact_id` — a stored id derived from a moving
+pointer, the same class as `ref_id`/G38. It is never recomputed so it
+round-trips, but two stores reviewing the same evidence mint different ids, and a
+ledger merged from two sources would double-count one decision.
 
 ### Also in this session
 
