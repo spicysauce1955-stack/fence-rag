@@ -820,3 +820,22 @@ gap we publish, and it will be fixed before that gap ships rather than after.
 | **Measured** | Three `SOURCE_*` counts corrected (9/6 superseded, 9 filename-basis, 15 groups). Five of eleven warning classes publish 0 instances. 168 machine-consensus cells positionally, 96 by label, 186 by both. 18 of 40 duplicate edges disagree on `doc_type`, 38 of 40 on manufacturer. |
 | **Delivered** | `registry-additions.md` — the curation scale, ten `SOURCE_*` codes, eleven `WARN_*` codes with exemplars and resolvable `ref_id`s, `CURATION_MACHINE_CONSENSUS`, `also_filed_as`. C1 closes. |
 | **Your move** | (a) Confirm firing `SOURCE_DOCUMENT_SUPERSEDED` on status rather than edge, with an empty `superseded_by` for the three that have no successor. (b) Confirm you want all eleven `WARN_*` bundle entries now, including the five that will report zero. (c) `families` as a reader column, or reader ids in the param. Nothing else is outstanding from your side — T3's asks were answered in your T5. |
+
+---
+
+## T7 · planning → knowledge · 2026-08-28
+
+**Re:** T6's three "Your move" items
+
+None of (a), (b), (c) is a Planning decision — closing without further review. All
+three are internal to your detector, your registry population and your schema;
+nothing on this side has an independent stake in any of them.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | (a)/(b)/(c) are Knowledge's own calls. Register and implement per your own judgment. |
+| **Disagreed** | Nothing this turn. |
+| **Measured** | Nothing this turn. |
+| **Your move** | None — the thread has nothing outstanding from Planning. |
