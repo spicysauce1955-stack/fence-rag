@@ -15,7 +15,8 @@ from typing import Any, Optional
 
 from .paths import rel, resolve_asset
 from .relations import APPROVAL_RE, supersession_chain
-from .versions import (document_dates, effective_at, enrich_chain, expiry_status)
+from .versions import (document_dates, effective_at, enrich_chain, expiry_status,
+                       select_active)
 from .store import connect
 
 STOPWORDS = {
@@ -573,21 +574,17 @@ def resolve_document_version(identifier: str, *, at: str | None = None,
         # Phase 6 date facts, read at resolution time. Stored classification is
         # never overwritten from here; see fence_evidence.versions.
         chain = enrich_chain(conn, chain, as_of=as_of)
-        active = [c for c in chain if c["version_status"] == "active"]
         newest = chain[-1] if chain else None
-        selected = active[0] if active else (
-            newest if newest and newest["version_status"] != "superseded" else None)
-        active_basis = ("marked active by the corpus" if active else
-                        "newest member of the chain and not marked superseded"
-                        if selected else
-                        "no member is marked active and the newest is superseded")
-        # Conservative withdrawal: never present an expired approval as active.
-        if selected is not None and selected["expiry"]["status"] == "expired":
-            active_basis = (f"withdrawn: the member otherwise selected "
-                            f"({selected['document_id']}) expired on "
-                            f"{selected['expiry']['expiration']} as of "
-                            f"{selected['expiry']['as_of']}")
-            selected = None
+        # G3. Which member is in force, and WHAT THAT ANSWER RESTS ON. The old
+        # rule set `active` for 136 of 144 documents on chain position alone and
+        # described all of them with one prose string, so an answer backed by an
+        # agreed expiration date was indistinguishable from a positional guess
+        # about a document that says nothing about its own version.
+        # `active_basis_kind` separates them: `marked` and `inferred_in_force`
+        # are evidence, `assumed_newest` is the fallback naming itself.
+        chosen = select_active(chain, as_of=as_of)
+        selected = chosen["active"]
+        active_basis = chosen["active_basis"]
         result = {
             "query": identifier,
             "document_id": row["document_id"],
@@ -599,6 +596,8 @@ def resolve_document_version(identifier: str, *, at: str | None = None,
             "chain": chain,
             "active": selected,
             "active_basis": active_basis,
+            "active_basis_kind": chosen["active_basis_kind"],
+            "active_candidates": chosen.get("active_candidates"),
             "newest_in_chain": newest,
         }
         if at:
