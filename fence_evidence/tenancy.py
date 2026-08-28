@@ -37,6 +37,31 @@ than filtered out. Selection is scoped too, so the gate is a backstop that
 should never fire rather than the thing doing the work; a gate that is load
 bearing turns a leak into an outage the first time real data reaches it.
 
+**Where the axis is applied today, and where it is not.** Kept as a list because
+the failure mode of a partial boundary is silence, and the next person to add a
+reader needs to know which side of the line they are on.
+
+    scoped   snapshot.SnapshotBuilder.source_ref     the gate
+             snapshot.SnapshotBuilder._successors    publishes another doc's hash
+             snapshot.SnapshotBuilder._other_filings publishes another doc's filing
+             snapshot.SnapshotBuilder.warnings       selection
+             parameters.build_parameter_tables       selection
+             sourcerefs._filings                     Discovery, fails closed
+
+    NOT      retrieval.search_evidence   internal today. `GET /search` is a
+                                         Discovery surface in contract.md §1.5
+                                         and is NOT implemented in api.py -- the
+                                         day it is, it needs scoping.
+             refs.build_index            indexes every element; the tenant check
+                                         happens one layer up, in sourcerefs,
+                                         because the index is a pure projection
+                                         of canonical rows and giving it a tenant
+                                         would mean rebuilding it per caller.
+             audit / reports / evaluate  internal measurement over the whole
+                                         store, which is the correct scope for
+                                         them -- they answer "what does this
+                                         platform hold", not "what may you see".
+
 What is deliberately NOT here: any notion of a tenant *reading* through the
 Discovery API. `api.py`'s bearer allowlist is authentication, not authorisation,
 and mapping a token to a tenant is a separate decision with its own failure
