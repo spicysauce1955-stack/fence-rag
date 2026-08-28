@@ -278,7 +278,7 @@ Things that will bite you if you don't know them (all measured, see the corpus a
 - **`ref_id` embeds a bbox, and a re-extraction can move it.** A 0.02pt shift
   changes the id completely and `delete_version_rows()` removes the rows the old
   id named, so a toolchain upgrade breaks published citations retroactively and
-  obligation 3 with them. All 431 currently resolve; `cli refs --verify` is the
+  obligation 3 with them. All 519 currently resolve; `cli refs --verify` is the
   guard. The fix is extraction editions — see `docs/four-layer-model-design.md`
   §5.1 and G38. **Do not change `ref_id`'s formula**; published snapshots depend
   on it byte-for-byte.

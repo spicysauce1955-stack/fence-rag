@@ -14,7 +14,7 @@ now has an owner.
 
 Two properties worth knowing before changing anything here:
 
-* **The formula is frozen.** The published snapshot carries 431 cites derived
+* **The formula is frozen.** The published snapshot carries 519 cites derived
   from it. `bbox` is interpolated as the **stored text**, verbatim -- it never
   passes through `canonical.canonical_bytes`, so that module's refusal of floats
   never applies here.
@@ -46,8 +46,8 @@ def ref_id(sha256: str, page_no: int, bbox: str | None) -> str:
     """A reference's id, derived from what it points at and nothing else.
 
     ``bbox`` is the raw ``elements.bbox`` text, passed through unchanged. Do not
-    normalise, round or re-serialise it: the 431 published cites were minted
-    from the stored string exactly as SQLite returns it.
+    normalise, round or re-serialise it: the published cites were minted from
+    the stored string exactly as SQLite returns it.
     """
     return hashlib.sha256(f"{sha256}:{page_no}:{bbox}".encode()).hexdigest()[:16]
 
@@ -136,13 +136,16 @@ def verify_snapshots(conn: sqlite3.Connection, *,
     which makes silent rot the worst possible failure mode and a loud one the
     whole point of this function.
 
-    This walks the ENTIRE payload, not just ``warnings[].cites[]``. Today all
-    431 published citations happen to live there, but the snapshot's other
-    top-level keys -- ``combinations, models, parameters, part_types, parts,
-    procedures, rules`` -- are all declared citation-bearing and currently
-    empty. A walk scoped to ``warnings`` would under-count silently the day
-    any of those sections gains a citation, which is exactly the failure class
-    this command exists to eliminate. The walk mirrors ``snapshot.py``'s own
+    This walks the ENTIRE payload, not just ``warnings[].cites[]``, and the
+    reason is no longer hypothetical: of the 519 published citations, **61 sit
+    in ``gaps[].cites[]``** rather than under a warning. (An earlier version of
+    this note said all 431 lived in ``warnings``; that was true when it was
+    written and stopped being true when `Gap` gained `cites`.) The snapshot's
+    remaining top-level keys -- ``combinations, models, parameters, part_types,
+    parts, procedures, rules`` -- are all declared citation-bearing and mostly
+    empty. A walk scoped to ``warnings`` would under-count silently the day any
+    of those sections gains a citation, which is exactly the failure class this
+    command exists to eliminate. The walk mirrors ``snapshot.py``'s own
     ``verify()`` in shape: a recursive ``walk(node, path)`` that accumulates a
     ``$.foo[3].bar`` path as it descends, one file over.
 
@@ -170,8 +173,8 @@ def verify_snapshots(conn: sqlite3.Connection, *,
     * Gating on a bare ``id`` alone, with neither arm, is wrong the other
       direction: `Gap` is `(id, kind, subject, would_close, closes_by,
       severity)` -- no `belongs_to`, not inside a `cites` list -- and there
-      are 63 of them in the shipped snapshot. That gate inflates `cites` from
-      431 to 494.
+      are 63 of them in the shipped snapshot. That gate inflated `cites` from
+      431 to 494 when it was measured.
 
     Tombstoned snapshots are skipped: their payload is gone by design, and
     holding them to a resolvability promise would report a deliberate excision

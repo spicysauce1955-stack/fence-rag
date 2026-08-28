@@ -453,7 +453,13 @@ def get_page(document_id: str, page_no: int, *,
         row = conn.execute("""SELECT p.* FROM pages p
             JOIN document_versions v ON v.version_id = p.version_id
             WHERE v.document_id=? AND p.page_no=?
-            ORDER BY v.ingested_at DESC LIMIT 1""",
+            -- `version_id` breaks the tie for the same reason
+            -- `store.CURRENT_EDITION_PREDICATE` does: `now()` has one-second
+            -- resolution, so two versions written in the same second order
+            -- arbitrarily, and `facts._iter_candidates` picks "newest" with a
+            -- window function of its own. Without a tie-break the two readers
+            -- can disagree about which version a page belongs to.
+            ORDER BY v.ingested_at DESC, v.version_id DESC LIMIT 1""",
             (document_id, page_no)).fetchone()
         if not row:
             return None

@@ -284,8 +284,12 @@ def _iter_candidates(conn: sqlite3.Connection, document_id: str | None) -> Itera
                     e.text, e.ocr_text, e.text_source, e.ocr_confidence, e.heading_path
                FROM elements e
                JOIN (SELECT document_id, version_id,
+                            -- tie-broken on version_id, so this and
+                            -- retrieval.get_page cannot disagree about which
+                            -- version is newest when two land in one second
                             ROW_NUMBER() OVER (PARTITION BY document_id
-                                               ORDER BY ingested_at DESC) rn
+                                               ORDER BY ingested_at DESC,
+                                                        version_id DESC) rn
                        FROM document_versions) latest
                  ON latest.version_id = e.version_id AND latest.rn = 1"""
     params: tuple = ()
