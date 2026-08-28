@@ -1915,6 +1915,65 @@ pointer, the same class as `ref_id`/G38. It is never recomputed so it
 round-trips, but two stores reviewing the same evidence mint different ids, and a
 ledger merged from two sources would double-count one decision.
 
+### G50 — a person's decision did not reach four of the readers that use it
+
+The fact review loop (G6) and the table review loop both record judgements.
+Four consumers read past them, and each was found by asking the same question of
+every reader: *does this see a correction, and does it see a rejection?*
+
+| reader | what it did |
+|---|---|
+| `versions.document_dates` | read `value_original`, so a **corrected date resolved on the machine's number** — and worse, a corrected fact is no longer `flagged`, so it also read as *confident*. `resolve_document_version` decides whether an approval is in force; this is the highest-stakes reader in the package |
+| `parameters.FACT_QUERY` | read `value_original` while `curation_level` is set from `review_status`, so a **corrected fact would publish the machine's value stamped level 2** — "a person compared this to the source image". G44 one layer up, in the only snapshot section that carries numbers |
+| `facts.query_facts` | had **no rejected filter on its default path** (`include_flagged=False` narrows to `('extracted','reviewed')`; the default did not), so a value a person ruled wrong still answered, through `retrieval.facts_for` and the evaluation harness |
+| `promote_tables.revoke_stale_promotions` | compared the candidate's effective value against `f.value_original`, so once the **fact** loop corrects a row the **table** loop also owns, each reads the other's decision as drift and un-promotes it |
+
+All four now go through `reviews.effective_fact_value` /
+`effective_fact_normalized`, or exclude `rejected` where that is the right rule.
+
+**Three deliberate calls inside that work:**
+
+- **The original stays visible at three depths**, because three callers stop
+  reading at three depths: a source carries `original` beside `corrected` and
+  `reviewer`; the date carries `corrected_from`; and `expiry_status` echoes it
+  through, because that dict is the one a caller *acts* on.
+- **A date's confidence is `(review_required, extracted, reviewed)`, taken from
+  its weakest source.** `reviewed` is a stronger claim than `extracted` and is
+  kept distinct for the same reason `marked` and `inferred_in_force` are. But
+  reviewed is not confident: a `reviewed` source beside an `extracted` one
+  reports `extracted`, and one unreviewed `flagged` source keeps the whole date
+  `review_required`. Claiming otherwise would assert a person checked something
+  nobody checked.
+- **A rejected fact does not answer, and is no longer silent.** A document whose
+  only date was struck out used to report *"no parseable date fact"*, which is a
+  different situation from never having had one.
+
+`value_raw` leads with the person's lexeme rather than merely including it:
+publishing the machine's lexeme beside a corrected magnitude shows a reader two
+different numbers and calls one of them the source.
+
+Zero reviews exist, so every tracked artifact except `environment-report.md` is
+byte-identical — the point being that this is a latent correctness fix, and the
+first review is when it stops being latent.
+
+### G28, second instance — `environment-report.md` embedded free disk space
+
+`| disk free | 669 GB of 1006 GB |` rewrote itself on every `cli report` run, so
+a committed artifact was permanently dirty for no content reason — which invites
+exactly the tidy-up G28 measured, where `git checkout .` reverts 137 PDFs to LFS
+pointers. `shutil.disk_usage` is gone. The report now states the **requirement**
+(`WORKSPACE_DISK_BUDGET_GB = 6`, measured: 5.0 GB of derived images plus the
+store and its FTS index, and ~0.4 GB of corpus), which is a property of the
+pipeline and does not move, and points at `df -h .` for whether this machine has
+it. Two tests: byte-identical across runs, and byte-identical under a patched
+0-byte-free disk **with the probe asserted uncalled**, so it cannot be
+reintroduced quietly.
+
+The same class of defect landed and was closed twice more today: a version basis
+string that embedded `today` reached `evaluation-report.md` and was closed by
+pinning `gq-011.interface_input.as_of`, which also stopped the benchmark
+silently failing on 2029-03-14.
+
 ### Also in this session
 
 `docs/build-plan.md` Phase E is now built rather than pending. Closed or
