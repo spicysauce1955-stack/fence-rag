@@ -30,7 +30,29 @@ Check first whether it forces a cut rather than batching:
 
 ---
 
-## C1 — `curation_level` 0 versus 1 is never defined
+## ~~C1 — `curation_level` 0 versus 1 is never defined~~ — ANSWERED, no amendment
+
+**Answered 2026-08-30 (`conversation.md` T17 §3), the cheapest disposition this
+entry itself named: Planning answered directly, and it's settled on their
+side.** They adopt this entry's provisional reading as written — `0` =
+extracted by machine, uncited or unchecked; `1` = extracted by machine with a
+resolvable `SourceRef`; `2` = a person compared it to the source image — and
+go further: §1.2.1's closure rule (*"every `SourceRef.belongs_to` cited
+anywhere inside a snapshot resolves to a `SourceDoc`"*) is already BINDING,
+so a snapshot publishing `curation_level: 1` on a value with a dangling
+`belongs_to` is refusable **by machine**, on a rule that already exists —
+turning the 0/1 boundary from something two teams remember into an
+invariant one of them enforces. Their own `min_curation` never uses 1 today,
+but does use 0 for `component_dimension`, `installation_step`, and
+`product_description`, so the boundary already decides real ties.
+
+**Not filed.** Planning offered to co-sign a one-sentence disposition in
+§1.1 if we'd rather have it in the document; we don't think it's needed —
+their answer plus the existing closure rule closes this more strongly than
+a defining sentence would. Revisit only if a future reader finds the
+0/1 boundary ambiguous in practice.
+
+<details><summary>Original entry, for the record</summary>
 
 | | |
 |---|---|
@@ -74,6 +96,8 @@ will have been written against whatever we happened to choose.
 by machine, uncited or unchecked; `1` = extracted by machine and carrying a
 resolvable `SourceRef`; `2` = a person compared it to the source image. That
 mapping is an assumption, not an agreement.
+
+</details>
 
 ---
 
@@ -302,7 +326,35 @@ relationships, confirmed against the rendered page image
 WITH 4 SCREWS"`). Raises the cost of leaving this unfixed: it is not one
 product's edge case.
 
+**Confirmed independently on Planning's own engine, 2026-08-30
+(`conversation.md` T17 §0).** `model.py:78`, `JointKind = Literal["butt",
+"channel", "groove", "bracket", "overlap"]` — the same five values, arrived
+at independently — and it is single-valued on **both** `FrameSlot` (`:375`)
+and `Member` (`:422`). Two teams hit the identical hole from opposite
+directions, read correctly as evidence the gap is real, not as a
+workaround: *"we are confirming your findings, not solving them."*
+
 ---
+
+## ~~C8 — no declared rule for choosing `FrameSlot` vs. `Member` for a non-repeating infill unit~~ — RESOLVED, no schema change
+
+**Resolved 2026-08-30 (`conversation.md` T17 §0).** Our proposed rule was
+right, and Planning sharpened it with something we couldn't see from our
+side: `fenceai/fencemodel/fit.py::_count_members` returns
+`floor(usable / (width + gap))`, so a one-`Member` pattern resolves to one
+piece **only by coincidence** when the panel happens to be exactly as wide
+as its bay — and would silently return 2 the day someone authored a wider
+bay or a narrower panel. Resolving by coincidence is worse than failing.
+
+**Agreed rule, better than the one we proposed:** the count is a symptom,
+not the test. `InfillSpec` carries `justification`, `excess`, `gap_after`
+and `edge_margin` — every one a *distribution* concept meaningless for one
+solid piece, while a `FrameSlot` is a named position that runs no fitter at
+all. **Anything positioned rather than distributed is a `FrameSlot`,
+whatever its count.** No schema change; this is an authoring rule, and it
+generalizes past the pattern-count-1 special case we'd guessed at.
+
+<details><summary>Original entry, for the record</summary>
 
 ## C8 — no declared rule for choosing `FrameSlot` vs. `Member` for a non-repeating infill unit
 
@@ -336,6 +388,8 @@ count 1 and no repeat dimension is authored as a `FrameSlot`."* Cheap if that
 is the right rule; needs a second worked example on a different single-piece
 product to confirm it generalizes before being written down as one.
 
+</details>
+
 ---
 
 ## C9 — `Joint.kind` has no value for a spring-retained snap connection
@@ -367,6 +421,11 @@ is nowhere to also require the retainer.
 to `Joint.kind`; separately, allow a slot to carry an additional retainer
 `PartRequirement` or a part-contains-part relationship (this second piece
 converges with C8's `ContainedSlot` territory).
+
+**Confirmed, not solved, on Planning's engine, 2026-08-30 (`conversation.md`
+T17 §0):** same `JointKind` hole as C7 — no help from their side, and their
+own words: *"no schema change"* is not on offer here, this one stays open
+on both sides.
 
 ---
 
@@ -401,6 +460,11 @@ neither.
 able to hold alternatives; separately, resolving the cap-profile ambiguity is
 a data question (which cap Chesterfield actually ships), not a schema one.
 
+**Confirmed, not solved, on Planning's engine, 2026-08-30 (`conversation.md`
+T17 §0):** same single-valued `JointKind` on both `FrameSlot` and `Member` —
+no fastening-method field on their side either. Stays open on both sides;
+the cap-profile half stays a data question, agreed.
+
 ---
 
 ## C11 — `AssemblyStep` has no per-step applicability condition
@@ -424,7 +488,54 @@ build.
 `AssemblyStep`, expressed against the same condition-dimension vocabulary
 `ParameterTable` already uses (§2.7), rather than a step-specific one-off.
 
+**Confirmed on both sides, 2026-08-30 (`conversation.md` T17 §0), and the
+blocker is narrower than a schema change.** Planning has no applicability
+field on `AssemblyStep` either — real gap, confirmed. But they already
+evaluate variant conditions against a live fact context
+(`fencemodel/resolve.py:64`, `PanelContext.condition_ctx()` →
+`panel.*`/`site.*`), so an `applies_when` would plug into an evaluator that
+already exists rather than needing a new one. **The actual catch:** our
+example's axis — Arbor Blend, Arctic Blend, etc. — is a finish/colour
+dimension, and their fact context carries none today (`panel.width_mm`,
+`panel.height_mm`, `panel.vertical`, `site.hvhz`, `site.exposure_category`
+only). Adding one is a **registry addition** — `AMENDING.md` §2 excludes
+registry additions from ratification, so it doesn't wait for this batch or
+need their sign-off. Their instinct matches ours: reuse the same condition
+vocabulary `ParameterTable` already has, not a step-specific one. The
+`applies_when` field itself is still the real, open schema gap.
+
 ---
+
+## ~~C12 — one `AssemblyStep` cannot hold two genuinely alternative methods~~ — RESOLVED, no schema change
+
+**Resolved 2026-08-30 (`conversation.md` T17 §0). We had both tools in hand
+and didn't recognize the shape.**
+
+**First half — the two alternative methods.** `Edge{kind: after |
+not_before | before | exclusive_with}` (`knowledge-datamodel.md` §3.6) —
+`exclusive_with` was already in the vocabulary we quoted in our own
+extraction contract, and it is exactly *"these two steps are alternatives:
+a build does one or the other, never both"*
+(`fenceai/fencemodel/model.py:601-632`, live since their obligation 11).
+Author *"Solidify Gate Posts"* as **two** `AssemblyStep`s — stiffener, and
+rebar-and-concrete — each with its own `slots`/`requires`, joined by one
+`exclusive_with` edge. Different parts and different prerequisites are what
+two steps express; one branching step isn't needed at all.
+
+**Second half — the cure time's dependency target.** `AssemblyStep.kind:
+installation` already covers a step that places no parts (the worked
+example on Planning's side is literally *"let the footings cure
+overnight"*). Author the 72-hour wait as its own `installation` step; the
+step that must wait carries `not_before: <that step>`. No `Elapsed` target
+on an edge is needed — the wait becomes a thing in the order, not a
+property hanging off one.
+
+**What's still open, separately:** the *duration itself* (72 hours,
+machine-readable rather than prose in `text_i18n`) is a real, narrower gap
+neither half above closes — worth its own entry if it ever matters enough
+to act on.
+
+<details><summary>Original entry, for the record</summary>
 
 ## C12 — one `AssemblyStep` cannot hold two genuinely alternative methods
 
@@ -453,6 +564,8 @@ alternative methods, each with its own `slots`/`requires`; separately, allow
 `requires` to target a `SlotTarget` (including `Elapsed`) rather than only a
 step key.
 
+</details>
+
 ---
 
 ## C13 — no relation for "either order is fine," across repeated instances of a step
@@ -476,6 +589,15 @@ bay-instance qualifier) that no edge kind addresses.
 **Possible disposition:** a branch or alternative-order relation that can
 address per-bay-instance step ordering, distinct from the step-to-step
 `Edge` that already exists.
+
+**Confirmed, and honestly not yet answerable, on Planning's engine,
+2026-08-30 (`conversation.md` T17 §0).** `Prerequisite.step` names another
+step's `key`, which carries no bay-instance qualifier either — same gap,
+independently. They decline to guess at a shape: their own step-per-bay
+instantiation (`report/assembly.py`) isn't built yet, so whether this
+*should* be an edge at all is a question honestly deferred rather than
+answered speculatively. Stays open on both sides, with no schema proposed
+by either.
 
 ---
 
