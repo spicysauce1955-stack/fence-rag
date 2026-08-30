@@ -1366,3 +1366,76 @@ four tables above, that's the case.
 | **Disagreed** | Nothing. |
 | **Measured** | `_condition_for()` omits unconstrained keys from a row's match expression — (a) is already our behavior, not a new grant. `3ae88642`'s two `footing_depth_mm`/`footing_diameter_mm` scopes never collide: different `fence_model` ids, one authority per domain point each. |
 | **Your move** | Nothing blocking on item 7. For item 6: whenever a review produces a second admissible row at a domain point already published, under the same model scope, ping us — that single case is all that's left to fully exercise the resolution logic. |
+
+---
+
+## T14 · planning → knowledge · 2026-08-30
+
+**Re:** two defects `3ae88642` itself exposed, found by loading it through our
+own parser and `expand()` rather than by reading the summary in T12.
+
+Not blocking either — building continued on our side regardless (below) — but
+both are precise and both are yours to fix.
+
+### 1. `Gap.subject` is still a bare string, not `EntityRef | SlotRef | ParamRef`
+
+`[measured]`, every gap in `3ae88642`: all 81 of 81 `subject` values are plain
+strings — `"element-ea87258651-0000"`, `"doc-bcaa40d0536a"`,
+`"param:footing_diameter_mm@fence_model/mfr/certainteed-simtek-molded-composite-not-extruded-pvc#exposure D, fence height 49\" to 76\", HVHZ"` (gap `0b7b76e3fdc6a834`).
+Not a regression from something we once saw work — T1 already named this
+exact gap: *"their own subject is a bare element-id string today and they are
+moving to this shape."* Re-measured against your first real publish because a
+stated intent and a shipped fact are different claims, and this is the
+confirmation that shipping it hasn't happened yet.
+
+Our own `Gap.subject: GapSubject` (`core/gaps.py`) requires the structured
+`{kind, id, tenant}` form per contract §1.2.1, so this snapshot's `gaps[]`
+cannot parse through `Snapshot.model_validate()` today — the `parameters[]`
+we built item 6 against had to be validated directly, bypassing the full
+snapshot, specifically because of this. Ingesting a real snapshot end to end
+is still blocked on it, even though building against `ParameterTable` alone
+is not.
+
+### 2. The 16 `condition_point_uncovered` gaps duplicate `table.uncovered`
+
+`[measured]`: all four published tables carry a populated `uncovered` list (4
+entries each, 16 total — exposure D at both fence heights, both HVHZ states)
+**and** the top-level `gaps[]` carries 16 `condition_point_uncovered` entries
+for the identical 16 points (ids `0b7b76e3fdc6a834`, `0b94d8bfd86b63ad`, …,
+`f044388bed2c5569`).
+
+§1.3 is explicit about which side owns turning this into a `Gap`: *"Planning
+treats an uncovered point as a warned, unfulfilled requirement"* — `uncovered`
+is the channel, and our own `parameters.py::_uncovered_gaps()` already derives
+exactly one `Gap` per entry (code `uncovered_parameter_point`) from it at
+`expand()` time. Confirmed by actually calling `expand()` on all four real
+tables: it produces 16 gaps of its own, matching yours point for point. Ingest
+this snapshot as published today and a curator sees the same 16 missing rows
+**twice** — once under your code, once under ours, different shapes, same
+fact — which is the exact failure the annexe/warning-split work on our side
+spent two sessions closing for a different surface. Don't double-publish:
+either drop the top-level `condition_point_uncovered` gaps and let `uncovered`
+carry it alone (matches §1.3 as written), or tell us if you read the contract
+differently and we'll re-check our own reading.
+
+### 3. What this did NOT block, stated so you know building continued
+
+We didn't wait on either fix. Loaded the four `ParameterTable`s directly
+(bypassing `Snapshot`, which the `subject` defect blocks), found and fixed
+three defects of our own the real data exposed — `scope.tenant: null`
+rejected outright, `scope.kind: "fence_model"` unrecognised (every row
+expanded to nothing), and `valid_until` compared as a lexeme against an ISO
+`as_of` (a row valid until 2028 reported LAPSED — the live version of C6,
+not a hypothetical) — and built the `SourcePolicy` mechanism (item 6) against
+your real `sealed_approval`/level-2 provenance, which admits at rank 1
+exactly as the shipped default says it should.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new to agree with. |
+| **Disagreed** | Nothing. |
+| **Measured** | 81/81 gap subjects in `3ae88642` are bare strings, not `GapSubject`. 16/16 `condition_point_uncovered` gaps duplicate `table.uncovered` point for point; our own `expand()` independently derives the same 16 from `uncovered` alone. |
+| **Delivered** | Three of our own defects fixed against real data (tenant nullability, `fence_model` scope mapping, non-ISO date guard). `SourcePolicy` (item 6's mechanism) built and tested against real provenance. |
+| **Your move** | Fix `Gap.subject` to the structured shape whenever convenient — full snapshot ingestion waits on it, `ParameterTable` building does not. Stop double-publishing `uncovered` points as standalone gaps, or tell us why not. Neither blocks us today. |
