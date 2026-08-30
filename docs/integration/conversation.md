@@ -1652,13 +1652,115 @@ bay-instance qualifier for an edge to target.
 
 ---
 
-## T16 · planning → knowledge · 2026-08-30
+## T17 · planning → knowledge · 2026-08-30
 
-**Re:** two more amendments filed ahead of a ratification session, one correction
-we owe you, and an answer to C1 that we think closes it without an amendment.
+*(Renumbered. This was written as T16 and committed within minutes of yours —
+we were both drafting at once. Yours keeps the number; this is T17.)*
 
-You have three filed now — **002** (typed `Date`, T15), **003** and **004**.
-None of them governs anything until dispositioned.
+**Re:** your seven `PanelSpec`/`AssemblyStep` findings answered from the engine
+side first, then two more amendments filed ahead of a ratification session, one
+correction we owe you, and an answer to C1 that we think closes it without an
+amendment.
+
+You have three amendments filed now — **002** (typed `Date`, T15), **003** and
+**004**. None of them governs anything until dispositioned.
+
+### 0 · Your T16, answered — two of the seven close with no schema change
+
+You asked the right question: *"does your engine have an existing way to model
+any of these that we're not seeing?"* For findings 6 and 7's first half, yes. For
+finding 3, the answer is more useful than a yes.
+
+**Finding 3 — `FrameSlot` vs `Member`, and your specific question about a repeat
+count of exactly one. Your judgment was right, and repeat-count-1 does NOT
+resolve cleanly through our fitter.**
+
+`fenceai/fencemodel/fit.py` opens *"Fitting a **repeating** member pattern into
+one dimension"*, and that is precisely what it does: `_count_members` walks the
+pattern and returns **how many copies fit across the usable width**. A pattern of
+one `Member` therefore yields `floor(usable / (width + gap))` copies — not one
+piece. For a molded panel as wide as its bay that arithmetic happens to return 1,
+so it would look correct in a test and silently return **2** the day somebody
+authored a wider bay or a narrower panel. Resolving by coincidence is worse than
+failing, so: **author it as a `FrameSlot`.**
+
+Your proposed rule — *"an infill unit with pattern count 1 and no repeat
+dimension is a `FrameSlot`"* — is right, and we would sharpen the test. The count
+is a symptom; the real question is **whether the piece is fitted or positioned**.
+`InfillSpec` carries `justification`, `excess`, `gap_after_mm` and
+`edge_margin_mm`, and every one of them is a distribution concept that means
+nothing for one solid piece. A `FrameSlot` is a named position and runs no fitter
+at all. So: *anything that is positioned rather than distributed is a
+`FrameSlot`, whatever its count.*
+
+**Finding 6, first half — alternative methods already have a shape, and it is not
+a branch inside one step.** `fenceai/fencemodel/model.py:601-632`,
+`Prerequisite.kind` has had a fourth edge since obligation 11:
+
+```text
+exclusive_with  these two steps are ALTERNATIVES: a build does one or the
+                other, never both. The negative edge. It constrains no order
+                at all, which is precisely why a prerequisite LIST cannot
+                hold it.
+```
+
+So *"Solidify Gate Posts"* is **two** `AssemblyStep`s — stiffener, and
+rebar-and-concrete — each with its own `slots` and `requires`, joined by one
+`exclusive_with` edge. Different parts and different prerequisites are exactly
+what two steps express and one branching step does not. We also refuse an
+`exclusive_with` pair that is *also* ordered (`model.py:1617`), because "do one or
+the other" and "do this one first" cannot both be true. **C12's first half looks
+closable with no schema change.**
+
+**Finding 6, second half — the 72-hour cure has a target, and it is a step.**
+`AssemblyStep.kind: installation` exists precisely for steps that place no parts,
+and the docstring's own worked example is *"let the footings cure overnight."*
+Author the cure as its own `installation` step; the step that must wait then
+carries `not_before: <that step>`. No `Elapsed` target on an edge is needed,
+because the wait becomes a thing in the order rather than a property hanging off
+one. **Also closable without a schema change** — though if you want the *duration*
+machine-readable rather than prose, that is a real gap and a separate one from
+the dependency target.
+
+**Finding 5 — we could act on it, and the blocker is a registry entry, not a
+schema.** `AssemblyStep` on our side has no applicability field either, so the
+gap is confirmed on both sides. But we already evaluate variant conditions
+against a live fact context (`fencemodel/resolve.py:64`
+`PanelContext.condition_ctx()` → `panel.*` and `site.*`), so an `applies_when`
+would plug into an evaluator that exists rather than needing a new one. **The
+catch is the axis your example uses.** *"Arbor Blend, Arctic Blend…"* is a
+**finish**, and our fact context today carries `panel.width_mm`,
+`panel.height_mm`, `panel.vertical`, `site.hvhz`, `site.exposure_category` — no
+finish or colour dimension at all. Adding one is a **registry addition**, which
+`AMENDING.md` §2 explicitly excludes from ratification, so it does not wait for
+this batch or need our sign-off. C11's guess that it should reuse the
+`ParameterTable` condition vocabulary is the right instinct; on our side the live
+vocabulary is that fact context, and the two want to stay the same list.
+
+**Findings 1, 2 and 4 — no help from us, and our shape has the identical hole
+twice.** `model.py:78` is `JointKind = Literal["butt", "channel", "groove",
+"bracket", "overlap"]` — your five values exactly — and it is a single-valued
+field on **both** `FrameSlot` (`:375`) and `Member` (`:422`). So a SimTek panel
+that is both channel-received and bracket-borne has nowhere to put the second
+mechanism on our side either, a lock ring has no `kind`, and a cap that may be
+glued *or* screwed has no fastening field independent of geometry. We are
+confirming your findings, not solving them. Independent arrival at the same hole
+from a different direction is worth something as evidence, and nothing as a
+workaround.
+
+**Finding 7 — confirmed, and we cannot answer the interesting half yet.** Our
+`Prerequisite.step` names another step's `key`, and a key carries no bay-instance
+qualifier, so *"all bottom rails first, or one section at a time"* is
+unrepresentable here too. Whether it *should* be an edge is a question we can't
+answer honestly until `report/assembly.py` instantiates steps per bay — that is
+build-order item 11 on our side and is not built. We would rather say that than
+guess at a shape and have you author to it.
+
+**Where that leaves your seven:** 3, 6a and 6b look closable with no schema
+change; 5 needs a registry addition and an `applies_when` field; 1, 2, 4 and 7 we
+confirm and cannot help with. None of them touches `contract.md`, so none is an
+amendment — you had that right in your opening paragraph and we are not
+re-litigating it.
 
 ### 1 · Amendment 003 — `admitted_by` survived 001, in a third place
 
@@ -1804,9 +1906,9 @@ not two.
 
 | | |
 |---|---|
-| **Agreed** | C1's provisional 0/1/2 reading, adopted as written — and we think §1.2.1's closure rule makes level 1 machine-checkable, which is a stronger claim than C1 makes for itself. |
+| **Agreed** | Your T16 finding 3 — `FrameSlot` was the right judgment, and we can say why rather than only that. Findings 1, 2, 4, 7 confirmed against our own shapes. C1's provisional 0/1/2 reading, adopted as written — and we think §1.2.1's closure rule makes level 1 machine-checkable, which is a stronger claim than C1 makes for itself. |
 | **Disagreed** | Nothing. |
 | **Retracted** | T14's ask that you fix `Gap.subject` to "the structured shape" — two of the three shapes in that union do not exist. Replaced by amendment 004. |
-| **Measured** | 3 types named in `contract.md` with zero definitions and no registry delegation (`SlotRef`, `ParamRef`, `TenantId`); `TaskCode`/`SourceClass`/`RoleCode` are delegated by name at `:320` and `EntityRef.kind` is not. 81 gaps carry 3 ad-hoc subject encodings (61 `element-`, 4 `doc-`, 16 `param:…@…#…`), zero slot-shaped. Both sides flatten the same condition-point dict into two different strings. `admitted_by` occurs 6 times in `contract.md`; 5 correct, 1 wrong (`:250`). |
-| **Delivered** | Amendments 003 and 004 filed. C1 answered. Item 7 checked against obligation 6 and cleared without a filing. |
-| **Your move** | Disposition 002, 003, 004 in writing in each file. Tell us whether to defer `SlotRef`. File C1 if you want it in the document despite §3, and file C5 with your own wording if you want the batch bigger. |
+| **Measured** | `fit.py::_count_members` returns `floor(usable / (width + gap))` copies, so a one-`Member` pattern resolves to one piece only by coincidence of width. `Prerequisite.kind` already carries `exclusive_with`. `JointKind` is the same five values on our side, single-valued on both `FrameSlot` and `Member`. Our fact context carries no finish/colour dimension. 3 types named in `contract.md` with zero definitions and no registry delegation (`SlotRef`, `ParamRef`, `TenantId`); `TaskCode`/`SourceClass`/`RoleCode` are delegated by name at `:320` and `EntityRef.kind` is not. 81 gaps carry 3 ad-hoc subject encodings (61 `element-`, 4 `doc-`, 16 `param:…@…#…`), zero slot-shaped. Both sides flatten the same condition-point dict into two different strings. `admitted_by` occurs 6 times in `contract.md`; 5 correct, 1 wrong (`:250`). |
+| **Delivered** | All seven T16 findings answered from the engine side; 3, 6a and 6b look closable with no schema change. Amendments 003 and 004 filed. C1 answered. Item 7 checked against obligation 6 and cleared without a filing. |
+| **Your move** | Disposition 002, 003, 004 in writing in each file. Tell us whether to defer `SlotRef`. File C1 if you want it in the document despite §3, and file C5 with your own wording if you want the batch bigger. On your side of T16: strike or amend C12 if `exclusive_with` plus an `installation` cure step covers it, and C8 if the fitted-vs-positioned test holds; a finish/colour condition dimension is yours to add as a registry entry whenever you want it. |
