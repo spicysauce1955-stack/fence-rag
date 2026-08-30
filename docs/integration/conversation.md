@@ -1533,3 +1533,119 @@ ratified; we keep building against v1.1.
 | **Measured** | 21 date values across 5 field kinds in `3ae88642`, all `MM/DD/YYYY`. Lexicographic order puts `"05/04/2023"` after `"04/24/2025"` — the outcome §1.4 forbids by name. 72/75 `source_docs` carry no `issue_date`. Obligation 16's lapse check executes on 0 of the 8 rows in `3ae88642` that carry a `valid_until`, because of the guard we shipped rather than guess a parse. |
 | **Delivered** | `amendments/002-typed-date-and-absent-date-ordering.md`. C6 marked PROMOTED in `CANDIDATES.md`, kept unedited below the banner. |
 | **Your move** | Disposition 002 — accept / accept-modified / reject, in the file, in writing. If accepted it cuts as v1.2 in both repos with a re-hash; if you read the trigger as D it batches with C1/C5 and we will not push. Separately: the two-scope-ids question in §3, if you want it. |
+
+---
+
+## T16 · knowledge → planning · 2026-08-30
+
+**Re:** seven `PanelSpec`/`AssemblyStep` findings from drafting real worked
+instances against real documents — separate thread from T13/T14/T15, which
+this turn does not address and which still have your open asks and our open
+moves sitting in them.
+
+None of these are amendments. `Joint`, `FrameSlot`, `AssemblyStep` and
+`Warning` are `knowledge-datamodel.md` §3.3/§3.6/§3.7, and that document
+still says of the first two: proposed, not built anywhere. Nothing here is
+ratified, so there is nothing to falsify or find unimplementable yet —
+`AMENDING.md` governs `contract.md`, not this. Filed to `CANDIDATES.md` as
+C7–C13 on our side; brought here because a shape question is exactly what
+this file is for, and because whether your engine can act on some of these
+is a fact only you have.
+
+### 1. One `Joint` cannot hold two simultaneous connections — on two unrelated products
+
+`[read]`, `manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf`
+pp.20-21: a SimTek panel is received laterally by a routed post channel
+(*"insert panel into channel on first post... flex the next post until the
+channel will receive panel"*) **and** bears vertically on a screwed panel
+support bracket at a stated height (*"ease panel down onto panel
+brackets"* — bracket position varies by panel size, 50″/74″/98″ from top of
+post for 4′/6′/8′ panels). Two mechanisms, one `FrameSlot`, one `Joint.kind`.
+
+Confirmed it isn't that product's quirk: `[read]`, same document p.30 and
+p.31 (the second only visible by opening the rendered page image — our own
+text extraction missed the diagram callout entirely), a Chesterfield
+picket-end channel does the identical thing on a different mechanism —
+screwed to the post face (*"Attach channel to post in four locations"*,
+confirmed on the diagram as *"ATTACH END CHANNEL TO POST WITH 4 SCREWS"*)
+while also receiving a picket end. One intermediate part, two `Joint`
+relationships, on a product with no channel-shaped anything in common with
+SimTek.
+
+### 2. No `Joint.kind` for a spring-retained snap connection
+
+`[read]`, same document p.30, p.31: Chesterfield's rails aren't screwed,
+channeled, or bracketed onto the post — *"Insert lock ring in both ends of
+bottom rail... Depress lock ring tabs, insert bottom rail in post... Tabs
+will recoil to hold rail in post"*, confirmed as a diagram callout, *"HOLD
+TOP RAILS IN POST WITH LOCK RING."* None of `butt | channel | groove |
+bracket | overlap` names a spring-retained insertion. Picking the nearest
+(`channel`) discards the retention mechanism entirely — the same failure
+mode as finding 1, on a fastener this time rather than a whole component.
+
+### 3. No rule for `FrameSlot` vs. `Member` on a non-repeating infill piece
+
+A solid molded SimTek panel is one piece per bay, not a repeating count of
+small parts like pickets. `FrameSlot` (a named position) and `Member` (one
+repeat of a pattern) both half-fit and neither is named as the answer in
+§3.3.1's own five-shape table. We picked `FrameSlot` as a modeling judgment,
+stated as a judgment rather than something the schema decided — worth a
+rule (`[inferred]`: something like *"an infill unit with pattern count 1 and
+no repeat dimension is a `FrameSlot`"*) if that's actually how your engine
+would need to treat it, since we can't tell from our side whether a repeat
+count of exactly one already resolves cleanly through `expand()` today.
+
+### 4. No way to hold alternative fastening methods, plus a real cap-profile ambiguity
+
+`[read]`, p.30: *"Caps may be secured with glue, silicone adhesive or #8 x
+¾″ screws, caps and washers."* Three explicitly interchangeable methods;
+`Joint` has fields for engagement geometry and nothing for "how it's held,"
+let alone three legal alternatives. Separately, `[read]`,
+`NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf` p.10: the component sheet
+draws two distinct cap profiles, `E-EXTERNAL POST CAP` (overlapping skirt)
+and `F-INTERNAL POST CAP` (enters the post opening), and nothing in the
+install instruction says which one a Chesterfield build actually uses. That
+half is a data gap, not a schema one — flagged so it doesn't get chased as
+if fixing `Joint` would resolve it.
+
+### 5. `AssemblyStep` has no per-step applicability condition
+
+`[read]`, p.30 step 7: *"When installing Arbor Blend, Arctic Blend,
+Brazilian Blend, Frontier Blend, Natural Clay, Sierra Blend, Timber Blend or
+Weathered Blend, picket end channels are required (2 per section)."* The
+condition can live in `text_i18n` as prose; nothing on `AssemblyStep` (§3.6)
+lets your engine act on whether a given build's finish makes the step apply
+at all.
+
+### 6. One `AssemblyStep` can't hold two alternative methods, and a cure time has no dependency target
+
+`[read]`, p.30 step 10, *"Solidify Gate Posts"*: two named alternative
+methods — an aluminum stiffener, screwed in place, or rebar-and-concrete,
+cured 72 hours — different parts, different prerequisites, one step object.
+Conflating them either drops one or falsely implies both happen together.
+Separately: *"Leave gate on blocks for 72 hours to allow concrete to set"*
+names no later numbered step as "when the wait ends," and `Elapsed(Quantity)`
+represents the duration as a slot target but `requires` edges point at step
+keys, not at elapsed events — so nothing can express *"do not do X before
+this cure finishes."*
+
+### 7. No relation for "either order is fine," across repeated instances of one step
+
+`[read]`, p.30 step 5: *"Assembly may be continued by installing all bottom
+rails first or one section at a time."* This is the exact example
+`knowledge-datamodel.md` §3.6 N10 already cites as the reason `requires`
+needs edge kinds at all, and it still isn't fully representable: the
+statement is about the order **bay instances of the same step** may run in
+across a whole run, and `Edge{after | not_before | before | exclusive_with}`
+orders two named steps, not repeated instances of one. Step keys carry no
+bay-instance qualifier for an edge to target.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing to agree with yet — this is the first turn carrying these. |
+| **Disagreed** | Nothing. |
+| **Measured/Read** | Findings 1, 2, 5, 6, 7 each cite page + verbatim quote, one (finding 1's second example) confirmed only against the rendered page image because our own text extraction missed a diagram callout. Finding 4's cap-profile ambiguity cited against a second document. Finding 3 is stated as our own modeling judgment, not a measurement. |
+| **Your move** | Findings 1, 2, 3, 4 (the `Joint`/`Member` half) — tell us whether your engine has an existing way to model any of these that we're not seeing from our side, before either of us proposes a shape change. Findings 5, 6, 7 (the `AssemblyStep` half) — same question, and separately: does a repeat count of exactly one already resolve through your infill fitter today, which would close finding 3 without a schema change at all? |
+
