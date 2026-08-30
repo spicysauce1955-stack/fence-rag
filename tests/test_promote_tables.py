@@ -7,6 +7,8 @@ import shutil
 
 from context import requires_store, store_snapshot
 from fence_evidence.promote_tables import (promote_verified,
+                                           NO_BRACKET_PRINTED,
+                                           bracket_from_span,
                                            _inches, _match, KEY_COLUMNS,
                                            VALUE_COLUMNS, _row_applicability,
                                            effective_value,
@@ -105,6 +107,67 @@ class TestApplicabilityFailsClosed(unittest.TestCase):
 
     def test_unknown_exposure_letter(self):
         self.assertIsNone(hvhz_for_exposure("NON HVHZ for the B rows", "Z"))
+
+
+class TestAPagePrintingNoBracketIsNotADisagreement(unittest.TestCase):
+    """"No bracket is printed here" and "readers disagreed" are different facts.
+
+    `_row_applicability` returns `unresolved` whenever no reader could read a
+    bracket, which conflates the two. Measured on the three SimTek footing crops
+    (doc-88dcd8a73079 p6/p8, doc-2b81f4c2925e p6): the pages carry no
+    HVHZ/NON-HVHZ labelling at all, the readers said so in their notes, and a
+    complete human review of all 48 cells published **0 ParameterTables and 24
+    disputed gaps** whose `would_close` told the reader that "readers did not
+    independently agree" -- a false statement about this store's own data.
+
+    A reviewer looking at the image is the only party who can settle it, so the
+    span vocabulary gains a token for it. The bracket is an applicability
+    RESTRICTION; a table that carries none is not restricted, so the row omits
+    the `hvhz` key and matches every value of the dimension -- exactly what
+    `HVHZ and non-HVHZ` already does -- while `hvhz` stays in the domain so
+    `uncovered` keeps telling the truth.
+    """
+
+    def test_a_reviewer_can_record_that_the_page_prints_no_bracket(self):
+        self.assertEqual(bracket_from_span("NO HVHZ BRACKET PRINTED"),
+                         NO_BRACKET_PRINTED)
+        self.assertEqual(bracket_from_span("no bracket"), NO_BRACKET_PRINTED)
+
+    def test_it_is_not_confused_with_a_non_hvhz_bracket(self):
+        """`NON HVHZ` and `NO HVHZ BRACKET` differ by one letter and one word,
+        and they mean opposite things: the first restricts the row out of the
+        HVHZ, the second says nothing restricts it."""
+        self.assertEqual(bracket_from_span("NON HVHZ"), "non-HVHZ only")
+        self.assertEqual(bracket_from_span("HVHZ AND NON HVHZ"),
+                         "HVHZ and non-HVHZ")
+
+    def test_a_partial_or_hedged_span_is_still_not_an_assertion(self):
+        """The token is anchored. A span that merely mentions the absence
+        somewhere in a longer sentence is a note, not a reviewer's verdict on
+        the whole span, and guessing from it is the machine inference this
+        change exists to stop."""
+        self.assertIsNone(bracket_from_span("NON HVHZ; no bracket on the C rows"))
+        self.assertIsNone(bracket_from_span("probably no bracket"))
+
+    def test_no_reader_read_a_bracket_is_not_reported_as_disagreement(self):
+        """`unresolved` is one word for two situations and only one of them is a
+        disagreement. The basis note is what a `disputed` gap quotes back to
+        Planning, so saying "readers did not independently agree" about readings
+        where nobody read a bracket at all publishes a false claim about this
+        store's own data."""
+        silent = [{"reader": "codex-C", "notes": "Table values as printed."}]
+        applicability, basis = _row_applicability(silent, "B")
+        self.assertEqual(applicability, "unresolved")
+        self.assertNotIn("agree", basis)
+        self.assertIn("no reader", basis)
+
+    def test_a_real_disagreement_still_says_so(self):
+        split = [{"reader": "codex-C", "notes": "NON HVHZ spans the B rows."},
+                 {"reader": "claude-sonnet-A",
+                  "notes": "HVHZ AND NON HVHZ spans the B rows."}]
+        applicability, basis = _row_applicability(split, "B")
+        self.assertEqual(applicability, "unresolved")
+        self.assertIn("agree", basis)
 
     def test_applicability_reads_every_reading_not_the_deduped_survivor(self):
         """G43's dedup starved the cross-family test of its evidence.
@@ -230,8 +293,14 @@ class TestPromotedFacts(unittest.TestCase):
     def test_every_promoted_fact_links_back_to_a_candidate(self):
         if not self.rows:
             self.skipTest("no table readings promoted yet")
+        # `facts.from_candidate_id`, not `table_read_candidates`: the pointer
+        # was inverted at SCHEMA_VERSION 3 so a fact names the reading it came
+        # from and never the reverse (docs/layering.md). This query named the
+        # old table with the new column and could only ever raise; it went
+        # unnoticed because A1 emptied the promoted set and the test has skipped
+        # ever since. The first human review in this store's history ran it.
         linked = self.conn.execute(
-            "SELECT COUNT(*) FROM table_read_candidates WHERE from_candidate_id IS NOT NULL"
+            "SELECT COUNT(*) FROM facts WHERE from_candidate_id IS NOT NULL"
         ).fetchone()[0]
         self.assertEqual(linked, len(self.rows))
 

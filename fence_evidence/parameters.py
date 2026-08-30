@@ -71,6 +71,7 @@ import sqlite3
 from fractions import Fraction
 
 from .canonical import canonical_bytes
+from .promote_tables import NO_BRACKET_PRINTED
 from .refs import ref_id
 from .reviews import effective_fact_value
 from .tenancy import visible_sql
@@ -361,6 +362,16 @@ def _translate_conditions(raw: dict) -> tuple[dict, set, tuple | None]:
             if _NON_HVHZ_ONLY.search(text):
                 conditions["hvhz"] = False
                 continue
+            if text.strip() == NO_BRACKET_PRINTED:
+                # A reviewer read the image and recorded that the page prints no
+                # bracket. A bracket is a RESTRICTION, so a table carrying none
+                # is unrestricted on this axis: the key is omitted and the row
+                # matches every `hvhz` value, exactly as `HVHZ and non-HVHZ`
+                # does, while the dimension stays in the domain so `uncovered`
+                # keeps telling the truth. This is a person's assertion at
+                # curation level 2, not an inference from silence -- silence is
+                # what `unresolved` below is for.
+                continue
             if text.strip().lower() == "unresolved":
                 return {}, dimensions, ("unresolved_applicability", text)
             return {}, dimensions, ("unrecognised_condition_value", f"{key}={text}")
@@ -642,12 +653,21 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
                                  "page_no": fact["page_no"],
                                  "value_raw": (effective_fact_value(fact) or "").strip()},
                          cites=cites,
-                         would_close=f"readers did not independently agree whether "
+                         # The BASIS the promotion recorded, not a guess at it.
+                         # This sentence hardcoded "readers did not
+                         # independently agree" for every unresolved bracket,
+                         # including the rows where no reader read one at all --
+                         # a false claim about this store's own data, published
+                         # as the instruction a person acts on.
+                         would_close=f"this platform could not settle whether "
                                      f"{(fact['value_original'] or '').strip()} on "
                                      f"page {fact['page_no']} of "
                                      f"{fact['title'] or fact['document_id']} applies "
-                                     f"in the HVHZ; a person should open the crop and "
-                                     f"record the bracket",
+                                     f"in the HVHZ -- "
+                                     f"{fact['condition_basis_note'] or 'readers did not independently agree on the applicability bracket'}"
+                                     f"; a person should open the crop and record "
+                                     f"the bracket, or record that the page prints "
+                                     f"none",
                          closes_by="knowledge")
             else:
                 gaps.add(kind="missing_value", subject=f"fact:{fact['fact_id']}",

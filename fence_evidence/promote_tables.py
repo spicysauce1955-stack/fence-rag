@@ -34,6 +34,14 @@ KEY_COLUMNS = {
     r"^exposure$": "exposure_category",
     r"fence\s*height": "fence_height",
 }
+# A reviewer's assertion that the page prints no applicability bracket at all.
+# Distinct from `unresolved`, which means readers DISAGREED about one that is
+# there. Anchored to the whole span on purpose: a span that merely mentions the
+# absence inside a longer sentence is a note, and inferring a verdict from it is
+# the machine guess this token exists to replace.
+NO_BRACKET_PRINTED = "no bracket printed"
+_NO_BRACKET = re.compile(r"^\s*no\s+(?:hvhz\s+)?bracket(?:\s+printed)?\s*$", re.I)
+_MENTIONS_NO_BRACKET = re.compile(r"\bno\s+(?:hvhz\s+)?bracket\b", re.I)
 _HVHZ_BOTH = re.compile(r"HVHZ\s+AND\s+NON[\s-]?HVHZ", re.I)
 _NON_HVHZ = re.compile(r"NON[\s-]?HVHZ", re.I)
 
@@ -100,6 +108,13 @@ def bracket_from_span(text: str) -> str | None:
     """
     if not text:
         return None
+    if _NO_BRACKET.match(text):
+        return NO_BRACKET_PRINTED
+    if _MENTIONS_NO_BRACKET.search(text):
+        # The span both names a bracket and denies one. `NON HVHZ` and `NO HVHZ
+        # BRACKET` differ by a letter and mean opposite things, so a text
+        # carrying both is not a verdict on the span it annotates.
+        return None
     if _HVHZ_BOTH.search(text):
         return "HVHZ and non-HVHZ"
     if _NON_HVHZ.search(text):
@@ -159,6 +174,15 @@ def _row_applicability(readings: list[sqlite3.Row], exposure: str) -> tuple[str,
     agreed = {next(iter(v)) for v in by_family.values() if len(v) == 1}
     if len(by_family) >= 2 and len(agreed) == 1:
         return agreed.pop(), "cross-family agreement on the bracket label"
+    # `unresolved` is one word for two different situations and only one of them
+    # is a disagreement. This note is what a `disputed` gap quotes back to
+    # Planning, and on the three SimTek footing crops -- pages that print no
+    # bracket at all -- it told them readers had failed to agree about a label
+    # none of the readers ever saw. Say which one it is.
+    if not by_family:
+        return "unresolved", ("no reader read an applicability bracket for this "
+                              "row; the page may print none, and only a person "
+                              "looking at the crop can say which")
     return "unresolved", ("readers did not independently agree on the applicability "
                           "bracket; see the page crop")
 

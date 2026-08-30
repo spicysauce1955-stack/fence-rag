@@ -21,6 +21,7 @@ import unittest
 
 import context  # noqa: F401  -- puts the repo root on sys.path
 from fence_evidence.canonical import canonical_bytes
+from fence_evidence.promote_tables import NO_BRACKET_PRINTED
 from fence_evidence.parameters import (CONDITION_SCOPE, PARAMETER_OF,
                                        _round_half_up, _windows_overlap,
                                        build_parameter_tables, quantity)
@@ -81,7 +82,8 @@ def _candidate(conn, document_id, version_id, page_no, value, review_status):
 
 
 def add_fact(conn, *, fact_type="footing_depth_in", value='36"',
-             conditions=None, condition_basis="stated", document_id="doc-1",
+             conditions=None, condition_basis="stated",
+             condition_basis_note=None, document_id="doc-1",
              version_id="v1", page_no=17, review_status="accepted",
              promoted=True, unit_normalized="in", value_alternates=None):
     """One promoted fact: a table cell carrying its row's conditions."""
@@ -89,14 +91,15 @@ def add_fact(conn, *, fact_type="footing_depth_in", value='36"',
                               review_status)
     conn.execute("""INSERT INTO facts(document_id, version_id, page_no, element_id,
         fact_type, subject, value_original, unit_original, unit_normalized,
-        conditions, condition_basis, value_alternates, evidence_text, extractor,
+        conditions, condition_basis, condition_basis_note, value_alternates,
+        evidence_text, extractor,
         review_status, created_at, from_candidate_id)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,'table row','table-read:accepted',?,
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,'table row','table-read:accepted',?,
                 '2026-08-27T00:00:00+00:00',?)""",
         (document_id, version_id, page_no, f"el-{version_id}", fact_type,
          "FOOTING DEPTH", value, "in" if '"' in value else None, unit_normalized,
          json.dumps(conditions if conditions is not None else {}),
-         condition_basis,
+         condition_basis, condition_basis_note,
          json.dumps(value_alternates) if value_alternates else None,
          review_status, candidate_id if promoted else None))
     conn.commit()
@@ -476,6 +479,49 @@ class TestWhatIsNotPublished(unittest.TestCase):
         self.assertEqual(disputed["because"]["code"],
                          "applicability_bracket_unresolved")
         self.assertTrue(disputed["cites"])
+        conn.close()
+
+    def test_a_page_that_prints_no_bracket_publishes_unrestricted(self):
+        """The other half of the reading above.
+
+        `unresolved` means readers disagreed and the row is withheld. A page
+        that prints no bracket at all is not a disagreement: a reviewer read the
+        image and recorded that nothing restricts the row. A bracket is a
+        restriction, so its absence leaves the row matching every `hvhz` value
+        -- the key is omitted, exactly as for `HVHZ and non-HVHZ` -- while
+        `hvhz` stays in the declared domain so `uncovered` stays honest.
+        """
+        conn = make_store()
+        add_document(conn)
+        for exposure, value in (("B", '24"'), ("C", '30"'), ("D", '36"')):
+            add_fact(conn, conditions={"exposure_category": exposure,
+                                       "hvhz_applicability": NO_BRACKET_PRINTED},
+                     value=value)
+        tables, gaps = build_parameter_tables(conn)
+        self.assertEqual([g["because"]["code"] for g in gaps], [])
+        table, = tables
+        self.assertIn("hvhz", table["domain"])
+        self.assertEqual(table["uncovered"], [])
+        for row in table["rows"]:
+            self.assertNotIn("hvhz", row["conditions"])
+        conn.close()
+
+    def test_the_disputed_gap_does_not_invent_a_disagreement(self):
+        """`would_close` is the sentence a person acts on, and it hardcoded
+        "readers did not independently agree" for every unresolved bracket --
+        including rows where no reader read one at all. It must quote the basis
+        the promotion actually recorded."""
+        conn = make_store()
+        add_document(conn)
+        add_fact(conn, conditions={"exposure_category": "B",
+                                   "hvhz_applicability": "unresolved"},
+                 condition_basis_note="no reader read an applicability bracket "
+                                      "for this row; the page may print none",
+                 value='97"', fact_type="post_spacing_in")
+        disputed, = build_parameter_tables(conn)[1]
+        self.assertIn("no reader read an applicability bracket",
+                      disputed["would_close"])
+        self.assertNotIn("did not independently agree", disputed["would_close"])
         conn.close()
 
     def test_an_unmapped_fact_type_is_held_back_and_named(self):
