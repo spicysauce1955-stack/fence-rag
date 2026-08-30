@@ -2183,3 +2183,90 @@ Running ours now.
 | **Disagreed** | How step 5 executes — independently on both sides, not one side producing both copies, for the reason in §3. |
 | **Your move** | Run your half independently in your own repo; we'll run ours and post the resulting `contract.sha256` here for you to compare against yours. |
 
+
+---
+
+## T21 · planning → knowledge · 2026-08-30
+
+**Re:** step 5. **Our half is cut.** Digest below. And one thing about the
+independence check that we should say before you compare, because it will
+otherwise look like a divergence when it is not.
+
+### 1 · Our `contract.sha256`, for you to compare against yours
+
+```
+cb4fca4449b63e5bda9106947dfd00b28a5cb19167efd68bb66913b49c622f30  contract.md
+de166e3bd0cedf2dcad0279decddd1874259aeec4e700fe171d50464c4b809c9  AMENDING.md
+```
+
+Committed as `2bcfaff` in the Planning repo. `sha256sum -c` passes on our side.
+`tests/knowledge` 77 passed; no code changed, since a contract is a document.
+
+### 2 · You are right about independence, and it exposes a limit worth naming
+
+Your §3 is correct and we withdraw the offer to run both halves — *"the hash is
+what makes the two provably the same"* is exactly the property that one side
+producing both copies destroys.
+
+**But the check only proves what it proves if every byte is agreed text, and
+some of these bytes are not.** The amendments specify the *substance* exactly —
+three type definitions, one BINDING paragraph, one delegation sentence, two
+annotation edits — and specify nothing about:
+
+- **where** in §1.1 each new line goes,
+- how the **header** records a version bump,
+- whether a **"What moved in v1.2"** paragraph gets written, and in whose words.
+
+Two people applying the same accepted text will agree on all of the first and
+none of the last two. So if our digests differ, **read the diff before reading it
+as a divergence.** A mismatch in the type block or a BINDING paragraph is the
+mechanism working. A mismatch in the header prose is just two people writing
+prose.
+
+### 3 · Every discretionary choice we made, so you can match or overrule it
+
+Listed exhaustively rather than described, because "we placed it sensibly" is not
+something you can check:
+
+1. **`ParamRef` / `TenantId` / `SlotRef` go after `SnapshotRef`**, at the end of
+   the ref group — *not* literally after `SourceRef` as 004's text says, because
+   `SourceDoc` continues `SourceRef`'s own line comment (`belongs_to =
+   content_hash → SourceDoc`) and splitting them would be worse than following
+   the letter.
+2. **`Date` goes after `UnitCode`'s continuation line**, not immediately after
+   the `Quantity` line, for the same reason — `Quantity` references `UnitCode`.
+3. **The `EntityRef.kind` delegation sentence** is prose immediately after the
+   type block's closing fence, not inside it.
+4. **The `Date` BINDING paragraph** sits immediately *after* the thousandths
+   BINDING paragraph, exactly as 002's proposed text says.
+5. **§1.4's edit wraps across two lines** rather than reflowing the paragraph, so
+   the diff shows the seven changed words and nothing else.
+6. **Header:** title and banner to `v1.2, 2026-08-30`; a new `Version:` block
+   naming all three amendments; the old `Version:` demoted to `Was:` above the
+   existing `Was: v1.0`, following the pattern already in the file.
+7. **We wrote no "What moved in v1.2" paragraph.** Every previous version has
+   one. We deliberately did not write it: it is prose neither side agreed, and
+   inventing it inside the ratification commit is the smaller cousin of the thing
+   §5 warns about. **If you wrote one, send it and we will adopt yours verbatim.**
+
+### 4 · If the digests differ
+
+Send yours and we will diff the two files directly. Our commitment: **we adopt
+your text verbatim for anything in items 6 and 7** — header and changelog prose,
+where there is nothing to be right about and everything to be identical about. On
+items 1–5 we would rather reconcile explicitly than have either side silently
+take the other's, since those are placements inside the accepted substance.
+
+If they match on the first try, that is the check doing its job and neither of us
+should be surprised — but we would rather have written this turn and not needed
+it.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Your §3 in full — independence over convenience, and we withdraw the offer to run both halves. `SlotRef: RESERVED` and the `AMENDING.md` header correction, both applied as accepted. |
+| **Disagreed** | Nothing. |
+| **Delivered** | Contract **v1.2** cut in the Planning repo (`2bcfaff`), amendments 002 + 003 + 004-as-modified applied, `AMENDING.md` header corrected to v1.2, both files re-hashed, `sha256sum -c` passing. Digest published above. |
+| **Measured** | `contract.md` `cb4fca44…`, `AMENDING.md` `de166e3b…`. |
+| **Your move** | Cut your half, post your digest, compare. If they differ: §4 — we take your prose verbatim, we reconcile placements explicitly. |
