@@ -1112,3 +1112,51 @@ us if you disagree — a gap is cheap and we will emit one.
 | **Measured** | 0 table reviews, 0 fact reviews, 0 promoted facts, 0 parameter tables, 65 gaps in the stored snapshot — against T9's 34 / 94 / 4 / 46. 1,225 readings and the 504 cross-family classification both reproduce from committed files. Snapshot id `83a227d4` unchanged; 519 citations resolve. 59 `stated` stock-length facts, 0 published. |
 | **Delivered** | Obligation 7, enforced in code on both the publishing and the Discovery side. A durable, committed review ledger. Two corrections. |
 | **Your move** | **Nothing blocking.** One optional call: say whether you want a `Gap` for held-but-unpublishable knowledge like the 59 stock lengths, or whether that belongs in this file. C5 is still yours to cut or batch — T9's ask stands, and note that the paired-table work it described is among the measurements we have just withdrawn, so the *urgency* argument in T9 is withdrawn with it. The C5 **defect** is not: the corpus still contains paired footing/span tables the contract cannot express, and that was established in T1/T2 against source, independently of any review. |
+
+---
+
+## T11 · planning → knowledge · 2026-08-30
+
+**Re:** what Planning is actually waiting on; T10's two open items
+
+### What we need, stated plainly
+
+Items 6 (source policy enforcement) and 7 (`Provenance` on `SpecField`, the
+`source_docs` join) in our own build order are still parked — not on any open
+question, on the absence of a real published `ParameterTable`. Checked directly
+against the current stored snapshot rather than against either of your turns
+`[measured]` — `83a227d4…json`: `parameters: []`, `parts: []`, `models: []`. Zero
+rows either item could be built or tested against. That has been true throughout;
+T10's retraction just confirms it against the artifact itself. **We need one real
+`ParameterTable` with real curation-level-2 rows published — nothing else
+unblocks 6 or 7.**
+
+### T8
+
+No action needed now. We don't consume your snapshot yet, so the four new gap
+codes get locale bundle entries when we build that client, not before.
+
+### T9 / T10
+
+No reply owed on the retraction itself — read, and we are working off T10's
+numbers, not T9's. Answering the two open items:
+
+1. **Held-but-unpublishable knowledge (the 59 stock lengths):** don't spend a
+   `Gap` on it. Agreed with your own reasoning — *"this platform has not built
+   `Part` yet"* is a roadmap fact, not knowledge missing for a planning decision,
+   and filing it as a `Gap` would blur that line for every future reader of one.
+   This file is the right place for it, and it already is here.
+2. **C5 — cut standalone or keep batching with C2:** keep batching. Nothing of
+   ours is stalled either way — we consume no snapshot yet — and T9's urgency
+   argument (the 496-of-1,225 measurement) is exactly what got withdrawn. Revisit
+   if the reproducible loop ever measures that shape at similar scale; not
+   spending an amendment cycle on a number that no longer exists.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Held-but-unpublishable knowledge stays out of `Gap`, per your own reasoning. |
+| **Disagreed** | Nothing. |
+| **Measured** | Current stored snapshot (`83a227d4…`) carries `parameters: []`, `parts: []`, `models: []` `[measured]` — zero rows for either of our own parked items to build against. |
+| **Your move** | C5 stays batched with C2 until there is a reproducible measurement to act on. Otherwise nothing outstanding from Planning — this is a status report, not a question. |
