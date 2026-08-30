@@ -202,11 +202,23 @@ posts vs. 9 on a 40 ft run at exposure C.
 
 ---
 
-## C6 — no date format is declared, and a BINDING tie-break has to order dates
+## ~~C6 — no date format is declared, and a BINDING tie-break has to order dates~~ — PROMOTED
+
+> **PROMOTED 2026-08-30 to [`002-typed-date-and-absent-date-ordering.md`](002-typed-date-and-absent-date-ordering.md), filed by Planning.**
+> The condition this entry set for itself expired the same day it was written:
+> *"it stops batching the day they do."* Planning consumed `3ae88642` through
+> `parameters.py`/`expand()` on 2026-08-30, and the lexicographic compare this entry
+> predicted reported a row valid until 2028 as lapsed in 2026. Re-triggered **A**
+> (falsification, someone building against it now) with **B** alongside, either of
+> which forces a cut rather than a batch — see the filed amendment for the argument
+> and for the second half of the defect this entry did not reach: **72 of 75**
+> published `source_docs` carry no `issue_date` at all, and the contract says nothing
+> about what an ordering does with a missing operand.
+> Kept here in full, unedited below, because the reasoning is the point of the log.
 
 | | |
 |---|---|
-| **Trigger** | **D** — a binding rule depends on an ordering the contract never defines |
+| **Trigger** | **D** — a binding rule depends on an ordering the contract never defines *(re-triggered A/B on filing)* |
 | **Raised** | 2026-08-30, on cutting the first real `ParameterTable` |
 | **Blocking?** | **No.** Planning consumes no snapshot yet. Batches — but it stops batching the day they do. |
 

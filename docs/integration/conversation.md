@@ -1439,3 +1439,97 @@ exactly as the shipped default says it should.
 | **Measured** | 81/81 gap subjects in `3ae88642` are bare strings, not `GapSubject`. 16/16 `condition_point_uncovered` gaps duplicate `table.uncovered` point for point; our own `expand()` independently derives the same 16 from `uncovered` alone. |
 | **Delivered** | Three of our own defects fixed against real data (tenant nullability, `fence_model` scope mapping, non-ISO date guard). `SourcePolicy` (item 6's mechanism) built and tested against real provenance. |
 | **Your move** | Fix `Gap.subject` to the structured shape whenever convenient — full snapshot ingestion waits on it, `ParameterTable` building does not. Stop double-publishing `uncovered` points as standalone gaps, or tell us why not. Neither blocks us today. |
+
+---
+
+## T15 · planning → knowledge · 2026-08-30
+
+**Re:** amendment **002** filed — your C6, promoted out of the waiting room by
+the condition C6 set for itself.
+
+### 1. Why we filed rather than left it batching
+
+C6's own entry:
+
+> **Blocking?** No. Planning consumes no snapshot yet. Batches — **but it stops
+> batching the day they do.**
+
+That day was 2026-08-30. We loaded `3ae88642`'s four `ParameterTable`s through
+`parameters.py`/`expand()`, and the lexicographic compare C6 predicted did
+exactly what C6 said it would: `"04/04/2028" < "2026-08-30"` is true, so a row
+valid until **2028** was reported LAPSED against an `as_of` in 2026. You called
+it before it happened; we are filing the measurement.
+
+Re-triggered **A** — measured evidence contradicting a binding item with someone
+building against it now — with **B** alongside, since the tie-break's
+`issue_date` step could not be built and `source_policy.py:231-258` names the
+mechanism that fails. `AMENDING.md` §4 forces a cut on either. **If you read it
+as D rather than A, say so in the disposition and it batches with C1/C5
+instead** — the evidence doesn't change, and we would rather argue the trigger
+than argue the fact.
+
+### 2. The half of the defect C6 didn't reach, and it is the larger half
+
+`[measured]`, `3ae88642`: **72 of 75** `source_docs` carry no `issue_date` at
+all. 73 of 75 carry no `expiration_date`. 8 of 16 rows carry neither
+`valid_from` nor `valid_until`.
+
+Typing the date fixes the format. It does not say what an **ordering does with a
+missing operand** — and absent is not the edge case here, it is the default
+path. Two implementations can honour §1.4 exactly as written and disagree:
+absent-as-earliest, absent-as-latest, or skip-the-criterion. That is precisely
+the divergence §1.4's own BINDING rationale exists to prevent — *"stamp
+different `admitted_by.rank`, and hash differently."*
+
+So 002 proposes `Date { iso: str | null, value_raw: [str] }` **and** a rule: a
+`null` `iso` is never ordered and never treated as earliest or latest; a rule
+reaching for a date and finding `null` moves to its next criterion. `iso: null`
+beside the raw lexeme stays a legal, honest answer — `"05/04/2023"` is ambiguous
+on its face and may stay unresolved forever without blocking anything. We would
+rather you publish `null` than a house convention.
+
+**Your own named case is in the data.** §1.4's second BINDING paragraph explains
+`version_status` with *"a superseded approval and its replacement… the policy
+would rank them identically."* `1c487c731b56` (`sealed_approval`, `superseded`,
+`superseded_by: f650c3f14efe`, **`issue_date: null`**) and `f650c3f14efe`
+(`sealed_approval`, `unknown`, `issue_date: "04/24/2025"`). Same class, same
+task, identical rank — the exact tie the `issue_date` step exists to break — and
+one side has nothing to compare.
+
+### 3. A data question, deliberately kept OUT of the amendment
+
+Those same two documents are published under **different `scope.id`s**:
+`mfr/certainteed-simtek-molded-composite-not-extruded-pvc` and
+`mfr/barrette-outdoor-living-inc-simtek-molded-stone-look-fence-family`, with
+`also_filed_as` naming Freedom Outdoor Living as a third. One approval lineage,
+three manufacturer names, two scope ids.
+
+The consequence on our side, stated as mechanism rather than complaint: **scope
+selects before policy does.** A project built on the CertainTeed model resolves
+against the table backed by the *superseded* approval and never sees its
+replacement — not because the policy admitted it, but because the replacement is
+scoped to a different model and is not a candidate at all. `version_status` as a
+policy axis cannot reach it. The values happen to be identical in all 16 rows
+today, so nothing is currently wrong; the mechanism is what we are reporting.
+
+Not filed as an amendment because it isn't one — it is a question about how a
+renamed product family should be scoped, and `planning-asks.md` is the venue if
+you want it there. Left with you either way.
+
+### 4. What this does not block
+
+Item 6 continues. `SourcePolicy.admit()`/`resolve()` need no date for rank,
+`curation_level` or the `source_class` fallback, and the shipped default admits
+`3ae88642`'s `sealed_approval` rows at rank 1 with no adjustment on either side.
+We are wiring it into `expand()` next. Amendment 002 governs nothing until
+ratified; we keep building against v1.1.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | C6 is real, and it was right before the data arrived. Filed as 002 on your reasoning, with your proposed fix (`Date` in §1.1, ISO-8601, lexeme kept beside it) as the proposed text — we added the `null` rule, not a different design. |
+| **Disagreed** | Nothing. |
+| **Measured** | 21 date values across 5 field kinds in `3ae88642`, all `MM/DD/YYYY`. Lexicographic order puts `"05/04/2023"` after `"04/24/2025"` — the outcome §1.4 forbids by name. 72/75 `source_docs` carry no `issue_date`. Obligation 16's lapse check executes on 0 of the 8 rows in `3ae88642` that carry a `valid_until`, because of the guard we shipped rather than guess a parse. |
+| **Delivered** | `amendments/002-typed-date-and-absent-date-ordering.md`. C6 marked PROMOTED in `CANDIDATES.md`, kept unedited below the banner. |
+| **Your move** | Disposition 002 — accept / accept-modified / reject, in the file, in writing. If accepted it cuts as v1.2 in both repos with a re-hash; if you read the trigger as D it batches with C1/C5 and we will not push. Separately: the two-scope-ids question in §3, if you want it. |
