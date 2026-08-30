@@ -238,6 +238,83 @@ differs, the same shape `Quantity` already uses for `value_raw`.
 
 ---
 
+## C7 — `Joint` cannot express two simultaneous connection mechanisms at one `FrameSlot`
+
+| | |
+|---|---|
+| **Trigger** | **D** — real product construction does not fit the proposed shape |
+| **Raised** | 2026-08-30, drafting a worked `FrameSlot`/`Joint` example against a real product |
+| **Blocking?** | **No.** `Joint` as an object is itself still proposed, not built anywhere (§3.3.1). Nothing is authored against it yet. Batches. |
+
+**The gap.** A SimTek molded panel connects to its post two ways at once, both
+load-bearing, neither optional: the panel's edge is received laterally by a
+routed channel in the post (*"insert panel into channel on first post... flex
+the next post until the channel will receive panel"*), and it also bears
+vertically on a panel support bracket screwed to the post at a stated height
+(*"ease panel down onto panel brackets... panel support brackets must be used
+under both sides of every panel"* — zinc-plated 1½" #10 hex screws, per the
+post's own spec sheet). `Joint { kind: butt | channel | groove | bracket |
+overlap, ... }` (§3.3) has one `kind` per `FrameSlot`. There is no field for
+the second mechanism.
+
+**Sources.** `manuals/barrette-outdoor-living/structural/noa-24-0117.06-simtek-fence.pdf`
+p.7 (post/bracket spec sheet) and pp.6/8 (panel drawings);
+`manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf`
+pp.20-21 (install steps and the bracket-position-by-panel-size table). Full
+worked example in `docs/superpowers/specs/2026-08-30-llm-assisted-extraction-design.md`
+§4, Spike 4.
+
+**Cost of leaving it.** Whichever mechanism is picked as the slot's one `kind`,
+the other has no field to live in at all — not reduced fidelity, an outright
+absent fact. This is not a hypothetical: SimTek is a real product line in the
+vertical slice currently being worked.
+
+**Possible dispositions**, in rough order of cheapness:
+
+- `joint` becomes a list, `[Joint]`, rather than one object — cheapest to add,
+  costs a migration for anything already authored against a single `Joint`
+  (nothing is, yet).
+- A `secondary_joint: Joint | null` field, mirroring how `Member` already
+  carries multiple engagement fields rather than one.
+- `Joint.kind` becomes a set rather than an enum member — cheapest to state,
+  most disruptive to every consumer that pattern-matches on `kind`.
+
+---
+
+## C8 — no declared rule for choosing `FrameSlot` vs. `Member` for a non-repeating infill unit
+
+| | |
+|---|---|
+| **Trigger** | **D** — a real product doesn't cleanly fit either authoring shape |
+| **Raised** | 2026-08-30, same worked example as C7 |
+| **Blocking?** | **No.** Batches. |
+
+**The gap.** `FrameSlot` is a named position in the frame (a rail, keyed);
+`Member` is one repeat of a pattern inside `InfillSpec` (one picket among
+many). A SimTek panel is one solid molded piece per bay — not a repeating
+count of small identical parts like pickets, but also not obviously "framing"
+the way a rail is. §3.3.1's own five-authoring-shapes table (`FrameSlot`,
+`Member`, `FixingRule`, `PostSlot`, `ContainedSlot`) gives no rule for which
+shape a monolithic, non-repeating infill unit should use.
+
+**Why it recurs rather than being a one-off.** SimTek is not the only product
+in this corpus built from one solid infill piece per bay rather than a
+repeating count of small parts; whatever rule resolves this for SimTek is
+needed again for every similar product, not just this one.
+
+**Disposition tried in the worked example, not a fix:** `FrameSlot` was chosen
+as the pragmatic answer, with the choice stated explicitly as a modeling
+judgment rather than something the schema decided. That is a workaround, not
+a closed question.
+
+**Likely disposition:** a clarifying rule analogous to how N10 (§3.6) resolved
+`AssemblyStep.scope` ambiguity — something like *"an infill unit with pattern
+count 1 and no repeat dimension is authored as a `FrameSlot`."* Cheap if that
+is the right rule; needs a second worked example on a different single-piece
+product to confirm it generalizes before being written down as one.
+
+---
+
 ## Not candidates — recorded so they are not re-raised
 
 - **`retain_until` has no specified value.** The contract requires a snapshot

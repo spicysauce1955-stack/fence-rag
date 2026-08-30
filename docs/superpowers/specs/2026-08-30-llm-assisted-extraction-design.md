@@ -161,16 +161,59 @@ which are already pulled in Spike 3 — a butt joint, a bracket-only case)
 before considering any pipeline. The goal is to learn whether Spike 4's
 compound-joint finding is systemic or a one-off.
 
-**Open, not decided here:** whether and how to raise the compound-joint
-finding with whoever owns `knowledge-datamodel.md` on the Planning side.
-That document's own §7 shows this is a live, iterated negotiation with a
-real counterparty; this finding is exactly the shape of thing that process
-expects, but routing it is not this document's call.
+**Resolved 2026-08-30:** the compound-joint finding and the `FrameSlot`-vs-
+`Member` ambiguity are both boundary (Tier 2) findings, not this platform's
+to fix unilaterally — filed as
+`docs/integration/amendments/CANDIDATES.md` C7 and C8, with a third piece of
+evidence found while verifying them: page 7 of the SimTek NOA (a generic
+post/bracket spec sheet, not panel-specific) gives the panel support
+bracket's actual fastener (zinc-plated 1½" #10 hex screws) and confirms three
+distinct post-internal stiffener profiles by `PostRole` (corner/end/line).
 
 **Explicitly deferred:** any reader/review pipeline for `PanelSpec`
 candidates, analogous to `table_read_candidates`. The schema itself is
 partly proposed rather than built (`Joint`, `ContainedSlot`), and one
 worked example is not enough evidence to design a pipeline against it.
+
+### Tier 1 fix — ready to implement, not gated on Planning or on Phase 2
+
+Unlike C7/C8, this one is ours to make freely: adding a `PartType` extension
+is, by contract §2.1, never a breaking change and needs no negotiation. It
+cannot be *shipped* yet — `part_types` is one of the six snapshot arrays at
+0 in §3, so there is no live registry to add a row to — but the decision can
+be made now and picked up the moment Part/PartType publishing exists.
+
+**The gap this closes.** Spike 2 found the corpus's own `reinforcement`
+label doing double duty: page 7 (verified above, not the earlier garbled OCR
+read) shows a **panel-frame stiffener** (top/bottom tube framing the molded
+shell, pp.6/8's parts-table item "PANEL STIFFENER", 1½"×1½"×18ga wall, 5 lbs
+/ 70¼") is a physically different component from a **post-internal
+stiffener**, which itself varies by the already-shared `PostRole` vocabulary
+(§1.1): corner posts get a 1½"×1½"×.065 16ga steel tube, end posts a
+2"×3"×.065 16ga steel stiffener, line posts a 17ga HSLAS galvanized steel
+Z-beam grade 60 class 2. One label cannot honestly cover both, and the
+post-internal case cannot honestly be one id either, since its spec changes
+with role.
+
+**Proposed extensions**, both children of the shared spine `reinforcement`:
+
+- `mfr/simtek/panel_stiffener` — the panel-frame tube. One id; its spec does
+  not vary by condition in what's been read so far.
+- `mfr/simtek/post_stiffener` — the post-internal member. **One id, not
+  three** — `PostRole` already exists as shared vocabulary for exactly this
+  kind of role-conditioned difference, so the three profiles are authored as
+  `Part.spec` variants selected by `PostRole` (the same pattern
+  `FenceModel.variants` already uses), not as three separate part-type ids.
+
+**Explicitly not proposed:** an extension for the panel support bracket.
+Nothing manufacturer-specific separates it from the shared spine `bracket`
+type's existing counting/placement behaviour — the mechanical test (§2.2)
+says this stays a spine type, not an extension.
+
+**Where this is recorded until it can be built:** here, and in C7/C8's
+citations. No code changes today — `fence_evidence` has no `PartType`
+registry to add these rows to yet. This becomes a Phase 2 (or earlier, if
+`Part`/`PartType` publishing lands independently) implementation item.
 
 ### Phase 3 — `Procedure`/`AssemblyStep` spike (C). Cheapest next test.
 
@@ -187,17 +230,25 @@ Not yet run. Likely fast, given how clean that document's text already is
   hand-authored dataset (`data/*.json`). Untouched by everything above —
   Phase 2 targets a different, newer schema that dataset was never designed
   against.
-- Any code change. `READER_FAMILY` registration, a `PanelSpec` review
-  pipeline, and anything in `docs/integration/` remain future work items,
-  not authorized by this document.
-- Deciding the reader-family-identity and upstream-communication questions
-  in §5. Both are named as open and left to the user.
+- Any code change. `READER_FAMILY` registration and a `PanelSpec` review
+  pipeline remain future work items, not authorized by this document. The
+  one exception, already done: filing C7/C8 in
+  `docs/integration/amendments/CANDIDATES.md`, which is itself a running log
+  meant to be added to, not a frozen document.
+- Deciding the reader-family-identity question in §5. Named as open and left
+  to the user; the upstream-communication question is resolved — see §5's
+  Phase 2 update.
 
 ## 7. Traceability
 
 - Reader-pipeline counts: `workspace/indexes/evidence.db`,
   `table_read_candidates`, queried by `(document_id, page_no)` grouped by
   distinct `reader`/family, 2026-08-30.
+- Tier 1 fix and C7/C8 evidence: `retrieval_units` text for
+  `doc-88dcd8a73079` p.7 (`noa-24-0117.06-simtek-fence.pdf`), the
+  `"4 LINE POST 30LBS. 102\""`/`"NTS |"` heading-path rows, queried
+  2026-08-30 — supersedes the earlier, incomplete OCR-fragment read of that
+  page used in Spike 2.
 - Snapshot array counts: `workspace/snapshots/3ae88642ec789f30de43766da57b5e201a58964999ffa6cec65ce1bacb430508.json`,
   top-level array lengths, 2026-08-30.
 - Schema quotes: `docs/integration/knowledge-datamodel.md` §3.1-3.6, §2.3;
