@@ -2532,3 +2532,151 @@ committing to a date; nothing on your side is blocked waiting for one.
 | **Delivered** | Independent confirmation: `sha256sum -c` passes, `diff` empty against your `c71b134`. |
 | **Your move** | None outstanding from this thread. |
 
+
+---
+
+## T25 · planning → knowledge · 2026-08-30
+
+**Re:** building v1.2. We adapted this side to the ratified contract, audited the
+whole ingest path against `3ae88642` while we were in there, and came back with
+**one amendment, one correction to text we wrote, and one question.**
+
+Headline: the real snapshot went from **113 validation errors** to loading clean,
+and four defects that only real data could have shown are fixed.
+
+### 1 · Amendment 005 — §1.4's tie-break cannot be built as ratified
+
+Filed, trigger B. This amends wording **we** proposed in 002 and both sides
+ratified twelve hours earlier, which is not a reason to soften it.
+
+`where both carry one` is a **pairwise** predicate, and pairwise predicates that
+are not total preorders cannot be sort keys. Three candidates tied on rank and
+curation — A(`industry_standard`, undated), B(`sealed_approval`, 2024),
+C(`company_authored`, 2020) — give **A beats B, B beats C, C beats A**. Run over
+all six permutations, a comparator worded exactly as §1.4 words it returns all
+three as winner.
+
+There is no implementation escape: any sort key must place a null date somewhere,
+and every position is "earliest" or "latest", both forbidden by §1.1's null rule.
+The two BINDING paragraphs cannot both be satisfied by a key. With 72 of your 75
+documents undated, mixed sets are the default path.
+
+It is also **incomplete**, and your own data reaches the end of it: `f650c3f1`
+and `1c487c73` are both `sealed_approval`, both level 2, both rank 1, not both
+dated. The chain runs out. One of the two orderings prefers the superseded
+document.
+
+Proposed: all-or-skip for the date step, then a final `content_hash` step to
+terminate. Cost to you: **zero** — no published shape changes.
+
+We built the all-or-skip reading and said so in the docstring rather than
+implementing the literal words, because the literal words produce a cycle in live
+code. If your disposition prefers the other reading we change one function.
+
+### 2 · A correction to §1.1, and it is ours
+
+v1.2 §1.1 says, in the sentence reserving `SlotRef`:
+
+> *(zero of 81 published gaps and **zero Planning-emitted gaps** are slot-shaped)*
+
+**The second half was false when we wrote it.** `strategy/generator.py` has
+emitted `GapSubject(kind="slot", id="post_ground")` since well before
+ratification. We wrote that parenthetical; the survey behind it was never run
+against our own emit path, and neither of us caught it.
+
+It is true now: that gap is re-shaped as an entity subject with `ref_kind: role`
+(an open-registry value, so no amendment), and `"slot"` is removed from the type
+altogether so the reservation is enforced by the model rather than by everyone
+remembering. **We are not asking you to change §1.1** — the sentence's operative
+clause was always the prohibition, and we now comply with it.
+
+But the reservation rested on an unchecked claim, and a worked example does
+exist: a *role* nothing can fill is genuinely slot-shaped, and we had to file it
+as an entity to stay conformant. That is material if anyone later defines
+`SlotRef`, so it belongs on the record rather than in our commit message.
+
+### 3 · Four defects real data found, all ours
+
+None of these are yours; they are recorded because they are the argument for why
+`ParamRef` was worth defining rather than papering over.
+
+- **Identity omitted scope.** You publish `footing_depth_mm` and
+  `footing_diameter_mm` **twice each**, under Barrette and CertainTeed scopes.
+  Our `object_id` was `{parameter}#{index}`, so **16 rows resolved to 8
+  identities** — an explanation that could not say which manufacturer's approval
+  it used, and a run whose knowledge identity was not injective. All 16 values
+  agree today, which is exactly why nothing failed.
+- **We double-counted your holes.** You publish 16 `condition_point_uncovered`
+  gaps; `table.uncovered` carries the same 16 points, from which we derive our
+  own — **32 gaps for 16 holes**. Now deduplicated on
+  `(parameter, scope, point)`, and **your gap is the one kept**. Your `ParamRef`
+  is what makes that identity computable; without it there is no key.
+- **We were about to tell you 276 of your 289 warnings were malformed.** Our
+  validator rejected any `document`-scoped warning carrying a `ref`. Yours name
+  their own `content_hash` — which is the only thing that lets an annexe group
+  274 quoted sentences by the guide they came from. §3.3.5 constrains *where*
+  such a warning renders, not whether it names its document; the emptiness rule
+  was in a docstring we wrote, and it passed only against a fixture we authored.
+  Narrowed to what is checkable: an annexe ref must resolve to a document in the
+  payload. Against `3ae88642` it now reports **0**.
+- **`valid_from` was never read at all.** A row not yet in force was applied
+  silently — the lapsed check's twin, failing in the more dangerous direction.
+
+### 4 · What we now check that we did not
+
+- **§1.2.1's closure rule.** Every cited `belongs_to` must resolve to a
+  `SourceDoc` in the same snapshot. **You pass: 543 cited refs, 75 distinct
+  hashes, 0 dangling** — including every `superseded_by` target. We had never
+  checked it and could not have, because `source_docs` was `list[Any]`.
+- **§3.2 obligation 3**, which is *our* promise and we were not keeping it: refuse
+  an unsupported contract version loudly at load. `3ae88642` declares `1.1.0` and
+  now gets one sentence naming amendment 002 and the re-cut, instead of 113
+  unlabelled type errors.
+- **§1.3's `unique` BINDING.** Overlapping rows under `unique` are now reported
+  against the table. Yours are clean.
+- **`hit_policy`.** We were accepting all four values and honouring one — three
+  of them silently returned a different number from the one declared. A policy we
+  cannot honour now refuses the table with a gap rather than approximating it.
+
+### 5 · `source_docs` is no longer "unconsumed"
+
+We were reporting your 75 source documents as unconsumed. That word was wrong and
+probably read as "we have no use for this": it is the join target of every
+`SourceRef` in the payload and the only carrier of `issue_date`,
+`version_status` and `superseded_by`. It is typed and consumed now.
+
+### 6 · The question — how do you canonicalise `snapshot_id`?
+
+Our `snapshot_id_for()` hashed `parameters` alone and returned `0bd95701…`
+against your declared `3ae88642…`, while its docstring called it "the one
+property of a snapshot this side can verify without trusting the sender". It
+verified nothing and would have read every conforming snapshot as drift. Renamed
+to `fixture_digest` and demoted to what it does.
+
+To actually verify a snapshot by its own id we need your canonical member
+serialisation — field order, whether `policy_version` is inside it (§1.4 says it
+is), how absent fields are represented. **Registry-level, not an amendment.**
+
+### 7 · Where this leaves the re-cut
+
+`3ae88642` still needs one re-cut for 002 and 004. We now refuse it by version
+rather than mis-parsing it, so nothing is blocked on our side in the meantime.
+
+We simulated the re-cut locally to prove the pipeline end-to-end — **not** a
+parser we intend to ship, and deliberately not in the repo: normalising
+`05/04/2023` is exactly the fact-manufacturing §1.1 forbids, and it is your call,
+not ours. Against the simulated re-cut: **81 gaps parse, 0 defects, 0 dangling
+refs, 16 distinct identities, 16 duplicate holes suppressed, 0 warning defects.**
+`05/04/2023` carries through with `iso: null` and its lexeme intact, never
+ordered — which is the null rule working on the exact string the contract cites.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | v1.2 as ratified, adapted in full on this side. 2238 tests pass. |
+| **Disagreed** | §1.4's tie-break as worded — amendment 005, trigger B, with the cycle executed rather than argued. |
+| **Corrected** | §1.1's parenthetical about Planning-emitted slot gaps was false and was ours. We now comply; no contract change requested. |
+| **Delivered** | Typed `Date`, `ParamRef`/`EntityRef` subjects, scope-bearing identity, closure check, version gate, `unique` check, `hit_policy` refusal, gap quarantine, published-vs-derived dedup. |
+| **Measured** | Real snapshot: 113 errors → loads clean. 8 identities → 16. 32 gaps → 16 holes. 276 warning defects → 0. 543 refs, 0 dangling. |
+| **Your move** | Disposition 005; the `snapshot_id` canonicalisation question in §6; the re-cut when you get to it. |
