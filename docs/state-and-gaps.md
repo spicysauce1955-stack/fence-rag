@@ -2169,16 +2169,38 @@ the earliest identified Bufftech/CertainTeed fence NOA in the renewal
 lineage — predates the wind-exposure breakdown every other footing table in
 this corpus carries. It states two bare rows: 12″ diameter × 24″ depth →
 48″ max spacing, and 12″ diameter × 30″ depth → 97″ max spacing. No
-exposure category, no HVHZ bracket, no height range — just the
-footing-depth/max-post-spacing trade, the exact paired design point
-candidate **C5** already names (`docs/integration/amendments/CANDIDATES.md`):
-a deeper footing buys a wider span, with no other dimension to split the
-pair. Promoting `footing_depth_in` alone from a table shaped like this is
-the specific thing C5 says not to do — it happened anyway because
-`promote_tables.py`'s column mapping has no case for "this table's rows have
-no conditioning dimension at all," and silently produced a fact with an
-`hvhz_applicability` key of `"unresolved"` standing in for a dimension the
-table never had, rather than refusing to promote or raising a gap.
+exposure category, no HVHZ bracket, no height range.
+
+**First diagnosis, wrong — corrected within the hour.** The first version of
+this entry said `promote_tables.py`'s column mapping has no case for a row
+with no conditioning dimension. That is false: commit `e6d1aed`, made
+earlier the same day and *before this session started*, already built
+exactly that case — a dropped column sets `condition_basis="assumed"` with a
+note naming what was dropped, precisely so a row like this one stops
+silently claiming `"stated"`, and its own test suite names this same table
+as the measured, motivating example. Promotion working as designed was
+mistaken for promotion working by accident.
+
+**The real defect is one stage downstream, and it's a fresh instance of
+G53's class of bug.** `_row_applicability` (`table_review`-adjacent, read by
+`parameters.py`) has exactly two answers: cross-family agreement on an HVHZ
+bracket, or `"unresolved"`. It has no third answer for *"this table has no
+bracket to agree or disagree about — the concept doesn't apply here."*
+Absence of information and disagreement about a real bracket both collapse
+to the same string. That `"unresolved"` then routes into
+`parameters.py`'s `unresolved_applicability` gap path (~line 641), which
+writes *"this platform could not settle whether 30″ ... applies in the
+HVHZ"* — a false claim about a bracket that was never printed on this sheet
+at all. G53 already fixed the adjacent case (a reviewer explicitly records
+`"NO HVHZ BRACKET PRINTED"` as a span), but that fix only fires when a
+reviewer records the absence; nothing here prompted me to, because I did not
+connect this table's missing HVHZ column to G53 at review time. There is
+already-correct code one stage further downstream —
+`parameters.py`'s collision detector (~line 866): *"the platform dropped the
+columns that would have told them apart, so the table is withheld... this
+is not a paired design point and needs no amendment"* — built, in the same
+`e6d1aed` commit, for exactly this shape. These two facts never reach it,
+because `unresolved_applicability` intercepts them first.
 
 **Reverted, not patched.** The two facts (`fact_id` 19225, 19226) were
 deleted directly; the review that produced them — the corrected grid,
@@ -2186,16 +2208,21 @@ deleted directly; the review that produced them — the corrected grid,
 because that part is genuinely right: this drawing really does use a tick
 mark for inches throughout the whole sheet (`107'` post length, `72'` fence
 height, both otherwise physically impossible), confirmed against the
-rendered page image, not inferred. Only the subsequent promotion was wrong.
-All 1,074 tests pass with the two facts removed.
+rendered page image, not inferred. Only the subsequent promotion path was
+wrong. All 1,074 tests pass with the two facts removed.
 
-**Not yet fixed.** `promote_tables.py` should detect a row with no
-condition-bearing column present at all and either withhold it as C5
-describes or raise a gap naming the missing dimension, rather than
-promoting a fact whose `conditions` is empty or a placeholder. `would_close`:
-a check in the column-mapping path for "no known condition column matched
-this table" and a test seeding exactly this table's shape (a footing/spacing
-pair, zero condition columns) to confirm it refuses rather than promotes.
+**Not yet fixed, and not patched under time pressure on purpose.** This
+touches `_row_applicability`'s vocabulary (a third answer — *"no bracket
+concept applies"* — alongside agreement and `unresolved`) and the ordering
+between the `unresolved_applicability` and collision-detection gap paths in
+`parameters.py`. Both are real design surface, not a guard clause, and a
+rushed fix here risks a third mistake stacked on this session's first two.
+`would_close`: decide how a table with no HVHZ column at all is supposed to
+present to `_row_applicability` — as a table-level fact recorded once
+(alongside `condition_basis="assumed"`), not re-derived per row from
+reader silence — then confirm the collision detector is reached before
+`unresolved_applicability` for facts whose condition_basis is `"assumed"`
+with no key columns at all.
 
 ---
 
