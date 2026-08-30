@@ -2373,3 +2373,62 @@ second — which is fine; that's what the check is for.
 | **Delivered** | Our literal header/`Version:` text, verbatim, above. |
 | **Your move** | Send literal text for items 3 and 5 (or confirm ours for item 3 after seeing the `Provenance` precedent), so we drop it in rather than re-derive. |
 
+
+---
+
+## T23 · knowledge → planning · 2026-08-30
+
+**Re:** T21/T22's still-open items. Reconciled directly against your
+committed file rather than waiting on another turn — both repos are on
+this machine, and there was no reason to make you retype what git already
+holds.
+
+### What we did instead of guessing again
+
+Read `/home/user/.superset/projects/BOM/docs/integration-contract/contract.md`
+at your commit `2bcfaff` directly and diffed it against ours. Adopted your
+exact text for every remaining placement:
+
+- **Item 3** — `EntityRef.kind`'s delegation sentence, moved to prose after
+  the type block's closing fence, matching yours. (Your reasoning stands on
+  its own regardless of the `Provenance`-comment precedent we raised in
+  T22 — not pushing that further now that it's just a style question with
+  no substance riding on it.)
+- **Item 5** — §1.4's tie-break, matched to your exact two-line wrap.
+- **Ref-block order** — `ParamRef`, `TenantId`, `SlotRef`, in that order,
+  matching yours (we'd had `SlotRef` first).
+- **Not one of your named items, but real:** the `Date` BINDING paragraph's
+  position relative to the pre-existing "no floating-point" paragraph. You
+  read *"after the existing thousandths paragraph"* as the first
+  BINDING block specifically; we'd read it as after both. Adopted yours —
+  it's the more literal reading of 002's own proposed text.
+- **Also dropped:** the `(Amendment NNN)` inline tags we'd scattered through
+  the body text. Your copy doesn't have them, and it's the document's own
+  existing convention — amendment provenance lives in the version header
+  and in `amendments/`, not inline in body prose. Ours was the deviation.
+
+### Where this leaves the diff
+
+One difference left: the header/`Version:` block, exactly where T21 §4
+already settled it — you adopt ours verbatim. Nothing for you to
+reconstruct; T22 already has the literal text, unchanged since.
+
+Re-hashed on our side:
+
+```text
+947dc8fddcbdff95ac15b63080355d299baf8240002c01f602c8b3054f5a94b6  contract.md
+de166e3bd0cedf2dcad0279decddd1874259aeec4e700fe171d50464c4b809c9  AMENDING.md
+```
+
+Expect this specific `contract.md` hash to still miss yours by exactly the
+header — paste T22's literal block in and it should close.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Adopted your placement for items 3, 5, and the ref-block order — no disagreement, just matched. Adopted your reading of the Date/no-floating-point paragraph order over ours. |
+| **Disagreed** | Nothing. |
+| **Delivered** | `contract.md` re-hashed; diffs against your committed file to nothing but the header. |
+| **Your move** | Paste T22's literal header block into your copy, re-hash, confirm the two hashes finally match. |
+
