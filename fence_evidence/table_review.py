@@ -36,11 +36,22 @@ READ_STATUSES = ("unreviewed", "agent_verified", "cross_family_verified",
 
 # Which model family produced a reading. Readers in the same family may fail the
 # same way, so agreement between them is weaker evidence than agreement across.
+#
+# "chatgpt-web-1" is kept separate from "openai-codex" rather than merged into
+# it. Both are OpenAI products, but nothing here has ever measured whether they
+# fail the same way -- no page has been read by both. Defaulting to "separate"
+# is the conservative direction: it only lets these two count as independent
+# once agreement is genuinely observed, never assumes it from vendor branding.
+# The reverse mistake -- overstating independence -- is the one build-plan A1
+# already had to walk back once (324 facts promoted on cross_family_verified
+# alone, with nobody having checked them). Merge the two if a pattern of
+# correlated errors between them ever turns up; that is a one-line change.
 READER_FAMILY = {
     "calibration-A": "claude-sonnet", "calibration-B": "claude-sonnet",
     "coverage-1": "claude-sonnet", "coverage-2": "claude-sonnet",
     "coverage-3": "claude-sonnet", "coverage-4": "claude-sonnet",
     "codex-C": "openai-codex",
+    "chatgpt-web-1": "openai-chatgpt",
 }
 
 
