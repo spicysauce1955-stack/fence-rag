@@ -320,6 +320,75 @@ class TestPromotedFacts(unittest.TestCase):
 
 
 @requires_store
+class TestAnUnreadableColumnIsNotSilence(unittest.TestCase):
+    """A column we could not classify is not a column the document lacked.
+
+    `promote_verified` decides value-vs-condition by regex on `col_label`, and a
+    cell matching neither is dropped as both — counted into an integer nobody
+    reads. Measured 2026-08-30: **55.7% of all 1,225 readings match neither**,
+    and on `doc-8727ba0fd4d4` p10 the two dropped columns (`FOOTING DIAMETER`,
+    `MAXIMUM POST SPACING` — near-misses on both regexes) were the ONLY thing
+    telling that crop's two rows apart.
+
+    That leaves `conditions` empty, and `condition_basis` was a hardcoded
+    `"stated"` literal, which makes the row an obligation-15 fallback — and
+    `parameters._collisions` excludes fallback rows by construction. So the
+    guard that exists to catch two values at one point is switched off by the
+    same defect that produces them. Reproduced end to end: the crop published
+    24" and 30" at one point under `hit_policy: unique`, curation level 2,
+    `uncovered: []`, zero gaps.
+
+    `stated` means *the document gave these conditions*. When a column was
+    unreadable we do not know what it gave, so the honest basis is `assumed`.
+    """
+
+    def _promote_row(self, labels_and_values):
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript(SCHEMA)
+        conn.execute("""INSERT INTO documents(document_id, source_path, file_type,
+            corpus_track, title) VALUES ('doc-1','manuals/x.pdf','pdf','us','t')""")
+        conn.execute("""INSERT INTO document_versions(version_id, document_id, sha256,
+            ingested_at) VALUES ('v1','doc-1',?, '2026-08-30T00:00:00+00:00')""",
+            ("a" * 64,))
+        conn.execute("""INSERT INTO pages(page_id, version_id, page_no, width, height,
+            extraction_method) VALUES ('v1-p10','v1',10,612.0,792.0,'ocr')""")
+        conn.execute("""INSERT INTO elements(element_id, page_id, version_id,
+            document_id, page_no, ordinal, element_type, text, text_source, bbox)
+            VALUES ('el-1','v1-p10','v1','doc-1',10,0,'table','t','ocr','[0,0,1,1]')""")
+        for col, (label, value) in enumerate(labels_and_values):
+            conn.execute("""INSERT INTO table_read_candidates
+                (document_id, version_id, page_no, crop_path, crop_sha256, reader,
+                 reader_kind, is_table, row_index, col_index, col_label, value,
+                 review_status, created_at)
+                VALUES ('doc-1','v1',10,'w/c.png',?, 'calibration-A','agent',1,0,?,
+                        ?,?, 'accepted','2026-08-30T00:00:00+00:00')""",
+                ("c" * 64, col, label, value))
+        conn.commit()
+        promote_verified(conn, dry_run=False)
+        return conn.execute("SELECT * FROM facts").fetchall()
+
+    def test_a_row_whose_columns_all_matched_still_says_stated(self):
+        rows = self._promote_row([("WIND EXPOSURE", "B"), ("FOOTING DEPTH", '24"')])
+        self.assertEqual([r["condition_basis"] for r in rows], ["stated"])
+
+    def test_a_dropped_column_makes_the_basis_assumed_not_stated(self):
+        rows = self._promote_row([("FOOTING DIAMETER", '12"'),
+                                  ("FOOTING DEPTH", '24"'),
+                                  ("MAXIMUM POST SPACING", '48"')])
+        self.assertTrue(rows, "the recognised column should still promote")
+        for r in rows:
+            self.assertEqual(r["condition_basis"], "assumed")
+
+    def test_the_note_names_the_columns_that_were_dropped(self):
+        rows = self._promote_row([("FOOTING DIAMETER", '12"'),
+                                  ("FOOTING DEPTH", '24"'),
+                                  ("MAXIMUM POST SPACING", '48"')])
+        note = rows[0]["condition_basis_note"]
+        self.assertIn("FOOTING DIAMETER", note)
+        self.assertIn("MAXIMUM POST SPACING", note)
+
+
 class TestRevokeMachinePromotions(unittest.TestCase):
     """A1: un-promote what the old gate let through, without losing the reading."""
 

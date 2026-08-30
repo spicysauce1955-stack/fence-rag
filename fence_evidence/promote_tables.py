@@ -334,11 +334,26 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
         by_type: dict[str, int] = defaultdict(int)
         for (doc, page, row_i), cells in sorted(groups.items()):
             conditions: dict[str, str] = {}
+            # A column matching neither registry is dropped as a value AND as a
+            # condition. It used to vanish into a counter, leaving `conditions`
+            # empty on a row that was in fact conditioned -- and an empty
+            # `conditions` under a hardcoded `stated` basis is obligation 15's
+            # FALLBACK row, which `parameters._collisions` excludes by
+            # construction. So the check that catches two values at one point
+            # was switched off by the same defect that produced them. Measured
+            # on doc-8727ba0fd4d4 p10: 24" and 30" published at one point,
+            # `hit_policy: unique`, curation level 2, zero gaps. Record what we
+            # could not read, and let the basis say so.
+            unread: list[str] = []
             for cell in cells:
                 key = _match(cell["col_label"], KEY_COLUMNS)
                 val = effective_value(cell)
                 if key and val and val.strip():
                     conditions[key] = val.strip()
+                elif not key and not _match(cell["col_label"], VALUE_COLUMNS):
+                    label = (cell["col_label"] or "").strip()
+                    if label and label not in unread:
+                        unread.append(label)
             exposure = conditions.get("exposure_category", "")
             # A reviewer's transcription first. It is the only reading in this
             # store that obligation 6 recognises, so consulting a cross-family
@@ -354,6 +369,17 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
             if applicability == "unresolved":
                 unresolved += 1
             conditions["hvhz_applicability"] = applicability
+            # `stated` means the document GAVE these conditions. Where a column
+            # was unreadable we do not know what it gave, so the row's
+            # conditions are what we could recognise -- an assumption, not a
+            # reading. This also takes the row out of `_is_fallback`, which is
+            # what restores the collision check.
+            basis_kind = "stated"
+            if unread:
+                basis_kind = "assumed"
+                basis = (f"columns this platform could not classify were dropped "
+                         f"from this row, so its conditions may be incomplete: "
+                         f"{', '.join(unread)}. {basis}")
             # A2. This note used to live in `conditions` under an underscore key,
             # where §1.3 publishes it as a condition dimension -- a sentence about
             # readers disagreeing, dressed as something Planning can bind a plan
@@ -382,11 +408,11 @@ def promote_verified(conn: sqlite3.Connection | None = None, *,
                      cell["col_label"], value, _inches(value),
                      'in' if '"' in (value or "") else None, "in",
                      json.dumps(conditions),
-                     # `stated`: these conditions are the table's own row and
-                     # column labels. The document printed them in a grid, which
-                     # is as stated as a condition gets -- and this is the one
-                     # path in the codebase where that is true.
-                     "stated", basis,
+                     # `stated` where every column was classified: those
+                     # conditions are the table's own row and column labels, and
+                     # this is the one path in the codebase where that is true.
+                     # `assumed` where a column was dropped -- see above.
+                     basis_kind, basis,
                      f"table row {row_i} of {cell['crop_path']}; read by "
                      f"{cell['reader']} ({reader_family(cell['reader'])})",
                      f"table-read:{cell['review_status']}",

@@ -524,6 +524,54 @@ class TestWhatIsNotPublished(unittest.TestCase):
         self.assertNotIn("did not independently agree", disputed["would_close"])
         conn.close()
 
+    def test_two_values_at_one_point_collide_even_with_no_conditions(self):
+        """The fallback exemption must not cover a row we simply could not read.
+
+        Obligation 15's fallback — `stated` with no conditions — is excluded
+        from the `unique` overlap check because it "never asserts anything about
+        the points it lands on". A row whose conditions are empty because a
+        COLUMN WAS DROPPED looks identical, and inherits an exemption it has no
+        claim to. Measured on doc-8727ba0fd4d4 p10, where the two dropped
+        columns were the only thing separating the rows: 609600 and 762000
+        milli-mm published at one point, `hit_policy: unique`, level 2, zero
+        gaps. `promote_tables` now writes `assumed` for such a row, which is
+        what puts it back inside the check.
+        """
+        conn = make_store()
+        add_document(conn)
+        for value in ('24"', '30"'):
+            add_fact(conn, conditions={}, condition_basis="assumed",
+                     condition_basis_note="columns this platform could not classify "
+                                          "were dropped from this row, so its "
+                                          "conditions may be incomplete: "
+                                          "FOOTING DIAMETER, MAXIMUM POST SPACING.",
+                     value=value)
+        tables, gaps = build_parameter_tables(conn)
+        self.assertEqual(tables, [], "a contradiction must not publish")
+        self.assertIn("parameter_point_collision_unread_columns", codes(gaps))
+        gap, = [g for g in gaps if g["kind"] == "missing_value"]
+        self.assertEqual(gap["closes_by"], "knowledge")
+        self.assertIn("FOOTING DIAMETER", gap["would_close"])
+        # it must not route this to C5: that amendment is about the SOURCE
+        # stating two design points, and this collision is our own misreading
+        self.assertNotIn("C5", gap["would_close"])
+        conn.close()
+
+    def test_a_real_unconditioned_fallback_still_publishes(self):
+        """The other side of the same line: obligation 15 is not weakened.
+
+        Two rows agreeing at one point is corroboration, and a genuinely
+        unconditioned `stated` row is the fallback the contract requires us to
+        publish.
+        """
+        conn = make_store()
+        add_document(conn)
+        add_fact(conn, conditions={}, condition_basis="stated", value='24"')
+        tables, gaps = build_parameter_tables(conn)
+        self.assertEqual(len(tables), 1)
+        self.assertEqual(tables[0]["uncovered"], [])
+        conn.close()
+
     def test_an_unmapped_fact_type_is_held_back_and_named(self):
         conn = make_store()
         add_document(conn)

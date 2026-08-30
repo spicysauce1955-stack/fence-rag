@@ -721,6 +721,14 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
             group["observed"].setdefault(dim, set()).add(dim_value)
 
         group["rows"].append({
+            # Internal only -- `_finish` pops it before the row is published.
+            # It records that promotion dropped a column it could not classify,
+            # which is what tells a collision "we misread this" apart from
+            # "the source really does state two design points here".
+            "_unread_columns": (fact["condition_basis"] != "stated"
+                                and "could not classify" in
+                                    (fact["condition_basis_note"] or "")),
+            "_basis_note": fact["condition_basis_note"],
             "conditions": conditions,
             "condition_basis": _publish_basis(fact["condition_basis"]),
             "value": value,
@@ -847,6 +855,37 @@ def _finish(group: dict, gaps: _Gaps) -> dict | None:
 
     collisions = _collisions(rows, points)
     if collisions:
+        # Two values at one point has two possible causes and they close
+        # differently. C5's paired design point is a fact about the SOURCE and
+        # closes by amendment; a column this platform failed to classify is a
+        # fact about US and closes by reading it. Reporting the second as the
+        # first would send Planning to negotiate an amendment for our own
+        # extraction defect, so the two get separate codes.
+        misread = any(r.get("_unread_columns") for _, clashing in collisions
+                      for r in clashing)
+        if misread:
+            for point, clashing in collisions:
+                lexemes = sorted({lex for r in clashing
+                                  for lex in r["value"]["value_raw"]})
+                notes = sorted({r["_basis_note"] for r in clashing
+                                if r.get("_unread_columns") and r["_basis_note"]})
+                gaps.add(kind="missing_value",
+                         subject=_subject(parameter, scope, point),
+                         code="parameter_point_collision_unread_columns",
+                         params={"parameter": parameter,
+                                 "scope_id": scope["id"],
+                                 "point": point,
+                                 "value_raw": lexemes},
+                         cites=[c for r in clashing
+                                for c in r["provenance"]["cites"]],
+                         would_close=f"{' and '.join(lexemes)} both reached "
+                                     f"{parameter} at {_describe(point)} and this "
+                                     f"platform dropped the columns that would have "
+                                     f"told them apart, so the table is withheld. "
+                                     f"This is not a paired design point and needs no "
+                                     f"amendment: {'; '.join(notes)}",
+                         closes_by="knowledge")
+            return None
         # C5, and the whole table goes. See the module docstring for why the
         # three alternatives are worse; the short form is that a paired
         # `value_type` needs an amendment that has not landed, and every way of
@@ -878,6 +917,9 @@ def _finish(group: dict, gaps: _Gaps) -> dict | None:
                      closes_by="planning")
         return None
 
+    for r in rows:
+        r.pop("_unread_columns", None)
+        r.pop("_basis_note", None)
     covered = any(_is_fallback(r) for r in rows)
     uncovered = [] if covered else [
         p for p in points if not any(_matches(r["conditions"], p) for r in rows)]
