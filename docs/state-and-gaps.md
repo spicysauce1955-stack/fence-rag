@@ -2151,6 +2151,56 @@ function it changes, not in a narrative document. `would_close`: an
 plus a regression test seeding one accepted row alongside a fresh
 cross-family agreement on the same cell.
 
+---
+
+### G56 — `promote-tables` created two facts with no scoping condition at all
+
+**What happened.** After G54's update, one page-level review (the
+foot/inch-mark correction on `NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf`
+p.10, `doc-8727ba0fd4d4`) was recorded and exported, and `cli promote-tables
+--apply` was run to complete the pipeline as usual. It created two
+`footing_depth_in` facts (24″, 30″) carrying `conditions:
+{"hvhz_applicability": "unresolved"}` — no `exposure_category`, no
+`fence_height`, nothing. `test_every_promoted_fact_carries_its_row_conditions`
+failed immediately.
+
+**Why this table produces that.** Drawing 07-315, sheet 8 of 8, dated 2008 —
+the earliest identified Bufftech/CertainTeed fence NOA in the renewal
+lineage — predates the wind-exposure breakdown every other footing table in
+this corpus carries. It states two bare rows: 12″ diameter × 24″ depth →
+48″ max spacing, and 12″ diameter × 30″ depth → 97″ max spacing. No
+exposure category, no HVHZ bracket, no height range — just the
+footing-depth/max-post-spacing trade, the exact paired design point
+candidate **C5** already names (`docs/integration/amendments/CANDIDATES.md`):
+a deeper footing buys a wider span, with no other dimension to split the
+pair. Promoting `footing_depth_in` alone from a table shaped like this is
+the specific thing C5 says not to do — it happened anyway because
+`promote_tables.py`'s column mapping has no case for "this table's rows have
+no conditioning dimension at all," and silently produced a fact with an
+`hvhz_applicability` key of `"unresolved"` standing in for a dimension the
+table never had, rather than refusing to promote or raising a gap.
+
+**Reverted, not patched.** The two facts (`fact_id` 19225, 19226) were
+deleted directly; the review that produced them — the corrected grid,
+`accepted`/`corrected` on the underlying candidates — was left in place,
+because that part is genuinely right: this drawing really does use a tick
+mark for inches throughout the whole sheet (`107'` post length, `72'` fence
+height, both otherwise physically impossible), confirmed against the
+rendered page image, not inferred. Only the subsequent promotion was wrong.
+All 1,074 tests pass with the two facts removed.
+
+**Not yet fixed.** `promote_tables.py` should detect a row with no
+condition-bearing column present at all and either withhold it as C5
+describes or raise a gap naming the missing dimension, rather than
+promoting a fact whose `conditions` is empty or a placeholder. `would_close`:
+a check in the column-mapping path for "no known condition column matched
+this table" and a test seeding exactly this table's shape (a footing/spacing
+pair, zero condition columns) to confirm it refuses rather than promotes.
+
+---
+
+### G51 — the audit's F1 heading fallback: measured and REJECTED
+
 R1 of `workspace/reports/projection-relevance-audit.md` — *project a heading as a
 unit only when no other unit on that page carries it in `heading_path`* — was
 built behind an opt-in, measured on a copy of the full-corpus store, and
