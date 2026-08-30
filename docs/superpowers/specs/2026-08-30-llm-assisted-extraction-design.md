@@ -374,3 +374,125 @@ and G56's own first wrong diagnosis) worth not risking a third on top of.
 Stopping here by request. Next session should treat G56 as its own
 brainstorm from scratch, not a continuation — it deserves the same
 unhurried treatment §1-§8 got, not a tail-end patch.
+
+## 10. The session didn't actually stop there — the contract got negotiated and cut
+
+§9 said "stopping here." Instead C7–C13 went to the Planning-side session as
+a real thread (`docs/integration/conversation.md` T16–T23, not this repo's
+convention of `amendments/NNN` — those types are `knowledge-datamodel.md`'s,
+proposed and unratified, so there was nothing to amend yet). What came back
+was substantial and is recorded turn by turn in `conversation.md`, not
+repeated here in full; this is the shape of it:
+
+- **Four of seven findings closed with no schema change**, once both sides
+  actually tried the tools already on hand: `C8` (a `FrameSlot` is anything
+  *positioned* rather than *distributed*, whatever its repeat count — sharper
+  than our own guess) and `C12`, both halves (`exclusive_with` for two
+  alternative methods, an `installation`-kind cure step plus `not_before` for
+  the elapsed dependency — both already in the edge vocabulary we'd quoted
+  ourselves and hadn't recognized). `C7`, `C9`, `C10` were independently
+  confirmed as real on Planning's own engine (identical `JointKind` hole) and
+  stay open — corroboration, not a fix. `C11` narrowed to one real gap
+  (`applies_when`) plus a registry addition neither side is blocked on. `C13`
+  stays open and honestly unresolved on both sides pending Planning's own
+  per-bay build item. `C1` closed as answered directly, no filing needed.
+- **Three real amendments were filed by Planning, all dispositioned by us**:
+  `002` (a typed `Date`, and the rule that an absent one is never ordered —
+  ACCEPT), `003` (a leftover `admitted_by` amendment 001's sweep missed —
+  ACCEPT), `004` (the two undefined `Gap.subject` ref types plus
+  `EntityRef.kind`'s undelegated vocabulary — ACCEPT-MODIFIED, `SlotRef`
+  ratified as `RESERVED` rather than shaped, since neither side has a worked
+  example for it yet).
+- **The contract was cut to v1.2**, independently on both sides — each
+  team produced its own copy from the same accepted text and compared
+  hashes, deliberately declining Planning's offer to produce both copies
+  (that would have defeated the one property the hash check exists for).
+  `AMENDING.md` matched byte-for-byte on the first try. `contract.md`
+  differed only on discretionary placement (where new lines go, one
+  paragraph's order, one line-wrap style) — reconciled by reading Planning's
+  actual committed file directly rather than guessing a third time. Every
+  substantive placement now matches byte-for-byte between the two
+  independently-produced copies.
+- **`SlotRef: RESERVED`** and the stale `AMENDING.md` header (`v1.0` → `v1.2`,
+  five days out of date) both went in on Planning's own follow-up asks —
+  both sound, both accepted without argument.
+
+**Deliberately not attempted, twice named rather than left silent:** `C5`
+(the paired `value_type` amendment — ours to draft, gates the largest
+category of currently-withheld tables, touches a BINDING clause, and
+deserves its own pass) and `T14`'s still-open ask to stop double-publishing
+`condition_point_uncovered` gaps that duplicate `table.uncovered` — bundled
+with `C5` since both touch the same `parameters.py` gap-generation code.
+
+## 11. Full session close — what's actually still open, for whoever picks this up
+
+Everything below is real, none of it is blocking anything, and none of it
+should be assumed done because it's been mentioned. Checked one more time
+right before closing, 2026-08-30, late in the day:
+
+**Waiting on someone else, not us:**
+- The BOM/Planning repo (`/home/user/.superset/projects/BOM`) still has its
+  own header text in `contract.md` — they committed in T21 to adopting ours
+  verbatim, T22/T23 gave them the literal text, and as of this session's end
+  they haven't pasted it in yet. `contract.sha256` will not match between
+  the two repos until they do. Nothing to do on our side but wait, or check
+  again next session with the same direct-file-comparison approach that
+  found this the first time (`diff <(bom's contract.md) <(ours)`).
+
+**Real design work, deliberately deferred:**
+- **G56** (`docs/state-and-gaps.md`) — `_row_applicability` has no third
+  answer for "this table has no HVHZ concept at all," so absence and
+  disagreement both collapse to `"unresolved"` and route into a false
+  `disputed` gap. A fresh instance of G53's bug class, one stage past where
+  G53's own fix reaches. Needs its own session, not a tail-end patch.
+- **C5** — the paired-footing-depth/max-span `value_type`. Ours to draft;
+  `parameters.py`'s own module docstring and Planning's T17 consumer note
+  ("one action carrying two numbers, not two rows at one domain point")
+  are the starting material.
+- **T14's double-publish ask**, bundled with C5 — same file, look once.
+
+**Human review still waiting, in order of how ready it is:**
+- One specific cell: `doc-c267c4cd071f` p.10, row 0 col 1 — `chatgpt-web-1`
+  read `"0.875 X6 X71.5 RIBBED PICKET"`, the existing reading has
+  `"0.875 X6X71.5"` (no space). Never resolved — the one Phase-1 mismatch
+  out of ten that didn't get a crop check this session.
+- **37 crops in the review queue** (`cli review --queue`), most already
+  `cross_family_verified` and just waiting for a person to open the crop and
+  formally accept/correct — the same five-minute motion done four times
+  this session, repeatable at any pace.
+- **7 of 44 flagged crops have never been read by anyone at all** —
+  genuinely untouched, not merely unreviewed. Out of this session's scope by
+  design (it targeted the single-reader backlog specifically), not an
+  oversight.
+- **2 backlog pages deliberately left out** of every batch this session: a
+  superseded SimTek NOA (`doc-2b81f4c2925e` p.8) and an out-of-family CLFMI
+  wind guideline (`doc-f87aa202ef21` p.47) — correct scope, still open if
+  the vertical-slice boundary ever expands.
+
+**Named but not filed, on purpose:**
+- The diagram-blind-spot defect (page 31 of
+  `bufftech-simtek-fence-install-guide.pdf` — two callouts our own text
+  extraction missed on a born-digital, not scanned, page) — one data point,
+  waiting for a second before it gets a `G` number.
+- The Tier 1 fix (`mfr/simtek/panel_stiffener`, `mfr/simtek/post_stiffener`
+  as `PartType` extensions) — decided, cited, and has nowhere to ship until
+  a `part_types` registry exists in `fence_evidence` at all.
+
+**Not blocking, whenever there's appetite:**
+- More Phase 2/3 manual worked examples (a butt joint, a bracket-only case
+  are the two `Joint.kind`s the original plan named and never got to) — the
+  session's own decision was to keep doing these by hand, no pipeline yet.
+
+## 12. Housekeeping done at close
+
+Session scratch (`/tmp/claude-1000/.../scratchpad/`) cleared — the ChatGPT
+Project briefings, source-PDF copies, draft turns, and review-grid JSON
+files it held are all either superseded (every draft turn's content is in
+`conversation.md`, committed) or fully reproducible from what's in this repo
+already. Nothing of lasting value lived only there.
+
+One thing found but not addressed, because it isn't ours: an untracked
+`AGENTS.md` has sat at the repo root since before this session started.
+Not created this session, purpose unknown, never touched — worth asking
+whoever's picking this up whether it's wanted, rather than either
+committing or deleting it unasked.
