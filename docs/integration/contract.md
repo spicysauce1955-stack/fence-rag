@@ -84,10 +84,10 @@ TenantId     str | null       null = tenant-agnostic, i.e. Knowledge-global
              (Amendment 004)
 
 Quantity     { amount_milli: int, unit: UnitCode, value_raw: [str] }
-Date         { iso: str | null, value_raw: [str] }   iso is ISO-8601 YYYY-MM-DD
-             (Amendment 002)
 UnitCode     mm | mm2 | mm3 | each | gram_milli | cent
              | deg_milli | mph_milli | pa_milli | second_milli
+Date         { iso: str | null, value_raw: [str] }   iso is ISO-8601 YYYY-MM-DD
+             (Amendment 002)
 
 Provenance   { cites: [SourceRef], source_class, curation_level,
                version_status: active | superseded | unknown }
