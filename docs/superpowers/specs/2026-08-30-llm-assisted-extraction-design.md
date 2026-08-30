@@ -345,3 +345,32 @@ confirmed only by opening the rendered page image directly — a born-digital
 PDF, not a scan, so this is a distinct defect from the documented OCR/scan
 problems. Not yet filed as its own gap; worth one if it recurs on another
 diagram-heavy page.
+
+## 9. Session closed here, 2026-08-30
+
+Seven open decisions were worked through one at a time after §8: Phase 2/3
+stays manual (no pipeline yet); C7-C13 stay batched; the Tier 1 fix stays
+parked pending a `PartType` registry; the two deferred backlog pages stay
+deferred; the diagram-blind-spot finding stays a note pending a second
+occurrence; and two of the three live reader conflicts were resolved for
+real — the footing-table unit-mark misread and the "U-SHAPPED" typo, both
+confirmed against the rendered page image before recording, taking the
+reviewed-crop count from 3 to 7 and `accepted`/`corrected` from 138/6 to
+222/15.
+
+Reviewing the first of those two triggered `promote-tables`, which surfaced
+**G56** — first written up wrong (a guard-clause fix that wasn't needed,
+since `e6d1aed` already built the right handling earlier the same day) and
+then corrected: the real defect is `_row_applicability` collapsing "no HVHZ
+bracket exists on this table" and "readers disagreed about a real one" into
+one `"unresolved"` string, which routes past an already-correct
+collision-detector into a false claim about a bracket that was never
+printed. See `docs/state-and-gaps.md` G56 for the full account. **Not
+patched** — it's real design surface (a third answer for
+`_row_applicability`, and gap-path ordering in `parameters.py`), not a
+guard clause, and this session already had two self-caused mistakes (G55,
+and G56's own first wrong diagnosis) worth not risking a third on top of.
+
+Stopping here by request. Next session should treat G56 as its own
+brainstorm from scratch, not a continuation — it deserves the same
+unhurried treatment §1-§8 got, not a tail-end patch.
