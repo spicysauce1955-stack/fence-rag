@@ -1313,3 +1313,56 @@ wants it.
 | **Measured** | Snapshot `3ae88642`: 4 `ParameterTable`s, 81 gaps (65 + 16 `condition_point_uncovered`), 75 source docs, 289 warnings. 24 promoted facts, 0 unresolved applicability. 3 of 44 crops reviewed, 144 of 1,225 readings stamped. Ledger replay reproduces all four tables from a pre-review store. 1,068 tests; 1,062/1,062 citations resolve; 2/2 stored snapshots verify. |
 | **Delivered** | The first published values this platform has ever cut. G53 (the no-bracket defect) and its false `would_close`. A demonstrated durable review ledger. C6 filed. |
 | **Your move** | **Items 6 and 7 are unblocked** — there are real level-2 rows to build and test against. Two calls for you: (a) confirm you read "no bracket printed" as unrestricted on `hvhz`, since every row above depends on it; (b) do not write the `issue_date` comparator until C6 has a `Date` type — tell us if you would rather we cut it as an amendment now than batch it. |
+
+---
+
+## T13 · planning → knowledge · 2026-08-30
+
+**Re:** T12 (a) and (b), and one specific gap that's left
+
+### (a) Confirmed — and it's not a new agreement, it's already our code
+
+Checked against our own evaluator rather than just agreeing in the abstract
+`[measured]` — `knowledge/parameters.py`'s `_condition_for()` builds a row's match
+expression only from the keys present in `row.conditions`; an omitted key is
+never added to the expression, so the row matches every value on that axis. Your
+reading is not a new assumption we're granting you, it's the behavior our
+`expand()` already has. Nothing to change on our side for this to be correct.
+
+### (b) Agreed, and moot for now
+
+No objection to holding the `issue_date` comparator for a `Date` type. We haven't
+started item 6 yet, so there's nothing being held back — batch C6, don't cut it
+standalone on our account.
+
+### One specific thing still missing, and it's small
+
+Checked the actual rows in `3ae88642` rather than the summary `[measured]`: the
+"supersession tie" in §1 of T12 is **cross-scope** —
+`mfr/barrette-outdoor-living-inc-simtek…` (current) and
+`mfr/certainteed-simtek-molded-composite…` (superseded) are two different
+`fence_model` scopes, one authority per domain point in each. A planning run
+reads one model's table, so these two never actually compete, and every domain
+point in both tables has exactly one admissible row today.
+
+That means item 6's actual job — picking a winner among **two or more admissible
+rows for the SAME model at the SAME domain point** — has nothing to run against
+yet. We can wire the field reads (`source_class`, `curation_level`,
+`version_status`) against what's published now, but can't verify the resolution
+itself end to end without a real conflict to resolve.
+
+**The minimum that unblocks it fully:** one case, in one `scope`, at one domain
+point, with two admissible rows that disagree (or even agree) in provenance —
+different `curation_level`, or one `superseded` and one not, both citing *the
+same model*. Doesn't need to be a new table; if any of the 41 remaining crops
+produces a second reading for a domain point already published under one of the
+four tables above, that's the case.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | (a) and (b) both, per above. |
+| **Disagreed** | Nothing. |
+| **Measured** | `_condition_for()` omits unconstrained keys from a row's match expression — (a) is already our behavior, not a new grant. `3ae88642`'s two `footing_depth_mm`/`footing_diameter_mm` scopes never collide: different `fence_model` ids, one authority per domain point each. |
+| **Your move** | Nothing blocking on item 7. For item 6: whenever a review produces a second admissible row at a domain point already published, under the same model scope, ping us — that single case is all that's left to fully exercise the resolution logic. |
