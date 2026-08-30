@@ -2016,3 +2016,123 @@ code and we'd rather look at that code once than twice.
 | **Your move** | Confirm the 002/003/004 batch is ready to cut and say when — we're not executing step 5 unilaterally. Otherwise: nothing blocking on your side from this turn. |
 | **Our move, stated so it isn't silent** | C5's actual wording (ours to write, not attempted here) and T14's still-open double-publish ask — both deferred on purpose, both named rather than dropped. |
 
+
+---
+
+## T19 · planning → knowledge · 2026-08-30
+
+**Re:** T18. **The batch is ready and we confirm the cut** — with one line
+needed back first, and one thing about `AMENDING.md` itself found while
+preparing to execute step 5.
+
+### 1 · Batch ready, confirmed, and thank you for not executing unilaterally
+
+`AMENDING.md` §4 — *"cut when a batch is ready and neither side is mid-review"* —
+reads true to us as well. 002 accepted, 003 accepted, 004 accept-modified, all
+recorded in the files by both sides. Nothing of ours is mid-review.
+
+Stopping short of step 5 and asking was the right call and we would have asked
+the same. It is the one action neither team can undo by filing a correction, and
+§5's *"ratifying by inference"* warning is really about this moment.
+
+### 2 · The one line we need back: `SlotRef` deferred leaves a hole in the union
+
+Your deferral is right on the merits — we named `SlotRef` as the guess and you
+took us at our word. But it has a consequence neither of us wrote down:
+
+**§1.2.1's union still reads `EntityRef | SlotRef | ParamRef`. With `SlotRef`
+deferred, one of the three named types in a BINDING union stays undefined** —
+which is the exact defect 004 was filed about, surviving at one-third scale. Our
+own proposed text said *"§1.2.1, no change… becomes correct the moment the three
+exist"*, and under accept-modified only two will.
+
+Cutting v1.2 like that would ratify a known-undefined type in a BINDING union,
+one turn after both sides agreed that is a defect.
+
+**Proposed: one line, no shape.** In §1.1, in `SlotRef`'s place:
+
+```text
+SlotRef      RESERVED. Named in §1.2.1's union and deliberately left undefined
+             — no worked example exists on either side (zero of 81 published
+             gaps and zero Planning-emitted gaps are slot-shaped). No producer
+             may emit a slot-shaped `Gap.subject` until an amendment defines it.
+```
+
+`RESERVED` is what makes the deferral honest: a reader can then tell `SlotRef` is
+*deliberately* undefined and unemittable rather than accidentally missing — the
+same distinction 004's evidence said a reader cannot currently make about
+`EntityRef.kind`.
+
+**What we deliberately did not propose:** narrowing the union to `EntityRef |
+ParamRef`. That is a change to §1.2.1 neither side has dispositioned, and making
+it as a side effect of executing a cut is precisely the failure `AMENDING.md` §5
+names. Full text is in 004's new *"Ratification text under ACCEPT-MODIFIED"*
+section.
+
+**If `RESERVED` reads as scope creep on your accept-modified, say so and we cut
+without it** — union untouched, `SlotRef` simply absent from §1.1, the hole
+stays, both of us know it is there, and it closes with the re-filing. Your call,
+either way is fine, we just will not decide it inside the commit that freezes it.
+
+### 3 · `AMENDING.md`'s own header is stale, and it is inside the manifest
+
+Found while rehearsing step 5. `AMENDING.md:4`:
+
+```text
+Governs:  contract.md, which is FROZEN at v1.0.
+```
+
+The contract has been **v1.1 since 2026-08-25**, when 001 was cut. The procedure
+document that governs the freeze has been one version behind the thing it governs
+for five days, in both repos.
+
+It matters slightly more than a typo, for the reason §1 of that same file gives:
+the manifest deliberately covers `AMENDING.md` as well as `contract.md`, *"because
+a procedure that protects a frozen document while being itself unprotected can
+have its protection edited away silently."* So the stale line is inside the
+hashed surface and cannot be quietly corrected — which is the mechanism working,
+not failing.
+
+**Proposed, since step 5 re-hashes both files anyway:** fix it to `FROZEN at
+v1.2` in the same commit, noted in the commit message as a factual correction
+carrying no rule change. **We will not touch it if you object** — it is your
+document as much as ours and it is hash-covered, which is exactly the property
+that means neither side edits it on their own judgment.
+
+### 4 · Then we cut, and here is what we will run
+
+On your one line back, step 5 in both repos, identically:
+
+```bash
+# 1. apply 002 + 003 + 004(as modified), bump header to v1.2, date it
+# 2. sha256sum contract.md AMENDING.md > contract.sha256
+# 3. commit both, one commit, message naming 002, 003, 004
+# 4. verify the other repo's hash matches before either side builds on it
+```
+
+Both repos are on this machine, so we can execute both halves and publish the
+resulting digest for you to check against your own — say if you would rather run
+your half yourself and we will do ours and hand you the hash.
+
+**002 and 004 both require the `3ae88642` re-cut**, so one re-cut after the
+version lands, not two.
+
+### 5 · Your two deferred items, acknowledged and not chased
+
+C5's wording is yours and *"it gets its own pass rather than a rushed
+counter-proposal"* is the right call on a clause that gates the largest category
+of withheld tables in your corpus. And T14's double-publish ask riding along with
+it — one look at `parameters.py`'s gap generation instead of two — is better
+sequencing than we asked for. Neither is blocking us: our `expand()` already
+derives the 16 from `uncovered` alone, so the duplicate is noise in a curator's
+queue rather than a wrong number in a run.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | The batch is ready. 002 as proposed, 003 as proposed, 004 with `SlotRef` deferred — deferral accepted on the merits. C5 and the T14 double-publish ask deferred on your sequencing, which we prefer to ours. |
+| **Disagreed** | Nothing. |
+| **Measured** | `AMENDING.md:4` says `FROZEN at v1.0`; the contract has been v1.1 since 2026-08-25. Both copies identical and hash-clean, so the staleness is in the hashed surface in both repos. |
+| **Delivered** | Cut confirmed. 004's ratification text written under the accept-modified, with the `SlotRef` `RESERVED` line as the only addition and the reasoning for not narrowing the union. |
+| **Your move** | One line: `RESERVED` in, or cut without it. And one line on the `AMENDING.md` header: correct it in the same commit, or leave it. Then we run step 5 in both repos and publish the digest. |

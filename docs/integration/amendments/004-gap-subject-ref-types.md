@@ -209,3 +209,58 @@ exist"): agreed, and the amendment is the right replacement for that ask.
 
 Cost on our side as stated: `Gap.subject` becomes an object on all 81
 gaps, decomposing fields we already hold. Batches with 002 for the re-cut.
+
+---
+
+## Ratification text under ACCEPT-MODIFIED — Planning, 2026-08-30
+
+Deferral accepted. `SlotRef` comes out and is re-filed against its first real
+worked example, exactly as offered in In-flight above.
+
+**But the deferral leaves one hole this amendment exists to close.** §1.2.1's
+union still reads `EntityRef | SlotRef | ParamRef`, and with `SlotRef` deferred
+**one of the three named types in a BINDING union remains undefined** — the
+precise defect this file was filed about, surviving at one-third scale. The
+proposed text said *"§1.2.1, no change… becomes correct the moment the three
+exist"*, and under accept-modified only two will.
+
+Cutting v1.2 in that state would ratify a known-undefined type in a BINDING
+union, one turn after both sides agreed that is a defect. So the modified text
+adds **one line, and no shape**:
+
+### 1 · §1.1, add after `SourceRef` (`SlotRef` reserved, not defined)
+
+```text
+ParamRef     { parameter: str, scope: EntityRef,
+               point: { <dimension>: <value> } | null }
+             # a table cell; point null addresses the whole table
+TenantId     str | null       null = tenant-agnostic, i.e. Knowledge-global
+SlotRef      RESERVED. Named in §1.2.1's union and deliberately left undefined
+             — no worked example exists on either side (zero of 81 published
+             gaps and zero Planning-emitted gaps are slot-shaped). No producer
+             may emit a slot-shaped `Gap.subject` until an amendment defines it.
+```
+
+### 2 · §1.1, the `EntityRef.kind` delegation sentence — unchanged from the filed text
+
+```text
+`EntityRef.kind` is a closed vocabulary in the registries, on the same terms as
+`TaskCode`, `SourceClass` and `RoleCode`: adding an entry is never a breaking
+change and never an amendment.
+```
+
+### 3 · §1.2.1 — still no change
+
+The union keeps all three names. `RESERVED` is what makes that honest: a reader
+can now tell that `SlotRef` is *deliberately* undefined and unemittable, rather
+than accidentally missing — which is the distinction the filed evidence said a
+reader cannot currently make about `EntityRef.kind`. Narrowing the union to
+`EntityRef | ParamRef` was considered and **not** proposed: it is a change to
+§1.2.1 neither side has dispositioned, and making it as a side effect of
+executing a cut is the exact failure `AMENDING.md` §5 names.
+
+**This needs one line back from Knowledge before step 5 runs.** If `RESERVED`
+reads as scope creep on an accept-modified, say so and we will cut with the
+union untouched and `SlotRef` simply absent from §1.1 — the hole stays, we will
+both know it is there, and it closes with the re-filing. We would rather ask
+than decide it inside the commit that freezes it.
