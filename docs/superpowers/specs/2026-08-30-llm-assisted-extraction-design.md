@@ -140,18 +140,19 @@ cannot represent both without either two slots or a compound joint type.
 
 ### Phase 1 — reader-family backlog (A). Ready for implementation planning.
 
-Register a ChatGPT reader in `fence_evidence/table_review.py`'s
-`READER_FAMILY`, load Spikes 1 and 3's output for real via
-`cli readings --load-dir`, confirm movement with `cli review --queue`, then
-continue the same way through the other ~23 single-family pages named in
-§3.
+**Decided and done, 2026-08-30:** `chatgpt-web-1` is registered in
+`fence_evidence/table_review.py`'s `READER_FAMILY` as its own family
+(`openai-chatgpt`), kept separate from `openai-codex` — no page has been read
+by both, so there is no evidence they fail the same way, and defaulting to
+"separate" only lets them count as independent once agreement is genuinely
+observed. Revisit if a pattern of correlated errors ever turns up; merging
+them is a one-line change. This means Spike 3's four crops **will** promote
+to `cross_family_verified` on load, not merely add pre-review volume.
 
-**Open, not decided here:** whether a ChatGPT-web reader counts as an
-independent family from the existing `openai-codex` entry (`codex-C`), or
-whether both should share a family on the theory that vendor, not product
-branding, is what correlates failure modes. This decides whether Spike 3's
-four crops promote to `cross_family_verified` on load, or merely add
-pre-review volume. Resolve before Phase 1 implementation.
+Remaining to implement: load Spikes 1 and 3's output for real via
+`cli readings --load-dir`, confirm movement with `cli review --queue`, then
+continue the same way through the other ~23 single-family pages named in §3
+— now unblocked, via the Project workflow set up for this (below).
 
 ### Phase 2 — more `PanelSpec` worked examples (B). Not ready to build.
 
@@ -223,6 +224,32 @@ using the install guide's numbered steps and explicit ordering language.
 Not yet run. Likely fast, given how clean that document's text already is
 (born-digital, no OCR involved) and how directly its content maps onto
 `AssemblyStep.requires{kind: after|not_before|before|exclusive_with}`.
+
+### The delivery mechanism — a persistent ChatGPT Project, not one-off prompts
+
+Decided 2026-08-30. Rather than a fresh scratch briefing per test, all three
+phases now run through one ChatGPT web Project with:
+
+- **Source documents:** the vertical-slice family only (16 of its 19 listed
+  documents — 3 are byte-identical NOA 24-0117.05 copies filed under
+  different manufacturers, skipped to avoid wasting Project space).
+- **One persistent reference file** (not re-explained per prompt): the real
+  `Quantity` type, the real `Gap` type, and the three tasks' output shapes
+  (table-reading grid, `FrameSlot`/`Joint`/`Member`, `Procedure`/
+  `AssemblyStep`), quoted from the schema docs rather than paraphrased.
+- **`Gap` in place of free text for "couldn't determine this"** on Tasks 2
+  and 3 — the fix named in §3's tier discussion, upgraded from Spike 4's ad
+  hoc "not supported by either document" strings into the real, enumerated
+  type. Task 1 keeps its own existing `illegible` cell marker, which is
+  already the right convention for that case.
+- **Phase 1's first real task: all 25 in-scope backlog pages in one batch**,
+  not a sample — the whole single-family backlog that falls inside this
+  slice (2 of the 27 total, on documents outside the slice, are deferred).
+
+Work order agreed: Phase 1 at scale first, then Phase 2's remaining worked
+examples, then Phase 3. Setup files staged for the user to upload/paste; not
+committed to this repo (session scratch), reproducible from this record if
+lost.
 
 ## 6. Explicitly out of scope
 
