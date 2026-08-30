@@ -588,21 +588,19 @@ class TestTheCommittedLedger(unittest.TestCase):
                          "the committed ledger disagrees with the store; run "
                          "`python3 -m fence_evidence.cli review --export`")
 
-    @requires_store
-    def test_nothing_in_the_live_store_has_been_reviewed(self):
-        """Obligation 6's measurement, restated where the ledger can see it.
-
-        Building durability for human decisions is not making them. If this
-        ever fails because a real person reviewed something, delete it and say
-        so in `docs/state-and-gaps.md`; if it fails because a *process* wrote a
-        review, that is the G17 defect returning.
-        """
-        from fence_evidence.store import connect
-        conn = connect(read_only=True)
-        self.addCleanup(conn.close)
-        reviews.ensure_fact_reviews(conn)
-        self.assertEqual(conn.execute("SELECT COUNT(*) FROM fact_reviews").fetchone()[0], 0)
-        self.assertEqual(conn.execute("SELECT COUNT(*) FROM table_reviews").fetchone()[0], 0)
+    # `test_nothing_in_the_live_store_has_been_reviewed` stood here and asserted
+    # `table_reviews` and `fact_reviews` were both empty. Its own docstring said
+    # what to do when it stopped being true: "If this ever fails because a real
+    # person reviewed something, delete it and say so in
+    # `docs/state-and-gaps.md`." On 2026-08-30 a person reviewed the three
+    # SimTek footing crops, so it is deleted and G17 records it.
+    #
+    # Nothing is weakened by its going. It only ever measured a population;
+    # `test_the_committed_ledger_agrees_with_the_store` above is the invariant,
+    # and it now has three reviews to hold rather than none. The G17 defect the
+    # deleted test also guarded against -- a *process* writing a review -- is
+    # policed where it belongs, by `PROMOTABLE` and by
+    # `submit_review`'s crop echo, not by a count.
 
 
 if __name__ == "__main__":

@@ -338,8 +338,14 @@ class TestFactProvenance(unittest.TestCase):
             self.skipTest("facts not extracted yet")
         bad = self.conn.execute("""SELECT COUNT(*) FROM facts
             WHERE page_no IS NULL OR evidence_text = '' OR value_original = ''
+               -- 'accepted' and 'corrected' are `table_review.PROMOTABLE`:
+               -- the two statuses a person's verdict writes, and the only two
+               -- obligation 6 lets reach curation level 2. This list predates
+               -- build-plan A1 and omitted them, which was invisible while the
+               -- promoted set was empty.
                OR review_status NOT IN ('extracted','flagged','reviewed','rejected',
-                                        'cross_family_verified')
+                                        'cross_family_verified','accepted',
+                                        'corrected')
             """).fetchone()[0]
         self.assertEqual(bad, 0)
 

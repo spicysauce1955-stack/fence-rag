@@ -162,6 +162,25 @@ class TestBuiltSnapshot(unittest.TestCase):
             f"these are templates, not work items")
         for g in gaps:
             w = g["would_close"]
+            if g["subject"].startswith("param:"):
+                # A gap about an uncovered point has no page to name: it reports
+                # that NO source states the value, so there is no document to
+                # send a curator to. The work item is the point itself, and
+                # G40's requirement is that the sentence names it.
+                parameter = g["because"]["params"]["parameter"]
+                self.assertIn(parameter, w,
+                              f"uncovered-point gap does not name its parameter: {w!r}")
+                for key, value in g["because"]["params"]["point"].items():
+                    # A boolean dimension is rendered as a phrase, not as its
+                    # value -- hvhz true reads "HVHZ" and false "non-HVHZ" --
+                    # so require the dimension by name there and the value
+                    # verbatim everywhere else.
+                    needle = key.split("_")[0] if isinstance(value, bool) \
+                        else str(value).strip('"')
+                    self.assertIn(needle.lower(), w.lower(),
+                                  f"uncovered-point gap does not name the point "
+                                  f"it is about: {key}={value!r} missing from {w!r}")
+                continue
             self.assertTrue(
                 re.search(r"\bp\d+\b", w) or g["subject"].startswith("doc-"),
                 f"element-scoped gap does not name its page: {w!r}")
