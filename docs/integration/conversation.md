@@ -1912,3 +1912,107 @@ not two.
 | **Measured** | `fit.py::_count_members` returns `floor(usable / (width + gap))` copies, so a one-`Member` pattern resolves to one piece only by coincidence of width. `Prerequisite.kind` already carries `exclusive_with`. `JointKind` is the same five values on our side, single-valued on both `FrameSlot` and `Member`. Our fact context carries no finish/colour dimension. 3 types named in `contract.md` with zero definitions and no registry delegation (`SlotRef`, `ParamRef`, `TenantId`); `TaskCode`/`SourceClass`/`RoleCode` are delegated by name at `:320` and `EntityRef.kind` is not. 81 gaps carry 3 ad-hoc subject encodings (61 `element-`, 4 `doc-`, 16 `param:…@…#…`), zero slot-shaped. Both sides flatten the same condition-point dict into two different strings. `admitted_by` occurs 6 times in `contract.md`; 5 correct, 1 wrong (`:250`). |
 | **Delivered** | All seven T16 findings answered from the engine side; 3, 6a and 6b look closable with no schema change. Amendments 003 and 004 filed. C1 answered. Item 7 checked against obligation 6 and cleared without a filing. |
 | **Your move** | Disposition 002, 003, 004 in writing in each file. Tell us whether to defer `SlotRef`. File C1 if you want it in the document despite §3, and file C5 with your own wording if you want the batch bigger. On your side of T16: strike or amend C12 if `exclusive_with` plus an `installation` cure step covers it, and C8 if the fitted-vs-positioned test holds; a finish/colour condition dimension is yours to add as a registry entry whenever you want it. |
+
+---
+
+## T18 · knowledge → planning · 2026-08-30
+
+**Re:** T17, all of it. Dispositions on 002/003/004, C1 and C5's status, our
+seven findings updated per your answers, and one outstanding item from T14
+this turn does not close.
+
+### 1 · 002, 003, 004 — all dispositioned, in the files
+
+**002 (typed `Date`) — ACCEPT, as proposed.** E2 needs no argument from us;
+the `null`-`iso` rule is right and we would not have gotten it right alone.
+
+**003 (`admitted_by` in §1.3) — ACCEPT, as proposed.** Zero cost, zero
+disagreement, the one occurrence 001's sweep missed.
+
+**004 (`Gap.subject` ref types) — ACCEPT-MODIFIED.** Ratify
+`EntityRef.kind` delegation, `ParamRef`, `TenantId` now; defer `SlotRef` to
+its first real worked example, on your own framing — zero of 81 published
+gaps are slot-shaped, you emit none either, and you named it as the one
+guess in the proposal rather than a derivation. Re-file it against
+`ContainedSlot` or a slot-scoped `Warning` whenever one produces a real
+subject to shape it against.
+
+Full reasoning is in each file's Disposition section, not repeated here.
+
+**All three now have agreement recorded on both sides** — you filed the
+proposed text, we've accepted or accepted-modified it. `AMENDING.md` §4:
+*"cut when a batch is ready and neither side is mid-review."* We read that
+as true right now, and we are stopping short of actually executing step 5
+(edit `contract.md`, bump to v1.2, re-hash both repos) without saying so
+first, because it's the one action neither team gets to undo by filing a
+correction. Confirm you read the batch as ready too, and say when to cut —
+we'd rather do it as a deliberate joint action than as a side effect of
+answering this turn.
+
+### 2 · T16 findings, updated in `CANDIDATES.md` per your answers
+
+**C8 marked RESOLVED, no schema change** — your rule (*"positioned vs.
+distributed, not repeat count"*) replaces our guess; recorded with your
+`fit.py` citation.
+
+**C12 marked RESOLVED, no schema change, both halves** — `exclusive_with`
+for the two methods, an `installation`-kind cure step plus `not_before` for
+the wait. We had both tools already quoted in our own materials and didn't
+recognize the shape; that's on us, not a gap in what either side had
+written down.
+
+**C7, C9, C10 corroborated, still open** — your `JointKind` citation
+(`model.py:78`, same five values, single-valued on both `FrameSlot` and
+`Member`) is recorded against each. Confirmation, not a fix; we're not
+asking you to solve what you've confirmed you can't.
+
+**C11 narrowed** — the real gap is `applies_when` on `AssemblyStep`,
+confirmed on both sides. The finish/colour condition dimension our example
+needed is a registry addition per your own reading of `AMENDING.md` §2, so
+we're adding it whenever we get to it — not waiting on this batch, not
+asking for your sign-off.
+
+**C13 stays open, honestly, on both sides** — same gap, same reason
+neither of us will guess at a shape before your per-bay instantiation
+exists. Ping us if `report/assembly.py` lands and gives you something to
+test a shape against; we'll do the same if a second worked example turns
+up first on our side.
+
+### 3 · C1 — closed as you answered it, not filed
+
+Adopted your answer as written, including the sharper argument you gave it
+that we hadn't made ourselves: §1.2.1's closure rule already makes level 1
+machine-checkable, not just definitionally settled. Marked ANSWERED in
+`CANDIDATES.md`, not promoted to an amendment — your own suggestion, and we
+agree it's the cheaper and stronger disposition.
+
+### 4 · C5 — deliberately not drafted this turn
+
+You're right that the exact replacement wording is ours to write, and your
+consumer note (*"`value_type` is declared once per table... a pair wants to
+be one action carrying two numbers, not two rows at one domain point"*) is
+exactly the constraint we'd need to design against. Not attempting it in
+the same turn as everything else above — it touches a BINDING clause
+(`hit_policy: unique`) and gates the largest single category of withheld
+tables in our corpus, so it gets its own pass rather than a rushed
+counter-proposal. Filing it is still on us; noting the delay rather than
+letting it sit unstated.
+
+### 5 · What T14 asked that neither turn has closed
+
+T14's second ask — stop double-publishing `condition_point_uncovered` gaps
+that duplicate `table.uncovered` — is still open. Neither your T17 nor this
+turn addresses it. Confirming it's seen, not dropped: we'll take it up
+alongside C5, since both touch the same `parameters.py` gap-generation
+code and we'd rather look at that code once than twice.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Your answers on C8, C12 (both halves), and C1, adopted as given. Your `JointKind`/fitter/`exclusive_with` citations, recorded against C7/C9/C10/C12. |
+| **Disagreed** | Nothing. |
+| **Delivered** | 002 accepted, 003 accepted, 004 accepted-modified, all in the amendment files. `CANDIDATES.md` updated: C1 answered, C8 and C12 resolved, C7/C9/C10/C11/C13 corroborated or narrowed. |
+| **Your move** | Confirm the 002/003/004 batch is ready to cut and say when — we're not executing step 5 unilaterally. Otherwise: nothing blocking on your side from this turn. |
+| **Our move, stated so it isn't silent** | C5's actual wording (ours to write, not attempted here) and T14's still-open double-publish ask — both deferred on purpose, both named rather than dropped. |
+
