@@ -65,29 +65,24 @@ Small, and expected to change rarely.
 
 ```text
 EntityRef    { kind, id, tenant }         a thing in the world
-             # kind is a closed vocabulary in the registries, on the same terms as
-             # TaskCode, SourceClass and RoleCode: adding an entry is never a
-             # breaking change and never an amendment. (Amendment 004)
 VersionRef   { object_id, version, content_hash }
 SourceRef    { id, belongs_to }              belongs_to = content_hash → SourceDoc
 SourceDoc    { content_hash, source_class, version_status, version_status_basis,
                issue_date, expiration_date, superseded_by }
 SnapshotRef  { snapshot_id, spine_version, contract_version }
-SlotRef      RESERVED. Named in Gap.subject's union (§1.2.1) and deliberately
-             left undefined — no worked example exists on either side. No
-             producer may emit a slot-shaped Gap.subject until an amendment
-             defines it. (Amendment 004)
 ParamRef     { parameter: str, scope: EntityRef,
                point: { <dimension>: <value> } | null }
-             # a table cell; point null addresses the whole table (Amendment 004)
+             # a table cell; point null addresses the whole table
 TenantId     str | null       null = tenant-agnostic, i.e. Knowledge-global
-             (Amendment 004)
+SlotRef      RESERVED. Named in §1.2.1's union and deliberately left undefined
+             — no worked example exists on either side (zero of 81 published
+             gaps and zero Planning-emitted gaps are slot-shaped). No producer
+             may emit a slot-shaped `Gap.subject` until an amendment defines it.
 
 Quantity     { amount_milli: int, unit: UnitCode, value_raw: [str] }
 UnitCode     mm | mm2 | mm3 | each | gram_milli | cent
              | deg_milli | mph_milli | pa_milli | second_milli
 Date         { iso: str | null, value_raw: [str] }   iso is ISO-8601 YYYY-MM-DD
-             (Amendment 002)
 
 Provenance   { cites: [SourceRef], source_class, curation_level,
                version_status: active | superseded | unknown }
@@ -95,17 +90,16 @@ Provenance   { cites: [SourceRef], source_class, curation_level,
 PostRole     end | corner | line | gate | junction | transition
 ```
 
+`EntityRef.kind` is a closed vocabulary in the registries, on the same terms as
+`TaskCode`, `SourceClass` and `RoleCode`: adding an entry is never a breaking change
+and never an amendment.
+
 > **BINDING.** Conversion from thousandths happens at **one named point**, and it
 > **rounds** — it does not truncate. A floor of one millimetre is not harmless: a span
 > limit passes through `n = ceil(run_length / max_span)`, so `2463.8 mm` floored to
 > 2463 rather than rounded to 2464 buys **an extra post, footing and pour** on a
 > 9.8 m run. Any arithmetic that MULTIPLIES a published value — a count, a pitch, a
 > span limit — consumes the thousandths and rounds only its output.
-
-> **BINDING.** No floating-point number crosses this boundary in either direction.
-> Quantities are integers in thousandths of the named unit. Where a value came from a
-> document, **every** verbatim source lexeme travels alongside the converted number, so
-> citations quote the page rather than the arithmetic.
 
 > **BINDING.** Every date-valued field crossing this boundary is a `Date`:
 > `SourceDoc.issue_date`, `SourceDoc.expiration_date`, and
@@ -122,7 +116,12 @@ PostRole     end | corner | line | gate | junction | transition
 > criterion; a consumer that cannot proceed without one reports it rather than
 > assuming. Absent is the common case — 72 of the 75 source documents in the first
 > published snapshot carry no `issue_date` — so silence here is not an edge case,
-> it is the default path. (Amendment 002)
+> it is the default path.
+
+> **BINDING.** No floating-point number crosses this boundary in either direction.
+> Quantities are integers in thousandths of the named unit. Where a value came from a
+> document, **every** verbatim source lexeme travels alongside the converted number, so
+> citations quote the page rather than the arithmetic.
 
 `value_raw` is a **list** because sources state two units themselves and contradict
 themselves doing it — `Height: 66 inch (16766 mm)` in a CSI masterspec a specifier copies
@@ -288,7 +287,6 @@ ParameterTable {
            condition_basis  stated | assumed
            value            Quantity | Token    conforming to value_type
            provenance       Provenance          class, level, status, cites
-                                                 (was admitted_by; Amendment 003)
            valid_from · valid_until · authority } ]
 
   uncovered [ { exposure_category: "D", hvhz: true } ]
@@ -363,10 +361,10 @@ rows are configurable by the operator.
 
 > **BINDING.** Ranks are unique within a task row. Where an operator's edit creates a
 > tie, resolution breaks it by higher `curation_level`, then later `issue_date` where
-> both carry one (§1.1 `Date`), then lexicographic `source_class` — deterministically,
-> and never silently preferring an older document. Without this, two implementations
-> could both honour the policy, stamp different `admitted_by.rank`, and hash
-> differently. (Amendment 002) `ai_proposal` is proposal-only on every task and is
+> both carry one (§1.1 `Date`), then
+> lexicographic `source_class` — deterministically, and never silently preferring an
+> older document. Without this, two implementations could both honour the policy, stamp
+> different `admitted_by.rank`, and hash differently. `ai_proposal` is proposal-only on every task and is
 omitted from the table for width.
 
 > **BINDING.** `version_status` is a policy axis. A superseded approval and its
