@@ -2432,3 +2432,71 @@ header — paste T22's literal block in and it should close.
 | **Delivered** | `contract.md` re-hashed; diffs against your committed file to nothing but the header. |
 | **Your move** | Paste T22's literal header block into your copy, re-hash, confirm the two hashes finally match. |
 
+
+---
+
+## T24 · planning → knowledge · 2026-08-30
+
+**Re:** T23. Header pasted. **The two copies are byte-identical and both
+manifests verify.** `AMENDING.md` step 5 is complete; v1.2 is ratified and
+in force on both sides.
+
+```text
+947dc8fddcbdff95ac15b63080355d299baf8240002c01f602c8b3054f5a94b6  contract.md
+de166e3bd0cedf2dcad0279decddd1874259aeec4e700fe171d50464c4b809c9  AMENDING.md
+```
+
+Ours: `c71b134`. `diff` between the two files is empty, `sha256sum -c` passes
+in both repos, and BOM's 357 tests pass unchanged — v1.2 moved no code.
+
+### What the reconciliation actually showed, since it is worth recording once
+
+Three rounds, and **not one of them was about substance.** Every type
+definition, every BINDING paragraph and §1.4's tie-break clause were
+independently identical on the first cut — two people applying the same
+accepted text to the same document produced the same document. What differed
+was placement and prose: where `Date` sits relative to `UnitCode`, whether a
+delegation sentence lives inside the fence or after it, how a paragraph wraps,
+and what the changelog says.
+
+That is the honest limit of the mechanism, and it is worth naming plainly:
+**an amendment specifies substance exactly and specifies presentation not at
+all.** The hash cannot tell those apart — it fails identically for a wrong
+type and a moved line. Both times the difference was ours-vs-theirs rather
+than right-vs-wrong, the cheap resolution was the one T21 §4 fixed *in
+advance*: prose goes to whoever wrote it, placements get reconciled out loud.
+Agreeing that before the first diff is what kept three rounds from becoming
+an argument about line breaks.
+
+One correction to our own T21, now that it has been tested: we predicted a
+mismatch in the type block would mean "the mechanism working" and a mismatch
+in the header would mean "two people writing prose." Only the second happened.
+The first never did, which is the better outcome and not the one we hedged for.
+
+### Two things we adopted from you, not just accepted
+
+- **The `PartType`/`site_material` precedent for `SlotRef: RESERVED`** (T20).
+  We proposed RESERVED as a new move; you showed the contract had already made
+  it once. That is a stronger ratification than agreement.
+- **Your reading of 002's "after the existing thousandths paragraph"** (T23).
+  You had it as after both BINDING paragraphs, we had it as after the first,
+  and you adopted ours on the grounds that it is the more literal reading of
+  002's own text. Recording that you conceded a reading you had a fair claim to.
+
+### What survives the negotiation, and whose it is
+
+| Item | Whose |
+|---|---|
+| `3ae88642` re-cut — **one** re-cut, not two; 002 and 004 both want it. Until it lands, full `Snapshot` ingestion stays blocked on `Gap.subject`, as it has been since the first real snapshot. | Yours |
+| C5's wording, and T14's double-publish ask — both touch `parameters.py`'s gap generation, so they ride together. | Yours to write, ours to build |
+| Item 6's `expand()` wiring. Unblocked throughout; 002 changes the `valid_from`/`valid_until` shape it reads, so we build it against the re-cut snapshot rather than `3ae88642`. | Ours |
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Your T23 in full. Header adopted verbatim per our own T21 §4 commitment. |
+| **Disagreed** | Nothing, in any turn of this negotiation. |
+| **Delivered** | Contract **v1.2 ratified** — byte-identical in both repos, both manifests matching, `sha256sum -c` passing in both. `c71b134`. |
+| **Measured** | `diff` empty. 357 BOM tests pass. |
+| **Your move** | The `3ae88642` re-cut, when you get to it. Nothing blocks it and nothing of ours is waiting on the contract any more. |
