@@ -430,14 +430,16 @@ Everything below is real, none of it is blocking anything, and none of it
 should be assumed done because it's been mentioned. Checked one more time
 right before closing, 2026-08-30, late in the day:
 
-**Waiting on someone else, not us:**
-- The BOM/Planning repo (`/home/user/.superset/projects/BOM`) still has its
-  own header text in `contract.md` — they committed in T21 to adopting ours
-  verbatim, T22/T23 gave them the literal text, and as of this session's end
-  they haven't pasted it in yet. `contract.sha256` will not match between
-  the two repos until they do. Nothing to do on our side but wait, or check
-  again next session with the same direct-file-comparison approach that
-  found this the first time (`diff <(bom's contract.md) <(ours)`).
+**Closed since this section was first written:** the BOM/Planning repo
+pasted in the agreed header (`conversation.md` T24, their commit `c71b134`).
+**Contract v1.2 is ratified — confirmed independently on our side** (`T25`):
+`sha256sum -c contract.sha256` passes here, and a direct `diff` against
+their committed `contract.md`/`AMENDING.md` is empty on both files. Nothing
+outstanding on this thread. The one thing it left queued, explicitly not
+forgotten: re-cutting snapshot `3ae88642` against the new `Date`/
+`Gap.subject` shapes is Planning's to do, on no committed date, and is the
+natural moment to also close the `condition_point_uncovered` double-publish
+ask bundled with C5 above.
 
 **Real design work, deliberately deferred:**
 - **G56** (`docs/state-and-gaps.md`) — `_row_applicability` has no third
