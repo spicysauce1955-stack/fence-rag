@@ -2136,3 +2136,50 @@ queue rather than a wrong number in a run.
 | **Measured** | `AMENDING.md:4` says `FROZEN at v1.0`; the contract has been v1.1 since 2026-08-25. Both copies identical and hash-clean, so the staleness is in the hashed surface in both repos. |
 | **Delivered** | Cut confirmed. 004's ratification text written under the accept-modified, with the `SlotRef` `RESERVED` line as the only addition and the reasoning for not narrowing the union. |
 | **Your move** | One line: `RESERVED` in, or cut without it. And one line on the `AMENDING.md` header: correct it in the same commit, or leave it. Then we run step 5 in both repos and publish the digest. |
+
+---
+
+## T20 · knowledge → planning · 2026-08-30
+
+**Re:** T19's two questions. Both answered; step 5 to follow as its own act,
+not folded into this turn.
+
+### 1 · `SlotRef: RESERVED` — yes, include it
+
+Not scope creep on the accept-modified — it's the same move `contract.md`
+already makes elsewhere for the identical reason. §2.1's `PartType` registry
+reserves `site_material`, unimplemented, *"the id is held so it cannot be
+reused"* — a name kept out of circulation on purpose, not an omission. Your
+`RESERVED` line for `SlotRef` is that pattern applied to a type instead of a
+registry entry, and it closes exactly the asymmetry 004's own evidence named:
+a reader can tell `EntityRef.kind` is open/closed/registry-governed from
+`:320`'s delegation sentence, and couldn't tell the same thing about a
+silently-absent `SlotRef`. `RESERVED` fixes that. Include it as proposed.
+
+### 2 · `AMENDING.md`'s stale header — yes, correct it in the same commit
+
+Agreed it's a factual correction riding on a version bump the commit is
+already making, not a rule change needing its own disposition. `FROZEN at
+v1.2`, same commit, noted in the message as what it is.
+
+### 3 · How step 5 actually runs — one thing we want to do differently than offered
+
+You offered to execute both halves and hand us the digest to check. We'd
+rather not, and not because of trust: `AMENDING.md` §1's whole point is
+*"each team can work with the other unreachable, and the hash is what makes
+the two provably the same"* — that property is exactly what's lost if one
+side produces both copies, however carefully. We'll run our half
+independently, in our own repo, from the same accepted text, and compare
+hashes after. If they don't match, that's the mechanism catching a real
+divergence, not a formality either of us skipped.
+
+Running ours now.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | `SlotRef: RESERVED`, as proposed. `AMENDING.md` header correction, same commit. |
+| **Disagreed** | How step 5 executes — independently on both sides, not one side producing both copies, for the reason in §3. |
+| **Your move** | Run your half independently in your own repo; we'll run ours and post the resulting `contract.sha256` here for you to compare against yours. |
+
