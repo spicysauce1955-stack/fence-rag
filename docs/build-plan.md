@@ -30,15 +30,14 @@ and 65 `gaps` at id `83a227d4`. **1,062 tests pass** (735 at the start of
 2026-08-28).
 
 **Phase A is closed.** All five items landed, and each was a promise already made in
-writing at ratification. The level-2 population is zero, which is the honest number:
-`reviewer` is NULL on all 1,225 readings. What closing it *taught* is in
+writing at ratification. The level-2 population was zero until 2026-08-30 and is now
+**144 readings across 3 of 44 crops** — the honest number, and a small one. What closing it *taught* is in
 `docs/phase-checkpoints.md` — several items turned out to rest on a premise that did not
 hold, and two of them found defects in code written the same day.
 
-**What does not exist** *(rewritten 2026-08-28 — most of this list was closed and the
-paragraph was not moved with it)*: no `Part`, no part-type spine. `ParameterTable` has a
-builder (`parameters.py`) but publishes nothing yet, because nothing is promoted — and
-nothing can be promoted until a person reviews something, which is not a build item.
+**What does not exist** *(rewritten 2026-08-30)*: no `Part`, no part-type spine.
+`ParameterTable` **now publishes** — four of them, at curation level 2, in snapshot
+`3ae88642` (G54) — so this is no longer the empty section it was.
 `part_types`, `parts`, `models`, `procedures`, `combinations` and `rules` are declared and
 empty in every snapshot. `Part` in particular is **blocked on the other team**: candidate
 C3 asks whether a `PanelSpec` member edge is a "value" under invariant 8, and
@@ -48,9 +47,11 @@ answer.
 **The review loop now exists on both sides of the human decision and in the middle.**
 `cli review --accept`, `POST /reviews`, `GET /source-refs/{id}` and
 `POST /source-refs:batch` are built and tested; `promote-tables --apply` is no longer a
-no-op. What has *not* happened is anybody using it: **`reviewer` is NULL on all 1,225
-readings**, so the curation-level-2 population is still zero. Read "the loop exists" as
-"the mechanism is there", never as "something has been reviewed".
+no-op. It has now been used once: `[measured]` 2026-08-30, **3 of 44 crops**, 144 of 1,225
+readings carrying a reviewer (138 `accepted`, 6 `corrected`), 24 promoted facts, four
+published `ParameterTable`s. Read that as "the loop works end to end", never as "the
+corpus is curated" — 703 readings are still `unreviewed` and 378 sit at
+`cross_family_verified`, which publishes nothing.
 
 **Two things are waiting on the other team**, logged rather than filed:
 `docs/integration/amendments/CANDIDATES.md` C1 (`curation_level` 0 vs 1 is never defined,

@@ -202,6 +202,42 @@ posts vs. 9 on a 40 ft run at exposure C.
 
 ---
 
+## C6 — no date format is declared, and a BINDING tie-break has to order dates
+
+| | |
+|---|---|
+| **Trigger** | **D** — a binding rule depends on an ordering the contract never defines |
+| **Raised** | 2026-08-30, on cutting the first real `ParameterTable` |
+| **Blocking?** | **No.** Planning consumes no snapshot yet. Batches — but it stops batching the day they do. |
+
+**The gap.** §1.4 is BINDING that a policy tie resolves *"by higher `curation_level`,
+then later `issue_date`, then lexicographic `source_class`"*. Ordering by `issue_date`
+requires knowing what an `issue_date` **is**. The contract types `source_class`,
+`curation_level` and every `UnitCode`, and types no date at all — not `issue_date`,
+not `expiration_date`, not `ParameterTable.rows[].valid_from` / `valid_until`.
+
+**What this platform actually publishes** `[measured]`, snapshot
+`3ae88642`: US-format slash strings, straight from the source document's own
+stamp — `"04/24/2025"`, `"05/04/2023"`, `"03/13/2029"`. Three `issue_date` and
+two `expiration_date` values in `source_docs`, and now `valid_from` /
+`valid_until` on four `ParameterTable` rows, which is the field §1.4's tie-break
+reaches through.
+
+**What it costs to leave.** Lexicographic comparison — the obvious reading of a
+bare string field, and the one §1.4 already names for `source_class` — orders
+`"04/24/2025"` **before** `"05/04/2023"`. The 2025 document loses the tie to the
+2023 one. §1.4's own sentence forbids exactly that outcome: *"never silently
+preferring an older document."* And `"05/04/2023"` is ambiguous on its face; only
+`"04/24/2025"` is self-disambiguating, and only by accident of the day number.
+
+**Not merely this platform's bug to fix.** Publishing ISO-8601 unilaterally would
+be the right internal change and would still leave the contract silent, so the
+next producer of a date is free to differ. The fix is a typed `Date` in §1.1 —
+ISO-8601 `YYYY-MM-DD`, with the source's own lexeme kept beside it where it
+differs, the same shape `Quantity` already uses for `value_raw`.
+
+---
+
 ## Not candidates — recorded so they are not re-raised
 
 - **`retain_until` has no specified value.** The contract requires a snapshot

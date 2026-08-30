@@ -47,7 +47,7 @@ review responses), `docs/mvp-implementation-spec.md` (the contract),
 | version status: active / superseded / unknown | 3 / 9 / 132 |
 | retrieval units | 10,886 |
 | facts: extracted / flagged | 1,452 / 266 — **1,718 total** (measured 2026-08-28, after G34 cause 1) |
-| facts promoted from table readings | **0** — see G17; the level-2 population is zero by design |
+| facts promoted from table readings | **24** — 2026-08-30, the first; see G54. 3 of 44 crops reviewed |
 | table read candidates: unreviewed / agent_verified / cross_family_verified | 709 / 12 / 504 — all 1,225 retained with crops |
 | facts: condition basis (stated / assumed / unexamined) | 59 / 117 / 1,538 — A2, A5 |
 | facts carrying a second unit lexeme / of which disagree | 7 / **4** — A3 plus G34 cause 1 |
@@ -463,10 +463,11 @@ full-page crops (73 flagged pages deduplicate to 44 distinct contents) with
 SHA-256s and a manifest.
 
 **It ran.** 1,225 candidate readings by 7 agent readers over all 44 distinct pages,
-cross-family compared. **None has been reviewed by a person** — `reviewer` is NULL on
-every one — and after A1 none is promotable, which is the honest state rather than a
-contradiction: the 504 `cross_family_verified` readings are the front of a review queue
-that has no interface yet. See G17 and `docs/build-plan.md` Phase B.
+cross-family compared. **144 of them, on 3 of the 44 crops, have now been reviewed by a
+person** (2026-08-30) and carry a reviewer; the other 1,081 do not — 703 `unreviewed`,
+378 `cross_family_verified`, which is level 1 and promotes nothing after A1. The
+remaining crops are the front of a queue that now has an interface and one worked
+example. See G17, G54 and `docs/build-plan.md` Phase B.
 
 
 A finding from building that input: the ruled-band detector locks onto fence
@@ -1914,11 +1915,16 @@ signature bound to the wrong row asserts something nobody said. When the
 extractor no longer produces the value a person checked, that is surfaced as
 `value_changed` with what it now reads.
 
-**What has NOT closed.** The ledger is empty: 0 table reviews, 0 fact reviews,
-`reviewer` NULL on all 1,225 readings, nothing at curation level 2. The T9
-discrepancy is not resolvable by this work, and recording reviews this session
-cannot verify would be exactly the failure obligation 6 exists to prevent. What
-changed is that from now on a review *can* be shown from a clean checkout.
+**What has NOT closed** *(written 2026-08-28; superseded 2026-08-30)*. The ledger was
+empty: 0 table reviews, 0 fact reviews, `reviewer` NULL on all 1,225 readings, nothing
+at curation level 2. The T9 discrepancy is still not resolvable by that work, and
+recording reviews a session cannot verify would be exactly the failure obligation 6
+exists to prevent. What changed then is that a review *could* be shown from a clean
+checkout; what changed on 2026-08-30 is that **one has been**. The ledger holds 3 table
+reviews, and `[measured]` that day: dropping every review from a copy of the store taken
+before them and replaying `review-ledger.jsonl` restores all three, promotes the same 24
+facts and rebuilds the same four `ParameterTable`s. G49's claim is now demonstrated
+rather than designed. See G54.
 
 **Residual.** `table_reviews.from_candidates` holds `table_read_candidates`
 rowids, which move if the readings are reloaded in a different order, and the
@@ -1987,6 +1993,99 @@ The same class of defect landed and was closed twice more today: a version basis
 string that embedded `today` reached `evaluation-report.md` and was closed by
 pinning `gq-011.interface_input.as_of`, which also stopped the benchmark
 silently failing on 2029-03-14.
+
+### G53 — "the page prints no bracket" was published as "the readers disagreed" — FIXED
+
+Found 2026-08-30, by trying to publish the first real `ParameterTable`.
+
+**The shape.** `promote_tables._row_applicability()` returns `"unresolved"` whenever no
+reader could read an HVHZ applicability bracket. Two different situations reach that
+branch and only one of them is a disagreement:
+
+* readers read the bracket and read it **differently** — genuinely unresolved;
+* **there is no bracket on the page**, so no reader read one — nothing to resolve.
+
+`parameters._translate_conditions()` turns `unresolved` into a `disputed` gap and drops
+the row, so the second case was unpublishable. Worse, the gap's `would_close` — the
+sentence §1.2.1 makes BINDING as *the work item* — was a hardcoded template asserting
+*"readers did not independently agree whether X applies in the HVHZ"* about readings
+where nobody had ever seen a bracket. A false statement about this store's own data,
+published as the instruction a curator acts on.
+
+**What it cost, measured.** The three SimTek footing crops (`doc-88dcd8a73079` p6 and
+p8, `doc-2b81f4c2925e` p6) carry the cleanest conditional table in this corpus: 4 rows ×
+4 columns, fence height × exposure → footing depth and diameter, two independent
+parameters with no C5 pairing collision, identical across two manufacturers and a
+supersession. All three readers noted the pages carry no HVHZ labelling at all. A
+complete 16-cell human review of all three published **0 `ParameterTable`s and 24
+`disputed` gaps**.
+
+**The fix.** A reviewer can now assert the absence, because a reviewer is the only party
+who can: `bracket_from_span` recognises `NO HVHZ BRACKET PRINTED` as a verdict distinct
+from `unresolved`. A bracket is an applicability *restriction*, so a table carrying none
+is unrestricted on that axis — the row omits the `hvhz` key and matches every value,
+exactly as `HVHZ and non-HVHZ` already does, while `hvhz` stays in the declared domain so
+`uncovered` keeps telling the truth.
+
+Two guards, both tested:
+
+* the token is **anchored to the whole span**. A span that merely mentions the absence
+  inside a longer sentence — `NON HVHZ; no bracket on the C rows` — returns `None` rather
+  than a verdict. `NON HVHZ` and `NO HVHZ BRACKET` differ by one letter and one word and
+  mean opposite things.
+* `_row_applicability` now says **which** unresolved case it is, and `would_close` quotes
+  that basis instead of asserting a disagreement it did not observe.
+
+**Measured after.** The same three reviews now promote 24 facts with **0 rows of
+unresolved applicability**, and snapshot `3ae88642` carries **4 `ParameterTable`s** at
+curation level 2. See G54.
+
+---
+
+### G54 — the first published values, and the four tests that had never run
+
+Snapshot `3ae88642ec789f30` (2026-08-30) is the first this platform has cut that carries
+any *value*. Before it: 75 `source_docs`, 289 `warnings`, 65 `gaps`, and `parameters`,
+`parts`, `models` all `[]` — which is what Planning measured in `conversation.md` T11 and
+what their build items 6 and 7 were parked on.
+
+**What published.** Four `ParameterTable`s — `footing_depth_mm` and `footing_diameter_mm`,
+each for `mfr/barrette-outdoor-living-inc-simtek-molded-stone-look-fence-family` and
+`mfr/certainteed-simtek-molded-composite-not-extruded-pvc`. Every row: `curation_level` 2,
+`condition_basis` `stated`, `source_class` `sealed_approval`, `hit_policy` `unique`,
+`domain_basis` `declared`, `condition_scope` on all three keys
+(`exposure_category` site, `fence_height` bay, `hvhz` site). Gaps rose 65 → 81: **16 new
+`condition_point_uncovered`**, which is exposure D at both fence heights and both HVHZ
+states, on all four tables. The sheets print B and C only, the regulatory domain declares
+B/C/D, and obligation 8 says publish the gap rather than let silence read as coverage.
+
+**Corroboration across a supersession.** The CertainTeed NOA is superseded and on the 2020
+FBC; the Barrette one is current and on 2023. The numbers are identical, and both publish —
+§1.4 requires every admissible row including ones a policy will reject, and
+`version_status` is the axis Planning ranks them on.
+
+**Four tests failed on this snapshot and every one was a real find.** All four had been
+dormant — three because the promoted-fact set had been empty since A1, one because it
+asserted that emptiness.
+
+| Test | What it was actually wrong about |
+|---|---|
+| `test_every_promoted_fact_links_back_to_a_candidate` | Queried `table_read_candidates.from_candidate_id` — **the wrong table**. The pointer was inverted to `facts.from_candidate_id` at `SCHEMA_VERSION = 3` and the test followed the rename but not the move. It could only ever raise `OperationalError`; it had skipped since A1, so nothing noticed. |
+| `test_every_fact_has_page_and_evidence` | Its allowed `review_status` list predated `PROMOTABLE = ("accepted", "corrected")` and omitted both — the only two statuses obligation 6 recognises. Invisible while no fact carried one. |
+| `test_would_close_names_the_gap_it_belongs_to` | Required every gap to name a page. A `condition_point_uncovered` gap has **no page by definition** — it reports that no source states the value. Generalised: a point gap must name its parameter and its point instead. |
+| `test_nothing_in_the_live_store_has_been_reviewed` | Asserted `table_reviews` was empty. **Deleted**, per its own docstring: *"If this ever fails because a real person reviewed something, delete it and say so in `docs/state-and-gaps.md`."* This is that. Nothing weakens — `test_the_committed_ledger_agrees_with_the_store` is the invariant and now has three reviews to hold rather than none. |
+
+**1,068 tests pass.** `refs --verify` resolves 1,062 citations across both live snapshots;
+`snapshot --verify-stored` 2/2; the previously stored `83a227d4` is untouched and was not
+re-cut.
+
+**What has NOT changed.** 3 crops of 44 are reviewed. 703 readings are still `unreviewed`,
+378 still sit at `cross_family_verified` — level 1, publishes nothing. `parts`, `models`,
+`part_types`, `procedures`, `combinations` and `rules` are all still `[]`. The 41 remaining
+crops are dominated by the paired footing/max-span tables that candidate C5 is about, and
+those still withhold.
+
+---
 
 ### G51 — the audit's F1 heading fallback: measured and REJECTED
 

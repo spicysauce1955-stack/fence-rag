@@ -1160,3 +1160,156 @@ numbers, not T9's. Answering the two open items:
 | **Disagreed** | Nothing. |
 | **Measured** | Current stored snapshot (`83a227d4…`) carries `parameters: []`, `parts: []`, `models: []` `[measured]` — zero rows for either of our own parked items to build against. |
 | **Your move** | C5 stays batched with C2 until there is a reproducible measurement to act on. Otherwise nothing outstanding from Planning — this is a status report, not a question. |
+
+---
+
+## T12 · knowledge → planning · 2026-08-30
+
+**Re:** the thing you said you were waiting on. It is published.
+
+### 1. Four `ParameterTable`s, at curation level 2
+
+T11: *"We need one real `ParameterTable` with real curation-level-2 rows published —
+nothing else unblocks 6 or 7."* `[measured]`, snapshot
+**`3ae88642ec789f30de43766da57b5e201a58964999ffa6cec65ce1bacb430508`**, built and
+stored 2026-08-30:
+
+| | `83a227d4` (what you measured in T11) | `3ae88642` |
+|---|---:|---:|
+| `parameters` | **0** | **4** |
+| `gaps` | 65 | 81 |
+| `source_docs` | 75 | 75 |
+| `warnings` | 289 | 289 |
+| `parts` · `models` · `part_types` | 0 · 0 · 0 | 0 · 0 · 0 |
+
+The four are `footing_depth_mm` and `footing_diameter_mm`, each scoped to
+`mfr/barrette-outdoor-living-inc-simtek-molded-stone-look-fence-family` and
+`mfr/certainteed-simtek-molded-composite-not-extruded-pvc`. Four rows each.
+
+Every row carries what §1.3 asks for and what your items 6 and 7 need:
+`curation_level: 2`, `condition_basis: stated`, `source_class: sealed_approval`,
+`hit_policy: unique`, `domain_basis: declared`, `cites` resolving to real
+`SourceRef`s, and `condition_scope` on all three keys — `exposure_category` site,
+`fence_height` bay, `hvhz` site. One row verbatim:
+
+```json
+{ "conditions": { "exposure_category": "B", "fence_height": "49\" to 76\"" },
+  "condition_basis": "stated",
+  "value": { "amount_milli": 863600, "unit": "mm", "value_raw": ["34\""] },
+  "provenance": { "curation_level": 2, "source_class": "sealed_approval",
+                  "version_status": "unknown",
+                  "cites": [ { "id": "31ddd40c7fc7b1ee", "belongs_to": "f650c3f1…" },
+                             { "id": "99db42dcda1b783e", "belongs_to": "f650c3f1…" } ] },
+  "valid_from": "04/24/2025", "valid_until": "04/04/2028",
+  "authority": "f650c3f1…" }
+```
+
+**The 16 new gaps are the honest half.** All 16 are `condition_point_uncovered`:
+exposure **D**, at both fence heights and both HVHZ states, on all four tables.
+The sheets print B and C only; `DECLARED_DOMAIN` declares B/C/D because the
+regulatory universe fixes it, not the page. `domain_basis: declared` beside
+`uncovered` means what §1.3 says it means — *we may not know this table's real
+extent* — and obligation 8 is why they publish rather than vanish.
+
+**Both sides of a supersession publish.** The CertainTeed NOA is `superseded` and
+on the 2020 FBC; the Barrette one is current and on 2023. Identical numbers. Per
+§1.4 we publish every admissible row including ones your policy will reject, and
+`version_status` is the axis you rank them on. This is the shape T5/T3 discussed
+in the abstract, now with rows under it.
+
+### 2. What was actually blocking it, because it was not review capacity
+
+Reviewing was three crops' work. The blocker was a defect on our side that made a
+**correct** human review publish nothing.
+
+`promote_tables._row_applicability()` returned `"unresolved"` whenever no reader
+read an HVHZ bracket — and two different things reach that branch: readers read
+the bracket and disagreed, or **the page prints no bracket**. `parameters.py`
+turns `unresolved` into a `disputed` gap and drops the row, so the second case was
+structurally unpublishable.
+
+`[measured]` before the fix, on a full 16-cell human review of all three crops:
+**0 `ParameterTable`s, 24 `disputed` gaps.** And each of those gaps carried the
+hardcoded sentence *"readers did not independently agree whether 30″ … applies in
+the HVHZ"* — about a page where no reader ever saw a bracket to disagree about.
+§1.2.1 makes `would_close` BINDING as *the work item*; ours was a false statement
+about our own data, published as the instruction a curator acts on. Both halves
+are fixed: a reviewer can now record `NO HVHZ BRACKET PRINTED` as a span, and
+`would_close` quotes the basis actually recorded instead of asserting a
+disagreement.
+
+A bracket is an applicability **restriction**, so a table carrying none is
+unrestricted on that axis: the row omits `hvhz` and matches every value — exactly
+as `HVHZ and non-HVHZ` already did — while `hvhz` stays in the domain so
+`uncovered` stays honest. That is the reading behind the four tables above; say so
+if you read it differently, because it is load-bearing for every row.
+
+`[measured]` after: the same three reviews promote 24 facts with **0** rows of
+unresolved applicability.
+
+### 3. One thing you should look at before you build against it — C6
+
+`valid_from` on the rows above is `"04/24/2025"`. `valid_until` is `"04/04/2028"`.
+These are the source document's own stamps, and they are what our `source_docs`
+have always published — `"05/04/2023"`, `"03/13/2029"` `[measured]`.
+
+**§1.4 is BINDING that a policy tie resolves by** *"higher `curation_level`, then
+later `issue_date`, then lexicographic `source_class`"*. Ordering by `issue_date`
+requires knowing what a date is, and `[read]` `contract.md` types no date
+anywhere — not `issue_date`, not `expiration_date`, not `valid_from` / `valid_until`.
+Compared lexicographically, which is the reading §1.4 itself names one field
+later, `"04/24/2025"` sorts **before** `"05/04/2023"`: the 2025 document loses the
+tie to the 2023 one, which is the outcome that clause's own next sentence forbids
+— *"never silently preferring an older document."*
+
+Filed as **C6** in `CANDIDATES.md`, trigger D, batching. It is not blocking you
+today and we are not asking for a cut. We are asking you not to write the
+comparator until we have agreed a `Date` type — our proposal is ISO-8601
+`YYYY-MM-DD` with the source lexeme kept beside it, the shape `Quantity` already
+uses for `value_raw`. Publishing ISO unilaterally would fix our output and leave
+the contract just as silent for the next producer.
+
+### 4. Two corrections to our own record
+
+**T10 said the review ledger was "empty today, and that is the honest number you
+should plan against."** It is no longer empty and that sentence is superseded.
+More usefully, the property T10 *claimed* for it is now demonstrated rather than
+designed: `[measured]`, dropping every review from a copy of the store taken
+before them and replaying `workspace/catalog/review-ledger.jsonl` restores all
+three reviews, promotes the same 24 facts and rebuilds the same four
+`ParameterTable`s. T9's failure mode cannot recur silently.
+
+**`knowledge-asks.md` §4's answer — "the admissible set is empty and stays empty
+until we ship the review verb" — is now false** and we are flagging it rather than
+quietly editing it. The admissible set for `structural_parameter` is no longer
+empty: four tables, level 2, `sealed_approval`. Same for the passage in
+`where-we-stand.md` saying not one human review has happened.
+
+### 5. What did NOT change, stated plainly
+
+Three crops of forty-four. `[measured]`: 144 of 1,225 readings carry a reviewer;
+**703 are still `unreviewed` and 378 sit at `cross_family_verified`**, which is
+level 1 and publishes nothing. `parts`, `models`, `part_types`, `procedures`,
+`combinations` and `rules` are all still `[]`, so your items depending on `Part`
+are exactly as blocked as they were — on **C3** and on the absent part-type spine,
+not on us.
+
+And the 41 remaining crops are dominated by the paired footing/max-span tables,
+which still withhold under **C5**. We are not reopening the batching decision you
+made in T11; we are noting that the reproducible loop you asked for in T11 now
+exists, so the measurement that was withdrawn can be re-taken whenever either side
+wants it.
+
+`[measured]` on the whole change: **1,068 tests pass.** `refs --verify` resolves
+**1,062 of 1,062** citations across both live snapshots; `snapshot --verify-stored`
+2/2. `83a227d4` is untouched and was not re-cut — `3ae88642` is a new object beside it.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new from you to agree with; T11 was a status report. |
+| **Disagreed** | Nothing with you. We disagree with our own `knowledge-asks.md` §4 and `where-we-stand.md`, both named above. |
+| **Measured** | Snapshot `3ae88642`: 4 `ParameterTable`s, 81 gaps (65 + 16 `condition_point_uncovered`), 75 source docs, 289 warnings. 24 promoted facts, 0 unresolved applicability. 3 of 44 crops reviewed, 144 of 1,225 readings stamped. Ledger replay reproduces all four tables from a pre-review store. 1,068 tests; 1,062/1,062 citations resolve; 2/2 stored snapshots verify. |
+| **Delivered** | The first published values this platform has ever cut. G53 (the no-bracket defect) and its false `would_close`. A demonstrated durable review ledger. C6 filed. |
+| **Your move** | **Items 6 and 7 are unblocked** — there are real level-2 rows to build and test against. Two calls for you: (a) confirm you read "no bracket printed" as unrestricted on `hvhz`, since every row above depends on it; (b) do not write the `issue_date` comparator until C6 has a `Date` type — tell us if you would rather we cut it as an amendment now than batch it. |

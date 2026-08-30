@@ -65,8 +65,10 @@ order, and `audit/10-ratification-v1.0.md` §3.2 is the non-compliance this plat
 signature — **partly closed as of 2026-08-25**. Its live violation (obligation 6) and its
 three representational gaps (obligations 4, 15, 10) closed with build-plan A1-A5, all
 five of which landed 2026-08-25. Still in force: the unbuilt publishing-layer
-obligations — and note that nothing is published at curation level 2 — the interface now exists
-(`cli review`, `POST /reviews`) and nobody has used it yet.
+obligations. Curation level 2 is **no longer empty as of 2026-08-30**: a person reviewed the
+three SimTek footing crops, and snapshot `3ae88642` publishes four `ParameterTable`s — the
+first values this platform has ever published — at level 2 with 16 `condition_point_uncovered`
+gaps beside them. That is 3 crops of 44; the other 41 are still waiting.
 
 Nothing in `docs/integration/` displaces the documents above. Those govern how this platform
 works; the contract governs only what it exposes.
@@ -282,13 +284,23 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   `workspace/catalog/review-ledger.jsonl` is the committed, deterministic export
   (`cli review --export` / `--import`), keyed on evidence — `crop_sha256` for a table
   review, the (element, fact type, value) anchor for a fact review — and never on a row
-  id, because a `fact_id` moves on every re-extraction. It is empty today, and a test
-  fails the build if somebody records a review and does not export it. See G49.
-- **The review loop exists as of 2026-08-28; the level-2 population is still zero.**
-  `reviews.py` writes `accepted` and `corrected`, `cli review --accept` and `POST /reviews`
-  reach it, and `promote-tables --apply` is no longer a no-op. What remains true is that
-  **`reviewer` is NULL on all 1,225 readings** — the mechanism exists and nobody has used
-  it. Do not read "the loop exists" as "anything has been reviewed".
+  id, because a `fact_id` moves on every re-extraction. It holds **3 table reviews** and a
+  test fails the build if somebody records a review and does not export it. Measured
+  2026-08-30: dropping the reviews from a pre-review copy of the store and replaying the
+  ledger reproduces all four published `ParameterTable`s. See G49.
+- **The review loop has been used, once, and the numbers are small.** `[measured]`
+  2026-08-30: **3 of 44 crops reviewed**, 144 of 1,225 readings carry a reviewer (138
+  `accepted`, 6 `corrected` — the corrections are the merged fence-height cells), 24
+  promoted facts, 4 published `ParameterTable`s. The other **703 readings are still
+  `unreviewed` and 378 still sit at `cross_family_verified`**, which is level 1 and
+  publishes nothing. Do not read "level 2 is populated" as "the corpus is curated".
+- **A page that prints no HVHZ bracket is not a reader disagreement.** `promote_tables`
+  returned `unresolved` for both, so a complete human review of the cleanest table in the
+  corpus published 0 tables and 24 `disputed` gaps whose text claimed readers had failed to
+  agree about a label none of them ever saw. A reviewer now records
+  `NO HVHZ BRACKET PRINTED` as a span; a bracket is a restriction, so its absence publishes
+  the row as matching every `hvhz` value while the dimension stays in the domain. The token
+  is anchored to the whole span — a hedged span asserts nothing. See G53.
 - **Tenant isolation is enforced at the ref minter, not by a filter.** `documents.owner_tenant`
   is the whole axis — NULL is shared, which is all 144 corpus documents — and
   `SnapshotBuilder.source_ref` refuses to mint a citation into another tenant's document, so a
