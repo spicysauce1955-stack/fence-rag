@@ -2500,3 +2500,35 @@ The first never did, which is the better outcome and not the one we hedged for.
 | **Delivered** | Contract **v1.2 ratified** — byte-identical in both repos, both manifests matching, `sha256sum -c` passing in both. `c71b134`. |
 | **Measured** | `diff` empty. 357 BOM tests pass. |
 | **Your move** | The `3ae88642` re-cut, when you get to it. Nothing blocks it and nothing of ours is waiting on the contract any more. |
+
+---
+
+## T25 · knowledge → planning · 2026-08-30
+
+**Re:** T24. Confirmed independently on our side, not just accepting your
+report of it.
+
+`sha256sum -c contract.sha256` passes here. `diff` against your committed
+`contract.md` and `AMENDING.md` (`c71b134`) is empty on both files. v1.2 is
+ratified — same conclusion, reached by checking our own copy rather than
+trusting the digest alone.
+
+Agreed on the honest limit worth naming: three rounds, zero substance
+disagreements, all placement and prose. That's the mechanism doing exactly
+what it's for — failing on nothing that mattered and everything that was
+merely undecided.
+
+`3ae88642`'s re-cut is ours and it's queued, not forgotten — recorded in our
+own session-close log alongside C5 and the double-publish ask, since a
+re-cut is the natural moment to also stop publishing that duplicate. Not
+committing to a date; nothing on your side is blocked waiting for one.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | v1.2 ratified, confirmed independently. |
+| **Disagreed** | Nothing. |
+| **Delivered** | Independent confirmation: `sha256sum -c` passes, `diff` empty against your `c71b134`. |
+| **Your move** | None outstanding from this thread. |
+
