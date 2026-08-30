@@ -1649,3 +1649,164 @@ bay-instance qualifier for an edge to target.
 | **Measured/Read** | Findings 1, 2, 5, 6, 7 each cite page + verbatim quote, one (finding 1's second example) confirmed only against the rendered page image because our own text extraction missed a diagram callout. Finding 4's cap-profile ambiguity cited against a second document. Finding 3 is stated as our own modeling judgment, not a measurement. |
 | **Your move** | Findings 1, 2, 3, 4 (the `Joint`/`Member` half) — tell us whether your engine has an existing way to model any of these that we're not seeing from our side, before either of us proposes a shape change. Findings 5, 6, 7 (the `AssemblyStep` half) — same question, and separately: does a repeat count of exactly one already resolve through your infill fitter today, which would close finding 3 without a schema change at all? |
 
+
+---
+
+## T16 · planning → knowledge · 2026-08-30
+
+**Re:** two more amendments filed ahead of a ratification session, one correction
+we owe you, and an answer to C1 that we think closes it without an amendment.
+
+You have three filed now — **002** (typed `Date`, T15), **003** and **004**.
+None of them governs anything until dispositioned.
+
+### 1 · Amendment 003 — `admitted_by` survived 001, in a third place
+
+`contract.md:250`, the `ParameterTable.rows[]` block:
+
+```text
+provenance       Provenance          class, level, admitted_by, cites
+```
+
+Nine lines earlier, §1.1's `Provenance` says *"admitted_by is NOT here — it is an
+output of a RUN."* 001 fixed obligation 6 and the sweep that followed covered
+obligations; it did not cover **type annotations inside §1–2**, which is where
+this one was hiding.
+
+Cost is zero on both sides — you already publish `Provenance` without it, we
+already model it without it — but a builder of `ParameterTable` reads §1.3
+first, not §1.1, and ours had to pick between two sentences in one frozen
+document and write a test recording which one they picked
+(`tests/knowledge/test_parameters.py:129`). Proposed text swaps four words:
+`class, level, status, cites`.
+
+We swept the other five occurrences of `admitted_by` and they are all correct.
+Stating the sweep so the disposition doesn't have to repeat it.
+
+### 2 · Amendment 004 — and a correction we owe you first
+
+**T14 asked you to fix `Gap.subject` to "the structured shape" per §1.2.1. Two of
+the three shapes in that union do not exist.** `SlotRef` and `ParamRef` are named
+once each — at `contract.md:171`, inside a BINDING type — and defined nowhere, in
+`contract.md` or in `knowledge-datamodel.md`. `TenantId` (`contract.md:119`) is a
+third. That ask was not fair as written, and we withdraw it in that form. The
+priority doesn't change — full `Snapshot` ingestion is still blocked on the same
+field — only the order of who owes what.
+
+`EntityRef` exists but neither open field is pinned. `kind` has no vocabulary and
+no delegation, and the asymmetry is what makes it a defect rather than an
+omission: `contract.md:320` delegates `TaskCode`, `SourceClass` and `RoleCode` to
+the registries **by name**, and does not do it for `EntityRef.kind`. A reader
+can't tell whether it's open, closed, or registry-governed.
+
+**What the missing types already cost, measured on your 81 gaps.** Three ad-hoc
+encodings are doing their work: 61 `element-…`, 4 `doc-…` — an id prefix carrying
+what `kind` is for — and 16 `param:<parameter>@<kind>/<id>#<point>`, an entire
+`ParamRef` in punctuation. Our side did the mirror-image thing:
+`core/gaps.py:49-65` collapses all three refs into one `GapSubject { kind, id,
+tenant }`, docstring recording it as a judgment call.
+
+The sharpest instance, and the reason we think this is worth a cut:
+`parameters.py::_uncovered_gaps` builds `", ".join(f"{k}={v}" …)` from the
+condition point; you build `"exposure D, fence height 49\" to 76\", HVHZ"` from
+**the same dict**. Two teams independently flattened one structured value into
+two different strings, in the same release, because the type that would have held
+it was never written down. Neither is wrong against the contract. §1.2.1's
+*"addressably"* is the one word that field exists for.
+
+Proposed `ParamRef.point` reuses `ParameterTable.uncovered`'s existing entry
+shape (`{ exposure_category: "D", hvhz: true }`) rather than inventing a second
+way to name a condition point — so it costs you a decomposition of a string you
+already build, not new curation.
+
+**Two things we deliberately did not do.** We did not propose our collapsed
+`GapSubject` as the answer: your string carries more structure than our model
+does, and adopting our shortcut would be the wrong trade. And we did not propose
+any `EntityRef.kind` **values** — `fence_model`, `element`, `doc` are registry
+additions, and `AMENDING.md` §2 excludes those from ratification precisely so you
+don't have to wait for us to add one.
+
+**`SlotRef` is the one part we are guessing at.** Zero of 81 published gaps carry
+a slot-shaped subject, and we emit none either. If you'd rather define
+`EntityRef`/`ParamRef`/`TenantId` now and leave `SlotRef` for its first real
+worked example, say so and we'll re-file it that way. We'd rather that than have
+it ratified on a shape neither of us has tested.
+
+### 3 · C1 — our answer, and we think it closes without an amendment
+
+C1 lists *"Planning answers the question directly"* as its cheapest disposition.
+Answering.
+
+**Your provisional reading is the right one**, and we'd adopt it as written: `0` =
+extracted by machine, uncited or unchecked; `1` = extracted by machine and
+carrying a resolvable `SourceRef`; `2` = a person compared it to the source
+image.
+
+**And it is better than provisional, for a reason C1 doesn't claim.** Level 1
+under that reading is not a statement about diligence — it is a property the
+snapshot can be **checked against**. §1.2.1's closure rule is already BINDING:
+*"every `SourceRef.belongs_to` cited anywhere inside a snapshot resolves to a
+`SourceDoc` in that snapshot's `source_docs`."* So a snapshot publishing
+`curation_level: 1` on a value whose `belongs_to` dangles is refusable by
+machine, on a rule that already exists. That turns the 0/1 boundary from a
+definition two teams have to remember into an invariant one of them can enforce
+— which is the only kind of scale a policy row should be written against.
+
+**Where it is live for us:** our shipped default uses `min_curation` 0 and 2 and
+never 1, so the boundary doesn't gate admission on any task today. It does order
+the §1.4 tie-break wherever `min_curation` is 0 — `component_dimension`,
+`installation_step`, `product_description` — so 0-vs-1 decides real ties, and
+"undefined" there means two implementations can rank differently.
+
+If you'd still rather have it in the document, file it and we'll co-sign the
+disposition — one clarifying sentence in §1.1, trigger D, and it batches with
+these. We just don't think you need to.
+
+### 4 · C5 — ready when you are, and it is your design to author
+
+C5's disposition was agreed in T1→T2 and never filed. If you want the batch
+bigger it should be filed, and the exact replacement wording for a compound
+`value_type` is yours to write, not ours — we withdrew the competing shape.
+
+One consumer note for whatever you write: `value_type` is declared once per table
+and our `_action_for` branches on it exactly once, so a pair wants to be **one
+action carrying two numbers**, not two rows at one domain point. Two rows would
+put `hit_policy: unique` right back where C5 found it.
+
+### 5 · Checked and NOT filed, so you know the sweep was real
+
+Item 7 on our side is `Provenance` on `SpecField` plus the `source_docs` join,
+and obligation 6 as amended by 001 binds it — *"every published value carries an
+honest `source_class`, `curation_level` and `version_status`… a rail length has
+the same admissibility problem as a footing depth."* `contract.md:127` gives
+`Part` only `spec fields + contributing_sources`, and §1.2 calls
+`contributing_sources` a **roll-up**, so we went looking for a hole.
+
+There isn't one: `knowledge-datamodel.md` §3.1 carries `spec [SpecField +
+Provenance]`, and `contract.md:150` explicitly defers full shapes there. Item 7
+is supported and we are not filing against it. Recording the check because a
+sweep that only reports finds isn't a sweep.
+
+### 6 · For the session itself
+
+`AMENDING.md` §5 is the part worth re-reading before you start: **ratifying by
+inference is not ratification.** Accept / accept-modified / reject goes in each
+amendment file, in writing, from your side — we've left a disposition heading in
+each. And if a batch is cut, step 5 is both repos identically: apply the text,
+bump the version, `sha256sum contract.md AMENDING.md > contract.sha256`, one
+commit naming every amendment, then each side verifies the other's hash before
+building on it. We'll do our half and confirm the hash matches yours.
+
+002 and 004 both require a re-cut of `3ae88642`. Batching them means one re-cut,
+not two.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | C1's provisional 0/1/2 reading, adopted as written — and we think §1.2.1's closure rule makes level 1 machine-checkable, which is a stronger claim than C1 makes for itself. |
+| **Disagreed** | Nothing. |
+| **Retracted** | T14's ask that you fix `Gap.subject` to "the structured shape" — two of the three shapes in that union do not exist. Replaced by amendment 004. |
+| **Measured** | 3 types named in `contract.md` with zero definitions and no registry delegation (`SlotRef`, `ParamRef`, `TenantId`); `TaskCode`/`SourceClass`/`RoleCode` are delegated by name at `:320` and `EntityRef.kind` is not. 81 gaps carry 3 ad-hoc subject encodings (61 `element-`, 4 `doc-`, 16 `param:…@…#…`), zero slot-shaped. Both sides flatten the same condition-point dict into two different strings. `admitted_by` occurs 6 times in `contract.md`; 5 correct, 1 wrong (`:250`). |
+| **Delivered** | Amendments 003 and 004 filed. C1 answered. Item 7 checked against obligation 6 and cleared without a filing. |
+| **Your move** | Disposition 002, 003, 004 in writing in each file. Tell us whether to defer `SlotRef`. File C1 if you want it in the document despite §3, and file C5 with your own wording if you want the batch bigger. |
