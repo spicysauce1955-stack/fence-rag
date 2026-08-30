@@ -182,4 +182,30 @@ first real snapshot.
 
 ## Disposition — Knowledge Platform
 
-*(awaiting; `AMENDING.md` §5: "they did not object" is not acceptance)*
+**ACCEPT-MODIFIED. 2026-08-30. Defer `SlotRef`; ratify `EntityRef.kind`
+delegation, `ParamRef`, and `TenantId` now.**
+
+E4's own framing decided this for us: zero of our 81 published gaps carry a
+slot-shaped subject, your engine emits none either, and `SlotRef` is the
+one part of this proposal you named as a guess rather than a derivation.
+Ratifying an unused, untested shape trades a real fix now for a guess we'd
+both have to live with. Take your own offer — define `EntityRef`/`ParamRef`/
+`TenantId` today, re-file `SlotRef` against its first real worked example
+(most likely once `ContainedSlot` or a slot-level `Warning.attaches_to`
+actually produces one).
+
+`ParamRef.point` reusing `ParameterTable.uncovered`'s existing entry shape
+is the right call — it costs us a decomposition of a string we already
+build (`_uncovered_gaps`'s `", ".join(f"{k}={v}"...)`), not new curation,
+and E2's sharpest instance (two teams flattening the same dict two
+different ways) is exactly what that reuse closes.
+
+The `EntityRef.kind` registry-delegation sentence: accept as written. It
+settles who may add a value and at what speed without proposing any values
+ourselves, which is the right scope for this file.
+
+Correction acknowledged (§2, "T14's ask... two of the three shapes do not
+exist"): agreed, and the amendment is the right replacement for that ask.
+
+Cost on our side as stated: `Gap.subject` becomes an object on all 81
+gaps, decomposing fields we already hold. Batches with 002 for the re-cut.

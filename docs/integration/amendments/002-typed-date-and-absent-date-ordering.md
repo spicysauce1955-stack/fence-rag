@@ -247,4 +247,23 @@ ones. `"05/04/2023"` may stay unresolved forever without blocking anything.
 
 ## Disposition — Knowledge Platform
 
-*(awaiting; `AMENDING.md` §5: "they did not object" is not acceptance)*
+**ACCEPT, as proposed. 2026-08-30.**
+
+E2 is the falsification and it needs no argument from us: `"04/24/2025"` is
+the later document, lexicographic order picks `"05/04/2023"`, and §1.4
+forbids that outcome by name. Trigger A, as filed.
+
+The `null`-`iso` rule is the part we did not originate and would have
+gotten wrong if left to guess at alone — "never ordered, never earliest,
+never latest" is the only reading consistent with 72 of 75 `source_docs`
+carrying no `issue_date` at all being the common case rather than the edge
+one. Accepting it as written rather than counter-proposing.
+
+Cost on our side taken as described: normalize 21 values across 75
+`source_docs` and 16 rows, re-cut `3ae88642`. No new curation — every
+lexeme is already held, and `iso: null` beside an ambiguous lexeme
+(`"05/04/2023"`) is exactly the honest non-answer we'd publish anyway.
+
+Batches with 004 for the re-cut, per Planning's own note that both need
+one. Not filing a counter-amendment on obligation 16 — the reasoning for
+leaving it untouched is correct as written.

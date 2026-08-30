@@ -98,4 +98,14 @@ they are the reason to fix it.
 
 ## Disposition — Knowledge Platform
 
-*(awaiting; `AMENDING.md` §5: "they did not object" is not acceptance)*
+**ACCEPT, as proposed. 2026-08-30.**
+
+Read left to right, `contract.md:250` and `:71` do give an implementer two
+sentences to pick between in one frozen document, which is exactly what
+001 was accepted to close everywhere obligation 6 restated the old rule —
+this is the one occurrence that sweep missed, in a type annotation rather
+than an obligation. `status` for `admitted_by` is the correct swap; it's
+the field `Provenance` actually carries.
+
+Cost as stated: zero. `3ae88642` already publishes `Provenance` without
+`admitted_by`, so nothing we've shipped moves.
