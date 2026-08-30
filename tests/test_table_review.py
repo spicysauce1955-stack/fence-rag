@@ -142,6 +142,25 @@ class TestPromotionGate(unittest.TestCase):
         self.assertNotIn("cross_family_verified", PROMOTABLE)
         self.assertEqual(set(PROMOTABLE), {"accepted", "corrected"})
 
+    def test_cross_family_marking_never_overwrites_a_human_verdict(self):
+        """G55: a person's accepted/corrected row must survive being re-agreed with."""
+        from fence_evidence.store import now
+        for reader, status in (("calibration-A", "accepted"), ("codex-C", "unreviewed")):
+            self.conn.execute("""INSERT INTO table_read_candidates(document_id, version_id,
+                page_no, crop_path, reader, reader_kind, is_table, row_index, col_index,
+                row_label, col_label, value, review_status, created_at)
+                VALUES (?,?,?,?,?,'agent',1,0,2,'C','FOOTING DEPTH','36"',?,?)""",
+                (self.doc["document_id"], self.doc["version_id"], self.doc["page_no"],
+                 self.doc["page_image_path"], reader, status, now()))
+        self.conn.commit()
+        mark_cross_family_verified(self.conn, ["calibration-A", "codex-C"])
+        rows = {r["reader"]: r["review_status"] for r in self.conn.execute(
+            "SELECT reader, review_status FROM table_read_candidates "
+            "WHERE reader IN ('calibration-A', 'codex-C') AND col_index=2")}
+        self.assertEqual(rows["calibration-A"], "accepted",
+                         "a human verdict must not be overwritten by a later machine agreement")
+        self.assertEqual(rows["codex-C"], "cross_family_verified")
+
 
 if __name__ == "__main__":
     unittest.main()

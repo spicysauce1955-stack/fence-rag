@@ -223,9 +223,13 @@ def mark_cross_family_verified(conn: sqlite3.Connection, readers: list[str]) -> 
         if len(values) != 1:
             skipped += 1
             continue
+        # G55: a person's accepted/corrected verdict on THIS row must never be
+        # overwritten by a machine agreement computed after the fact, even
+        # though the row is one of the readers being agreed across here.
         conn.execute(f"""UPDATE table_read_candidates SET review_status='cross_family_verified'
              WHERE document_id=? AND page_no=? AND row_index=? AND col_index=?
-               AND reader IN ({placeholders})""",
+               AND reader IN ({placeholders})
+               AND review_status NOT IN ('accepted', 'corrected')""",
             (r["document_id"], r["page_no"], r["row_index"], r["col_index"], *readers))
         verified += 1
     conn.commit()
