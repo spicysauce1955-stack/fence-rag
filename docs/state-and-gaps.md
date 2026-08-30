@@ -2085,9 +2085,71 @@ re-cut.
 crops are dominated by the paired footing/max-span tables that candidate C5 is about, and
 those still withhold.
 
+**Update, 2026-08-30, later the same day.** A fourth reader family,
+`chatgpt-web-1` (family `openai-chatgpt`, distinct from `openai-codex` —
+neither has ever read a page the other has, so nothing supports merging
+them), read 25 of the 27 pages that had only ever had one reader. 527 of 537
+cells matched the existing reading exactly; the ten that did not are exactly
+the kind of thing this gate exists to catch, not a reason to distrust it — six
+are a footing table where the existing single reading used foot marks
+(`97'`) against `chatgpt-web-1`'s inch marks (`97"`), and 97 feet of post
+spacing is physically impossible, so this is very likely the second reader
+catching a real, previously unflagged error. `unreviewed` drops to 192,
+`cross_family_verified` rises to 1,426 (`accepted`/`corrected` unchanged at
+138/6 — see G55 below for why that took a second step). 41 crops still
+dominated by C5's paired tables; 2 of the original 27 single-family pages
+(a superseded SimTek NOA and an out-of-family CLFMI wind guideline) remain
+untouched, out of this batch's scope by design.
+
 ---
 
-### G51 — the audit's F1 heading fallback: measured and REJECTED
+### G55 — `mark_cross_family_verified` has no CLI wiring, and running it broadly downgraded a human review
+
+**What happened.** Loading `chatgpt-web-1`'s readings (G54's update, above) is
+safe — `load_directory` only inserts new candidate rows. Marking the new
+agreement is not yet wired to the CLI at all (`fence_evidence/table_review.py`'s
+`mark_cross_family_verified` has no `cli table-review` flag), so it has to be
+called directly. Called with the full reader roster so genuine new agreement
+would be found wherever it existed, it did find some — but its `UPDATE`
+sets `review_status` unconditionally for every reader in the list, with no
+guard against a row that is already `accepted` or `corrected`. Three
+already-human-reviewed pages (the two SimTek crops reviewed 2026-08-30 plus
+the corroborating superseded-NOA crop) had cells re-stamped
+`cross_family_verified`, because their values also happen to agree across
+families — `accepted` dropped from 138 to 12 in the summary before anyone
+looked twice.
+
+**Why this is the one thing the whole review-gate design exists to prevent.**
+`reviews.py`'s own docstring: *"a person accepts or corrects a machine
+reading."* A person already had, on these exact cells. Overwriting that
+silently is the failure this store's obligation-6 test
+(`test_no_fact_was_promoted_without_a_person`) is written against — this
+defect sat one layer upstream of it, in `review_status` rather than in
+`facts`, so that test alone would not have caught it. It did not, in fact:
+`promoted_facts` stayed at 24 throughout, because nothing had been
+re-promoted from the downgraded rows yet. Caught here, before it reached a
+fact, by cross-checking the summary against the documented 138/6 baseline
+immediately after running it.
+
+**Fixed the same session**, and the fix is itself evidence the mechanism
+this store depends on works: `cli review --import workspace/catalog/review-ledger.jsonl --apply`
+replayed all 144 reviewed readings and restored `accepted`/`corrected` to
+exactly 138/6. This is the second time this ledger has been used to
+reconstruct reviewed state from scratch (the first was the measured claim in
+CLAUDE.md that dropping the reviews from a pre-review copy and replaying the
+ledger reproduces all four `ParameterTable`s); this time the "pre-review
+copy" was an accidental one, not a deliberate test, and the ledger recovered
+it exactly the same way.
+
+**Not yet fixed: the underlying function.** `mark_cross_family_verified`
+should refuse to touch a row whose `review_status` is already `accepted` or
+`corrected`, the same way `promote_tables.py` already refuses to re-promote
+a fact resting on a reading a person rejected. It does not yet. Filing this
+as a defect rather than fixing it inline, because the fix belongs beside the
+function it changes, not in a narrative document. `would_close`: an
+`AND review_status NOT IN ('accepted','corrected')` guard on the `UPDATE`,
+plus a regression test seeding one accepted row alongside a fresh
+cross-family agreement on the same cell.
 
 R1 of `workspace/reports/projection-relevance-audit.md` — *project a heading as a
 unit only when no other unit on that page carries it in `heading_path`* — was

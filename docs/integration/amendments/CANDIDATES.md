@@ -279,6 +279,17 @@ vertical slice currently being worked.
 - `Joint.kind` becomes a set rather than an enum member — cheapest to state,
   most disruptive to every consumer that pattern-matches on `kind`.
 
+**Second, independent worked example, 2026-08-30 — this is not a SimTek
+quirk.** A Chesterfield picket-end channel shows the identical shape on a
+different product, different manufacturer-family sheet, different mechanism:
+*"Attach channel to post in four locations"* (a screw-fastened face mount)
+and, separately, *"Center channel on post between routed holes"* (the same
+channel receiving a picket end) — one intermediate part, two `Joint`
+relationships, confirmed against the rendered page image
+(`bufftech-simtek-fence-install-guide.pdf` p.31: `"ATTACH END CHANNEL TO POST
+WITH 4 SCREWS"`). Raises the cost of leaving this unfixed: it is not one
+product's edge case.
+
 ---
 
 ## C8 — no declared rule for choosing `FrameSlot` vs. `Member` for a non-repeating infill unit
@@ -312,6 +323,174 @@ a closed question.
 count 1 and no repeat dimension is authored as a `FrameSlot`."* Cheap if that
 is the right rule; needs a second worked example on a different single-piece
 product to confirm it generalizes before being written down as one.
+
+---
+
+## C9 — `Joint.kind` has no value for a spring-retained snap connection
+
+| | |
+|---|---|
+| **Trigger** | **D** — a real, common mechanism has no enum value |
+| **Raised** | 2026-08-30, second `PanelSpec` worked example (Chesterfield) |
+| **Blocking?** | **No.** `Joint` is proposed, not built. Batches. |
+
+**The gap.** Chesterfield's top and bottom rails are not screwed, channeled,
+grooved, or bracketed onto the post — they are inserted into a routed post
+opening and retained by a separate lock ring whose tabs recoil once seated:
+*"Insert lock ring in both ends of bottom rail... Depress lock ring tabs,
+insert bottom rail in post... Tabs will recoil to hold rail in post"*
+(`bufftech-simtek-fence-install-guide.pdf` p.30), confirmed as a diagram
+callout on p.31 (`"HOLD TOP RAILS IN POST WITH LOCK RING"`). None of `butt |
+channel | groove | bracket | overlap` names a spring-retained insertion —
+picking the nearest (`channel`) silently discards the retention mechanism,
+which is exactly the failure mode `Joint` exists to avoid for the SimTek
+bracket case (C7).
+
+**A second, related gap in the same example.** The lock ring is itself a
+distinct physical part (inserted into each rail end before the rail is
+inserted into the post), and `PartRequirement` names one part per slot — there
+is nowhere to also require the retainer.
+
+**Possible dispositions:** add `spring_retained_socket` (or similarly named)
+to `Joint.kind`; separately, allow a slot to carry an additional retainer
+`PartRequirement` or a part-contains-part relationship (this second piece
+converges with C8's `ContainedSlot` territory).
+
+---
+
+## C10 — no way to express alternative fastening methods independent of joint geometry
+
+| | |
+|---|---|
+| **Trigger** | **D** — real corpus data states equally-valid alternatives `Joint` cannot hold |
+| **Raised** | 2026-08-30, second `PanelSpec` worked example (Chesterfield post cap) |
+| **Blocking?** | **No.** Batches. |
+
+**The gap.** *"Caps may be secured with glue, silicone adhesive or #8 x ¾"
+screws, caps and washers"* (`bufftech-simtek-fence-install-guide.pdf` p.30).
+Three fastening methods, explicitly interchangeable, none more authoritative
+than another. `Joint` has fields for interface geometry (`channel_depth`,
+`insertion_margin`) but nothing for "how it's held together," and nothing
+that can hold three alternatives at all — every other field in this schema
+is one value or a null, not a set of equally-valid choices.
+
+**Compounding ambiguity found in the same example.** The product-family
+component sheet (`NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf` p.10) depicts
+*two different cap profiles* — an external cap with an overlapping skirt and
+an internal cap that enters the post opening — and nothing in the
+installation instruction says which one a Chesterfield build actually uses.
+That is closer to C1/C3's shape (an undefined axis a binding rule already
+depends on) than to a missing enum value, and is filed here rather than
+split out because both symptoms trace to the same underlying cause: `Joint`
+assumes one fixed geometry and one fixed fastening, and this component has
+neither.
+
+**Possible dispositions:** a fastening-method field independent of `kind`,
+able to hold alternatives; separately, resolving the cap-profile ambiguity is
+a data question (which cap Chesterfield actually ships), not a schema one.
+
+---
+
+## C11 — `AssemblyStep` has no per-step applicability condition
+
+| | |
+|---|---|
+| **Trigger** | **D** — a real step is explicitly conditional, and nothing carries the condition |
+| **Raised** | 2026-08-30, first `Procedure` worked example (Chesterfield installation) |
+| **Blocking?** | **No.** `Procedure`/`AssemblyStep` are both unbuilt (§3). Batches. |
+
+**The gap.** *"When installing Arbor Blend, Arctic Blend, Brazilian Blend,
+Frontier Blend, Natural Clay, Sierra Blend, Timber Blend or Weathered Blend,
+picket end channels are required (2 per section)"*
+(`bufftech-simtek-fence-install-guide.pdf` p.30, step 7). `AssemblyStep` (§3.6)
+has no condition or applicability field — the finish-dependency can be kept
+in `text_i18n`, but that makes it prose a person reads, not something
+Planning's engine can act on to decide whether the step applies to a given
+build.
+
+**Possible disposition:** a structured `applies_when` condition on
+`AssemblyStep`, expressed against the same condition-dimension vocabulary
+`ParameterTable` already uses (§2.7), rather than a step-specific one-off.
+
+---
+
+## C12 — one `AssemblyStep` cannot hold two genuinely alternative methods
+
+| | |
+|---|---|
+| **Trigger** | **D** — real instructions branch into two methods with different parts |
+| **Raised** | 2026-08-30, same worked example as C11 |
+| **Blocking?** | **No.** Batches. |
+
+**The gap.** Step 10, *"Solidify Gate Posts,"* states two methods explicitly
+as alternatives — (a) an aluminum gate-post stiffener, screwed in place, or
+(b) rebar and concrete fill, cured 72 hours — with different parts, different
+`slots`, and different prerequisites (method (b) has a cure time; method (a)
+does not). One `AssemblyStep` object can name one set of `slots`; conflating
+both methods into it either drops one entirely or falsely implies both
+happen together.
+
+**Compounding gap in the same step.** Method (b)'s cure time has nothing to
+attach an `after`/`not_before` edge *to* — the source states the gate must
+stay blocked for 72 hours, but names no later numbered step as "when
+blocking ends." `Elapsed(Quantity)` can represent the duration as a slot
+target, but `requires` edges point at step keys, not at elapsed events.
+
+**Possible dispositions:** allow an `AssemblyStep` to branch into named
+alternative methods, each with its own `slots`/`requires`; separately, allow
+`requires` to target a `SlotTarget` (including `Elapsed`) rather than only a
+step key.
+
+---
+
+## C13 — no relation for "either order is fine," across repeated instances of a step
+
+| | |
+|---|---|
+| **Trigger** | **D** — the source states an explicit non-dependency `Edge` cannot hold |
+| **Raised** | 2026-08-30, same worked example as C11/C12 |
+| **Blocking?** | **No.** Batches. |
+
+**The gap.** *"Assembly may be continued by installing all bottom rails
+first or one section at a time"* (`bufftech-simtek-fence-install-guide.pdf`
+p.30, step 5) is the corpus's own example already named in
+`knowledge-datamodel.md` §3.6 as the reason `requires` needs edge kinds at
+all — and it still isn't fully representable. `Edge{kind: after |
+not_before | before | exclusive_with}` orders two *named steps*; this
+statement is about the order **bay instances of the same step** may run in
+across a whole fence run, which is a different axis (step keys don't carry a
+bay-instance qualifier) that no edge kind addresses.
+
+**Possible disposition:** a branch or alternative-order relation that can
+address per-bay-instance step ordering, distinct from the step-to-step
+`Edge` that already exists.
+
+---
+
+## C14 — `Warning.attaches_to` has no scope between "one step" and "the whole document"
+
+| | |
+|---|---|
+| **Trigger** | **D**, weakly — may already be settled and simply not carried into a compact reference |
+| **Raised** | 2026-08-30, `Warning` worked examples |
+| **Blocking?** | **No.** Batches. |
+
+**Not a new gap in the schema — a near-miss worth recording anyway.** Given
+only `Warning`'s field list (not the worked reasoning in
+`knowledge-datamodel.md` §3.7 N11), a test run filed the page-30 freeze-thaw
+caution (printed against method 10(b) specifically, not step 10 as a whole)
+as unresolvable, on the reasoning that neither `step` nor `document` honestly
+names its scope. §3.7 N11 already settles this exact example —
+*"attaching the freeze-thaw footnote to step 10 would be a curator's
+inference"* — and its disposition is `document`-scope, one annexe entry,
+precisely because a reader judges applicability from the warning's own text
+rather than needing a machine-actionable pointer to the one substep. Struck
+as a schema gap; kept as a process note: a compact reference that gives a
+type's *shape* without its *settled reasoning* will cause this exact
+rediscovery again. Fixed in the extraction contract this batch used
+(`chatgpt-project-bundle/01-EXTRACTION-CONTRACT.md`, not itself a repo
+artifact); worth a one-line addition to `knowledge-datamodel.md` §3.7 itself
+if this keeps recurring once real curation work begins.
 
 ---
 

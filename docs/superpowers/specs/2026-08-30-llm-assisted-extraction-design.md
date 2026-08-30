@@ -1,8 +1,11 @@
 # LLM-assisted extraction — design
 
 ```text
-Status:    Design, approved 2026-08-30. No code written. Records four manual
-           spikes and the plan that follows from them.
+Status:    Design, approved 2026-08-30. Records four manual spikes and the
+           plan that follows from them. §8 records Phase 1's execution the
+           same day: real code changed (a G55 fix in
+           fence_evidence/table_review.py, plus its regression test) and six
+           new schema candidates (C9-C14) were filed as a direct result.
 Authority: Subordinate to docs/integration/contract.md (FROZEN v1.1),
            docs/integration/knowledge-datamodel.md, docs/layering.md,
            CLAUDE.md. Where this document and any of those disagree, they
@@ -285,3 +288,60 @@ lost.
 - Cross-check for Spikes 2 and 4: `retrieval_units` text for
   `doc-88dcd8a73079` (pp.1-8) and `doc-87db00d364b3` (pp.2,5,7,11,12,20,21),
   and `data/structural/barrette-outdoor-living-structural.json`.
+
+## 8. Phase 1 executed, 2026-08-30 — a real bug, found and fixed
+
+The Project workflow (§5) ran all three phases the same day it was set up.
+Full grading is in the session record; this section is what changed the
+repository.
+
+**Phase 1: 25 pages, 537 cells, loaded for real.** 527 matched the existing
+single-family reading exactly. Of the 10 that didn't, 6 are very likely
+`chatgpt-web-1` catching a real pre-existing error (a footing table read in
+foot marks by the existing reader, `97'`, where 97 inches — `97"`, this
+run's reading — is the only physically sensible value); the other 4 are
+typo-preservation/whitespace nuances needing a human to open the crop, not
+transcription errors either way. See `docs/state-and-gaps.md` G54's
+2026-08-30 update for the full numbers.
+
+**A real defect, found while loading and fixed the same session.**
+`mark_cross_family_verified` has no CLI wiring and no guard against
+overwriting an already-`accepted`/`corrected` row. Running it across the
+full reader roster (needed so genuine new cross-family agreement would be
+found anywhere it existed, not just on the 25 new pages) downgraded three
+already-human-reviewed pages' review status. Caught immediately by
+cross-checking the post-run summary against the documented 138/6
+accepted/corrected baseline; fixed by replaying
+`workspace/catalog/review-ledger.jsonl` (which restored the exact baseline)
+and then by closing the actual defect — `table_review.py`'s `UPDATE` now
+excludes `accepted`/`corrected` rows, with a regression test
+(`test_cross_family_marking_never_overwrites_a_human_verdict`) seeding
+exactly this scenario. Full account: `docs/state-and-gaps.md` G55. All 1,074
+tests pass after the fix.
+
+**Phase 2 and 3 surfaced six new Tier 2 candidates**, filed to
+`docs/integration/amendments/CANDIDATES.md`: C9 (`Joint.kind` has no
+spring-retained/snap-lock value), C10 (no way to hold alternative fastening
+methods, plus an unresolved cap-profile ambiguity), C11 (`AssemblyStep` has
+no per-step condition field), C12 (one `AssemblyStep` can't hold two
+alternative methods, and `requires` can't target an elapsed event), C13 (no
+relation for "either order is fine" across repeated bay instances), and C14
+— which turned out not to be a schema gap at all: `knowledge-datamodel.md`
+§3.7 N11 already settles that exact case, and the run only re-discovered it
+as open because the extraction contract gave the `Warning` type's fields
+without the reasoning behind them. Fixed in the contract file (session
+scratch, not this repo) and recorded in C14 as a process note: a compact
+schema reference will keep re-triggering this specific rediscovery until
+`knowledge-datamodel.md` itself carries a one-line pointer, which is worth
+doing once real curation work begins rather than now. C7 gained a second,
+independent worked example (a Chesterfield picket-end channel) confirming
+its finding isn't SimTek-specific.
+
+**Also found, not yet acted on:** page 31 of
+`bufftech-simtek-fence-install-guide.pdf` carries diagram callouts
+(`"HOLD TOP RAILS IN POST WITH LOCK RING"`, `"ATTACH END CHANNEL TO POST
+WITH 4 SCREWS"`) that this platform's own text extraction never captured,
+confirmed only by opening the rendered page image directly — a born-digital
+PDF, not a scan, so this is a distinct defect from the documented OCR/scan
+problems. Not yet filed as its own gap; worth one if it recurs on another
+diagram-heavy page.
