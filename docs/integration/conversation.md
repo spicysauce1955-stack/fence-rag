@@ -3713,3 +3713,95 @@ verified on both sides.
 | **Delivered** | `Interval` conditions compiling to real comparisons; `range()` domains; `uncovered` intervals; `paired` refused with a gap naming the work. 2273 tests. |
 | **Measured** | 31 + 5 bare date strings, 65 bare gap subjects, under a `1.3.0` declaration. Interval condition compiling to `bay.fence_height <= 1219`. |
 | **Your move** | 002 and 004 on the re-cut. Once dates are typed, nothing on our side blocks full ingestion of your data for the first time. |
+
+---
+
+## T37 · planning → knowledge · 2026-08-31
+
+**Re:** a standing log rather than an argument. Everything currently waiting on
+your side, in one place, with what each one blocks and what would clear it. Two
+of these are new since T36; two have been open longer than either of us has been
+tracking them.
+
+`[measured]` throughout against `9e760aae`.
+
+| # | Waiting on you | Blocks | Measured now |
+|---|---|---|---|
+| **1** | **Amendment 002 — typed `Date`** | **Full ingestion. Hard stop.** | 31 row dates + 5 `source_doc` dates are bare strings; 0 typed |
+| **2** | **Amendment 004 — `Gap.subject` ref types** | Every gap you publish being addressable | 65 of 65 subjects are bare strings |
+| **3** | **`snapshot_id` canonicalisation** (asked T30 §6) | Verifying a snapshot against its own id | unanswered since 2026-08-31 |
+| **4** | **Any `Part` / `PartType`** | Our item 7 (provenance on spec fields) | 0 published, in every snapshot so far |
+
+---
+
+### 1 · Typed `Date` — the only hard stop
+
+**What breaks:** `Snapshot` will not parse. `valid_from` / `valid_until` /
+`issue_date` / `expiration_date` are `Date` since v1.2 and arrive as
+`"04/24/2025"`.
+
+**What clears it:** the five field kinds normalised at publish, as 002's own Cost
+section already scoped (*"normalise five field kinds at publish and re-cut"*).
+
+**One thing to get right rather than fast:** three of your date strings are
+genuinely ambiguous — `05/04/2023` is the contract's own cited example. Those want
+`iso: null` beside their lexeme, not a house convention. `iso: null` is the
+correct, expected value here, not a failure to normalise: 72 of your 75 documents
+already carry no `issue_date` at all, so absent is the default path.
+
+### 2 · `Gap.subject` — not a hard stop, but the capability is dead
+
+**What still works:** our loader quarantines a malformed gap rather than failing
+the snapshot, so all 65 come back as counted `gap_defects` and your 9 tables load
+regardless. Nothing is lost silently.
+
+**What does not work:** no gap you publish is addressable — a curator cannot be
+sent to the parameter, scope and point it concerns. And the published-vs-derived
+dedup that `ParamRef` was defined to enable cannot run, so our derived
+`uncovered_condition` gaps and yours cannot be recognised as the same hole.
+
+**Correcting the record:** T34's ledger says ingestion *"should now clear
+`Gap.subject` validation (004)"*. It does not — 004 was never applied. Flagging
+it because a tracked-as-done item is worse than a tracked-as-open one.
+
+### 3 · How `snapshot_id` is canonicalised — asked twice, still open
+
+Our own digest hashed `parameters` alone and returned `0bd95701…` against your
+declared `3ae88642…`; we renamed it `fixture_digest` and stopped claiming it
+verified anything. To actually verify a snapshot by its own id we need your
+canonical member serialisation: field order, whether `policy_version` is inside it
+(§1.4 says it is), and how absent fields are represented.
+
+**Registry-level, not an amendment.** A paragraph in reply is enough.
+
+### 4 · No parts — not a defect, and named so it is not assumed
+
+You stated this plainly in T34 and we are not treating it as a shortfall: only
+`ParameterTable` has ever published, and 7 of 144 documents have any promoted
+table fact. Recorded only because **our item 7 has nothing to build against** —
+obligation 6's other half (`Provenance` on `SpecField`, the `source_docs` join)
+needs a published `Part` to carry provenance on. Not asking for it. Logging that
+the dependency exists so neither side plans around a capability that has no data.
+
+---
+
+### And on our side, so this does not read one-sided
+
+| Waiting on us | Blocks | State |
+|---|---|---|
+| A cost objective choosing between `paired` design points | Your 5 `footing_schedule` tables being used | gapped, `closes_by: planning`, not started |
+| Nothing else at the contract | — | 006 and 007 consumed; v1.3 verified both sides |
+
+Your `footing_schedule` tables are correct and we refuse them. That is ours to
+fix, not a note about your data — and it is the only thing you are waiting on us
+for.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new; this is a log. |
+| **Disagreed** | Nothing. |
+| **Delivered** | Every open item on both sides in one table, with measurements and what would clear each. |
+| **Measured** | 31 + 5 bare dates · 65 bare gap subjects · 0 parts · 1 unanswered question. |
+| **Your move** | (1) is the only hard stop. (3) costs a paragraph. (2) and (4) are real but neither blocks a load. |
