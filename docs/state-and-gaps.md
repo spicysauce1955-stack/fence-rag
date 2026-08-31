@@ -2616,6 +2616,77 @@ any of the above.
 
 ---
 
+### G61 — amendments 002 (typed `Date`) and 004 (`Gap.subject` ref types) were ratified and never built; now built
+
+Planning's T36/T37 (`conversation.md`, 2026-08-31) caught something this
+platform's own T34 ledger had claimed was already true: *"full Snapshot
+ingestion should now clear `Gap.subject` validation (004)."* It did not.
+`[measured]`, verified directly against the code before touching anything
+(`systematic-debugging`): `SourceDoc.issue_date`/`.expiration_date` and
+`ParameterTable.rows[].valid_from`/`.valid_until` were `str | None`,
+publishing raw lexemes like `"04/24/2025"`; `Gap.subject` was an
+f-string. Both amendments were cut into `contract.md` at v1.2 and carried
+BINDING into v1.3 — the version field was honest about the contract and
+dishonest about the payload, which T36 correctly called "a worse place to
+be than the stale `1.1.0`."
+
+**Built, TDD throughout, three parallel research forks (Date shape, Gap.subject
+shape, test/determinism conventions) ahead of any code:**
+
+- **`fence_evidence/dates.py`** (new): `normalize_date(raw) -> {"iso":
+  str|None, "value_raw": [str]} | None`. The amendment gives the outcome
+  contract (`iso: null` for a genuinely ambiguous lexeme, its own cited
+  example is `"05/04/2023"`) but no algorithm; the parsing rule — day > 12
+  is unambiguous MM/DD/YYYY, both fields ≤ 12 and unequal is ambiguous,
+  already-ISO passes through — is this platform's reading, not a quote.
+  `tests/test_dates.py`, 10 cases including the five real corpus values.
+- **Wired** into `snapshot.py` (`SourceDoc` dates) and `parameters.py`
+  (`ParameterTable` row `valid_from`/`valid_until`), and `_windows_overlap`
+  updated to compare `.get("iso")` — an unparseable date is an open bound,
+  same as an absent one, never read as proof of a disjoint window.
+- **`Gap.subject`** is now `EntityRef | ParamRef` (`SlotRef` stays
+  `RESERVED`, per the ratified disposition — zero of the current 65 gaps
+  are slot-shaped). `parameters.py::_subject()` returns the dict directly;
+  every bare-string call site in both `snapshot.py` and `parameters.py`
+  wrapped. Both dedup keys (`SnapshotBuilder.gap()`,
+  `parameters._Gaps.add()`) switched from f-string interpolation —
+  non-deterministic on a dict — to `canonical_bytes()`, the same keying
+  `parameters.py` already used for its `[parameter, scope]` group key.
+  `snapshot.verify()`'s two subject-shape checks updated to match.
+- **9 existing tests fixed** to the new shapes (`test_parameters.py`,
+  `test_snapshot_build.py`, `test_snapshot_verify.py`) — listed, not
+  silently patched: each was asserting the OLD string shape and needed
+  updating, not weakening. One new coverage gap closed:
+  `test_a_typed_date_passes`, since nothing previously exercised a
+  non-null `issue_date` through `verify()`.
+
+**Re-cut and tombstoned.** `9e760aae…` superseded by
+`a4181dbf2e781b25017399a0b89632b81d5f14d433d99393bffa28f7e0a7a706` — same
+75 source_docs / 289 warnings / 65 gaps / 9 `ParameterTable`s, now typed
+correctly. `9e760aae…` tombstoned: it declared `contract_version: "1.3.0"`
+while violating two obligations already BINDING at that version, which is
+a real defect, not mere staleness.
+
+**The same fix also surfaced the identical defect in two OLDER historical
+snapshots**, `3ae88642ec789f30…` (the first snapshot ever published, and
+one Planning had already consumed) and `83a227d4722379f6…` — both
+published `Gap.subject` as a bare string, never valid under an obligation
+BINDING since v1.2, only undetected until `verify()` could check it. Named
+for the user rather than tombstoned unilaterally; the answer, once asked,
+was tombstone both — an obligation always BINDING was always violated,
+staleness was never the reason, and neither resolved to "live" regardless.
+All three now tombstoned. `refs --verify`: 564/564 resolved, 0 dangling,
+across the single snapshot that remains live. `snapshot --verify-stored`:
+1/1.
+
+Full suite: 1104 tests (10 new date-unit tests, 1 new verify-shape test),
+same one pre-existing error (G58's 537-row crop gap), 1 expected failure.
+Reported to Planning in `conversation.md` T38, answering T36/T37's items 1
+and 2 in full and item 3 (`snapshot_id` canonicalisation) with the
+paragraph it asked for.
+
+---
+
 ### G51 — the audit's F1 heading fallback: measured and REJECTED
 
 R1 of `workspace/reports/projection-relevance-audit.md` — *project a heading as a

@@ -396,7 +396,7 @@ class TestTheUniqueCheck(unittest.TestCase):
         self.assertEqual(len(clash), 2)                  # both HVHZ states
         self.assertEqual({g["kind"] for g in clash}, {"unmodellable_entity"})
         self.assertEqual({g["closes_by"] for g in clash}, {"planning"})
-        self.assertIn("footing_depth_mm", clash[0]["subject"])
+        self.assertEqual(clash[0]["subject"]["parameter"], "footing_depth_mm")
         self.assertIn("Amendment 006", clash[0]["would_close"])
         self.assertEqual(clash[0]["because"]["params"]["amount_milli"],
                          [762000, 914400])
@@ -452,7 +452,9 @@ class TestTheUniqueCheck(unittest.TestCase):
         self.assertEqual(codes([g for g in gaps
                                 if g["kind"] == "unmodellable_entity"]), [])
         self.assertEqual([r["valid_until"] for r in tables[0]["rows"]],
-                         sorted([None, "2018-01-01"], key=lambda v: (v is None, v)))
+                         sorted([None,
+                                 {"iso": "2018-01-01", "value_raw": ["2018-01-01"]}],
+                                key=lambda v: (v is None, v)))
         conn.close()
 
     def test_overlapping_windows_are_a_real_collision(self):
@@ -472,17 +474,26 @@ class TestTheUniqueCheck(unittest.TestCase):
         conn.close()
 
     def test_window_arithmetic(self):
+        def d(iso):
+            return None if iso is None else {"iso": iso, "value_raw": [iso]}
+
         open_ended = {"valid_from": None, "valid_until": None}
         self.assertTrue(_windows_overlap(open_ended, open_ended))
         self.assertFalse(_windows_overlap(
-            {"valid_from": "2015-01-01", "valid_until": "2018-01-01"},
-            {"valid_from": "2019-01-01", "valid_until": None}))
+            {"valid_from": d("2015-01-01"), "valid_until": d("2018-01-01")},
+            {"valid_from": d("2019-01-01"), "valid_until": None}))
         self.assertTrue(_windows_overlap(
-            {"valid_from": "2015-01-01", "valid_until": "2020-01-01"},
-            {"valid_from": "2019-01-01", "valid_until": None}))
+            {"valid_from": d("2015-01-01"), "valid_until": d("2020-01-01")},
+            {"valid_from": d("2019-01-01"), "valid_until": None}))
         self.assertFalse(_windows_overlap(
-            {"valid_from": "2019-01-01", "valid_until": None},
-            {"valid_from": "2015-01-01", "valid_until": "2018-01-01"}))
+            {"valid_from": d("2019-01-01"), "valid_until": None},
+            {"valid_from": d("2015-01-01"), "valid_until": d("2018-01-01")}))
+        # amendment 002: an unparseable date (iso: null) is an open end, the
+        # same as an absent one -- it must not be read as evidence of a gap.
+        self.assertTrue(_windows_overlap(
+            {"valid_from": d("2015-01-01"),
+             "valid_until": {"iso": None, "value_raw": ["05/04/2023"]}},
+            {"valid_from": d("2019-01-01"), "valid_until": None}))
 
     def test_the_same_value_twice_is_corroboration_not_a_conflict(self):
         """§1.4 requires every row to be published, including ones a policy will

@@ -31,6 +31,7 @@ from dataclasses import asdict, dataclass
 from datetime import date, timedelta
 
 from .canonical import canonical_bytes, content_hash
+from .dates import normalize_date
 from .lang import detect_lang
 from .refs import ref_id
 from .store import connect
@@ -240,8 +241,8 @@ class SourceDoc:
     source_class: str
     version_status: str
     version_status_basis: str | None
-    issue_date: str | None
-    expiration_date: str | None
+    issue_date: dict | None    # amendment 002: {"iso": str|None, "value_raw": [str]}
+    expiration_date: dict | None
     # Defect 2. In contract.md §1.1's shape and absent here, while `relations`
     # already held the edges. A LIST because doc-8727ba0fd4d4 fans out to seven
     # successors, and CONTENT HASHES because `belongs_to` is a content hash
@@ -283,7 +284,7 @@ class Gap:
     """
     id: str
     kind: str
-    subject: str
+    subject: dict           # amendment 004: EntityRef | ParamRef (SlotRef unemitted)
     because: dict          # {"code": str, "params": dict}
     cites: list            # [SourceRef], empty where there is no region to point at
     would_close: str
@@ -300,7 +301,7 @@ class SnapshotBuilder:
         self._docs: dict[str, SourceDoc] = {}
         self._refs: dict[str, SourceRef] = {}
         self._gaps: list[Gap] = []
-        self._gap_keys: set[str] = set()
+        self._gap_keys: set[bytes] = set()
 
     # -- provenance ---------------------------------------------------------
     def source_ref(self, element_id: str) -> SourceRef:
@@ -346,8 +347,8 @@ class SnapshotBuilder:
                 source_class=SOURCE_CLASS[row["doc_type"]],
                 version_status=row["version_status"],
                 version_status_basis=row["version_status_basis"],
-                issue_date=row["issue_date"],
-                expiration_date=row["expiration_date"],
+                issue_date=normalize_date(row["issue_date"]),
+                expiration_date=normalize_date(row["expiration_date"]),
                 superseded_by=self._successors(row["document_id"]),
                 # The class published above came from THIS record, which is the
                 # first filing of these bytes that a citation reached. The other
@@ -355,7 +356,7 @@ class SnapshotBuilder:
                 also_filed_as=self._other_filings(row["sha256"],
                                                   row["document_id"]))
             if row["doc_type"] in UNCLASSIFIED:
-                self.gap(kind="missing_value", subject=row["document_id"],
+                self.gap(kind="missing_value", subject={"kind": "source_document", "id": row["document_id"], "tenant": None},
                          code="source_class_unclassified",
                          params={"doc_type": row["doc_type"],
                                  "content_hash": row["sha256"]},
@@ -434,7 +435,7 @@ class SnapshotBuilder:
         return sorted(self._docs.values(), key=lambda d: d.content_hash)
 
     # -- gaps ---------------------------------------------------------------
-    def gap(self, *, kind: str, subject: str, code: str, would_close: str,
+    def gap(self, *, kind: str, subject: dict, code: str, would_close: str,
             closes_by: str, severity: str = "warns_line",
             params: dict | None = None, cites: list | None = None,
             on: str | None = None) -> None:
@@ -443,11 +444,14 @@ class SnapshotBuilder:
                              "on='value' or on='conditions'")
         if kind != "disputed" and on is not None:
             raise ValueError(f"`on` is only meaningful on `disputed`, not {kind!r}")
-        key = f"{kind}:{subject}"
+        # `subject` is a dict (amendment 004) -- canonical_bytes() gives a
+        # deterministic byte key the same way parameters.py's own group key
+        # already does for a [parameter, scope] pair.
+        key = canonical_bytes([kind, subject])
         if key in self._gap_keys:      # one gap per subject per kind
             return
         self._gap_keys.add(key)
-        self._gaps.append(Gap(id=hashlib.sha256(key.encode()).hexdigest()[:16],
+        self._gaps.append(Gap(id=hashlib.sha256(key).hexdigest()[:16],
                               kind=kind, subject=subject,
                               because={"code": code, "params": params or {}},
                               cites=[asdict(c) for c in (cites or [])],
@@ -525,7 +529,7 @@ class SnapshotBuilder:
                     body = body_of(nxt)
                     text = f"{text}\n{body}"
                 else:
-                    self.gap(kind="unquantified", subject=r["element_id"],
+                    self.gap(kind="unquantified", subject={"kind": "element", "id": r["element_id"], "tenant": None},
                              code="warning_lexeme_without_body",
                              params={"lexeme": lexeme, "page_no": r["page_no"]},
                              cites=[self.source_ref(r["element_id"])],
@@ -550,7 +554,7 @@ class SnapshotBuilder:
                 continue
 
             if len(body) < MIN_BODY_CHARS:
-                self.gap(kind="unquantified", subject=r["element_id"],
+                self.gap(kind="unquantified", subject={"kind": "element", "id": r["element_id"], "tenant": None},
                          code="warning_body_too_short",
                          params={"lexeme": lexeme, "chars": len(body),
                                  "minimum": MIN_BODY_CHARS},
@@ -564,7 +568,7 @@ class SnapshotBuilder:
             if _DANGLING.search(body) or body[:1].islower():
                 # ends on a function word or starts mid-sentence: the column or
                 # the page cut it. Verbatim-but-truncated is worse than absent.
-                self.gap(kind="illegible_source", subject=r["element_id"],
+                self.gap(kind="illegible_source", subject={"kind": "element", "id": r["element_id"], "tenant": None},
                          code="warning_truncated_mid_clause",
                          params={"ends_with": _tail(body, 30),
                                  "page_no": r["page_no"]},
@@ -576,7 +580,7 @@ class SnapshotBuilder:
                 continue
             if (r["text_source"] in ("ocr", "image_ocr")
                     and (r["ocr_confidence"] or 0) < OCR_TRUST_FLOOR):
-                self.gap(kind="illegible_source", subject=r["element_id"],
+                self.gap(kind="illegible_source", subject={"kind": "element", "id": r["element_id"], "tenant": None},
                          code="warning_ocr_below_confidence_floor",
                          # Integers in thousandths: obligation 1 forbids a
                          # float in either direction, and canonical_bytes()
@@ -598,7 +602,7 @@ class SnapshotBuilder:
             # honest answer; obligation 10's lang is a claim about `text_raw`.
             lang, lang_basis = detect_lang(text)
             if lang == "und":
-                self.gap(kind="missing_value", subject=r["element_id"],
+                self.gap(kind="missing_value", subject={"kind": "element", "id": r["element_id"], "tenant": None},
                          code="warning_language_undetermined",
                          params={"page_no": r["page_no"]},
                          cites=[self.source_ref(r["element_id"])],
@@ -845,7 +849,7 @@ def verify(snapshot: dict) -> None:
         # this check was added for.
         if g.get("cites") is None:
             fail.append(f"{at}: `cites` is absent; publish [] rather than omitting it")
-        elif not g["cites"] and str(g.get("subject", "")).startswith("element-"):
+        elif not g["cites"] and (g.get("subject") or {}).get("kind") == "element":
             fail.append(f"{at}: obligation 8 - an element-scoped gap names a region "
                         f"and so has evidence; cite it")
         if g.get("severity") not in SEVERITIES:

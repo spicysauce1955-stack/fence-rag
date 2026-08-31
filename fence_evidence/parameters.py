@@ -71,6 +71,7 @@ import sqlite3
 from fractions import Fraction
 
 from .canonical import canonical_bytes
+from .dates import normalize_date
 from .promote_tables import NO_BRACKET_PRINTED
 from .refs import ref_id
 from .reviews import effective_fact_value
@@ -565,6 +566,14 @@ def _is_fallback(row: dict) -> bool:
     return not row["conditions"] and row["condition_basis"] == "stated"
 
 
+def _iso(bound: dict | None) -> str | None:
+    """A `Date` dict's `iso`, or `None` -- for an absent bound and an
+    unparseable (amendment 002) lexeme alike. Both are open ends here: a date
+    this platform could not normalise is not evidence the windows are
+    disjoint, so it must not be read as one."""
+    return bound["iso"] if bound else None
+
+
 def _windows_overlap(a: dict, b: dict) -> bool:
     """Do two rows' validity windows intersect? Open ends are unbounded.
 
@@ -574,10 +583,10 @@ def _windows_overlap(a: dict, b: dict) -> bool:
     contradiction -- and §1.3 carries expiry as fields precisely so that a time
     dimension does not have to be enumerated into the domain.
     """
-    a_from, a_until = a.get("valid_from"), a.get("valid_until")
-    b_from, b_until = b.get("valid_from"), b.get("valid_until")
-    # ISO-8601 dates compare correctly as strings, which is why they are stored
-    # that way; a null bound is an open one and can never separate the windows.
+    a_from, a_until = _iso(a.get("valid_from")), _iso(a.get("valid_until"))
+    b_from, b_until = _iso(b.get("valid_from")), _iso(b.get("valid_until"))
+    # ISO-8601 dates compare correctly as strings; a null bound (absent or
+    # unparseable) is an open one and can never separate the windows.
     if a_until is not None and b_from is not None and a_until < b_from:
         return False
     if b_until is not None and a_from is not None and b_until < a_from:
@@ -736,8 +745,10 @@ class _Gaps:
 
     def add(self, *, kind, subject, code, would_close, closes_by,
             severity="warns_line", params=None, cites=None, on=None) -> None:
-        key = f"{kind}:{subject}:{code}"
-        gap_id = hashlib.sha256(key.encode()).hexdigest()[:16]
+        # `subject` is a dict (amendment 004) -- the same canonical_bytes()
+        # keying this module already uses for a [parameter, scope] group key.
+        key = canonical_bytes([kind, subject, code])
+        gap_id = hashlib.sha256(key).hexdigest()[:16]
         if gap_id in self._by_id:
             return
         self._by_id[gap_id] = {
@@ -765,16 +776,14 @@ def _describe(point: dict) -> str:
     return ", ".join(parts) or "any conditions"
 
 
-def _subject(parameter: str, scope: dict, point: dict | None = None) -> str:
-    """A `ParamRef`, flattened to a string.
+def _subject(parameter: str, scope: dict, point: dict | None = None) -> dict:
+    """A `ParamRef` (amendment 004): `{parameter, scope: EntityRef, point}`.
 
-    §1.2.1 types `Gap.subject` as `EntityRef | SlotRef | ParamRef`, but
-    `snapshot.Gap.subject` is a string and its dedupe key interpolates it, so a
-    dict there would break both. The string is addressable and round-trippable,
-    which is what "addressably" in §1.2.1 asks for.
+    `point` reuses `ParameterTable.uncovered`'s own entry shape, as the
+    amendment specifies -- the same `{dimension: value}` dict already built by
+    `_points()` elsewhere in this module.
     """
-    base = f"param:{parameter}@{scope['kind']}/{scope['id']}"
-    return base if point is None else f"{base}#{_describe(point)}"
+    return {"parameter": parameter, "scope": scope, "point": point}
 
 
 # --------------------------------------------------------------------------
@@ -808,7 +817,7 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
         named = PARAMETER_OF.get(fact["fact_type"])
         if named is None:
             gaps.add(kind="missing_value",
-                     subject=f"fact_type:{fact['fact_type']}",
+                     subject={"kind": "fact_type", "id": fact["fact_type"], "tenant": None},
                      code="parameter_name_unmapped",
                      params={"fact_type": fact["fact_type"]},
                      would_close=f"decide what published parameter "
@@ -842,7 +851,7 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
                 # as covering both HVHZ states would assert an approval regime
                 # nobody read off the page.
                 gaps.add(kind="disputed", on="conditions",
-                         subject=f"fact:{fact['fact_id']}",
+                         subject={"kind": "element", "id": fact["element_id"], "tenant": None},
                          code="applicability_bracket_unresolved",
                          params={"parameter": parameter,
                                  "page_no": fact["page_no"],
@@ -865,7 +874,7 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
                                      f"none",
                          closes_by="knowledge")
             else:
-                gaps.add(kind="missing_value", subject=f"fact:{fact['fact_id']}",
+                gaps.add(kind="missing_value", subject={"kind": "element", "id": fact["element_id"], "tenant": None},
                          code=code, params={"parameter": parameter,
                                             "detail": detail,
                                             "page_no": fact["page_no"]},
@@ -882,7 +891,7 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
 
         value = quantity(fact)
         if value is None:
-            gaps.add(kind="unquantified", subject=f"fact:{fact['fact_id']}",
+            gaps.add(kind="unquantified", subject={"kind": "element", "id": fact["element_id"], "tenant": None},
                      code="value_not_a_quantity",
                      params={"parameter": parameter, "page_no": fact["page_no"],
                              "value_raw": (effective_fact_value(fact) or "").strip()},
@@ -901,7 +910,7 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
             # weakest class, so it cannot make anything wrongly admissible, and
             # it publishes a gap because a guess presented as a classification
             # is what obligation 6 forbids.
-            gaps.add(kind="missing_value", subject=f"document:{fact['document_id']}",
+            gaps.add(kind="missing_value", subject={"kind": "source_document", "id": fact["document_id"], "tenant": None},
                      code="source_class_unclassified",
                      params={"doc_type": fact["doc_type"],
                              "document_id": fact["document_id"]},
@@ -938,8 +947,8 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
             # the nearest addressable authority this store holds is the document
             # itself -- there is no issuer field. `belongs_to` joins it to the
             # `SourceDoc` in the snapshot, which carries the same dates.
-            "valid_from": fact["issue_date"],
-            "valid_until": fact["expiration_date"],
+            "valid_from": normalize_date(fact["issue_date"]),
+            "valid_until": normalize_date(fact["expiration_date"]),
             "authority": cites[0]["belongs_to"],
         }
         group["rows"].append(row)

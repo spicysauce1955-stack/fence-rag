@@ -53,6 +53,16 @@ class TestVerifyAccepts(unittest.TestCase):
         s["source_docs"] = []
         verify(s)
 
+    def test_a_typed_date_passes(self):
+        """Amendment 002: `issue_date`/`expiration_date` are `Date` dicts, not
+        bare strings -- including the ambiguous case, `iso: null` beside the
+        lexeme it could not resolve."""
+        s = _ok()
+        s["source_docs"][0].update(
+            issue_date={"iso": "2023-05-04", "value_raw": ["05/04/2023"]},
+            expiration_date={"iso": None, "value_raw": ["05/04/2023"]})
+        verify(s)                           # must not raise
+
 
 class TestVerifyRefuses(unittest.TestCase):
     def _fails(self, mutate, expect):
@@ -139,7 +149,7 @@ if __name__ == "__main__":
 
 def _gap(**over):
     """A well-formed gap, for tests that break exactly one thing about it."""
-    g = {"id": "g1", "kind": "illegible_source", "subject": "element-x-0001",
+    g = {"id": "g1", "kind": "illegible_source", "subject": {"kind": "element", "id": "element-x-0001", "tenant": None},
          "because": {"code": "warning_truncated_mid_clause", "params": {}},
          "cites": [{"id": "r1", "belongs_to": "h1"}],
          "would_close": "read the page image and record the sentence whole",
@@ -185,11 +195,11 @@ class TestGapCarriesItsReasonAndEvidence(unittest.TestCase):
     def test_a_document_scoped_gap_may_cite_nothing(self):
         """There is no region to point at, and §1.2.1 says "where there is any"."""
         snap = _ok()
-        snap["gaps"] = [_gap(subject="doc-abc123", cites=[])]
+        snap["gaps"] = [_gap(subject={"kind": "source_document", "id": "doc-abc123", "tenant": None}, cites=[])]
         verify(snap)
 
     def test_absent_cites_is_refused_even_though_empty_is_allowed(self):
-        g = _gap(subject="doc-abc123")
+        g = _gap(subject={"kind": "source_document", "id": "doc-abc123", "tenant": None})
         del g["cites"]
         self._fails(g, "publish [] rather than omitting it")
 
@@ -349,7 +359,7 @@ class TestTheGateEnforcesWhatTheContractBinds(unittest.TestCase):
             "not in source_docs")
 
     def test_a_gap_names_its_subject(self):
-        self._fails(lambda s: s.__setitem__("gaps", [_gap(subject="")]),
+        self._fails(lambda s: s.__setitem__("gaps", [_gap(subject={})]),
                     "names its subject")
 
     def test_because_params_must_be_an_object(self):

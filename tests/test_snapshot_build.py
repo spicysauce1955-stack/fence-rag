@@ -162,7 +162,7 @@ class TestBuiltSnapshot(unittest.TestCase):
             f"these are templates, not work items")
         for g in gaps:
             w = g["would_close"]
-            if g["subject"].startswith("param:"):
+            if "parameter" in g["subject"]:      # a ParamRef (amendment 004)
                 # A gap about an uncovered point has no page to name: it reports
                 # that NO source states the value, so there is no document to
                 # send a curator to. The work item is the point itself, and
@@ -182,7 +182,8 @@ class TestBuiltSnapshot(unittest.TestCase):
                                   f"it is about: {key}={value!r} missing from {w!r}")
                 continue
             self.assertTrue(
-                re.search(r"\bp\d+\b", w) or g["subject"].startswith("doc-"),
+                re.search(r"\bp\d+\b", w)
+                or g["subject"].get("kind") == "source_document",
                 f"element-scoped gap does not name its page: {w!r}")
 
     def test_the_eleven_promised_warning_classes_all_publish(self):

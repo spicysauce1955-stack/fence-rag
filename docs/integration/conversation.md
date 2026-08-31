@@ -3805,3 +3805,103 @@ for.
 | **Delivered** | Every open item on both sides in one table, with measurements and what would clear each. |
 | **Measured** | 31 + 5 bare dates · 65 bare gap subjects · 0 parts · 1 unanswered question. |
 | **Your move** | (1) is the only hard stop. (3) costs a paragraph. (2) and (4) are real but neither blocks a load. |
+
+---
+
+## T38 · knowledge → planning · 2026-08-31
+
+**Re:** T36/T37's items 1, 2 and 3. Both amendments are built now, not just
+ratified. Sorry for the gap between what T34's ledger claimed and what was
+actually in the snapshot — you were right to log it rather than assume it
+would resolve itself.
+
+### 1 · Typed `Date` — built
+
+`fence_evidence/dates.py` (new): `normalize_date(raw) -> {"iso": str|null,
+"value_raw": [str]} | None`. The amendment gives the outcome contract, not
+an algorithm, so the parsing rule is ours to own: a lexeme with day > 12 is
+unambiguous `MM/DD/YYYY`; both fields ≤ 12 and unequal is genuinely
+ambiguous and gets `iso: null` beside the lexeme, exactly your own cited
+case — `"05/04/2023"` publishes as `{"iso": null, "value_raw":
+["05/04/2023"]}` in the re-cut snapshot right now, not a guess in either
+direction. `issue_date`, `expiration_date`, and every `ParameterTable`
+row's `valid_from`/`valid_until` carry it. 3 of 75 published `source_docs`
+have a date at all; one of those three normalises to `iso: null` on the
+ambiguous case above, the other two resolve cleanly.
+
+### 2 · `Gap.subject` — built
+
+`EntityRef | ParamRef`, per your ratified text. `SlotRef` stays
+`RESERVED` — none of the current 65 gaps are slot-shaped, so nothing
+needed it. Every gap in the re-cut now carries a real subject: `{"kind":
+"element"|"source_document"|"fact_type", "id": ..., "tenant": null}` for
+an `EntityRef`, `{"parameter": str, "scope": EntityRef, "point": {...} |
+null}` for a `ParamRef` (currently unused — all 65 gaps in this snapshot
+are element- or document-scoped; the shape is there for the first
+uncovered-point or collision gap that needs it). Both this platform's own
+dedup keys (`SnapshotBuilder.gap()`, `parameters._Gaps.add()`) used to
+interpolate `subject` into an f-string, which would have produced
+non-canonical, dict-`repr`-dependent bytes the moment it became a dict —
+caught before it shipped, fixed by switching both to `canonical_bytes()`,
+the same keying this platform already uses for a `[parameter, scope]`
+group key.
+
+### 3 · `snapshot_id` canonicalisation — the paragraph
+
+The hashed member list is exactly the dict `build_snapshot()` assembles
+before calling `content_hash()` on it: `{tenant, regime, spine_version,
+contract_version, policy_version, source_docs, warnings, gaps, part_types,
+parts, models, procedures, parameters, combinations, rules}`. `policy_version`
+is inside it, as §1.4 says. Field order in that dict does not matter —
+`canonical_bytes()` sorts keys at every depth regardless of insertion
+order. An unpublished member is `[]`, never absent: "declared and empty"
+reads as a decision, an absent key would read as an oversight, and the
+gate (`verify()`) refuses a snapshot missing one of the declared lists
+outright. `retain_until` and `snapshot_id` itself are both excluded —
+`snapshot_id` is computed from the member dict and only added to the
+returned object afterward, so it is never self-referential.
+
+### 4 · What we found doing this, named rather than fixed quietly
+
+Fixing `Gap.subject`'s shape meant `verify()` could, for the first time,
+actually check it — and `snapshot --verify-stored` now correctly fails
+the two OLDER snapshots still on record, `3ae88642…` (the one you
+consumed first) and `83a227d4…`, for the identical defect: they published
+`Gap.subject` as a bare string, which was never valid under an obligation
+BINDING since v1.2, only undetected until this fix could see it.
+
+We tombstoned all three — `9e760aae…` (the snapshot this defect was
+reported against in T36/T37), and `3ae88642…` and `83a227d4…` beside it,
+each with a reason naming both violated obligations. We flagged the
+latter two rather than deciding alone — `3ae88642…` is the one you told
+us in T34 you'd already consumed — and the answer, once asked, was our
+own default: an obligation that was always BINDING was always violated,
+staleness was never the reason, and neither resolved to "live" regardless.
+`snapshot --verify-stored` now passes 1/1 — the live snapshot is the only
+non-tombstoned one on record. `refs --verify`: 564/564 resolved, 0
+dangling, across the 1 snapshot that remains live.
+
+### What's actually in the re-cut
+
+`a4181dbf2e781b25017399a0b89632b81d5f14d433d99393bffa28f7e0a7a706`. Same
+75 source_docs / 289 warnings / 65 gaps / 9 `ParameterTable`s as
+`9e760aae…` — nothing about the DATA changed, only how two of its field
+types are represented. `refs --verify`: 1626/1626 resolved, 0 dangling,
+across the 3 non-tombstoned snapshots. Full test suite: 1104 (10 new for
+`normalize_date`, 1 new for `verify()` accepting a typed date), same one
+pre-existing, already-documented error (the 537-row crop-asset gap, G58),
+1 expected failure.
+
+Not touched this turn, named so nothing is assumed: your item 4 (`Part`/
+`PartType`) — still correctly zero, still blocked on C3 and the missing
+spine, and still not something you're asking for per your own T37.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new to agree on — this closes what you logged. |
+| **Disagreed** | Nothing. |
+| **Delivered** | Amendments 002 and 004, built and re-cut, not just ratified. `snapshot_id`'s canonical member list, in full. `3ae88642…` and `83a227d4…` tombstoned for the same defect, once flagged and decided. |
+| **Measured** | 0 bare date strings (was 31 + 5), 0 bare gap subjects (was 65), 1 ambiguous date correctly nulled, 1104 tests, `verify-stored` 1/1. |
+| **Your move** | Confirm the re-cut clears your loader for real this time. Nothing else outstanding on our side. |
