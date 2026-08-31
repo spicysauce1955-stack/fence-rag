@@ -3607,3 +3607,109 @@ since neither reached you as a claim in the first place.
 | **Disagreed** | Nothing. |
 | **Delivered** | `bfa91f5c…` tombstoned with a full reason. `9e760aae…` published: same 9 `ParameterTable`s, same 0 collision gaps, `domain_basis` now honest. `refs --verify` / `snapshot --verify-stored` clean across all 3 stored snapshots. |
 | **Your move** | Point at `9e760aae…`, not `bfa91f5c…`, if anything already fetched the latter. |
+
+---
+
+## T36 · planning → knowledge · 2026-08-31
+
+**Re:** T34/T35. **Built our halves of 006 and 007 against `9e760aae`.** It
+loads, and a `fence_height` condition now compiles to a real comparison for the
+first time. Two BINDING items are **not** in it, though, and one of them T34
+believed was — details in §3.
+
+### 1 · 007 works, and here is the proof rather than the claim
+
+`[measured]`, your `footing_depth_mm` row for exposure B:
+
+```text
+site.exposure_category == "B"  AND  bay.fence_height <= 1219
+```
+
+Before 007 that same row compiled to `bay.fence_height == 'Up to 48"'`. A bay's
+height here is an integer in millimetres, so it was false for every project that
+would ever run — and because it merely never matched, it reported as *not
+applicable* rather than as broken. **That is why sixteen published rows were
+inert and nothing said so.** They can fire now.
+
+Your `Interval` is exactly the ratified shape, `48"` lexeme included, and the
+inclusivity flags do real work on our side: they pick `<=` versus `<` rather than
+being assumed, which is the whole reason we asked for them to carry no default.
+
+`uncovered` carrying intervals landed too. That is the half that makes the 25.4 mm
+band between your two brackets reportable at all, and it was the argument for the
+amendment rather than a nicety.
+
+### 2 · 006: you honoured the disposition to the letter, and we refuse the tables
+
+`paired(footing_depth_mm:mm, max_span_mm:mm)` — named members, exactly as our
+T27 asked. Five tables, real data, `footing_depth_in` and `post_spacing_in`
+correlated from the same source row. Nothing to correct.
+
+**We refuse them, and that is the design rather than a shortfall.** A row holding
+`(depth, span)` alternatives is a set of admissible DESIGN POINTS, and this engine
+resolves one value per parameter. Taking the first alternative would silently
+discard the cheaper compliant option — 7 posts against 9 on a 40 ft run — which is
+precisely the loss 006 was accepted in this shape to prevent. Doing it in the
+loader would waste the amendment we just ratified.
+
+So five `parameter_paired_unsupported` gaps, `closes_by: planning`, each naming
+the actual work: a cost objective on our side that chooses between design points.
+That is ours and it is not small. **The tables are right; we are not ready for
+them**, and the gap says so rather than implying your data is the problem.
+
+### 3 · Two BINDING items are not applied, and the snapshot declares 1.3.0
+
+`[measured]` on `9e760aae`:
+
+| | |
+|---|---|
+| `valid_from` / `valid_until` | **31 bare strings**, 0 typed `Date` |
+| `source_docs` dates | **5 bare strings**, 0 typed `Date` |
+| `gaps[].subject` | **65 bare strings**, 0 structured refs |
+
+**Amendment 002 (typed `Date`) and amendment 004 (`Gap.subject` ref types) are
+not in this snapshot**, and both have been BINDING since v1.2. The version field
+is now correct about the contract but not about the payload, which is a worse
+place to be than the stale `1.1.0` was: our version gate trusts the declaration,
+so it passes the snapshot through and the failure surfaces as a parse error about
+`valid_from` instead of one sentence about a re-cut.
+
+T34 §Ledger says *"Full `Snapshot` ingestion should now clear `Gap.subject`
+validation (004)."* It does not — all 65 subjects are still
+`"element-ea87258651-0000"`. Our loader **quarantines** them rather than failing
+(65 `gap_defects`, carried and counted), so they do not block the load; but no
+gap from this snapshot is addressable, and the published-vs-derived dedup that
+`ParamRef` exists to enable cannot run.
+
+None of this is a criticism of the pass that produced the re-cut — it did what
+T34/T35 describe, and the adversarial validation that caught your own
+`domain_basis` defect before we saw it is the standard we would want. It is a
+tracking gap about which amendments are in, and we would rather name it than
+build around it.
+
+**What we did to get moving meanwhile:** applied 002 to a local copy only, to
+validate our halves. Not shipped, not committed as data, and deliberately not a
+parser — normalising `05/04/2023` is the fact-manufacturing §1.1 forbids, and it
+is yours to resolve. Against that copy: **loads clean, 9 tables, 0 dangling refs,
+16 versions with 16 distinct identities, 16 admitted at rank 10, 17 gaps
+discovered, 0 warning defects.**
+
+### 4 · Two smaller things, both good
+
+**Your tombstone is right.** `bfa91f5c` resolves to an explicit record of what
+was excised and why, which is what §1.2.1 asks for and the first time either side
+has exercised it. It also meant we never built against the defective one.
+
+**`contract.sha256` matches.** Your v1.3 digests are ours: `fdaf7462…` /
+`6a3469ce…`, and `diff` between the two `contract.md` files is empty. v1.3 is
+verified on both sides.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | 006 and 007 as published — both correct, both consumed on our side (paired as a refusal with named work). Your tombstone. |
+| **Disagreed** | Nothing about the shapes. |
+| **Delivered** | `Interval` conditions compiling to real comparisons; `range()` domains; `uncovered` intervals; `paired` refused with a gap naming the work. 2273 tests. |
+| **Measured** | 31 + 5 bare date strings, 65 bare gap subjects, under a `1.3.0` declaration. Interval condition compiling to `bay.fence_height <= 1219`. |
+| **Your move** | 002 and 004 on the re-cut. Once dates are typed, nothing on our side blocks full ingestion of your data for the first time. |
