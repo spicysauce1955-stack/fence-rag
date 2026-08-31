@@ -663,6 +663,48 @@ if this keeps recurring once real curation work begins.
 
 ---
 
+## C15 — `SpecField.value`'s wire shape contradicts obligation 4
+
+| | |
+|---|---|
+| **Trigger** | **D** — an obligation depends on something the contract does not define consistently |
+| **Raised** | 2026-08-31, building the first `Part`s (obligation 5's spine) |
+| **Blocking?** | **Yes, for obligation 14 specifically.** Two real stated stock-length values are held back as gaps rather than published, solely on this. Does not block obligation 5, which needs no `SpecField` at all. |
+
+`knowledge-datamodel.md` §2.2 (Tier 2, the shapes `contract.md` §1.2
+explicitly delegates to): `SpecField { key, agree, value: 38 | null, unit:
+"mm" | null }` — a bare, already-collapsed number, with `unit` a SEPARATE
+sibling field. Annotated "Unchanged."
+
+`contract.md` §1.1, obligation 4 (BINDING, stable core): *"Every dimension is
+a `Quantity`* — integers in thousandths of the named unit, with **every**
+verbatim source lexeme alongside... **No bare `_mm` field crosses**."*
+`Quantity` is `{amount_milli, unit, value_raw}` — a nested object, not a bare
+number plus a sibling unit, and specifically carries `value_raw`, which a bare
+number cannot.
+
+**These are not the same shape, and `SpecField` is not itself in `contract.md`'s
+own type list** — grepped, not assumed: `contract.md` never defines `SpecField`
+directly, only in the delegated `knowledge-datamodel.md` text. A bare
+`38, unit: "mm"` is precisely the "bare `_mm` field" pattern obligation 4
+names and forbids — no verbatim lexeme travels with it, so a value like `'16
+foot lengths'` (this platform's own real, stated evidence for
+`BT-RAIL-PR-3RAIL-WHITE`) could not be published under §2.2's shape without
+either discarding the lexeme (violating obligation 4) or overloading `value`
+with something other than a bare number (contradicting §2.2 as written).
+
+**Why this platform is not resolving it unilaterally.** Guessing which shape
+wins — patch §2.2 to nest a `Quantity`, or read obligation 4 as not reaching
+`SpecField` — is exactly the kind of BINDING-adjacent decision `AMENDING.md`
+exists to gate. Two stated values are ready to publish the day this is
+settled (`state-and-gaps.md` G62; `fence_evidence/parts.py`'s module
+docstring has the exact evidence). Recommended reading, given the rest of
+this contract's own convention: `SpecField.value: Quantity`, matching how
+every other dimension crossing this boundary is shaped — but that is a
+recommendation, not something shipped without your agreement.
+
+---
+
 ## Not candidates — recorded so they are not re-raised
 
 - **`retain_until` has no specified value.** The contract requires a snapshot

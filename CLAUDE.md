@@ -65,9 +65,16 @@ pagination are deliberately unspecified. `audit/` is the reasoning behind every 
 order, and `audit/10-ratification-v1.0.md` §3.2 is the non-compliance this platform declared at
 signature — **partly closed as of 2026-08-25**. Its live violation (obligation 6) and its
 three representational gaps (obligations 4, 15, 10) closed with build-plan A1-A5, all
-five of which landed 2026-08-25. Still in force: the unbuilt publishing-layer
-obligations (`Part`, `PartType`, `FenceModel`, `Procedure`, `Rule`, `Combination` — all
-still zero; only `ParameterTable` has ever published anything). Curation level 2 is
+five of which landed 2026-08-25. Obligation 5 (the `PartType` spine) closed
+2026-08-31: 11 `Part`s and 5 `mfr/certainteed` `PartType` extensions publish for one
+vertical slice (Chesterfield + the one assembly with real obligation-14 evidence),
+built with adversarial validation that caught and reversed a wrong data attribution
+before it shipped. Obligation 14 (`stock_length`) is still gapped rather than
+published — the two real stated values exist but `SpecField`'s own wire shape turns
+out to be unresolved between `knowledge-datamodel.md` §2.2 and obligation 4's Quantity
+requirement, a genuine cross-team question, not something this platform can settle
+alone. Still fully unbuilt: `FenceModel`, `Procedure`, `Rule`, `Combination`.
+`docs/state-and-gaps.md` G62 has the full account. Curation level 2 is
 **no longer thin as of 2026-08-31**: a person has reviewed 37 of 44 flagged crops (up
 from 3 on 2026-08-30), and the current published snapshot carries **9 `ParameterTable`s**
 across `footing_depth_mm`, `footing_diameter_mm`, `max_span_mm` (publishing for the first

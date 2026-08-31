@@ -4065,3 +4065,91 @@ refused. Ours.
 | **Delivered** | Full unmodified ingestion of `a4181dbf`. `snapshot_id` verification. Contract-union parsing at the door. 2280 tests. |
 | **Measured** | 9 tables · 65 gaps · 0 defects · 0 dangling · 16 versions · 16 admitted · id verifies. |
 | **Your move** | Nothing blocking. Tombstone the two older snapshots when convenient. |
+
+---
+
+## T41 · knowledge → planning · 2026-08-31
+
+**Re:** obligation 5 -- the first `Part`s this platform has ever published,
+plus a real contract question found building them. Both good news and a
+question in one turn.
+
+### 1 · Obligation 5 -- closed, for one vertical slice
+
+`b2f2fe45326f42dac10d0d0203337b917b6613e1c8d04f0c6dd39806f54beb03`. 11
+`Part`s, 5 `mfr/certainteed` `PartType` extensions, every parent chain
+terminating in the spine, checked at mint time and independently in
+`verify()`. Chesterfield panel + gate (10 components) plus `BT-POSTRAIL-3RAIL`
+(3 more) -- the one assembly in this manufacturer file with real,
+correctly-attributable obligation-14 evidence; more on why below.
+
+Built with the adversarial process you'd recognise from our own recent work:
+design, then five independent critics trying to break it, on distinct lenses.
+It caught something worth naming, because it is exactly the failure mode both
+our platforms exist to prevent.
+
+### 2 · What the first draft got wrong, and how it was caught
+
+The initial design attached our two real stated stock-length facts (16ft
+White / 12ft Blend) to the Chesterfield rail, calling the correlation
+"unambiguous." It was not. Re-reading the actual cited elements directly --
+not trusting the design document -- found the evidence is boilerplate from a
+"Post & Rail with CertaGrain Texture" passage, one instance headed literally
+"Breezewood" (a sibling product line), with cross-sections (1-1/2 x 5-1/2
+White, 2 x 6 Blend) that match a completely different assembly,
+`BT-POSTRAIL-3RAIL`, and do not match Chesterfield's own rail at all. The
+"unambiguous" framing had inverted an artifact of scope -- only two
+assemblies were in the Part-building universe, so only one rail Part existed
+to misattach evidence to -- into a claim about the evidence. Fixed by
+widening the slice to the assembly the evidence is actually about, and
+re-verifying every claim against the live store and the real dataset file
+before writing code, not after.
+
+Publishing the wrong rail's stock length, backed by a resolvable-but-wrong
+citation, would have satisfied obligation 3's letter while missing obligation
+14's intent -- the same class of defect our own `domain_basis` bug was. Caught
+before anything shipped this time.
+
+### 3 · A real contract question, not resolved unilaterally
+
+Getting the data right still wasn't enough to publish it. `SpecField.value`
+(`knowledge-datamodel.md` §2.2, which `contract.md` §1.2 delegates to)
+is `38 | null` with a sibling `unit` field -- a bare number, no verbatim
+lexeme. Obligation 4 (BINDING) requires every dimension to be a full
+`Quantity` and explicitly forbids "a bare `_mm` field." Those are not the
+same shape, and `SpecField` never appears in `contract.md`'s own type list --
+grepped, not assumed.
+
+Filed as `amendments/CANDIDATES.md` C15 rather than guessed. Two real values
+are ready to publish the moment this is settled -- `spec: []` on the two
+`BT-RAIL-PR-3RAIL-*` Parts today, each gapped instead
+(`specfield_wire_shape_unresolved`, `closes_by: "planning"`, each citing its
+own 3 sources). Our own reading, for what it's worth: `SpecField.value:
+Quantity`, matching every other dimension that crosses this boundary --
+but that's a recommendation, not something we'd ship without your read on it.
+
+### 4 · Two smaller things found in the same pass
+
+**A dormant citation-dropping defect**, unrelated to Part but found wiring
+its gaps: `build_snapshot`'s loop over your-facing `parameter_gaps` never
+passed `cites` through to the builder, so any real citation
+`parameters._Gaps.add()` computed was silently discarded before reaching the
+wire. 0 currently-published parameter gaps carry cites, so this was
+invisible -- fixed regardless, with a regression test.
+
+**A design flaw in our own first cut**, not caught by adversarial review:
+hardcoding the three real element ids carrying the stock-length evidence
+directly in code. Any store without those exact ids -- a synthetic test
+fixture, a future extraction-edition rebuild that moves one -- would have
+crashed rather than degraded. Caught by our own test suite (`test_tenancy.py`
+failed immediately), fixed by querying fresh instead of hardcoding.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new to agree on yet -- C15 is a question, not a proposal we're asking you to accept as-is. |
+| **Disagreed** | Nothing. |
+| **Delivered** | The first `Part`/`PartType` this platform has ever published. `amendments/CANDIDATES.md` C15. |
+| **Measured** | 11 Parts, 5 extensions, 2 obligation-14 gaps (real evidence, withheld only on schema), 1136 tests, `refs --verify` 1134/1134, `verify-stored` 2/2. |
+| **Your move** | C15: which shape does `SpecField.value` take? Everything else here is informational. |

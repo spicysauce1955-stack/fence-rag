@@ -869,6 +869,58 @@ def verify(snapshot: dict) -> None:
             fail.append(f"{at}: §1.2.1 - `on` belongs to `disputed` and to nothing "
                         f"else; it is value|conditions")
 
+    # Obligation 5: every part type resolves to a spine type through its
+    # parent chain, and `shared` is Planning's namespace, never this
+    # platform's to emit. Lazy import: part_types.py never imports this
+    # module, so this is not a cycle, but keeping the coupling local matches
+    # `_source_class`'s own discipline in parameters.py.
+    from .part_types import SPINE
+    part_type_keys = set()
+    for i, pt in enumerate(snapshot.get("part_types", [])):
+        at = f"part_types[{i}]"
+        namespace = pt.get("namespace")
+        if namespace == "shared":
+            fail.append(f"{at}: obligation 5 - `shared` is Planning's namespace; "
+                        f"this platform only ever emits mfr/<manufacturer>")
+        elif not (isinstance(namespace, str)
+                 and re.match(r"^mfr/[a-z0-9]+(?:-[a-z0-9]+)*$", namespace)):
+            fail.append(f"{at}: namespace {namespace!r} is not mfr/<slug>")
+        key = (namespace, pt.get("key"))
+        if key in part_type_keys:
+            fail.append(f"{at}: duplicate (namespace, key) {key}")
+        part_type_keys.add(key)
+        parent = pt.get("parent") or {}
+        if parent.get("namespace") != "shared" or parent.get("key") not in SPINE:
+            fail.append(f"{at}: parent {parent} does not terminate in the spine")
+
+    PART_STATUSES = frozenset({"draft", "active", "retired"})
+    SPEC_AGREE = frozenset({"==", "!=", "<=", ">=", "in", "supplies"})
+    declared_part_types = [{"namespace": pt.get("namespace"), "key": pt.get("key")}
+                           for pt in snapshot.get("part_types", [])]
+    for i, p in enumerate(snapshot.get("parts", [])):
+        at = f"parts[{i}]"
+        if p.get("status") not in PART_STATUSES:
+            fail.append(f"{at}: status {p.get('status')!r} is not "
+                        f"draft|active|retired")
+        if p.get("authorship") != "third_party_authored":
+            fail.append(f"{at}: authorship {p.get('authorship')!r} -- everything "
+                        f"this platform publishes is third_party_authored")
+        ptype = p.get("type") or {}
+        if ptype.get("namespace") == "shared":
+            if ptype.get("key") not in SPINE:
+                fail.append(f"{at}.type: {ptype} does not resolve to a spine key")
+        elif ptype not in declared_part_types:
+            fail.append(f"{at}.type: {ptype} resolves to no part_types[] entry "
+                        f"in this snapshot")
+        for j, sf in enumerate(p.get("spec") or []):
+            sat = f"{at}.spec[{j}]"
+            if sf.get("agree") not in SPEC_AGREE:
+                fail.append(f"{sat}: agree {sf.get('agree')!r} is not one of "
+                            f"the six")
+            if not (sf.get("provenance") or {}).get("cites"):
+                fail.append(f"{sat}: obligation 3 - a spec value carries a "
+                            f"resolvable SourceRef")
+
     if fail:
         raise VerificationFailed(
             f"{len(fail)} obligation failure(s); the snapshot is not returned:\n  - "
@@ -899,6 +951,34 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
         for g in parameter_gaps:
             b.gap(kind=g["kind"], subject=g["subject"],
                   code=g["because"]["code"], params=g["because"].get("params") or {},
+                  # Defect found while wiring PartType/Part gaps below: this
+                  # loop never passed `cites` through, so every real citation
+                  # `parameters._Gaps.add()` computed (disputed, unquantified,
+                  # unmodellable_entity) was silently dropped before reaching
+                  # the wire -- obligation 8's "evidence, where there is any"
+                  # violated in spirit though not in verify()'s letter (ParamRef
+                  # subjects are never required to cite). Currently dormant --
+                  # 0 published parameter gaps carry cites as of this snapshot
+                  # -- not yet a live defect, but the next disputed/unquantified
+                  # gap would have shipped uncited.
+                  cites=[SourceRef(**c) for c in g.get("cites") or []],
+                  would_close=g["would_close"], closes_by=g["closes_by"],
+                  severity=g.get("severity", "warns_line"), on=g.get("on"))
+
+        # PartType/Part (obligation 5, and the identity half of obligation 14):
+        # same ref minter, same closure-is-structural reasoning as above.
+        from .part_types import PartTypeRegistry, build_part_types, load_slice_components
+        from .parts import build_parts
+        components = load_slice_components()      # DatasetChanged -> build fails closed
+        part_type_registry = PartTypeRegistry()
+        part_types, part_type_gaps = build_part_types(components, part_type_registry)
+        parts, part_gaps = build_parts(
+            components, part_type_registry, conn=conn,
+            source_ref=lambda eid: asdict(b.source_ref(eid)))
+        for g in (*part_type_gaps, *part_gaps):
+            b.gap(kind=g["kind"], subject=g["subject"],
+                  code=g["because"]["code"], params=g["because"].get("params") or {},
+                  cites=[SourceRef(**c) for c in g.get("cites") or []],
                   would_close=g["would_close"], closes_by=g["closes_by"],
                   severity=g.get("severity", "warns_line"), on=g.get("on"))
 
@@ -917,7 +997,8 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
             "gaps": [asdict(g) for g in b.gaps()],
             # declared and empty rather than absent: an absent key reads as an
             # oversight, an empty list reads as "we publish none of these yet".
-            "part_types": [], "parts": [], "models": [], "procedures": [],
+            "part_types": part_types, "parts": parts,
+            "models": [], "procedures": [],
             "parameters": parameters, "combinations": [], "rules": [],
         }
         canonical_bytes(members)           # refuses floats, sets, unsortable keys

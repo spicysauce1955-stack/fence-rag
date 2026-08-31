@@ -2687,6 +2687,104 @@ paragraph it asked for.
 
 ---
 
+### G62 — obligation 5 (the `PartType` spine) closed for one vertical slice; obligation 14 correctly withheld, not guessed
+
+At the user's request: design, adversarial validation (13 agents — 4 research,
+3 independent designs, 1 judge/synthesis, 5 adversarial critics, each a
+distinct lens), then implementation. The adversarial pass earned its keep
+twice over, and both findings are worth recording in full because they are
+exactly the failure mode this project's whole culture exists to catch.
+
+**What the workflow's synthesis got wrong, caught before anything shipped.**
+The synthesized design's headline claim — "obligation 14 nets a real
+publication this round" — attached the corpus's two real stated
+stock-length facts (16ft White / 12ft Blend) to `BT-RAIL-CHESTERFIELD`,
+calling the correlation "unambiguous given the data shape." `[measured]`,
+independently, by re-reading the actual cited elements rather than trusting
+the design document: the evidence is boilerplate from a "Post & Rail with
+CertaGrain Texture" passage, one instance headed literally "Breezewood" (a
+sibling product line), and the cross-sections it states (1-1/2 x 5-1/2
+White, 2 x 6 Blend) match `BT-POSTRAIL-3RAIL`'s two rail components exactly
+and do NOT match Chesterfield's own undifferentiated rail. The design's
+"verified" framing inverted an artifact of scope — only two assemblies were
+read into the Part-building universe, so only one rail Part existed to
+misattach evidence to — into a claim about the evidence. Fixed by widening
+the vertical slice to include `BT-POSTRAIL-3RAIL`, the one assembly this
+manufacturer file actually has real, correctly-attributable evidence for,
+and re-verifying every claim directly (element text, `heading_path`, the
+dataset's own cross-section fields) before writing a line of code.
+
+**What shipped anyway got caught too, before it shipped.** The same
+adversarial pass found: `Part.spec`'s list order was never pinned to a
+canonical-bytes sort (obligation-1 non-determinism, one line to fix); the
+`PartType` namespace was specified two different ways in one document and
+never actually resolved (`mfr/certainteed-bufftech` vs. the slugify function's
+real output, `mfr/certainteed`); the planned SQL query omitted
+`unit_normalized` (an unconditional `IndexError` on every row) and
+`reviewed_value`/`reviewed_value_normalized` (silently reproducing the
+pre-G44 defect); and — the most consequential — the design invented an
+undocumented `conditions` field on `SpecField` to publish two colour
+variants on one `Part`, a Tier-1 contract-adjacent schema change smuggled in
+as an implementation detail. Widening the slice to `BT-POSTRAIL-3RAIL`
+resolved this last one for free: `BT-RAIL-PR-3RAIL-WHITE` and
+`BT-RAIL-PR-3RAIL-COLOR` are already two separate components in the real
+data, so the two colours become two `Part`s with one unconditioned value
+each — no schema invention needed.
+
+**A second, independent contract tension found doing this, not invented:**
+`SpecField.value` (`knowledge-datamodel.md` §2.2, delegated-to by
+`contract.md` §1.2, "Unchanged") is `38 | null` with a sibling `unit` field —
+a bare number, no verbatim lexeme. Obligation 4 (BINDING) requires every
+dimension to be a full `Quantity` and explicitly forbids "a bare `_mm`
+field." These are not the same shape, and `SpecField` is not itself in
+`contract.md`'s own type list. Filed as `amendments/CANDIDATES.md` C15
+rather than resolved unilaterally — deciding which shape wins is exactly
+what `AMENDING.md` exists to gate. Reported to Planning in `conversation.md`
+T41.
+
+**What actually publishes, `b2f2fe45…`:** 11 `Part`s (13 slice components
+minus 2 unmapped `gate_kit` instances), 5 `mfr/certainteed` `PartType`
+extensions (`picket`→infill, `post_stiffener_aluminum`→reinforcement,
+`hinge`/`latch`/`drop_rod`→gate_hardware), every extension's parent chain
+terminating in the spine, checked twice (mint time and independently in
+`verify()`). Obligation 5 fully satisfied. Obligation 14 gapped, not
+guessed: 2 `unmodellable_entity` gaps (one per colour), `closes_by:
+"planning"`, each citing its own real evidence (3 `SourceRef`s) — a work
+item, not a silent omission. 2 more `unmapped_part_kind` gaps for
+`gate_kit` (a hardware-bundle SKU that fails §2.2's mechanical test on its
+face — force-mapping it would assert an answer nobody gave).
+
+**A third, dormant defect found while wiring these gaps' citations through:**
+`build_snapshot`'s loop over `parameter_gaps` never passed `cites` to
+`SnapshotBuilder.gap()`, so any real citation `parameters._Gaps.add()`
+computed was silently dropped before reaching the wire. `[measured]`: 0
+currently-published parameter gaps carry cites today, so this was invisible
+— but the next `disputed`/`unquantified` gap with real evidence would have
+shipped uncited, violating obligation 8's "evidence, where there is any" in
+spirit if not in `verify()`'s letter. Fixed in the same commit, with a
+regression test that monkeypatches `build_parameter_tables` to inject a real
+citation and asserts it survives into the built snapshot.
+
+**A design flaw found by me, not the adversarial workflow, while
+implementing:** the first draft hardcoded the three real element ids
+carrying the stock-length evidence directly into `parts.py`. Every test or
+build against a store that does not hold those exact ids — any synthetic
+fixture, a partial ingestion, a future extraction edition that moves an
+element id (`docs/state-and-gaps.md` G38) — crashed with `KeyError` rather
+than degrading. Caught by running the full suite (`test_tenancy.py`'s
+synthetic-store tests failed immediately), fixed by querying the store
+fresh for this evidence instead, returning `{}` — not raising — when a
+store holds none of it.
+
+Full suite: 1136 tests (24 new: `test_part_types.py`, `test_parts.py`, plus
+real-store milestone/determinism/dataset-tamper tests in
+`test_snapshot_build.py`), same one pre-existing error (G58), 1 expected
+failure. `refs --verify`: 1134/1134 resolved, 0 dangling. `snapshot
+--verify-stored`: 2/2 (the prior snapshot, `a4181dbf…`, stays live beside
+the new one — superseded, not defective, so not tombstoned).
+
+---
+
 ### G51 — the audit's F1 heading fallback: measured and REJECTED
 
 R1 of `workspace/reports/projection-relevance-audit.md` — *project a heading as a

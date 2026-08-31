@@ -93,6 +93,52 @@ class TestClosureIsStructural(unittest.TestCase):
 
 
 @requires_store
+class TestParameterGapsCarryTheirCitations(unittest.TestCase):
+    """A dormant defect found while wiring PartType/Part: `build_snapshot`'s
+    loop over `parameter_gaps` never passed `cites` through to
+    `SnapshotBuilder.gap()`, so any real citation `parameters._Gaps.add()`
+    computed was silently dropped before reaching the wire. 0 currently-
+    published parameter gaps carry cites, so this was invisible -- the next
+    disputed/unquantified gap would have shipped uncited."""
+
+    def test_a_parameter_gaps_citation_survives_into_the_built_snapshot(self):
+        from unittest.mock import patch
+
+        from fence_evidence.store import connect
+        conn = connect()
+        try:
+            row = conn.execute(
+                "SELECT element_id FROM elements WHERE bbox IS NOT NULL "
+                "LIMIT 1").fetchone()
+            element_id = row["element_id"]
+
+            def fake_build_parameter_tables(conn, *, tenant, source_ref):
+                ref = source_ref(element_id)     # mints through the real closure
+                return [], [{
+                    "kind": "missing_value",
+                    "subject": {"kind": "fact_type", "id": "test_fixture",
+                               "tenant": None},
+                    "because": {"code": "test_fixture_gap", "params": {}},
+                    "cites": [ref],
+                    "would_close": "this is a test fixture",
+                    "closes_by": "knowledge",
+                }]
+
+            with patch("fence_evidence.parameters.build_parameter_tables",
+                      side_effect=fake_build_parameter_tables):
+                snap = build_snapshot(tenant="t", conn=conn)
+        finally:
+            conn.close()
+
+        fixture = [g for g in snap["gaps"]
+                  if g["because"]["code"] == "test_fixture_gap"]
+        self.assertEqual(len(fixture), 1)
+        self.assertTrue(fixture[0]["cites"],
+                        "the citation build_parameter_tables computed was "
+                        "dropped before reaching the published snapshot")
+
+
+@requires_store
 class TestBuiltSnapshot(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -180,6 +226,16 @@ class TestBuiltSnapshot(unittest.TestCase):
                     self.assertIn(needle.lower(), w.lower(),
                                   f"uncovered-point gap does not name the point "
                                   f"it is about: {key}={value!r} missing from {w!r}")
+                continue
+            if g["subject"].get("kind") == "component":
+                # A component-scoped gap (obligation 14, PartType/Part) can
+                # cite several sources across several pages at once -- no
+                # single page to name -- so G40's requirement here is that the
+                # component itself is named, the same way a ParamRef gap must
+                # name its parameter.
+                self.assertIn(g["subject"]["id"], w,
+                              f"component-scoped gap does not name the "
+                              f"component it is about: {w!r}")
                 continue
             self.assertTrue(
                 re.search(r"\bp\d+\b", w)
@@ -343,6 +399,55 @@ def _filings_store(*records, sha=SHA_A):
                      (f"e{i}", f"p{i}", f"v{i}", doc_id))
     conn.commit()
     return conn
+
+
+@requires_store
+class TestPartTypeSpineOverTheRealStore(unittest.TestCase):
+    """`part_types.py`/`parts.py` against the live corpus -- the milestone,
+    the determinism guard every hash-bearing addition needs, and the closed
+    build on a tampered dataset baseline."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.snap = build_snapshot(tenant="acme", regime="us_astm")
+
+    def test_part_types_and_parts_are_no_longer_the_empty_declared_lists(self):
+        self.assertGreater(len(self.snap["parts"]), 0,
+                           "obligation 5 milestone: the first Part ever published")
+        self.assertGreater(len(self.snap["part_types"]), 0)
+
+    def test_every_part_type_is_an_mfr_extension_never_shared(self):
+        for pt in self.snap["part_types"]:
+            self.assertNotEqual(pt["namespace"], "shared")
+            self.assertTrue(pt["namespace"].startswith("mfr/"))
+            self.assertEqual(pt["parent"]["namespace"], "shared")
+
+    def test_obligation_14_is_gapped_not_guessed_for_the_known_ambiguity(self):
+        specfield_gaps = [g for g in self.snap["gaps"]
+                          if g["because"]["code"] == "specfield_wire_shape_unresolved"]
+        self.assertEqual(len(specfield_gaps), 2)
+        for g in specfield_gaps:
+            self.assertTrue(g["cites"])
+
+    def test_building_twice_produces_byte_identical_part_types_and_parts(self):
+        from fence_evidence.canonical import canonical_bytes
+        second = build_snapshot(tenant="acme", regime="us_astm")
+        self.assertEqual(canonical_bytes(self.snap["part_types"]),
+                         canonical_bytes(second["part_types"]))
+        self.assertEqual(canonical_bytes(self.snap["parts"]),
+                         canonical_bytes(second["parts"]))
+
+
+@requires_store
+class TestDatasetTamperFailsTheBuildClosed(unittest.TestCase):
+    def test_a_forged_baseline_raises_and_returns_no_snapshot(self):
+        from unittest.mock import patch
+
+        from fence_evidence.dataset import DatasetChanged
+        with patch("fence_evidence.part_types.dataset.verify_dataset",
+                  side_effect=DatasetChanged("forged for the test")):
+            with self.assertRaises(DatasetChanged):
+                build_snapshot(tenant="acme", regime="us_astm")
 
 
 class TestAlsoFiledAsIsBuilt(unittest.TestCase):
