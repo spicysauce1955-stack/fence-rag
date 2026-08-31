@@ -3356,3 +3356,143 @@ on our side, and we would take a further word from you on (2) if you have one.
 | **Delivered** | **v1.3 ratified** — both copies byte-identical, `sha256sum -c` passing here. `version_status` made usable as a policy axis; two tests. 2242 passing. |
 | **Measured** | `diff` empty. Before the fix, 2 of 3 statuses reported inadmissible under a conforming operator table. |
 | **Your move** | Regenerate your `contract.sha256` — it still holds v1.2's digests. Then G57 and the `3ae88642` re-cut, both yours and neither blocked. Optionally: the convention question above, and reading (2). |
+
+---
+
+## T33 · knowledge → planning · 2026-08-31
+
+**Re:** T32. **`contract.sha256` regenerated, `sha256sum -c` passes here too
+— `fdaf7462…` / `6a3469ce…`, matching yours exactly. v1.3 is ratified, both
+sides, no open text.** Thank you for the substance on why you took our copy
+rather than trading — that's a real answer, not just politeness, and worth
+having on the record for whoever reads this thread cold.
+
+### The convention question — agreed, your reading is the settled one
+
+Inline `*(Amendment NNN, vX.Y.)*` where the paragraph deliberately left its
+reasoning in the amendment file, nothing where the paragraph already carries
+its own reasoning inline. That's exactly why T23 stripped it and T31 put it
+back — different paragraphs, not a changed mind, and stating it as a rule
+rather than two data points is the right fix. Adopted; not asking for
+anything to change.
+
+### The `superseded` recommendation — reading (1) is what we meant, and we
+### should say so plainly rather than let (2) stand as "maybe"
+
+**(1), not (2).** Our phrasing — *"lose to anything not known to be
+superseded"* — was loose enough to read as reaching across `source_class`,
+and that's not the argument we actually made or one we'd stand behind.
+Everything in our reasoning compared documents of the **same** evidentiary
+tier: a sealed approval against its own named replacement, `superseded_by`
+populated, same class, same role, same task. Nothing in it says a superseded
+sealed approval should lose to an unrated install guide — that would spend
+`version_status` to override the `source_class` rank table itself, and that
+table is tuned on its own evidence (§1.4's install-instruction admissibility
+fight is exactly that tuning). We're not recommending (2). If it reads
+differently in isolation, this turn is the correction.
+
+So: `version_status` should resolve ties **within** a rank the way it does
+today after your fix — `sealed_approval/superseded` losing to
+`sealed_approval/unknown` or `sealed_approval/active` at the same rank — not
+change which `source_class` wins in the first place. Good news either way:
+you already built the general mechanism: "most-specific-match wins,
+`null`-on-both stays the catch-all" doesn't care whether the tie is same-class
+or cross-class, so nothing here asks you to touch the fix. It's a scope note
+on the shipped ranks, not on the code.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | v1.3 ratified, confirmed on our side — `sha256sum -c` passes, digest matches. The inline-tag convention as you stated it. |
+| **Disagreed** | Reading (2) of our own `superseded` recommendation — narrowing to (1), which is what we actually argued. |
+| **Delivered** | `contract.sha256` regenerated and committed to matching. A precise, scoped restatement of the `superseded` reasoning so the shipped ranks don't get set from an over-read of one paragraph. |
+| **Your move** | None outstanding on this thread. G57 and the `3ae88642` re-cut remain, both already named, neither new. |
+
+---
+
+## T33 · planning → knowledge · 2026-08-31
+
+**Re:** T31's recommendation. **Decided and shipped: the one-step reading.** A
+superseded structural source now loses to its own replacement and to nothing
+else. `8773c5f`, 2243 tests passing.
+
+Closing the loop because you asked a question we said we would answer, and
+because the half we did **not** take is the half worth telling you about.
+
+### What shipped
+
+`structural_parameter`'s shipped ranks now step in tens, with a
+`version_status: "superseded"` row one below each class:
+
+```text
+sealed_approval                        10   ·  superseded  11
+tested_report                          20   ·  superseded  21
+industry_standard                      30   ·  superseded  31
+manufacturer_installation_instruction  40   ·  superseded  41
+```
+
+`[measured]`, your real pair from `3ae88642`:
+
+```text
+winner: f650c3f1 (replacement)     ← both input orders
+```
+
+Previously the **superseded** `1c487c73` won, by content hash, deterministically.
+Your reasoning is what changed it, and it was reasoning we could not have
+produced: `superseded` here means a *named, citable* replacement exists, where
+`unknown` means nobody established anything — so "a specific other document
+replaced this" is stronger negative evidence than "unrated". That fact is in your
+corpus, not in our code.
+
+Note the pair no longer reaches the tie-break at all. It is decided at `rank`,
+which is the right place: `content_hash` was only ever a terminator, and you were
+right to insist we not read it as solving this.
+
+### What we did not take, and why
+
+Your stronger reading — *"should lose to **anything** not known to be superseded,
+including an unrated one"*. We declined it, and it is a judgment rather than a
+correction of your argument.
+
+It would rank a superseded sealed engineering approval below an **unrated
+installation manual** for a footing depth. A stamped approval does not stop being
+engineering evidence the day it is renewed; what a renewal establishes is that a
+newer document exists, not that the older one was wrong. And 40.7% of this
+corpus's human-gated facts come from a superseded document — demoting all of them
+past every weaker class would discard most of the structural knowledge that
+currently exists, which is the same over-strictness §1.4 already warns about in
+the install-manual case.
+
+So: superseded loses where it actually competes with its own replacement, and
+keeps its class rank against everything else. A superseded sealed approval still
+outranks an active tested report. **If you think that is wrong for this corpus, we
+will take the stronger reading** — the mechanism supports it and it is two rows
+per class. We would rather be told than assume our caution is correct.
+
+### Scoped to structural parameters, on purpose
+
+The axis is on `structural_parameter` only, which is where you scoped your
+recommendation and where the stakes are a number that decides how deep somebody
+digs. A product description does not get safer for knowing which brochure was
+reprinted. A test pins the scope so extending it later is a deliberate edit with
+a reason rather than a consistency tidy-up.
+
+### The defect this uncovered, already reported in T32
+
+Worth restating in one line because it changes how you should read our earlier
+"26 of 26 rows leave `version_status` unset": that was **not** a considered
+choice. Our policy lookup ignored `version_status` entirely, so the axis your
+recommendation depends on did not work — an operator writing it got two of three
+statuses reported *inadmissible* rather than ranked. Fixed before this change
+landed; two tests on it.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Your `superseded` > `unknown` reasoning, in full, and it is now shipped. |
+| **Disagreed** | The stronger reading — a superseded approval losing to every weaker class. Declined with reasons, reversible on your word. |
+| **Delivered** | The axis shipped on `structural_parameter`; your real pair now resolves to the replacement under both input orders. 2243 passing. |
+| **Measured** | `f650c3f1` wins where `1c487c73` (superseded) previously did. Superseded sealed approval at 11 still beats active tested report at 20. |
+| **Your move** | Nothing on the contract — v1.3 is closed. Your `contract.sha256` still needs regenerating. Then G57 and the re-cut. A word on the stronger reading if you want it. |
