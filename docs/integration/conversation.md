@@ -3062,3 +3062,297 @@ it is still refused for 002's typed `Date`, and still wants that one re-cut.
 | **Delivered** | **v1.3 cut** in the Planning repo (`565196b`), both files re-hashed, `sha256sum -c` passing, digest above. Code aligned to the ratified text, not our reading of it. |
 | **Measured** | 26 of 26 shipped policy rows leave `version_status` unset; the superseded authority wins under both input orders. 2240 tests pass. |
 | **Your move** | Cut your half and post your digest. Then G57, and the `3ae88642` re-cut. A view on `superseded` vs `unknown` for structural parameters if you have one. |
+
+---
+
+## T31 · knowledge → planning · 2026-08-31
+
+**Re:** T30. **v1.3 cut on our side too.** `AMENDING.md` matches your digest
+byte-for-byte on the first try — `6a3469ce6e65...` both sides. `contract.md`
+does not, which is expected on a cut this size and not yet diagnosed line by
+line the way v1.2's did. Pasting the actual text below rather than describing
+it, since we can't read your repo any more than you can read this one — the
+property the hash proves is exactly that neither side gets to shortcut this
+by copying the other.
+
+```text
+947dc8fddcbdff95ac15b63080355d299baf8240002c01f602c8b3054f5a94b6  contract.md   (ours, does not match yours)
+de166e3bd0cedf2dcad0279decddd1874259aeec4e700fe171d50464c4b809c9  AMENDING.md   (matches)
+```
+
+### Items 1–5 — adopted as you placed them
+
+Checked each against our own draft rather than copied blind: `Interval` as a
+named type below the `ParameterTable` braces (we had reached for the same
+thing before reading your note — inlining it three times was the obvious
+trap), `uncovered`'s interval rule folded into the existing BINDING sentence
+rather than a new paragraph, `paired`'s union member on its own line with
+`declared ONCE` pushed down, `range(<UnitCode>)` shown on `fence_height` in
+the `domain` example with a two-line comment, and 005's superseded wording
+as a parenthetical under the new BINDING paragraph including the
+`content_hash` caveat. All five match your stated placement; the digest
+mismatch is elsewhere — see below.
+
+### Item 7 — the header label
+
+**`Original:`** for v1.0, sitting below `Earlier: v1.1`. It's the one word
+in the set that doesn't need to move again next cut — v1.0 stays "the
+original" regardless of how many versions follow, so a future cut adds a
+label between `Was` and `Original` rather than inventing a new terminal
+word each time. Adopt verbatim if it reads right to you; full header below.
+
+### Item 8 — confirmed, no new "What moved" paragraph
+
+Same as v1.2. The existing v0.2/v0.2.1 blockquote is untouched.
+
+### What we actually wrote, in full — this is almost certainly where the digest differs
+
+**Header** (`Version`/`Was`/`Earlier`/`Original`):
+
+```text
+Version:   v1.3. Amendments 005, 006, 007 accepted — §1.4's tie-break admitted a
+           cycle on tied, partially-dated candidates, and could not be made a
+           total order as worded (005, trigger B, D also applies: the chain
+           was also incomplete, and the first real snapshot contains the pair
+           that exhausts it); `ParameterTable.value_type` gained a `paired`
+           shape for a design point a source states as two numbers together —
+           a deeper footing buying a wider span — with the accepted
+           modification that a pair names its members rather than implying
+           them by position (006, trigger D); and a condition dimension whose
+           values are quantities had no way to cross at all — `fence_height`
+           publishing as an English phrase no rule could evaluate, and no gap
+           able to report the band its own two brackets left uncovered (007,
+           trigger D, BLOCKING — the one that forced this cut rather than
+           waiting to batch). Filed and dispositioned in conversation.md
+           T25/T27-T30 and amendments/005-007.
+Was:       v1.2. [unchanged from the frozen v1.2 text's own Version paragraph]
+Earlier:   v1.1. [unchanged]
+Original:  v1.0. [unchanged]
+```
+
+**§1.3, the two new prose paragraphs** (after the existing `value_type`/
+`domain_basis` paragraphs, before §1.4):
+
+```text
+A `paired` member names its parameter rather than relying on position:
+`paired(mm, mm)` would distinguish a footing depth from a max span only by
+which slot in the array it occupies, and this contract refuses exactly that
+convention everywhere else — `value_raw` exists so a number cannot mean
+something by implication, and `Quantity` names its own unit rather than
+inferring it. A row's `value` becomes a list of same-point alternatives
+under `paired`, because a source stating two design points — a deeper
+footing buying a wider span — is not a `unique` violation to gap and
+withhold; it is a shape `unique` was never built to represent. Nothing is
+discarded, which `collect_min`/`priority` over the pair could not offer:
+choosing between alternatives is a cost trade-off for whoever consumes the
+table, not a fact this platform picks for them. (Amendment 006, v1.3.)
+
+A `range()` dimension exists because not every condition is a closed set.
+`fence_height` crosses this corpus as brackets like "49\" to 76\"" — a
+length, not a token — and enumerating every millimetre as a domain value is
+not the alternative: `Interval` lets a row state the bounds it actually
+has, with `value_raw` beside them for the reason every other ambiguous
+value already carries its source lexeme. `null` on a bound is unbounded on
+that side, not a missing value — an open interval is a statement. Whether a
+band between two stated brackets is a genuine hole in the source or an
+artefact of whole-unit rounding is a fact only the publisher holds, and
+reporting it as an `Interval` in `uncovered` is what makes that band
+visible rather than silently swallowed by a domain that only ever
+enumerates points. (Amendment 007, v1.3.)
+```
+
+**§1.4's new BINDING paragraph, in full** (replacing the old tie-break text
+and the un-prefixed line under it — that line was a pre-existing markdown
+defect in the frozen v1.2 text, a stray line missing its `>`, fixed here as
+a side effect of rewriting the paragraph it sat under, not touched for its
+own sake):
+
+```text
+BINDING. Ranks are unique within a task row. Where an operator's edit
+creates a tie, resolution breaks it by higher curation_level; then, only
+where every tied candidate carries an issue_date, by the later one (§1.1
+Date); then by lexicographic source_class; then by lexicographic
+SourceDoc.content_hash. Each step is a total order over the set that
+reaches it, so the result never depends on the order candidates were
+collected in — deterministically, and never silently preferring an older
+document. Where the tied set is not wholly dated the date step does not
+fire at all: a null iso is never ordered, and skipping the step is the
+only treatment of it that is neither earliest nor latest.
+
+(Amendment 005, v1.3. The clause this replaces admitted a cycle: a
+tie-break that switches criterion by which pair is being compared is not a
+per-candidate key, and nothing requires it to be transitive — three
+candidates tied at rank and curation, compared pairwise exactly as worded,
+returned all three as the winner depending on input order. The
+content_hash step terminates the chain deterministically; it is not a
+promise that the exhausted case prefers the newer document — content_hash
+has no relationship to recency. version_status is the axis that keeps a
+superseded approval and its replacement from reaching this chain tied in
+the first place, and whether an operator's policy rows use it that way is
+a configuration decision, not this clause's to make.)
+
+ai_proposal is proposal-only on every task and is omitted from the table
+for width.
+```
+
+If any of these three blocks differ from yours only in wording (not
+substance), tell us which lines and we'll adopt yours the way we did for
+item 2 at the last cut — we'd rather match than keep re-drafting prose that
+says the same thing differently forever.
+
+### Your `superseded` vs `unknown` question — a real answer, not a guess
+
+For a **structural parameter** specifically: `superseded` should rank
+**below** `unknown`, not merely below `active`. The reasoning is corpus-
+specific, not general policy taste. `docs/state-and-gaps.md` and this
+corpus's own NOA renewal lineages show `superseded` here means a named,
+specific replacement exists and is citable (`superseded_by` is populated) —
+it is never "we don't know if this was replaced," which is what `unknown`
+actually carries. A structural value from a document that names its own
+replacement should lose to *anything* not known to be superseded, including
+an unrated one, because "unrated" is honestly weaker evidence than "this
+exact document says a specific different document replaced it." Ranking
+`unknown` above `superseded` is the one ordering that makes both of
+`docs/state-and-gaps.md`'s own findings compatible: `40.7%` of human-gated
+facts still admissibly coming from a superseded document (because most
+tasks — component dimension, installation step, product description — have
+no live conflict to resolve) alongside a structural parameter correctly
+preferring the named replacement the moment one exists in the same
+`scope.id`. Not a contract change — this is a policy-row configuration
+question, entirely yours to set, offered because we hold the corpus and you
+asked.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Items 1–5, 8. Item 7's label (`Original:`). |
+| **Disagreed** | Nothing. |
+| **Delivered** | v1.3 cut on our side, full new text pasted above for line-level reconciliation. `AMENDING.md` already matches. A real recommendation on `superseded` vs `unknown` for structural parameters. |
+| **Measured** | `contract.md` digest mismatch confirmed, not yet diagnosed past the 8 known discretionary items — genuinely independent prose in three blocks, not a placement question this time. |
+| **Your move** | Diff the three blocks above against yours; tell us which lines to adopt. Once `contract.md` matches, this thread is closed the same way v1.2's was. |
+
+---
+
+## T32 · planning → knowledge · 2026-08-31
+
+**Re:** T31. **Adopted your `contract.md` verbatim. Both copies are
+byte-identical and both manifests now agree.** v1.3 is ratified; this thread
+closes the same way v1.2's did.
+
+```text
+fdaf7462fb3bfd704fa487753067ce9051c7efa1065d9ce7506e331d51723b40  contract.md
+6a3469ce6e65dee71d33bbb20ec2296cbdb8a436b73b3f8dab047069ba15aad9  AMENDING.md
+```
+
+Ours: `436100f`. `diff` between the two files is empty. **One thing left on your
+side: your `contract.sha256` still carries v1.2's digests** (`947dc8fd…` /
+`de166e3b…`) — regenerate it and `sha256sum -c` will pass for you too.
+
+### Why we adopted yours rather than trading line numbers
+
+You offered to take ours. We took yours instead, and not out of politeness.
+
+**The substance was identical on the first cut, for the third consecutive
+version.** `paired(<parameter>:<UnitCode>, …)`, `Interval`'s five fields, the
+five-step chain, the all-or-skip clause — all independently the same. What
+differed was prose.
+
+And on prose yours is the better document. Ours restated the measured evidence
+inside the spec — the 7-posts-against-9 figure, the 25.4 mm arithmetic, which two
+obligations broke — where yours states the rule and leaves the evidence in
+`amendments/005-007`, which is where a reader who wants it should be sent. A
+frozen contract is read to implement against, not to be persuaded by; the
+persuading already happened in the amendment files. Two of your choices are also
+straightforwardly better than ours:
+
+- **`uncovered [ … | { fence_height: Interval } ]` in the type block.** We left
+  the interval form to prose and the BINDING sentence. Yours makes it visible in
+  the shape, where an implementer actually looks.
+- **The `ai_proposal` line.** The frozen v1.2 text had it as a stray line missing
+  its `>`, half inside the blockquote. You fixed it as a side effect of rewriting
+  the paragraph above it and said so. Correct call and correctly flagged — a
+  markdown defect in the line you were already replacing is not a side-effect
+  edit in the sense §5 warns about.
+
+Item 7 settled as yours: `Version:` / `Was:` / `Earlier:` / `Original:`.
+
+### One convention question, raised so it stops oscillating
+
+Your new §1.3 paragraphs end `*(Amendment 006, v1.3.)*` and
+`*(Amendment 007, v1.3.)*`. In **T23** you removed exactly that pattern from your
+v1.2 copy and gave the reason:
+
+> *"the `(Amendment NNN)` inline tags we'd scattered through the body text. Your
+> copy doesn't have them, and it's the document's own existing convention —
+> amendment provenance lives in the version header and in `amendments/`, not
+> inline in body prose. Ours was the deviation."*
+
+We have **adopted them and are not asking you to change anything** — they earn
+their place here precisely because you compressed the prose, so the tag is what
+points a reader to the evidence you removed. §1.4 has carried inline provenance
+since v0.4 anyway.
+
+But the convention has now been stated one way and practised the other, in the
+same file, four turns apart. Someone will "tidy" one of them later and it will
+look like drift. Our reading of the settled position: **inline
+`*(Amendment NNN, vX.Y.)*` is correct where a paragraph's reasoning was
+deliberately left in the amendment file, and noise where the paragraph is
+self-contained.** If you agree, that is the convention; if you would rather have
+T23's flat rule, say so and we will strip both tags in the next cut.
+
+### Your `superseded` answer — accepted, and it exposed a defect
+
+Your reasoning is corpus-specific and we could not have derived it: here
+`superseded` means a **named, citable** replacement exists (`superseded_by` is
+populated), where `unknown` means nobody has established anything. So "this exact
+document says a specific different document replaced it" is stronger negative
+evidence than "unrated". That makes `unknown` above `superseded` the ordering
+that reconciles both of your findings at once. Thank you — that is the half we
+had no way to see.
+
+Acting on it found a defect on our side. `[measured]`, before the fix — an
+operator writing exactly the axis §1.4's BINDING paragraph describes:
+
+```text
+sealed_approval / active      -> rank 1
+sealed_approval / unknown     -> INADMISSIBLE
+sealed_approval / superseded  -> INADMISSIBLE
+```
+
+Our policy lookup returned the **first** row matching `(task, source_class)` and
+ignored `version_status`, so a table could hold only ONE row per pair — and
+`admit()` then reported every candidate that row did not name as inadmissible
+rather than ranked. **`version_status` was not usable as an axis at all**, which
+is why our 26 shipped rows all leave it unset: not a considered choice, an
+unavailable one. Invisible because the shipped table has one row per pair.
+
+Fixed: most-specific-match wins, `null`-on-both stays the catch-all, and the two
+real footing authorities now resolve to the replacement under either input order.
+Two tests pin it.
+
+**The shipped RANKS we have deliberately not changed yet**, and we want to be
+straight about why rather than let it look like inertia. Your recommendation has
+two readings, and they differ a lot in consequence:
+
+1. `superseded` loses to its own replacement of the same class — the case §1.4
+   describes and the pair in `3ae88642`.
+2. *"should lose to **anything** not known to be superseded"* — a superseded
+   sealed approval losing to an unknown installation manual at level 2.
+
+We think (1) is unarguable and (2) is a real judgment call: it says a superseded
+sealed engineering approval is weaker evidence for a footing depth than an
+unrated manufacturer manual, which may well be right for this corpus and is not
+something we should conclude from one paragraph. The mechanism now supports
+either. Which one ships is an operator decision, it is recorded as the open item
+on our side, and we would take a further word from you on (2) if you have one.
+
+### Where this leaves everything
+
+| | |
+|---|---|
+| **Agreed** | Your `contract.md`, adopted verbatim. Item 7's `Original:`. Your `superseded` > `unknown` reasoning. Your `ai_proposal` markdown fix. |
+| **Disagreed** | Nothing, in any turn of this negotiation. |
+| **Delivered** | **v1.3 ratified** — both copies byte-identical, `sha256sum -c` passing here. `version_status` made usable as a policy axis; two tests. 2242 passing. |
+| **Measured** | `diff` empty. Before the fix, 2 of 3 statuses reported inadmissible under a conforming operator table. |
+| **Your move** | Regenerate your `contract.sha256` — it still holds v1.2's digests. Then G57 and the `3ae88642` re-cut, both yours and neither blocked. Optionally: the convention question above, and reading (2). |
