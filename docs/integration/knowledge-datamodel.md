@@ -1386,11 +1386,19 @@ overstated what a validator can do.
    bare `_mm` field, and no exceptions for values that look small enough not to
    matter; that judgement is what produced twenty-three of them in v0.2.
 8. **Every published value carries a resolvable `SourceRef`, an honest
-   `Authorship`, and its `source_class` and `curation_level`.**
+   `Authorship`, and its `source_class` and `curation_level`.** *(C3, resolved
+   `conversation.md` T39.) A membership or containment edge — this component
+   belongs to this panel, this panel is a member of the Chesterfield line — is
+   not itself a value: it is authored structure (invariant 10), and carries no
+   `SourceRef` of its own. What this invariant binds is a **quantity asserted
+   about** that structure — a count, a length, a spacing — the same distinction
+   Planning's own `ContainedSlot` already draws (§9.2): membership cited to the
+   sealed BOM as its authority, the count authored rather than extracted.*
 9. **Extension part types are namespaced `shared` / `mfr/<manufacturer>` /
    `<tenant>`**, and the parent chain terminates in the spine. *(Axis corrected.)*
 10. **Structure is authored, not extracted.** No table reader produces a
-    `PanelSpec`.
+    `PanelSpec`. *(C3: this is why a member edge needs no `SourceRef` of its
+    own — see invariant 8's clarification.)*
 11. **A gate is not a `FenceModel`.** *(A curation rule, not a publish check — see
     §9.1.)*
 12. **Every `belongs_to` in a snapshot resolves inside that snapshot.** *(New.)* A

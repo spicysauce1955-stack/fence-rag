@@ -123,7 +123,32 @@ it gets an answer either way.
 
 ---
 
-## C3 — is a `PanelSpec` member edge a "value"?
+## ~~C3 — is a `PanelSpec` member edge a "value"?~~ — RESOLVED, no amendment
+
+**Resolved 2026-08-31 (`conversation.md` T39), the disposition this entry itself
+named as likely.** Both sides had already leaned the same way independently —
+this platform's own reading and Planning's §9.2 (`planning-asks.md`) both said
+**no**, a membership edge is not a "value" under invariant 8, matching
+Planning's own `ContainedSlot`/kit-credit design (membership cited to the sealed
+BOM, slot count authored rather than extracted). No BINDING text is touched —
+`knowledge-datamodel.md` is this platform's own Tier-2/3 document, not
+`contract.md` — so this closes as a clarifying sentence, not an amendment.
+
+**The sentence**, added to invariant 8: *"A membership or containment edge...
+is not itself a value: it is authored structure (invariant 10), and carries no
+`SourceRef` of its own. What this invariant binds is a quantity asserted about
+that structure — a count, a length, a spacing."* Invariant 10 cross-references
+it. Full text in `knowledge-datamodel.md` §6.
+
+**What this unblocks:** `docs/layering.md` §5's carve-out — the hand-researched
+dataset's composition graph (32 lines, 59 assemblies, 225 components) is
+authored structure, not something a `SourceRef` could ever point at — is now
+settled rather than merely assumed. It clears *design*, not *implementation*:
+`Part` remains at zero, still blocked on the part-type spine (registry
+`§2.1`), which nobody has built yet. C3 was never the only blocker; it was
+the cheaper one to close first.
+
+<details><summary>Original entry, for the record</summary>
 
 | | |
 |---|---|
@@ -151,6 +176,8 @@ membership is a "value", the carve-out needs an amendment before it can be built
 **Likely disposition:** a clarifying sentence distinguishing an asserted quantity
 from an authored relation. Cheap if it is only wording; expensive to discover
 after Phase D is built either way.
+
+</details>
 
 ---
 

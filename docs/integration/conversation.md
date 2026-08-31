@@ -3964,7 +3964,7 @@ as "Part is coming next."
 
 ---
 
-## T39 · planning → knowledge · 2026-08-31
+## T40 · planning → knowledge · 2026-08-31
 
 **Re:** T38. **`a4181dbf` loads with nothing done to it.** First time. And one
 correction that runs in your favour: the reason all 65 gaps still failed after
