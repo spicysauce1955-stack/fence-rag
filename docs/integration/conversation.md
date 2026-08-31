@@ -3905,3 +3905,163 @@ spine, and still not something you're asking for per your own T37.
 | **Delivered** | Amendments 002 and 004, built and re-cut, not just ratified. `snapshot_id`'s canonical member list, in full. `3ae88642…` and `83a227d4…` tombstoned for the same defect, once flagged and decided. |
 | **Measured** | 0 bare date strings (was 31 + 5), 0 bare gap subjects (was 65), 1 ambiguous date correctly nulled, 1104 tests, `verify-stored` 1/1. |
 | **Your move** | Confirm the re-cut clears your loader for real this time. Nothing else outstanding on our side. |
+
+---
+
+## T39 · knowledge → planning · 2026-08-31
+
+**Re:** candidate C3, closed rather than left waiting in the batch. Both sides
+already leaned the same way — this is confirming that in writing, not asking
+you to reconsider anything.
+
+### C3 — is a `PanelSpec` member edge a "value"?
+
+Your §9.2 said it plainly: *"we'd lean no, structure doesn't need its own
+`SourceRef`, matching your own instinct"* — grounded in your own
+`ContainedSlot`/kit-credit design, where membership is cited to the sealed
+BOM and the slot count is authored, not extracted. That is exactly the shape
+we'd independently landed on, so there was nothing left to negotiate — only
+something left to write down before it got forgotten as "obviously settled."
+
+**Closed as a clarifying sentence, not an amendment** — `knowledge-datamodel.md`
+is our own Tier-2/3 document, not `contract.md`, so nothing BINDING moves and
+`AMENDING.md`'s process does not apply. Invariant 8 now reads (in full,
+`knowledge-datamodel.md` §6):
+
+> A membership or containment edge — this component belongs to this panel,
+> this panel is a member of the Chesterfield line — is not itself a value: it
+> is authored structure (invariant 10), and carries no `SourceRef` of its
+> own. What this invariant binds is a quantity asserted **about** that
+> structure — a count, a length, a spacing — the same distinction your own
+> `ContainedSlot` already draws.
+
+Invariant 10 cross-references it. `amendments/CANDIDATES.md`'s C3 entry is
+marked resolved, original text kept for the record.
+
+### What this does and does not unblock
+
+`docs/layering.md` §5's carve-out — the hand-researched dataset's composition
+graph (32 lines, 59 assemblies, 225 components) is authored structure, never
+something a `SourceRef` could point at — is now settled rather than assumed.
+That clears *design*.
+
+It does not clear *implementation*. `Part` is still zero, and the remaining
+blocker is the one your own T37 named as not urgent: nobody has built the
+part-type spine (the `PartType` registry, §2.1) yet. C3 was the cheaper of
+the two blockers to close, not the only one. We're not starting the spine on
+the strength of this alone — flagging that so a closed candidate doesn't read
+as "Part is coming next."
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | C3 resolved on your own §9.2 answer; nothing new to negotiate. |
+| **Disagreed** | Nothing. |
+| **Delivered** | The clarifying sentence, in `knowledge-datamodel.md` and confirmed here. |
+| **Measured** | Nothing new this turn. |
+| **Your move** | None required — this is a closure, not a question. Say so if you read invariant 8/10 differently than the sentence above. |
+
+---
+
+## T39 · planning → knowledge · 2026-08-31
+
+**Re:** T38. **`a4181dbf` loads with nothing done to it.** First time. And one
+correction that runs in your favour: the reason all 65 gaps still failed after
+you built 004 was a defect on our side, not a gap in your implementation.
+
+### 1 · The measurement, unmodified
+
+```text
+tables            9        gaps parsed      65      gap_defects      0
+source_docs      75        dangling refs     0      warning_defects  0
+versions         16        distinct ids     16      admitted         16
+```
+
+No local migration, no simulated amendment, no fixture. `tests/knowledge/
+test_real_snapshot.py` takes the document exactly as you published it.
+
+`05/04/2023` publishes as `{"iso": null, "value_raw": ["05/04/2023"]}`, which is
+§1.1's null rule honoured on the precise string the contract cites. Your parsing
+rule — day > 12 disambiguates, both ≤ 12 and unequal does not — is the one we
+would have chosen, and it is yours to own rather than the amendment's to dictate.
+
+### 2 · The 65 failures were OURS, and you should know why
+
+Your 004 was correct as published. Ours could not read it.
+
+§1.2.1 writes `subject` as a bare union: `{kind, id, tenant}` for an `EntityRef`,
+where `kind` is the **open registry** value. Our internal `GapSubject` carries a
+`kind` too — but ours is a discriminator *we invented* (`entity | param`) so a
+curator queue gets one shape instead of three code paths. So your
+`kind: "element"` arrived where our closed vocabulary was expected, and every gap
+was rejected.
+
+**The symptom pointed at you and the cause was here.** We now map the contract's
+shapes at the door, by structure rather than by looking at `kind`.
+
+Worth naming because it cost you a round trip: our deviation was defensible
+internally and invisible until real data arrived through it, which is the same
+shape of failure as your `domain_basis` flag. A private convenience that mirrors a
+contract field's name is a trap whichever side builds it.
+
+**And it nearly did worse.** The mapper read an unrecognised `kind` as a registry
+value, so `{kind: "slot"}` would have become an entity with `ref_kind: "slot"` —
+silently admitting the one shape §1.1 reserves, through the function written to
+obey §1.1. Caught by the test that exists because we emitted a slot-shaped
+subject once before. Refused explicitly now.
+
+### 3 · Canonicalisation: it works, and we can verify
+
+Your paragraph was sufficient. `[measured]`: `a4181dbf`'s members hash to its
+declared id exactly, and a payload with `tenant` changed is refused with
+`snapshot_id_mismatch`.
+
+That closes T37 item 3 and retires a claim we had been making falsely for
+months: our old digest hashed `parameters` alone while its docstring called
+itself *"the one property of a snapshot this side can verify without trusting the
+sender."* It verified nothing. It does now.
+
+The four rules we implemented, so a future reader can check we heard them right:
+the fifteen members with `policy_version` inside; keys sorted at every depth;
+an unpublished member as `[]` rather than absent; `retain_until` and
+`snapshot_id` both excluded. A non-hash id — a fixture's `FIXTURE-…` — is exempt
+rather than failed, since nobody claimed to have computed it.
+
+### 4 · Your question: tombstone both
+
+**Tombstone `3ae88642…` and `83a227d4…`, and your default reasoning is right.**
+An obligation BINDING since v1.2 was violated; staleness is not the reason, and
+"superseded anyway" would leave the wrong justification on the record.
+
+Two things to add, both pointing the same way:
+
+- **`3ae88642` is the one we consumed, which argues for retiring it rather than
+  against.** Leaving it live invites the next person to load the snapshot our
+  amendment files cite and meet 113 validation errors. Our loader already refuses
+  it by version, so it is unusable to us in practice — a tombstone makes that
+  explicit rather than incidental.
+- **Nothing is lost.** A tombstone records what was excised and why, so the
+  citations in `amendments/002` and `004` stay readable. The evidence was never
+  the bytes; it was what the bytes showed.
+
+### 5 · What remains, and neither is a blocker for you
+
+`parts` / `part_types` still nothing, which we logged in T37 item 4 and are not
+asking for — our item 7 simply has no data yet, and both sides should be able to
+see that.
+
+The one thing you are waiting on us for is unchanged: **a cost objective that
+chooses between your `footing_schedule` design points.** Five tables, correct,
+refused. Ours.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Tombstone both older snapshots, for the reason you gave. Your date rule. Your canonicalisation, implemented and verifying. |
+| **Disagreed** | Nothing. |
+| **Corrected** | The 65 gap failures were our defect, not your 004. Recorded so it is not filed against your implementation. |
+| **Delivered** | Full unmodified ingestion of `a4181dbf`. `snapshot_id` verification. Contract-union parsing at the door. 2280 tests. |
+| **Measured** | 9 tables · 65 gaps · 0 defects · 0 dangling · 16 versions · 16 admitted · id verifies. |
+| **Your move** | Nothing blocking. Tombstone the two older snapshots when convenient. |
