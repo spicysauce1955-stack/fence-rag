@@ -23,6 +23,7 @@ import context  # noqa: F401  -- puts the repo root on sys.path
 from fence_evidence.canonical import canonical_bytes
 from fence_evidence.promote_tables import NO_BRACKET_PRINTED
 from fence_evidence.parameters import (CONDITION_SCOPE, PARAMETER_OF,
+                                       _describe, _parse_fence_height,
                                        _round_half_up, _windows_overlap,
                                        build_parameter_tables, quantity)
 from fence_evidence.store import SCHEMA
@@ -163,6 +164,51 @@ class TestQuantity(unittest.TestCase):
         self.assertIsNone(quantity(self._row("36", unit="furlong")))
 
 
+class TestFenceHeightInterval(unittest.TestCase):
+    """G57. Amendment 007, ratified into contract v1.3: `fence_height` crosses
+    as an `Interval`, not a bare string. Corpus-wide only two labels exist —
+    this is a two-label parser, not an open-ended one."""
+
+    def test_up_to_is_unbounded_below(self):
+        iv = _parse_fence_height('Up to 48"')
+        self.assertIsNone(iv["min"])
+        self.assertEqual(iv["max"]["amount_milli"], 1219200)     # 48 * 25.4 * 1000
+        self.assertEqual(iv["max"]["unit"], "mm")
+        self.assertTrue(iv["max_inclusive"])
+        self.assertEqual(iv["value_raw"], ['Up to 48"'])
+
+    def test_a_to_b_is_bounded_both_sides(self):
+        iv = _parse_fence_height('49" to 76"')
+        self.assertEqual(iv["min"]["amount_milli"], 1244600)     # 49 * 25.4 * 1000
+        self.assertEqual(iv["max"]["amount_milli"], 1930400)     # 76 * 25.4 * 1000
+        self.assertTrue(iv["min_inclusive"])
+        self.assertTrue(iv["max_inclusive"])
+        self.assertEqual(iv["value_raw"], ['49" to 76"'])
+
+    def test_read_literally_not_smoothed_into_touching_brackets(self):
+        """The 25.4 mm band between these two real brackets (amendment 007
+        E2) is exactly what a literal reading produces -- inclusive on both
+        sides of both brackets, as written, with no inclusivity invented to
+        make them tile."""
+        below = _parse_fence_height('Up to 48"')
+        above = _parse_fence_height('49" to 76"')
+        self.assertLess(below["max"]["amount_milli"], above["min"]["amount_milli"])
+
+    def test_each_bound_keeps_its_own_lexeme_not_the_whole_label(self):
+        iv = _parse_fence_height('49" to 76"')
+        self.assertEqual(iv["min"]["value_raw"], ['49"'])
+        self.assertEqual(iv["max"]["value_raw"], ['76"'])
+
+    def test_no_float_reaches_the_boundary(self):
+        canonical_bytes(_parse_fence_height('Up to 48"'))
+        canonical_bytes(_parse_fence_height('49" to 76"'))
+
+    def test_unparseable_is_refused_not_guessed(self):
+        self.assertIsNone(_parse_fence_height("see chart"))
+        self.assertIsNone(_parse_fence_height(""))
+        self.assertIsNone(_parse_fence_height(None))
+
+
 class TestConditionScope(unittest.TestCase):
     """Obligation 13, BINDING: a published condition key declares its scope."""
 
@@ -275,18 +321,25 @@ class TestUncoveredPoints(unittest.TestCase):
                           {"exposure_category": "D", "hvhz": True}])
         conn.close()
 
-    def test_the_gap_names_the_point_rather_than_saying_something_is_missing(self):
+    def test_an_uncovered_point_is_not_also_published_as_a_gap(self):
+        """T14 (`conversation.md`). Every point no row covers already appears in
+        `table.uncovered` -- §1.3's own channel: "Planning treats an uncovered
+        point as a warned, unfulfilled requirement." A `condition_point_uncovered`
+        gap for the identical point restates the same fact under a second shape;
+        Planning's own `expand()` measurably derives an equivalent gap from
+        `uncovered` alone, so ingesting both means a curator sees the same missing
+        row twice. `uncovered` still carries the point -- the gap channel does not.
+        """
         conn = make_store()
         add_document(conn)
         add_fact(conn, conditions=both_hvhz("C"), value='36"')
-        _, gaps = build_parameter_tables(conn)
-        holes = [g for g in gaps
-                 if g["because"]["code"] == "condition_point_uncovered"]
-        self.assertEqual(len(holes), 4)                  # B and D, both states
-        self.assertTrue(any("exposure D, HVHZ" in g["would_close"] for g in holes))
-        for g in holes:
-            self.assertEqual(g["closes_by"], "knowledge")
-            self.assertEqual(g["kind"], "uncovered_condition")
+        table, gaps = build_parameter_tables(conn)
+        table = table[0]
+        self.assertEqual(len(table["uncovered"]), 4)      # B and D, both states
+        self.assertTrue(any("exposure D, HVHZ" in _describe(p)
+                            for p in table["uncovered"]))
+        self.assertFalse([g for g in gaps
+                          if g["because"]["code"] == "condition_point_uncovered"])
         conn.close()
 
     def test_a_point_the_source_excludes_is_distinguished_from_one_it_never_read(self):
@@ -557,6 +610,38 @@ class TestWhatIsNotPublished(unittest.TestCase):
         self.assertNotIn("C5", gap["would_close"])
         conn.close()
 
+    def test_unresolved_bracket_on_an_unread_row_is_not_a_disputed_gap(self):
+        """G56. The row above, but with `_row_applicability`'s own verdict
+        included -- exactly what `promote_tables` actually wrote for
+        doc-8727ba0fd4d4 p10, whose drawing predates this corpus's HVHZ
+        column entirely: no exposure, no fence height, no bracket, nothing.
+
+        `_translate_conditions` treated `hvhz_applicability: "unresolved"` as
+        a disputed disagreement regardless of WHY it was unresolved, and
+        returned early -- so the row never reached `_finish`'s collision
+        detector, which already knows how to tell "we misread this" apart
+        from a real disagreement. A table with no key columns at all
+        (`condition_basis: assumed`, nothing classified) reads exactly like
+        the no-conditions case above; it must be gapped the same way, not
+        published as `disputed` on a bracket nobody was ever in a position to
+        agree or disagree about.
+        """
+        conn = make_store()
+        add_document(conn)
+        for value in ('24"', '30"'):
+            add_fact(conn, conditions={"hvhz_applicability": "unresolved"},
+                     condition_basis="assumed",
+                     condition_basis_note="columns this platform could not classify "
+                                          "were dropped from this row, so its "
+                                          "conditions may be incomplete: "
+                                          "FOOTING DIAMETER, MAXIMUM POST SPACING.",
+                     value=value)
+        tables, gaps = build_parameter_tables(conn)
+        self.assertEqual(tables, [], "a contradiction must not publish")
+        self.assertIn("parameter_point_collision_unread_columns", codes(gaps))
+        self.assertNotIn("applicability_bracket_unresolved", codes(gaps))
+        conn.close()
+
     def test_a_real_unconditioned_fallback_still_publishes(self):
         """The other side of the same line: obligation 15 is not weakened.
 
@@ -721,6 +806,102 @@ class TestAPersonsCorrectionIsWhatPublishes(unittest.TestCase):
         row = tables[0]["rows"][0]
         self.assertEqual(row["value"]["amount_milli"], 609600)
         self.assertEqual(row["value"]["value_raw"], ['24"'])
+
+
+class TestFenceHeightPublishing(unittest.TestCase):
+    """G57. The real corpus shape: two non-overlapping fence_height brackets,
+    each carrying a different footing depth. Before the fix they were
+    compared as opaque strings and happened not to collide by accident of
+    being unequal text; this pins the Interval-based mechanism that replaced
+    it, which is correct rather than merely lucky.
+    """
+
+    def _two_heights(self, conn):
+        add_document(conn)
+        add_fact(conn, conditions={**non_hvhz("B"), "fence_height": 'Up to 48"'},
+                 value='24"')
+        add_fact(conn, conditions={**non_hvhz("B"), "fence_height": '49" to 76"'},
+                 value='30"')
+
+    def test_two_non_overlapping_brackets_do_not_collide(self):
+        conn = make_store()
+        self._two_heights(conn)
+        tables, gaps = build_parameter_tables(conn)
+        self.assertEqual(len(tables), 1, "a real, disjoint-height pair must publish")
+        self.assertFalse([g for g in gaps if g["kind"] == "unmodellable_entity"])
+        conn.close()
+
+    def test_domain_shows_range_not_an_enumerated_list(self):
+        conn = make_store()
+        self._two_heights(conn)
+        table = build_parameter_tables(conn)[0][0]
+        self.assertEqual(table["domain"]["fence_height"], "range(mm)")
+        self.assertEqual(table["condition_scope"]["fence_height"], "bay")
+        conn.close()
+
+    def test_each_row_publishes_its_own_interval(self):
+        conn = make_store()
+        self._two_heights(conn)
+        table = build_parameter_tables(conn)[0][0]
+        by_value = {r["value"]["amount_milli"]: r["conditions"]["fence_height"]
+                    for r in table["rows"]}
+        below = by_value[609600]                       # 24"
+        above = by_value[762000]                       # 30"
+        self.assertIsNone(below["min"])
+        self.assertEqual(below["max"]["amount_milli"], 1219200)
+        self.assertEqual(above["min"]["amount_milli"], 1244600)
+        self.assertEqual(above["max"]["amount_milli"], 1930400)
+        conn.close()
+
+    def test_overlapping_brackets_at_the_same_height_still_collide(self):
+        """The safety this whole mechanism exists for: an actual conflict —
+        same bracket, two different values — must still be caught, not waved
+        through because fence_height is now special-cased."""
+        conn = make_store()
+        add_document(conn)
+        for value in ('24"', '30"'):
+            add_fact(conn, conditions={**non_hvhz("B"), "fence_height": 'Up to 48"'},
+                     value=value)
+        tables, gaps = build_parameter_tables(conn)
+        self.assertEqual(tables, [])
+        self.assertIn("paired_design_point_unmodellable", codes(gaps))
+        conn.close()
+
+    def test_the_25_4mm_band_is_reportable_as_an_uncovered_interval(self):
+        """Amendment 007 E2, the half that makes it possible at all: a real
+        band between two stated brackets, invisible under the old bare
+        string, now lands in `uncovered` as an `Interval` instead of nowhere.
+        Read literally -- both brackets inclusive as written, so the gap is
+        exclusive on both ends of the space between them."""
+        conn = make_store()
+        self._two_heights(conn)
+        table = build_parameter_tables(conn)[0][0]
+        band, = [u["fence_height"] for u in table["uncovered"]
+                 if "fence_height" in u]
+        self.assertEqual(band["min"]["amount_milli"], 1219200)   # 48"
+        self.assertEqual(band["max"]["amount_milli"], 1244600)   # 49"
+        self.assertFalse(band["min_inclusive"])
+        self.assertFalse(band["max_inclusive"])
+        conn.close()
+
+    def test_no_band_reported_when_only_one_bracket_is_stated(self):
+        conn = make_store()
+        add_document(conn)
+        add_fact(conn, conditions={**non_hvhz("B"), "fence_height": 'Up to 48"'},
+                 value='24"')
+        table = build_parameter_tables(conn)[0][0]
+        self.assertFalse([u for u in table["uncovered"] if "fence_height" in u])
+        conn.close()
+
+    def test_an_unparseable_fence_height_gaps_rather_than_guesses(self):
+        conn = make_store()
+        add_document(conn)
+        add_fact(conn, conditions={**non_hvhz("B"), "fence_height": "see chart"},
+                 value='24"')
+        tables, gaps = build_parameter_tables(conn)
+        self.assertEqual(tables, [])
+        self.assertIn("unrecognised_condition_value", codes(gaps))
+        conn.close()
 
 
 if __name__ == "__main__":

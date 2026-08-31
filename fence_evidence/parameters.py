@@ -322,6 +322,74 @@ def quantity(row) -> dict | None:
 
 
 # --------------------------------------------------------------------------
+# fence_height -- amendment 007, ratified into contract v1.3 (G57). A
+# condition dimension whose values are quantities crosses as an `Interval`,
+# not a bare string. Corpus-wide only two labels exist in
+# `table_read_candidates` -- this is a two-label parser, not an NLP problem.
+# Both are read LITERALLY, inclusive where the English says so, with no
+# inclusivity invented to make the two brackets tile: whether the 25.4 mm
+# band between them (amendment 007 E2) is a genuine hole in the source or an
+# artefact of whole-inch brackets is a fact only a person can settle, and
+# guessing would be exactly the manufactured fact §1.1 already forbids on a
+# length.
+_FENCE_UP_TO = re.compile(r"^\s*up\s+to\s+(?P<max>.+?)\s*$", re.IGNORECASE)
+_FENCE_RANGE = re.compile(r"^\s*(?P<min>.+?)\s+to\s+(?P<max>.+?)\s*$", re.IGNORECASE)
+
+
+def _quantity_from_lexeme(lexeme: str) -> dict | None:
+    """A `Quantity` parsed from one bound's own lexeme, e.g. `'48"'`.
+
+    Not `quantity()`: that reads a fact row's `unit_normalized` column, which
+    a bound sliced out of a compound phrase like `"49\" to 76\""` does not
+    have -- the unit lives only in the lexeme here, same as `_unit_of` reads
+    it as a fallback.
+    """
+    unit = "in" if '"' in lexeme else ("ft" if "'" in lexeme else None)
+    if unit is None:
+        for token, u in (("mm", "mm"), ("cm", "cm")):
+            if re.search(rf"\d\s*{token}\b", lexeme, re.IGNORECASE):
+                unit = u
+                break
+    magnitude = _magnitude(lexeme)
+    if unit is None or magnitude is None:
+        return None
+    return {"amount_milli": _round_half_up(magnitude * MILLI_PER_UNIT[unit]),
+            "unit": "mm", "value_raw": [lexeme.strip()]}
+
+
+def _parse_fence_height(label: str | None) -> dict | None:
+    """A `fence_height` label -> an `Interval`, or `None` if it will not parse.
+
+    `null` on a bound is UNBOUNDED there, not absent -- an open interval is a
+    statement (contract.md §1.3). `value_raw` here carries the WHOLE label,
+    same reason every other ambiguous value keeps its source phrase beside
+    the number; each bound's own `Quantity.value_raw` carries only the
+    lexeme that bound came from.
+    """
+    text = (label or "").strip()
+    if not text:
+        return None
+    m = _FENCE_UP_TO.match(text)
+    if m:
+        hi = _quantity_from_lexeme(m.group("max"))
+        if hi is None:
+            return None
+        return {"min": None, "max": hi,
+                "min_inclusive": True, "max_inclusive": True,
+                "value_raw": [text]}
+    m = _FENCE_RANGE.match(text)
+    if m:
+        lo = _quantity_from_lexeme(m.group("min"))
+        hi = _quantity_from_lexeme(m.group("max"))
+        if lo is None or hi is None:
+            return None
+        return {"min": lo, "max": hi,
+                "min_inclusive": True, "max_inclusive": True,
+                "value_raw": [text]}
+    return None
+
+
+# --------------------------------------------------------------------------
 # conditions
 
 def _publish_basis(basis: str | None) -> str:
@@ -336,21 +404,43 @@ def _publish_basis(basis: str | None) -> str:
     return "stated" if basis == "stated" else "assumed"
 
 
-def _translate_conditions(raw: dict) -> tuple[dict, set, tuple | None]:
+def _translate_conditions(raw: dict, unread_columns: bool = False
+                          ) -> tuple[dict, set, tuple | None, dict | None]:
     """Store conditions -> published conditions, plus the dimensions in play.
 
-    Returns `(conditions, dimensions, problem)`. `dimensions` can be wider than
-    `conditions`: a row annotated *"HVHZ and NON HVHZ"* omits the `hvhz` key --
-    because a key it does not mention matches every value of that dimension --
-    while still putting `hvhz` in the table's domain. Without that, a table whose
-    rows all cover both HVHZ states would publish a domain with no HVHZ axis and
-    could never report `(B, hvhz=true)` as uncovered at all.
+    Returns `(conditions, dimensions, problem, fence_height)`. `dimensions` can
+    be wider than `conditions`: a row annotated *"HVHZ and NON HVHZ"* omits the
+    `hvhz` key -- because a key it does not mention matches every value of that
+    dimension -- while still putting `hvhz` in the table's domain. Without that,
+    a table whose rows all cover both HVHZ states would publish a domain with no
+    HVHZ axis and could never report `(B, hvhz=true)` as uncovered at all.
+
+    `unread_columns` is the same "this platform dropped a column it could not
+    classify" fact `_finish`'s collision detector reads off `_unread_columns` --
+    passed in rather than recomputed, so the two checks can never disagree about
+    one fact.
+
+    `fence_height` is returned SEPARATELY from `conditions`, as a parsed
+    `Interval` (G57, amendment 007) rather than a token: it is a continuous
+    dimension, and every point-matching function downstream (`_points`,
+    `_matches`, `_collisions`) compares `conditions` by exact equality against a
+    finite cross-product. Folding an `Interval` into that dict would make every
+    row conditioned on it fail to match any point at all -- see `_finish`, which
+    grafts it back onto the published `conditions` only after matching is done.
 
     `problem` is non-None when the row cannot be placed in the domain honestly.
     """
     conditions: dict = {}
     dimensions: set = set()
+    fence_height: dict | None = None
     for key, value in sorted(raw.items()):
+        if key == "fence_height":
+            dimensions.add(key)
+            fence_height = _parse_fence_height(str(value or ""))
+            if fence_height is None:
+                return {}, dimensions, ("unrecognised_condition_value",
+                                        f"{key}={value}"), None
+            continue
         if key == "hvhz_applicability":
             # The applicability bracket `promote_tables` recovered from the
             # merged annotation column. It is not itself a condition dimension:
@@ -372,9 +462,26 @@ def _translate_conditions(raw: dict) -> tuple[dict, set, tuple | None]:
                 # curation level 2, not an inference from silence -- silence is
                 # what `unresolved` below is for.
                 continue
+            if (text.strip().lower() == "unresolved" and unread_columns
+                    and "exposure_category" not in raw and "fence_height" not in raw):
+                # G56. This row has no key columns at all -- not merely a
+                # bracket nobody read, but a table this platform never
+                # classified a single condition out of. `_row_applicability`
+                # answering "unresolved" here is not a disagreement to
+                # publish as `disputed`; it is the SAME already-known gap
+                # `condition_basis: assumed` already carries one level up, one
+                # more symptom of the columns this platform dropped. Let it
+                # through exactly as `NO_BRACKET_PRINTED` does, so `_finish`'s
+                # collision detector -- which already knows how to tell "we
+                # misread this" from "the source states two design points" --
+                # gets to see the row instead of the code below intercepting
+                # it first and sending a person to look for a disagreement
+                # that was never there to find.
+                continue
             if text.strip().lower() == "unresolved":
-                return {}, dimensions, ("unresolved_applicability", text)
-            return {}, dimensions, ("unrecognised_condition_value", f"{key}={text}")
+                return {}, dimensions, ("unresolved_applicability", text), None
+            return ({}, dimensions,
+                    ("unrecognised_condition_value", f"{key}={text}"), None)
         if key == "hvhz":
             dimensions.add("hvhz")
             if isinstance(value, bool):
@@ -384,25 +491,25 @@ def _translate_conditions(raw: dict) -> tuple[dict, set, tuple | None]:
             elif str(value).strip().lower() in ("false", "0", "no"):
                 conditions["hvhz"] = False
             else:
-                return {}, dimensions, ("unrecognised_condition_value",
-                                        f"hvhz={value}")
+                return ({}, dimensions,
+                        ("unrecognised_condition_value", f"hvhz={value}"), None)
             continue
         if key == "exposure_category":
             dimensions.add(key)
             m = _EXPOSURE.search(str(value or ""))
             if not m:
-                return {}, dimensions, ("unrecognised_condition_value",
-                                        f"{key}={value}")
+                return ({}, dimensions,
+                        ("unrecognised_condition_value", f"{key}={value}"), None)
             conditions[key] = m.group(1).upper()
             continue
         if key not in CONDITION_SCOPE:
             # Obligation 13 is BINDING: a published condition key declares its
             # scope. We cannot declare one we have not decided, and dropping the
             # key would publish the row as applying more widely than it does.
-            return {}, dimensions, ("condition_scope_undeclared", key)
+            return {}, dimensions, ("condition_scope_undeclared", key), None
         dimensions.add(key)
         conditions[key] = " ".join(str(value).split())
-    return conditions, dimensions, None
+    return conditions, dimensions, None, fence_height
 
 
 def _points(domain: dict) -> list[dict]:
@@ -455,6 +562,68 @@ def _windows_overlap(a: dict, b: dict) -> bool:
     if b_until is not None and a_from is not None and b_until < a_from:
         return False
     return True
+
+
+def _fence_height_overlap(a: dict, b: dict) -> bool:
+    """Do two rows' `fence_height` Intervals overlap? G57, amendment 007.
+
+    Same shape as `_windows_overlap`: a row with no `fence_height` at all
+    carries no restriction on this axis, so it is vacuously compatible with
+    any other row -- absence is not a bound. Two disjoint brackets --
+    "Up to 48" and "49 to 76" -- are a succession across the height axis,
+    the same reason disjoint validity windows are not a `unique` violation:
+    both rows are right, for different heights.
+    """
+    x, y = a.get("_fence_height"), b.get("_fence_height")
+    if x is None or y is None:
+        return True
+
+    def bounds(iv):
+        lo = iv["min"]["amount_milli"] if iv["min"] else float("-inf")
+        hi = iv["max"]["amount_milli"] if iv["max"] else float("inf")
+        return lo, iv["min_inclusive"], hi, iv["max_inclusive"]
+
+    x_lo, x_lo_inc, x_hi, x_hi_inc = bounds(x)
+    y_lo, y_lo_inc, y_hi, y_hi_inc = bounds(y)
+    x_before_y = x_hi < y_lo or (x_hi == y_lo and not (x_hi_inc and y_lo_inc))
+    y_before_x = y_hi < x_lo or (y_hi == x_lo and not (y_hi_inc and x_lo_inc))
+    return not (x_before_y or y_before_x)
+
+
+def _fence_height_gaps(rows: list[dict]) -> list[dict]:
+    """Bounded bands between stated `fence_height` brackets that no row
+    covers -- amendment 007's whole point (E2): `uncovered` enumerates
+    points, and a continuous dimension's holes are not points. Only INTERIOR
+    gaps are reported: an unbounded tail, below the lowest stated bound or
+    above the highest, is not a hole this MEASURED domain claims to cover at
+    all, and reporting one would invent an extent nobody stated.
+    """
+    intervals, seen = [], set()
+    for r in rows:
+        fh = r["conditions"].get("fence_height")
+        if fh is None:
+            continue
+        key = canonical_bytes(fh)
+        if key in seen:
+            continue
+        seen.add(key)
+        intervals.append(fh)
+    if len(intervals) < 2:
+        return []
+    intervals.sort(key=lambda iv: iv["min"]["amount_milli"] if iv["min"]
+                                  else float("-inf"))
+    gaps = []
+    for a, b in zip(intervals, intervals[1:]):
+        if a["max"] is None or b["min"] is None:
+            continue                    # unbounded tail, not a stated hole
+        if _fence_height_overlap({"_fence_height": a}, {"_fence_height": b}):
+            continue
+        gaps.append({"fence_height": {
+            "min": a["max"], "max": b["min"],
+            "min_inclusive": not a["max_inclusive"],
+            "max_inclusive": not b["min_inclusive"],
+            "value_raw": []}})
+    return gaps
 
 
 # --------------------------------------------------------------------------
@@ -633,8 +802,11 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
             "rows": [], "dimensions": set(), "observed": {}})
 
         cites = [mint(fact["element_id"])]
-        conditions, dimensions, problem = _translate_conditions(
-            json.loads(fact["conditions"] or "{}"))
+        unread_columns = (fact["condition_basis"] != "stated"
+                          and "could not classify" in
+                              (fact["condition_basis_note"] or ""))
+        conditions, dimensions, problem, fence_height = _translate_conditions(
+            json.loads(fact["conditions"] or "{}"), unread_columns)
         group["dimensions"] |= dimensions
 
         if problem is not None:
@@ -725,10 +897,9 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
             # It records that promotion dropped a column it could not classify,
             # which is what tells a collision "we misread this" apart from
             # "the source really does state two design points here".
-            "_unread_columns": (fact["condition_basis"] != "stated"
-                                and "could not classify" in
-                                    (fact["condition_basis_note"] or "")),
+            "_unread_columns": unread_columns,
             "_basis_note": fact["condition_basis_note"],
+            "_fence_height": fence_height,
             "conditions": conditions,
             "condition_basis": _publish_basis(fact["condition_basis"]),
             "value": value,
@@ -810,7 +981,8 @@ def _collisions(rows: list[dict], points: list[dict]) -> list[tuple]:
         clashing = []
         for i, a in enumerate(here):
             for b in here[i + 1:]:
-                if a["value"] == b["value"] or not _windows_overlap(a, b):
+                if (a["value"] == b["value"] or not _windows_overlap(a, b)
+                        or not _fence_height_overlap(a, b)):
                     continue
                 clashing.extend([a, b])
         if clashing:
@@ -834,14 +1006,24 @@ def _finish(group: dict, gaps: _Gaps) -> dict | None:
     # MEASURED. §1.3: "uncovered against a declared domain means *we may not know
     # this table's real extent*; against a measured one it means *this table
     # really does not cover that point*."
-    domain, declared = {}, False
+    domain, point_domain, declared = {}, {}, False
     for dim in sorted(group["dimensions"]):
+        if dim == "fence_height":
+            # G57. `range(mm)` is a CONTINUOUS dimension -- it has no finite
+            # enumeration to cross-product into `points`, and every row
+            # conditioned on it carries an `Interval`, not a value equal to
+            # any other row's. Kept out of `point_domain` entirely;
+            # `_collisions` compares it by overlap instead, via
+            # `_fence_height_overlap`.
+            domain[dim] = "range(mm)"
+            continue
         if dim in DECLARED_DOMAIN:
             domain[dim] = list(DECLARED_DOMAIN[dim])
             declared = True
         elif group["observed"].get(dim):
             domain[dim] = sorted(group["observed"][dim], key=canonical_bytes)
-    points = _points(domain)
+        point_domain[dim] = domain[dim]
+    points = _points(point_domain)
 
     if scope["kind"] == "source_document":
         gaps.add(kind="missing_value", subject=_subject(parameter, scope),
@@ -947,17 +1129,33 @@ def _finish(group: dict, gaps: _Gaps) -> dict | None:
                                  f"than unread; an approval covering "
                                  f"{_describe(point)} would close this",
                      closes_by="knowledge")
-        else:
-            gaps.add(kind="uncovered_condition",
-                     subject=_subject(parameter, scope, point),
-                     code="condition_point_uncovered",
-                     params={"parameter": parameter, "scope_id": scope["id"],
-                             "point": point},
-                     would_close=f"a {parameter} row for {_describe(point)} on "
-                                 f"{scope['id']}; no source in the store states one, "
-                                 f"and Planning treats the point as a warned "
-                                 f"unfulfilled requirement rather than guessing",
-                     closes_by="knowledge")
+        # T14 (`conversation.md`): a point no row covers is already listed in
+        # `uncovered` below -- that IS §1.3's channel ("Planning treats an
+        # uncovered point as a warned, unfulfilled requirement"), and
+        # Planning's own `expand()` measurably derives an equivalent gap from
+        # `uncovered` alone. A second, `condition_point_uncovered` gap for the
+        # identical point restated the same fact under a different shape, so a
+        # curator ingesting a real snapshot saw the same missing row twice.
+        # The excluded-by-source case above stays a gap: it carries a citation
+        # and a reason `uncovered` alone cannot express -- §1.3 has no field
+        # for "the source itself brackets this point out."
+
+    # G57. Only now -- after every point-matching pass (`_collisions`,
+    # `uncovered`) is done comparing `conditions` by exact equality against a
+    # finite cross-product -- does the `Interval` rejoin the published row.
+    # Any earlier and a row carrying one would fail to match every point in
+    # `point_domain`, since no point ever has a `fence_height` key.
+    for r in rows:
+        fh = r.pop("_fence_height", None)
+        if fh is not None:
+            r["conditions"]["fence_height"] = fh
+
+    # Amendment 007 E2: a band between two stated brackets is a hole this
+    # domain is measured to have, not a point -- `_fence_height_gaps` runs
+    # after the merge above so it reads the same published `Interval`s a
+    # consumer would.
+    if "fence_height" in group["dimensions"]:
+        uncovered = uncovered + _fence_height_gaps(rows)
 
     return {
         "parameter": parameter,

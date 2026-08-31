@@ -498,3 +498,55 @@ One thing found but not addressed, because it isn't ours: an untracked
 Not created this session, purpose unknown, never touched — worth asking
 whoever's picking this up whether it's wanted, rather than either
 committing or deleting it unasked.
+
+## 13. G56's routing half closed, a later session, 2026-08-30
+
+Picked up as the one concrete bug on this list. `_row_applicability` turned
+out not to need the third answer §11 named — the fix lives entirely in
+`parameters._translate_conditions`, gated on the same `unread_columns` fact
+`_finish`'s collision detector already reads, not on a new status string.
+Full account, with what is still open (re-running `promote-tables --apply`
+still recreates the two `facts` rows, which still trip a *different*,
+pre-existing invariant test): `docs/state-and-gaps.md` G56. `AGENTS.md`
+above is untouched — still a question for the user, not resolved here.
+
+## 14. C5 filed, T14 closed, same day
+
+C5 (§5, §9, §11 above) went out as amendment 006
+(`docs/integration/amendments/006-paired-value-type-for-footing-schedule.md`):
+`value_type` gains `paired(<UnitCode>, <UnitCode>)`, a row's `value` becomes
+a list of same-point alternatives instead of a single scalar, and
+`hit_policy: unique` needs no wording change since exactly one row still
+occupies each point by construction. Filed, not ratified — Planning's
+disposition is still outstanding. T14's double-publish ask closed in code,
+no amendment needed: `parameters.py` no longer emits a top-level
+`condition_point_uncovered` gap duplicating `table.uncovered`; measured
+live, 16 → 0. Reported together in `conversation.md` T26.
+
+**Found while doing this, not part of either task, and not acted on:**
+Planning filed their own amendment 005 (§1.4's tie-break is not a total
+order — a real cycle on tied candidates, trigger B) and opened T25 while
+this session was in progress — a genuinely new commit (`591e183`) that
+landed on `main` mid-session, not something the earlier audit this document
+records could have seen. It asks for a disposition and is unrelated to G56/
+C5/T14. Left for the user to route rather than dispositioned here — a
+contract tie-break amendment deserves the same verification-before-claiming
+treatment as everything else in this file, not a decision made in passing
+while doing something else.
+
+## 15. Amendments 005 and 007 dispositioned, v1.3 cut and ratified, same day
+
+The user chose to have both dispositioned properly rather than left open.
+005 (the tie-break cycle) and 007 (`fence_height` publishing as a bare
+string) were each independently re-verified — the cycle hand-checked
+pairwise, 007's math and its two-label corpus scope both re-measured against
+the live store — and accepted, in `amendments/005` and `amendments/007`.
+Both were then cut into contract v1.3 (`docs/integration/contract.md`,
+`conversation.md` T30-T32): independently drafted here, and adopted by
+Planning verbatim after the substance matched on the first try for the
+third consecutive version — only the prose differed, and theirs read better
+for a frozen reference. `contract.sha256` passes on both sides.
+
+G57 (state-and-gaps.md) — actually parsing `fence_height` into the ratified
+`Interval` shape in `fence_evidence/parameters.py` — remains unbuilt. The
+schema is now locked; the code is not.

@@ -191,6 +191,14 @@ defect amendment rather than a registry addition.
 
 ---
 
+## ~~C5 — `ParameterTable.value_type` cannot express a paired design point~~ — PROMOTED
+
+> **PROMOTED 2026-08-30 to
+> [`006-paired-value-type-for-footing-schedule.md`](006-paired-value-type-for-footing-schedule.md),
+> filed by Knowledge.** The disposition below was agreed 2026-08-27; this is
+> the concrete wording neither side had written yet. Kept here in full,
+> unedited, because the reasoning is the point of the log.
+
 ## C5 — `ParameterTable.value_type` cannot express a paired design point
 
 | | |

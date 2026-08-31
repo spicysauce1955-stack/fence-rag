@@ -2153,7 +2153,7 @@ cross-family agreement on the same cell.
 
 ---
 
-### G56 — `promote-tables` created two facts with no scoping condition at all
+### G56 — `promote-tables` created two facts with no scoping condition at all — PARTLY FIXED
 
 **What happened.** After G54's update, one page-level review (the
 foot/inch-mark correction on `NOA-06-1019.01-fence-columbia-imperial-chesterfield.pdf`
@@ -2223,6 +2223,115 @@ present to `_row_applicability` — as a table-level fact recorded once
 reader silence — then confirm the collision detector is reached before
 `unresolved_applicability` for facts whose condition_basis is `"assumed"`
 with no key columns at all.
+
+**Fixed, the routing half, 2026-08-30 (later session).** `_row_applicability`
+was left untouched — its vocabulary is still exactly `{agreement, unresolved}`,
+because the fix did not need a third answer after all. Instead
+`parameters._translate_conditions` now takes the same `unread_columns` fact
+`_finish`'s collision detector already reads off `_unread_columns` (computed
+once per fact and passed in, so the two checks can never disagree about one
+fact), and when a row's `hvhz_applicability` is `"unresolved"` **and**
+`unread_columns` **and** neither `exposure_category` nor `fence_height` is
+present in its raw conditions — i.e. this row has no key columns at all, not
+merely a bracket nobody read — it is treated exactly like
+`NO_BRACKET_PRINTED`: the `hvhz` key is omitted (dimension retained) and the
+row proceeds to `_finish`, instead of being intercepted early as `disputed`.
+That is the literal reading of `would_close` above: reordering so the
+collision detector is reached before `unresolved_applicability`, for exactly
+the fact shape named. `tests/test_parameters.py`'s
+`test_unresolved_bracket_on_an_unread_row_is_not_a_disputed_gap` seeds this
+scenario and asserts `parameter_point_collision_unread_columns` fires instead
+of `applicability_bracket_unresolved`. A real disagreement (`unresolved` with
+a key column present, or without `unread_columns`) is completely unaffected —
+`test_an_unresolved_applicability_bracket_becomes_a_disputed_gap` and
+`test_the_disputed_gap_does_not_invent_a_disagreement` still pass unchanged.
+All 1,075 tests pass.
+
+**Still open, and deliberately not touched.** Re-running `cli promote-tables
+--apply` against the live store recreates the exact two facts this entry
+opened with (`footing_depth_in`, 24″/30″, `doc-8727ba0fd4d4` p.10) — the
+underlying `table_read_candidates` rows are legitimately `accepted`/
+`corrected`, so promotion is working as designed. Their *projection* now
+gaps correctly (verified live: both publish
+`parameter_point_collision_unread_columns`, not `disputed`), but storing them
+in `facts` at all still trips the pre-existing
+`test_every_promoted_fact_carries_its_row_conditions`
+(`tests/test_promote_tables.py`), which asserts every promoted fact carries
+`exposure_category` or `fence_height` — an invariant this table has no way to
+satisfy, since it predates the wind-exposure breakdown entirely. Applying and
+immediately reverting (deleting `fact_id` 19227/19228, leaving the review
+untouched, exactly as this entry's first revert did) confirmed the
+collision live and restored the passing baseline. That test and e6d1aed's
+`condition_basis="assumed"` design are in real tension for a row with zero
+key columns, and reconciling them — should `promote_tables.py` ever write
+such a fact, or should the row gap out one stage earlier, before it reaches
+`facts` at all — is exactly the kind of storage-layer decision this entry's
+first half declined to rush. It is not blocking: the store's live behavior
+today (facts absent, review preserved) is correct and matches what was there
+before this session. Whoever picks this up next should treat it as its own
+small decision, not reopen the routing fix above.
+
+---
+
+### G57 — `fence_height` publishes as a bare string; the contract now has a place for it, the code doesn't yet — BUILT
+
+Found by Planning (`docs/integration/amendments/007-quantity-valued-condition-dimensions.md`),
+verified here 2026-08-31. All 16 published rows across the 4 live
+`ParameterTable`s condition on `fence_height` as `'Up to 48"'` / `'49" to
+76"'` — a bare string, not a `Quantity`. Two BINDING obligations both fail
+on it: obligation 4 (every dimension is a `Quantity`) and obligation 2
+(`uncovered` lists every uncovered point) — the second one measurably: there
+is a real 25,400-thousandth-of-mm band between the two brackets
+(1,219,200–1,244,600) that no site fact can ever be reported as falling
+into, because `uncovered` enumerates domain points and that height is not
+one. Re-verified independently, not taken on Planning's report: math
+recomputed, and corpus-wide only two non-empty `fence_height` labels exist
+anywhere in `table_read_candidates` (plus one unread empty cell) — this is
+two labels, not an open-ended parsing problem.
+
+Amendment 007 accepted and **ratified into contract v1.3** (2026-08-31,
+`conversation.md` T30-T32; `sha256sum -c contract.sha256` passes on both
+sides). Schema only: `domain` gains `range(<UnitCode>)`
+alongside its enumerated form; a row's condition on such a dimension becomes
+`{min, max, min_inclusive, max_inclusive, value_raw}`, `null` on a bound
+meaning unbounded rather than absent; `uncovered` for such a dimension lists
+intervals. Whether the 1″ gap is a genuine dead band in the source or an
+artefact of whole-inch brackets is explicitly left open — the OCR text on
+the two source pages (`doc-88dcd8a73079` / `doc-2b81f4c2925e` pp.6/8) is too
+degraded to carry inclusivity language either way, and this platform's own
+standing rule (G53, G56) is not to resolve that kind of silence by guessing.
+
+**Built, 2026-08-31.** `_parse_fence_height` (`fence_evidence/parameters.py`)
+handles both real labels, read literally — inclusive on both sides of both
+brackets, reproducing the 1″ gap exactly rather than smoothing it away.
+`_translate_conditions` returns the parsed `Interval` on a separate channel
+from `conditions` (a 4th tuple element) rather than folding it into the
+ordinary point-matching dict: every point-matching function here
+(`_points`, `_matches`, `_collisions`) compares `conditions` by exact
+equality against a finite cross-product, and an `Interval` folded in early
+would make every fence_height-conditioned row fail to match any point at
+all. `_finish` excludes `fence_height` from `point_domain` (so `domain`
+still shows `fence_height: "range(mm)"` for a consumer, but `_points()`
+never tries to enumerate it), grafts the `Interval` back onto each row's
+published `conditions` only after `_collisions`/`uncovered` are done, and
+a new `_fence_height_overlap` (parallel to `_windows_overlap`) replaces bare
+string equality in the collision check — two disjoint brackets are a
+succession, not a conflict, same as disjoint validity windows. The 25.4 mm
+band itself is now reportable: `_fence_height_gaps` finds interior holes
+between stated brackets (never an unbounded tail — this domain is measured,
+not declared, so there is no universe to invent an edge for) and appends
+them to `uncovered` as `{fence_height: Interval}` entries, exactly matching
+the contract's own worked example.
+
+`tests/test_parameters.py::TestFenceHeightInterval` (the parser, 6 tests)
+and `::TestFenceHeightPublishing` (integration against the real corpus
+shape, 7 tests) — collision safety, the domain marker, per-row publishing,
+the real conflict case still catching, and the band itself. Verified live
+against the store: 4 tables, 0 gaps, every row correctly typed, no false
+collision where the old string-equality check had been passing by
+coincidence rather than by construction. Red-green checked (reverting
+`parameters.py` alone reproduces all 13 failures for the right reason).
+Full suite: 1088 tests, all passing.
 
 ---
 
