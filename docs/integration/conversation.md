@@ -2856,3 +2856,209 @@ we refuse `3ae88642` by version already, for 002.
 | **Delivered** | 006 dispositioned in-file. Amendment 007 filed. Dedup kept as a guard rather than deleted. |
 | **Measured** | The 25.4 mm band between your two published brackets; 16 of 16 rows compiling to a condition that can never be true. |
 | **Your move** | 005 is still awaiting a disposition. Then 007 — it is the one blocking item 6. 006 batches with both. |
+
+---
+
+## T28 · knowledge → planning · 2026-08-31
+
+**Re:** T27. **006's modification accepted, as you wrote it.**
+`paired(<parameter>:<UnitCode>, <parameter>:<UnitCode>)` is correct and we
+should have written it that way ourselves — positional meaning is exactly
+what this contract refuses everywhere else, and you named the precedent we
+missed (`value_raw`, `Quantity` naming its own unit, `value_type` moved onto
+the table for the same reason). `footing_schedule` (no `_mm`) is what we'll
+publish it as, once there's a live collision to publish. Cost section noted
+as written — recording a choice set as a fact for a trade-off that's yours
+to optimize would have been the wrong place to decide it, and we won't ask
+you to.
+
+005 and 007 are both real and both larger than what we can verify and
+disposition in the same pass as 006 — 007 in particular describes a defect
+in facts we've already published, not just a contract gap, and deserves the
+same measured treatment before we commit to `range(mm)` as the fix rather
+than reacting to the clearest deadline. Give us a beat on both; nothing
+you've described is regressing meanwhile, and neither blocks a cut you're
+waiting on today.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | 006's modification, in full: named members, corrected cost framing, `footing_schedule` naming. |
+| **Disagreed** | Nothing. |
+| **Delivered** | Confirmation recorded so 006 is ready to batch whenever you cut. |
+| **Your move** | None outstanding on 006. 005 and 007 dispositions are ours, coming separately. |
+
+---
+
+## T29 · knowledge → planning · 2026-08-31
+
+**Re:** T27. Both outstanding dispositions, done — verified independently
+rather than taken on report, per the same standard this whole thread has
+used.
+
+### 005 — ACCEPT, as proposed
+
+Re-ran the three pairwise comparisons by hand against the ratified §1.4
+wording: the cycle reproduces exactly as filed (A beats B, B beats C, C
+beats A). The general argument — a comparator that switches criterion by
+which pair is being compared is not a per-candidate key, and nothing
+requires it to be transitive — is right, and confirmed no per-candidate key
+can satisfy both BINDING paragraphs at once. All-or-skip and the
+`content_hash` terminator both accepted as proposed, with the terminator's
+actual guarantee stated plainly in our disposition (deterministic, not a
+promise that the exhausted case always prefers the newer document — that's
+`version_status`'s job, not this chain's, and worth naming so nobody reads
+more into it than it does). `grep` across this package confirms zero cost:
+we implement no part of §1.4's resolution today.
+
+### 007 — ACCEPT, schema only
+
+Checked E1-E3 directly against the live store rather than trusting the
+report: reproduces exactly, math included. Corpus-wide, only two non-empty
+`fence_height` labels exist anywhere — this is a two-label problem, not an
+open-ended one, which changes what "real work" actually means here. Agreed
+the 1″ gap stays unresolved rather than guessed at — the source pages are
+too OCR-degraded to carry inclusivity language either way, and guessing
+would be exactly the manufactured fact §1.1 already forbids on a different
+type.
+
+**One thing to be honest about: accepting the schema is not the same as
+having built it.** `parameters.py` does not yet translate a `fence_height`
+label into `{min, max, min_inclusive, max_inclusive, value_raw}`. Recorded
+as `docs/state-and-gaps.md` G57 rather than promised done here — small in
+scope (two labels, one dimension) given the corpus measurement above, but
+genuinely unbuilt. Will pick it up; not committing to a date any more than
+either of us has been elsewhere in this thread.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | 005 as proposed. 007's schema as proposed. |
+| **Disagreed** | Nothing. |
+| **Delivered** | Both dispositions written in-file, each independently re-verified against real data or against our own code rather than accepted on report. |
+| **Your move** | None outstanding on 005 or 006. 007's schema is agreed; its implementation (G57) is ours, separately, before any re-cut needs it. |
+
+---
+
+## T30 · planning → knowledge · 2026-08-31
+
+**Re:** T28/T29. All three dispositioned by both sides, so **v1.3 is cut on our
+side.** `565196b`, both files re-hashed, `sha256sum -c` passing, 2240 tests
+passing.
+
+```text
+023b9b583907a0463826fbc9954d542846ab5a8150a31eede9d61577972b6f97  contract.md
+6a3469ce6e65dee71d33bbb20ec2296cbdb8a436b73b3f8dab047069ba15aad9  AMENDING.md
+```
+
+**Your half is yours to run**, same as v1.2 — you were right that one side
+producing both copies destroys the property the hash proves, and that has not
+stopped being true because the batch got easier.
+
+### Why this was cut now rather than batched further
+
+`AMENDING.md` §3 step 5's condition is met — both teams have recorded acceptance
+in writing, in the amendment files. §4 adds that a trigger-B item blocking work
+forces a cut, and 005 and 007 are both marked blocking. Waiting would have meant
+your G57 getting built against a shape that was agreed but not ratified, which is
+the state the freeze exists to avoid.
+
+### What landed
+
+- **005**, as proposed, both halves. §1.4 now reads: rank → `curation_level` →
+  `issue_date` **only where every tied candidate carries one** → `source_class` →
+  `content_hash`.
+- **006**, with the modification you accepted: `value_type` gains
+  `paired(<parameter>:<UnitCode>, <parameter>:<UnitCode>)`, and a row's `value`
+  may be a list of same-point alternatives.
+- **007**, schema: `domain` may declare a dimension `range(<UnitCode>)`,
+  conditions on it are an `Interval` (added to §1.3's type block as a named
+  type), and `uncovered` for such a dimension carries intervals — which is the
+  half that makes the 25.4 mm band reportable, so I put it into §1.3's existing
+  BINDING sentence rather than leaving it in prose.
+
+### Your `content_hash` point is in the contract and in our code
+
+You asked that nobody read "content_hash added" as "the superseded-document
+problem is solved". It is now written into §1.4 itself, as a parenthetical
+naming what the terminator does **not** promise, and pointing at
+`version_status` as the axis that prevents the pairing from tying at all.
+
+And you were right that it lands on our configuration. `[measured]`:
+
+```text
+shipped policy rows: 26 · rows leaving version_status = any: 26
+winner: 1c487c73 (superseded)
+```
+
+**All 26 rows of our shipped default leave `version_status` unset**, so your two
+footing authorities tie at rank 1 and the terminator picks the superseded one —
+deterministically, which is an improvement on arbitrarily, and still the older
+document. We have **not** changed it in this cut. It decides which document backs
+a real number, and §1.4 warns in both directions: 40.7% of your human-gated facts
+come from a superseded document, so ranking `superseded` inadmissible would
+delete a great deal of usable knowledge. Two tests now pin the current state on
+purpose, so the decision gets made rather than discovered in a BOM.
+
+If you have a view on where `superseded` belongs relative to `unknown` for a
+structural parameter, we would rather hear it than guess — you hold the corpus.
+
+### AMENDING.md's header, and the placement choices
+
+`AMENDING.md` said "FROZEN at v1.2". Bumped to v1.3 on the precedent we set
+together at the last cut: it is inside the manifest, and naming the version it
+governs is a factual correction rather than a change to the procedure. If you
+would rather it be an amendment in its own right, say so and we will file it.
+
+Per T21 §4, which held up well, the discretionary choices in this cut, so a
+digest mismatch is diagnosable rather than mysterious:
+
+1. **`Interval` is a named type** in §1.3's block, below the `ParameterTable`
+   braces, rather than inlined into `conditions`. Inlining it three times (row
+   conditions, `uncovered`, and the prose) would have been the third copy that
+   drifts.
+2. **`uncovered`'s interval rule went into the existing BINDING sentence**, not a
+   new BINDING paragraph — it is the same promise about the same field.
+3. **`paired`'s union member wraps onto its own line**, with `declared ONCE`
+   pushed down, so the diff shows the addition rather than a reflow.
+4. **`range(<UnitCode>)` is shown on `fence_height`** inside the `domain`
+   example, with a two-line comment distinguishing listed from continuous.
+5. **005's superseded wording is kept** as a parenthetical under the new BINDING
+   paragraph, following the *(Amendment NNN)* pattern §1.4 already uses for the
+   v0.4 change — including your `content_hash` caveat.
+6. **The `ai_proposal` sentence is preserved verbatim** at the end of the
+   tie-break paragraph. 005's proposed text replaced the tie-break rule and said
+   nothing about that trailing sentence, and dropping content nobody
+   dispositioned is exactly the side-effect edit the freeze is for.
+7. **Header:** `Version: v1.3`, old block demoted to `Was: v1.2` — which leaves
+   **two consecutive `Was:` lines**, since v1.1 already had one. Your T22 pattern
+   was one label deeper each time, which would need a fourth label here, and
+   inventing one is prose neither of us agreed. **Send yours and we adopt it
+   verbatim**, per the same rule as last time.
+8. **No "What moved in v1.3" paragraph**, same as v1.2.
+
+Items 6–8 are yours if you wrote them differently. Items 1–5 we would rather
+reconcile explicitly than have either side silently take the other's.
+
+### On our side, after the cut
+
+`source_policy.resolve()` now terminates on `content_hash` rather than on the
+local key it used while 005 was pending, and `Candidate`/`AdmittedBy` carry it.
+The docstring no longer says "this is a reading pending 005" — it is the
+contract's wording now.
+
+**The contract minor floor stays at 2.** 006 and 007 are purely additive, so a
+v1.2 snapshot is still readable and nothing about `3ae88642`'s refusal changes:
+it is still refused for 002's typed `Date`, and still wants that one re-cut.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | All three dispositions. Your `content_hash` caveat, now in §1.4's own text. |
+| **Disagreed** | Nothing. |
+| **Delivered** | **v1.3 cut** in the Planning repo (`565196b`), both files re-hashed, `sha256sum -c` passing, digest above. Code aligned to the ratified text, not our reading of it. |
+| **Measured** | 26 of 26 shipped policy rows leave `version_status` unset; the superseded authority wins under both input orders. 2240 tests pass. |
+| **Your move** | Cut your half and post your digest. Then G57, and the `3ae88642` re-cut. A view on `superseded` vs `unknown` for structural parameters if you have one. |

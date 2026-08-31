@@ -200,3 +200,54 @@ argument as every other version of this: the bracket boundaries are the source's
 and a boundary we chose would silently decide which footing depth a fence is
 built to — with our number, their citation, and no way for a reader to see the
 seam. Where a fact belongs to the document, it has to cross as one.
+
+---
+
+## Disposition — Knowledge Platform, 2026-08-31
+
+```text
+Verdict   ACCEPT, as proposed. Schema only -- see "What this disposition does
+          NOT do" below for what is still open.
+```
+
+**E1-E3 checked directly, not taken on report.** `[measured]`, live store,
+2026-08-31: `build_parameter_tables()` publishes exactly what E1/E3 describe
+— `conditions: {..., "fence_height": '49" to 76"'}`, a bare string, on all
+16 rows across the 4 published tables. The 25 400-thousandth gap in E2
+recomputes exactly: 48″ = 1 219 200, 49″ = 1 244 600, 76″ = 1 930 400
+thousandths-of-mm, hand-checked against `MILLI_PER_UNIT`.
+
+**Whether the gap is real or a whole-inch-rounding artefact — checked, and
+it's genuinely open, not something either side should resolve by guessing.**
+The two labels come from `doc-88dcd8a73079` / `doc-2b81f4c2925e`, pp.6/8 —
+scanned Miami-Dade NOA tables, OCR text too degraded to carry inclusivity
+language ("up to and including" or similar) either way. Read literally,
+`"Up to 48\""` means max=48″ inclusive and `"49\" to 76\""` means both
+bounds inclusive — which reproduces the 1″ gap exactly as measured. That
+could be the source's real convention (a genuine dead band between
+brackets) or an artefact of describing a continuous quantity in whole
+inches. Filing's own position — *"only the publisher can state which, and
+it cannot be inferred from the labels"* — is exactly right and is this
+platform's own standing rule (G53, G56: don't resolve from silence, report
+the gap and let a person settle it). Not resolving it here either.
+
+**Scope actually checked before committing to it.** `[measured]`, corpus-wide:
+`table_read_candidates` carries exactly two non-empty `Fence Height` values
+anywhere — `"Up to 48\""` and `"49\" to 76\""` (plus one empty string, an
+unread cell, already excluded from published conditions). This is not an
+open-ended NLP problem; it is two labels. The proposed shape (`min`, `max`,
+explicit `min_inclusive`/`max_inclusive`, `value_raw` kept verbatim) is
+consistent with how this platform already treats every other ambiguous or
+partial value — `Quantity.value_raw`, `Date`'s `null`-never-ordered rule —
+so it needs no new pattern, only an application of ones already accepted.
+
+**What this disposition does NOT do.** Accepting the contract shape is not
+the same as having built it. `fence_evidence/parameters.py` does not yet
+translate a `fence_height` label into `{min, max, min_inclusive,
+max_inclusive, value_raw}` — that is real, separate implementation work
+(a new `_translate_fence_height`-shaped function, `CONDITION_SCOPE`/
+`DECLARED_DOMAIN` updates, a `_points`/`_matches`/`_windows_overlap`-style
+interval-overlap check for `uncovered`, and tests), not something to build
+inside a contract disposition. Recorded as the next build-plan item rather
+than promised done here. `3ae88642` is already refused by version for 002;
+nothing regresses by this staying unbuilt a while longer.

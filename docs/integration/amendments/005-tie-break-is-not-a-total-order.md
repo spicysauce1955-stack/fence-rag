@@ -140,3 +140,55 @@ produced a cycle in live code. We implemented the all-or-skip reading and said s
 docstring, citing this amendment. If the Knowledge team's disposition prefers the other
 reading, we change it. We would rather have the argument here than have two teams each
 quietly pick a reading and discover it through a hash mismatch.
+
+---
+
+## Disposition — Knowledge Platform, 2026-08-31
+
+```text
+Verdict   ACCEPT, as proposed.
+```
+
+**Defect 1 checked by hand, not taken on report.** Re-ran the three pairwise
+comparisons against the ratified §1.4 wording: A/B not both dated →
+lexicographic, `industry_standard` < `sealed_approval` → A. B/C both dated →
+later wins, 2024 > 2020 → B. C/A not both dated → lexicographic,
+`company_authored` < `industry_standard` → C. A beats B, B beats C, C beats
+A — the cycle reproduces exactly as filed. The general argument is also
+right and not specific to this triple: a comparator whose *choice of
+criterion* depends on which pair is being compared is a pairwise predicate,
+not a per-candidate key, and nothing requires a pairwise predicate to be
+transitive. `where both carry one` is exactly such a predicate. Confirmed
+independently that no per-candidate key can rescue it while also honouring
+§1.1's null rule — every position for a null date is earliest or latest, and
+both are forbidden by name.
+
+**All-or-skip is the only reading consistent with both BINDING paragraphs**,
+for the reason filed: it is a real total order over the full set (the date
+step either applies to everyone being compared or nobody), and it never
+assigns a null date a position relative to a real one. Accepting without a
+counter-proposal — we don't have a third option that keeps both guarantees.
+
+**The `content_hash` step is accepted with its actual guarantee understood,
+not a stronger one.** It terminates the chain deterministically, which is
+what §1.4's own stated reason for existing asks for — *"two implementations
+... hash differently"* is about reproducibility, not about the exhausted
+case always preferring the newer document. Defect 2's pair (both
+`sealed_approval`, one `superseded` with no date, one `unknown` with a
+date) still reaches `content_hash` once the date step is skipped for not
+being wholly dated, and content_hash ordering has no relationship to
+recency — so the exhausted case can still rank a superseded document ahead
+of its replacement, deterministically, on both sides now, rather than
+arbitrarily on each. That is a real gap in what the tie-break can promise,
+not one this amendment claims to close, and not one we're asking you to
+solve here: `version_status` already exists as the axis meant to prevent
+this pairing from tying in the first place (contract.md §1.4's own BINDING
+paragraph on it), and if it isn't currently being used to separate
+`superseded` from `active`/`unknown` at the `rank` step, that's an operator
+configuration question, not a tie-break defect. Named so nobody reads
+"content_hash added" as "the superseded-document problem is now solved."
+
+**Verified against our own side.** `fence_evidence` implements no part of
+§1.4's resolution chain — `grep` across the package for the tie-break
+mechanism returns nothing; `admitted_by`/rank resolution is entirely
+Planning's engine. "Cost: none" is accurate, not assumed.
