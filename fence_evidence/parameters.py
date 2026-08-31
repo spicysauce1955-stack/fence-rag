@@ -101,7 +101,22 @@ TASK_OF = {
     "footing_depth_mm": "structural_parameter",
     "max_span_mm": "structural_parameter",
     "footing_diameter_mm": "structural_parameter",
+    "footing_schedule": "structural_parameter",
 }
+
+# Amendment 006, ratified in contract v1.3 (G-numbered in state-and-gaps.md
+# under the review-scale session that proved it necessary). The two
+# `fact_type`s whose cells `promote_tables` links to the SAME source table
+# row -- `table_read_candidates.row_index` -- and whose values are a real
+# corpus pairing (a deeper footing buying a wider span), not two independent
+# facts that happen to collide. `footing_diameter_in` is deliberately not a
+# third member: nothing in the corpus pairs a diameter to a span the way
+# depth does, and adding it without that evidence would be inventing a
+# pairing rather than reading one.
+SCHEDULE_MEMBERS = {"footing_depth_in": "footing_depth_mm",
+                    "post_spacing_in": "max_span_mm"}
+SCHEDULE_PARAMETER = "footing_schedule"
+SCHEDULE_VALUE_TYPE = "paired(footing_depth_mm:mm, max_span_mm:mm)"
 
 # Obligation 13. A published condition key declares WHEN it can be bound.
 #
@@ -202,9 +217,15 @@ SELECT f.fact_id, f.document_id, f.page_no, f.element_id, f.fact_type,
        -- below goes through `reviews.effective_fact_value`.
        f.reviewed_value, f.reviewed_value_normalized,
        d.doc_type, d.manufacturer, d.product_family, d.title,
-       d.version_status, d.issue_date, d.expiration_date
+       d.version_status, d.issue_date, d.expiration_date,
+       -- G57/amendment 006 (footing_schedule): the SAME source table row's
+       -- other cells, recovered via the candidate this cell was promoted
+       -- from. `NULL` for anything not promoted from a table reading, which
+       -- is exactly when there is no row to correlate against.
+       c.row_index
   FROM facts f
   JOIN documents d ON d.document_id = f.document_id
+  LEFT JOIN table_read_candidates c ON c.candidate_id = f.from_candidate_id
  WHERE f.from_candidate_id IS NOT NULL
    AND f.review_status <> 'rejected'
 {tenant_clause}
@@ -779,6 +800,8 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
     mint = source_ref or _default_source_ref(conn)
     gaps = _Gaps()
     groups: dict[bytes, dict] = {}
+    # (document_id, page_no, row_index) -> {fact_type: {"row": row, "scope": scope}}
+    schedule_candidates: dict[tuple, dict] = {}
 
     sql, params = _fact_query(tenant)
     for fact in conn.execute(sql, params):
@@ -892,7 +915,7 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
         for dim, dim_value in conditions.items():
             group["observed"].setdefault(dim, set()).add(dim_value)
 
-        group["rows"].append({
+        row = {
             # Internal only -- `_finish` pops it before the row is published.
             # It records that promotion dropped a column it could not classify,
             # which is what tells a collision "we misread this" apart from
@@ -918,14 +941,37 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
             "valid_from": fact["issue_date"],
             "valid_until": fact["expiration_date"],
             "authority": cites[0]["belongs_to"],
-        })
+        }
+        group["rows"].append(row)
+
+        # Amendment 006 (G-numbered, state-and-gaps.md): the same physical
+        # table row, read again under the OTHER member's fact_type, is the
+        # pairing key -- `row_index` comes from the candidate this cell was
+        # promoted from, the same link `promote_tables.one_reading_per_cell`
+        # already uses for a cell's own readers. `scope` is not re-derived:
+        # depth and span from one row share a document, so they share a scope
+        # by construction.
+        if fact["fact_type"] in SCHEDULE_MEMBERS and fact["row_index"] is not None:
+            slot = schedule_candidates.setdefault(
+                (fact["document_id"], fact["page_no"], fact["row_index"]), {})
+            slot[fact["fact_type"]] = {"row": row, "scope": scope}
 
     tables = []
     for key in sorted(groups):
         table = _finish(groups[key], gaps)
         if table is not None:
             tables.append(table)
-    return tables, gaps.list()
+
+    schedules, covered_scopes = _footing_schedules(schedule_candidates)
+    tables = [t for t in tables
+             if not (t["parameter"] in SCHEDULE_MEMBERS.values()
+                     and t["scope"]["id"] in covered_scopes)]
+    tables.extend(schedules)
+    all_gaps = [g for g in gaps.list()
+               if not (g["because"]["params"].get("parameter") in
+                       SCHEDULE_MEMBERS.values()
+                       and g["because"]["params"].get("scope_id") in covered_scopes)]
+    return tables, all_gaps
 
 
 def _merge(rows: list[dict]) -> list[dict]:
@@ -994,6 +1040,107 @@ def _collisions(rows: list[dict], points: list[dict]) -> list[tuple]:
     return found
 
 
+def _footing_schedules(schedule_candidates: dict) -> tuple[list[dict], set]:
+    """Correlated `(footing_depth_in, post_spacing_in)` pairs -> `footing_schedule`
+    `ParameterTable`s, plus the scope ids they cover.
+
+    Amendment 006. Every pair here comes from the SAME source table row (the
+    caller keys on `table_read_candidates.row_index`), so there is no
+    collision to detect the way `_collisions` detects one -- two alternative
+    pairs at one point are not a `unique` violation, they are the whole
+    reason `value_type: paired` exists. One row per point, by construction.
+    """
+    by_scope: dict[str, dict] = {}
+    for slot in schedule_candidates.values():
+        depth = slot.get("footing_depth_in")
+        span = slot.get("post_spacing_in")
+        if depth is None or span is None:
+            continue                       # nothing to pair this row against
+        scope = depth["scope"]
+        d_row, s_row = depth["row"], span["row"]
+        entry = by_scope.setdefault(scope["id"], {"scope": scope, "points": {}})
+        point_key = canonical_bytes(d_row["conditions"])
+        bucket = entry["points"].setdefault(point_key, {
+            "conditions": d_row["conditions"],
+            "condition_basis": d_row["condition_basis"],
+            "pairs": {},                    # (depth_milli, span_milli) -> row
+            "valid_from": d_row["valid_from"], "valid_until": d_row["valid_until"],
+            "authority": d_row["authority"], "provenance": d_row["provenance"],
+        })
+        pair_key = (d_row["value"]["amount_milli"], s_row["value"]["amount_milli"])
+        if pair_key in bucket["pairs"]:
+            held = bucket["pairs"][pair_key]["provenance"]["cites"]
+            known = {canonical_bytes(c) for c in held}
+            for cite in d_row["provenance"]["cites"] + s_row["provenance"]["cites"]:
+                if canonical_bytes(cite) not in known:
+                    held.append(cite)
+        else:
+            bucket["pairs"][pair_key] = {
+                "value": [d_row["value"], s_row["value"]],
+                "provenance": {
+                    **d_row["provenance"],
+                    "cites": sorted(
+                        {canonical_bytes(c): c for c in
+                         d_row["provenance"]["cites"] + s_row["provenance"]["cites"]
+                        }.values(), key=canonical_bytes),
+                },
+            }
+
+    tables, covered = [], set()
+    for scope_id, entry in sorted(by_scope.items()):
+        scope = entry["scope"]
+        dimensions: set = set()
+        observed: dict[str, set] = {}
+        for bucket in entry["points"].values():
+            for dim, dim_value in bucket["conditions"].items():
+                dimensions.add(dim)
+                observed.setdefault(dim, set()).add(dim_value)
+        # Same rule as `_finish`: DECLARED means every dimension's extent is
+        # authoritatively known, not merely one of several.
+        domain, all_declared = {}, True
+        for dim in sorted(dimensions):
+            if dim in DECLARED_DOMAIN:
+                domain[dim] = list(DECLARED_DOMAIN[dim])
+            elif observed.get(dim):
+                domain[dim] = sorted(observed[dim], key=canonical_bytes)
+                all_declared = False
+        points = _points(domain)
+
+        rows = []
+        for bucket in entry["points"].values():
+            alternatives = [p["value"] for p in
+                           sorted(bucket["pairs"].values(), key=canonical_bytes)]
+            all_cites = sorted(
+                {canonical_bytes(c): c for p in bucket["pairs"].values()
+                 for c in p["provenance"]["cites"]}.values(), key=canonical_bytes)
+            rows.append({
+                "conditions": bucket["conditions"],
+                "condition_basis": bucket["condition_basis"],
+                "value": alternatives,
+                "provenance": {**bucket["provenance"], "cites": all_cites},
+                "valid_from": bucket["valid_from"],
+                "valid_until": bucket["valid_until"],
+                "authority": bucket["authority"],
+            })
+        covered_points = {canonical_bytes(r["conditions"]) for r in rows}
+        uncovered = [p for p in points if canonical_bytes(p) not in covered_points]
+
+        tables.append({
+            "parameter": SCHEDULE_PARAMETER,
+            "scope": scope,
+            "task": TASK_OF[SCHEDULE_PARAMETER],
+            "hit_policy": "unique",
+            "value_type": SCHEDULE_VALUE_TYPE,
+            "domain": domain,
+            "domain_basis": "declared" if all_declared else "measured",
+            "condition_scope": {dim: CONDITION_SCOPE[dim] for dim in sorted(domain)},
+            "rows": sorted(rows, key=canonical_bytes),
+            "uncovered": uncovered,
+        })
+        covered.add(scope_id)
+    return tables, covered
+
+
 def _finish(group: dict, gaps: _Gaps) -> dict | None:
     """One group of rows -> one `ParameterTable`, or None where it is withheld."""
     parameter, scope = group["parameter"], group["scope"]
@@ -1006,7 +1153,16 @@ def _finish(group: dict, gaps: _Gaps) -> dict | None:
     # MEASURED. §1.3: "uncovered against a declared domain means *we may not know
     # this table's real extent*; against a measured one it means *this table
     # really does not cover that point*."
-    domain, point_domain, declared = {}, {}, False
+    # `declared` is a claim about the WHOLE domain's completeness, not about
+    # any one dimension of it -- found by an adversarial audit, 2026-08-31: a
+    # table conditioned on both a DECLARED_DOMAIN dimension (exposure_category)
+    # and a continuous, unbounded one (fence_height) was reporting
+    # `domain_basis: "declared"` from the first dimension alone, overstating
+    # confidence in an extent that is genuinely only ever partially known.
+    # Every dimension must be authoritatively fixed for the table to be
+    # DECLARED; one dimension with an unknown true extent makes the whole
+    # domain MEASURED, which is the more honest default.
+    domain, point_domain, all_declared = {}, {}, True
     for dim in sorted(group["dimensions"]):
         if dim == "fence_height":
             # G57. `range(mm)` is a CONTINUOUS dimension -- it has no finite
@@ -1014,14 +1170,17 @@ def _finish(group: dict, gaps: _Gaps) -> dict | None:
             # conditioned on it carries an `Interval`, not a value equal to
             # any other row's. Kept out of `point_domain` entirely;
             # `_collisions` compares it by overlap instead, via
-            # `_fence_height_overlap`.
+            # `_fence_height_overlap`. Its true extent above the highest
+            # stated bracket is never known, so it can never make a table
+            # DECLARED.
             domain[dim] = "range(mm)"
+            all_declared = False
             continue
         if dim in DECLARED_DOMAIN:
             domain[dim] = list(DECLARED_DOMAIN[dim])
-            declared = True
         elif group["observed"].get(dim):
             domain[dim] = sorted(group["observed"][dim], key=canonical_bytes)
+            all_declared = False
         point_domain[dim] = domain[dim]
     points = _points(point_domain)
 
@@ -1061,7 +1220,8 @@ def _finish(group: dict, gaps: _Gaps) -> dict | None:
                          cites=[c for r in clashing
                                 for c in r["provenance"]["cites"]],
                          would_close=f"{' and '.join(lexemes)} both reached "
-                                     f"{parameter} at {_describe(point)} and this "
+                                     f"{parameter} on {scope['id']} at "
+                                     f"{_describe(point)} and this "
                                      f"platform dropped the columns that would have "
                                      f"told them apart, so the table is withheld. "
                                      f"This is not a paired design point and needs no "
@@ -1087,12 +1247,13 @@ def _finish(group: dict, gaps: _Gaps) -> dict | None:
                              "value_raw": lexemes},
                      cites=[c for r in clashing for c in r["provenance"]["cites"]],
                      would_close=f"{' and '.join(lexemes)} are both valid for "
-                                 f"{parameter} at {_describe(point)} and no condition "
+                                 f"{parameter} on {scope['id']} at "
+                                 f"{_describe(point)} and no condition "
                                  f"dimension separates them -- they are paired design "
                                  f"points, a deeper footing buying a wider span. "
-                                 f"Amendment C5 (a paired value_type) would let this "
-                                 f"table publish; until it lands the table is "
-                                 f"withheld, because publishing it under "
+                                 f"Amendment 006 (the ratified paired value_type) "
+                                 f"would let this table publish once built; until "
+                                 f"then it is withheld, because publishing it under "
                                  f"hit_policy: unique would break a BINDING clause "
                                  f"and any collect/priority policy would silently "
                                  f"discard the cheaper compliant option",
@@ -1123,7 +1284,8 @@ def _finish(group: dict, gaps: _Gaps) -> dict | None:
                      params={"parameter": parameter, "scope_id": scope["id"],
                              "point": point},
                      cites=list(excluded["provenance"]["cites"]),
-                     would_close=f"the source states {parameter} at "
+                     would_close=f"the source states {parameter} on "
+                                 f"{scope['id']} at "
                                  f"{_describe(excluded['conditions'])} and brackets it "
                                  f"there, so {_describe(point)} is not approved rather "
                                  f"than unread; an approval covering "
@@ -1168,7 +1330,7 @@ def _finish(group: dict, gaps: _Gaps) -> dict | None:
         "hit_policy": "unique",
         "value_type": f"quantity({group['unit']})",
         "domain": domain,
-        "domain_basis": "declared" if declared else "measured",
+        "domain_basis": "declared" if all_declared else "measured",
         # Obligation 13, BINDING. One entry per dimension in the domain: when
         # can Planning bind this key?
         "condition_scope": {dim: CONDITION_SCOPE[dim] for dim in sorted(domain)},

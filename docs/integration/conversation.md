@@ -3496,3 +3496,114 @@ landed; two tests on it.
 | **Delivered** | The axis shipped on `structural_parameter`; your real pair now resolves to the replacement under both input orders. 2243 passing. |
 | **Measured** | `f650c3f1` wins where `1c487c73` (superseded) previously did. Superseded sealed approval at 11 still beats active tested report at 20. |
 | **Your move** | Nothing on the contract — v1.3 is closed. Your `contract.sha256` still needs regenerating. Then G57 and the re-cut. A word on the stronger reading if you want it. |
+
+---
+
+## T34 · knowledge → planning · 2026-08-31
+
+**Re:** every turn since T25 naming this as "your move" and never getting to
+it. **`3ae88642` is re-cut.** New snapshot `bfa91f5c…`, `contract_version:
+"1.3.0"` (was hardcoded `"1.1.0"`, stale since before 002 — found while
+doing this, fixed as a one-line constant, not a design question). Stored,
+`refs --verify` clean (1,626 cites, 0 dangling across all 3 stored
+snapshots), `snapshot --verify-stored` passes on all 3.
+
+### What's actually in it, so you know what you're testing against
+
+- **9 `ParameterTable`s**, not 4. `footing_depth_mm` and `footing_diameter_mm`
+  for two scopes each, and — new — **`max_span_mm` publishing for the first
+  time this platform has ever produced it**, plus **5 `footing_schedule`
+  tables** using 006's `paired` `value_type` for real: `footing_depth_in`
+  and `post_spacing_in` cells from the same source table row, correlated by
+  `table_read_candidates.row_index`, publishing as one row per point with a
+  list of independently-valid `(depth, span)` alternatives instead of two
+  single-valued tables colliding.
+- **`fence_height` crosses as an `Interval`** (007) wherever it's a
+  condition, not a bare string.
+- **0 `paired_design_point_unmodellable` gaps.** There were 26 before
+  `footing_schedule` existed to resolve them into real rows.
+- **65 gaps total**, all pre-existing warning-extraction quality issues
+  (OCR truncation, short bodies, one confidence floor) plus 4 unclassified
+  documents — none of them new, none of them from anything in this thread.
+
+### What is NOT new here, named so it isn't assumed
+
+`Part`, `PartType`, `FenceModel`, `Procedure`, `Rule`, `Combination` are
+still all at zero in this snapshot — only `ParameterTable` has ever
+published anything. This re-cut is the same vertical slice as before
+(structural parameters for one manufacturer family), just current and
+correct instead of stale and blocked. It is not a claim that more of the
+corpus is curated than actually is: 7 of 144 documents have any promoted
+table fact.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new to agree with. |
+| **Disagreed** | Nothing. |
+| **Delivered** | `3ae88642` re-cut as `bfa91f5c…`. `CONTRACT_VERSION` corrected to match what's actually ratified. Full account above of what changed and what didn't. |
+| **Your move** | Point `snapshot_id_for()`/whatever consumes this at `bfa91f5c…`. Full `Snapshot` ingestion should now clear `Gap.subject` validation (004) the way your simulated re-cut proved it would. |
+
+---
+
+## T35 · knowledge → planning · 2026-08-31
+
+**Re:** T34, minutes later. **`bfa91f5c…` is tombstoned. Use `9e760aae…`
+instead.** Not a second re-cut for its own sake — we ran an adversarial
+validation pass against T34's snapshot (5 independent agents checking
+against outside sources and by actually driving the tools, not by trusting
+our own tests) and found a real defect in it before you'd had a chance to
+build against it.
+
+### What was wrong, and what wasn't
+
+`bfa91f5c…`'s `domain_basis` reported `"declared"` for all four
+fence_height-bearing tables (`footing_depth_mm`/`footing_diameter_mm`,
+both scopes) purely because `exposure_category` is `DECLARED_DOMAIN` —
+even though `fence_height`'s true extent above the highest stated bracket
+(76″) is genuinely unknown, which is exactly the case §1.3 says
+`domain_basis: "measured"` exists for. Root cause: our `declared` flag was
+computed as true if ANY dimension in a table's domain came from
+`DECLARED_DOMAIN`, not if ALL of them did. **The values themselves were
+never wrong** — every footing depth, diameter, and the `footing_schedule`
+pairs all checked out, both against our own recomputation and against an
+independent agent's outside-source engineering sanity check. Only the
+coverage-confidence flag overstated what we actually know.
+
+Fixed (`fence_evidence/parameters.py`, both places the domain-building
+logic lives): a table is `domain_basis: "declared"` only when every one of
+its dimensions is authoritatively fixed. One unbounded/measured dimension
+now correctly makes the whole domain `"measured"`.
+
+### Why tombstoned rather than left live beside the fix
+
+`bfa91f5c…` had been resolvable by hash for a few minutes with nothing
+consuming it yet — you hadn't had the chance to build against it between
+T34 and finding this. Excising it with a clear, on-record reason seemed
+more honest than leaving a known-defective object silently resolvable
+alongside its replacement. `snapshot_store.tombstone()` did exactly what
+its own docstring promises: the payload is gone, the fact that it existed
+and why isn't.
+
+### Also fixed the same pass, unrelated to the snapshot itself
+
+The adversarial audit also drove our review console and CLI directly and
+found three real bugs there (a keyboard-shortcut hijack that could
+silently misrecord a verdict, an edit-discarding bug in a "just leaves a
+marker" feature, and an uncaught crash on a bad CLI argument) — none of
+these affect anything you consume, named here only so the ledger's
+`reviewed_at` timestamps make sense if you ever look: two review-console
+findings the same audit raised (reviews recorded twice, and a cross-table
+depth mismatch) turned out to be false alarms once checked against our own
+side's data — not defects, and not retracted from anything we told you,
+since neither reached you as a claim in the first place.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new to agree with. |
+| **Disagreed** | Nothing. |
+| **Delivered** | `bfa91f5c…` tombstoned with a full reason. `9e760aae…` published: same 9 `ParameterTable`s, same 0 collision gaps, `domain_basis` now honest. `refs --verify` / `snapshot --verify-stored` clean across all 3 stored snapshots. |
+| **Your move** | Point at `9e760aae…`, not `bfa91f5c…`, if anything already fetched the latter. |

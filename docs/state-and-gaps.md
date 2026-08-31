@@ -2335,6 +2335,287 @@ Full suite: 1088 tests, all passing.
 
 ---
 
+### G58 — the review backlog cleared at scale: 86 new facts, `max_span_mm` publishes for the first time, one double-apply mistake, two real findings left open
+
+2026-08-31, the same session as G57. The user reviewed the backlog through
+the console (`review_server.py`/`review_app.html`, session scratch, not in
+this repo) down to 37 crops and 102 flagged facts answered in
+`answers.jsonl`. Replayed and promoted for real, not simulated:
+
+**What landed.** `promote-tables --apply`: 86 new facts (44
+`footing_depth_in`, 42 `post_spacing_in`). `build_parameter_tables` now
+publishes **8 `ParameterTable`s** (was 4) — including **`max_span_mm` for
+the first time this platform has ever published it**, matching what
+`CANDIDATES.md`'s C5 entry had been saying was still true ("neither side
+publishes `max_span_mm` against real data yet") until now. 26
+`paired_design_point_unmodellable` gaps also appeared for the first time
+against real data — amendment 006's collision scenario, previously only
+exercised by a synthetic test, is now live: real footing/span rows collide
+exactly the way C5 predicted, correctly withheld pending the (ratified,
+not yet built) `paired` `value_type`.
+
+**A mistake, assessed rather than hand-waved.** `replay_answers.py --apply`
+was run twice by accident (a stray command referencing the wrong log file
+led to a real second invocation instead of a check). Consequence: every
+submitted review has two entries in the append-only `table_reviews` /
+`fact_reviews` tables (71 rows for 37 crops, 204 for ~102 facts) instead of
+one. Checked, not assumed, harmless: `build_ledger`'s own docstring says
+the ledger is "every review in this store," an intentional full history,
+not a deduped projection — `read_ledger`/`rebuild_projection` already treat
+it as "last review to arrive is the one in force," so a reviewer
+re-confirming the same verdict is a shape the system was already built to
+tolerate. `promote_tables.py` reads current `table_read_candidates.
+review_status`, not the review count, so the duplication affected zero
+promoted facts. Left as-is rather than trimmed: deleting "the duplicate"
+row risks picking the wrong one for no correctness gain, on a store this
+platform's own rules say is the one thing here that does not regenerate.
+
+**G56 recurred, and was reverted the same way, immediately.** Two new
+facts (`fact_id` 19301, 19302 — `footing_depth_in`, `doc-8727ba0fd4d4` p10,
+the same drawing 07-315 as G56's original instance) landed with
+`conditions: {"hvhz_applicability": "no bracket printed"}` and nothing
+else: this table has no `exposure_category`/`fence_height` columns at all,
+a human this session confirmed "no bracket printed" on it (correctly —
+`NO_BRACKET_PRINTED` omits the `hvhz` key), and the row that leaves behind
+has zero conditions, which `test_every_promoted_fact_carries_its_row_
+conditions` correctly still refuses. G56's own write-up named this exact
+tension as still open ("should `promote_tables.py` ever write such a fact,
+or should the row gap out one stage earlier") and declined to rush it a
+second time; this instance got the same treatment — the two facts deleted,
+the review left in place, all 1088 tests green again. The open design
+question is unchanged and still unresolved.
+
+**Two baseline tests updated, not patched around.** `test_fact_review.
+TestTheRealQueue.test_nothing_in_the_store_has_been_reviewed` and
+`test_facts.TestFactProvenance.test_ocr_derived_facts_are_flagged_or_
+confident` both asserted a point-in-time fact about the live store —
+"nothing has been reviewed yet" — that real review permanently falsifies,
+correctly. The first is retired (its real invariant, "every reviewed fact
+is accountable," is its sibling test, unaffected by count). The second now
+checks that a low-confidence OCR fact was never left at `extracted`
+(skipped the flag) rather than requiring it stay `flagged` forever, which
+was never the actual intent.
+
+**One of the two findings above, diagnosed and fixed the same session —
+not left as "maybe a defect":**
+
+`test_would_close_names_the_gap_it_belongs_to` (G40) regressed: 79 distinct
+`would_close` sentences across 101 snapshot gaps, short of the required
+90.9%. Root cause, not guessed at: `paired_design_point_unmodellable` and
+`condition_point_excluded_by_source` both build `would_close` from
+`parameter`/point/lexemes but never `scope['id']` — so two manufacturers
+stating byte-identical footing tables (a documented, common shape in this
+corpus, `same_content_as`) produce gaps whose `would_close` text is
+identical, even though `subject` already distinguishes them. Not the
+original G40 defect (a hardcoded constant) returning; a different route to
+the same symptom — genuinely varying, content-derived text that happens to
+collide because the underlying corpus values legitimately repeat across
+scopes. Fixed: `scope['id']` added to all three `would_close` f-strings that
+lacked it (`parameters.py`); the stale *"Amendment C5"* wording in the same
+string, noticed while there, corrected to *"Amendment 006"*, since it is now
+ratified. `tests/test_parameters.py::test_would_close_names_the_scope_not_
+just_the_point` seeds the exact two-manufacturer collision and pins the fix;
+red-green checked (reverting `parameters.py` alone reproduces 79/101).
+`build_snapshot()` now reports 101/101 distinct. Full suite: 1088 passing.
+
+**The second finding is much bigger than first measured, and still not
+fixed — a real next-session item:**
+
+`candidate 1226 has no source crop on disk` was not one missing file.
+`[measured]`: **537 `table_read_candidates` rows carry `crop_path = ''` and
+`crop_sha256 = NULL`**, every one of them reader `chatgpt-web-1` — the
+Phase 1 batch load from
+`docs/superpowers/specs/2026-08-30-llm-assisted-extraction-design.md` §8
+("25 pages, 537 cells, loaded for real"). Not a missing derived asset to
+regenerate; the loader that ingested that batch never populated a crop
+reference for the new reader's own rows at all, on the reasoning (untested
+here) that another reader's row for the same document/page already carries
+one. `test_basis_columns.TestPromotionWritesTheBasis._accept_one` picks the
+first remaining `cross_family_verified` candidate ordered by `candidate_id`,
+and reducing that pool by ~30 crops this session changed which one sorts
+first — from a candidate with a real crop to one of these 537, which is why
+it surfaced now rather than earlier. Whether `promote()`'s crop-on-disk
+requirement should fall back to a sibling reader's crop for the same
+document/page, or whether these 537 rows need their own crop reference
+written retroactively, is a real design question — not diagnosed further
+here, and not something to guess at under the same time pressure this
+session already flagged twice.
+
+Full suite after all of the above: **1088 tests, 0 failures, 1 error (the
+537-row gap above), 1 expected failure** — real, named, not patched.
+
+---
+
+### G59 — G40 fixed; amendment 006 built: `footing_schedule` publishes, 26 gaps → 0
+
+Same day, after G58. Two closes, one small and diagnosed, one the actual
+build C5/006 had been waiting on since 2026-08-27.
+
+**G40 (`test_would_close_names_the_gap_it_belongs_to`) diagnosed and fixed.**
+Root cause, not the original defect returning: `paired_design_point_
+unmodellable` and `condition_point_excluded_by_source` both built `would_close`
+from `parameter`/point/lexemes but never `scope['id']`, so two manufacturers
+stating byte-identical footing tables (`same_content_as`, a documented shape
+in this corpus) produced textually identical gaps that only `subject`
+distinguished. `scope['id']` added to all three affected `would_close`
+f-strings in `parameters.py`; the stale *"Amendment C5"* wording in the same
+string corrected to *"Amendment 006"* while there.
+`test_would_close_names_the_scope_not_just_the_point` seeds the exact
+two-manufacturer collision. `build_snapshot()` now reports 101/101 distinct
+`would_close` sentences, was 79/101.
+
+**Amendment 006 built.** `footing_depth_in` and `post_spacing_in` cells
+promoted from the SAME source table row (`table_read_candidates.row_index`,
+recovered via `from_candidate_id` — the same link `promote_tables.
+one_reading_per_cell` already uses) now publish as one `footing_schedule`
+`ParameterTable`, `value_type: paired(footing_depth_mm:mm, max_span_mm:mm)`,
+each row's `value` a list of independently-valid `(depth, span)`
+alternatives — instead of two single-valued tables both withheld as
+`paired_design_point_unmodellable`. No collision detection needed for the
+schedule itself: correlation is by physical row, so there is exactly one row
+per point by construction, which is the property `hit_policy: unique` asks
+for. A depth or span with nothing to correlate against (no reading of the
+other member for that row) is unaffected — publishes exactly as before,
+under its own single-valued parameter. `footing_diameter_in` is deliberately
+not a third schedule member: nothing in the corpus pairs a diameter to a
+span the way depth does, and adding it without that evidence would be
+inventing a pairing rather than reading one.
+
+`[measured]`, live store: **26 `paired_design_point_unmodellable` gaps → 0.
+5 new `footing_schedule` tables publish** (was 4 `footing_depth_mm`/
+`max_span_mm` tables total before G58's review session, 8 after it, 9 now).
+One spot-checked directly against the source rows
+(`mfr/certainteed-columbia-imperial-chesterfield`): `{B: (24″,66″),(30″,97″)}`,
+`{C: (30″,68″),(36″,88″)}`, `{D: (30″,56″),(36″,75″)}` — matches the
+correlated `(document_id, page_no, row_index)` join exactly, domain fully
+covered, `curation_level: 2` (human-reviewed) throughout.
+
+`tests/test_parameters.py::TestFootingSchedule` (4 tests: the correlated
+case, an uncontested single-alternative row, an unpaired depth alone
+unaffected, a genuine collision with nothing to pair against still gapping)
+plus the G40 fix's own test. Red-green checked on both. Full suite: **1092
+tests, 0 failures, the same one already-documented error (the 537-row crop
+gap), 1 expected failure.**
+
+**Same day: `3ae88642` re-cut, as `bfa91f5c…`.** Owed since v1.2's own
+ratification (`conversation.md` T25 onward, restated in every turn since as
+"your move" and never actioned) — found while doing it that `snapshot.
+CONTRACT_VERSION` was still hardcoded `"1.1.0"`, stale since before amendment
+002. Fixed as a one-line constant, not a design question, then rebuilt:
+`cli snapshot --dry-run` clean, `--build` stored, `refs --verify` clean
+(1,626 cites, 0 dangling across all 3 stored snapshots), `snapshot
+--verify-stored` passes on all 3. Reported in `conversation.md` T34 with a
+full account of what's new (9 `ParameterTable`s, `footing_schedule` for the
+first time) and what pointedly is not (`Part`/`PartType`/`FenceModel`/
+`Procedure`/`Rule`/`Combination` all still zero — 7 of 144 documents have any
+promoted table fact), so the re-cut is not misread as more corpus coverage
+than actually exists.
+
+---
+
+### G60 — an adversarial validation workflow, five real findings, two false alarms, and a second re-cut
+
+Same day, at the user's request: 5 parallel agents independently validated
+`bfa91f5c…` and platform functionality against **outside sources** (web
+search, general engineering knowledge) and by **actually driving the
+tools**, not by trusting this platform's own tests or `verify()`. Two
+findings were false alarms, verified and corrected rather than passed
+along; five were real, three of them fixed the same session.
+
+**False alarm 1 — "134 reviews recorded twice, 11 seconds apart, incompatible
+with genuine human review."** Checked `answers.jsonl`'s own `at` timestamps
+directly: the real review spans 34 minutes at a normal human pace (seconds
+to tens of seconds between decisions). The DB's `reviewed_at` — what the
+auditing agent actually saw — is stamped at REPLAY time, not decision time,
+and the "twice, 11 seconds apart" pattern is G58's own double-apply mistake
+re-surfacing under a different, more alarming-sounding description. The
+review is real; `reviewed_at` conflating submission time with decision time
+is a minor, separate provenance note, not a credibility problem.
+
+**False alarm 2 — "footing_depth_mm says 34in, footing_schedule says 30in
+for the same Exposure-B tier, a possible data error."** Traced both rows to
+their source: 34in belongs to `mfr/*-simtek-molded-stone-look-fence-family`
+/ `mfr/*-simtek-molded-composite-not-extruded-pvc` (SimTek), 30in belongs to
+`mfr/*-columbia-imperial-chesterfield-breezewood-brookline` (Chesterfield)
+— two completely different product families the auditing agent mismatched,
+not one system disagreeing with itself.
+
+**Fixed — keyboard shortcuts hijacked the HVHZ dropdown (critical).**
+Verified in the live JS: the "don't fire shortcuts while typing" guard
+checked `INPUT`/`TEXTAREA` but not `SELECT`. Focusing a row's bracket
+dropdown and pressing an arrow key or a letter like "r" silently rejected
+or navigated away from the WHOLE crop instead of operating the dropdown —
+real risk on safety-relevant footing/HVHZ data, in a tool that had just
+been used for 275 real reviews. Fixed: `SELECT` added to the guard.
+
+**Fixed — "flag for re-read" silently discarded unsaved edits (moderate).**
+Verified: `flagForReread()` called a full `render()`, which resets
+`edits{}`/`brackets[]` unconditionally — contradicting its own code comment
+that flagging "just leaves a marker." Fixed: flagging now patches the flag
+indicator in place and never calls `render()`.
+
+**Fixed — HVHZ column shown on tables with no HVHZ concept (minor, but
+measured as the majority case).** `[measured]`: 22 of 30 live crops
+(`bill_of_materials`/`spec_table` kind) showed a full HVHZ-applicability
+column and could trigger the "no bracket printed" nudge, though the
+underlying page never had a bracket column at all — only 8 of 30
+(`wind_exposure_footing`) actually have the concept. Fixed client-side:
+the column, its validation-before-accept, and its explanatory note now
+gate on table_kind, matching the server's own `VALUABLE` tuple. Two
+smaller UX fixes bundled in while there: the header progress count now
+reflects the active filter tab instead of always the whole queue, and the
+footer's `U`/`1`/`2`/`3` hints hide themselves on item kinds they don't
+apply to instead of always showing regardless of relevance.
+
+**Fixed — `domain_basis: "declared"` overstated confidence in a mixed
+domain (critical, contract-adjacent).** `[measured]`: all 4 fence_height-
+bearing tables in `bfa91f5c…` reported `domain_basis: "declared"` purely
+because `exposure_category` is `DECLARED_DOMAIN` — even though
+`fence_height`'s true extent above the highest stated bracket (76″) is
+genuinely unknown, which is exactly the "measured" case §1.3 exists to
+distinguish. Root cause: `declared` was computed as true if ANY dimension
+came from `DECLARED_DOMAIN`, not if ALL of them did. Fixed in both places
+this logic lives (`_finish`, `_footing_schedules`): a table is now
+`domain_basis: "declared"` only when every one of its dimensions is
+authoritatively fixed; one dimension with an unknown true extent makes the
+whole domain honestly `"measured"`.
+`tests/test_parameters.py::test_a_table_with_an_unbounded_dimension_is_
+never_domain_basis_declared` pins it, red-green checked.
+
+**Fixed — `fetch --subset bogus` crashed with a raw Python traceback
+(moderate, pre-existing).** `files_for_subset` already raised a clear
+`KeyError`; it just propagated uncaught through the CLI instead of
+producing the clean `{"error": ...}` + exit 2 every other subcommand's
+bad-input handling already uses. Fixed the one reported instance
+(`fetch`); the broader inconsistency across `resolve`/`document`/`search
+--element-type` (silent `null`/`[]` + exit 0 instead of a real "not
+found" signal) is named but not fixed — a larger, CLI-wide pattern that
+deserves its own pass, not a rushed one bolted onto this session.
+
+**CLAUDE.md corrected**, not just the code: "FROZEN and RATIFIED at v1.1"
+→ v1.3, "3 of 44 crops reviewed" → 37 of 44, the removed
+`condition_point_uncovered` gap type no longer mentioned, stale reading
+counts (1,225 → 1,755) updated, and a pointer added to `state-and-gaps.md`
+G58/G59 as the numbers to trust if this file and the measurement ever
+disagree again.
+
+**`bfa91f5c…` tombstoned, not left live beside its fix.** It carried the
+`domain_basis` defect above (values themselves were correct; only the
+coverage-confidence flag was wrong). Reported to Planning in
+`conversation.md` T34 only minutes before the defect was found, with no
+real consumption in between, so excising it with a clear reason was
+judged better than leaving a known-defective artifact resolvable by hash
+alongside its silent successor. Re-cut as `9e760aae…`; `refs --verify`
+and `snapshot --verify-stored` both clean across all 3 stored snapshots
+(1 more tombstoned, 2 live). Reported to Planning in `conversation.md`
+T35.
+
+Full suite throughout: 1093 tests, the same one already-documented error
+(the 537-row crop gap, G58), 1 expected failure. Nothing else broken by
+any of the above.
+
+---
+
 ### G51 — the audit's F1 heading fallback: measured and REJECTED
 
 R1 of `workspace/reports/projection-relevance-audit.md` — *project a heading as a

@@ -19,7 +19,7 @@ There is also a **third thing, which is not in this repository**: a separate sys
 what this platform publishes. The boundary between them is settled — see below.
 
 Governing documents, in order of authority: `docs/integration/contract.md` (**FROZEN and RATIFIED
-at v1.1** — binding at the boundary, silent on everything inside it),
+at v1.3** — binding at the boundary, silent on everything inside it),
 `docs/mvp-implementation-spec.md` (authoritative for how this platform works), `guide.md` (the
 contract it implements, including 12 numbered prohibitions), `docs/target-architecture.md`
 (informative future direction), `rag-pipeline-plan.md` (historical, superseded, kept only because
@@ -45,8 +45,9 @@ extraction or ingestion.
 
 ### The boundary — `docs/integration/`
 
-`contract.md` is frozen at v1.1 and signed by both teams. **Eighteen BINDING obligations; nothing
-outside that list binds.** Verify your copy before relying on it:
+`contract.md` is frozen at v1.3 and signed by both teams. **Eighteen BINDING obligations; nothing
+outside that list binds.** Amendments 002-007 are cut in; the reasoning behind each is in
+`amendments/002-007` and `conversation.md` T15 onward. Verify your copy before relying on it:
 
 ```bash
 cd docs/integration && sha256sum -c contract.sha256   # both lines must print OK
@@ -65,10 +66,16 @@ order, and `audit/10-ratification-v1.0.md` §3.2 is the non-compliance this plat
 signature — **partly closed as of 2026-08-25**. Its live violation (obligation 6) and its
 three representational gaps (obligations 4, 15, 10) closed with build-plan A1-A5, all
 five of which landed 2026-08-25. Still in force: the unbuilt publishing-layer
-obligations. Curation level 2 is **no longer empty as of 2026-08-30**: a person reviewed the
-three SimTek footing crops, and snapshot `3ae88642` publishes four `ParameterTable`s — the
-first values this platform has ever published — at level 2 with 16 `condition_point_uncovered`
-gaps beside them. That is 3 crops of 44; the other 41 are still waiting.
+obligations (`Part`, `PartType`, `FenceModel`, `Procedure`, `Rule`, `Combination` — all
+still zero; only `ParameterTable` has ever published anything). Curation level 2 is
+**no longer thin as of 2026-08-31**: a person has reviewed 37 of 44 flagged crops (up
+from 3 on 2026-08-30), and the current published snapshot carries **9 `ParameterTable`s**
+across `footing_depth_mm`, `footing_diameter_mm`, `max_span_mm` (publishing for the first
+time as of 2026-08-31), and `footing_schedule` (amendment 006's paired `value_type`, also
+first published 2026-08-31). That is 37 crops of 44 and 7 of 144 documents with any
+promoted table fact; the rest of the corpus is still waiting. `docs/state-and-gaps.md`
+G58/G59 has the full account, and its own numbers are the ones to trust over this
+paragraph's if the two ever disagree — this file is prose, not the measurement.
 
 Nothing in `docs/integration/` displaces the documents above. Those govern how this platform
 works; the contract governs only what it exposes.
@@ -279,21 +286,24 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   `sourcerefs.py` builds the Discovery read model on top, and `api.py` serves
   `GET /source-refs/{id}` and `POST /source-refs:batch` behind a bearer allowlist.
 - **A human review is the ONLY thing here that does not regenerate, and it now has a
-  file.** Elements, facts, the projection and even the 1,225 table readings all rebuild
+  file.** Elements, facts, the projection and even the 1,755 table readings all rebuild
   from the corpus or from committed inputs; a person's judgement does not.
   `workspace/catalog/review-ledger.jsonl` is the committed, deterministic export
   (`cli review --export` / `--import`), keyed on evidence — `crop_sha256` for a table
   review, the (element, fact type, value) anchor for a fact review — and never on a row
-  id, because a `fact_id` moves on every re-extraction. It holds **3 table reviews** and a
-  test fails the build if somebody records a review and does not export it. Measured
-  2026-08-30: dropping the reviews from a pre-review copy of the store and replaying the
-  ledger reproduces all four published `ParameterTable`s. See G49.
-- **The review loop has been used, once, and the numbers are small.** `[measured]`
-  2026-08-30: **3 of 44 crops reviewed**, 144 of 1,225 readings carry a reviewer (138
-  `accepted`, 6 `corrected` — the corrections are the merged fence-height cells), 24
-  promoted facts, 4 published `ParameterTable`s. The other **703 readings are still
-  `unreviewed` and 378 still sit at `cross_family_verified`**, which is level 1 and
-  publishes nothing. Do not read "level 2 is populated" as "the corpus is curated".
+  id, because a `fact_id` moves on every re-extraction. A test fails the build if
+  somebody records a review and does not export it. Measured 2026-08-30 against the
+  first four `ParameterTable`s: dropping the reviews from a pre-review copy of the
+  store and replaying the ledger reproduces them exactly. See G49.
+- **The review loop has grown well past its first use, and the numbers have moved a
+  lot since 2026-08-30.** `[measured]` 2026-08-31: **37 of 44 crops reviewed** (up
+  from 3), 1,218 of 1,755 readings carry a reviewer (1,194 `accepted`, 8 `corrected`),
+  110 promoted facts, **9 published `ParameterTable`s** (up from 4 — `max_span_mm` and
+  `footing_schedule` publish for the first time as of 2026-08-31). The other **13
+  readings are still `unreviewed` and 524 sit at `cross_family_verified`**, which is
+  level 1 and publishes nothing. Do not read "level 2 is populated" as "the corpus is
+  curated" — 7 of 144 documents have any promoted table fact. Full account, updated
+  faster than this file: `docs/state-and-gaps.md` G58/G59.
 - **A page that prints no HVHZ bracket is not a reader disagreement.** `promote_tables`
   returned `unresolved` for both, so a complete human review of the cleanest table in the
   corpus published 0 tables and 24 `disputed` gaps whose text claimed readers had failed to

@@ -449,7 +449,15 @@ class TestRebuild(unittest.TestCase):
 # ---------------------------------------------------------- the live store
 @requires_store
 class TestTheRealQueue(unittest.TestCase):
-    """The measurement. Nothing here may have been reviewed by anybody."""
+    """The measurement, until 2026-08-31. This class used to assert nothing in
+    the live store had ever been reviewed -- true when it was written, and
+    permanently false the moment real review began. `test_nothing_in_the_store_
+    has_been_reviewed` asserted exactly that as a one-time baseline; retired
+    here rather than left failing forever, because the invariant that
+    actually matters going forward -- every fact claiming a reviewer has an
+    accountable record -- is `test_no_reviewed_fact_lacks_an_accountable_
+    record` below, and that one keeps working whether the count is 0 or not.
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -458,14 +466,6 @@ class TestTheRealQueue(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.conn.close()
-
-    def test_nothing_in_the_store_has_been_reviewed(self):
-        cols = {r[1] for r in self.conn.execute("PRAGMA table_info(facts)")}
-        if "reviewer" not in cols:
-            self.skipTest("store predates the fact review loop; run `cli migrate`")
-        n = self.conn.execute(
-            "SELECT COUNT(*) FROM facts WHERE reviewer IS NOT NULL").fetchone()[0]
-        self.assertEqual(n, 0, "a fact claims a reviewer; nobody has reviewed one")
 
     def test_no_reviewed_fact_lacks_an_accountable_record(self):
         cols = {r[1] for r in self.conn.execute("PRAGMA table_info(facts)")}

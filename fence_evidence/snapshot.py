@@ -36,7 +36,7 @@ from .refs import ref_id
 from .store import connect
 from .tenancy import TenantLeak, validate_tenant, visible_sql, visible_to
 
-CONTRACT_VERSION = "1.1.0"
+CONTRACT_VERSION = "1.3.0"  # v1.3, ratified 2026-08-31 -- amendments 002-007
 SPINE_VERSION = "0.1.0"
 POLICY_VERSION = "0.1.0"
 

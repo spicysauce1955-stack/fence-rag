@@ -734,6 +734,15 @@ def main(argv: list[str] | None = None) -> int:
         from .fetch import fetch_subset, load_remote_manifest
         from .paths import REPO_ROOT
         manifest = load_remote_manifest(args.manifest_url)
+        # Subsets are declared in the fetched manifest, not a fixed list
+        # argparse could validate at parse time -- checked here instead, so
+        # an unknown --subset is a clean error and exit 2 (matching every
+        # other subcommand's own bad-input handling) rather than an uncaught
+        # KeyError and a raw traceback out of fetch_subset.
+        if args.subset not in manifest["subsets"]:
+            _print({"error": f"unknown subset {args.subset!r}; known: "
+                             f"{sorted(manifest['subsets'])}"})
+            return 2
         result = fetch_subset(manifest, args.subset, REPO_ROOT, workers=args.workers)
         _print(result)
         if result.get("downloaded") or result.get("copied"):

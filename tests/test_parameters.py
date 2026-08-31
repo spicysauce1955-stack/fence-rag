@@ -67,18 +67,29 @@ def add_document(conn, *, document_id="doc-1", sha256=SHA_A, version_id="v1",
 _ROW_INDEX = [0]
 
 
-def _candidate(conn, document_id, version_id, page_no, value, review_status):
+def _candidate(conn, document_id, version_id, page_no, value, review_status,
+               row_index=None, col_index=1):
     """The reading a fact was promoted from. `facts.from_candidate_id` is a real
-    foreign key and `SCHEMA` turns foreign keys ON, so it has to exist."""
-    _ROW_INDEX[0] += 1
+    foreign key and `SCHEMA` turns foreign keys ON, so it has to exist.
+
+    `row_index` defaults to an ever-incrementing counter, unique across the
+    whole test run -- fine when a test only needs a valid foreign key. Pass
+    it explicitly to correlate two facts as readings of the SAME source table
+    row (amendment 006's pairing key), the way `promote_tables` actually
+    links `footing_depth_in` and `post_spacing_in`. `col_index` must then
+    differ between the two, matching two different columns of one row.
+    """
+    if row_index is None:
+        _ROW_INDEX[0] += 1
+        row_index = _ROW_INDEX[0]
     cur = conn.execute("""INSERT INTO table_read_candidates
         (document_id, version_id, page_no, crop_path, crop_sha256, reader,
          reader_kind, is_table, row_index, col_index, col_label, value,
          review_status, created_at)
-        VALUES (?,?,?,'workspace/derived/c.png',?,'calibration-A','agent',1,?,1,
+        VALUES (?,?,?,'workspace/derived/c.png',?,'calibration-A','agent',1,?,?,
                 'FOOTING DEPTH',?,?,'2026-08-27T00:00:00+00:00')""",
-        (document_id, version_id, page_no, "c" * 64, _ROW_INDEX[0], value,
-         review_status))
+        (document_id, version_id, page_no, "c" * 64, row_index, col_index,
+         value, review_status))
     return cur.lastrowid
 
 
@@ -86,10 +97,12 @@ def add_fact(conn, *, fact_type="footing_depth_in", value='36"',
              conditions=None, condition_basis="stated",
              condition_basis_note=None, document_id="doc-1",
              version_id="v1", page_no=17, review_status="accepted",
-             promoted=True, unit_normalized="in", value_alternates=None):
+             promoted=True, unit_normalized="in", value_alternates=None,
+             row_index=None, col_index=1):
     """One promoted fact: a table cell carrying its row's conditions."""
     candidate_id = _candidate(conn, document_id, version_id, page_no, value,
-                              review_status)
+                              review_status, row_index=row_index,
+                              col_index=col_index)
     conn.execute("""INSERT INTO facts(document_id, version_id, page_no, element_id,
         fact_type, subject, value_original, unit_original, unit_normalized,
         conditions, condition_basis, condition_basis_note, value_alternates,
@@ -384,9 +397,39 @@ class TestTheUniqueCheck(unittest.TestCase):
         self.assertEqual({g["kind"] for g in clash}, {"unmodellable_entity"})
         self.assertEqual({g["closes_by"] for g in clash}, {"planning"})
         self.assertIn("footing_depth_mm", clash[0]["subject"])
-        self.assertIn("C5", clash[0]["would_close"])
+        self.assertIn("Amendment 006", clash[0]["would_close"])
         self.assertEqual(clash[0]["because"]["params"]["amount_milli"],
                          [762000, 914400])
+        conn.close()
+
+    def test_would_close_names_the_scope_not_just_the_point(self):
+        """G40 regressed at scale (docs/state-and-gaps.md): two manufacturers
+        stating byte-identical footing tables -- a documented, common shape in
+        this corpus -- produce two `paired_design_point_unmodellable` gaps
+        whose point, parameter and lexemes are all identical, so a curator
+        reading `would_close` alone cannot tell the two apart or act on
+        either. `subject` already carries the scope id; `would_close` did
+        not, which is the actual defect -- G40's own principle is that this
+        field alone must be a work item, not something requiring a second
+        field to disambiguate.
+        """
+        conn = make_store()
+        add_document(conn, document_id="doc-a", version_id="va", sha256=SHA_A,
+                    manufacturer="Bufftech", product_family="Chesterfield")
+        add_document(conn, document_id="doc-b", version_id="vb", sha256=SHA_B,
+                    manufacturer="Certainteed", product_family="Chesterfield")
+        for doc, ver in (("doc-a", "va"), ("doc-b", "vb")):
+            for value in ('36"', '30"'):
+                add_fact(conn, document_id=doc, version_id=ver,
+                         conditions=both_hvhz("C"), value=value)
+        _, gaps = build_parameter_tables(conn)
+        clash = [g for g in gaps
+                 if g["because"]["code"] == "paired_design_point_unmodellable"]
+        self.assertEqual(len(clash), 4)          # 2 manufacturers x 2 HVHZ states
+        sentences = [g["would_close"] for g in clash]
+        self.assertEqual(len(set(sentences)), len(sentences),
+                         "identical corpus content under two manufacturers "
+                         "produced indistinguishable work items")
         conn.close()
 
     def test_a_succession_is_not_a_collision(self):
@@ -839,6 +882,24 @@ class TestFenceHeightPublishing(unittest.TestCase):
         self.assertEqual(table["condition_scope"]["fence_height"], "bay")
         conn.close()
 
+    def test_a_table_with_an_unbounded_dimension_is_never_domain_basis_declared(self):
+        """Found by an adversarial audit of the published snapshot, 2026-08-31:
+        every fence_height-bearing table reported `domain_basis: "declared"`
+        purely because `exposure_category` is DECLARED_DOMAIN -- overstating
+        confidence in the whole domain, since fence_height's true extent
+        above the highest stated bracket is genuinely unknown. `declared`
+        must mean every dimension's extent is authoritatively known, not
+        merely that one of several dimensions is."""
+        conn = make_store()
+        self._two_heights(conn)
+        table = build_parameter_tables(conn)[0][0]
+        self.assertIn("exposure_category", table["domain"])   # DECLARED_DOMAIN
+        self.assertIn("fence_height", table["domain"])         # range(mm), not
+        self.assertEqual(table["domain_basis"], "measured",
+                         "a table is not fully DECLARED while one of its "
+                         "dimensions has an unknown true extent")
+        conn.close()
+
     def test_each_row_publishes_its_own_interval(self):
         conn = make_store()
         self._two_heights(conn)
@@ -901,6 +962,92 @@ class TestFenceHeightPublishing(unittest.TestCase):
         tables, gaps = build_parameter_tables(conn)
         self.assertEqual(tables, [])
         self.assertIn("unrecognised_condition_value", codes(gaps))
+        conn.close()
+
+
+class TestFootingSchedule(unittest.TestCase):
+    """Amendment 006, ratified in contract v1.3: a table stating two design
+    points together -- a deeper footing buying a wider span -- publishes as
+    one `footing_schedule` table with a paired `value_type`, not two
+    colliding single-valued tables gapped out as `paired_design_point_
+    unmodellable`. `row_index` is the correlation key: `promote_tables`
+    already links every cell of one source table row to the same
+    `table_read_candidates.row_index`, real corpus data confirmed the same
+    depth/span pairing this seeds (`docs/state-and-gaps.md`), and building a
+    second correlation mechanism here would be a second answer to a question
+    the store already answers once.
+    """
+
+    def _paired_row(self, conn, *, row_index, depth, span, exposure):
+        conditions = both_hvhz(exposure)
+        add_fact(conn, fact_type="footing_depth_in", value=depth,
+                 conditions=conditions, row_index=row_index, col_index=2)
+        add_fact(conn, fact_type="post_spacing_in", value=span,
+                 conditions=conditions, row_index=row_index, col_index=3)
+
+    def test_two_correlated_alternatives_publish_as_one_paired_row(self):
+        conn = make_store()
+        add_document(conn)
+        self._paired_row(conn, row_index=1001, depth='30"', span='68"', exposure="C")
+        self._paired_row(conn, row_index=1002, depth='36"', span='88"', exposure="C")
+        tables, gaps = build_parameter_tables(conn)
+        schedules = [t for t in tables if t["parameter"] == "footing_schedule"]
+        self.assertEqual(len(schedules), 1)
+        table = schedules[0]
+        self.assertEqual(table["value_type"],
+                         "paired(footing_depth_mm:mm, max_span_mm:mm)")
+        row, = [r for r in table["rows"]
+                if r["conditions"] == {"exposure_category": "C"}]
+        pairs = {(v[0]["amount_milli"], v[1]["amount_milli"]) for v in row["value"]}
+        self.assertEqual(pairs, {(762000, 1727200), (914400, 2235200)})
+        self.assertFalse([t for t in tables if t["parameter"] in
+                          ("footing_depth_mm", "max_span_mm")],
+                         "the single-valued tables must not ALSO publish")
+        self.assertFalse([g for g in gaps if g["because"]["code"] ==
+                          "paired_design_point_unmodellable"])
+        conn.close()
+
+    def test_an_uncontested_row_still_publishes_as_a_single_alternative_list(self):
+        """`paired` is declared once, on the table -- every row's `value` is a
+        list, even where there is exactly one alternative, or a consumer has
+        to branch on shape depending on the row, which is the exact defect
+        `value_type` sitting on the table exists to prevent."""
+        conn = make_store()
+        add_document(conn)
+        self._paired_row(conn, row_index=2001, depth='24"', span='97"', exposure="B")
+        table, = [t for t in build_parameter_tables(conn)[0]
+                 if t["parameter"] == "footing_schedule"]
+        row, = table["rows"]
+        self.assertEqual(len(row["value"]), 1)
+        self.assertEqual(row["value"][0][0]["amount_milli"], 609600)   # 24"
+        self.assertEqual(row["value"][0][1]["amount_milli"], 2463800)  # 97"
+        conn.close()
+
+    def test_an_unpaired_depth_alone_still_publishes_footing_depth_mm(self):
+        """No `post_spacing_in` reading exists for this row -- nothing to
+        correlate, so this stays exactly what it was before amendment 006:
+        an ordinary `footing_depth_mm` row."""
+        conn = make_store()
+        add_document(conn)
+        add_fact(conn, fact_type="footing_depth_in", value='24"',
+                 conditions=both_hvhz("B"))
+        tables, _ = build_parameter_tables(conn)
+        self.assertEqual([t["parameter"] for t in tables], ["footing_depth_mm"])
+        conn.close()
+
+    def test_a_genuine_footing_depth_collision_with_no_correlated_span_still_gaps(self):
+        """Two depths at one point, neither correlated to a span reading --
+        amendment 006 has nothing to pair them with, so this is exactly the
+        pre-006 withheld-and-gapped behaviour, unchanged."""
+        conn = make_store()
+        add_document(conn)
+        add_fact(conn, fact_type="footing_depth_in", value='24"',
+                 conditions=both_hvhz("C"))
+        add_fact(conn, fact_type="footing_depth_in", value='30"',
+                 conditions=both_hvhz("C"))
+        tables, gaps = build_parameter_tables(conn)
+        self.assertEqual(tables, [])
+        self.assertIn("paired_design_point_unmodellable", codes(gaps))
         conn.close()
 
 

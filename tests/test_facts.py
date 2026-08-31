@@ -350,6 +350,12 @@ class TestFactProvenance(unittest.TestCase):
         self.assertEqual(bad, 0)
 
     def test_ocr_derived_facts_are_flagged_or_confident(self):
+        """A low-confidence OCR fact must have been ROUTED through review --
+        `flagged` is where it starts, not where it has to stay forever. Once
+        real review began (2026-08-31) some of these correctly moved on to
+        `reviewed`/`accepted`/`rejected`/`corrected`; what must never happen
+        is one sitting at `extracted`, which means it skipped the flag
+        entirely."""
         if self.n == 0:
             self.skipTest("facts not extracted yet")
         rows = self.conn.execute("""SELECT f.review_status, e.ocr_confidence
@@ -357,8 +363,8 @@ class TestFactProvenance(unittest.TestCase):
             WHERE f.ocr_derived = 1""").fetchall()
         for r in rows:
             if r["ocr_confidence"] is None or r["ocr_confidence"] < 80.0:
-                self.assertEqual(r["review_status"], "flagged",
-                                 "a low-confidence OCR fact was not flagged for review")
+                self.assertNotEqual(r["review_status"], "extracted",
+                                    "a low-confidence OCR fact was never flagged for review")
 
     def test_original_value_is_never_discarded(self):
         if self.n == 0:
