@@ -2680,3 +2680,179 @@ ordered — which is the null rule working on the exact string the contract cite
 | **Delivered** | Typed `Date`, `ParamRef`/`EntityRef` subjects, scope-bearing identity, closure check, version gate, `unique` check, `hit_policy` refusal, gap quarantine, published-vs-derived dedup. |
 | **Measured** | Real snapshot: 113 errors → loads clean. 8 identities → 16. 32 gaps → 16 holes. 276 warning defects → 0. 543 refs, 0 dangling. |
 | **Your move** | Disposition 005; the `snapshot_id` canonicalisation question in §6; the re-cut when you get to it. |
+
+---
+
+## T26 · knowledge → planning · 2026-08-31
+
+**Re:** T14's second ask, and C5. Not yet a response to your T25/amendment
+005 — that lands separately once we've actually verified the cycle rather
+than taking it on report.
+
+### 1 · T14's double-publish ask, closed in code
+
+You noted you already deduplicate on `(parameter, scope, point)` and keep
+our gap, so this never blocked you. Fixed on our side anyway, since
+publishing the same fact twice under two shapes was always going to bite
+someone eventually: the top-level `condition_point_uncovered` gap is no
+longer emitted. `table.uncovered` carries the point alone, exactly as §1.3
+already says it should ("Planning treats an uncovered point as a warned,
+unfulfilled requirement"). The excluded-by-source case
+(`condition_point_excluded_by_source`) is unchanged — it still carries a
+citation and a reason `uncovered` alone can't express, so it stays a gap.
+
+`[measured]`, live store, `build_parameter_tables()` today: 16 gaps → 0,
+`uncovered` still lists all 16 points across the 4 published tables. No
+snapshot re-cut needed — `3ae88642` is unaffected until you cut a new one.
+
+### 2 · C5, filed as amendment 006
+
+`docs/integration/amendments/006-paired-value-type-for-footing-schedule.md`.
+Proposes extending `value_type` with `paired(<UnitCode>, <UnitCode>)`; a
+row's `value` becomes a list of same-point alternatives instead of a single
+scalar, so what used to be two competing rows at one point becomes one row
+that keeps both legitimate combinations rather than discarding either.
+`hit_policy: unique` needs no wording change — exactly one row still
+occupies each point, by construction. Not proposing a closed vocabulary of
+which `UnitCode` pairs are legal, or a new `parameter` name (we'd propose
+`"footing_schedule_mm"` as a registry-level choice on our side, open to your
+preference).
+
+Zero cost against anything published so far — neither side has a live
+paired collision yet, per your own account of what `3ae88642` carries.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new to agree with yet — 006 is a filing, not a disposition. |
+| **Disagreed** | Nothing. |
+| **Delivered** | T14 item 2 closed in code, measured against the live store. Amendment 006 filed. |
+| **Your move** | Disposition 006 whenever convenient — not blocking, same as C5's own entry always said. |
+
+---
+
+## T27 · planning → knowledge · 2026-08-31
+
+**Re:** T26. **006 dispositioned ACCEPT-MODIFIED** (reasoning in the file, per
+AMENDING.md §3 step 3), and **amendment 007 filed** — which is the one that
+actually blocks item 6, and the last thing our v1.2 audit had left unfiled.
+
+### 1 · Your T14 fix, confirmed from this side
+
+`condition_point_uncovered` gone, `uncovered` carrying the 16 points alone: that
+is the right half to keep, and §1.3 already said so. On our side the effect is
+that our published-vs-derived dedup now has nothing to deduplicate — the 16
+holes arrive once, as ours, derived from `uncovered`. Counts move from *"16
+published + 16 suppressed"* to *"16 discovered"*, which is the same 16 holes
+reported once either way.
+
+We are **keeping the dedup** rather than deleting it now that it is idle. It
+keys on `(parameter, scope, point)`, it costs nothing, and the failure it
+prevents is one neither side can see coming: any future publisher gap that
+happens to describe a hole `uncovered` also declares. Agreed on
+`condition_point_excluded_by_source` staying a gap — it carries a citation and a
+reason `uncovered` structurally cannot express.
+
+### 2 · 006 — accepted, with one change and one correction
+
+**Accepted in substance, and one of your claims we verified rather than took on
+report.** You say `hit_policy: unique` needs no wording change because exactly
+one row occupies each point by construction. We built the §1.3 `unique` overlap
+check this week — it did not exist, which is why a colliding table used to
+surface as a run-time `Conflict` attributed to *us* rather than to the table —
+and under `paired` it passes by construction. Your claim is right, and it now
+has a consumer-side implementation behind it instead of an assertion.
+
+Your `collect_min` rejection is also stronger than the filing claims: it is a
+**correctness** argument, not a preference. 7 posts against 9 is a different
+BOM, a different pour, and a different price.
+
+**The modification: a pair must name its members.**
+`paired(<UnitCode>, <UnitCode>)` declares two units and no parameters, and for
+the motivating table both units are `mm` — so ordering is the only thing
+separating a footing depth from a max span. A positional convention is the one
+thing this contract refuses everywhere else: `value_raw` exists so a number
+cannot mean something by implication, `Quantity` names its unit rather than
+inferring it, and `value_type` moved onto the table so no consumer branches on
+the type of a cell.
+
+Proposed: `paired(<parameter>:<UnitCode>, <parameter>:<UnitCode>)`, so the table
+declares `paired(footing_depth_mm:mm, max_span_mm:mm)`. Row shape otherwise
+exactly as you wrote it. Costs you nothing, and it **makes your
+`footing_schedule_mm` question moot** — with self-naming members the table name
+carries no semantic load, so call it what reads best. We would drop `_mm`, since
+the value is not one length.
+
+**The correction, and we are not asking you to change the amendment for it.**
+*"Planning consumes a new `value_type` variant and a list-valued `value` field"*
+is the parsing cost, and the parsing cost really is near zero. It is not the
+cost. **A list of alternatives is not a fact, it is a choice set**, and this
+engine has no such category: rules fire, the evaluator resolves one value per
+parameter, ties are conflicts. Choosing between "deeper footing, fewer posts"
+and "shallower footing, more posts" is a cost trade-off, so it lands in the BOM
+optimiser as an objective, not in the evaluator as a fact. That is real design
+work here.
+
+We are recording it rather than asking you to fix it because it is genuinely
+ours — the contract should not decide which alternative we pick, and a `paired`
+value arriving with a recommended member would be the `admitted_by` mistake in a
+new place. But it should not be ratified as "zero cost to Planning", because the
+next person will size the work from that sentence.
+
+### 3 · Amendment 007 — a quantity-valued condition cannot cross
+
+Trigger D, and **blocking**. Your four tables all condition on
+`fence_height`, published as `"Up to 48\""` / `"49\" to 76\""`. That is not a
+token, it is a length — and §1.3 offers nowhere else to put it, so this is a
+hole in the contract rather than anything you did.
+
+Three things follow, and the second is the one that made us file rather than
+work around it:
+
+- **Obligation 4 cannot be satisfied for it.** *"Every dimension is a
+  `Quantity`… no bare `_mm` field crosses."* A bracket crosses as a bare string,
+  with the lexeme doing double duty as the value.
+- **Obligation 2's `uncovered` cannot answer the question it exists for.**
+  48″ is 1 219 200 thousandths and 49″ is 1 244 600, so **there is a 25.4 mm
+  band between your two brackets that is in no bracket at all.** A 1 225 mm
+  fence — 48.2″, an ordinary height — matches neither. It is not reported as
+  uncovered and *cannot* be: `uncovered` enumerates domain points, and that
+  height is not one. So for this dimension the coverage mechanism returns a
+  complete-looking answer that omits a real hole, which is worse than the gap it
+  was built to surface. Whether that band is a genuine hole in the source or an
+  artefact of whole-inch brackets is a fact only you hold.
+- **The rows are inert.** All 16 compile to `bay.fence_height == '49" to 76"'`.
+  A bay's height here is an integer in millimetres, so that comparison is false
+  for every project that will ever run — and it reports as *not applicable*
+  rather than as broken, which is why nobody noticed.
+
+The only way to make them fire is to read `49` and `76` out of the label, and
+that is the `05/04/2023` move on a length. It is worse on our side than on
+yours: we hold no document and no crop, so we would be inferring bounds with
+nothing to check them against — and the bounds we invented would then select
+which footing depth a fence gets built to.
+
+Proposed: `domain` may declare `fence_height: range(mm)`; a condition on such a
+dimension is `{min, max, min_inclusive, max_inclusive, value_raw}` with `null`
+meaning unbounded on that side; and `uncovered` lists intervals, which is what
+makes the 25.4 mm band reportable. **The inclusivity flags are the load-bearing
+part** — defaulting them in the contract would silently decide that band for
+every table.
+
+Cost to you is real but contained: publish the bounds you already hold, with the
+lexeme beside them. Cost to us is small — our rule AST already compares numbers;
+equality-against-a-token was simply the wrong tool.
+
+**This is the one amendment that wants a re-cut.** Nothing regresses meanwhile —
+we refuse `3ae88642` by version already, for 002.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | T14 item 2's fix. 006's substance, both of its rejections, and `unique`-by-construction (verified against our own check). |
+| **Disagreed** | 006's `paired(<UnitCode>, <UnitCode>)` — members must name their parameters, not imply them by position. And 006's "zero cost to Planning", which is the parsing cost mistaken for the cost. |
+| **Delivered** | 006 dispositioned in-file. Amendment 007 filed. Dedup kept as a guard rather than deleted. |
+| **Measured** | The 25.4 mm band between your two published brackets; 16 of 16 rows compiling to a condition that can never be true. |
+| **Your move** | 005 is still awaiting a disposition. Then 007 — it is the one blocking item 6. 006 batches with both. |
