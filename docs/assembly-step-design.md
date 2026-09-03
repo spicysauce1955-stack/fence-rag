@@ -162,12 +162,35 @@ Three consequences, each with a standing reason in this repo:
 1. **Proposals never publish on their own.** A1/C0 is the precedent: machine agreement
    between two readers was being laundered into curation level 2, and 324 facts had to be
    un-promoted. A `step_candidate` with no reviewer publishes nothing, ever.
-2. **Proposer precision is measured and reported before anything publishes.** The rules
-   come from the audit's own thirteen observed scopes — `811`/utility → `site`, string
-   line and stakes → `run`, dig/gravel/concrete → `post`, rail and picket → `panel`,
-   `72 hours` → `Elapsed`. The last time this repo guessed at a pattern without measuring
-   it, the guess ran at 18.6% precision (A5, `stock_length`). The number gets reported
-   whatever it is.
+2. **Proposer precision is measured and reported before anything publishes.** The last
+   time this repo guessed at a pattern without measuring it, the guess ran at 18.6%
+   precision (A5, `stock_length`). The number gets reported whatever it is.
+
+   **Correction, made while researching this design: only five of the audit's thirteen
+   scopes are recoverable.** `audit/01-audit-response.md` §2.4 says *"Thirteen scopes that
+   are neither. Each has a verbatim quote in the working file; five that make the case"* —
+   and the working file was never committed. Searching the repo, including deleted paths in
+   `git log --diff-filter=D`, finds the count in four places and the scopes themselves in
+   one: the five published in that table. **Eight scope names and all their quotes are
+   lost.** An earlier draft of this section claimed the rules "come from the audit's own
+   thirteen observed scopes"; they cannot, and this slice starts from five:
+
+   | Audit scope | Verbatim trigger | Lands as |
+   |---|---|---|
+   | `site` — utility locate | *"have the utility companies clearly mark your property"* | scope `site` |
+   | `run` — string line | *"install line stakes and run a string line"* | scope `run`, slot `SiteFixture(string_line)` |
+   | `footing` — gravel base | *"add 6" of gravel for post drainage"* | scope `post`, slot `Footing(gravel)` |
+   | `wait` — elapsed time | *"Leave gate on blocks for 72 hours"* | scope `post`, slot `Elapsed` |
+   | `temporary` — part as jig | *"Use only one rail as temporary spacer"* | slot `Reused(slot_path)` |
+
+   Note that three of the five are **not** scopes in the ratified model — `footing`, `wait`
+   and `temporary` became `SlotTarget` variants. The audit's vocabulary predates N10 and
+   must be translated, not copied.
+
+   The eight lost scopes are a reason to **derive the rest of the rule set from the slice
+   itself** rather than reconstruct it: the reviewer's corrections on 44 real bullets are
+   better evidence than a half-remembered list, and they are recorded in the ledger where
+   the working file was not.
 3. **Damaged source text is a review outcome, not an extractor fix.** The text layer holds
    `I nsert`; the page says `Insert`. The reviewer sees the crop and records `corrected`,
    exactly as table readings do. No OCR overwrites a source text layer (prohibition).
@@ -212,6 +235,26 @@ coverage:
 - **The procedure's owner.** `Procedure.scope` is `null` for this slice. The shape permits
   it (`EntityRef | null`, "owned by no product at all") and it is honest: the guide's
   `FenceModel` does not exist yet, so a gap says so rather than inventing a referent.
+
+## 7a. Two decisions this design did not anticipate
+
+Both surfaced during research and are recorded here rather than discovered mid-build.
+
+**The review ledger's schema has to go to 2.** `reviews.LEDGER_SCHEMA = 1`, and
+`read_ledger` hard-refuses any other value. The header line carries per-kind counts
+(`{"fact_reviews":204,"kind":"ledger","schema":1,"table_reviews":71}`), so adding a
+`step_reviews` count changes the header shape. `workspace/catalog/review-ledger.jsonl` is
+committed and `tests/test_review_ledger.py` fails the build when it disagrees with the
+store, so this is a deliberate, tested migration — not a field that can be slipped in.
+
+**The anchor cannot be a crop digest or a `ref_id`.** Table reviews key on `crop_sha256`;
+that does not apply here, because `[measured]` 0 of 28 elements on p8 have a pre-rendered
+crop — review renders on demand. `ref_id` embeds a bbox and does not survive a
+re-extraction (G38), which is the same reason §3 rejected option B. The anchor is therefore
+`(element_id, char_span, bullet_text)` — the element, the character span option A already
+requires, and the verbatim text the reviewer actually saw — resolved on import by the
+one-and-only-one rule `reviews._facts_matching` already uses, reporting
+`ambiguous` / `value_changed` / `orphaned` rather than guessing.
 
 ## 8. Acceptance
 
