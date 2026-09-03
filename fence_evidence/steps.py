@@ -232,6 +232,11 @@ def _classify(body: str, leader: str, depth: int, branch: str | None,
     # is why the repair is computed before the kind and not after it.
     repair, _ = _propose_repair(body)
     flat = repair or " ".join(body.split())
+    # Strip a leading `4. ` before asking what the line is: a numbered line
+    # carries its number, and `PROHIBITION_RE` anchors at the start, so
+    # `4. Do not hang your gate system off a single non-supported post.`
+    # was read as an ordinary step.
+    flat = re.sub(r"^\d{1,2}[.)]\s+", "", flat)
     if PROHIBITION_RE.match(flat):
         return "prohibition"
     if not RIDER_RE.match(body.lstrip()):
@@ -254,17 +259,15 @@ def split_block(block: str, *, text_source: str = "pdf_text_layer") -> list[Segm
     footnote_leader = "*" if text_source != "ocr" else None
 
     numbered = bool(SECTION_RE.match(block))
-    if numbered:
-        repair, confidence = _propose_repair(block)
+    if numbered and _is_heading(block):
         # A numbered line is a heading only if it reads like one. Otherwise it
         # is an instruction that happens to be numbered, and returning it as a
         # `section` produced zero steps for every manufacturer who numbers a
         # procedure instead of bulleting it.
-        kind = "section" if _is_heading(block) else "step"
-        if kind == "section" or "\n" not in block.strip():
-            return [Segment(text=block, start=0, end=len(block), leader="",
-                            depth=0, kind=kind, branch=None, repair=repair,
-                            repair_confidence=confidence)]
+        repair, confidence = _propose_repair(block)
+        return [Segment(text=block, start=0, end=len(block), leader="",
+                        depth=0, kind="section", branch=None, repair=repair,
+                        repair_confidence=confidence)]
 
     # Line-based, because `[measured]` no bullet in this corpus ever starts
     # mid-line inside a `list` element -- 0 of 3,146 bulleted elements. The
@@ -308,16 +311,29 @@ def split_block(block: str, *, text_source: str = "pdf_text_layer") -> list[Segm
     cuts.sort(key=lambda c: c[0])
     if not cuts:
         repair, confidence = _propose_repair(block)
+        # A numbered instruction with no bullets inside it is a STEP, wrapped or
+        # not, and it is classified like any other -- so a numbered prohibition
+        # is typed as one. An earlier version returned early only when the block
+        # had no newline, which sent every numbered instruction that merely
+        # wrapped down this path to land as `prose`: chrome, excluded from
+        # CARRIES_CONTENT, silently dropped. `[measured]` 119 real action steps
+        # across 20 manuals, half of one document's segments among them.
+        kind = _classify(block, "", 0, None, text_source) if numbered else "prose"
         return [Segment(text=block, start=0, end=len(block), leader="", depth=0,
-                        kind="prose", branch=None, repair=repair,
+                        kind=kind, branch=None, repair=repair,
                         repair_confidence=confidence)]
 
     out: list[Segment] = []
     if cuts[0][0] > 0 and block[:cuts[0][0]].strip():
         head = block[:cuts[0][0]]
         repair, confidence = _propose_repair(head)
+        # `1. Getting Started` followed by its bullets: the head is the section
+        # title, not stray prose. Judged on the head alone, because the block as
+        # a whole is long precisely BECAUSE the bullets are in it.
+        head_kind = ("section" if SECTION_RE.match(head) and _is_heading(head)
+                     else _classify(head, "", 0, None, text_source))
         out.append(Segment(text=head, start=0, end=cuts[0][0], leader="",
-                           depth=0, kind="prose", branch=None, repair=repair,
+                           depth=0, kind=head_kind, branch=None, repair=repair,
                            repair_confidence=confidence))
 
     current_branch: str | None = None

@@ -409,5 +409,59 @@ class TestBranchScopeDoesNotLeak(unittest.TestCase):
         self.assertEqual([s.branch for s in segs], [None, "a", "a", None],
                          "a new top-level bullet inherited a stale branch")
 
+
+class TestANumberedInstructionSurvivesWrapping(unittest.TestCase):
+    """A regression introduced by the SECTION_RE fix itself.
+
+    Making a heading "short and unpunctuated" was right, but the guard added
+    with it — return early only when the block has no newline — sent every
+    numbered instruction that merely WRAPS onto a second line down the
+    cut-scanning path, where it finds no bullet leader and lands as `prose`.
+    `prose` is chrome and is not in `CARRIES_CONTENT`, so those steps were
+    silently dropped.
+
+    `[measured]`: 119 occurrences across 20 installation manuals — real action
+    steps like `10. Slide the mid-rail and top rail into the second post (post
+    B).` and `11. Pour concrete around post B to about 3 inches below ground
+    level`. Half of one document's segments were lost this way.
+    """
+
+    def test_a_wrapped_numbered_instruction_is_a_step(self):
+        segs = split_block("10. Slide the mid-rail and top rail into the second post\n"
+                           "(post B).", text_source="pdf_text_layer")
+        self.assertEqual(kinds(segs), ["step"])
+
+    def test_it_is_carried_to_the_reader(self):
+        from fence_evidence.steps import CARRIES_CONTENT
+        segs = split_block("11. Pour concrete around post B to about 3 inches\n"
+                           "below ground level and level and plumb.",
+                           text_source="pdf_text_layer")
+        self.assertTrue(all(s.kind in CARRIES_CONTENT for s in segs))
+
+    def test_a_numbered_prohibition_is_a_prohibition(self):
+        """The numbered path never called `_classify`, so a whole-line
+        prohibition printed as a numbered step was typed `step` — and where it
+        also wrapped, it became `prose` and vanished entirely."""
+        segs = split_block("4. Do not hang your gate system off a single "
+                           "non-supported post.", text_source="pdf_text_layer")
+        self.assertEqual(kinds(segs), ["prohibition"])
+
+    def test_a_wrapped_numbered_prohibition_is_also_caught(self):
+        segs = split_block("4. Do not hang your gate system off a single\n"
+                           "non-supported post.", text_source="pdf_text_layer")
+        self.assertEqual(kinds(segs), ["prohibition"])
+
+    def test_a_short_numbered_title_is_still_a_section(self):
+        self.assertEqual(kinds(split_block("2. Dig Holes", text_source="pdf_text_layer")),
+                         ["section"])
+
+    def test_a_numbered_block_that_does_contain_bullets_is_still_cut(self):
+        """Wrapping is not the same as containing a list. A numbered block with
+        real bullet leaders must still be split into them."""
+        segs = split_block("1. Getting Started\n• Call 811 before digging\n"
+                           "• Stake out the fence line", text_source="pdf_text_layer")
+        self.assertEqual(kinds(segs), ["section", "step", "step"])
+
+
 if __name__ == "__main__":
     unittest.main()

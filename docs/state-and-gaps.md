@@ -3660,6 +3660,199 @@ one genuine gap — down from five. Published in snapshot `762967d3`.
 
 ---
 
+## 3f. Update, 2026-09-03 — second adversarial round
+
+Five more adversaries, aimed at what round 1 never touched (`warnings`, `gaps`,
+`source_docs`) and at the G73/G74 fix itself. Each was told round 1's conclusions are not
+evidence — round 1's provenance audit passed the very citations that pointed at page
+banners, because it asked whether a ref was self-consistent rather than whether it was the
+*right* evidence.
+
+### G75 — `version_status` is published from a raw column, and `versions.py` is never called
+
+`[measured]`. `SnapshotBuilder._register_doc` copies `documents.version_status`,
+`issue_date` and `expiration_date` verbatim from whichever document row a citation reaches
+first. It never calls `fence_evidence/versions.py`, which already implements the date-aware
+resolver — `select_active`, `inferred_in_force`, expiry withdrawal — over the 84
+`effective_date` and 75 `expiration_date` facts Phase 6 extracted across all 17 NOA
+documents. **The logic is built and the publisher does not use it.**
+
+Consequences, all in the current snapshet `762967d3`:
+
+* **64 of 75 published `SourceDoc`s are `version_status: "unknown"`.** At least 28 have a
+  document row carrying an explicit date, edition or revision.
+* **Two currently-valid Miami-Dade NOAs publish as `unknown`.** NOA 24-0117.05 (*"Expiration
+  Date: 03/13/2029 … Approval Date: 04/24/2025 … This NOA revises NOA #23-0314.05"*) and
+  NOA 24-0117.06 (*"Expiration Date: 04/04/2028"*). Both unexpired today, both carrying
+  `version_status_basis: "no explicit version marker in curated metadata"` — which the PDF's
+  own first page contradicts. That `unknown` propagates into **11 published parameter rows**
+  (`footing_schedule` ×3, `footing_depth_mm` ×8), so obligation 6's "honest `version_status`"
+  fails at the row level, not just in metadata.
+* **Registration is order-dependent.** NOA 24-0117.05 has four byte-identical filings whose
+  curated dates disagree — two rows filled, two blank. `_register_doc` keyed on "first
+  citation reached" picked a blank one, discarding real dates present two rows away for the
+  same bytes. Nothing makes that choice deterministic by design.
+* **Three documents publish `source_class: "marketing"`, the weakest class, wrongly.** One is
+  a genuine Miami-Dade NOA (*"NOTICE OF ACCEPTANCE … shall not be valid after the expiration
+  date"*), one a dimensioned spec sheet, one literal installation instructions. All three do
+  raise `source_class_unclassified` gaps, so the platform discloses that it does not know —
+  but the published field still asserts a positive, wrong class rather than an absent one.
+
+Also measured and **clean**: `also_filed_as` is complete and correct for all 11 published
+documents carrying one, checked against all 15 `same_content_as` clusters; and referential
+closure is exact — 75 distinct hashes cited, 75 published, no missing document and no dead
+weight.
+
+### G76 — the 289 published warnings, never audited before
+
+`[measured]`. Five findings, worst first.
+
+**Binary control characters publish as "verbatim, untranslated" warning text.** Two
+warnings carry a corrupted font layer: `'Note: See next page on\n_o\x89|orovbࢼomv1u;\x89vom\nthe
+post side of the hinge.'` `quality.is_mojibake()` judges a whole page's control ratio, and
+enough of that page is clean prose that the page-level average passes while this element is
+unreadable binary. Zero `mojibake_text_layer` issues recorded for it.
+
+**One warning fragments into 12 published objects.** The freeze-thaw caution — the code's
+own comment calls it *"83 instances, the most repeated warning in this corpus"* and says the
+design is *"one warning with several citations"* — publishes as **12 separate `Warning`s
+carrying 14 citations between them**. The dedup key is `" ".join(text.split())` over the raw
+element text, so page-number bleed and delimiter noise each mint a distinct identity:
+`'30 * Caution – …'`, `'36 * Caution – …'`, `'32 * Caution – …'`, `'* Caution - …'`,
+`'30 + Caution - …'`. The merge logic itself is sound — the underground-utilities warning
+correctly merges 11 documents into one — it is defeated by noise surviving into the key.
+
+**94.8% of published warnings are document-scoped, against the 68% the design was argued
+from.** 274 document, 13 step, 2 warranty. The 68% figure comes from a corpus-wide census of
+1,038 warning-shaped instances and is what justified defaulting to document scope; whatever
+step-level attachment that implied did not survive to publication, and the 27-point gap was
+recorded nowhere.
+
+**Four published "warnings" are not warnings.** All via `_LEXEME_ONLY`, which glues the next
+element in ordinal order onto a bare lexeme heading with no check that it is that heading's
+body: `'NOTES\nIllusions Fence Catalog 04/20/20'` (a heading plus the catalog's footer),
+`'IMPORTANT!\n5 . UNSTABLE GROUND OR ROCK?'` (paired with the *next section's heading*,
+dropping its real body), `'ADVERTENCIA:\nCanales en U'` (a floating part-label; the real
+bodily-injury warning sits two elements later and is published for 14 sibling documents but
+not these two).
+
+**A two-word heading drops content silently.** `_LEXEME_ONLY` and `_LEXEME_LED` both require
+exactly one lexeme word, so `IMPORTANT NOTE:` matches neither and its body — *"Installer
+must consult local code officials for compliance to building code requirements."* — is
+dropped with **no gap recorded**. The identical sentence under a single-word `IMPORTANT:`
+heading in another document **is** published. Same content, different heading spelling,
+opposite outcome, no trace. Of 579 warning-shaped elements, 157 are cited nowhere and 73
+have no matching text anywhere in the published set.
+
+### G77 — the SECTION_RE fix dropped 119 real steps, and this entry is the fix
+
+`[measured]`, and it is a regression this session introduced. Making a heading "short and
+unpunctuated" (G64's follow-up) was right; the guard shipped with it was not — returning
+early only when the block had no newline sent every numbered instruction that merely
+**wrapped** down the cut-scanning path, where it found no bullet leader and landed as
+`prose`. `prose` is chrome and not in `CARRIES_CONTENT`, so those steps were silently
+dropped: **119 occurrences across 20 installation manuals**, including `10. Slide the
+mid-rail and top rail into the second post (post B).` and `11. Pour concrete around post
+B…`. Half of one document's segments went this way.
+
+Two further defects the same path hid: the numbered branch never called `_classify`, so a
+whole-line numbered prohibition (`4. Do not hang your gate system off a single
+non-supported post.`) was typed `step`; and `PROHIBITION_RE` anchors at the start, so the
+`4. ` prefix blocked the match even once classification ran.
+
+**Fixed.** A numbered block is a `section` only if it reads like a heading, and otherwise is
+classified like anything else — wrapped or not. Classification strips a leading `4. ` before
+asking what the line is. A numbered heading that opens a bulleted block keeps its `section`
+kind, judged on the head alone rather than on a block that is long precisely because the
+bullets are in it. `[measured]` after: `prose` falls **131 → 12** (the 119 recovered
+exactly), prohibitions rise 191 → 194, 0 span violations, and the slice page is unchanged at
+71 candidates.
+
+Not fixed, recorded: `PROHIBITION_RE` misses mid-sentence negatives (38 corpus-wide, e.g.
+`… tighten with ½" deep socket wrench (do not overtighten)`) — arguably right, since the
+line *is* an action with a caveat. And 45 of 194 prohibitions (23.6%) are not hazards:
+customer-service redirects (`DO NOT return the product to the store`) and technique tips
+(`Avoid "soupy" concrete mix`). A hazard prohibition and a negative imperative are not the
+same thing, and `prohibition` currently means the latter.
+
+### G78 — a fifth of published gaps are false, and the biggest real gap class publishes none
+
+`[measured]` over all 67 gaps in snapshot `762967d3`. All 61 element-subject gaps come from
+`SnapshotBuilder.warnings()`.
+
+**Roughly 23% are FALSE — the text is complete and already in the store.** The truncation
+heuristic is `body[:1].islower()` plus a `_DANGLING` word list, and a lowercase first
+character is not evidence of truncation. It fires on: a bullet glyph the text layer renders
+as a literal `k` (*"k Check the inside of the larger pieces in your box…"* — complete, and
+the gap claims it breaks off), a decorative drop-cap split into its own element (`NOTE: D` →
+the next ordinal completes *"Depending on severity of rack…"*), a maths variable (`q =
+(0.00256)(K z)(K zt)…` — a whole formula, also not a warning), and ordinary lowercase text
+after `Note: `. In every case the complete sentence sits in `elements.text`, in the same row
+or the next ordinal on the same page. **A rebuild would close these, not a person** — yet
+they publish as `closes_by: knowledge`, asking a human to transcribe something already held.
+
+**15 of 52 `warning_truncated_mid_clause` gaps are NOA legal boilerplate**, matched only
+because `_HAZARD` contains the phrase *"failure to comply"*. They all cite the identical
+clause: *"Misuse of this NOA as an endorsement of any product, for sales, advertising or
+any other purposes shall automatically terminate this NOA. Failure to comply with any
+section of this NOA shall be cause for termination and removal of NOA."* Rendered at 200dpi
+the pages are crisp and trivially readable. This is administrative boilerplate, not
+installation safety content, and calling it a `warns_line` gap misrepresents both.
+
+**One gap misattributes an OCR confidence across elements.** `d243231fbf74595d` says the
+warning *"was read at 75.5% confidence"*; 75.5% is the confidence of the two-token heading
+`IMPORTANT !`, while the body it quotes was extracted at **95.31%**. `snapshot.py` reads the
+lexeme row's `ocr_confidence` rather than the body row's when the lookahead path is taken.
+
+**And the largest real gap class publishes nothing at all.** Cross-referencing all 374
+`quality_issues` against the 67 gaps' subjects finds essentially zero overlap. **73
+`table_not_reconstructed` issues across 13 documents produce not one published gap** — along
+with 172 low-OCR-confidence passages, 81 mojibake pages, 34 failed OCR supplements and 9
+empty-after-OCR pages. `warnings()` only looks at text matching a warning lexeme, so an
+entire class of *known* extraction failure is invisible to a consumer reading `gaps[]`.
+**This is precisely the "silence reads as coverage" failure the member exists to prevent**,
+and it is larger than everything the member currently publishes: a Planning consumer has no
+signal whatever that 13 documents hold tables this platform could not reconstruct — the same
+tables G2 calls the corpus's highest-value numbers.
+
+The category is not uniformly wrong: two sampled `illegible_source` gaps are correct and
+well-triaged, including one where OCR genuinely garbled an italic note interleaved with
+diagram graphics. And G40's disease has not recurred — no two `would_close` strings are
+identical; each names its own document, page and text tail.
+
+### G79 — one published table claims full coverage where its siblings restrict exposure B
+
+`[measured]`. Of the five published `footing_schedule` tables, four carry
+`{"exposure_category": "B", "hvhz": false}` and correctly flag `{B, hvhz: true}` as
+uncovered. The fifth — scope `mfr/certainteed-columbia-imperial-chesterfield`, citing p11 of
+`NOA-12-1106.11` — carries a bare `{"exposure_category": "B"}` and publishes
+**`uncovered: []`**. Its B values therefore present as valid under HVHZ, where its four
+siblings say they are not. **This is the dangerous direction: silence reading as coverage.**
+
+The chain: a table review recorded the span `NO HVHZ BRACKET PRINTED` for every row on that
+page; the 12 underlying facts consequently carry `hvhz_applicability: "no bracket printed"`;
+and `parameters.py` treats that — correctly, per G53's policy — as *"unrestricted on hvhz,
+matches every value"*. Given the input, the output follows.
+
+**Whether the input is right is unresolved and needs a person.** The OCR text for p11
+carries the `HVHZ: MIAMI-DADE AND BROWARD COUNTIES` legend but no bracket string, which is
+consistent with a reviewer seeing nothing legible to record; the sibling page p17 of
+NOA-23-0314.05 shows `HVHZ AND NON HVHZ` twice in its OCR. An adversary that rendered p11 at
+200dpi reports the bracket **is** printed, on the same drawing template as the siblings. If
+that is right, the review is wrong and this table should restrict B exactly as the other four
+do. It is one crop, and it is the user's own review to re-cut — `review --accept` with a
+corrected span is the mechanism.
+
+Recorded alongside it, a latent asymmetry that did not cause this but could: `_footing_schedules`
+derives a table's `dimensions` only from keys present in each row's own conditions, while
+`_finish` unions the fuller set `_translate_conditions` returns. Where every row wildcards a
+dimension, that dimension leaves the declared domain entirely. Post-G74 the coverage answer
+is the same either way, because a wildcard row genuinely covers every point — but a table
+that does not *declare* `hvhz` in its domain says something different to Planning than one
+that declares it and covers it.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and
