@@ -444,11 +444,18 @@ def _fraction(num: str) -> float | None:
 def _canonical_unit(unit: str) -> str | None:
     """`"foot"`/`"'"`/`"\u2019"` -> `"ft"`, `"inch"`/`'"'`/`"\u201d"` -> `"in"`.
 
-    G63: `unit_normalized` must name the SOURCE's stated unit, the same
-    invariant every other fact type holds (`parameters._unit_of()` reads it
-    on that assumption) -- not "the unit `value_normalized` happens to be
-    expressed in", which for this fact type is always inches regardless of
-    what the source said. `_to_inches` converts; this only labels.
+    A pure label for `_to_inches`'s own branching -- shared so the two
+    cannot drift apart, nothing more. It does NOT feed `unit_normalized`.
+    An earlier version of this function did, on the reasoning that
+    `unit_normalized` ought to name the SOURCE's stated unit; an
+    adversarial review caught that this contradicts `_normalise`'s own
+    feet-conversion branch a few functions up, which converts a
+    feet-stated `footing_depth_in` with `value * 12.0` and STILL labels it
+    `"in"` -- the codebase's real, existing invariant is "`unit_normalized`
+    names the unit `value_normalized` is expressed in", not "the unit the
+    source stated". `unit_original` is where the source's own unit already
+    lives, for every fact type, verbatim; that column needed no fix. See
+    `state-and-gaps.md` G63's correction.
     """
     u = unit.lower().rstrip(".")
     if u in ("foot", "feet", "ft", "'", "\u2019"):
@@ -491,7 +498,7 @@ def _stock_from_triples(text: str) -> list[dict]:
         out.append({
             "value_original": f"{m.group('num')} {m.group('unit').rstrip('.')}",
             "value_normalized": inches, "unit_original": m.group("unit"),
-            "unit_normalized": _canonical_unit(m.group("unit")), "conditions": cond,
+            "unit_normalized": "in", "conditions": cond,
             # The part is read off the SKU line itself; the colour, where present,
             # is a suffix the publisher wrote. Both are the document speaking.
             "condition_basis": "stated"})
@@ -540,7 +547,7 @@ def stock_lengths(text: str | None, *, element_type: str | None = None,
     # true, rather than `assumed`, which would claim an inference.
     out.append({"value_original": f"{lexeme} lengths",
                 "value_normalized": inches, "unit_original": m.group("unit"),
-                "unit_normalized": _canonical_unit(m.group("unit")),
+                "unit_normalized": "in",
                 "conditions": {"colour": primary_colour} if primary_colour else {},
                 "condition_basis": "stated" if primary_colour else "unexamined"})
     for a in alts:
@@ -549,7 +556,7 @@ def stock_lengths(text: str | None, *, element_type: str | None = None,
             continue
         out.append({"value_original": f"{a.group('num')} {a.group('unit').rstrip('.')} rails",
                     "value_normalized": alt_in, "unit_original": a.group("unit"),
-                    "unit_normalized": _canonical_unit(a.group("unit")),
+                    "unit_normalized": "in",
                     "conditions": {"colour": a.group("colour")},
                     "condition_basis": "stated"})
     return out

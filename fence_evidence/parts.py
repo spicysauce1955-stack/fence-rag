@@ -46,12 +46,19 @@ misattribution above. `unit_original` is not subject to this: verified
 correct for all 62 rows across every group (`in.`, `'`, `foot`, `’`, `"`).
 `_stock_length_quantity` reads it, never `unit_normalized`.
 
-**The extractor was fixed separately** (`facts._canonical_unit`, closed
-2026-09-03) -- `unit_normalized` is now correct corpus-wide for this fact
-type too. This module still reads `unit_original` rather than
-`unit_normalized`: doing so cost nothing when the fix landed, and there is
-no reason to grow a dependency on a column this module never needed in the
-first place. See `state-and-gaps.md` G63.
+**A same-session attempt to "fix" `unit_normalized` at the extractor was
+itself wrong, caught by adversarial review, and reverted.** The instinct
+was to make `unit_normalized` name the source's unit for this fact type
+too; that contradicts `facts._normalise`'s own feet-conversion branch,
+which converts a feet-stated `footing_depth_in` and STILL labels it
+`"in"` -- the codebase's real, existing invariant is "`unit_normalized`
+names the unit `value_normalized` is expressed in", full stop, for every
+fact type, stock lengths included. Reusing that column for the source's
+unit would have made `(value_normalized, unit_normalized)` self-
+contradictory the moment anything reads them as a pair (`reports.
+_to_mm` does, for every OTHER fact type). This module's own choice --
+read `unit_original`, never `unit_normalized` -- was correct from the
+start and needed no change. See `state-and-gaps.md` G63.
 """
 from __future__ import annotations
 

@@ -2621,23 +2621,42 @@ found" signal) is named but not fixed — a larger, CLI-wide pattern that
 deserves its own pass, not a rushed one bolted onto this session.
 
 **Fixed — the named `resolve`/`document`/`search --element-type` pattern
-itself, closed 2026-09-03.** `document`/`resolve` on an identifier that
-matches nothing now print `{"error": "no document matching ..."}` and
-exit 1, instead of `null` and exit 0 — the same ambiguity `fetch`'s fix
-closed (a script cannot tell "found nothing to say" from "found nothing").
-`search --element-type` has no fixed enum to validate against — matching
-`fetch --subset`'s own reasoning, an unknown value is now checked against
-`SELECT DISTINCT element_type FROM elements` in the live store rather
-than a list hardcoded here, so it tracks whatever `extract.py` actually
-assigns rather than drifting stale. An unrecognised value is bad input
-(exit 2, `fetch`'s own convention); a *recognised* type with zero matches
-for a given query stays exit 0 — that is a normal empty result, not bad
-input, and `tests/test_cli_not_found.py` pins the distinction explicitly
-so the two cannot be conflated later. `page`/`region`/`context` share the
-identical `dict | None` + silent-`null` shape and were deliberately left
-alone — not in the pattern this gap named, and widening to them here
-would be scope creep on an unrequested pass. 1151 tests (6 new), same one
-pre-existing error (G58), 1 expected failure.
+itself, closed 2026-09-03, then widened to `page`/`region`/`context` and
+corrected once more after an adversarial review.** `document`/`resolve` on
+an identifier that matches nothing now print `{"error": "no document
+matching ..."}` and exit 1, instead of `null` and exit 0 — the same
+ambiguity `fetch`'s fix closed (a script cannot tell "found nothing to say"
+from "found nothing"). `search --element-type` has no fixed enum to
+validate against — matching `fetch --subset`'s own reasoning, an unknown
+value is checked against the live store rather than a list hardcoded here.
+An unrecognised value is bad input (exit 2, `fetch`'s own convention); a
+*recognised, searchable* type with zero matches for a given query stays
+exit 0 — that is a normal empty result, not bad input.
+
+The first cut validated `--element-type` against `SELECT DISTINCT
+element_type FROM elements`, the canonical table — wrong, caught by review:
+the filter itself (`retrieval.FILTER_COLUMNS["element_type"] ==
+"u.element_type"`) is applied to `retrieval_units`, the projection, and
+`heading`/`figure` are real `elements.element_type` values structurally
+excluded from it (`store.UNIT_EXCLUDED_TYPES`, and figures carry no unit at
+all — 20,925 of 81,794 elements are headings alone, per the projection note
+above). Validating against `elements` let both through and then returned
+`[]` forever, for every query — the exact silent-forever-empty failure this
+fix exists to remove, just moved one column over. Fixed: validated against
+`retrieval_units` instead, and switched to a read-only connection (matching
+`refs`/`gc`'s own guards — this is a lookup, not a write).
+
+The first cut also framed itself as covering "a larger, CLI-wide pattern"
+while leaving `page`/`region`/`context` — which share the identical `dict |
+None` + silent-`null` shape — untouched, deliberately scoped out as "not in
+the pattern this gap named." Review called that framing an overstatement of
+what had actually landed, and the resulting asymmetry a live trap for a
+script author who reasonably infers from `document` exiting 1 that `region`
+will too. Extended the same fix to all three; each was one `if x is None`
+check, following the identical pattern. `tests/test_cli_not_found.py` now
+covers all five accessor commands and pins the `heading`/`figure`
+regression explicitly. 1157 tests, same one pre-existing error until G58
+closed it, 1 expected failure.
 
 **CLAUDE.md corrected**, not just the code: "FROZEN and RATIFIED at v1.1"
 → v1.3, "3 of 44 crops reviewed" → 37 of 44, the removed
@@ -2907,27 +2926,65 @@ pins the exact number a `unit_normalized`-trusting implementation would have
 gotten wrong, so a regression reads as a factor-of-twelve failure, not a
 close miss.
 
-**The extractor itself, and the 31 other feet-stated rows, are now also
-fixed — closed 2026-09-03, independently of the Planning obligations this
-gap started under.** `facts.stock_lengths()` and `_stock_from_triples()`
-called a new `_canonical_unit()` in place of the hardcoded `"in"`; it
-returns `"ft"`/`"in"` from the same word/glyph lists `_to_inches` already
-matched against (refactored to share them, so the two cannot drift apart
-again). `[measured]` after `cli facts --extract` re-ran against the live
-store: all 62 `stock_length_in` facts preserved (204 fact reviews replayed,
-0 orphaned), the 33 feet-stated rows now read `unit_normalized: "ft"`, the
-29 inch-stated rows still read `"in"`. `parts.py` was untouched — it already
-read `unit_original` directly — and `build_parts()` reproduces the exact
-same two published values (4876800 / 3657600 milli-mm) byte-for-byte, so no
-snapshot re-cut was needed; `refs --verify` (2282/2282) and `snapshot
---verify-stored` (4/4) both stayed clean. `tests/test_stock_length.py` gained
-`TestUnitNormalizedNamesTheStatedUnit` (6 cases) pinning the canonicalization
-itself, and the pre-existing `test_the_plain_statement` — which had asserted
-the bug's own output as correct — now asserts `"ft"`. 1145 tests, same one
-pre-existing error (G58's crop gap), 1 expected failure — no regression from
-this change. The trap for the next caller is gone: `unit_normalized` now
-means the same thing for `stock_length_in` that it means for every other
-fact type.
+**An attempt to fix the extractor itself, on 2026-09-03, was wrong — caught
+by an adversarial review before it stood, corrected the same day.** The
+first cut made `facts.stock_lengths()`/`_stock_from_triples()` write the
+SOURCE's own canonicalized unit into `unit_normalized` (a new
+`_canonical_unit()` in place of the hardcoded `"in"`), re-ran `cli facts
+--extract` against the live store, and — wrongly — declared the corpus-wide
+defect closed. It was not a fix: it inverted the defect. `facts._normalise`
+(used for `footing_depth_in`/`post_spacing_in`/`footing_diameter_in`) has
+its own feet-conversion branch, `value * 12.0`, that converts a feet-stated
+reading to inches and STILL labels the result `unit_normalized: "in"` —
+proof, in code already live everywhere else, that this platform's real
+existing invariant is *"`unit_normalized` names the unit `value_normalized`
+is expressed in"*, never *"the unit the source stated"*. The paragraph two
+above already said this correctly; the fix contradicted its own module's
+diagnosis. Making `unit_normalized` track the source's unit for
+`stock_length_in` specifically would have made `(value_normalized,
+unit_normalized)` self-contradictory the instant anything reads them as a
+pair — which `reports.py`'s `_to_mm(value_normalized, unit_normalized)`
+does, for every OTHER fact type, and would have for this one too the
+moment `stock_lengths()` grew `value_alternates` support (a natural next
+step for a module whose own docstring already discusses obligation 4). A
+foot-stated row would have published as `value_normalized: 192.0,
+unit_normalized: "ft"` — read together, 192 **feet**, not the 16 feet the
+source actually said.
+
+**Reverted the same day**, back to `unit_normalized: "in"`, unconditionally,
+for every `stock_length_in` row — matching the codebase's one real
+invariant instead of inventing a second one. `_canonical_unit()` is kept,
+but only as a label for `_to_inches`'s own conversion branching (DRY,
+behaviour-neutral, independently confirmed complete against every glyph/word
+`_TRIPLE`/`_SUPPLIED`/`_ALT_COLOUR` can produce); it no longer feeds
+`unit_normalized`. `cli facts --extract` re-ran again to restore the live
+store: `[measured]` all 62 `stock_length_in` facts read `unit_normalized:
+"in"` again, `unit_original` unchanged and still correct for all 62 rows
+across every group. `parts.py` was never touched by either version — it
+reads `unit_original` directly and always did — so `build_parts()`
+reproduces the same two published values (4876800 / 3657600 milli-mm)
+byte-for-byte across both the wrong fix and its correction; `refs --verify`
+(2282/2282) and `snapshot --verify-stored` (4/4) stayed clean throughout.
+`tests/test_stock_length.py`'s `TestUnitNormalizedLabelsValueNormalizedNotTheSource`
+pins the corrected invariant explicitly, replacing the version that had
+pinned the wrong one. 1157 tests (the CLI not-found fix below adds more in
+the same pass), same one pre-existing error until G58 closed it, 1 expected
+failure.
+
+**What actually closes the risk G63 named** — a future caller trusting
+`unit_normalized` as the source's unit — **is unchanged from before this
+whole detour: read `unit_original`.** That column already carries the
+source's own unit, verbatim, for every fact type, and always did; nothing
+here needed fixing to make that true. The trap was in `parameters._unit_of()`'s
+docstring ("the unit a fact is stated in") reading `unit_normalized` first
+and `unit_original` only as a fallback — misleading, but not live, since
+`quantity()` never processes regex-derived stock-length facts (`FACT_QUERY`
+filters to `from_candidate_id IS NOT NULL`, promoted-table facts only).
+Worth a real follow-up, not done here: either retitle `_unit_of`'s
+docstring to say what it actually returns, or swap its candidate order so
+`unit_original` is tried first — but that is a `parameters.py` change
+serving a currently-unreached path, not something this fact type's own
+data needed.
 
 ---
 
