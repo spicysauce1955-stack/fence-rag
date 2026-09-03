@@ -3275,6 +3275,285 @@ and still short, so it stays opt-in.
 
 ---
 
+## 3e. Update, 2026-09-03 — adversarial audit of published data
+
+Five adversaries were dispatched over the extracted, digested and published data, each
+briefed to falsify rather than confirm and to verify against the source PDFs rather than
+against this repository's own prose. **Two completed; three died on an account session
+limit having produced nothing** — the facts/units sweep, the provenance-chain audit and the
+tables/dataset audit are therefore **not done** and must not be read as clean.
+
+### G66 — obligation 14's published value rests on a sentence the current edition deleted
+
+`[measured]` and independently confirmed against the PDFs. **This is a defect in data that
+has already crossed the boundary.**
+
+`shared/bt-rail-pr-3rail-color` publishes `nominal_length_mm = 3657600` milli-mm — 12 ft —
+for the Blend/CertaGrain Post & Rail rail. The arithmetic is right and the citations
+resolve. The problem is what they cite:
+
+| | |
+|---|---|
+| cited editions | `bufftech-install-guide-e-2201cts` (2023-10) and siblings |
+| the sentence relied on | *"Standard rails are supplied in 16 foot lengths for White (12 foot rails for Blend products)"* |
+| the successor edition, **in the same snapshot** | `bufftech-fence-installation-guide-2024.pdf`, `2024-07`, sha `71c42837fd50` |
+| what the successor says on p40 | the section is renamed CertaGrain → **TimberGrain** and **that sentence is deleted** |
+| what the successor says on p38 | *"Standard rails are supplied in 16 foot lengths"* — **unconditional, no White/Blend split** |
+| occurrences of "foot lengths" anywhere in the 2024 edition | **one**, the unconditional 16 |
+
+So the manufacturer's current guide states 16 ft for all Post & Rail rails, and this
+platform publishes 12 ft for the Blend variant on the strength of an edition its own
+author replaced.
+
+**Why nothing caught it, which is the actual defect.** Publishing from a superseded source
+is not forbidden — `contract.md` §1.4 exists for exactly that, and 40.7% of promoted facts
+already cite a superseded document. What is forbidden is publishing it *unmarked*, because
+Planning applies the source policy and cannot apply it to a document this platform calls
+`unknown`. `[measured]`:
+
+* **0 `superseded_by` edges touch any Bufftech installation guide.** All 24 edges in the
+  store cover NOAs — 23 `hvhz_noa` plus one `unspecified`. `relations.py` detects
+  supersession by approval number, and an installation guide has none, so **the entire
+  install-manual half of the corpus has no supersession detection at all.** That is 70 of
+  144 documents.
+* **132 of 144 documents are `version_status: "unknown"`**; only 3 are `active` and 9
+  `superseded`. For this document the curated metadata literally reads
+  `2024-07 (BOL-Bufftech-and-Simtek-Instructions-4-24)` against a
+  `version_status_basis` of *"no explicit version marker in curated metadata"*.
+
+At `on_center_in: 96` the difference between 12 ft and 16 ft is a rail spanning 1.5 bays
+versus 2 — a different cut plan and a different rail count on every Blend Post & Rail job.
+Obligation 14's stated purpose is that Planning derives continuity from stock length
+against spacing, so this is the value doing real work.
+
+**Not fixed in this session, deliberately.** Three courses exist and choosing between them
+is a curation decision, not a code change: re-cut the value against the current edition;
+keep it and publish the supersession so Planning's policy can see it; or withdraw it to a
+`Gap` citing both editions. What *is* clear is that dated editions of the same guide must
+carry a `superseded_by` edge, and that a `version_status_basis` claiming no marker exists
+where the metadata holds one is not honest under obligation 6.
+
+### G67 — the step splitter's repair proposal measured precision and never measured recall
+
+`[measured]`. `steps.py::_propose_repair` stakes its confidence model on *"all 249
+newline-form repairs are real damage"*. That is a **precision** claim, and recall was never
+measured: `SPLIT_CAP_RE`'s `[a-z]{2,}` requires a two-letter tail, so **`T\no lower a
+post` and `B\ne sure to call underground` are invisible to it** — 20 real newline-form
+damage sites silently dropped, a 7.1% recall hole in the class the module says it trusts
+absolutely.
+
+The corollary is worse than the miss. `docs/assembly-step-design.md` §2 recorded *"damaged
+words in the text layer on p8 | 11"* as a `[measured]` figure. The real count is **12**.
+The 11 was the number of repairs the regex emitted, relabelled as a property of the page —
+a measurement of the instrument reported as a measurement of the world, and the one word it
+cannot see is exactly the one it did not count.
+
+### G68 — the 44-vs-49 bullet discrepancy is resolved: the ratified audit is wrong
+
+`docs/assembly-step-design.md` §2 recorded the disagreement and declined to chase it. It
+has now been chased. **44 is correct**, reproducible six ways: `pdftotext` in all four
+modes, the store, and a visual count of a 150-dpi render matching the store element by
+element (`5,3,5,5,6,3,2 | 4,3,5,1,2`). Every visible bullet has a text-layer counterpart;
+none is vector art.
+
+**49 is reproducible by no counting rule at all.** `•` = 44; `•` plus the lettered labels,
+the `Note:` and the `*Caution` = 48; `•` plus `-` sub-bullets = 55; every leader-led row
+including headings = 71. It is not another page (no page in the guide has 49) and not the
+OCR'd twin.
+
+`audit/01-audit-response.md` §2.4 writes it as `13 panel | 11 bay | 25 neither`, summing to
+49 with `25 = 51%` computed against it — so it is not a typo in a total, the error is
+inside the classification, and §5 of the design records that the working file holding that
+classification was never committed. An unverifiable count therefore sits in a **signed,
+ratified document delivered to Planning**, beside the words *"transcribed bullet by
+bullet"*. The 44–51% headline that N10 was argued from inherits the error, though not
+enough to change N10's conclusion — 25 of 44 is still 57%.
+
+The audit is history and is not being rewritten. This entry is the correction of record.
+
+### G69 — two structural links are printed on the page and exist in no column
+
+`[measured]` on the slice page, and neither is fixed.
+
+**A footnote is orphaned from the branch it governs.** Candidate 71 is
+`* Caution – In climates that experience freeze-thaw cycles, this installation method
+could result in post cracking over time. This would not be covered by the warranty.` It
+applies to **method b only**, whose label reads `b. Concrete and rebar*`. The only trace
+of the link is a bare `*` inside a `text_raw`. **A consumer publishing branch b's six
+steps ships a concrete-and-rebar procedure with the warranty exclusion silently
+detached** — the single worst thing in the slice, because the omission is the kind that
+costs somebody money rather than merely being wrong.
+
+**A `-` sub-bullet outside a lettered branch has no parent.** Candidate 9,
+`- Hole size for 4x4 posts = approximately 10"`, `depth=1`, `branch=NULL`, qualifies
+candidate 8, `Dig holes 30" deep or to frost line`. Branch sub-steps get a `branch`
+column; this one gets nothing, so parentage is recoverable only as "the previous depth-0
+sibling", which is a convention rather than data.
+
+Both want a column — a footnote marker and a parent — and both are deferred rather than
+guessed, because a wrong link is worse than an absent one.
+
+**Also left for the reviewer rather than another regex: 5 of the 54 steps are not
+actions.** The prohibition is now typed (`Never strike the PVC post…` → `prohibition`,
+which is what the design's §6 worked example always said). These five remain:
+
+| Candidate | What it actually is |
+|---|---|
+| `Assembly may be continued by installing all bottom rails first, or one section at a time` | an ordering **permission** — and the contract's own example of a guide denying its print order |
+| `It is critical that gate hinge and latch posts are solid… Two methods are available:` | rationale plus a branch header |
+| `For complete details, see gate installation instructions in hardware box` | a cross-reference to another document |
+| `Tabs will recoil to hold rail in post` | resulting behaviour, not an action |
+| `Hole size for 4x4 posts = approximately 10"` | a dimension |
+
+`segment_kind` classifies **structure** — what kind of line this is — not semantics. A
+person decides whether a line is an `AssemblyStep`, which is what §5 always said and what
+the classification proposer (still unbuilt) will offer a starting point for.
+
+### G70 — `unit_original` is not the reliable source-unit column after all
+
+`[measured]` 2026-09-03, run by hand after all three redeployed adversaries died on API
+529s. **This is the facts/units audit §3e recorded as not done; it is now done, and the
+provenance-chain and ParameterTable audits remain outstanding.**
+
+`CLAUDE.md` and G63 both say: *"`unit_original`, unchanged throughout, is and always was
+the reliable source-unit column."* That is the claim `parts.py::_stock_length_quantity`
+rests on — reading `unit_original` is the whole G63 workaround that stopped 16 ft
+publishing as 406,400 milli-mm instead of 4,876,800. **The claim is false, for three
+facts.**
+
+| fact | `value_original` | `unit_original` | what the source says |
+|---|---|---|---|
+| 21708 `post_spacing_in` | `10 ft.\n(3.05 m) on center` | **`in`** | feet |
+| 21841 `footing_diameter_in` | `2'dia.` | **`in`** | feet |
+| 21849 `footing_diameter_in` | `2'dia.` | **`in`** | feet |
+
+`value_normalized` is **correct in all three** — 120.0 and 24.0 inches respectively — so no
+number is wrong. What is wrong is the column that names the source's unit, in the direction
+that would matter: a consumer trusting `unit_original` to say what the page said gets
+`inches` for a page that printed feet.
+
+**Bounded, and none of it published.** All three have `from_candidate_id IS NULL`, none is
+promoted, and none of their elements appears in the current snapshot. Two are `flagged`
+(already in the OCR review queue) and one is `extracted`.
+
+**What this changes.** The workaround is still right — `unit_original` is right for all 62
+`stock_length_in` facts, which is the case it was built for — but the *reasoning* recorded
+in G63 and CLAUDE.md is stronger than the evidence. "Reliable" should read "reliable for
+`stock_length_in`, and wrong in 3 of 1,826 facts elsewhere." A reader who took the
+universal claim at face value and reused `unit_original` for a new fact type would inherit
+a defect nobody had bounded.
+
+**The rest of the facts audit, measured and clean:**
+
+* **Round-trip of every numeric fact.** 62 of 62 `stock_length_in` convert exactly
+  (0 mismatches), and 663 other numeric facts round-trip with only the 3 above deviating —
+  and those deviate because the source unit is mislabelled, not because the arithmetic is
+  wrong. **No factor-of-12, ×25.4 or ×304.8 error exists anywhere in the fact layer.**
+* **`unit_original` vs `unit_normalized` per type.** `stock_length_in` is the ONLY type
+  where they differ, 62 of 62 — exactly as G63 describes, and every other type is
+  identical on both. The G63 defect is contained to the type it was found in.
+* **Duplicate assertions.** 52 groups share `(element, fact_type, value)`, but 17 of those
+  are legitimate: one table cell genuinely asserts the same value under several condition
+  combinations — `footing_diameter_in 12.0` appears 4× from one element under
+  `fence_height` × `exposure_category`, which is correct table data, and its conditions
+  carry `hvhz_applicability: "no bracket printed"`, so G53's fix is working in the store.
+  **35 groups (73 rows) are identical on conditions too** and are real duplication: 33
+  `reinforcement`, 1 `exposure_category`, 1 `stock_length_in`. **0 are promoted and 0 are
+  published.** The `stock_length_in` one (`106.0`, `{"part": "post"}`, ×2) is worth naming
+  because it is in the type that does publish, and `_stock_length_evidence` takes its value
+  from the first row by `fact_id` while citing every row — agreeing duplicates are
+  harmless, but the multi-row case is not hypothetical in that type.
+
+### G71 — 125 dataset paths point outside the repository, and the guard cannot see it
+
+`[measured]` 2026-09-03, found by an adversarial audit and verified by hand. **This is the
+"prove it on a clean checkout" failure in its purest form.**
+
+`local_path` entries across eleven tracked dataset files — six per-manufacturer, three
+structural, and the generated `master-dataset.json` — are absolute paths rooted at
+`/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/…`, a **different checkout on
+one machine**. 250 of 451 `local_path` values overall; 125 of 153 in `master-dataset.json`
+alone.
+
+| | |
+|---|---|
+| `manuals/` files on disk | 140 |
+| referenced paths after `build_master.py`'s `relpath` | 258 |
+| …of which **escape the repository** (`../play/…`) | **125** |
+| `Missing (broken local_path)` reported | **0** |
+| `Files on disk but NOT referenced` reported | **0** |
+
+**Both guard numbers are 0, and both are meaningless here.** `CLAUDE.md` names those two
+lines as the ones that matter after a rebuild. They pass only because
+`/home/user/Workspace/play/vinyl-fence-bom-pipeline/` still exists on this machine, so
+`os.path.isfile(BASE + "/../play/…")` normalises back onto a real file. On a fresh clone —
+the documented path, and the one the distribution design assumes — those 125 resolve to
+nothing.
+
+`cli dataset --verify` cannot see it either, and is not supposed to: it SHA-256s the 16
+source files as opaque bytes and answers "unchanged since baseline", not "internally
+consistent" or "portable". It reports `{"files": 16, "unchanged": true}` while every one of
+these paths is machine-local.
+
+**The two generated artifacts already disagree.** `data/documents-index.json` carries the
+correct repo-relative `manuals/certainteed-bufftech/bufftech-fence-installation-guide-2024.pdf`
+for the same document `master-dataset.json` records absolutely. Both are generated by the
+same script from the same inputs, and they were both introduced in the initial import — so
+the index was generated from a state the sources no longer match.
+
+**Why it matters beyond tidiness.** `CLAUDE.md` requires re-running `build_master.py` after
+any edit to a per-manufacturer or structural JSON. Doing that today rewrites 125
+`local_path` values to `../play/vinyl-fence-bom-pipeline/…` — a path escaping the repo —
+and commits them. Every manifest row records the SHA-256 it was built from, so the evidence
+system is insulated; the dataset itself is not.
+
+Not fixed here: correcting 250 paths across eleven committed files is a mechanical change,
+but it rewrites the hand-researched dataset and re-baselines `data-digests.json`, which is
+a decision about curated input rather than a bug fix.
+
+### G72 — supersession has holes the NOA lineage hides, and `ref_id` can collide on scanned pages
+
+`[measured]`, from the provenance audit. Two findings, plus one significant clean result.
+
+**Clean, and worth stating plainly: no published citation points at the wrong region.** The
+audit resolved every one of the **427 published `ref_id`s whose element comes from a PDF
+text layer** and checked word-centre containment against `pdftotext -bbox-layout`, plus
+rendered page crops for 9 OCR-sourced citations. No mismatch. All 24 `superseded_by` edges
+point the right way — `from` is the older document in every case, consistent with both
+dates and Miami-Dade approval ordering. Closure is complete: all 75 `content_hash` values
+distinct, every `belongs_to`, `superseded_by`, `also_filed_as` and `contributing_sources`
+reference resolving. ~91 OCR-sourced citations were not individually inspected, so this is
+thorough rather than exhaustive.
+
+**A document the corpus itself calls superseded has no relations at all.**
+`doc-79c89a8bd572` — Miami-Dade NOA 22-0217.05, whose curated title literally reads
+*"(superseded, expires 2027-05-25)"* and whose `version_status` is `superseded` — carries
+**zero relations of any kind**, in a lineage that is otherwise densely cross-linked. The
+store says it is superseded and cannot say by what. Two catalogue pairs are in the same
+position: `bufftech-catalog-brochure-2009` and `bufftech-catalog-2014` share product code
+`40-40-70610` five years apart with no edge, as do the Showtech PVC catalogues for 2022 and
+2024. This is the same shape as G66 one level up: supersession is detected by approval
+number, so anything without one falls through.
+
+**`ref_id` collides on scanned pages, and the colliding elements differ.** `ref_id` is
+`f(sha256, page_no, bbox)` and omits the element kind — a gap `refs.py` §5.2 documents as
+harmless, on the reasoning that colliding elements are duplicate copies. `[measured]`: 9,930
+ids cover more than one element, and **67 of those collisions have genuinely different
+text**. They concentrate where a whole-page bbox is shared, e.g. `doc-32e36a07ab44` p4,
+`ref_id 5a16c2e0ef675407`, bbox `[0, 0, 1224, 792]`:
+
+| element | kind | text |
+|---|---|---|
+| `element-f6ea6bf243-0118` | `ocr_supplement` | `eee TARLE ead 937° LJ wt 333-0569 Davis, withthe 13 Contre…` |
+| `element-f6ea6bf243-0119` | `drawing` | `SEE TABLE 1 ON SHEET 8 MAXIMUM POST SPACING \| NOT TO EXCEED 966”…` |
+
+Two unrelated texts, one id. **None of the 67 is currently cited**, so nothing published is
+wrong — but the docstring's justification is falsified, and the next citation minted on one
+of these NOA drawing pages is the one that breaks. Those pages are exactly the corpus's
+highest-value, hardest-to-read content (G2), so it is not an unlikely place to cite next.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

@@ -77,8 +77,11 @@ computing them surfaced a corpus-wide `unit_normalized` defect (G63, 33 of 62
 number twelve times too small. A same-day attempt to fix it at the extractor was
 itself wrong — it made `unit_normalized` name the source's unit, contradicting this
 platform's real invariant that the column always names `value_normalized`'s unit
-instead — caught by adversarial review and reverted; `unit_original`, unchanged
-throughout, is and always was the reliable source-unit column. Still fully
+instead — caught by adversarial review and reverted. `unit_original` is the column to
+read for a source's unit, and it is right for all 62 `stock_length_in` facts — but
+**"always reliable" is overstated and G70 bounds it**: 3 facts elsewhere say `in` for a
+page that printed feet. Their values are correct and none is published, but do not reuse
+`unit_original` for a new fact type without re-measuring it. Still fully
 unbuilt: `FenceModel`, `Procedure`, `Rule`,
 `Combination`. `docs/state-and-gaps.md` G62/G63 has the full account. Curation level 2 is
 **no longer thin as of 2026-08-31**: a person has reviewed 37 of 44 flagged crops (up
@@ -129,6 +132,8 @@ python3 -m fence_evidence.cli review --accept CROP --reviewer NAME   # record a 
 python3 -m fence_evidence.cli review --export    # the durable review ledger (G49)
 python3 -m fence_evidence.cli review --import PATH --apply   # replay it into this store
 python3 -m fence_evidence.cli fact-review --queue    # 266 OCR-flagged facts waiting
+python3 -m fence_evidence.cli steps --propose --document PATH [--page N]  # split bullets into step candidates
+python3 -m fence_evidence.cli steps --queue          # step candidates waiting for a person
 python3 -m fence_evidence.cli snapshot --verify-stored   # do PUBLISHED snapshots still pass?
 python3 -m fence_evidence.cli backfill-spans --apply     # recover merged cells (G41)
 python3 -m fence_evidence.cli serve --token TOK  # the API behind Planning's screens
@@ -162,8 +167,15 @@ about the files that happen to be there.
 The two `scripts/build_*.py` dataset builders are pure-stdlib, idempotent, and safe to re-run; they
 overwrite their outputs. They print a reconciliation summary — the lines that matter are
 `Missing (broken local_path)` and `Files on disk but NOT referenced` (orphans), both of which should
-be **0**. Any edit to a per-manufacturer or structural JSON requires re-running the corresponding
-builder and committing the regenerated output; `master-dataset.json`, `china-dataset.json` and the
+be **0**. **They are 0 today and both are currently meaningless** — 250 of 451 `local_path` values
+are absolute paths into a *different checkout on this machine*
+(`/home/user/Workspace/play/vinyl-fence-bom-pipeline/…`), 125 of them escaping the repository root
+after `relpath`, and the guard passes only because that stray directory happens to exist here. On a
+fresh clone they resolve to nothing. `cli dataset --verify` cannot see it either: it hashes the 16
+source files as opaque bytes and answers "unchanged", not "portable". Read `docs/state-and-gaps.md`
+G71 before trusting either number, and **before re-running a builder** — doing so today rewrites
+those 125 paths to `../play/…` and commits them. Any edit to a per-manufacturer or structural JSON
+requires re-running the corresponding builder and committing the regenerated output; `master-dataset.json`, `china-dataset.json` and the
 two `*documents-index.json` files are generated artifacts, never hand-edited. Re-running them can
 change the curated metadata the evidence system reads, which is why every manifest row records the
 SHA-256 it was built from.
@@ -315,6 +327,14 @@ Things that will bite you if you don't know them (all measured, see the corpus a
 - **`retain_until` is deliberately outside the snapshot hash.** It moves with the clock, so
   hashing it would mean two builds over identical knowledge never matched. What exactly belongs
   in "the canonical member list" is not fully specified; that is a reading, not a quote.
+- **`segment_kind` on a `step_candidate` classifies STRUCTURE, not semantics.** `step` means
+  "this is a bullet that reads like an instruction", not "this is an `AssemblyStep`". On the
+  slice page 5 of 54 such rows are an ordering permission, a rationale, a cross-reference, a
+  resulting behaviour and a dimension — a person decides, and `docs/state-and-gaps.md` G69
+  lists them. `prohibition` is separate because the design's worked example says
+  `Never strike the PVC post…` publishes as a `Warning`, and typing it `step` was a real
+  defect. Note the ordering trap it exposed: the damage HIDES the prohibition, because
+  `N\never` flattens to `N ever`, so the kind must be decided on the repaired reading.
 - **`crops.py` is wired as of 2026-08-28.** `cropcache.py` renders through it,
   `sourcerefs.py` builds the Discovery read model on top, and `api.py` serves
   `GET /source-refs/{id}` and `POST /source-refs:batch` behind a bearer allowlist.
