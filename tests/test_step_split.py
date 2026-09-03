@@ -204,3 +204,119 @@ class TestSegmentIsAValue(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDefectsFoundByAdversarialValidation(unittest.TestCase):
+    """Eight defects found by running the splitter over all 6,105 `list`
+    elements rather than the one page it was written against. Spans, coverage
+    and crash-safety held everywhere — every failure was in what gets
+    *recognised*."""
+
+    def test_an_uppercase_branch_is_a_branch(self):
+        """123 elements print `A.`/`B.` where p8 prints `a.`/`b.`, and 118 of
+        them collapsed into a single undifferentiated prose blob. The same
+        gate-post instruction appears in the corpus in both cases; the
+        lowercase copy segmented perfectly and the uppercase copy presented two
+        MUTUALLY EXCLUSIVE methods as one sequential procedure. A consumer
+        reading that tells an installer to do both."""
+        block = ("• Two methods are available:\n"
+                 "A. Aluminum gate post stiffener\n"
+                 "- Slide aluminum gate stiffener inside hinge\n"
+                 "B. Concrete and rebar*\n"
+                 "- Use two pieces of rebar in each post")
+        segs = split_block(block, text_source="pdf_text_layer")
+        self.assertEqual(kinds(segs), ["step", "branch", "step", "branch", "step"])
+        self.assertEqual([s.branch for s in segs], [None, "A", "A", "B", "B"])
+
+    def test_a_numbered_instruction_is_not_a_section_heading(self):
+        """`SECTION_RE` returned the whole block as one `section` and split
+        nothing. 233 of 783 such blocks are instruction-shaped, so whole
+        documents that number their procedure instead of bulleting it produced
+        zero steps."""
+        segs = split_block("3. Insert bottom rail into bottom post route holes.",
+                           text_source="pdf_text_layer")
+        self.assertEqual(kinds(segs), ["step"])
+
+    def test_a_short_numbered_title_is_still_a_section(self):
+        for title in ("1. Getting Started", "2. Dig Holes", "3. Install First Post"):
+            self.assertEqual(kinds(split_block(title, text_source="pdf_text_layer")),
+                             ["section"], title)
+
+    def test_a_heading_broken_by_the_split_capital_is_still_a_heading(self):
+        """The slice page prints `10. H\\nang Gate/Install Hardware` — the
+        newline is the pdftotext artifact, not a line break. Judging
+        heading-ness on the raw text made the damage decide the classification
+        and dropped it to `prose`."""
+        segs = split_block("10. H\nang Gate/Install Hardware",
+                           text_source="pdf_text_layer")
+        self.assertEqual(kinds(segs), ["section"])
+
+    def test_a_section_still_gets_its_repair_proposed(self):
+        """`10. H ang Gate/Install Hardware` is on the slice page and was
+        getting `repair=None`, because the section path returned early."""
+        segs = split_block("10. H ang Gate/Install Hardware",
+                           text_source="pdf_text_layer")
+        self.assertEqual(segs[0].repair, "10. Hang Gate/Install Hardware")
+
+    def test_a_newline_split_is_higher_confidence_than_a_space_split(self):
+        """The separator is the signal, and flattening destroyed it. Measured:
+        all 249 newline-form repairs are real damage; of 71 space-form ones, 17
+        are the English article `A` in `A cut panel bracket` and `A template can
+        speed attachment`. 94.7% precision overall, ~100% on the newline form."""
+        newline = split_block("• T\namp concrete in hole", text_source="pdf_text_layer")
+        self.assertEqual(newline[0].repair, "Tamp concrete in hole")
+        self.assertEqual(newline[0].repair_confidence, "high")
+        # `I nsert` is the space form and real damage — 48 occurrences — so it
+        # is still proposed, just not with the same confidence behind it.
+        space = split_block("• I nsert post in hole", text_source="pdf_text_layer")
+        self.assertEqual(space[0].repair, "Insert post in hole")
+        self.assertEqual(space[0].repair_confidence, "low")
+
+    def test_the_article_a_is_not_proposed_for_repair(self):
+        """The two false-positive families, quoted verbatim from the corpus."""
+        for text in ("• A cut panel bracket is required on top and bottom cut panels.",
+                     "• A template can speed attachment for level installations"):
+            segs = split_block(text, text_source="pdf_text_layer")
+            self.assertIsNone(segs[0].repair, text)
+
+    def test_a_real_space_form_repair_is_still_proposed(self):
+        """`I nsert` is 48 occurrences and unambiguous damage. Suppressing the
+        article must not suppress the rest of the space form."""
+        segs = split_block("• I nsert post in hole", text_source="pdf_text_layer")
+        self.assertEqual(segs[0].repair, "Insert post in hole")
+
+    def test_an_ocr_bullet_note_is_a_note_not_a_footnote(self):
+        """`_classify` keyed the footnote rule on `leader == "*"` alone. Under
+        OCR the asterisk IS the bullet, so an OCR bullet whose body opens with
+        `Caution` was typed `footnote`. The answer happened to be right for the
+        one line it hit; the mechanism was wrong for all OCR."""
+        segs = split_block("* Caution: wear goggles", text_source="ocr")
+        self.assertEqual(kinds(segs), ["note"])
+
+    def test_two_ocr_bullets_on_one_line_are_two_steps(self):
+        """The line-based cut is right for the text layer — 0 of 3,146 elements
+        put a bullet mid-line — but OCR merges columns, and 10 elements carry
+        two unrelated instructions on one line."""
+        segs = split_block(
+            "* Clean holes and check for straight walls * Square pickets and rails",
+            text_source="ocr")
+        self.assertEqual(kinds(segs), ["step", "step"])
+        self.assertEqual(texts(segs), ["Clean holes and check for straight walls",
+                                       "Square pickets and rails"])
+
+    def test_a_text_layer_bullet_mid_line_is_not_split(self):
+        """The mirror of the case above: in the text layer a mid-line `•` is a
+        separator in a footer (`site.com • (800) 336-2383`), never a bullet."""
+        segs = split_block("• Insert rail • into post", text_source="pdf_text_layer")
+        self.assertEqual(len(segs), 1)
+
+    def test_the_instruction_kinds_are_named_so_a_filter_cannot_miss_one(self):
+        """664 segments (8.4%) are `kind="branch"` and 627 of those carry a full
+        instruction, so anything filtering `kind == "step"` silently drops them."""
+        from fence_evidence.steps import INSTRUCTION_KINDS
+        self.assertEqual(set(INSTRUCTION_KINDS), {"step", "branch"})
+
+    def test_the_leader_gap_is_declared_not_accidental(self):
+        from fence_evidence.steps import LEADER_GAP
+        self.assertEqual([hex(ord(c)) for c in LEADER_GAP],
+                         ["0x20", "0x9", "0x2002", "0xa0"])

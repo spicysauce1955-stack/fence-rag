@@ -409,12 +409,69 @@ CREATE INDEX IF NOT EXISTS ix_fact_reviews_fact ON fact_reviews(fact_id);
 CREATE INDEX IF NOT EXISTS ix_fact_reviews_ref ON fact_reviews(ref_id);
 """
 
+# Step candidates -- the assertion layer between an element and a `Procedure`.
+#
+# A `list` element in an installation guide holds a whole bullet block, so the
+# unit an `AssemblyStep` is about has no row of its own. `steps.split_block`
+# manufactures it and this table holds the result: one row per segment, naming
+# the element it was cut from and the character span within it.
+#
+# `char_start`/`char_end` are the span, and they are load-bearing twice over:
+# they are how a candidate proves it is a real slice of its source, and they are
+# half the review anchor. A crop digest cannot be the anchor here -- `[measured]`
+# 0 of 28 elements on the slice page have a rendered crop -- and `ref_id` cannot
+# either, because it embeds a bbox and does not survive a re-extraction (G38).
+#
+# `text_raw` is verbatim. `text_repair` is a PROPOSAL and is never substituted
+# for it: 195 of 4,629 segments begin with a split capital (`T\namp`, `I nsert`)
+# but only 7 of the 20 distinct space-form artifacts are real damage, so a
+# person disposes.
+#
+# The last four columns are a PROJECTION of `step_reviews`, exactly as
+# `table_read_candidates`' are of `table_reviews`. A candidate that no person
+# has reviewed publishes nothing, ever (A1/C0).
+#
+# Pointers run DOWN: a candidate names its element; nothing on `elements` names
+# a candidate.
+STEP_CANDIDATES_DDL = """
+CREATE TABLE IF NOT EXISTS step_candidates (
+    candidate_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+    document_id     TEXT NOT NULL,
+    version_id      TEXT NOT NULL,
+    page_no         INTEGER NOT NULL,
+    element_id      TEXT NOT NULL,
+    ordinal         INTEGER NOT NULL,     -- the element's, for source order
+    seq             INTEGER NOT NULL,     -- position within the element
+    char_start      INTEGER NOT NULL,
+    char_end        INTEGER NOT NULL,
+    text_raw        TEXT NOT NULL,        -- verbatim slice; never rewritten
+    text_repair     TEXT,                 -- proposed, never applied
+    segment_kind    TEXT NOT NULL,        -- step | note | branch | footnote | section | prose
+    leader          TEXT NOT NULL,
+    depth           INTEGER NOT NULL,
+    branch          TEXT,
+    proposed_kind   TEXT,                 -- AssemblyStep.kind, machine-proposed
+    proposed_scope  TEXT,                 -- AssemblyStep.scope, machine-proposed
+    proposed_slot   TEXT,                 -- SlotTarget, machine-proposed
+    proposal_basis  TEXT,                 -- which rule fired, for measuring it
+    review_status   TEXT NOT NULL DEFAULT 'unreviewed',
+    reviewer        TEXT,
+    reviewed_at     TEXT,
+    created_at      TEXT NOT NULL,
+    UNIQUE(element_id, char_start, char_end)
+);
+CREATE INDEX IF NOT EXISTS ix_step_candidates_doc
+    ON step_candidates(document_id, page_no);
+CREATE INDEX IF NOT EXISTS ix_step_candidates_element
+    ON step_candidates(element_id);
+"""
+
 # Appended rather than written inline so `reviews.ensure_fact_reviews` can apply
 # this one fragment. `connect()` runs `ensure_columns` but never
 # `executescript(SCHEMA)`, so a store that predates a new TABLE meets it as
 # `no such table` in whatever command runs next -- the table-shaped version of
 # the silent no-op ADDED_COLUMNS exists for.
-SCHEMA = SCHEMA + FACT_REVIEWS_DDL
+SCHEMA = SCHEMA + FACT_REVIEWS_DDL + STEP_CANDIDATES_DDL
 
 
 def now() -> str:
