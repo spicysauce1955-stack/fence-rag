@@ -44,9 +44,14 @@ with a confident-looking `SourceRef` attached, the exact "letter satisfied,
 intent missed" shape as the `domain_basis` bug and the Chesterfield
 misattribution above. `unit_original` is not subject to this: verified
 correct for all 62 rows across every group (`in.`, `'`, `foot`, `’`, `"`).
-`_stock_length_quantity` reads it, never `unit_normalized`. See
-`state-and-gaps.md` G63 for the corpus-wide count; this module does not fix
-the extractor, only routes around it for the two values in this slice.
+`_stock_length_quantity` reads it, never `unit_normalized`.
+
+**The extractor was fixed separately** (`facts._canonical_unit`, closed
+2026-09-03) -- `unit_normalized` is now correct corpus-wide for this fact
+type too. This module still reads `unit_original` rather than
+`unit_normalized`: doing so cost nothing when the fix landed, and there is
+no reason to grow a dependency on a column this module never needed in the
+first place. See `state-and-gaps.md` G63.
 """
 from __future__ import annotations
 

@@ -31,13 +31,49 @@ class TestTheUnconditionalCase(unittest.TestCase):
         got = stock_lengths("Standard rails are supplied in 16 foot lengths")
         self.assertEqual(len(got), 1)
         self.assertEqual(got[0]["value_normalized"], 192.0)      # 16 ft in inches
-        self.assertEqual(got[0]["unit_normalized"], "in")
+        self.assertEqual(got[0]["unit_normalized"], "ft")        # G63: the SOURCE's unit
         self.assertEqual(got[0]["conditions"], {})
 
     def test_the_verbatim_lexeme_is_kept(self):
         """Obligation 4: every verbatim source lexeme alongside the number."""
         got = stock_lengths("Standard rails are supplied in 16 foot lengths")
         self.assertIn("16 foot", got[0]["value_original"])
+
+
+class TestUnitNormalizedNamesTheStatedUnit(unittest.TestCase):
+    """G63: `unit_normalized` must mean what it means for every other fact
+    type -- the SOURCE's stated unit, canonicalized -- not "the unit
+    `value_normalized` happens to be expressed in" (always inches here,
+    regardless of what the source said). A foot-stated rail must not carry
+    `unit_normalized: "in"`; a caller trusting that column (`parameters.
+    _unit_of()`, and anyone after it) would compute 16 feet as 16 inches."""
+
+    def test_a_foot_stated_plain_length_is_normalized_to_ft_not_in(self):
+        got = stock_lengths("Standard rails are supplied in 16 foot lengths")
+        self.assertEqual(got[0]["unit_normalized"], "ft")
+
+    def test_an_inch_stated_plain_length_is_still_normalized_to_in(self):
+        got = stock_lengths('Standard rails are supplied in 96 inch lengths')
+        self.assertEqual(got[0]["unit_normalized"], "in")
+
+    def test_both_colours_in_the_conditional_case_get_ft(self):
+        got = stock_lengths(
+            "Standard rails are supplied in 16 foot lengths for White "
+            "(12 foot rails for Blend products)")
+        for f in got:
+            self.assertEqual(f["unit_normalized"], "ft")
+
+    def test_a_foot_stated_triple_is_normalized_to_ft(self):
+        got = stock_lengths('1-1/2" x 5-1/2" x 16\' Rail (STANDARD)')
+        self.assertEqual(got[0]["unit_normalized"], "ft")
+
+    def test_an_inch_stated_triple_is_normalized_to_in(self):
+        got = stock_lengths('5in. x 5in. x 108in. Line Post')
+        self.assertEqual(got[0]["unit_normalized"], "in")
+
+    def test_the_curly_apostrophe_variant_is_still_ft(self):
+        got = stock_lengths('1-1/2" x 5-1/2" x 15-1/2’ Rail - White')
+        self.assertEqual(got[0]["unit_normalized"], "ft")
 
 
 class TestTheConditionalCase(unittest.TestCase):

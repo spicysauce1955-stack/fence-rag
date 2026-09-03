@@ -2860,16 +2860,27 @@ pins the exact number a `unit_normalized`-trusting implementation would have
 gotten wrong, so a regression reads as a factor-of-twelve failure, not a
 close miss.
 
-**Not fixed: the extractor, or the 31 other feet-stated rows this platform
-has not yet built a `Part` to attach to.** `facts.stock_lengths()`'s
-`unit_normalized: "in"` convention is defensible in isolation — it correctly
-labels `value_normalized`, a column nothing outside this defect reads — but
-it is a trap for the next caller who assumes `unit_normalized` means what it
-means everywhere else. Worth a follow-up: either rename the column's role
-for this fact type so the trap cannot recur, or have `stock_lengths()` also
-write a genuine `unit_original`-derived `unit_normalized` and stop
-overloading the field. Neither is done here — this is one gap named, not a
-license to widen this round's scope.
+**The extractor itself, and the 31 other feet-stated rows, are now also
+fixed — closed 2026-09-03, independently of the Planning obligations this
+gap started under.** `facts.stock_lengths()` and `_stock_from_triples()`
+called a new `_canonical_unit()` in place of the hardcoded `"in"`; it
+returns `"ft"`/`"in"` from the same word/glyph lists `_to_inches` already
+matched against (refactored to share them, so the two cannot drift apart
+again). `[measured]` after `cli facts --extract` re-ran against the live
+store: all 62 `stock_length_in` facts preserved (204 fact reviews replayed,
+0 orphaned), the 33 feet-stated rows now read `unit_normalized: "ft"`, the
+29 inch-stated rows still read `"in"`. `parts.py` was untouched — it already
+read `unit_original` directly — and `build_parts()` reproduces the exact
+same two published values (4876800 / 3657600 milli-mm) byte-for-byte, so no
+snapshot re-cut was needed; `refs --verify` (2282/2282) and `snapshot
+--verify-stored` (4/4) both stayed clean. `tests/test_stock_length.py` gained
+`TestUnitNormalizedNamesTheStatedUnit` (6 cases) pinning the canonicalization
+itself, and the pre-existing `test_the_plain_statement` — which had asserted
+the bug's own output as correct — now asserts `"ft"`. 1145 tests, same one
+pre-existing error (G58's crop gap), 1 expected failure — no regression from
+this change. The trap for the next caller is gone: `unit_normalized` now
+means the same thing for `stock_length_in` that it means for every other
+fact type.
 
 ---
 
