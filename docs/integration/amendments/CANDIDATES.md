@@ -101,6 +101,54 @@ mapping is an assumption, not an agreement.
 
 ---
 
+## C16 — `Rule` is a BINDING payload member with no shape anywhere
+
+| | |
+|---|---|
+| **Trigger** | **D** — an omission, but a structural one: the type cannot be produced |
+| **Raised** | 2026-09-03, decomposing the four empty snapshot members before building `Procedure` |
+| **Blocking?** | **No** for anything currently planned. **Yes** for `rules` ever being non-empty. |
+
+`contract.md` §1.2 lists `rules [Rule]` in the snapshot payload, alongside nine members
+that all have a defined shape. `Rule` does not have one. Searched and not found:
+
+- no `Rule { … }` block in `contract.md`;
+- no `Rule { … }` block in `knowledge-datamodel.md` — §3 defines `Part`, `FenceModel`,
+  `PanelSpec`, `ContainedSlot`, `PartRequirement`, `AssemblyStep`, `Procedure`, `Warning`,
+  `ParameterTable` and `Combination`, and stops;
+- nothing in `docs/` at all. `FixingRule` (§3.3) is a different type — a `PanelSpec`
+  component, not a payload member.
+
+The word appears exactly three times in a load-bearing position: the payload list; §4's
+tier-3 mapping, `derived rule → a Rule`; and traceability row B1, *"§4 — seven crossings,
+`Gap` and `Rule` published"*. All three assume a shape none of them gives.
+
+One false positive, recorded so it is not re-litigated: `knowledge-datamodel.md` §3.7 has a
+table whose second column is headed `Rule` (N12, the registry split). That is a column
+header meaning "the rule for this registry", not the type.
+
+**What it costs to leave it.** Nothing today — this platform publishes `rules: []` and no
+obligation names the member, so there is no violation to declare. The cost is that the
+member is unbuildable by either side, indefinitely and silently. Neither team can be wrong
+about `Rule`, because there is nothing to be wrong about; it will simply stay empty while
+looking like work someone forgot.
+
+**What we are NOT asking for.** Not a design. §4's mapping suggests Planning has one in
+mind (`derived rule → a Rule`), and this platform has no evidence class it is currently
+withholding for want of the type. The question is only whether the member is live.
+
+**Likely disposition:** one of three, and any is fine —
+(a) a shape, in which case it batches like any other addition;
+(b) a note recording that `Rule` is reserved and deliberately unshaped, which makes the
+empty member honest rather than outstanding; or
+(c) removal from the payload, which is an amendment to a BINDING list and the only
+disposition needing a round.
+
+Raised now rather than later because the alternative is discovering it while building the
+member, which is when a missing shape is most expensive.
+
+---
+
 ## C2 — `Warning.attaches_to.ref` is declared but never typed
 
 | | |
