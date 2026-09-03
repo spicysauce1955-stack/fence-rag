@@ -6,8 +6,8 @@
     "no_answer": 37,
     "recall_at_k": 0.805,
     "page_recall_at_k": 0.659,
-    "mrr": 0.552,
-    "evidence_support": 0.672,
+    "mrr": 0.557,
+    "evidence_support": 0.695,
     "page_evidence_support": 0.769,
     "no_answer_precision": 0.324,
     "false_unsupported_rate": 0.146,
@@ -19,7 +19,7 @@
       "gq-015",
       "gq-019"
     ],
-    "passed": 38,
+    "passed": 39,
     "by_category": {
       "comparison": {
         "n": 4,
@@ -40,7 +40,7 @@
           "gq-004",
           "gq-006"
         ],
-        "mean_support": 0.574
+        "mean_support": 0.61
       },
       "conflict": {
         "n": 2,
@@ -121,13 +121,12 @@
       "paraphrase": {
         "n": 5,
         "doc_hits": 3,
-        "passed": 2,
+        "passed": 3,
         "failures": [
           "gq-106",
-          "gq-108",
-          "gq-109"
+          "gq-108"
         ],
-        "mean_support": 0.467
+        "mean_support": 0.6
       },
       "source_verification": {
         "n": 4,
@@ -211,12 +210,21 @@
       "comparability": "answer_support is the graded number: the annotated answer terms in the text of the ONE document the interface asserts as its answer -- the active member for `resolve`, the top-ranked fact's document for `facts`. It is narrower than page_evidence_support (a document, not a page) and wider than evidence_support (a document, not a unit), so it is the analogue of neither and must not be averaged with either. returned_documents_support is the same terms anywhere in ANY document returned -- for `resolve` that is the whole supersession chain, so a term printed only in a superseded member counts. It is reported and never graded. page_rank is reported only where the interface knows a page; `resolve` answers with documents and reports none. The pass rule is the search harness's own, applied to answer_support. These numbers are NOT part of the headline metrics and are not averaged into them."
     },
     "second_stage": true,
-    "second_stage_attachments": 447,
+    "dedupe_text": true,
+    "page_cap": null,
+    "second_stage_attachments": 443,
     "acceptance": {
       "A3_recall_at_10_ge_0.80": true,
       "A3_evidence_support_ge_0.70": false,
       "A4_no_answer_precision_ge_0.66": false,
       "A4b_false_unsupported_le_0.20": true
+    },
+    "raw": {
+      "recall_at_k": 0.8048780487804879,
+      "mrr": 0.5566008517228029,
+      "evidence_support": 0.6946341463414635,
+      "no_answer_precision": 0.32432432432432434,
+      "false_unsupported_rate": 0.14634146341463414
     }
   },
   "results": [
@@ -466,8 +474,8 @@
       "query": "crossbuck gate installation Weatherables cross buck gate rail cut length vinyl crossbuck gate instructions",
       "answerable": true,
       "n_results": 10,
-      "doc_rank": 8,
-      "page_rank": 8,
+      "doc_rank": 7,
+      "page_rank": 7,
       "expected_documents": [
         "manuals/weatherables/weatherables-crossbuck-gate-installation.pdf"
       ],
@@ -483,9 +491,8 @@
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 19.494,
-      "second_stage_attachments": 4,
+      "second_stage_attachments": 5,
       "element_types": [
-        "paragraph",
         "paragraph",
         "paragraph",
         "paragraph",
@@ -493,7 +500,8 @@
         "paragraph",
         "list",
         "paragraph",
-        "drawing",
+        "paragraph",
+        "paragraph",
         "paragraph"
       ],
       "reported_unsupported": false,
@@ -525,15 +533,19 @@
           "snippet": " \u2026 5\u201d x 5\u201d square post\nPost Length: 5\u2019 & 6\u2019\nRail Spacing: 11\u201d\nRail Size: 1.5\u201d x 5.5\u201d\nColor:\nPost: 5\u201d x 5\u201d square post\nPost Length \u2026 "
         },
         {
-          "source_path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
-          "page": 13,
+          "source_path": "manuals/weatherables/weatherables-2-rail-gate-installation.pdf",
+          "page": 3,
           "element_type": "paragraph",
-          "score": 15.8107,
+          "score": 13.2085,
           "matched_terms": [
+            "gate",
+            "cross",
             "rail",
-            "length"
+            "cut",
+            "length",
+            "vinyl"
           ],
-          "snippet": " \u2026 5\u201d x 5\u201d square post\nPost Length: 5\u2019 & 6\u2019\nRail Spacing: 11\u201d\nRail Size: 1.5\u201d x 5.5\u201d\nColor:\nPost: 5\u201d x 5\u201d square post\nPost Length \u2026 "
+          "snippet": " \u2026 cross-brace on the gate and mark the length to cut.\n2. Pre-drill holes into the cross-brace only. DO NOT pre-drill into the vinyl rail \u2026 "
         }
       ]
     },
@@ -702,8 +714,8 @@
       "query": "remove concrete stains vinyl fence post cleaning mortar off vinyl fence CSI vinyl fence cleaning spec",
       "answerable": true,
       "n_results": 10,
-      "doc_rank": 4,
-      "page_rank": 4,
+      "doc_rank": 3,
+      "page_rank": 3,
       "expected_documents": [
         "manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx"
       ],
@@ -719,17 +731,17 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 23.921,
-      "second_stage_attachments": 8,
+      "second_stage_attachments": 6,
       "element_types": [
         "paragraph",
         "list",
-        "list",
         "paragraph",
         "list",
         "paragraph",
         "paragraph",
-        "paragraph",
         "list",
+        "paragraph",
+        "paragraph",
         "paragraph"
       ],
       "reported_unsupported": false,
@@ -768,19 +780,17 @@
           "snippet": " \u2026 For more stubborn stains, use a cleanser such as\nSoft Scrub \u00ae or cleaning solution listed on warranty\n\u2022 Concrete is easily washed off when wet, but can also be \u2026 "
         },
         {
-          "source_path": "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
-          "page": 7,
-          "element_type": "list",
-          "score": 18.4001,
+          "source_path": "manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 17.7104,
           "matched_terms": [
             "remove",
-            "concrete",
-            "stains",
             "fence",
-            "cleaning",
-            "off"
+            "post",
+            "mortar"
           ],
-          "snippet": " \u2026 For more stubborn stains, use a cleanser such as\nSoft Scrub \u00ae or cleaning solution listed on warranty\n\u2022 Concrete is easily washed off when wet, but can also be \u2026 "
+          "snippet": " \u2026 instructions. Post hole excavations shall be scattered uniformly away from the posts. Clean fence with mild household detergent and rinse well with clean water. Remove mortar from exposed \u2026 "
         }
       ]
     },
@@ -809,18 +819,18 @@
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 12.836,
-      "second_stage_attachments": 1,
+      "second_stage_attachments": 3,
       "element_types": [
         "paragraph",
         "table",
-        "table",
         "paragraph",
         "paragraph",
         "table",
-        "table",
         "paragraph",
         "paragraph",
-        "paragraph"
+        "caption",
+        "paragraph",
+        "list"
       ],
       "reported_unsupported": true,
       "unsupported_reason": "term(s) absent from the whole corpus: markings",
@@ -852,16 +862,17 @@
           "snippet": "EW r 2021 | Line | Corner | End\n'6x'6 | Line | 72\" | 73\" | 72\"\nCorner | 74\" | 73\""
         },
         {
-          "source_path": "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
-          "page": 21,
-          "element_type": "table",
-          "score": 12.5696,
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 5,
+          "element_type": "paragraph",
+          "score": 12.1127,
           "matched_terms": [
             "corner",
+            "post",
             "line",
             "end"
           ],
-          "snippet": "EW r 2021 | Line | Corner | End\n'6x'6 | Line | 72\" | 73\" | 72\"\nCorner | 74\" | 73\""
+          "snippet": "Line Post\nEnd Post\nCorner Post"
         }
       ]
     },
@@ -879,15 +890,14 @@
         "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf"
       ],
       "equivalent_documents": [],
-      "support": 0.333,
+      "support": 1.0,
       "page_support": 1.0,
       "found_terms": [
-        "Heavy Duty Posts"
-      ],
-      "missing_terms": [
         ".250\u201d",
+        "Heavy Duty Posts",
         "VH88"
       ],
+      "missing_terms": [],
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 15.462,
@@ -906,7 +916,7 @@
       ],
       "reported_unsupported": true,
       "unsupported_reason": "term(s) absent from the whole corpus: strengthen",
-      "passed": false,
+      "passed": true,
       "top_hits": [
         {
           "source_path": "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf",
@@ -976,9 +986,8 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 12.241,
-      "second_stage_attachments": 9,
+      "second_stage_attachments": 7,
       "element_types": [
-        "table",
         "table",
         "paragraph",
         "paragraph",
@@ -986,7 +995,8 @@
         "caption",
         "paragraph",
         "paragraph",
-        "paragraph",
+        "drawing",
+        "caption",
         "drawing"
       ],
       "reported_unsupported": false,
@@ -995,20 +1005,6 @@
       "top_hits": [
         {
           "source_path": "manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf",
-          "page": 7,
-          "element_type": "table",
-          "score": 12.2408,
-          "matched_terms": [
-            "concrete",
-            "post",
-            "fence",
-            "gate",
-            "5x5"
-          ],
-          "snippet": " \u2026 Fence Corner Filled with Post Size Height Posts Concrete Gate P\n4x4 3' 100 lbs 145 lbs 160\n4x4 | 4' | 100 lbs | 155 lbs 175 l\n5x5 5 \u2026 "
-        },
-        {
-          "source_path": "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
           "page": 7,
           "element_type": "table",
           "score": 12.2408,
@@ -1035,6 +1031,21 @@
             "bags"
           ],
           "snippet": " \u2026 High Strength Concrete (1 1 \u2044 2 bags per hole average)\n\uf06f Coarse Gravel (6\" per hole)\n\uf06f Water for Concrete\n\uf06f Clean Rags\n\uf06f Post Hole Digger\n\uf06f \u2026 "
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-40-40-70743.pdf",
+          "page": 5,
+          "element_type": "paragraph",
+          "score": 11.8846,
+          "matched_terms": [
+            "concrete",
+            "post",
+            "vinyl",
+            "fence",
+            "gate",
+            "5x5"
+          ],
+          "snippet": " \u2026 Concrete Usage for Posts\nPost Size\nFence\nHeight\nEnd Line\nor Corner\nPosts\nEnd Posts\nFilled with\nConcrete\nGate Posts\n4x4\n4x4\n5x5\n5x5\n5x5\n5x5\n5x5\n3 \u2026 "
         }
       ]
     },
@@ -1254,7 +1265,7 @@
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 17.968,
-      "second_stage_attachments": 6,
+      "second_stage_attachments": 7,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -1262,9 +1273,9 @@
         "paragraph",
         "table",
         "paragraph",
-        "table",
         "paragraph",
         "table",
+        "paragraph",
         "paragraph"
       ],
       "reported_unsupported": false,
@@ -1339,12 +1350,12 @@
       "second_stage_attachments": 0,
       "element_types": [
         "drawing_label",
-        "drawing",
         "table",
         "drawing_label",
-        "drawing",
         "list",
         "table",
+        "paragraph",
+        "paragraph",
         "paragraph",
         "paragraph",
         "paragraph"
@@ -1362,14 +1373,6 @@
           "snippet": "71.75\"\n3p,\n48.5\"\n41.5\""
         },
         {
-          "source_path": "manuals/weatherables/structural/weatherables-cad-captiva-4x6-pool.png",
-          "page": 1,
-          "element_type": "drawing",
-          "score": 18.0152,
-          "matched_terms": [],
-          "snippet": "71.75\" 3p, 48.5\" 41.5\""
-        },
-        {
           "source_path": "manuals/barrette-outdoor-living/catalyst-fence-accents-hardware-sku-sheet.pdf",
           "page": 17,
           "element_type": "table",
@@ -1378,6 +1381,14 @@
             "ft"
           ],
           "snippet": " \u2026 4' Ft/Fta) (G) | 73012664\n2\" x 2\" x 82\" Corner (30\" Deep - 4' Ft/Fta) (G) | 73012655\n2\" x 2\" x 82\" End (30\" Deep - 4' Ft \u2026 "
+        },
+        {
+          "source_path": "manuals/weatherables/structural/weatherables-cad-captiva-gate-48in.png",
+          "page": 1,
+          "element_type": "drawing_label",
+          "score": 14.9061,
+          "matched_terms": [],
+          "snippet": "|\n<\u2014_______ 48\" \u2014_______+ |\n|\n|\nit\n|"
         }
       ]
     },
@@ -1389,8 +1400,8 @@
       "query": "Augusta 8 ft privacy panel dimensions Weatherables Augusta CAD detail U channel rail reinforcement vinyl privacy panel",
       "answerable": true,
       "n_results": 10,
-      "doc_rank": 10,
-      "page_rank": 10,
+      "doc_rank": 9,
+      "page_rank": 9,
       "expected_documents": [
         "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png"
       ],
@@ -1406,17 +1417,17 @@
       "element_type_ok": true,
       "image_evidence_ok": true,
       "top_score": 16.574,
-      "second_stage_attachments": 3,
+      "second_stage_attachments": 2,
       "element_types": [
         "paragraph",
         "paragraph",
         "caption",
         "list",
-        "list",
         "paragraph",
         "paragraph",
         "drawing",
         "table",
+        "drawing_label",
         "drawing_label"
       ],
       "reported_unsupported": false,
@@ -1492,9 +1503,9 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "paragraph",
         "list",
-        "list"
+        "list",
+        "paragraph"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -1637,17 +1648,17 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 15.88,
-      "second_stage_attachments": 5,
+      "second_stage_attachments": 7,
       "element_types": [
         "paragraph",
         "paragraph",
         "paragraph",
+        "drawing",
+        "drawing",
         "paragraph",
         "paragraph",
-        "drawing",
-        "drawing",
-        "drawing",
-        "drawing",
+        "paragraph",
+        "paragraph",
         "paragraph"
       ],
       "reported_unsupported": false,
@@ -1681,17 +1692,20 @@
           "snippet": " \u2026 THE\nHIGH VELOCITY HURRICANE ZONES (HVHZ),\nDEFINITION: THIS FENCE-AND IT'S SUPPORTS ARE DESIGNED FOR 75 MPH\nFASTEST MILE WIND SPEED OR 115 MPH (ULTIMATE 3 SEC \u2026 "
         },
         {
-          "source_path": "manuals/certainteed-bufftech/structural/NOA-24-0117.05-Barrette-successor-extruded-pvc-fencing-post-CertainTeed-transfer-2029.pdf",
-          "page": 7,
+          "source_path": "manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf",
+          "page": 6,
           "element_type": "paragraph",
-          "score": 15.2703,
+          "score": 14.7809,
           "matched_terms": [
             "fence",
             "wind",
+            "rating",
             "mph",
-            "hurricane"
+            "Miami",
+            "Dade",
+            "NOA"
           ],
-          "snippet": " \u2026 HIGH VELOCITY HURRICANE ZONES (HVHZ).\n2- DEFINITION: THIS FENCE AND IT'S SUPPORTS ARE DESIGNED FOR 75 MPH\nFASTEST MILE WIND SPEED OR | 15 MPH (ULTIMATE 3 SEC \u2026 "
+          "snippet": "rhthe _\n0 Approved as complyinb 4.920 WIND LOAD RATING\nPOSTS LOCATED 96\u00b0 FloridaBpi/ey 7201) THIS FENCE, ITS VERTICAL SUPPORTS AND FOUNDATIONS,\nON CENTER NOAPLO-}o 11 \u2026 "
         }
       ]
     },
@@ -1786,8 +1800,8 @@
       "query": "how much does vinyl privacy fence rack Chesterfield racking degrees Kingston rackable section 8 foot",
       "answerable": true,
       "n_results": 10,
-      "doc_rank": 7,
-      "page_rank": 7,
+      "doc_rank": 5,
+      "page_rank": 5,
       "expected_documents": [
         "manuals/certainteed-bufftech/bufftech-catalog-2014.pdf",
         "manuals/industry-standards/Digger-Specialties-Polyvinyl-Fence-Brochure_Racking-Post-Spacing.pdf"
@@ -1805,7 +1819,7 @@
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 16.323,
-      "second_stage_attachments": 1,
+      "second_stage_attachments": 2,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -1851,10 +1865,10 @@
           "snippet": " \u2026 foot or the angle of the slope. Refer to the diagram and\nexamples.\nWith the racking method, the horizontal rails will follow the\nsloping terrain.\n\u2022 Measure section length \u2026 "
         },
         {
-          "source_path": "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
-          "page": 46,
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 42,
           "element_type": "paragraph",
-          "score": 16.2158,
+          "score": 15.4294,
           "matched_terms": [
             "fence",
             "rack",
@@ -1862,7 +1876,7 @@
             "section",
             "foot"
           ],
-          "snippet": " \u2026 foot or the angle of the slope. Refer to the diagram and\nexamples.\nWith the racking method, the horizontal rails will follow the\nsloping terrain.\n\u2022 Measure section length \u2026 "
+          "snippet": " \u2026 rise by section length to get rise per inch\n\u2022 Multiply by 12 to determine rise per foot\nRacking Method \u2014 10\u02da or Less\nWith the racking method, the horizontal \u2026 "
         }
       ]
     },
@@ -2067,7 +2081,7 @@
         "paragraph",
         "table",
         "table",
-        "table",
+        "paragraph",
         "table",
         "table",
         "table",
@@ -2239,7 +2253,7 @@
         "paragraph",
         "table",
         "table",
-        "table",
+        "paragraph",
         "paragraph",
         "paragraph",
         "paragraph"
@@ -2426,20 +2440,6 @@
           "snippet": " \u2026 of the slope. Refer to the diagram and\nexamples.\nWith the racking method, the horizontal rails will follow the\nsloping terrain.\n\u2022 Measure section length in inches\n\u2022 Determine section \u2026 "
         },
         {
-          "source_path": "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
-          "page": 46,
-          "element_type": "paragraph",
-          "score": 17.049,
-          "matched_terms": [
-            "racking",
-            "inches",
-            "fence",
-            "rack",
-            "slope"
-          ],
-          "snippet": " \u2026 of the slope. Refer to the diagram and\nexamples.\nWith the racking method, the horizontal rails will follow the\nsloping terrain.\n\u2022 Measure section length in inches\n\u2022 Determine section \u2026 "
-        },
-        {
           "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
           "page": 46,
           "element_type": "paragraph",
@@ -2452,6 +2452,19 @@
             "slope"
           ],
           "snippet": " \u2026 for installing a fence on variable sloping\nterrain \u2014 stepping and racking 1. Enlarge holes in post to accept rails\n* For either method, divide slope evenly into all sections \u2026 "
+        },
+        {
+          "source_path": "manuals/weatherables/weatherables-3-rail-fence-installation-2024.pdf",
+          "page": 6,
+          "element_type": "paragraph",
+          "score": 15.8419,
+          "matched_terms": [
+            "panel",
+            "over",
+            "fence",
+            "rack"
+          ],
+          "snippet": "This fence panel can rack up to 6\u201d over\nan 8 ft. span. If more material is\nneeded, please call 1-888-743-3673."
         }
       ]
     },
@@ -2483,9 +2496,9 @@
         "paragraph",
         "list",
         "list",
-        "list",
         "paragraph",
-        "list"
+        "paragraph",
+        "paragraph"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -2543,7 +2556,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 24.885,
-      "second_stage_attachments": 10,
+      "second_stage_attachments": 9,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -2551,10 +2564,10 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "paragraph",
-        "paragraph",
         "ocr_supplement",
-        "ocr_supplement"
+        "ocr_supplement",
+        "paragraph",
+        "list"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -2565,26 +2578,6 @@
           "page": 1,
           "element_type": "paragraph",
           "score": 24.8851,
-          "matched_terms": [
-            "D696",
-            "coefficient",
-            "thermal",
-            "expansion",
-            "vinyl",
-            "PVC",
-            "Illusions",
-            "PVC",
-            "D696",
-            "value",
-            "per"
-          ],
-          "snippet": " \u2026 determine tensile properties\nD648 - To determine heat distortion temperature\nD696 \u2013 Test Method for Coefficient of Linear Thermal\nExpansion of Plastics Between \u00d830\u00b0C and 30\u00b0C with a \u2026 "
-        },
-        {
-          "source_path": "manuals/industry-standards/ASTM-Info-Flyer_Illusions-F964-D4216-Summary.pdf",
-          "page": 1,
-          "element_type": "paragraph",
-          "score": 23.9924,
           "matched_terms": [
             "D696",
             "coefficient",
@@ -2619,6 +2612,27 @@
             "per"
           ],
           "snippet": " \u2026 determine tensile properties\nD648 \u2013 To determine heat distortion temperature\nD696 \u2013 Test Method for Coefficient of Linear\nThermal Expansion of Plastics Between \u00d830\u00b0C\nand 30\u00b0C with a \u2026 "
+        },
+        {
+          "source_path": "manuals/illusions-vinyl-fence/classic-product-brochure.pdf",
+          "page": 22,
+          "element_type": "paragraph",
+          "score": 21.6165,
+          "matched_terms": [
+            "D696",
+            "coefficient",
+            "thermal",
+            "expansion",
+            "vinyl",
+            "PVC",
+            "Illusions",
+            "PVC",
+            "D696",
+            "value",
+            "rail",
+            "per"
+          ],
+          "snippet": " \u2026 determine tensile properties\nD648 - To determine heat distortion temperature\nD696 \u2013 Test Method for Coefficient of Linear Thermal\nExpansion of Plastics Between \u00d830\u00b0C and 30\u00b0C with a \u2026 "
         }
       ]
     },
@@ -2649,9 +2663,9 @@
         "paragraph",
         "paragraph",
         "paragraph",
+        "list",
         "paragraph",
-        "paragraph",
-        "paragraph",
+        "list",
         "list"
       ],
       "reported_unsupported": false,
@@ -2735,8 +2749,8 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "paragraph",
         "table",
+        "paragraph",
         "paragraph",
         "paragraph",
         "paragraph"
@@ -2750,22 +2764,6 @@
           "page": 1,
           "element_type": "paragraph",
           "score": 16.5285,
-          "matched_terms": [
-            "Illusions",
-            "vinyl",
-            "flame",
-            "spread",
-            "number",
-            "PVC",
-            "burning"
-          ],
-          "snippet": " \u2026 Poly(Vinyl Chloride)\n(PVC) Exterior-Pro\ufb01le Extrusions Used for Assembled\nWindows and Doors\nE-84-04 - Used to determine the flame spread value of\nPVC material; Illusions burn \u2026 "
-        },
-        {
-          "source_path": "manuals/industry-standards/ASTM-Info-Flyer_Illusions-F964-D4216-Summary.pdf",
-          "page": 1,
-          "element_type": "paragraph",
-          "score": 15.9558,
           "matched_terms": [
             "Illusions",
             "vinyl",
@@ -2793,6 +2791,22 @@
             "burning"
           ],
           "snippet": " \u2026 E-84-04 - Used to determine the flame spread value of\nPVC material; Illusions burn rate is significantly lower than\nallowed value"
+        },
+        {
+          "source_path": "manuals/illusions-vinyl-fence/product-price-catalog-186pg.pdf",
+          "page": 12,
+          "element_type": "paragraph",
+          "score": 15.2119,
+          "matched_terms": [
+            "Illusions",
+            "vinyl",
+            "flame",
+            "spread",
+            "number",
+            "PVC",
+            "burning"
+          ],
+          "snippet": " \u2026 Poly(Vinyl\nChloride) (PVC) Exterior-Pro\ufb01le Extrusions Used\nfor Assembled Windows and Doors\nE-84-04 \u2013 Used to determine the flame spread\nvalue of PVC material; Illusions\u00ae burn \u2026 "
         }
       ]
     },
@@ -3054,13 +3068,13 @@
       "element_types": [
         "list",
         "list",
-        "list",
         "table",
         "table",
         "table",
         "paragraph",
         "drawing",
         "paragraph",
+        "table",
         "paragraph"
       ],
       "reported_unsupported": true,
@@ -3098,17 +3112,17 @@
           "snippet": " \u2026 6 ft panel includes vertical steel insert in center of panel."
         },
         {
-          "source_path": "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
-          "page": 24,
-          "element_type": "list",
-          "score": 15.2411,
+          "source_path": "manuals/industry-standards/Digger-Specialties-Polyvinyl-Fence-Brochure_Racking-Post-Spacing.pdf",
+          "page": 13,
+          "element_type": "table",
+          "score": 14.12,
           "matched_terms": [
-            "6 ft",
             "post",
-            "ft",
-            "panel"
+            "spacing",
+            "centers",
+            "ft"
           ],
-          "snippet": " \u2026 6 ft panel includes vertical steel insert in center of panel."
+          "snippet": " \u2026 Standard Post Cap\nWhite Tan | 48\u201d, 60\u201d, 72\u201d | 3\u201d Standard | 8\u2019 Centers Per Ft. Section Widths Available | \u2022 7/8\u201d x 6\u201d (.060\u201d) Verticals w/15/16\u201d Spacing \u2022 1 \u2026 "
         }
       ]
     },
@@ -3211,9 +3225,9 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "paragraph",
-        "paragraph",
         "list",
+        "paragraph",
+        "paragraph",
         "paragraph",
         "paragraph",
         "paragraph",
@@ -3250,16 +3264,18 @@
           "snippet": " \u2026 For example, if your gate opening size is 192\u201d (192\u201d divided by 2\nequals 96\u201d) then cut each rail to 94\u201d wide.\n4. Insert rails into sockets by \u2026 "
         },
         {
-          "source_path": "manuals/weatherables/weatherables-4-rail-gate-installation.pdf",
-          "page": 2,
+          "source_path": "manuals/barrette-outdoor-living/install-horizontal-privacy-fence-panel.pdf",
+          "page": 3,
           "element_type": "paragraph",
-          "score": 13.037,
+          "score": 12.6309,
           "matched_terms": [
             "insert",
+            "fence",
+            "panel",
             "size",
             "opening"
           ],
-          "snippet": " \u2026 For example, if your gate opening size is 192\u201d (192\u201d divided by 2\nequals 96\u201d) then cut each rail to 94\u201d wide.\n4. Insert rails into sockets by \u2026 "
+          "snippet": "Plan gate placement, opening and hardware\nclearance before installing fencing.\nPost Location:\nFig. 2\nMeasure the width of the fence panel (X) plus the\nwidth of the post \u2026 "
         }
       ]
     },
@@ -3282,12 +3298,12 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 16.186,
-      "second_stage_attachments": 2,
+      "second_stage_attachments": 1,
       "element_types": [
         "paragraph",
         "list",
         "list",
-        "list",
+        "paragraph",
         "paragraph",
         "paragraph",
         "paragraph",
@@ -3326,17 +3342,18 @@
           "snippet": " \u2026 6 ft panel includes vertical steel insert in center of panel."
         },
         {
-          "source_path": "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
-          "page": 24,
+          "source_path": "manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf",
+          "page": 12,
           "element_type": "list",
-          "score": 14.8859,
+          "score": 14.561,
           "matched_terms": [
             "6 ft",
             "post",
+            "fence",
             "ft",
             "panel"
           ],
-          "snippet": " \u2026 6 ft panel includes vertical steel insert in center of panel."
+          "snippet": " \u2026 including 6 ft. (1.2m)\nGate leaf width\nPost Outside Diameter\nup to 4 ft.\n(1.2 m)\n2.375 in. (60.3 mm)\nover 4 ft. to \u2026 "
         }
       ]
     },
@@ -3501,17 +3518,17 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 9.023,
-      "second_stage_attachments": 6,
+      "second_stage_attachments": 3,
       "element_types": [
         "paragraph",
         "paragraph",
         "list",
         "list",
         "paragraph",
-        "list",
-        "list",
         "paragraph",
-        "list",
+        "paragraph",
+        "paragraph",
+        "table",
         "paragraph"
       ],
       "reported_unsupported": true,
@@ -3580,8 +3597,8 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "paragraph",
         "list",
+        "paragraph",
         "paragraph",
         "paragraph",
         "paragraph"
@@ -3662,7 +3679,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 25.283,
-      "second_stage_attachments": 4,
+      "second_stage_attachments": 5,
       "element_types": [
         "list",
         "paragraph",
@@ -4146,18 +4163,18 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 31.494,
-      "second_stage_attachments": 1,
+      "second_stage_attachments": 2,
       "element_types": [
-        "paragraph",
         "paragraph",
         "paragraph",
         "paragraph",
         "drawing",
         "paragraph",
-        "paragraph",
         "list",
         "paragraph",
-        "paragraph"
+        "paragraph",
+        "paragraph",
+        "caption"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -4245,7 +4262,7 @@
         "list",
         "paragraph",
         "list",
-        "list",
+        "paragraph",
         "paragraph"
       ],
       "reported_unsupported": false,
@@ -4314,7 +4331,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 36.082,
-      "second_stage_attachments": 4,
+      "second_stage_attachments": 5,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -4503,12 +4520,12 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 23.333,
-      "second_stage_attachments": 8,
+      "second_stage_attachments": 7,
       "element_types": [
         "table",
         "drawing",
         "table",
-        "table",
+        "paragraph",
         "paragraph",
         "paragraph",
         "paragraph",
@@ -4618,26 +4635,6 @@
           "snippet": " \u2026 Dixon, P.E.,\nbearing the Miami-Dade County Product Control revision stamp with the Notice of Acceptance number and\nexpiration date by the Miami-Dade County Product Control \u2026 "
         },
         {
-          "source_path": "manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf",
-          "page": 1,
-          "element_type": "paragraph",
-          "score": 22.9631,
-          "matched_terms": [
-            "Miami-Dade",
-            "NOA",
-            "number",
-            "expiration",
-            "date",
-            "notice",
-            "acceptance",
-            "hurricane",
-            "approval",
-            "Florida",
-            "product"
-          ],
-          "snippet": " \u2026 Dixon, P.E.,\nbearing the Miami-Dade County Product Control revision stamp with the Notice of Acceptance number and\nexpiration date by the Miami-Dade County Product Control \u2026 "
-        },
-        {
           "source_path": "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-22-0217.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
           "page": 1,
           "element_type": "paragraph",
@@ -4655,6 +4652,25 @@
             "product"
           ],
           "snippet": " \u2026 2022, bearing the Miami-Dade County Product Control Revision stamp with the Notice of Acceptance\nnumber and the expiration date by Miami-Dade County Product Control Section.\nMISSILE \u2026 "
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf",
+          "page": 1,
+          "element_type": "paragraph",
+          "score": 20.8599,
+          "matched_terms": [
+            "Miami-Dade",
+            "NOA",
+            "number",
+            "expiration",
+            "date",
+            "notice",
+            "acceptance",
+            "approval",
+            "Florida",
+            "product"
+          ],
+          "snippet": " \u2026 bearing the Miami-Dade County Product Control Approval stamp with the\nNotice of Acceptance number and the approval date by the Miami-Dade County Product Control Section.\nMISSILE \u2026 "
         }
       ]
     },
@@ -4677,7 +4693,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 21.725,
-      "second_stage_attachments": 8,
+      "second_stage_attachments": 7,
       "element_types": [
         "paragraph",
         "list",
@@ -4686,9 +4702,9 @@
         "paragraph",
         "paragraph",
         "list",
-        "list",
-        "list",
-        "list"
+        "paragraph",
+        "paragraph",
+        "table"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -4766,7 +4782,7 @@
       "element_type_ok": null,
       "image_evidence_ok": null,
       "top_score": 30.277,
-      "second_stage_attachments": 2,
+      "second_stage_attachments": 3,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -4775,8 +4791,8 @@
         "paragraph",
         "drawing",
         "list",
-        "list",
-        "list",
+        "paragraph",
+        "paragraph",
         "paragraph"
       ],
       "reported_unsupported": false,
@@ -5088,16 +5104,15 @@
         "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
       ],
       "equivalent_documents": [],
-      "support": 0.75,
+      "support": 1.0,
       "page_support": 1.0,
       "found_terms": [
         "88",
+        "POST SPACING AND FOOTING DIMENSIONS",
         "HVHZ: MIAMI-DADE AND BROWARD COUNTIES",
         "ASCE 7-10"
       ],
-      "missing_terms": [
-        "POST SPACING AND FOOTING DIMENSIONS"
-      ],
+      "missing_terms": [],
       "element_type_ok": false,
       "image_evidence_ok": false,
       "top_score": 31.4,
@@ -5106,13 +5121,13 @@
         "table",
         "table",
         "table",
-        "table",
-        "table",
-        "table",
-        "table",
-        "table",
         "paragraph",
-        "drawing"
+        "drawing",
+        "paragraph",
+        "paragraph",
+        "table",
+        "table",
+        "paragraph"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -5155,10 +5170,10 @@
           "snippet": "Wind Exposure | Footing Depth | Max. Post Spacing\nB | 30\" | 97\" | NON HVHZ\nB | 24\" | 66\"\nC | 36\" | 88\" | HVHZ and NON HVHZ\nC | 30\" | 68\"\nD | 36\" | 75 \u2026 "
         },
         {
-          "source_path": "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
-          "page": 29,
+          "source_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+          "page": 17,
           "element_type": "table",
-          "score": 31.0799,
+          "score": 30.7669,
           "matched_terms": [
             "Exposure",
             "36",
@@ -5564,12 +5579,12 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "paragraph",
-        "paragraph",
         "drawing",
         "paragraph",
         "paragraph",
-        "paragraph"
+        "table",
+        "table",
+        "table"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -5910,7 +5925,7 @@
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 18.987,
-      "second_stage_attachments": 10,
+      "second_stage_attachments": 9,
       "element_types": [
         "paragraph",
         "list",
@@ -5920,7 +5935,7 @@
         "list",
         "paragraph",
         "list",
-        "list",
+        "paragraph",
         "paragraph"
       ],
       "reported_unsupported": false,
@@ -6109,8 +6124,8 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "paragraph",
-        "ocr_supplement"
+        "ocr_supplement",
+        "list"
       ],
       "reported_unsupported": true,
       "unsupported_reason": "term(s) absent from the whole corpus: 18 inch, 12 inch",
@@ -6192,7 +6207,7 @@
       "element_type_ok": false,
       "image_evidence_ok": true,
       "top_score": 24.549,
-      "second_stage_attachments": 6,
+      "second_stage_attachments": 7,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -6201,9 +6216,9 @@
         "paragraph",
         "list",
         "list",
-        "list",
         "paragraph",
-        "list"
+        "list",
+        "paragraph"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -6263,7 +6278,7 @@
       "answerable": true,
       "n_results": 10,
       "doc_rank": 2,
-      "page_rank": 8,
+      "page_rank": 5,
       "expected_documents": [
         "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
         "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
@@ -6287,7 +6302,7 @@
       "element_type_ok": false,
       "image_evidence_ok": true,
       "top_score": 19.954,
-      "second_stage_attachments": 10,
+      "second_stage_attachments": 9,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -6332,17 +6347,18 @@
           "snippet": "ee oe See SEE TABLE 1 ON SHEET 10\nj-\u2014 MAXIMUM POST SPACING \u2014\u2014 MAXIMUM POST SPACING\nNOT TO EXCEED 968\u201d NOT TO EXCEED 97\u201d Nemolete.\n| [ x ENGINEER | TEST \u2026 "
         },
         {
-          "source_path": "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-24-0117.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+          "source_path": "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf",
           "page": 9,
           "element_type": "paragraph",
-          "score": 17.9055,
+          "score": 15.2579,
           "matched_terms": [
             "post",
             "spacing",
             "table",
-            "engineer"
+            "engineer",
+            "record"
           ],
-          "snippet": "ee oe See SEE TABLE 1 ON SHEET 10\nj-\u2014 MAXIMUM POST SPACING \u2014\u2014 MAXIMUM POST SPACING\nNOT TO EXCEED 968\u201d NOT TO EXCEED 97\u201d Nemolete.\n| [ x ENGINEER | TEST \u2026 "
+          "snippet": " \u2026 Ot SBEF SG SFE TABLE 1 ON SHEET 9 > 9\nIN THIS CURRENT SET OF DRAWINGS. MAXIMUM POST SPACING MAXIMUM POST SPACING \u2014| Lis\nG- USE: IT SHALL BE \u2026 "
         }
       ]
     },
@@ -6375,18 +6391,18 @@
       "element_type_ok": true,
       "image_evidence_ok": true,
       "top_score": 17.025,
-      "second_stage_attachments": 4,
+      "second_stage_attachments": 3,
       "element_types": [
         "drawing_label",
-        "drawing",
         "paragraph",
-        "list",
         "list",
         "list",
         "paragraph",
         "paragraph",
         "caption",
-        "paragraph"
+        "paragraph",
+        "paragraph",
+        "drawing"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -6403,16 +6419,6 @@
           "snippet": "96\"\nH\n15\u00b0x55\u00b0x95.5\"\nH\n55\"\n39.5\"\na\nTo\n-\nTo\nTo\ncs\n95.5\"\na\na\na\na\na\n55\"\n|U-Channels\n39.5\"\nwn \u2026 "
         },
         {
-          "source_path": "manuals/weatherables/structural/weatherables-cad-augusta-8x8-privacy.png",
-          "page": 1,
-          "element_type": "drawing",
-          "score": 17.0254,
-          "matched_terms": [
-            "U-channel"
-          ],
-          "snippet": "96\" H 15\u00b0x55\u00b0x95.5\" H 55\" 39.5\" a To - To To cs 95.5\" a a a a a 55\" |U-Channels 39.5\" wn \u2026 "
-        },
-        {
           "source_path": "manuals/weatherables/weatherables-3-rail-fence-installation-2024.pdf",
           "page": 6,
           "element_type": "paragraph",
@@ -6423,6 +6429,19 @@
             "ft"
           ],
           "snippet": "This fence panel can rack up to 6\u201d over\nan 8 ft. span. If more material is\nneeded, please call 1-888-743-3673."
+        },
+        {
+          "source_path": "manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf",
+          "page": 12,
+          "element_type": "list",
+          "score": 15.7256,
+          "matched_terms": [
+            "6 ft",
+            "8 ft",
+            "panel",
+            "ft"
+          ],
+          "snippet": " \u2026 to 12 ft. (1.2 to 2.4m)\nGate leaf width\n2.875 in. (73.0 mm)\nup to 6 ft.\n(1.8 m)\nover 6 ft. to \u2026 "
         }
       ]
     },
@@ -6549,7 +6568,7 @@
       "element_type_ok": false,
       "image_evidence_ok": true,
       "top_score": 27.805,
-      "second_stage_attachments": 10,
+      "second_stage_attachments": 9,
       "element_types": [
         "paragraph",
         "paragraph",
@@ -6557,7 +6576,7 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "paragraph",
+        "table",
         "paragraph",
         "paragraph",
         "paragraph"
@@ -6650,8 +6669,8 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "paragraph",
-        "list"
+        "list",
+        "paragraph"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",

@@ -266,10 +266,21 @@ independent of Planning (nothing here is blocked on them):
 - **`FenceModel`/`Procedure`/`Rule`/`Combination`** — the largest remaining Phase D gap.
   Needs a design pass before implementation; there is no assembly-step model in this
   codebase yet to build on. The natural next `Part`/`PartType`-style vertical slice.
-- **Retrieval quality, R3/R5** — duplicate-unit suppression and a per-page cap. G51 measured
-  and rejected R1 (the heading fallback) but explicitly left R3/R5 as "worth 29.5% and 20.2%
-  of top-10 slots" and unmeasured. The next retrieval-quality item to actually measure, not
-  guess at — see G51's own recommendation in `docs/state-and-gaps.md`.
+- ~~**Retrieval quality, R3/R5**~~ — **done 2026-09-03, G64.** R3 accepted and on by
+  default (unit support 0.623 → 0.645, two gold questions better and none worse); R5
+  measured and rejected (0.623 → 0.583, eight worse). Both are retrieval-time filters, not
+  projection changes — the audit's within-document framing of R3 reaches 5.5% of slots
+  where the real cross-document duplication reaches 35.3%. It also moved the second stage
+  0.672 → 0.6946 against its 0.70 criterion, and surfaced G65 (the acceptance gate was
+  grading rounded display values). Code review caught a real defect in the first cut —
+  the dedupe key ignored `heading_path`, discarding a governing load on 11 of 78
+  questions — so read G64's account of the key before touching it. The retrieval residual is still the first-stage recall
+  deficit G51 named, which R3 was never going to fix.
+- **Dense retrieval for paraphrase** (G1) — now the retrieval item with the most headroom,
+  since R1/R3/R5 are all settled and the first-stage recall deficit is what is left. Still
+  the most expensive option and still subject to the guide's "no vector database until a
+  measured failure category justifies one" — but that failure category is now measured and
+  named three times over.
 - **`parameters._unit_of()`'s docstring** ("the unit a fact is stated in") is misleading —
   it actually returns the unit `value_normalized` is expressed in, and reads `unit_original`
   only as a fallback. Currently harmless (`quantity()` never processes regex-derived facts,

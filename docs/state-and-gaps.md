@@ -70,7 +70,7 @@ plus 81 whose text layer decoded to mojibake and was rejected.
 | A1 pilot preservation assertions | all | all | pass |
 | A2 retrieval contract | all fields, images resolve | all | pass |
 | A3 document recall@10 | ≥ 0.80 | 0.805 | pass |
-| A3 evidence support | ≥ 0.70 | **0.623** (0.672 with the second stage) | **fail** |
+| A3 evidence support | ≥ 0.70 | **0.645** (0.6946 with the second stage) | **fail** |
 | A4 no-answer precision | ≥ 0.66 | **0.324** on 37 negatives | **fail** |
 | A4b false-unsupported rate | ≤ 0.20 | 0.146 | pass |
 | A5 full-corpus coverage report | no silent skips | 0 skipped, 0 failures | pass |
@@ -80,7 +80,9 @@ plus 81 whose text layer decoded to mojibake and was rejected.
 
 Eight of eleven met. A3's evidence support and A4's no-answer precision both
 fail, and A4's earlier 0.667 turned out to be an artefact of a three-question
-negative set — see G1 and G7 below. A4b is new: it is the other half of A4, added
+negative set — see G1 and G7 below. A3's support figures moved 0.623 → 0.645 and
+0.672 → 0.6946 on 2026-09-03 when R3 shipped on (G64); the verdict did not, and
+both are graded on the unrounded mean rather than the shown one (G65). A4b is new: it is the other half of A4, added
 because a no-answer detector can score well by declaring almost everything
 unsupported.
 
@@ -88,9 +90,15 @@ unsupported.
 
 ## 2. Gaps
 
-### G1 — Evidence support misses its target (0.623 against 0.70)
+### G1 — Evidence support misses its target (0.645 against 0.70)
 
-**The gap.** Page evidence support is 0.769 while unit support is 0.623. For
+*Heading and first figure updated 2026-09-03: unit support was 0.623 when this
+gap was written and is 0.645 since R3 shipped on (G64). The failing-question
+table below is the original 44-question measurement and has NOT been re-cut; the
+gold set is now 78. The diagnosis is unchanged — the residual is a first-stage
+recall deficit, which G51 confirmed and R3 does not address.*
+
+**The gap.** Page evidence support is 0.769 while unit support is 0.645. For
 most misses the system retrieves the right document and the right page but not
 the specific retrieval unit carrying the value. A reader looking at the returned
 page image has the answer; a consumer reading only the matched unit's text does
@@ -3104,6 +3112,169 @@ figure is 519, and 61 of them are in `gaps[].cites[]` rather than all in
 
 ---
 
+## 3d. Update, 2026-09-03 — the audit's R3 and R5, measured
+
+### G64 — R3 ships on, R5 is rejected, and the audit's own R3 was a sixth the size it looked
+
+`[measured]` 2026-09-03, over the 78-question gold set at k = 10. `docs/build-plan.md`
+§6 and §4 item 2 of this file both named R3 and R5 as the next retrieval work,
+"worth 29.5% and 20.2% of top-10 slots" (the audit's figures, measured when the gold
+set held 44 questions), and both said measure rather than assume. This is that
+measurement.
+
+**The audit's R3 is not the R3 that was worth 29.5%.** `projection-relevance-audit.md`
+§6 specifies R3 as collapsing duplicate unit text *within a document*; its F2 headline
+counts text duplicated anywhere in the index. Those are very different populations:
+
+| | units | share |
+|---|---|---|
+| units whose text is duplicated **somewhere in the index** (F2 as published) | 5,060 | 46.5% |
+| units whose text is duplicated **within their own document** | 1,785 | 16.4% |
+
+At slot level the gap is wider still: 5.5% of top-10 slots hold text duplicated inside
+their own document, against 35.3% duplicated somewhere. The duplication that spends
+result slots is overwhelmingly **cross-document** — `1. None.`, the "Evidence Submitted"
+boilerplate on every Miami-Dade NOA, is 150 units across 14 documents. So R3 as literally
+specified could not have delivered R3's own headline, and the index-time collapse it
+describes was **not built**. What was built is the same idea at retrieval time.
+
+**What was built.** `search_evidence` gained two opt-in slot filters
+(`retrieval._slot_filtered`) that walk the ranked rows and skip a row that repeats a
+record already kept (R3) or comes from a page already at its quota (R5). Because a
+skipped row is *backfilled* from the next-best row, the list is refilled from the
+over-fetched pool. The projection is untouched — no `unit_id` churn, no BM25 IDF shift,
+no rebuild, and `tests/test_idempotency.py` never comes into it.
+
+**The measurement:**
+
+| variant | recall@10 | MRR | unit support | page support | passed |
+|---|---|---|---|---|---|
+| baseline | 0.805 | 0.552 | 0.623 | 0.769 | 33 |
+| **R3 dedupe** | 0.805 | 0.557 | **0.645** | 0.769 | **34** |
+| R5 cap = 1 | 0.805 | 0.555 | 0.583 | **0.782** | 33 |
+| R5 cap = 2 | 0.805 | 0.553 | 0.606 | 0.777 | 33 |
+| R3 + cap = 2 | 0.805 | 0.557 | 0.632 | 0.777 | 34 |
+
+`no_answer_precision` (0.324) and `false_unsupported_rate` (0.146) are identical in every
+row, reported together as always.
+
+**R3 accepted, and shipped on by default.** Two questions improved — `gq-109` 0.333 → 1.0
+(paraphrase) and `gq-004` 0.75 → 1.0 (conditional table lookup) — **none got worse**, and
+`gq-109` newly passes. The reason for turning it on rather than leaving it behind a flag
+is that "none worse" is structural here rather than lucky: **the dedupe key is the whole
+record the caller receives**, so two rows sharing it are indistinguishable in the response
+and dropping one removes nothing a reader could have used. `[measured]` across all 78
+questions: R3 loses returned evidence on **zero** of them.
+`tests/test_slot_filters.py::test_dedupe_never_drops_evidence_the_raw_list_carried`
+asserts that superset property directly. `search --no-dedupe-text` reaches the raw
+ranking.
+
+**The key does not include provenance, and that is deliberate — but it took a second
+review to get the consequence right.** Two rows carrying the same words from different
+documents are exactly what R3 exists for (`1. None.` prints in 14 NOAs), so keying on
+`document_id` would collapse R3 back to the audit's within-document version and its 5.5%.
+But such rows are *not* interchangeable: they differ in `document_id`, `source_path`,
+`page`, `bbox` and `page_image_path`, which is the entire product of this platform.
+`[measured]` on the version that shipped in this branch's first two commits: R3 removed
+**8 genuinely distinct documents** from the gold set's top-10 lists — not
+`same_content_as` twins, which account for the other 60 — including the weatherables
+2-rail and 4-rail installation guides, dropped because the 3-rail guide prints the same
+text and outranked them. Neither recall@10 nor unit support noticed: they measure terms
+and expected documents, not citations.
+
+The fix is the half of the audit's own R3 that had been dropped — it says "collapse …
+to one unit, **linking the others**". `_slot_filtered` now returns what it suppressed and
+`search_evidence` reports it as `retrieval_reason["duplicates_suppressed"]`, so the slot
+is saved and the citation is still reachable. `[measured]` after: **0 documents
+unreachable** across all 78 questions, 147 suppressed rows linked. A page-capped row is
+not linked, because R5 only ever suppresses a row on a page the list already carries.
+
+**Neither of R3's two defects was caught by the gold set, and both were caught by review.**
+That is the reusable lesson here, not the 0.022. Term-based support cannot see a lost
+citation, and a "no question got worse" result is evidence about the metric as much as
+about the mechanism.
+
+**The first version was wrong in a second way too, and the difference is
+instructive.** The key was `text` alone. `SearchResult` also returns `heading_path`, and
+`evaluate._returned_evidence` counts it — in this corpus the condition a table row
+applies under is printed in the heading, not in the row. So two rows reading
+`HEIGHT OF THE PANEL (in) / ≤42 / 48` under `130MPH WIND-EXPOSURE D` and under
+`120MPH WIND-EXPOSURE D` were treated as one duplicate and a governing load was
+discarded. `[measured]` on that version: **11 of 78 questions lost at least one
+`heading_path`** the unfiltered list carried, and `gq-010` lost the answer term
+`130MPH WIND`. It did not show up as a regression because `gq-010` gained
+`46.7 psf wind` from the backfilled row and broke even — the metric was flat for a
+reason that had nothing to do with the mechanism being safe. Found by code review, not
+by the gold set. The interim numbers it produced (0.650 unit support, 35 passed, page
+support 0.777) are **not** the shipped ones; keying on the full record costs 0.005 of
+support and one passing question, and buys the guarantee.
+
+**R5 rejected.** It does exactly what it promised — page support 0.769 → 0.782, mean
+distinct pages per list up — and the trade is bad: unit support falls 0.623 → 0.583,
+with **two questions better and eight worse** (`gq-003` 1.0 → 0.5, `gq-021` 0.667 →
+0.333 and newly failing). Forcing page diversity discards a genuinely better second unit
+on a page already returned, which is the risk `projection-relevance-audit.md` §6 named
+for R5 in its own risk column. It stays available as `--page-cap N`, off, so the
+measurement can be re-run rather than re-argued.
+
+**A hazard worth naming: the audit measures F2 and F3 *through* `search_evidence`.**
+With R3 on by default, `audit.result_list_composition` would have been reading its own
+fix and reporting that the duplication it exists to measure had gone. Both of its calls
+now pass `dedupe_text=False` explicitly, and `tests/test_slot_filter_wiring.py` fails if
+either figure reaches zero. Re-run after the change: 243 of 780 slots still hold
+duplicated text (31.2%) and 118 still repeat a page (15.1%) — the audit's own published
+29.5% and 20.2% were measured over 44 questions, and this is the same corpus read over 78.
+
+**A list can come back short, and that is the honest answer.** Backfill draws on a pool
+of 8 × k ranked rows; where a query has fewer than k distinct records to show, the list
+is shorter rather than padded with repeats. `[measured]`: `none` filtered to one
+structural subdirectory returns 10 rows unfiltered and 6 with R3. Pinned by
+`test_a_short_list_means_the_pool_ran_out`.
+
+**What it costs.** R3 is on by default, so every search now over-fetches 8 × k rows from
+FTS5 and filters them. `[measured]`: 15.0 ms → 18.1 ms per query over the 78 gold queries,
++3.1 ms and +21%. Paid only by `GET /search`, which is Discovery — human-facing, and
+explicitly never an input to a planning run, which reads a published snapshot instead.
+
+**Where this leaves retrieval.** Unit support 0.623 → 0.645 against a 0.70 acceptance
+target — still short, and the first-stage recall deficit G51 identified is still the
+dominant residual. R3 is a slot-budget fix, not a recall fix, and it was never going to
+be one.
+
+### G65 — the acceptance gate was grading the display value, not the measurement
+
+`[measured]`, found while checking G64's second-stage number. `run_evaluation` rounds
+every metric to three decimals for reading, and the Phase 4 gate was applied to those
+rounded values, so any measurement within half a thousandth of a threshold could be
+graded on the wrong side of it.
+
+**The instance that exposed it no longer occurs, and that is worth stating plainly.**
+The interim version of R3 described in G64 lifted the second stage to mean unit support
+of **0.699512**, which displays as `0.700` and duly reported
+`A3_evidence_support_ge_0.70: true` for a number below 0.70. Correcting R3's dedupe key
+moved that figure to **0.694634**, which is not near enough to a threshold to be graded
+wrongly. So the defect is latent again — as it had been all along, since no earlier
+configuration (0.623, 0.672) had ever landed inside a rounding step of a threshold. It is
+fixed anyway: a gate that reads display values is wrong whether or not anything currently
+sits on a boundary, and the next measurement to land there would not announce itself.
+Same shape as G52 — a metric saying more than it measured.
+
+Fixed: `evaluate.acceptance_flags()` grades the unrounded means, `summary["raw"]` carries
+them in the results file so a verdict can be re-checked, and `acceptance_table()` prints
+graded rows at four decimals so `0.6946 | A3 ≥ 0.70 — FAIL` cannot be mistaken for a
+formatting bug. `None` — nothing measured — now grades as a fail on all three, including
+the ceiling criterion, where an unmeasured rate was previously treated as respecting it.
+`tests/test_acceptance_precision.py` covers each boundary, including the 0.699512 case
+that no longer arises in practice.
+
+**Both committed evaluation reports were regenerated**, and the second stage's headline
+moves with them: **0.672 → 0.6946** unit support, 38 → 39 questions passed, on R3 alone.
+`docs/second-stage-evaluation.md` recorded 0.672 against a 0.70 target as the reason the
+second stage stays opt-in. It is now 0.005 short of that target rather than 0.028 short —
+and still short, so it stays opt-in.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and
@@ -3118,12 +3289,15 @@ than finishing it would have.*
    publishes nothing because nothing is promoted, and nothing can be promoted
    until somebody looks. This is the only item that unblocks the publishing
    layer, and no amount of code will do it.
-2. **Duplicate suppression and a per-page cap in the projection** — the audit's
-   R3 and R5, worth 29.5% and 20.2% of top-10 slots. Promoted to second because
-   G51 falsified the item that used to be first: R1's heading fallback moves
-   evidence support 0.115 the *wrong* way, so the residual is a first-stage
-   recall deficit and the slots wasted on redundancy are the cheapest place to
-   look for room. Measure, do not assume — R1 read just as promising.
+2. ~~**Duplicate suppression and a per-page cap in the projection**~~ —
+   **done and measured, 2026-09-03; see G64.** R3 is built, accepted and on by
+   default (unit support 0.623 → 0.645, two questions better and none worse);
+   R5 is built, measured and rejected (0.623 → 0.583, eight questions worse) and
+   stays behind `--page-cap`. Neither was built in the projection in the end —
+   both are retrieval-time filters, because the audit's within-document framing
+   of R3 reaches 5.5% of slots where the cross-document duplication reaches 35.3%.
+   The first-stage recall deficit G51 identified remains the dominant residual,
+   so item 5 below is now the retrieval item with the most headroom.
 3. **Visual or model-based reading of the NOA drawing tables** (G2) — still the
    only route to the corpus's highest-value numbers, still justified by
    measurement (G15: OCR recovers 0.588 of the values containing a digit), and
@@ -3140,4 +3314,5 @@ Closed or answered from the previous list: **more negative questions** (G7 — 1
 to 37, and the per-class result settled what the detector actually is);
 **version status from document bodies** (G3 — measured and closed as a question,
 not by building a speculative extractor); **unit granularity via the heading
-fallback** (G51 — built, measured, rejected).
+fallback** (G51 — built, measured, rejected); **slot-budget redundancy** (G64 —
+R3 built and accepted, R5 built and rejected).

@@ -16,8 +16,9 @@ from typing import Any
 
 from .paths import REPO_ROOT, REPORTS_DIR, TESTS_DIR, open_write, resolve_asset
 from .relations import APPROVAL_RE
-from .retrieval import (STOPWORDS, UNIT_WORDS, build_match_expression,
-                        resolve_document_version, search_evidence)
+from .retrieval import (DEDUPE_TEXT_DEFAULT, STOPWORDS, UNIT_WORDS,
+                        build_match_expression, resolve_document_version,
+                        search_evidence)
 from .store import connect
 
 DEFAULT_K = 10
@@ -190,9 +191,12 @@ def _equivalent_paths(conn, paths: set[str]) -> set[str]:
 
 
 def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
-                      second_stage: bool = False) -> dict:
+                      second_stage: bool = False,
+                      dedupe_text: bool = DEDUPE_TEXT_DEFAULT,
+                      page_cap: int | None = None) -> dict:
     query = _query_for(q)
-    results = search_evidence(query, limit=k, conn=conn, second_stage=second_stage)
+    results = search_evidence(query, limit=k, conn=conn, second_stage=second_stage,
+                              dedupe_text=dedupe_text, page_cap=page_cap)
     declared_docs = set(q.get("expected_documents") or [])
     expected_docs = _equivalent_paths(conn, declared_docs)
     expected_pages: dict[str, list[int]] = dict(q.get("expected_pages") or {})
@@ -637,9 +641,10 @@ def _routed_summary(routed_rows: list[dict], search_rows: list[dict]) -> dict:
 
 
 def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
-                   only_ingested: bool = False, report_name: str = "evaluation",
+                   only_ingested: bool = False, report_name: str | None = None,
                    second_stage: bool = False, db_path: Path | None = None,
-                   write: bool = True) -> dict:
+                   write: bool = True, dedupe_text: bool = DEDUPE_TEXT_DEFAULT,
+                   page_cap: int | None = None) -> dict:
     """Run the gold set.
 
     ``only_ingested`` restricts the run to questions whose expected documents are
@@ -670,7 +675,8 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
                     continue
                 kept.append(q)
             questions = kept
-        rows = [evaluate_question(q, k=k, conn=conn, second_stage=second_stage)
+        rows = [evaluate_question(q, k=k, conn=conn, second_stage=second_stage,
+                                  dedupe_text=dedupe_text, page_cap=page_cap)
                 for q in questions]
         # The routed pass is a *second* pass over the same questions. Nothing
         # here feeds back into `rows`; the search harness above is untouched.
@@ -710,6 +716,11 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
         c.pop("support")
 
     false_unsupported = [r for r in answerable if r["reported_unsupported"]]
+    raw_support = statistics.mean(supports) if supports else None
+    raw_no_answer_precision = (sum(1 for r in unanswerable if r["passed"]) / len(unanswerable)
+                               if unanswerable else None)
+    raw_false_unsupported = (len(false_unsupported) / len(answerable)
+                             if answerable else None)
     summary = {
         "k": k,
         "questions": len(rows),
@@ -718,16 +729,15 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
         "recall_at_k": round(recall, 3),
         "page_recall_at_k": round(page_recall, 3),
         "mrr": round(mrr, 3),
-        "evidence_support": round(statistics.mean(supports), 3) if supports else None,
+        "evidence_support": round(raw_support, 3) if raw_support is not None else None,
         "page_evidence_support": round(statistics.mean(page_supports), 3) if page_supports else None,
-        "no_answer_precision": round(
-            sum(1 for r in unanswerable if r["passed"]) / len(unanswerable), 3)
-        if unanswerable else None,
+        "no_answer_precision": round(raw_no_answer_precision, 3)
+        if raw_no_answer_precision is not None else None,
         # The other half of the picture. A detector can reach high no-answer
         # precision by declaring almost everything unsupported, so the two are
         # always reported together.
-        "false_unsupported_rate": round(len(false_unsupported) / len(answerable), 3)
-        if answerable else None,
+        "false_unsupported_rate": round(raw_false_unsupported, 3)
+        if raw_false_unsupported is not None else None,
         "false_unsupported_ids": [r["id"] for r in false_unsupported],
         "passed": sum(1 for r in rows if r["passed"]),
         "by_category": {k2: v for k2, v in sorted(by_cat.items())},
@@ -740,17 +750,36 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
         "interfaces": dict(sorted(interface_counts.items())),
         "routed": _routed_summary(routed_rows, rows),
         "second_stage": second_stage,
+        # The projection audit's R3 and R5. Recorded on every run, including the
+        # baseline, so a results file always says which configuration produced it.
+        "dedupe_text": dedupe_text,
+        "page_cap": page_cap,
         "second_stage_attachments": sum(r.get("second_stage_attachments") or 0 for r in rows),
         "acceptance": {},
+        # The values the gate was applied to, unrounded. `evidence_support`
+        # above is rounded for reading, and a value like 0.699512 reads as
+        # 0.700; a reader checking a verdict needs the number it was made on.
+        "raw": {"recall_at_k": recall, "mrr": mrr, "evidence_support": raw_support,
+                "no_answer_precision": raw_no_answer_precision,
+                "false_unsupported_rate": raw_false_unsupported},
     }
-    summary["acceptance"] = {
-        "A3_recall_at_10_ge_0.80": summary["recall_at_k"] >= 0.80,
-        "A3_evidence_support_ge_0.70": (summary["evidence_support"] or 0) >= 0.70,
-        "A4_no_answer_precision_ge_0.66": (summary["no_answer_precision"] or 0) >= 0.66,
-        "A4b_false_unsupported_le_0.20": (summary["false_unsupported_rate"] or 1.0) <= 0.20,
-    }
+    # Graded on the measured means, never on the three-decimal display values
+    # in `summary`. Reading the rounded number once let 0.699512 report as a
+    # pass against a 0.70 threshold; see G65.
+    summary["acceptance"] = acceptance_flags(
+        recall_at_k=recall, evidence_support=raw_support,
+        no_answer_precision=raw_no_answer_precision,
+        false_unsupported_rate=raw_false_unsupported)
     out = {"summary": summary, "results": rows, "routed_results": routed_rows}
     if write:
+        # Derived here, not only in the CLI. A programmatic
+        # `run_evaluation(page_cap=1)` used to inherit `report_name="evaluation"`
+        # and overwrite the shipped configuration's committed artifacts -- the
+        # exact failure `default_report_name` exists to prevent, left open on
+        # the one path that does not go through argument parsing.
+        report_name = default_report_name(report_name, second_stage,
+                                          dedupe_text=dedupe_text, page_cap=page_cap,
+                                          only_ingested=only_ingested)
         with open_write(TESTS_DIR / f"{report_name}-results.json") as f:
             json.dump(out, f, indent=2)
         _write_report(out, report_name)
@@ -900,17 +929,110 @@ def _routed_section(out: dict) -> list[str]:
     return lines
 
 
-def default_report_name(explicit: str | None, second_stage: bool) -> str:
+def _configuration_line(s: dict) -> str:
+    """What produced these numbers, in the report itself and not only its name."""
+    parts = [f"second stage {'on' if s.get('second_stage') else 'off'}",
+             f"R3 duplicate suppression {'on' if s.get('dedupe_text') else 'off'}",
+             ("R5 page cap off" if s.get("page_cap") is None
+              else f"R5 page cap {s['page_cap']}")]
+    if s.get("skipped_not_ingested"):
+        parts.append("restricted to ingested documents")
+    return ", ".join(parts) + "."
+
+
+def acceptance_table(s: dict) -> list[str]:
+    """The acceptance table's markdown rows.
+
+    Graded rows print the unrounded value, because the verdict was made on it:
+    a row reading `0.700 | A3 >= 0.70 - FAIL` gives the reader no way to tell a
+    formatting bug from a measurement 0.0005 short. Ungraded rows keep the
+    three-decimal reading precision. Results files written before `raw` existed
+    fall back to the rounded values.
+    """
+    raw = s.get("raw") or {}
+
+    def graded(key, criterion, flag):
+        value = raw.get(key, s.get(key))
+        shown = f"{value:.4f}" if isinstance(value, (int, float)) else value
+        return f"{shown} | {criterion} — {'PASS' if s['acceptance'][flag] else 'FAIL'} |"
+
+    return [
+        "| Metric | Value | Acceptance |",
+        "|---|---|---|",
+        f"| Document recall@{s['k']} | "
+        + graded("recall_at_k", "A3 ≥ 0.80", "A3_recall_at_10_ge_0.80"),
+        f"| Page recall@{s['k']} | {s['page_recall_at_k']:.3f} | reported |",
+        f"| MRR | {s['mrr']:.3f} | reported |",
+        "| Evidence support (terms in the retrieved unit) | "
+        + graded("evidence_support", "A3 ≥ 0.70", "A3_evidence_support_ge_0.70"),
+        f"| Page evidence support (terms anywhere on a retrieved page) | "
+        f"{s['page_evidence_support']} | reported |",
+        "| No-answer precision | "
+        + graded("no_answer_precision", "A4 ≥ 0.66", "A4_no_answer_precision_ge_0.66"),
+        "| False-unsupported rate (answerable questions wrongly declared unsupported) | "
+        + graded("false_unsupported_rate", "A4b ≤ 0.20", "A4b_false_unsupported_le_0.20"),
+    ]
+
+
+def acceptance_flags(*, recall_at_k: float, evidence_support: float | None,
+                     no_answer_precision: float | None,
+                     false_unsupported_rate: float | None) -> dict:
+    """The Phase 4 gate, graded on measured values rather than displayed ones.
+
+    `summary` rounds every metric to three decimals for reading. Grading that
+    rounded number is a different question from grading the measurement: a mean
+    unit support of 0.699512 displays as 0.700 and would report PASS against a
+    0.70 threshold it does not reach. That is the case that exposed this (G65);
+    no shipped configuration sits on a boundary today, which is exactly why the
+    gate has to be right before one does. Take the raw means here and round only
+    for display.
+
+    `None` means the run measured nothing -- no answerable questions, or no
+    no-answer questions -- and never grades as a pass. The ceiling criterion is
+    the same: an unmeasured rate is not evidence that the ceiling was respected.
+    """
+    return {
+        "A3_recall_at_10_ge_0.80": recall_at_k >= 0.80,
+        "A3_evidence_support_ge_0.70": evidence_support is not None
+        and evidence_support >= 0.70,
+        "A4_no_answer_precision_ge_0.66": no_answer_precision is not None
+        and no_answer_precision >= 0.66,
+        "A4b_false_unsupported_le_0.20": false_unsupported_rate is not None
+        and false_unsupported_rate <= 0.20,
+    }
+
+
+def default_report_name(explicit: str | None, second_stage: bool, *,
+                        dedupe_text: bool = DEDUPE_TEXT_DEFAULT,
+                        page_cap: int | None = None,
+                        only_ingested: bool = False) -> str:
     """Where a run's artifacts land, when the caller did not say.
 
-    The two configurations measure different things -- 0.623 unit support
-    against 0.672 -- and both are committed artifacts, so sharing a path means
-    the file says whatever the last run happened to be. An explicit `--name`
-    still wins; this only supplies the default nobody should have to remember.
+    Configurations that measure different things must not share a path -- 0.645
+    unit support against 0.6946 -- and all of these are committed artifacts, so
+    sharing one means the file says whatever the last run happened to be. Every
+    switch that changes what is measured therefore changes the name -- with two
+    exceptions that cannot be named usefully and are the caller's to handle:
+    `gold_paths` (a different question set) and `db_path` (a different store).
+    Pass an explicit name for those. An explicit `--name` still wins; this only
+    supplies the default nobody should have to remember.
     """
     if explicit:
         return explicit
-    return "evaluation-second-stage" if second_stage else "evaluation"
+    parts = ["evaluation"]
+    if second_stage:
+        parts.append("second-stage")
+    # Named by deviation from the shipped configuration, so `evaluation` always
+    # means "what this platform actually returns" however the defaults move.
+    if dedupe_text != DEDUPE_TEXT_DEFAULT:
+        parts.append("dedupe" if dedupe_text else "nodedupe")
+    if page_cap is not None:
+        parts.append(f"pagecap{page_cap}")
+    if only_ingested:
+        # A pilot-restricted run measures a different corpus, not a different
+        # retrieval configuration, and must not land on the full-corpus baseline.
+        parts.append("pilot")
+    return "-".join(parts)
 
 
 def _write_report(out: dict, report_name: str = "evaluation") -> None:
@@ -923,26 +1045,17 @@ def _write_report(out: dict, report_name: str = "evaluation") -> None:
         f"Questions: **{s['questions']}** ({s['answerable']} answerable, "
         f"{s['no_answer']} no-answer) · k = {s['k']}",
         "",
+        # Only the filename distinguished two configurations' reports, which is
+        # the same hazard `default_report_name` exists against -- a renamed or
+        # copied file lost the one thing that said what it measured.
+        "Configuration: " + _configuration_line(s),
+        "",
         (f"{len(s['skipped_not_ingested'])} questions were skipped because none of their "
          f"expected documents are in the store yet: "
          f"{', '.join(s['skipped_not_ingested'])}." if s.get("skipped_not_ingested")
          else "Every gold question was runnable."),
         "",
-        "| Metric | Value | Acceptance |",
-        "|---|---|---|",
-        f"| Document recall@{s['k']} | {s['recall_at_k']:.3f} | A3 ≥ 0.80 — "
-        f"{'PASS' if s['acceptance']['A3_recall_at_10_ge_0.80'] else 'FAIL'} |",
-        f"| Page recall@{s['k']} | {s['page_recall_at_k']:.3f} | reported |",
-        f"| MRR | {s['mrr']:.3f} | reported |",
-        f"| Evidence support (terms in the retrieved unit) | {s['evidence_support']} | "
-        f"A3 ≥ 0.70 — {'PASS' if s['acceptance']['A3_evidence_support_ge_0.70'] else 'FAIL'} |",
-        f"| Page evidence support (terms anywhere on a retrieved page) | "
-        f"{s['page_evidence_support']} | reported |",
-        f"| No-answer precision | {s['no_answer_precision']} | A4 ≥ 0.66 — "
-        f"{'PASS' if s['acceptance']['A4_no_answer_precision_ge_0.66'] else 'FAIL'} |",
-        f"| False-unsupported rate (answerable questions wrongly declared unsupported) | "
-        f"{s['false_unsupported_rate']} | A4b ≤ 0.20 — "
-        f"{'PASS' if s['acceptance']['A4b_false_unsupported_le_0.20'] else 'FAIL'} |",
+        *acceptance_table(s),
         "",
         "## By category",
         "",
@@ -979,7 +1092,11 @@ if __name__ == "__main__":
     ap.add_argument("-k", type=int, default=DEFAULT_K)
     ap.add_argument("--only-ingested", action="store_true")
     ap.add_argument("--second-stage", action="store_true")
-    ap.add_argument("--name", default="evaluation")
+    # None, not "evaluation": an explicit name wins over `default_report_name`,
+    # so hardcoding one here would let `-m fence_evidence.evaluate --second-stage`
+    # write second-stage numbers over the shipped configuration's committed
+    # artifacts -- the very hole `report_name=None` was introduced to close.
+    ap.add_argument("--name", default=None)
     args = ap.parse_args()
     out = run_evaluation(k=args.k, only_ingested=args.only_ingested,
                          report_name=args.name, second_stage=args.second_stage)

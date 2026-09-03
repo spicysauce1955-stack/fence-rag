@@ -2,31 +2,33 @@
 
 Questions: **78** (41 answerable, 37 no-answer) · k = 10
 
+Configuration: second stage on, R3 duplicate suppression on, R5 page cap off.
+
 Every gold question was runnable.
 
 | Metric | Value | Acceptance |
 |---|---|---|
-| Document recall@10 | 0.805 | A3 ≥ 0.80 — PASS |
+| Document recall@10 | 0.8049 | A3 ≥ 0.80 — PASS |
 | Page recall@10 | 0.659 | reported |
-| MRR | 0.552 | reported |
-| Evidence support (terms in the retrieved unit) | 0.672 | A3 ≥ 0.70 — FAIL |
+| MRR | 0.557 | reported |
+| Evidence support (terms in the retrieved unit) | 0.6946 | A3 ≥ 0.70 — FAIL |
 | Page evidence support (terms anywhere on a retrieved page) | 0.769 | reported |
-| No-answer precision | 0.324 | A4 ≥ 0.66 — FAIL |
-| False-unsupported rate (answerable questions wrongly declared unsupported) | 0.146 | A4b ≤ 0.20 — PASS |
+| No-answer precision | 0.3243 | A4 ≥ 0.66 — FAIL |
+| False-unsupported rate (answerable questions wrongly declared unsupported) | 0.1463 | A4b ≤ 0.20 — PASS |
 
 ## By category
 
 | Category | n | doc hits | passed | mean support | failing ids |
 |---|---|---|---|---|---|
 | comparison | 4 | 4 | 2 | 0.516 | gq-119, gq-120 |
-| conditional_table_lookup | 7 | 5 | 4 | 0.574 | gq-113, gq-004, gq-006 |
+| conditional_table_lookup | 7 | 5 | 4 | 0.61 | gq-113, gq-004, gq-006 |
 | conflict | 2 | 1 | 0 | 0.298 | gq-015, gq-016 |
 | current_version | 2 | 1 | 1 | 0.6 | gq-011 |
 | exact_identifier | 3 | 3 | 3 | 1.0 | — |
 | exact_product | 4 | 4 | 2 | 0.417 | gq-102, gq-104 |
 | historical_version | 2 | 2 | 2 | 1.0 | — |
 | no_answer | 37 | 0 | 12 | None | gq-116, gq-117, gq-118, gq-201, gq-202, gq-203, gq-204, gq-206, gq-207, gq-208, gq-210, gq-215, gq-222, gq-223, gq-224, gq-225, gq-226, gq-227, gq-228, gq-229, gq-230, gq-231, gq-232, gq-233, gq-234 |
-| paraphrase | 5 | 3 | 2 | 0.467 | gq-106, gq-108, gq-109 |
+| paraphrase | 5 | 3 | 3 | 0.6 | gq-106, gq-108 |
 | source_verification | 4 | 4 | 4 | 0.834 | — |
 | table_retrieval | 4 | 3 | 3 | 0.9 | gq-009 |
 | visual_evidence | 4 | 3 | 3 | 0.938 | gq-019 |
@@ -88,9 +90,9 @@ Only categories that actually failed appear here. Nothing below is built.
 - **Experiment**: Rarest-term coverage plus a calibrated score floor, reported as an explicit unsupported-answer response.
 - **Acceptance**: No-answer precision >=0.66 with no loss of answerable recall.
 
-### paraphrase — 3 of 5 failing
+### paraphrase — 2 of 5 failing
 
-- **Problem**: paraphrase questions fail lexical retrieval (failing ids: gq-106, gq-108, gq-109).
+- **Problem**: paraphrase questions fail lexical retrieval (failing ids: gq-106, gq-108).
 - **Experiment**: Dense semantic retrieval over the pilot corpus.
 - **Acceptance**: Improves recall@10 on paraphrase questions by >=0.15 without reducing recall on exact_identifier or conditional_table_lookup.
 
@@ -123,7 +125,7 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 
 - query: `crossbuck gate installation Weatherables cross buck gate rail cut length vinyl crossbuck gate instructions`
 - expected: manuals/weatherables/weatherables-crossbuck-gate-installation.pdf
-- doc rank: 8 · unit support: 0.0 · page support: 0.0 · missing terms: ['Cross Buck Fence Gate Installation Guide', '2 1/2”', '93.5”']
+- doc rank: 7 · unit support: 0.0 · page support: 0.0 · missing terms: ['Cross Buck Fence Gate Installation Guide', '2 1/2”', '93.5”']
 - top hit: manuals/weatherables/weatherables-crossbuck-fence-installation-2024.pdf p2 score 19.4942
 
 ### gq-106 — paraphrase
@@ -141,14 +143,6 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 - expected: manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf
 - doc rank: None · unit support: 0.0 · page support: 0.0 · missing terms: ['green dots', 'red dots', 'Line Posts - no marking']
 - top hit: manuals/industry-standards/Digger-Specialties-Polyvinyl-Fence-Brochure_Racking-Post-Spacing.pdf p27 score 12.8357
-
-### gq-109 — paraphrase
-*How is a fence post beefed up so the run survives hurricane gusts?*
-
-- query: `strengthen fence post for wind heavy duty post high wind vinyl fence hurricane rated vinyl fence post`
-- expected: manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf
-- doc rank: 1 · unit support: 0.333 · page support: 1.0 · missing terms: ['.250”', 'VH88']
-- top hit: manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf p2 score 15.4624
 
 ### gq-113 — conditional_table_lookup
 *I'm running an 8 ft high Illusions privacy fence with the 75 mph wind kit, so I have to use the 8" x 8" posts. How deep and how wide does the post hole have to be?*
@@ -195,7 +189,7 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 
 - query: `how much does vinyl privacy fence rack Chesterfield racking degrees Kingston rackable section 8 foot`
 - expected: manuals/certainteed-bufftech/bufftech-catalog-2014.pdf, manuals/industry-standards/Digger-Specialties-Polyvinyl-Fence-Brochure_Racking-Post-Spacing.pdf
-- doc rank: 7 · unit support: 0.333 · page support: 0.333 · missing terms: ['Rackable', '12” per 8’ Section']
+- doc rank: 5 · unit support: 0.333 · page support: 0.333 · missing terms: ['Rackable', '12” per 8’ Section']
 - top hit: manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf p46 score 16.3232
 
 ### gq-201 — no_answer
@@ -379,7 +373,7 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 
 - query: `Exposure C 36 inch footing maximum post spacing vinyl fence NOA Bufftech post spacing footing depth table HVHZ max post spacing exposure C`
 - expected: manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf
-- doc rank: None · unit support: 0.75 · page support: 1.0 · missing terms: ['POST SPACING AND FOOTING DIMENSIONS']
+- doc rank: None · unit support: 1.0 · page support: 1.0 · missing terms: []
 - top hit: manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf p17 score 31.3999
 
 ### gq-006 — conditional_table_lookup

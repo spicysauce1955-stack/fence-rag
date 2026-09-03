@@ -142,24 +142,24 @@
     "ocr_share": 0.3392
   },
   "result_list_composition": {
-    "queries": 59,
-    "slots": 590,
+    "queries": 78,
+    "slots": 780,
     "by_element_type": {
-      "paragraph": 437,
-      "list": 67,
-      "table": 49,
-      "drawing": 24,
+      "paragraph": 579,
+      "list": 107,
+      "table": 53,
+      "drawing": 28,
       "caption": 5,
       "drawing_label": 4,
       "ocr_supplement": 4
     },
-    "slots_with_duplicated_text": 186,
-    "duplicated_share": 0.3153,
-    "slots_under_40_chars": 80,
-    "tiny_share": 0.1356,
-    "slots_repeating_a_page": 97,
-    "repeat_page_share": 0.1644,
-    "mean_distinct_pages_per_list": 8.36
+    "slots_with_duplicated_text": 243,
+    "duplicated_share": 0.3115,
+    "slots_under_40_chars": 87,
+    "tiny_share": 0.1115,
+    "slots_repeating_a_page": 118,
+    "repeat_page_share": 0.1513,
+    "mean_distinct_pages_per_list": 8.49
   },
   "within_page_ceiling": {
     "questions": 41,

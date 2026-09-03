@@ -276,8 +276,28 @@ Things that will bite you if you don't know them (all measured, see the corpus a
 - `pdftotext -bbox-layout` already reports word boxes in *display* space; only the page attributes
   are unrotated. Do not add a rotation transform — that bug was found and removed once.
 - Headings are excluded from `retrieval_units`, and 33.9% of them are reachable nowhere else. The
-  relevance audit lists this and six other defects; its recommendations are deliberately unapplied
-  pending review, so do not "fix" the projection casually.
+  relevance audit lists this and six other defects; **most of its recommendations are still
+  deliberately unapplied** pending review, so do not "fix" the projection casually. Three have now
+  been measured and settled: R1 built and rejected (G51), R3 built and **on by default** as a
+  retrieval-time filter, R5 built and rejected (both G64). **R3's dedupe key is the whole
+  returned record — `text` AND `heading_path` — not `text` alone.** Keyed on text, it treats
+  two table rows printed under different governing loads as one duplicate and discards a
+  wind exposure; that was the first cut, it cost `gq-010` an answer term on 11 of 78
+  questions, and only code review caught it. **And because the key deliberately spans
+  documents, every row R3 suppresses is reported on the row that replaced it as
+  `retrieval_reason["duplicates_suppressed"]`** — without that, R3 dropped 8 genuinely
+  distinct documents from result lists and no metric noticed, because term support and
+  recall@10 cannot see a lost citation. Both halves are what make R3 safe to default on. Note what R3 taught — the audit scopes it
+  *within a document*, which reaches 5.5% of top-10 slots, where the duplication that actually
+  spends slots is cross-document and reaches 35.3%. Read a recommendation's scope before costing it.
+- **The relevance audit measures F2/F3 by calling `search_evidence`, so it asks for
+  `dedupe_text=False` explicitly.** R3 is on by default; without the pin the audit would read its
+  own fix and report the duplication it exists to measure as solved. Any new default-on retrieval
+  filter needs the same treatment.
+- **Acceptance criteria are graded on unrounded means** (`evaluate.acceptance_flags`), and
+  `summary["raw"]` carries them. Grading the three-decimal display value once reported PASS for
+  0.699512 against a 0.70 threshold. Nothing sits on a boundary today; that is not a reason to
+  grade a rounded number. See G65.
 - A `superseded_by` edge reads subject → object: its *from* side is the superseded document. Marking
   the wrong side once labelled every current NOA superseded; `tests/test_versions.py` guards it.
 - No-answer detection does not work on near-miss questions and cannot be fixed with a threshold —
