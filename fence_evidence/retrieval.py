@@ -339,12 +339,96 @@ FILTER_COLUMNS = {
 }
 
 
+def _normalized_unit_text(text: str | None) -> str:
+    """The key two units are duplicates under. Whitespace and case only.
+
+    Deliberately not a fuzzy match: R3 is about *identical* boilerplate spending
+    result slots, and anything looser would start suppressing evidence that
+    merely resembles other evidence.
+    """
+    return " ".join((text or "").split()).lower()
+
+
+def _slot_filtered(rows, *, limit: int, dedupe_text: bool, page_cap: int | None):
+    """Spend `limit` result slots on distinct evidence — the audit's R3 and R5.
+
+    Walks the ranked rows in order and keeps a row unless it repeats text
+    already kept (R3) or comes from a page already at its quota (R5). A
+    suppressed row is *replaced* by the next-best row rather than leaving the
+    list short, which is why `search_evidence` over-fetches when either filter
+    is on. Rank order among the kept rows is untouched: this decides which rows
+    are shown, never in what order.
+
+    With both filters off it truncates and nothing else, so the shipped
+    behaviour is reproduced exactly rather than approximately.
+    """
+    kept: list = []
+    seen_text: set[str] = set()
+    per_page: dict[tuple, int] = {}
+    for row in rows:
+        if len(kept) >= limit:
+            break
+        norm = _normalized_unit_text(row["text"]) if dedupe_text else ""
+        # An empty unit says nothing, so it is not evidence that a later unit
+        # repeats it. Without this, two blank units collapse into one.
+        if dedupe_text and norm and norm in seen_text:
+            continue
+        page_key = (row["document_id"], row["page_no"])
+        if page_cap is not None and per_page.get(page_key, 0) >= page_cap:
+            continue
+        kept.append(row)
+        if norm:
+            seen_text.add(norm)
+        if page_cap is not None:
+            per_page[page_key] = per_page.get(page_key, 0) + 1
+    return kept
+
+
+# How many ranked rows to consider when a slot filter is on. The filters can
+# only choose among the rows they are given, so under-fetching would cap the
+# benefit and shorten lists; over-fetching costs one wider BM25 scan and no
+# extra per-result work, because the expensive per-row lookups happen after
+# filtering. 8x covers the worst duplication measured in this corpus
+# (`1. None.`, 194 units across 14 documents) at k=10.
+SLOT_FILTER_OVERFETCH = 8
+
+# R3 ships on; R5 does not. Measured over the 78-question gold set at k=10:
+#
+#   variant       recall@10   MRR     unit support   page support   passed
+#   baseline      0.805       0.552   0.623          0.769          33
+#   R3            0.805       0.557   0.650          0.777          35
+#   R5 cap=1      0.805       0.555   0.583          0.782          33
+#   R5 cap=2      0.805       0.553   0.606          0.777          33
+#   R3 + cap=2    0.805       0.558   0.637          0.777          35
+#
+# R3 improved three questions and worsened none, which is structural rather than
+# lucky: a suppressed row's text is still in the list through the row that kept
+# it, so the returned text can only grow. R5 buys page diversity (0.769 ->
+# 0.782) by discarding a better second unit on a page already returned -- eight
+# questions worse, `gq-003` from 1.0 to 0.5 -- which is the risk the audit
+# itself named. `docs/state-and-gaps.md` G64 has the full account.
+DEDUPE_TEXT_DEFAULT = True
+
+
 def search_evidence(query: str, *, limit: int = 10, filters: dict | None = None,
                     mode: str = "fts5", conn: sqlite3.Connection | None = None,
                     min_score: float = 0.0,
-                    second_stage: bool = False) -> list[SearchResult]:
+                    second_stage: bool = False,
+                    dedupe_text: bool = DEDUPE_TEXT_DEFAULT,
+                    page_cap: int | None = None) -> list[SearchResult]:
+    """`dedupe_text` and `page_cap` are the projection audit's R3 and R5. R3 is
+    on by default and R5 is off; both are measured, see `DEDUPE_TEXT_DEFAULT`.
+
+    Pass `dedupe_text=False` for the unfiltered ranking — which is what the
+    relevance audit does, because it measures the projection rather than this
+    function's filters."""
     if mode != "fts5":
         raise ValueError(f"only mode='fts5' is implemented in the MVP; got {mode!r}")
+    if page_cap is not None and page_cap < 1:
+        # A cap of zero admits nothing, so it would return an empty list for
+        # every query and read as "the corpus has no answer" rather than as the
+        # bad argument it is.
+        raise ValueError(f"page_cap must be at least 1; got {page_cap!r}")
     own = conn is None
     conn = conn or connect()
     try:
@@ -381,8 +465,15 @@ def search_evidence(query: str, *, limit: int = 10, filters: dict | None = None,
              ORDER BY bm25
              LIMIT ?
         """
-        params.append(limit)
+        slot_filtering = dedupe_text or page_cap is not None
+        params.append(limit * SLOT_FILTER_OVERFETCH if slot_filtering else limit)
         rows = conn.execute(sql, params).fetchall()
+        if slot_filtering:
+            # `min_score` first: a row that would be dropped below must not
+            # spend a slot the filters are trying to free.
+            rows = _slot_filtered(
+                [r for r in rows if round(-float(r["bm25"]), 4) >= min_score],
+                limit=limit, dedupe_text=dedupe_text, page_cap=page_cap)
         results: list[SearchResult] = []
         for r in rows:
             score = round(-float(r["bm25"]), 4)

@@ -2,8 +2,16 @@
 
 ```text
 Status: Audit. Findings only.
-Action taken: none. No classification, indexing, weighting or projection
-              change has been applied, pending review.
+Action taken: none at the time of writing. Three recommendations have since
+              been measured and settled, and this document has NOT been
+              re-measured against them -- every number below is the projection
+              as audited, which is still what the projection is:
+                R1  built, measured, REJECTED (state-and-gaps G51)
+                R3  built as a retrieval-time filter, ACCEPTED, on by default
+                R5  built as a retrieval-time filter, measured, REJECTED
+              R3 and R5 are 2026-09-03, state-and-gaps G64. Neither changed
+              the projection, so §1-§5 stand unaltered. R4 and R6-R9 remain
+              unapplied pending review.
 ```
 
 Audited: `retrieval_units` and `retrieval_fts` as built by
@@ -145,8 +153,10 @@ no-answer precision, 0.667 → 0.333.
 | R1 | Project a heading as a unit only when no other unit on that page would carry it in `heading_path` — a fallback, not a general re-admission | F1, F6 | reintroduces some short units; needs the no-answer metric watched, per the weight experiment |
 | R2 | Alternatively, attach the nearest heading text to the *first* unit beneath it as a prefix, rather than indexing headings separately | F1 | duplicates heading text into unit `text`, double-counting it against the `heading_path` column |
 | R3 | Collapse exact-duplicate unit text within a document to one unit, linking the others; keep every canonical element | F2 | none to canonical data; changes result ids, so anything caching them must be rebuilt |
+| | **Outcome 2026-09-03: accepted, but not as specified.** Within-document collapse reaches 5.5% of top-10 slots; the duplication that spends slots is cross-document and reaches 35.3%. Built instead as a retrieval-time filter over the whole ranking, on by default, projection untouched. Unit support 0.623 → 0.650, three questions better and none worse. G64. | | |
 | R4 | Suppress units whose text is below a minimum information threshold (e.g. under 12 characters, or matching known boilerplate) from the *index only* | F2, F4 | a hard threshold will drop some genuine short answers such as a bare dimension |
 | R5 | Cap results per page in `search_evidence` (one unit per page, or two) | F3 | reduces recall for pages that genuinely hold two distinct answers |
+| | **Outcome 2026-09-03: built, measured, rejected — this risk column was right.** Page support 0.769 → 0.782, unit support 0.623 → 0.583, eight gold questions worse against two better. Kept as `--page-cap N`, off. G64. | | |
 | R6 | Add row-level table units alongside the whole-grid unit, from `table_cells` | F5 | multiplies unit count for large tables; needs the duplicate-suppression of R3 to avoid flooding |
 | R7 | Lower the mojibake judgement floor from 200 characters, or apply the check to unit text at projection time | F7 | more false positives on short legitimate pages; would need re-extraction to take effect on canonical rows |
 | R8 | Carry `ocr_mean_confidence` into the result object, and consider it as a ranking signal | F8 | ranking on confidence risks burying the scanned NOAs, which are the highest-value documents |

@@ -57,6 +57,14 @@ def main(argv: list[str] | None = None) -> int:
                         "query terms the matched unit missed (opt-in: measured at 0.672 "
                         "unit support against a 0.70 acceptance target, see "
                         "docs/second-stage-evaluation.md)")
+    # The projection audit's R3 and R5, measured 2026-09-03 (state-and-gaps
+    # G64). R3 earned its default -- three gold questions better, none worse --
+    # so the flag turns it OFF; R5 did not, so its flag turns it on.
+    p.add_argument("--no-dedupe-text", dest="dedupe_text", action="store_false",
+                   help="turn off R3, which is on by default: without it a list may "
+                        "spend several of its k slots on identical boilerplate")
+    p.add_argument("--page-cap", type=int, default=None,
+                   help="R5: at most N results from any one page, backfilled")
 
     p = sub.add_parser("document", help="document record with versions and relations")
     p.add_argument("identifier")
@@ -87,6 +95,10 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("evaluate", help="Phase 4: run the gold evaluation set")
     p.add_argument("-k", type=int, default=10)
     p.add_argument("--second-stage", action="store_true")
+    p.add_argument("--no-dedupe-text", dest="dedupe_text", action="store_false",
+                   help="measure without R3 (see `search --no-dedupe-text`)")
+    p.add_argument("--page-cap", type=int, default=None,
+                   help="measure the projection audit's R5 (see `search --page-cap`)")
     # Left as None so `--second-stage` can pick its own default below. Two
     # different measurements sharing one artifact path is not a naming nicety:
     # `cli evaluate --second-stage` used to overwrite `evaluation-report.md`
@@ -338,8 +350,12 @@ def main(argv: list[str] | None = None) -> int:
                          ("element_type", args.element_type)):
             if val:
                 filters[key] = val
+        if args.page_cap is not None and args.page_cap < 1:
+            _print({"error": f"--page-cap must be at least 1; got {args.page_cap}"})
+            return 2
         results = search_evidence(args.query, limit=args.limit, filters=filters or None,
-                                  second_stage=args.second_stage)
+                                  second_stage=args.second_stage,
+                                  dedupe_text=args.dedupe_text, page_cap=args.page_cap)
         out = []
         for r in results:
             d = r.to_dict()
@@ -403,10 +419,15 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "evaluate":
         _warn_unfetched()
         from .evaluate import run_evaluation, default_report_name
+        if args.page_cap is not None and args.page_cap < 1:
+            _print({"error": f"--page-cap must be at least 1; got {args.page_cap}"})
+            return 2
         _print(run_evaluation(
             k=args.k, second_stage=args.second_stage,
-            report_name=default_report_name(args.name,
-                                            args.second_stage))["summary"])
+            dedupe_text=args.dedupe_text, page_cap=args.page_cap,
+            report_name=default_report_name(args.name, args.second_stage,
+                                            dedupe_text=args.dedupe_text,
+                                            page_cap=args.page_cap))["summary"])
     elif args.cmd == "audit":
         _warn_unfetched()
         from .audit import run_audit

@@ -3104,6 +3104,108 @@ figure is 519, and 61 of them are in `gaps[].cites[]` rather than all in
 
 ---
 
+## 3d. Update, 2026-09-03 — the audit's R3 and R5, measured
+
+### G64 — R3 ships on, R5 is rejected, and the audit's own R3 was a sixth the size it looked
+
+`[measured]` 2026-09-03, over the 78-question gold set at k = 10. `docs/build-plan.md`
+§6 and §4 item 2 of this file both named R3 and R5 as the next retrieval work,
+"worth 29.5% and 20.2% of top-10 slots", and both said measure rather than assume.
+This is that measurement.
+
+**The audit's R3 is not the R3 that was worth 29.5%.** `projection-relevance-audit.md`
+§6 specifies R3 as collapsing duplicate unit text *within a document*; its F2 headline
+counts text duplicated anywhere in the index. Those are very different populations:
+
+| | units | share |
+|---|---|---|
+| units whose text is duplicated **somewhere in the index** (F2 as published) | 5,060 | 46.5% |
+| units whose text is duplicated **within their own document** | 1,785 | 16.4% |
+
+At slot level the gap is wider still: 5.5% of top-10 slots hold text duplicated inside
+their own document, against 35.3% duplicated somewhere. The duplication that spends
+result slots is overwhelmingly **cross-document** — `1. None.`, the "Evidence Submitted"
+boilerplate on every Miami-Dade NOA, is 150 units across 14 documents. So R3 as literally
+specified could not have delivered R3's own headline, and the index-time collapse it
+describes was **not built**. What was built is the same idea at retrieval time.
+
+**What was built.** `search_evidence` gained two opt-in slot filters
+(`retrieval._slot_filtered`) that walk the ranked rows and skip a row that repeats text
+already kept (R3) or comes from a page already at its quota (R5). Because a skipped row
+is *backfilled* from the next-best row rather than dropped, the list stays k long. The
+projection is untouched — no `unit_id` churn, no BM25 IDF shift, no rebuild, and
+`tests/test_idempotency.py` never comes into it.
+
+**The measurement:**
+
+| variant | recall@10 | MRR | unit support | page support | passed |
+|---|---|---|---|---|---|
+| baseline | 0.805 | 0.552 | 0.623 | 0.769 | 33 |
+| **R3 dedupe** | 0.805 | 0.557 | **0.650** | 0.777 | **35** |
+| R5 cap = 1 | 0.805 | 0.555 | 0.583 | **0.782** | 33 |
+| R5 cap = 2 | 0.805 | 0.553 | 0.606 | 0.777 | 33 |
+| R3 + cap = 1 | 0.805 | 0.560 | 0.594 | 0.782 | 33 |
+| R3 + cap = 2 | 0.805 | 0.558 | 0.637 | 0.777 | 35 |
+
+`no_answer_precision` (0.324) and `false_unsupported_rate` (0.146) are identical in every
+row, reported together as always.
+
+**R3 accepted, and shipped on by default.** Three questions improved and **none got
+worse** — `gq-109` 0.333 → 1.0 (paraphrase), `gq-004` 0.75 → 1.0 and `gq-007` 0.4 → 0.6
+(conditional table lookup); `gq-007` and `gq-109` newly pass, nothing newly fails. That
+is structural rather than lucky, which is the reason for turning it on rather than
+leaving it behind a flag: a suppressed row's text is still in the list through the row
+that kept it, so the set of text returned can only grow. `tests/test_slot_filters.py`
+asserts that superset property directly. `search --no-dedupe-text` reaches the raw
+ranking.
+
+**R5 rejected.** It does exactly what it promised — page support 0.769 → 0.782, mean
+distinct pages per list up — and the trade is bad: unit support falls 0.623 → 0.583,
+with **two questions better and eight worse** (`gq-003` 1.0 → 0.5, `gq-021` 0.667 →
+0.333 and newly failing). Forcing page diversity discards a genuinely better second unit
+on a page already returned, which is the risk `projection-relevance-audit.md` §6 named
+for R5 in its own risk column. It stays available as `--page-cap N`, off, so the
+measurement can be re-run rather than re-argued.
+
+**A hazard worth naming: the audit measures F2 and F3 *through* `search_evidence`.**
+With R3 on by default, `audit.result_list_composition` would have been reading its own
+fix and reporting that the duplication it exists to measure had gone. Both of its calls
+now pass `dedupe_text=False` explicitly, and `tests/test_slot_filter_wiring.py` fails if
+either figure reaches zero. Re-run after the change: 243 of 780 slots still hold
+duplicated text (31.2%) and 118 still repeat a page (15.1%).
+
+**Where this leaves retrieval.** Unit support 0.623 → 0.650 against a 0.70 acceptance
+target — still short, and the first-stage recall deficit G51 identified is still the
+dominant residual. R3 is a slot-budget fix, not a recall fix, and it was never going to
+be one.
+
+### G65 — the acceptance gate was grading the display value, not the measurement
+
+`[measured]`, found while checking G64's second-stage number. `run_evaluation` rounds
+every metric to three decimals for reading, and the Phase 4 gate was applied to those
+rounded values. With R3 on, the second stage measures mean unit support of **0.699512**
+— which displays as `0.700` and duly reported `A3_evidence_support_ge_0.70: true` for a
+number that does not reach 0.70. The report said `0.7 | A3 ≥ 0.70 — PASS`.
+
+Latent until now rather than wrong in practice: no configuration had ever landed inside
+a rounding step of a threshold (0.623, 0.672). R3 moved one there. The same shape as
+G52 — a metric saying more than it measured.
+
+Fixed: `evaluate.acceptance_flags()` grades the unrounded means, `summary["raw"]` carries
+them in the results file so a verdict can be re-checked, and `acceptance_table()` prints
+graded rows at four decimals so `0.6995 | A3 ≥ 0.70 — FAIL` cannot be mistaken for a
+formatting bug. `None` — nothing measured — now grades as a fail on all three, including
+the ceiling criterion, where an unmeasured rate was previously treated as respecting it.
+`tests/test_acceptance_precision.py` covers each boundary.
+
+**Both committed evaluation reports were regenerated**, and the second stage's headline
+moves with them: **0.672 → 0.6995** unit support, 38 → 39 questions passed, on R3 alone.
+`docs/second-stage-evaluation.md` recorded 0.672 against a 0.70 target as the reason the
+second stage stays opt-in. It is now 0.0005 short of that target rather than 0.028 — and
+still short, so it stays opt-in.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and
@@ -3118,12 +3220,15 @@ than finishing it would have.*
    publishes nothing because nothing is promoted, and nothing can be promoted
    until somebody looks. This is the only item that unblocks the publishing
    layer, and no amount of code will do it.
-2. **Duplicate suppression and a per-page cap in the projection** — the audit's
-   R3 and R5, worth 29.5% and 20.2% of top-10 slots. Promoted to second because
-   G51 falsified the item that used to be first: R1's heading fallback moves
-   evidence support 0.115 the *wrong* way, so the residual is a first-stage
-   recall deficit and the slots wasted on redundancy are the cheapest place to
-   look for room. Measure, do not assume — R1 read just as promising.
+2. ~~**Duplicate suppression and a per-page cap in the projection**~~ —
+   **done and measured, 2026-09-03; see G64.** R3 is built, accepted and on by
+   default (unit support 0.623 → 0.650, three questions better and none worse);
+   R5 is built, measured and rejected (0.623 → 0.583, eight questions worse) and
+   stays behind `--page-cap`. Neither was built in the projection in the end —
+   both are retrieval-time filters, because the audit's within-document framing
+   of R3 reaches 5.5% of slots where the cross-document duplication reaches 35.3%.
+   The first-stage recall deficit G51 identified remains the dominant residual,
+   so item 5 below is now the retrieval item with the most headroom.
 3. **Visual or model-based reading of the NOA drawing tables** (G2) — still the
    only route to the corpus's highest-value numbers, still justified by
    measurement (G15: OCR recovers 0.588 of the values containing a digit), and
@@ -3140,4 +3245,5 @@ Closed or answered from the previous list: **more negative questions** (G7 — 1
 to 37, and the per-class result settled what the detector actually is);
 **version status from document bodies** (G3 — measured and closed as a question,
 not by building a speculative extractor); **unit granularity via the heading
-fallback** (G51 — built, measured, rejected).
+fallback** (G51 — built, measured, rejected); **slot-budget redundancy** (G64 —
+R3 built and accepted, R5 built and rejected).

@@ -125,7 +125,12 @@ def result_list_composition(conn: sqlite3.Connection, k: int = 10) -> dict:
     total = tiny = dup = repeat_page = 0
     distinct_pages = []
     for q in load_gold():
-        results = search_evidence(_query_for(q), limit=k, conn=conn)
+        # Explicitly unfiltered. This audit measures the projection, so it must
+        # see the ranking the projection produces -- not `search_evidence`'s
+        # default R3 dedupe, which exists precisely to hide F2's duplication
+        # from a result list. Reading the fix instead of the defect would
+        # silently report F2 and F3 as solved.
+        results = search_evidence(_query_for(q), limit=k, conn=conn, dedupe_text=False)
         seen = set()
         for r in results:
             total += 1
@@ -163,7 +168,12 @@ def within_page_ceiling(conn: sqlite3.Connection, k: int = 10) -> dict:
         if not q.get("answerable") or not q.get("expected_answer_terms"):
             continue
         terms = q["expected_answer_terms"]
-        results = search_evidence(_query_for(q), limit=k, conn=conn)
+        # Explicitly unfiltered. This audit measures the projection, so it must
+        # see the ranking the projection produces -- not `search_evidence`'s
+        # default R3 dedupe, which exists precisely to hide F2's duplication
+        # from a result list. Reading the fix instead of the defect would
+        # silently report F2 and F3 as solved.
+        results = search_evidence(_query_for(q), limit=k, conn=conn, dedupe_text=False)
         returned = "\n".join(_returned_evidence(r) for r in results)
         cur = sum(1 for t in terms if _norm(t) in returned) / len(terms)
         parts = []
