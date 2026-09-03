@@ -2444,6 +2444,34 @@ session already flagged twice.
 Full suite after all of the above: **1088 tests, 0 failures, 1 error (the
 537-row gap above), 1 expected failure** — real, named, not patched.
 
+**Closed 2026-09-03, without new code.** The open design question above
+had an existing answer sitting unused: `cropcache.realign_review_crops`
+(G46, `cli realign-review-crops`) already rewrites `crop_path`/
+`crop_sha256` for *every* `table_read_candidates` row sharing a
+`(document_id, page_no)`, by rendering that page's ref fresh and keying
+the `UPDATE` on the page alone — never on reader. It was built for a
+different defect (the queue's stored digest disagreeing with what the API
+serves) and had not been re-run since the `chatgpt-web-1` batch loaded, so
+it never got a chance to also close this one. Before running it for real,
+the untested reasoning from above was checked directly against the store:
+all 25 distinct `(document_id, page_no)` pairs behind the 537 rows have
+**exactly one** distinct crop (path + sha256) among their other readers —
+no page has two siblings disagreeing about the same crop — so a sibling's
+crop is the right answer, not a guess. `cli realign-review-crops --apply`:
+25 pages realigned, 0 unrenderable, **1074 rows updated** (the 537 plus
+their siblings on the same 25 pages, all converging on one freshly
+rendered, agreed crop). `[measured]` after: 0 `table_read_candidates` rows
+anywhere in the store now have an empty `crop_path` or a null
+`crop_sha256`. The 44 already-reviewed crops were untouched — their stored
+digest already matched what the API serves, so `realign_review_crops`'s
+own skip condition (`served == stored`) left them alone; the review
+ledger's `crop_sha256` keys are therefore still valid. Full suite: **1151
+tests, 0 failures, 0 errors, 1 expected failure** — the first fully clean
+run this project has had. `refs --verify` (2282/2282) and `snapshot
+--verify-stored` (4/4) both stayed clean; neither table facts nor the
+published snapshot read `table_read_candidates.crop_*` at all, so nothing
+downstream needed re-cutting.
+
 ---
 
 ### G59 — G40 fixed; amendment 006 built: `footing_schedule` publishes, 26 gaps → 0
