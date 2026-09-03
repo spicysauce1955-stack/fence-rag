@@ -3596,11 +3596,31 @@ to `table_read_candidates` rows with `review_status='accepted'` and a named huma
 and 10 sampled `crop_sha256` values still match their files on disk. The number is right;
 the pointer to where it came from is not.
 
-**Not fixed here.** The fix is to bind `element_id` to the element the crop actually covers
-— intersecting the crop's bbox with `elements.bbox` on that page. That changes 108 facts'
-`element_id`, therefore their `ref_id`, therefore every citation in the published snapshot.
-It is a correction of wrong data rather than churn for its own sake, but it is a re-publish
-and wants a deliberate decision, like G66.
+**FIXED 2026-09-03, and not the way this entry first proposed.** The first plan was to bind
+`element_id` to the element the crop covers, by intersecting the crop's bbox with
+`elements.bbox`. Investigating it showed that cannot work and should not: the reviewed crop
+is the **whole page** — `is_page=True`, `bbox=None` — because a person looked at the page
+image, not a sub-region. No geometry can recover a table rectangle that was never chosen,
+and inventing one would put a precise-looking box around a judgement nobody made at that
+precision.
+
+So the citation is the page, which is what was actually examined. `refs.ref_id(sha, page,
+None)` was already the page-level id and `refs.build_index` already marked it `is_page`;
+`crops.render_crop` already read `bbox=None` as "the whole page, not an error". The only
+missing piece was a way to mint one — `SnapshotBuilder.source_ref_page()` — and its absence
+is the whole reason `promote_tables` settled for the first element in reading order.
+
+`[measured]` after: **45 of 45 parameter citations resolve to a page, 0 to an element, 0
+dangling**; `cli refs --verify` reports 2,854 cites, 2,854 resolved, `resolved_as_page_only:
+45`. Published as snapshot `762967d3`. Registration was extracted to
+`SnapshotBuilder._register_doc` so both minters share one closure implementation rather than
+each carrying a copy that can drift.
+
+Note what this does NOT fix: `facts.element_id` for a promoted fact still holds the
+page's first element, because the column is `NOT NULL` and references `elements`. It is no
+longer the evidence anchor — the published citation is — but the store still carries a
+misleading value, and a reader joining `facts` to `elements` to see "where this came from"
+gets the banner. Recorded rather than papered over.
 
 ### G74 — `uncovered` claims gaps the source explicitly closes
 
@@ -3633,9 +3653,10 @@ docstring, which explains that keeping an omitted dimension in the domain exists
 so these cases are **not** misreported as uncovered.
 
 This is the inverse of a silent wrong answer: it makes Planning warn on lines the source
-actually covers. Cheap to fix — use `_matches()` — and worth fixing, because `uncovered` is
-one of the two channels by which this platform tells its consumer what it does not know, and
-a channel that cries wolf stops being read.
+actually covers. **FIXED 2026-09-03** — `_uncovered_points()` uses `_matches`, and a test
+asserts the two agree for every point rather than trusting them to. `[measured]` after:
+`footing_schedule`'s uncovered list is `[{"exposure_category": "B", "hvhz": true}]` — the
+one genuine gap — down from five. Published in snapshot `762967d3`.
 
 ---
 

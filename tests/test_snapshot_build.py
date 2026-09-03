@@ -112,7 +112,8 @@ class TestParameterGapsCarryTheirCitations(unittest.TestCase):
                 "LIMIT 1").fetchone()
             element_id = row["element_id"]
 
-            def fake_build_parameter_tables(conn, *, tenant, source_ref):
+            def fake_build_parameter_tables(conn, *, tenant, source_ref,
+                                            source_ref_page=None):
                 ref = source_ref(element_id)     # mints through the real closure
                 return [], [{
                     "kind": "missing_value",

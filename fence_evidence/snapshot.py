@@ -304,6 +304,85 @@ class SnapshotBuilder:
         self._gap_keys: set[bytes] = set()
 
     # -- provenance ---------------------------------------------------------
+    def _register_doc(self, row) -> None:
+        """Register the `SourceDoc` a ref belongs to. Idempotent per hash.
+
+        Shared by `source_ref` and `source_ref_page` — the registration IS the
+        closure mechanism (§1.2.1), so two minters must not each carry their
+        own copy of it and drift.
+        """
+        if row["sha256"] in self._docs:
+            return
+        self._docs[row["sha256"]] = SourceDoc(
+            content_hash=row["sha256"],
+            source_class=SOURCE_CLASS[row["doc_type"]],
+            version_status=row["version_status"],
+            version_status_basis=row["version_status_basis"],
+            issue_date=normalize_date(row["issue_date"]),
+            expiration_date=normalize_date(row["expiration_date"]),
+            superseded_by=self._successors(row["document_id"]),
+            # The class published above came from THIS record, which is the
+            # first filing of these bytes that a citation reached. The other
+            # filings travel beside it rather than being dropped.
+            also_filed_as=self._other_filings(row["sha256"],
+                                              row["document_id"]))
+
+        if row["doc_type"] in UNCLASSIFIED:
+                self.gap(kind="missing_value", subject={"kind": "source_document", "id": row["document_id"], "tenant": None},
+                         code="source_class_unclassified",
+                         params={"doc_type": row["doc_type"],
+                                 "content_hash": row["sha256"]},
+                         would_close=f"classify the source class of {_label(row)} "
+                                     f"(filed as {row['doc_type']!r}); it is "
+                                     f"published at the weakest class, so it cannot "
+                                     f"make anything wrongly admissible until it is",
+                         closes_by="knowledge", severity="informational")
+
+    def source_ref_page(self, document_id: str, page_no: int) -> SourceRef:
+        """Mint a reference to a WHOLE PAGE, registering its document.
+
+        The page is a first-class locus: `refs.ref_id(sha, page_no, None)` is
+        its id, `refs.build_index` marks it `is_page`, and `crops.render_crop`
+        already reads `bbox=None` as "the whole page, not an error". The only
+        thing missing was a way to mint one, and its absence is what produced
+        G73: `promote_tables` needed an evidence anchor for a reviewed table,
+        had no page-level ref available, and settled for the first element on
+        the page in reading order -- the banner on every scanned NOA. 108 of
+        108 promoted facts cited a heading.
+
+        A table review in this store is a review of a PAGE crop: `is_page=True`,
+        `bbox=None`. A person looked at the page image, so no geometry can
+        recover a table rectangle after the fact and the page is the honest
+        citation -- it is exactly, and only, what was examined.
+
+        Registers the `SourceDoc` as a side effect, like `source_ref`, so
+        closure stays structural rather than checked. Tenancy is enforced
+        before registration for the same reason it is there.
+        """
+        key = f"page:{document_id}:{page_no}"
+        if key in self._refs:
+            return self._refs[key]
+        row = self.conn.execute("""
+            SELECT p.page_no, v.sha256, d.document_id, d.doc_type,
+                   d.title, d.version_status, d.version_status_basis,
+                   d.issue_date, d.expiration_date, d.owner_tenant
+              FROM pages p
+              JOIN document_versions v ON v.version_id = p.version_id
+              JOIN documents d         ON d.document_id = v.document_id
+             WHERE d.document_id = ? AND p.page_no = ?""",
+            (document_id, page_no)).fetchone()
+        if row is None:
+            raise KeyError(f"no such page: {document_id} p{page_no}")
+        if not visible_to(row["owner_tenant"], self.tenant):
+            raise TenantLeak(
+                f"page {page_no} of {document_id} belongs to tenant "
+                f"{row['owner_tenant']!r}, not {self.tenant!r}")
+        self._register_doc(row)
+        ref = SourceRef(id=ref_id(row["sha256"], row["page_no"], None),
+                        belongs_to=row["sha256"])
+        self._refs[key] = ref
+        return ref
+
     def source_ref(self, element_id: str) -> SourceRef:
         """Mint a reference, registering its document. Closure happens here."""
         if element_id in self._refs:
@@ -341,31 +420,7 @@ class SnapshotBuilder:
                 f"{self.tenant!r}. Nothing of one tenant's reaches another's "
                 f"snapshot (obligation 7).")
 
-        if row["sha256"] not in self._docs:
-            self._docs[row["sha256"]] = SourceDoc(
-                content_hash=row["sha256"],
-                source_class=SOURCE_CLASS[row["doc_type"]],
-                version_status=row["version_status"],
-                version_status_basis=row["version_status_basis"],
-                issue_date=normalize_date(row["issue_date"]),
-                expiration_date=normalize_date(row["expiration_date"]),
-                superseded_by=self._successors(row["document_id"]),
-                # The class published above came from THIS record, which is the
-                # first filing of these bytes that a citation reached. The other
-                # filings travel beside it rather than being dropped.
-                also_filed_as=self._other_filings(row["sha256"],
-                                                  row["document_id"]))
-            if row["doc_type"] in UNCLASSIFIED:
-                self.gap(kind="missing_value", subject={"kind": "source_document", "id": row["document_id"], "tenant": None},
-                         code="source_class_unclassified",
-                         params={"doc_type": row["doc_type"],
-                                 "content_hash": row["sha256"]},
-                         would_close=f"classify the source class of {_label(row)} "
-                                     f"(filed as {row['doc_type']!r}); it is "
-                                     f"published at the weakest class, so it cannot "
-                                     f"make anything wrongly admissible until it is",
-                         closes_by="knowledge", severity="informational")
-
+        self._register_doc(row)
         ref = SourceRef(id=ref_id(row["sha256"], row["page_no"], row["bbox"]),
                         belongs_to=row["sha256"])
         self._refs[element_id] = ref
@@ -947,7 +1002,8 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
         # the builder, so the closure rule stays structural.
         parameters, parameter_gaps = build_parameter_tables(
             conn, tenant=tenant,
-            source_ref=lambda eid: asdict(b.source_ref(eid)))
+            source_ref=lambda eid: asdict(b.source_ref(eid)),
+            source_ref_page=lambda d, pg: asdict(b.source_ref_page(d, pg)))
         for g in parameter_gaps:
             b.gap(kind=g["kind"], subject=g["subject"],
                   code=g["because"]["code"], params=g["because"].get("params") or {},

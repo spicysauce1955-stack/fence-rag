@@ -553,6 +553,30 @@ def _matches(conditions: dict, point: dict) -> bool:
     return all(point.get(k) == v for k, v in conditions.items())
 
 
+def _uncovered_points(rows: list[dict], points: list[dict]) -> list[dict]:
+    """Which enumerated points no published row answers.
+
+    Must use `_matches`, not equality on the serialised conditions. A row that
+    STATES fewer dimensions covers MORE points: the NOA page brackets exposure
+    B as `NON HVHZ` but C and D as `HVHZ AND NON HVHZ`, so the C and D rows
+    carry no `hvhz` key at all and match both values of it.
+
+    Byte equality could not see that, and published 16 false `uncovered`
+    points out of 20 across four `footing_schedule` tables -- claiming gaps the
+    source explicitly closes. `_finish()` had used `_matches` for this all
+    along; `_footing_schedules()` had not, which also contradicted
+    `_translate_conditions`'s own docstring: keeping an omitted dimension in
+    the domain exists precisely so these are not misreported as uncovered.
+
+    The failure direction matters. This is not a silent wrong answer -- it
+    makes Planning warn on a line the source answers -- but `uncovered` is one
+    of two channels by which this platform says what it does not know, and a
+    channel that cries wolf stops being read. G74.
+    """
+    return [p for p in points
+            if not any(_matches(r["conditions"], p) for r in rows)]
+
+
 def _is_fallback(row: dict) -> bool:
     """Obligation 15's unconditioned row.
 
@@ -669,6 +693,34 @@ def _source_class(doc_type: str | None) -> str:
     """
     from .snapshot import SOURCE_CLASS
     return SOURCE_CLASS.get(doc_type or "unspecified", "marketing")
+
+
+def _default_source_ref_page(conn: sqlite3.Connection):
+    """Standalone page-level minter, mirroring `_default_source_ref`.
+
+    Same reasoning as its sibling: the integrator should pass
+    `SnapshotBuilder.source_ref_page`, which registers the document and so
+    makes closure structural. This exists so the module stays testable alone,
+    and mints the identical id because `refs.ref_id` has one owner.
+    """
+    cache: dict[tuple, dict] = {}
+
+    def mint_page(document_id: str, page_no: int) -> dict:
+        key = (document_id, page_no)
+        if key in cache:
+            return cache[key]
+        row = conn.execute("""
+            SELECT v.sha256 FROM pages p
+              JOIN document_versions v ON v.version_id = p.version_id
+             WHERE v.document_id = ? AND p.page_no = ?""",
+            (document_id, page_no)).fetchone()
+        if row is None:
+            raise KeyError(f"no such page: {document_id} p{page_no}")
+        cache[key] = {"id": ref_id(row["sha256"], page_no, None),
+                      "belongs_to": row["sha256"]}
+        return cache[key]
+
+    return mint_page
 
 
 def _default_source_ref(conn: sqlite3.Connection):
@@ -790,7 +842,7 @@ def _subject(parameter: str, scope: dict, point: dict | None = None) -> dict:
 # the builder
 
 def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
-                           source_ref=None,
+                           source_ref=None, source_ref_page=None,
                            tenant: str | None = None) -> tuple[list[dict], list[dict]]:
     """Promoted facts -> (`[ParameterTable]`, `[Gap]`), both deterministic.
 
@@ -807,6 +859,7 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
     """
     scope_of = scope_resolver or _default_scope
     mint = source_ref or _default_source_ref(conn)
+    mint_page = source_ref_page or _default_source_ref_page(conn)
     gaps = _Gaps()
     groups: dict[bytes, dict] = {}
     # (document_id, page_no, row_index) -> {fact_type: {"row": row, "scope": scope}}
@@ -833,7 +886,16 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
             "parameter": parameter, "unit": unit, "scope": scope,
             "rows": [], "dimensions": set(), "observed": {}})
 
-        cites = [mint(fact["element_id"])]
+        # G73. A table-promoted fact cites its PAGE, not an element. The
+        # review behind it is a review of a whole-page crop (`is_page=True`,
+        # `bbox=None`) -- a person looked at the page image -- and
+        # `promote_tables` had no page ref available, so it bound `element_id`
+        # to the first element in reading order: the banner on every scanned
+        # NOA. All 108 promoted facts cited a heading, and the citation
+        # resolved cleanly to the wrong evidence.
+        cites = [mint_page(fact["document_id"], fact["page_no"])
+                 if fact["from_candidate_id"] is not None
+                 else mint(fact["element_id"])]
         unread_columns = (fact["condition_basis"] != "stated"
                           and "could not classify" in
                               (fact["condition_basis_note"] or ""))
@@ -1131,8 +1193,7 @@ def _footing_schedules(schedule_candidates: dict) -> tuple[list[dict], set]:
                 "valid_until": bucket["valid_until"],
                 "authority": bucket["authority"],
             })
-        covered_points = {canonical_bytes(r["conditions"]) for r in rows}
-        uncovered = [p for p in points if canonical_bytes(p) not in covered_points]
+        uncovered = _uncovered_points(rows, points)
 
         tables.append({
             "parameter": SCHEDULE_PARAMETER,
