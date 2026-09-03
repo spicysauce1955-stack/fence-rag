@@ -1,15 +1,19 @@
 # Build plan — what this component builds next
 
 ```text
-Status:   Written at the close of the integration rounds, 2026-08-25, with contract
-          v1.1 ratified by both teams. **Phases A, B, C and E are built.** Phase D
-          — the publishing layer — is the only one left, and it is partly done:
-          source_docs, warnings, gaps and parameters publish; part_types, parts,
-          models, procedures, combinations and rules are declared and empty.
-          Updated 2026-08-28.
+Status:   Written at the close of the integration rounds, 2026-08-25. Overtaken in
+          several places since — contract is now v1.3, not v1.1, and Phase D's
+          "no Part, no part-type spine" is no longer true. **Phases A, B, C and E
+          are built.** Phase D is now built for one vertical slice: `part_types`
+          (obligation 5, closed 2026-08-31) and `parts` (obligation 14, closed
+          2026-09-03) publish real rows; `models`, `procedures`, `combinations`
+          and `rules` are still declared and empty — that is the actual remaining
+          gap this doc's Phase D section describes, not the whole section.
+          Updated 2026-09-03; docs/state-and-gaps.md G62 has the account of
+          how the slice closed and stays the source to trust if the two disagree.
 Authority: Advisory on sequencing. The authorities are unchanged —
           docs/mvp-implementation-spec.md for how this platform works, and
-          docs/integration/contract.md (FROZEN v1.1) for what crosses the boundary.
+          docs/integration/contract.md (FROZEN v1.3) for what crosses the boundary.
 Read first: docs/state-and-gaps.md (what is measured and true today), then
           docs/phase-checkpoints.md "Phase A" for what closing it actually taught,
           then docs/integration/audit/10-ratification-v1.0.md §3.2 (what we
@@ -35,7 +39,8 @@ writing at ratification. The level-2 population was zero until 2026-08-30 and is
 `docs/phase-checkpoints.md` — several items turned out to rest on a premise that did not
 hold, and two of them found defects in code written the same day.
 
-**What does not exist** *(rewritten 2026-08-30)*: no `Part`, no part-type spine.
+**What does not exist** *(rewritten 2026-08-30, and this paragraph is now stale —
+see the correction just below)*: no `Part`, no part-type spine.
 `ParameterTable` **now publishes** — four of them, at curation level 2, in snapshot
 `3ae88642` (G54) — so this is no longer the empty section it was.
 `part_types`, `parts`, `models`, `procedures`, `combinations` and `rules` are declared and
@@ -43,6 +48,21 @@ empty in every snapshot. `Part` in particular is **blocked on the other team**: 
 C3 asks whether a `PanelSpec` member edge is a "value" under invariant 8, and
 `docs/layering.md` §5's carve-out — the only route to a `Part` at all — depends on the
 answer.
+
+**Correction, 2026-09-03: the block above cleared, and `Part`/`PartType` are no
+longer empty.** C3 closed with no amendment needed (`docs/integration/
+amendments/CANDIDATES.md`) — a `PanelSpec` member edge is authored structure,
+not a value, so invariant 8 does not gate it. `part_types` (obligation 5) and
+`parts` (obligation 14) both publish for one vertical slice — 11 `Part`s, 5
+`mfr/certainteed` `PartType` extensions, two real `SpecField.value: Quantity`
+stock lengths matching Planning's own independently-computed math exactly.
+Building it surfaced and closed a corpus-wide data defect along the way (G63)
+— including one attempt at fixing it that was itself wrong and had to be
+reverted after adversarial review, a cautionary example worth reading before
+touching `unit_normalized`/`value_normalized` anywhere in `facts.py` again.
+Full account: `docs/state-and-gaps.md` G62/G63. **Still fully unbuilt:**
+`FenceModel`, `Procedure`, `Rule`, `Combination` — real remaining Phase D
+work, not blocked on anything named here.
 
 **The review loop now exists on both sides of the human decision and in the middle.**
 `cli review --accept`, `POST /reviews`, `GET /source-refs/{id}` and
@@ -152,11 +172,18 @@ Ordered as Planning re-ranked them after the cell-coverage measurement.
 | C2 | **`also_filed_as`** — one source class per content hash | 18 of 40 `same_content_as` pairs carry a different `doc_type` on each side. Load-bearing now that Planning applies the policy. Committed and relied upon. |
 | C3 | **Cell bounding boxes** (K4) | 973 of 18,472 cells have one — 100% of `ocr-word-grid`, **0 of 17,499** from either pdfplumber detector, which discards geometry pdfplumber already returns. ~594 tables to re-extract. Bounds the text-layer queue; does **not** bound the structural queue, where 73 pages have no reconstructed grid to box at all. |
 
-### Phase D — the publishing layer
+### Phase D — the publishing layer — **`ParameterTable` and `Part` built for one slice, 2026-08-31/09-03**
 
-The large one, and the first thing that makes this platform useful to its consumer. Build
-it as a vertical slice rather than a schema: **the two early publishes Planning asked for
-are the acceptance test.**
+The large one, and the first thing that makes this platform useful to its consumer. Built
+as a vertical slice rather than a schema, per the plan below — and the two early publishes
+Planning asked for landed: `ParameterTable` (9 published, up from the 0 this section
+originally described) and `Part`/`PartType` (11 `Part`s, one manufacturer's rail
+components, real stock-length `Quantity` values). `Gap`, `Warning` and the snapshot itself
+are built and in production use. **Still fully unbuilt:** `FenceModel`, `Procedure` +
+`AssemblyStep`, `Combination`, `Rule` — the real remaining Phase D work. Whoever picks this
+up next should read `docs/state-and-gaps.md` G62/G63 first: building `Part` surfaced a
+corpus-wide data defect, and fixing it wrong the first time (caught only by a later
+adversarial review) is worth understanding before extending the same fact-extraction code.
 
 1. One `ParameterTable` with a `declared` domain — hit policy, `value_type`, `uncovered`,
    `condition_basis`, and `condition_scope` on every key.
@@ -230,3 +257,28 @@ or an uncovered condition produces a warned, named line and a plan that still wo
 gap published from this side breaks nobody, and a snapshot containing very little is still a
 valid snapshot. That is what lets this component ship the vertical slice in Phase D long
 before the corpus is fully curated.
+
+## 6. Where to start next — written 2026-09-03, for a cold pickup
+
+Not a decision about what's most important, just the honest list of what's real and open,
+independent of Planning (nothing here is blocked on them):
+
+- **`FenceModel`/`Procedure`/`Rule`/`Combination`** — the largest remaining Phase D gap.
+  Needs a design pass before implementation; there is no assembly-step model in this
+  codebase yet to build on. The natural next `Part`/`PartType`-style vertical slice.
+- **Retrieval quality, R3/R5** — duplicate-unit suppression and a per-page cap. G51 measured
+  and rejected R1 (the heading fallback) but explicitly left R3/R5 as "worth 29.5% and 20.2%
+  of top-10 slots" and unmeasured. The next retrieval-quality item to actually measure, not
+  guess at — see G51's own recommendation in `docs/state-and-gaps.md`.
+- **`parameters._unit_of()`'s docstring** ("the unit a fact is stated in") is misleading —
+  it actually returns the unit `value_normalized` is expressed in, and reads `unit_original`
+  only as a fallback. Currently harmless (`quantity()` never processes regex-derived facts,
+  only promoted-table ones, where the two happen to coincide), but named as a real trap by
+  the review that caught G63's wrong-direction fix. A `parameters.py` cleanup, not urgent.
+- **The remaining crop review backlog** — 7 of 44 flagged crops still unreviewed. Human-paced,
+  not a coding task.
+- **CLI error-handling sweep** — `fetch --subset`, `document`/`resolve`/`page`/`region`/
+  `context`/`search --element-type` are now consistent (bad input → clean error + exit 2,
+  not-found → error + exit 1). No other command is known to still have the old silent-null
+  shape, but this was found by inspection, not an exhaustive audit — worth one if the pattern
+  turns out to recur elsewhere.
