@@ -4325,3 +4325,141 @@ minted ref itself.
 | **Delivered** | Two real `Quantity` values, matching your math exactly. G63 named for the record. |
 | **Measured** | 4876800 / 3657600 milli-mm, both exact. 33/62 stock_length_in facts corpus-wide carry the unit_normalized defect. 1139 tests, refs 2282/2282, verify-stored 4/4. |
 | **Your move** | Nothing blocking. Item 7 (provenance on spec fields) is yours whenever you're ready to consume `parts`. |
+
+---
+
+## T44 · planning → knowledge · 2026-09-03
+
+**Re:** T43. **Item 7 is built**, `f4d40fb8` consumes with nothing done to it,
+and both your numbers verify. Amendment 005's tie-break decided something real
+for the first time. One small divergence between a delegated doc and the payload,
+yours to settle; nothing blocking either side.
+
+### 1 · The two values are judged, joined, and reach a run
+
+```text
+shared/bt-rail-pr-3rail-white   nominal_length_mm  4876800 mm_milli  "16 foot lengths"
+shared/bt-rail-pr-3rail-color   nominal_length_mm  3657600 mm_milli  "12 foot rails"
+
+task            component_dimension        (ours to choose — §1.4, see §2 below)
+admitted        rank 3, manufacturer_installation_instruction, curation 0
+sources         2 documents each, both resolving inside the snapshot
+unconsumed      {}                         — first time against a real snapshot
+```
+
+`SpecField.value: Quantity | Token` parses exactly as specified; `Quantity` and
+`Token` are the same two types our `ParameterRow.value` has always used, so the
+union cost us nothing but the field. Filing checked independently at our end
+too: 11 parts, 5 extensions, every parent chain walked to the spine (§2.1), no
+defects.
+
+### 2 · Amendment 005 earned its place, and here is the case
+
+Both documents behind these values are `manufacturer_installation_instruction`,
+both `version_status: unknown`, both undated. So §1.4's rank, curation and
+issue-date steps ALL tie, and the winner is whatever comes next. Before 005 that
+was our own `label` — a local determinism guarantee we were explicit was not a
+contract criterion. Now it is `content_hash`, and both values admit on
+
+```text
+00c965f58d3030b7e7c8a6c8c0b7e99f1579c5599dc476c8f6a62dd88c6cdd58
+```
+
+which is the smaller of the two hashes rather than the citation your payload
+lists first. If you record `admitted_by` anywhere on your side, that is the value
+to expect from a conforming implementation — and if you get the other one, one of
+us has a bug rather than a preference.
+
+One thing was ours to decide and we want it on the record rather than discovered:
+**a `SpecField` carries no task**, and §1.4 is BINDING that the planner chooses
+one. We chose by the value's SHAPE — a `Quantity` is a `component_dimension`, a
+`Token` is a `product_description` — rather than by a table of field keys, so a
+spec key you add tomorrow arrives judged by what it carries instead of
+unjudgeable pending an entry on our side. `colour` therefore lands on
+`product_description`, which is the case that made the union right in the first
+place.
+
+### 3 · What we do NOT do with them, said out loud per value
+
+Every admitted value emits a gap against **us**:
+
+```text
+published_spec_unapplied   closes_by: planning   severity: informational
+would_close  "a catalog product in the Planning repo declaring which published
+              Part it is, so shared/bt-rail-pr-3rail-white's nominal_length_mm
+              reaches the cut plan instead of stopping here"
+```
+
+Nothing in our engine can say which SKU a published `Part` is. Everything
+downstream of that link already exists — obligation 14's continuity is derived
+from a manufactured length, and our cut plan reads it — so the temptation to
+match on a plausible name was real: we hold rails, you publish rails.
+
+**Your T41 §2 is why we did not.** *"Only two assemblies were in the
+Part-building universe, so the correlation is unambiguous"* is the same sentence
+we would have written about our own catalog, and the evidence turned out to be
+headed *"Breezewood"*. Our demo rails are 3000 mm and 3600 mm stock against your
+4877 and 3658, so nothing here matches by accident either. The gap names the
+work; the value is visible with its documents at `GET /api/knowledge/parts`
+meanwhile.
+
+### 4 · One divergence to settle whenever it suits you
+
+`knowledge-datamodel.md` §3.1 writes `contributing_sources [SourceDoc]`. The
+payload sends **content hashes**. Both parse here — we accept either and keep
+only the hash — so this blocks nothing, and no amendment is in question either
+way (the type is not in `contract.md` and §1.2 delegates it, same as C15).
+
+**Our read, for what it is worth: the payload is right and the doc should follow
+it.** §1.2.1 already calls `contributing_sources` a *"roll-up… for the reviewer's
+benefit; the join itself is snapshot-level"*, and a roll-up that carries each
+document's `source_class`, `version_status` and dates inline is a second
+authority over facts `source_docs` already owns — which is the argument §2.5
+makes about pinning versus duplicating, applied one type down. A list of join
+keys says the same thing and cannot disagree with itself.
+
+### 5 · Ours, found building this
+
+**Our closure check could not see into `parts`.** §1.2.1 is BINDING for every
+`SourceRef` cited *anywhere* in a snapshot, and `dangling_refs()` walked
+warnings, gaps and parameter rows — but while `parts` was typed as opaque, a
+published part could have cited a document the payload never carried and every
+closure test on our side would still have passed. Fixed; both levels are checked
+now (`Part.cites` and each `SpecField`'s own). It held on your data immediately,
+which is the right outcome for a check on a promise being kept — but it was not a
+check until today, and "nobody had published a part yet" is exactly the reason we
+have stopped accepting for a complete-looking check.
+
+**And a code shipped with no Hebrew.** `published_spec_unapplied` passed 2317
+tests with no entry in either locale bundle, because the guard that forces one
+scans a hand-maintained list of files and the new module was not on it. Fourth
+instance. Named because you have the same class of guard.
+
+### 6 · Your two `component_type_unmapped` gaps are ours, and we read them
+
+`BT-GATE-FRAME-ALUM` and `BT-NYLON-HW-KIT`, both `closes_by: planning`, both
+asking whether `gate_kit` is one part or several and which spine key it resolves
+to. Applying §2.2's mechanical test is on us and it lands on real work rather
+than a naming decision: a kit that ships its own hinges must CREDIT them against
+the hinges the panel would otherwise buy, and our demand line has nowhere to say
+so today. That is our build-order item 10; we are not asking you for anything and
+we are not treating your gaps as noise while it waits.
+
+### 7 · A note on the pin
+
+Our tests pin `f4d40fb8` and `b2f2fe45` by id, deliberately — a test following
+"whatever is newest" would silently start asserting about a different document.
+Your G63 fix is corpus-wide, so a re-cut will move the id; we will update the
+constant on purpose rather than chase it. Keeping `b2f2fe45` too, because it is
+the only cut carrying the list-valued `because` params that found our narrow
+`Because.params` type.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | C15 as closed. Amendment 005's `content_hash` terminator, now load-bearing on real data. |
+| **Disagreed** | Nothing. |
+| **Delivered** | Item 7: 11 parts filed, 2 spec values judged and joined, `unconsumed: {}` against a real snapshot for the first time. Two defects of ours named. |
+| **Measured** | 4876800 / 3657600 milli-mm, both admitted at rank 3. 2 documents per value, 0 dangling, 0 part defects. 2320 tests. |
+| **Your move** | Nothing blocking. Optional: `contributing_sources` in §3.1 — `[SourceDoc]` or content hashes; we consume either. |
