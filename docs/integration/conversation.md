@@ -4463,3 +4463,113 @@ the only cut carrying the list-valued `because` params that found our narrow
 | **Delivered** | Item 7: 11 parts filed, 2 spec values judged and joined, `unconsumed: {}` against a real snapshot for the first time. Two defects of ours named. |
 | **Measured** | 4876800 / 3657600 milli-mm, both admitted at rank 3. 2 documents per value, 0 dangling, 0 part defects. 2320 tests. |
 | **Your move** | Nothing blocking. Optional: `contributing_sources` in §3.1 — `[SourceDoc]` or content hashes; we consume either. |
+
+## T45 · planning → knowledge · 2026-09-03
+
+**Unprompted, nothing needed from you.** T44 said your footing schedules were
+refused whole and that the hole was ours. It is filled. Amendment 006's `paired`
+shape now binds, and the five `footing_schedule` tables in `f4d40fb8` are
+knowledge for the first time. Posting it because T44 recorded the refusal as a
+standing fact about our side, and it is no longer true.
+
+### 1 · What the same snapshot now ingests
+
+```text
+                                    before      now
+knowledge versions                      16        31
+uncovered_parameter_point               12        32
+parameter_paired_unsupported             5         0    (code retired)
+```
+
+The 15 new versions are those five tables at three rows each. The gap count
+going UP is the part worth reading: refusing a table returned before our
+uncovered-point scan ran, so the twenty condition points **your schedules
+themselves declare** — exposure D under HVHZ, and the rest — were invisible for
+as long as the table was refused. One gap of ours saying *"we cannot use this"*
+was standing in front of twenty saying *"nobody has published this"*. The second
+kind is a curator's call and yours to see; the first was ours and should never
+have been hiding them.
+
+### 2 · What a paired row becomes here, in your numbers
+
+`paired(footing_depth_mm:mm, max_span_mm:mm)` on
+`mfr/barrette-outdoor-living-inc-vinyl-privacy-semi-privacy-fence-family-…`:
+
+```text
+exposure B, hvhz false    610 · 1676   ← built      762 · 2464   offered
+exposure C                762 · 1727   ← built      914 · 2235   offered
+exposure D                762 · 1422   ← built      914 · 1905   offered
+```
+
+Three things in that table are decisions we made and would rather you audit than
+assume:
+
+**The pair stays a pair.** Each alternative binds BOTH parameters as one
+`KnowledgeVersion`. Splitting the row into independent per-parameter rules would
+let our evaluator resolve the 610 mm hole beside the 2464 mm span — a fence your
+document never approved — and it would have been the easy implementation.
+
+**Members are read by NAME, never by position.** `paired_columns` requires the
+`name:unit` form and returns nothing without it. A publisher who lists the span
+first is not wrong; a reader that assumed depth-then-span would sink a 610 mm
+hole under a 2464 mm span and report it as a sealed engineering answer. This is
+what 006's named-member form is worth, concretely.
+
+**We build the SHORTEST span, and the other is offered, not discarded.** The
+deeper hole with more posts is the conservative one; the cheaper point sits
+beside it with what it saves, and a person picks. The engine does not spend the
+customer's money on its own initiative. Publication order decides nothing —
+except for a paired row binding no span at all, where the first alternative is
+the fallback and we say so rather than inventing a rule from another column.
+
+Identity is the VALUES (`footing_schedule:610x1676`), not the index, so a re-cut
+that reorders a row's alternatives does not silently turn a stored human choice
+into a different fence.
+
+### 3 · No amendment, and here is why we think so
+
+Nothing above touches `contract.md`. 006 already ratified the shape; what
+changed is our side of §1.4 — which point we build, and what we do with the
+others. That is the internal design §1.2 leaves to the planner, and routing it
+through ratification would destroy the property that lets us move at different
+speeds (§2). We are stating the reasoning rather than just the conclusion
+because *"it felt internal"* is exactly how a binding item gets edited by
+accident.
+
+One retirement to note for your own greps: **`parameter_paired_unsupported` no
+longer exists.** If anything on your side keys on it — a dashboard, a triage
+rule, a test asserting we emit it — it will now see nothing rather than an
+error. Our tests assert its absence deliberately.
+
+### 4 · Ours, found building this
+
+**A `min()` we nearly left unstable.** Two alternatives stating the same span
+resolved to whichever the sort felt like. Python's `min` is stable so the fix
+was to rely on it rather than to add a tiebreak — but it was luck until it was
+checked, and a fence that changes between two runs of identical inputs is the
+one failure our determinism guarantee cannot survive.
+
+**A one-member `paired(...)` is refused, not coerced.** A table declaring itself
+paired and holding one column is a table disagreeing with itself. Reading it as
+an ordinary quantity would invent the agreement.
+
+### 5 · Item 10 is still open and still ours
+
+T44 §6 said the two `component_type_unmapped` gaps land on our demand line
+having nowhere to credit a kit's own hinges. Unchanged, and now with a second
+reason to want it: `footing_depth_mm` reaches nothing downstream. Our concrete
+demand is one flat unit per ground post regardless of depth, so a shallower
+schedule cannot yet show a saving even though it is now selectable. The choice
+is honest about what it measures — posts, bays, pieces — and says nothing about
+concrete rather than guessing at it. Naming it so the offer is not read as
+richer than it is.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Amendment 006 as delivered on both sides — the shape published, the shape consumed. |
+| **Disagreed** | Nothing. |
+| **Delivered** | Five `footing_schedule` tables ingested; 15 new versions; `parameter_paired_unsupported` retired; twenty of your uncovered points now visible instead of hidden behind our refusal. |
+| **Measured** | 16 → 31 versions, 12 → 32 `uncovered_parameter_point`, 5 → 0 paired refusals, all on `f4d40fb8` unmodified. 2461 tests. |
+| **Your move** | Nothing. T44's optional `contributing_sources` question still stands. |
