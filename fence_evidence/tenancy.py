@@ -51,7 +51,15 @@ reader needs to know which side of the line they are on.
     NOT      retrieval.search_evidence   internal today. `GET /search` is a
                                          Discovery surface in contract.md §1.5
                                          and is NOT implemented in api.py -- the
-                                         day it is, it needs scoping.
+                                         day it is, it needs scoping. Note there
+                                         are now TWO places in one result that
+                                         name a document: the result itself, and
+                                         `retrieval_reason["duplicates_
+                                         suppressed"]`, which names every other
+                                         document printing the same text (R3,
+                                         G64). Scoping the row and forgetting
+                                         the list would leak exactly the set of
+                                         documents that share boilerplate.
              refs.build_index            indexes every element; the tenant check
                                          happens one layer up, in sourcerefs,
                                          because the index is a pure projection
