@@ -3878,6 +3878,96 @@ is the same either way, because a wildcard row genuinely covers every point — 
 that does not *declare* `hvhz` in its domain says something different to Planning than one
 that declares it and covers it.
 
+### G80 — the published-layer fix pass: five defects, and three found in the fixes
+
+`[measured]` 2026-09-03, snapshot `61da0f9d`. Five contained fixes to the publishing layer,
+each measured by an adversary before a line was written, because every rule here turns on a
+threshold and this codebase has repeatedly punished choosing one by eye.
+
+| | Before | After |
+|---|---|---|
+| gaps | 67 | **402** |
+| warnings | 289 | **287** |
+| warning citations | 458 | **623** |
+| `warning_truncated_mid_clause` gaps | 52 | **0** |
+| published citations resolving | 2,854 | **4,860**, 0 dangling |
+
+**1. Every detected extraction failure publishes** (G78). Covered above.
+
+**2. Undecodable text is gapped, not published.** Two warnings carried binary control
+characters as "verbatim, untranslated" text. `quality.is_mojibake` cannot see it, and the
+reason is worth keeping: the cipher substitutes letters onto OTHER printable ASCII, so
+`ascii_token_ratio` lands at 0.857–0.958 against its 0.85 limit on every affected page while
+`control_ratio` trips 2–4× over. A per-element legibility ratio at 0.015 rejects 176 of
+49,984 elements and 3 of 289 warnings, with zero legitimate rejections — `¼`, `•`, `–`, `©`,
+`ﬁ`, and French and Spanish accents all pass. **A measured, deliberate recall gap remains**:
+two elements of the same corruption score 0.0169 and 0.0, because a substitution onto valid
+ASCII is invisible to any character-class test. This bounds the damage; it does not end it.
+
+**3. Published dates come from evidence** (G75). `versions.document_dates` resolves both
+dates from the facts Phase 6 extracted for every filing independently, so the answer stops
+depending on which filing a citation reached first. **The trap the measurement caught before
+it shipped:** `versions.parse_date` and `dates.normalize_date` are two independent parsers
+that disagree, and `normalize_date` is the one implementing amendment 002 — refuse to guess
+when day and month are both ≤ 12 and unequal. Publishing `parse_date`'s ISO output directly
+would have overridden a ratified amendment's refusal with a confident guess on four
+documents, one of which correctly publishes `iso: null` today. Every value is re-normalised
+through `normalize_date`. `version_status` itself is untouched: `select_active` reports
+`inferred_in_force`, and collapsing an inference into the word a document uses about itself
+is the overclaim obligation 6 exists to prevent.
+
+**4. The truncation test was noise.** `body[:1].islower()` measured **precision 0.000 and
+recall 0.000** — it caught none of the 5 genuine defects and produced 21 false gaps alone,
+firing on a bullet glyph OCR'd as a literal `k`, on a drop cap, and on the maths variable in
+`q = (0.00256)(K z)…`. Removed. In its place, a dangling body is **joined forward** up to
+four elements before being judged, which *recovers* the warning rather than gapping it:
+`"Note: The latch is designed for"` becomes `"…for left and right hand applications."` 24 of
+26 danglers complete this way. And 15 gaps were Miami-Dade administrative boilerplate
+matched only because `_HAZARD` contains *"failure to comply"* — every one of the 15
+corpus-wide occurrences of that phrase is the same clause, so excluding it costs nothing.
+The OCR-confidence gate now reads the row the published body came from, not the heading's:
+one gap claimed a warning "was read at 75.5% confidence" when 75.5% belonged to the
+two-token heading and the quoted body was read at 95.31%.
+
+**5. One warning is one `Warning`** (G76). The dedup key ran over raw element text, so page
+bleed and delimiter variance minted a separate identity per copy and the corpus's
+most-repeated caution published as 12 objects. The key now strips a leading page number and
+footnote marker before a recognised lexeme, folds dash variants and case: 24 objects merge
+into 7, with **zero false merges** across all 289. Citations are now a **union**, not capped
+one-per-document — capping would have dropped the count from 458 to 448, losing evidence to
+a fix meant to consolidate it. The lexeme deliberately stays in the identity: 8 pairs share
+a body and differ only in a `WARNING:` heading, and a body-only key cannot tell that
+separate extraction defect from a real WARNING and a real CAUTION that coincide.
+
+**Three defects were found IN these fixes, all by measurement rather than by the tests.**
+
+* The first cut of fix 1 reproduced the disease it was fixing — 53 of 73 gaps collapsed by
+  a dedupe key mismatch this session had already been warned about in writing.
+* `quality_gaps` filtered `WHERE page_no IS NOT NULL`, so `encrypted_pdf` — a document-level
+  failure with a null page, and listed as publishable — could never publish. A detected
+  failure staying invisible, inside the change written to stop that.
+* The forward join returned the whole rebuilt string and the caller spliced it back over
+  text that already held the body, publishing `"Note: The Note: The donut can be The Note:
+  The donut can be level should sit…"`. Worse, four of the five genuinely garbled bodies
+  stopped being gapped and published as joined nonsense — **the fix silently traded a false
+  gap for a false warning**, which is the more dangerous direction. `_INTERLEAVED` now gaps a
+  body containing a second severity lexeme, which is what OCR reading two columns onto one
+  line looks like. One of the five (a paragraph fused with a diagram callout, no second
+  lexeme) still publishes joined; recorded rather than detected for n=1.
+
+**Severity is no longer blanket.** The first cut made every quality gap `informational`,
+justified as "a page we read badly is attached to no plan line". `[measured]`, that was
+false: 11 of the 13 documents carrying an unreconstructed table are the same documents
+backing published `ParameterTable` rows, and 93% of those gaps sit on a document that
+already backs a live value. A gap now warns a line when the document it names already backs
+something published — those pages are siblings of pages a plan depends on — and is
+informational when nothing cites the document.
+
+**Known and unfixed, recorded:** `Gap.id` is `sha256([kind, subject, code])`, so changing the
+dedupe key changed the id of all 67 carried-over gaps. Nothing in `contract.md` §1.2.1 states
+id stability across builds, but a consumer diffing two snapshots by gap id would see 67
+removed and 67 added that are in fact the same 67.
+
 ---
 
 ## 4. If work resumes, in order

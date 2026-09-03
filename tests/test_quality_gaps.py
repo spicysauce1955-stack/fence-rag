@@ -47,6 +47,10 @@ def scratch() -> sqlite3.Connection:
     conn.execute("INSERT INTO document_versions VALUES ('v1','doc-1','abc123')")
     for page in (11, 17):
         conn.execute("INSERT INTO pages VALUES ('v1',?,'p.png',1224.0,792.0,200)", (page,))
+    # An element to cite, so a test can register the document the way a real
+    # published value does and exercise the severity rule.
+    conn.execute("INSERT INTO elements VALUES ('el-doc-1','doc-1','v1',17,0,"
+                 "'paragraph','a value lives here',NULL,'[1,2,3,4]')")
     return conn
 
 
@@ -213,6 +217,71 @@ class TestQualityGapsAreInformational(unittest.TestCase):
         b = SnapshotBuilder(conn, tenant="default", regime="us_astm")
         b.quality_gaps()
         self.assertEqual({g.severity for g in b.gaps()}, {"informational"})
+
+
+class TestADocumentScopedFailureStillPublishes(unittest.TestCase):
+    """`WHERE q.page_no IS NOT NULL` meant a document-level failure could never
+    publish. `encrypted_pdf` is exactly that — one row, `page_no` NULL, a
+    document whose extraction is known-partial — and `QUALITY_GAP_KINDS` listed
+    it as publishable while the query silently excluded it.
+
+    That is this fix's own defect reproducing in miniature: a detected failure
+    staying invisible, inside the change written to stop that happening."""
+
+    def test_a_null_page_publishes_a_document_scoped_gap(self):
+        conn = scratch()
+        conn.execute("INSERT INTO quality_issues VALUES ('enc','doc-1','v1',NULL,NULL,"
+                     "'warning','encrypted_pdf','document is encrypted','2026-01-01')")
+        b = SnapshotBuilder(conn, tenant="default", regime="us_astm")
+        b.quality_gaps()
+        gaps = b.gaps()
+        self.assertEqual(len(gaps), 1)
+        self.assertEqual(gaps[0].subject["kind"], "source_document")
+        self.assertEqual(gaps[0].because["code"], "encrypted_pdf")
+
+    def test_a_document_scoped_gap_names_its_document(self):
+        conn = scratch()
+        conn.execute("INSERT INTO quality_issues VALUES ('enc','doc-1','v1',NULL,NULL,"
+                     "'warning','encrypted_pdf','d','2026-01-01')")
+        b = SnapshotBuilder(conn, tenant="default", regime="us_astm")
+        b.quality_gaps()
+        self.assertIn("Big NOA", b.gaps()[0].would_close)
+
+
+class TestSeverityFollowsWhetherTheDocumentBacksAValue(unittest.TestCase):
+    """The first cut made every quality gap `informational`, justified as "a
+    page we read badly is attached to no plan line".
+
+    `[measured]`, and the justification was false: 11 of the 13 documents
+    carrying `table_not_reconstructed` are the SAME documents backing published
+    `ParameterTable` rows, and 68 of 73 such gaps (93%) sit on a document that
+    already backs a live plan-facing value. Those pages are siblings, in the
+    same authority document, of pages that do warn real lines — which is
+    exactly the signal a curator working that NOA's footing schedule wants.
+    """
+
+    def test_a_gap_on_a_document_that_backs_a_value_warns_a_line(self):
+        conn = scratch()
+        issue(conn, "table_not_reconstructed", 17)
+        b = SnapshotBuilder(conn, tenant="default", regime="us_astm")
+        b.source_ref("el-doc-1")          # something published cites this document
+        b.quality_gaps()
+        self.assertEqual([g.severity for g in b.gaps()], ["warns_line"])
+
+    def test_a_gap_on_a_document_nothing_cites_is_informational(self):
+        conn = scratch()
+        issue(conn, "table_not_reconstructed", 17)
+        b = SnapshotBuilder(conn, tenant="default", regime="us_astm")
+        b.quality_gaps()
+        self.assertEqual([g.severity for g in b.gaps()], ["informational"])
+
+    def test_an_info_issue_stays_informational_either_way(self):
+        conn = scratch()
+        issue(conn, "ocr_supplement_failed", 17, severity="info")
+        b = SnapshotBuilder(conn, tenant="default", regime="us_astm")
+        b.source_ref("el-doc-1")
+        b.quality_gaps()
+        self.assertEqual([g.severity for g in b.gaps()], ["informational"])
 
 
 if __name__ == "__main__":

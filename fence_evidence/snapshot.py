@@ -147,7 +147,13 @@ _RULE_WARNING = re.compile(
 _NOT_A_WARNING = re.compile(
     r"NOTICE OF ACCEPTANCE"                 # 76 hits: a Miami-Dade form header
     r"|never fades|never blisters|never peels"   # marketing copy
-    r"|^\s*(safety glasses|safety goggles)\s*$",  # a line in a tool inventory
+    r"|^\s*(safety glasses|safety goggles)\s*$"   # a line in a tool inventory
+    # Miami-Dade administrative boilerplate, matched by `_HAZARD` only because
+    # it contains "failure to comply". `[measured]`: every one of the 15
+    # corpus-wide occurrences of that phrase is this identical clause, so
+    # excluding it drops 15 false gaps with ZERO collateral. Keyed on the
+    # NOA-specific wording rather than on `doc_type`, which spans four values.
+    r"|removal of NOA|terminate this NOA",
     re.IGNORECASE)
 
 # A body that stops mid-clause. Publishing it as "verbatim" is technically true
@@ -156,8 +162,49 @@ _DANGLING = re.compile(
     r"(?:\b(?:to|the|a|an|and|or|of|in|on|at|as|is|are|be|with|for|from|by|your"
     r"|you|it|this|that|will|may|can|need|needs|into|onto|over|under)\b|-)\s*$",
     re.IGNORECASE)
+# A second severity lexeme INSIDE a body means OCR read two columns onto one
+# line -- `"Note: Do not over-tighten the Note: Line up and drive the"` is two
+# different notes fused word by word. Joining forward makes such a body longer
+# without making it true, so it must be gapped rather than published: this is
+# the one case where a dangling body is garbled rather than merely split.
+_INTERLEAVED = re.compile(rf"\S\s+({_LEXEMES})\s*[:!]", re.IGNORECASE)
 MIN_BODY_CHARS = 12
 OCR_TRUST_FLOOR = 80.0
+
+
+
+def _join_forward(rows, i, body, limit=4):
+    """Complete a dangling body from the elements that follow it, or None.
+
+    A warning that ends on a function word is usually SPLIT across layout
+    elements rather than cut off by the page. `[measured]` over the 52 gaps
+    that claimed truncation: 24 of the 26 real danglers complete within four
+    forward elements, and joining them RECOVERS the warning instead of merely
+    suppressing a false gap -- `"Note: The latch is designed for"` becomes
+    `"Note: The latch is designed for left and right hand applications."`
+
+    Returns `(added_text, anchor_row)` -- only what was APPENDED, never the
+    whole rebuilt string. Returning the join caused the caller to splice it back
+    on top of text that already contained the body, publishing
+    `"Note: The Note: The donut can be The Note: The donut can be ..."`.
+
+    Stops at a page or document boundary, at a new severity lexeme, and as soon
+    as the joined text reads as a finished sentence.
+    """
+    here = rows[i]
+    out, added = body, []
+    for nxt in rows[i + 1:i + 1 + limit]:
+        if (nxt["document_id"] != here["document_id"]
+                or nxt["page_no"] != here["page_no"]):
+            return None, here
+        more = (nxt["text"] or "").strip() or (nxt["ocr_text"] or "").strip()
+        if not more or _LEXEME_ONLY.match(more) or _LEXEME_LED.match(more):
+            return None, here
+        added.append(more)
+        out = f"{out} {more}".strip()
+        if not _DANGLING.search(out):
+            return " ".join(added), nxt
+    return None, here
 
 
 def _where(row) -> str:
@@ -304,6 +351,46 @@ class SnapshotBuilder:
         self._gap_keys: set[bytes] = set()
 
     # -- provenance ---------------------------------------------------------
+    def _document_dates(self, row) -> tuple[dict | None, dict | None, str]:
+        """`(issue_date, expiration_date, evidence_note)` for one document.
+
+        Evidence beats the curated column. Every value is re-normalised through
+        `dates.normalize_date` before publication, and that is not belt and
+        braces: `versions.parse_date` and `dates.normalize_date` are two
+        independent parsers that DISAGREE. `normalize_date` implements
+        amendment 002 -- when both day and month are <= 12 and unequal, refuse
+        to guess -- and `versions.parse_date` guesses unconditionally.
+        Publishing its ISO output directly would override a ratified
+        amendment's refusal with a confident guess on four documents, one of
+        which correctly publishes `iso: null` today.
+
+        `version_status` itself is deliberately NOT derived here.
+        `select_active` distinguishes `marked` from `inferred_in_force`, and
+        collapsing an inference into the same word a document uses about itself
+        is the kind of overclaim obligation 6 exists to prevent.
+        """
+        from .versions import document_dates
+        try:
+            found = document_dates(self.conn, row["document_id"])
+        except sqlite3.Error:
+            found = {}
+        out, seen = [], []
+        for key, column in (("effective", "issue_date"),
+                            ("expiration", "expiration_date")):
+            raw = None
+            entry = (found or {}).get(key) or {}
+            for source in entry.get("sources") or []:
+                raw = source.get("original") or source.get("value") or raw
+                if raw:
+                    break
+            date = normalize_date(raw) if raw else None
+            if date is None:
+                date = normalize_date(row[column])
+            else:
+                seen.append(f"{key} {date['iso'] or 'ambiguous'}")
+            out.append(date)
+        return out[0], out[1], ", ".join(seen)
+
     def _register_doc(self, row) -> None:
         """Register the `SourceDoc` a ref belongs to. Idempotent per hash.
 
@@ -313,13 +400,27 @@ class SnapshotBuilder:
         """
         if row["sha256"] in self._docs:
             return
+        # Dates come from EVIDENCE first, the curated column only as a
+        # fallback. `documents.issue_date`/`expiration_date` are blank for most
+        # documents and, for one NOA with four byte-identical filings,
+        # disagree -- two rows filled, two blank -- and whichever row a
+        # citation reached first won. `versions.document_dates` resolves both
+        # from the `effective_date`/`expiration_date` facts Phase 6 extracted
+        # for every filing independently, so the answer stops depending on
+        # arrival order (G75).
+        issue_date, expiration_date, evidence = self._document_dates(row)
         self._docs[row["sha256"]] = SourceDoc(
             content_hash=row["sha256"],
             source_class=SOURCE_CLASS[row["doc_type"]],
             version_status=row["version_status"],
-            version_status_basis=row["version_status_basis"],
-            issue_date=normalize_date(row["issue_date"]),
-            expiration_date=normalize_date(row["expiration_date"]),
+            version_status_basis=(
+                # The stored basis says "no explicit version marker in curated
+                # metadata". That is true about the COLUMN and false about what
+                # this platform holds, once its own pages have been read.
+                f"{row['version_status_basis']}; dates read from the document: "
+                f"{evidence}" if evidence else row["version_status_basis"]),
+            issue_date=issue_date,
+            expiration_date=expiration_date,
             superseded_by=self._successors(row["document_id"]),
             # The class published above came from THIS record, which is the
             # first filing of these bytes that a citation reached. The other
@@ -396,22 +497,45 @@ class SnapshotBuilder:
         that lies.
         """
         raised = 0
+        # Which documents something published already cites. A failure on a
+        # page of a document that BACKS a live value is actionable -- it is a
+        # sibling page of one a plan depends on -- so it warns a line; a
+        # failure on a document nothing cites is background. `[measured]` 11 of
+        # the 13 documents carrying an unreconstructed table are documents that
+        # back a published `ParameterTable`, which is why the first cut's blanket
+        # `informational` was justified by a claim that was false for most of them.
+        backing = set(self._docs)
+        # No `page_no IS NOT NULL` filter: `encrypted_pdf` is a DOCUMENT-level
+        # failure with a null page, and excluding it reproduced in miniature
+        # the exact defect this method exists to fix.
         for row in self.conn.execute("""
                 SELECT q.document_id, q.page_no, q.kind, q.severity, q.detail,
                        d.title
                   FROM quality_issues q
                   JOIN documents d ON d.document_id = q.document_id
-                 WHERE q.page_no IS NOT NULL
-                 ORDER BY q.document_id, q.page_no, q.kind"""):
+                 ORDER BY q.document_id, q.page_no IS NULL, q.page_no, q.kind"""):
             spec = self.QUALITY_GAP_KINDS.get(row["kind"])
             if spec is None:
                 continue
             gap_kind, code, advice = spec
+            title = row["title"] or row["document_id"]
+            if row["page_no"] is None:
+                # Document-level: no page to cite, so the subject is the
+                # document and `cites` is empty, which `verify()` permits for a
+                # non-element subject.
+                self.gap(kind=gap_kind,
+                         subject={"kind": "source_document",
+                                  "id": row["document_id"], "tenant": None},
+                         code=code, params={"detail": row["detail"] or ""},
+                         cites=[],
+                         would_close=f"\"{title}\": {advice}",
+                         closes_by="knowledge", severity="informational")
+                raised += 1
+                continue
             try:
                 ref = self.source_ref_page(row["document_id"], row["page_no"])
             except (KeyError, TenantLeak):
                 continue
-            title = row["title"] or row["document_id"]
             self.gap(kind=gap_kind,
                      subject={"kind": "page",
                               "id": f"{row['document_id']}#p{row['page_no']}",
@@ -423,12 +547,16 @@ class SnapshotBuilder:
                      # and every other gap in the snapshot reads that way.
                      would_close=f"p{row['page_no']} of \"{title}\": {advice}",
                      closes_by="knowledge",
-                     # `warns_line` means a line of a plan gets a warning. A
-                     # page this platform read badly is a statement about its
-                     # OWN knowledge, attached to no line -- and 372 of them at
-                     # `warns_line` would drown the channel G74 just finished
-                     # making trustworthy. The signal is the gap's existence.
-                     severity="informational")
+                     # An `info` issue is never a line warning. Otherwise the
+                     # question is whether this document already backs a
+                     # published value: if it does, this page is a sibling of
+                     # one a plan depends on and the curator working that
+                     # document needs it; if nothing cites the document, the
+                     # gap is background about this platform's own reading.
+                     severity=("informational"
+                               if row["severity"] == "info"
+                               or ref.belongs_to not in backing
+                               else "warns_line"))
             raised += 1
         return raised
 
@@ -720,9 +848,36 @@ class SnapshotBuilder:
                                      f"and record the instruction",
                          closes_by="knowledge", severity="informational")
                 continue
-            if _DANGLING.search(body) or body[:1].islower():
-                # ends on a function word or starts mid-sentence: the column or
-                # the page cut it. Verbatim-but-truncated is worse than absent.
+            # A body that dangles is usually SPLIT, not truncated: the sentence
+            # continues in the next element on the page. Join forward before
+            # judging, which recovers the warning instead of gapping it --
+            # `[measured]` 24 of 26 danglers complete within four elements.
+            if _DANGLING.search(body):
+                added, used = _join_forward(rows, i, body)
+                if added is not None:
+                    body = f"{body} {added}".strip()
+                    text = f"{text} {added}".strip()
+                    anchor = used
+            if _INTERLEAVED.search(body):
+                self.gap(kind="illegible_source",
+                         subject={"kind": "element", "id": r["element_id"], "tenant": None},
+                         code="warning_columns_interleaved",
+                         params={"page_no": r["page_no"], "tail": _tail(body, 30)},
+                         cites=[self.source_ref(r["element_id"])],
+                         would_close=f"OCR read two columns of {_where(r)} onto one "
+                                     f"line, fusing two notes ({_tail(body)!r}); a "
+                                     f"person should read the page image and record "
+                                     f"them separately",
+                         closes_by="knowledge", severity="warns_line")
+                continue
+            if _DANGLING.search(body):
+                # Still dangling after the join: genuinely cut off. `[measured]`
+                # the old test also fired on `body[:1].islower()`, which caught
+                # ZERO of the 5 real defects (precision 0.000, recall 0.000)
+                # and produced 21 false gaps on its own -- a lowercase first
+                # character is not evidence of truncation. It fired on a bullet
+                # glyph OCR'd as a literal `k`, on a drop cap, and on the maths
+                # variable in `q = (0.00256)(K z)...`. Removed.
                 self.gap(kind="illegible_source", subject={"kind": "element", "id": r["element_id"], "tenant": None},
                          code="warning_truncated_mid_clause",
                          params={"ends_with": _tail(body, 30),
@@ -733,18 +888,23 @@ class SnapshotBuilder:
                                      f"page image and record the sentence whole",
                          closes_by="knowledge", severity="warns_line")
                 continue
-            if (r["text_source"] in ("ocr", "image_ocr")
-                    and (r["ocr_confidence"] or 0) < OCR_TRUST_FLOOR):
+            # `anchor`, not `r`: where a lexeme heading's body came from the
+            # NEXT element, the confidence that matters is that element's.
+            # `[measured]` one published gap claimed a warning "was read at
+            # 75.5% confidence" -- 75.5% belonged to the two-token heading
+            # `IMPORTANT !`, while the body it quoted was read at 95.31%.
+            if (anchor["text_source"] in ("ocr", "image_ocr")
+                    and (anchor["ocr_confidence"] or 0) < OCR_TRUST_FLOOR):
                 self.gap(kind="illegible_source", subject={"kind": "element", "id": r["element_id"], "tenant": None},
                          code="warning_ocr_below_confidence_floor",
                          # Integers in thousandths: obligation 1 forbids a
                          # float in either direction, and canonical_bytes()
                          # refuses one rather than rounding it silently.
-                         params={"confidence_milli": round(r["ocr_confidence"] * 1000),
+                         params={"confidence_milli": round(anchor["ocr_confidence"] * 1000),
                                  "floor_milli": round(OCR_TRUST_FLOOR * 1000)},
                          cites=[self.source_ref(r["element_id"])],
                          would_close=f"OCR read the warning on {_where(r)} at "
-                                     f"{r['ocr_confidence']:.1f}% against a "
+                                     f"{anchor['ocr_confidence']:.1f}% against a "
                                      f"{OCR_TRUST_FLOOR:.0f}% floor and produced "
                                      f"{_tail(body)!r}; a person should read the "
                                      f"page image",
@@ -767,17 +927,42 @@ class SnapshotBuilder:
                          closes_by="knowledge", severity="informational")
                 continue
 
+            if _undecodable_ratio(body) > UNDECODABLE_LIMIT:
+                # The font layer is corrupted and the text decodes to
+                # ciphertext. Publishing it as "verbatim, untranslated" is
+                # technically true and useless. `quality.is_mojibake` cannot
+                # catch it -- the cipher substitutes onto printable ASCII, so
+                # `ascii_token_ratio` stays above its limit on every affected
+                # page while `control_ratio` trips 2-4x over.
+                self.gap(kind="illegible_source",
+                         subject={"kind": "element", "id": r["element_id"], "tenant": None},
+                         code="warning_text_undecodable",
+                         params={"ratio_milli": round(_undecodable_ratio(body) * 1000),
+                                 "page_no": r["page_no"]},
+                         cites=[self.source_ref(r["element_id"])],
+                         would_close=f"the warning on {_where(r)} decodes to "
+                                     f"unreadable characters; its font layer is "
+                                     f"corrupted and a person should read the "
+                                     f"page image",
+                         closes_by="knowledge", severity="warns_line")
+                continue
+
             path = json.loads(r["heading_path"] or "[]")
             step = next((h for h in reversed(path)
                          if _STEP_HEADING.match(h) and not _NOT_A_STEP.search(h)), None)
 
-            key = " ".join(text.split())       # identity on content, not whitespace
+            key = _warning_key(text)           # G76: identity on the warning
             ref = self.source_ref(anchor["element_id"])
             if key in seen:
                 # The same text printed in several documents is one warning with
                 # several citations. 14 groups of files here are byte-identical
                 # under different manufacturers.
-                if ref.belongs_to not in {c["belongs_to"] for c in seen[key]["cites"]}:
+                # UNION, not one-per-document. The old cap was safe only while
+                # fragmentation kept each object to a single document; now that
+                # twelve fragments of one caution merge, capping would drop the
+                # citation count from 458 to 448 -- losing evidence to a fix
+                # meant to consolidate it.
+                if asdict(ref) not in seen[key]["cites"]:
                     seen[key]["cites"].append(asdict(ref))
                 continue
 
@@ -820,6 +1005,84 @@ GAP_KINDS = frozenset({
     "illegible_source"})
 DECLARED_LISTS = ("source_docs", "warnings", "gaps", "part_types", "parts",
                   "models", "procedures", "parameters", "combinations", "rules")
+
+
+
+# --- warning identity, and text we must not publish -------------------------
+# `[measured]` 2026-09-03 over the 289 published warnings.
+
+# A lead marker plus a severity lexeme, at the start of a warning. Widened from
+# `_LEAD` to cover `+` and the dash variants, because the corpus prints the same
+# caution with `*`, `+`, `–` and `-` and with a bled-through page number in
+# front of it: `30 * Caution –`, `4A. * Caution -`, `42 * caution -`.
+_KEY_LEAD = re.compile(
+    r"^\s*(?:[0-9]{1,3}[A-Za-z]?[.)]?\s*)?[*+\u2013\u2014-]?\s*"
+    r"(NOTE|NOTES|CAUTION|WARNING|IMPORTANT|NOTICE|DANGER|ATTENTION|"
+    r"ADVERTENCIA|AVERTISSEMENT|TIP)\s*[:!]?\s*", re.I)
+
+
+def _warning_key(text: str) -> str:
+    """The identity two warnings share when they are the same warning.
+
+    The old key was `" ".join(text.split())` over the RAW element text, so
+    page-number bleed and delimiter variance each minted a separate identity
+    and the corpus's most-repeated caution published as TWELVE objects.
+
+    Normalises only what is demonstrably noise: a leading page number and
+    footnote marker before a recognised lexeme, the lexeme's own case, dash
+    variants, and whitespace. `[measured]`: merges 24 objects into 7 with ZERO
+    false merges across all 289.
+
+    What it deliberately does NOT do is drop the lexeme from the identity. 8
+    pairs share a body and differ only in whether a `WARNING:` heading is
+    present -- a separate extraction defect, where a body consumed as a
+    heading's body is then re-published bare -- and a body-only key has no
+    principled way to tell that from a real WARNING and a real CAUTION that
+    happen to say the same sentence.
+    """
+    flat = " ".join((text or "").split())
+    m = _KEY_LEAD.match(flat)
+    if m:
+        flat = f"{m.group(1).upper()}||{flat[m.end():]}"
+    return flat.replace("\u2013", "-").replace("\u2014", "-").casefold()
+
+
+# Characters a fence document legitimately prints: ASCII, the Latin supplements
+# and extensions (accents, `¼`, `°`, `©`), general punctuation (`•`, `–`, `″`),
+# currency/letterlike/arrows/maths, dingbats, Greek (engineering symbols),
+# ligatures (`ﬁ` from InDesign), and spacing modifiers (`˚`).
+def _is_legible_char(ch: str) -> bool:
+    if ch in "\n\t" or ch.isprintable():
+        code = ord(ch)
+        return not (0xE000 <= code <= 0xF8FF          # private use
+                    or 0xFFF0 <= code <= 0xFFFF       # specials, incl. U+FFFD
+                    or 0xD800 <= code <= 0xDFFF)      # surrogates
+    return False
+
+
+def _undecodable_ratio(text: str) -> float:
+    """Share of characters that no fence document would print.
+
+    A page whose font layer is corrupted decodes to text like
+    `_o\x89|orovbࢼomv1u;\x89vom`. `quality.is_mojibake` cannot catch it: the
+    cipher substitutes most letters onto OTHER printable ASCII, so
+    `ascii_token_ratio` lands just above its 0.85 limit on every affected page
+    (0.857-0.958) while `control_ratio` trips 2-4x over. Only ~10-15% of a
+    corrupted page's tokens carry a stray byte at all.
+
+    `[measured]` at the 0.015 threshold: 176 of 49,984 elements and 3 of 289
+    warnings are rejected, and every rejected warning is genuine ciphertext.
+    Known and deliberate recall gap: two elements of the SAME corruption score
+    0.0169 and 0.0, because a substitution onto valid ASCII is invisible to any
+    character-class test. This bounds the damage; it does not end it.
+    """
+    if not text:
+        return 0.0
+    bad = sum(1 for ch in text if not _is_legible_char(ch))
+    return bad / len(text)
+
+
+UNDECODABLE_LIMIT = 0.015
 
 
 class VerificationFailed(RuntimeError):
@@ -1091,10 +1354,6 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
     try:
         b = SnapshotBuilder(conn, tenant=tenant, regime=regime)
         warnings = b.warnings()   # mints refs, registers docs, raises gaps
-        # G78. Every extraction failure this platform already DETECTED,
-        # published as a gap. Runs with the other ref-minting passes and before
-        # `source_docs()` is read -- see the ordering note above.
-        b.quality_gaps()
 
         # Parameter tables are built through the SAME ref minter, so §1.2.1's
         # closure rule stays STRUCTURAL rather than merely checked: minting a
@@ -1146,6 +1405,13 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
         # meaning. `retain_until` is deliberately outside it: it moves with the
         # clock, and hashing it would mean two builds over identical knowledge
         # never matched -- which is the opposite of what obligation 1 asks for.
+        # G78. Every extraction failure this platform already DETECTED,
+        # published as a gap. Runs LAST of the ref-minting passes, and that
+        # ordering is load-bearing: its severity rule asks whether a document
+        # already backs a published value, which is only knowable once
+        # warnings, parameters and parts have registered theirs.
+        b.quality_gaps()
+
         members = {
             "tenant": tenant,
             "regime": regime,
