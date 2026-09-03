@@ -663,7 +663,28 @@ if this keeps recurring once real curation work begins.
 
 ---
 
-## C15 — `SpecField.value`'s wire shape contradicts obligation 4
+## ~~C15 — `SpecField.value`'s wire shape contradicts obligation 4~~ — RESOLVED, no amendment
+
+**Resolved 2026-09-03 (`conversation.md` T42), no ratification round needed —
+two independent reasons, either sufficient on its own.** `SpecField` is not in
+`contract.md` at all (grep confirms 0 hits); it lives only in
+`knowledge-datamodel.md`, which `contract.md` §1.2 explicitly delegates to this
+platform to correct. And obligation 4 had already decided the substance: a
+bare `{value: 38, unit: "mm"}` on a key like `nominal_length_mm` **is** the
+bare `_mm` field obligation 4 names and forbids, and always was — there was no
+ambiguity to ratify away, only a stale sketch in a document this platform owns.
+
+**The fix landed one case narrower than proposed here.** `value: Quantity` was
+the reading recommended below; Planning caught that it forbids `colour`, which
+this same section's own `key` list names, and pointed at the contract's own
+precedent one section over — `ParameterTable.rows[].value: Quantity | Token`
+(§1.3), discriminable by shape (`amount_milli` vs. `key`), no separate
+`value_type` declaration needed at `SpecField` granularity. Shipped as
+`value: Quantity | Token` in `knowledge-datamodel.md` §2.2. The two stock-length
+values this candidate names below now publish as real `Quantity`s — see
+`state-and-gaps.md` G63.
+
+<details><summary>Original entry, for the record</summary>
 
 | | |
 |---|---|
@@ -702,6 +723,8 @@ docstring has the exact evidence). Recommended reading, given the rest of
 this contract's own convention: `SpecField.value: Quantity`, matching how
 every other dimension crossing this boundary is shaped — but that is a
 recommendation, not something shipped without your agreement.
+
+</details>
 
 ---
 

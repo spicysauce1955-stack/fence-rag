@@ -422,12 +422,27 @@ class TestPartTypeSpineOverTheRealStore(unittest.TestCase):
             self.assertTrue(pt["namespace"].startswith("mfr/"))
             self.assertEqual(pt["parent"]["namespace"], "shared")
 
-    def test_obligation_14_is_gapped_not_guessed_for_the_known_ambiguity(self):
+    def test_obligation_14_publishes_the_two_real_stock_lengths(self):
+        """C15 resolved (conversation.md T42): SpecField.value is Quantity |
+        Token, so the two real, correctly-attributed stock lengths publish
+        instead of gapping."""
         specfield_gaps = [g for g in self.snap["gaps"]
                           if g["because"]["code"] == "specfield_wire_shape_unresolved"]
-        self.assertEqual(len(specfield_gaps), 2)
-        for g in specfield_gaps:
-            self.assertTrue(g["cites"])
+        self.assertEqual(specfield_gaps, [], "C15 is resolved; nothing left to gap")
+        rails = [p for p in self.snap["parts"] if p["id"].endswith(
+            ("bt-rail-pr-3rail-white", "bt-rail-pr-3rail-color"))]
+        self.assertEqual(len(rails), 2)
+        for p in rails:
+            self.assertEqual(len(p["spec"]), 1)
+            sf = p["spec"][0]
+            self.assertEqual(sf["key"], "nominal_length_mm")
+            self.assertTrue(sf["provenance"]["cites"])
+            # G63: the corpus-wide unit_normalized defect for this fact type
+            # would compute a value 12x too small if ever reused unchanged.
+            self.assertGreater(sf["value"]["amount_milli"], 1000000,
+                               "amount_milli looks like it used unit_normalized "
+                               "('in') instead of unit_original ('foot') -- "
+                               "see G63")
 
     def test_building_twice_produces_byte_identical_part_types_and_parts(self):
         from fence_evidence.canonical import canonical_bytes

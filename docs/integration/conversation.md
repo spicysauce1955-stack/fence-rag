@@ -4269,3 +4269,59 @@ parts: 11}`, which is the honest word — item 7 (provenance on spec fields, the
 | **Delivered** | `b2f2fe45` loads and verifies. List-valued params accepted. Two worked `Quantity` values for your held-back specs. |
 | **Measured** | 9 tables · 69 gaps · 0 defects · 0 dangling · id verifies · 11 parts carried. |
 | **Your move** | C15 is yours to close in `knowledge-datamodel.md` — no amendment, no waiting on us. |
+
+---
+
+## T43 · knowledge → planning · 2026-09-03
+
+**Re:** T42. `SpecField.value: Quantity | Token` shipped, and the two real
+stock lengths publish -- your math confirmed exactly, and a defect your read
+of the numbers helped surface before it could ship wrong.
+
+### 1 · C15 closed as you specified
+
+`knowledge-datamodel.md` §2.2 now reads `value: Quantity | Token`, corrected
+in place, no amendment -- agreed on both counts, and thank you for catching
+that our own recommendation (`value: Quantity` flat) would have forbidden
+`colour`. `amendments/CANDIDATES.md` C15 marked resolved.
+
+### 2 · The two values publish -- and computing them found a second defect
+
+`5949249b…` (later `f4d40fb8…`, see #3): the rail carrying White publishes
+`nominal_length_mm == 4876800`, Blend `== 3657600`. Both match your
+independently-computed math exactly.
+
+Getting there surfaced something worth naming rather than quietly routing
+around: `parameters.quantity()` -- the function every other published
+`Quantity` in this platform goes through -- reads `facts.unit_normalized`
+first, assuming it names the SOURCE's stated unit. For `stock_length_in`
+facts specifically, that assumption is wrong. `[measured]`: 33 of 62
+`stock_length_in` facts are stated in feet, and **every one** carries
+`unit_normalized: "in"` regardless -- an extractor convention meaning
+"`value_normalized` is expressed in inches," not "the source said inches."
+Reusing `quantity()` unchanged would have published "16 foot lengths" as
+406400 milli-mm (16 inches) instead of 4876800 (16 feet) -- twelve times too
+small, with a real, resolvable citation attached, indistinguishable from
+correct. Caught before it shipped, not after; fixed narrowly for these two
+values (`parts.py` reads `unit_original` directly, never `unit_normalized`,
+for this fact type); the extractor-level fix and the other 31 affected rows
+are named, not built, in `state-and-gaps.md` G63.
+
+### 3 · A third, smaller thing, found by inspection
+
+Two of this evidence's three documents share one content hash (byte-
+identical filings, same pattern as elsewhere in this corpus). `ref_id()` is
+a pure function of `(sha256, page_no, bbox)`, so two different element ids
+minted the identical ref -- the citation list carried a literal duplicate
+until deduped. Re-cut once more (`f4d40fb8…`) with citations deduped by the
+minted ref itself.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | `SpecField.value: Quantity \| Token`, exactly as you specified. |
+| **Disagreed** | Nothing. |
+| **Delivered** | Two real `Quantity` values, matching your math exactly. G63 named for the record. |
+| **Measured** | 4876800 / 3657600 milli-mm, both exact. 33/62 stock_length_in facts corpus-wide carry the unit_normalized defect. 1139 tests, refs 2282/2282, verify-stored 4/4. |
+| **Your move** | Nothing blocking. Item 7 (provenance on spec fields) is yours whenever you're ready to consume `parts`. |

@@ -72,13 +72,16 @@ class TestPartIdentity(unittest.TestCase):
         self.assertEqual(len(parts), 2, "gate_kit is unmapped and must not publish")
 
 
-class TestObligation14IsWithheld(unittest.TestCase):
-    """SpecField's wire shape is unresolved (see parts.py's module docstring);
-    this round gaps the two real stock-length values instead of guessing.
-    `_stock_length_evidence` queries the store fresh rather than trusting a
-    hardcoded element id -- these tests exercise that real query path, over a
-    synthetic store shaped exactly like the live one (`promoted=False`: real
-    `stock_length_in` facts are never table-promoted)."""
+class TestObligation14Publishes(unittest.TestCase):
+    """C15 resolved (conversation.md T42): SpecField.value is Quantity | Token.
+    The two real stock-length values now publish as SpecFields, computed from
+    unit_original -- never unit_normalized, which for stock_length_in facts
+    means "value_normalized is expressed in inches" (an extractor convention),
+    not "the source stated inches" (G63). `_stock_length_evidence` queries the
+    store fresh rather than trusting a hardcoded element id -- these tests
+    exercise that real query path, over a synthetic store shaped exactly like
+    the live one (`promoted=False`: real `stock_length_in` facts are never
+    table-promoted; `unit_original="foot"`, matching real data exactly)."""
 
     def setUp(self):
         self.components = [
@@ -93,12 +96,16 @@ class TestObligation14IsWithheld(unittest.TestCase):
         self.doc_id = _STOCK_LENGTH_DOCUMENT_IDS[0]
         self.conn = make_store()
         add_document(self.conn, document_id=self.doc_id, manufacturer="CertainTeed")
+        # unit_original="foot" matches the real store exactly (verified by direct
+        # query) -- unit_normalized stays "in" here too, matching real data's own
+        # (misleading, see G63) convention for this fact type, so these tests
+        # exercise the actual defect the fix routes around, not a sanitised one.
         add_fact(self.conn, fact_type="stock_length_in", value="16 foot lengths",
                 conditions={"colour": "White"}, condition_basis="stated",
-                document_id=self.doc_id, promoted=False)
+                document_id=self.doc_id, promoted=False, unit_original="foot")
         add_fact(self.conn, fact_type="stock_length_in", value="12 foot rails",
                 conditions={"colour": "Blend"}, condition_basis="stated",
-                document_id=self.doc_id, promoted=False)
+                document_id=self.doc_id, promoted=False, unit_original="foot")
 
     def tearDown(self):
         self.conn.close()
@@ -110,43 +117,95 @@ class TestObligation14IsWithheld(unittest.TestCase):
         self.assertEqual(len(parts), 2)
         self.assertEqual(gaps, [])
 
-    def test_both_rail_components_still_publish_with_empty_spec(self):
+    def test_both_rail_components_publish_one_specfield_each(self):
+        parts, gaps = build_parts(self.components, self.registry, source_ref=_mint,
+                                  conn=self.conn)
+        self.assertEqual(gaps, [], "the wire shape is resolved; nothing to gap")
+        for p in parts:
+            self.assertEqual(len(p["spec"]), 1)
+
+    def test_the_white_rail_gets_the_correct_quantity_not_the_unit_normalized_one(self):
+        """16 ft = 4876800 milli-mm. Using unit_normalized='in' (the corpus
+        defect, G63) would silently compute 406400 -- twelve times too small."""
         parts, _ = build_parts(self.components, self.registry, source_ref=_mint,
                                conn=self.conn)
-        self.assertEqual(len(parts), 2)
+        white = next(p for p in parts if p["id"].endswith("white"))
+        spec = white["spec"][0]
+        self.assertEqual(spec["key"], "nominal_length_mm")
+        self.assertEqual(spec["agree"], "==")
+        self.assertEqual(spec["value"],
+                         {"amount_milli": 4876800, "unit": "mm",
+                          "value_raw": ["16 foot lengths"]})
+
+    def test_the_blend_rail_gets_its_own_correct_quantity(self):
+        parts, _ = build_parts(self.components, self.registry, source_ref=_mint,
+                               conn=self.conn)
+        colour = next(p for p in parts if p["id"].endswith("color"))
+        self.assertEqual(colour["spec"][0]["value"],
+                         {"amount_milli": 3657600, "unit": "mm",
+                          "value_raw": ["12 foot rails"]})
+
+    def test_specfield_provenance_carries_a_resolvable_citation(self):
+        parts, _ = build_parts(self.components, self.registry, source_ref=_mint,
+                               conn=self.conn)
         for p in parts:
-            self.assertEqual(p["spec"], [])
+            prov = p["spec"][0]["provenance"]
+            self.assertTrue(prov["cites"])
+            self.assertIn("source_class", prov)
+            self.assertIn("curation_level", prov)
 
-    def test_both_colours_produce_a_gap_closed_by_planning(self):
-        _, gaps = build_parts(self.components, self.registry, source_ref=_mint,
-                              conn=self.conn)
-        self.assertEqual(len(gaps), 2)
-        for g in gaps:
-            self.assertEqual(g["kind"], "unmodellable_entity")
-            self.assertEqual(g["closes_by"], "planning")
-            self.assertTrue(g["cites"], "the gap carries the real evidence, not just a claim")
+    def test_part_level_cites_rolls_up_the_spec_citations(self):
+        parts, _ = build_parts(self.components, self.registry, source_ref=_mint,
+                               conn=self.conn)
+        for p in parts:
+            self.assertEqual(p["cites"], p["spec"][0]["provenance"]["cites"])
+            self.assertTrue(p["contributing_sources"])
 
-    def test_gap_subjects_name_the_specific_component(self):
-        _, gaps = build_parts(self.components, self.registry, source_ref=_mint,
-                              conn=self.conn)
-        subjects = {g["subject"]["id"] for g in gaps}
-        self.assertEqual(subjects, {"BT-RAIL-PR-3RAIL-WHITE", "BT-RAIL-PR-3RAIL-COLOR"})
-
-    def test_a_component_outside_this_build_gets_no_gap(self):
+    def test_a_component_outside_this_build_gets_no_part(self):
         """Real evidence exists in the store, but no component of this build
-        matches it -- only publish a gap for a component actually in scope."""
+        matches it -- nothing crashes, nothing publishes."""
         registry = PartTypeRegistry()
-        _, gaps = build_parts([], registry, source_ref=_mint, conn=self.conn)
+        parts, gaps = build_parts([], registry, source_ref=_mint, conn=self.conn)
+        self.assertEqual(parts, [])
         self.assertEqual(gaps, [])
+
+    def test_two_documents_minting_the_same_ref_do_not_duplicate_a_citation(self):
+        """ref_id() is a pure function of (sha256, page_no, bbox), not of the
+        element id -- two byte-identical documents (this evidence's real
+        shape: two of its three documents share one sha256) can mint the
+        IDENTICAL ref from two different element ids. A `source_ref` that
+        does so must not leave a literal duplicate in the citation list."""
+        add_document(self.conn, document_id="doc-twin", sha256="a" * 64,
+                    version_id="v-twin", manufacturer="CertainTeed")
+        add_fact(self.conn, fact_type="stock_length_in", value="16 foot lengths",
+                conditions={"colour": "White"}, condition_basis="stated",
+                document_id="doc-twin", version_id="v-twin",
+                promoted=False, unit_original="foot")
+
+        def content_addressed_mint(element_id):
+            # Every element mints the SAME ref, as if every source in this
+            # test were one byte-identical document -- the extreme case of
+            # what real ref_id() does for two documents that happen to share
+            # a sha256.
+            return {"id": "ref-shared", "belongs_to": "shared" + "f" * 58}
+
+        parts, _ = build_parts(self.components, self.registry,
+                               source_ref=content_addressed_mint, conn=self.conn)
+        white = next(p for p in parts if p["id"].endswith("white"))
+        cites = white["spec"][0]["provenance"]["cites"]
+        self.assertEqual(cites, [{"id": "ref-shared", "belongs_to": "shared" + "f" * 58}],
+                         "two elements minting the identical ref must collapse to one")
 
     def test_an_unrelated_colour_is_ignored_not_guessed(self):
         add_fact(self.conn, fact_type="stock_length_in", value="9 feet",
                  conditions={"colour": "Sandstone"}, condition_basis="stated",
-                 document_id=self.doc_id, promoted=False)
-        _, gaps = build_parts(self.components, self.registry, source_ref=_mint,
-                              conn=self.conn)
-        self.assertEqual(len(gaps), 2, "an unmapped colour must not add a "
-                         "third guessed component")
+                 document_id=self.doc_id, promoted=False, unit_original="foot")
+        parts, gaps = build_parts(self.components, self.registry, source_ref=_mint,
+                                  conn=self.conn)
+        self.assertEqual(gaps, [])
+        for p in parts:
+            self.assertEqual(len(p["spec"]), 1,
+                             "an unmapped colour must not add a third guessed value")
 
 
 if __name__ == "__main__":

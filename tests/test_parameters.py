@@ -97,12 +97,23 @@ def add_fact(conn, *, fact_type="footing_depth_in", value='36"',
              conditions=None, condition_basis="stated",
              condition_basis_note=None, document_id="doc-1",
              version_id="v1", page_no=17, review_status="accepted",
-             promoted=True, unit_normalized="in", value_alternates=None,
-             row_index=None, col_index=1):
-    """One promoted fact: a table cell carrying its row's conditions."""
+             promoted=True, unit_normalized="in", unit_original=None,
+             value_alternates=None, row_index=None, col_index=1):
+    """One promoted fact: a table cell carrying its row's conditions.
+
+    `unit_original` defaults to inferring `"in"` from a `"` in `value`, the
+    long-standing behaviour every other caller relies on -- pass it
+    explicitly for a fact type where the real column holds something else
+    (`stock_length_in`'s `unit_original` is the source's own unit word --
+    `"foot"`, `"'"` -- never `unit_normalized`, which for that fact type
+    labels `value_normalized`'s unit, always `"in"` by convention; see
+    parts.py's module docstring and state-and-gaps.md G63).
+    """
     candidate_id = _candidate(conn, document_id, version_id, page_no, value,
                               review_status, row_index=row_index,
                               col_index=col_index)
+    if unit_original is None:
+        unit_original = "in" if '"' in value else None
     conn.execute("""INSERT INTO facts(document_id, version_id, page_no, element_id,
         fact_type, subject, value_original, unit_original, unit_normalized,
         conditions, condition_basis, condition_basis_note, value_alternates,
@@ -111,7 +122,7 @@ def add_fact(conn, *, fact_type="footing_depth_in", value='36"',
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,'table row','table-read:accepted',?,
                 '2026-08-27T00:00:00+00:00',?)""",
         (document_id, version_id, page_no, f"el-{version_id}", fact_type,
-         "FOOTING DEPTH", value, "in" if '"' in value else None, unit_normalized,
+         "FOOTING DEPTH", value, unit_original, unit_normalized,
          json.dumps(conditions if conditions is not None else {}),
          condition_basis, condition_basis_note,
          json.dumps(value_alternates) if value_alternates else None,

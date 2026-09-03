@@ -110,12 +110,24 @@ start: `post`, `post_cap`, `rail`, `bar`, `infill`, `reinforcement`, `bracket`,
 SpecField {
   key    "width_mm" | "nominal_length_mm" | "colour" | …
   agree  == | != | <= | >= | in | supplies
-  value  38 | null
-  unit   "mm" | null
+  value  Quantity | Token
 }
 ```
 
-Unchanged. Three things that matter when you publish one:
+**Corrected (C15, `conversation.md` T41/T42).** The bare `value: 38 | null` with
+a sibling `unit` field this section used to show was a bare `_mm` field with a
+unit beside it -- obligation 4 (BINDING) forbids exactly that, and always did;
+this was a defect in this delegated document, not a contract gap, so it closes
+here rather than through `AMENDING.md`. A flat `Quantity` was considered and
+rejected: this section's own `key` list includes `"colour"`, which is not a
+`Quantity`, and forcing it into one is worse than the shape it replaces. The
+union mirrors `ParameterTable`'s own precedent (§1.3: `value: Quantity | Token`)
+-- a `SpecField` is one cell, needing no separate `value_type` declaration the
+way a table does, since the union is discriminable by shape (`amount_milli` vs.
+`key`). `Token` carries `value_raw` too: a colour keeps `"Sierra Blend"` beside
+its code, the same reason a `Quantity` never crosses without its lexeme.
+
+Three things that matter when you publish one:
 
 - It reads left to right as a sentence about the item: `item.<key> <agree> <value>`.
   One direction always.

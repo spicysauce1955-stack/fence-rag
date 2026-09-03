@@ -69,12 +69,13 @@ five of which landed 2026-08-25. Obligation 5 (the `PartType` spine) closed
 2026-08-31: 11 `Part`s and 5 `mfr/certainteed` `PartType` extensions publish for one
 vertical slice (Chesterfield + the one assembly with real obligation-14 evidence),
 built with adversarial validation that caught and reversed a wrong data attribution
-before it shipped. Obligation 14 (`stock_length`) is still gapped rather than
-published — the two real stated values exist but `SpecField`'s own wire shape turns
-out to be unresolved between `knowledge-datamodel.md` §2.2 and obligation 4's Quantity
-requirement, a genuine cross-team question, not something this platform can settle
-alone. Still fully unbuilt: `FenceModel`, `Procedure`, `Rule`, `Combination`.
-`docs/state-and-gaps.md` G62 has the full account. Curation level 2 is
+before it shipped. Obligation 14 (`stock_length`) closed 2026-09-03: `SpecField.value:
+Quantity | Token` (candidate C15, resolved by Planning correcting this platform's own
+delegated document, no amendment), and the two real stated stock lengths publish —
+computing them surfaced a corpus-wide `unit_normalized` defect (G63, 33 of 62
+`stock_length_in` facts affected) caught and routed around before it could publish a
+number twelve times too small. Still fully unbuilt: `FenceModel`, `Procedure`, `Rule`,
+`Combination`. `docs/state-and-gaps.md` G62/G63 has the full account. Curation level 2 is
 **no longer thin as of 2026-08-31**: a person has reviewed 37 of 44 flagged crops (up
 from 3 on 2026-08-30), and the current published snapshot carries **9 `ParameterTable`s**
 across `footing_depth_mm`, `footing_diameter_mm`, `max_span_mm` (publishing for the first

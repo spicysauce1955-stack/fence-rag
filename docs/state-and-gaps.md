@@ -2687,7 +2687,7 @@ paragraph it asked for.
 
 ---
 
-### G62 — obligation 5 (the `PartType` spine) closed for one vertical slice; obligation 14 correctly withheld, not guessed
+### G62 — obligation 5 (the `PartType` spine) closed for one vertical slice; obligation 14 published two real values, correcting a corpus-wide defect on the way (G63)
 
 At the user's request: design, adversarial validation (13 agents — 4 research,
 3 independent designs, 1 judge/synthesis, 5 adversarial critics, each a
@@ -2782,6 +2782,94 @@ real-store milestone/determinism/dataset-tamper tests in
 failure. `refs --verify`: 1134/1134 resolved, 0 dangling. `snapshot
 --verify-stored`: 2/2 (the prior snapshot, `a4181dbf…`, stays live beside
 the new one — superseded, not defective, so not tombstoned).
+
+**C15 resolved 2026-09-03, `conversation.md` T42 — Planning's answer, not
+this platform's guess.** No amendment: `SpecField` lives only in
+`knowledge-datamodel.md`, which `contract.md` §1.2 delegates to this
+platform to correct directly, and obligation 4 had already decided the
+substance (a bare `_mm`-plus-unit field was never legal). The shape landed
+one case narrower than this platform's own C15 recommendation: not flat
+`Quantity` (forbids `colour`, which the same section's own `key` list
+names) but `Quantity | Token`, matching `ParameterTable`'s own precedent
+(§1.3) — a `SpecField` is one cell, discriminable by shape, no separate
+`value_type` needed. `knowledge-datamodel.md` §2.2 corrected;
+`amendments/CANDIDATES.md` C15 marked resolved.
+
+**The two real values now publish, and computing them surfaced G63** (below)
+— `parameters.quantity()`/`_unit_of()` could not be reused unchanged, because
+for `stock_length_in` facts specifically `unit_normalized` does not mean
+what every other fact type uses it to mean. Fixed with a dedicated,
+narrowly-scoped `_stock_length_quantity()` in `parts.py` reading
+`unit_original` instead — 16 ft → `4876800` milli-mm, 12 ft → `3657600`,
+both verified against Planning's own independently-computed math in T42,
+exact.
+
+**A second, smaller defect found inspecting the re-cut, not by any test:**
+two of this evidence's three documents share one content hash (byte-
+identical filings under two manufacturer-string spellings, same as
+elsewhere in this corpus), so two different element ids mint the IDENTICAL
+`SourceRef` — `ref_id()` is a pure function of `(sha256, page_no, bbox)`,
+never of the element id. The citation list carried a literal duplicate
+entry until deduped by the minted ref itself, the same `canonical_bytes`
+idiom `parameters._merge()` already uses for the identical reason.
+
+Re-cut twice more (`5949249b…` for the C15 publication, `f4d40fb8…` for the
+citation dedup — both same-day, both superseding a snapshot with no real
+defect, neither tombstoned). Full suite: 1139 tests, same one pre-existing
+error (G58), 1 expected failure. `refs --verify`: 2282/2282 resolved, 0
+dangling, across 4 non-tombstoned snapshots. `snapshot --verify-stored`:
+4/4. Reported to Planning in `conversation.md` T43.
+
+---
+
+### G63 — `stock_length_in` facts stated in feet all carry `unit_normalized: "in"`, corpus-wide
+
+`[measured]`, found computing the two real `Part.spec` values above, before
+either reached the wire. `parameters._unit_of()` — the unit-detection every
+other published `Quantity` in this platform relies on — reads
+`facts.unit_normalized` first, on the assumption that it names the SOURCE's
+stated unit. For every OTHER fact type this holds: `footing_depth_in`,
+`post_spacing_in` and `footing_diameter_in` are 100% `unit_original ==
+unit_normalized == "in"` (288 rows checked), because their sources are
+always stated in inches. `stock_length_in` is different, and the column
+means something different for it: `facts.stock_lengths()`
+(`fence_evidence/facts.py`) always writes `unit_normalized: "in"`, because
+`value_normalized` — a SEPARATE column — is the extractor's own
+already-converted-to-inches number, not a restatement of what the source
+said. The column name is shared; the meaning is not.
+
+`[measured]`: of 62 `stock_length_in` facts, **33 are stated in feet**
+(`unit_original` ∈ `{"'", "foot", "’"}` — 18 + 9 + 6) and every one still
+carries `unit_normalized: "in"`. Had this platform reused
+`parameters.quantity()`/`_unit_of()` unchanged for the two `Part.spec`
+values in G62 — the obvious, DRY move — it would have silently published
+"16 foot lengths" as `406400` milli-mm (16 **inches**) instead of the
+correct `4876800` (16 **feet**): twelve times too small, with a real,
+resolvable `SourceRef` attached, indistinguishable from a correct value to
+anyone reading the snapshot. The same shape of defect as `domain_basis` and
+the Chesterfield rail misattribution in G62 — the letter of "cite a real
+source" satisfied, the number wrong by a factor the citation does nothing
+to catch.
+
+**Fixed for the two values this round needs**, not corpus-wide: `parts.py`'s
+`_stock_length_quantity()` reads `unit_original` directly (verified correct
+for all 62 rows across every group) and never touches `unit_normalized` for
+this fact type. `tests/test_parts.py`'s
+`test_the_white_rail_gets_the_correct_quantity_not_the_unit_normalized_one`
+pins the exact number a `unit_normalized`-trusting implementation would have
+gotten wrong, so a regression reads as a factor-of-twelve failure, not a
+close miss.
+
+**Not fixed: the extractor, or the 31 other feet-stated rows this platform
+has not yet built a `Part` to attach to.** `facts.stock_lengths()`'s
+`unit_normalized: "in"` convention is defensible in isolation — it correctly
+labels `value_normalized`, a column nothing outside this defect reads — but
+it is a trap for the next caller who assumes `unit_normalized` means what it
+means everywhere else. Worth a follow-up: either rename the column's role
+for this fact type so the trap cannot recur, or have `stock_lengths()` also
+write a genuine `unit_original`-derived `unit_normalized` and stop
+overloading the field. Neither is done here — this is one gap named, not a
+license to widen this round's scope.
 
 ---
 
