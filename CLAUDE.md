@@ -167,8 +167,15 @@ about the files that happen to be there.
 The two `scripts/build_*.py` dataset builders are pure-stdlib, idempotent, and safe to re-run; they
 overwrite their outputs. They print a reconciliation summary — the lines that matter are
 `Missing (broken local_path)` and `Files on disk but NOT referenced` (orphans), both of which should
-be **0**. Any edit to a per-manufacturer or structural JSON requires re-running the corresponding
-builder and committing the regenerated output; `master-dataset.json`, `china-dataset.json` and the
+be **0**. **They are 0 today and both are currently meaningless** — 250 of 451 `local_path` values
+are absolute paths into a *different checkout on this machine*
+(`/home/user/Workspace/play/vinyl-fence-bom-pipeline/…`), 125 of them escaping the repository root
+after `relpath`, and the guard passes only because that stray directory happens to exist here. On a
+fresh clone they resolve to nothing. `cli dataset --verify` cannot see it either: it hashes the 16
+source files as opaque bytes and answers "unchanged", not "portable". Read `docs/state-and-gaps.md`
+G71 before trusting either number, and **before re-running a builder** — doing so today rewrites
+those 125 paths to `../play/…` and commits them. Any edit to a per-manufacturer or structural JSON
+requires re-running the corresponding builder and committing the regenerated output; `master-dataset.json`, `china-dataset.json` and the
 two `*documents-index.json` files are generated artifacts, never hand-edited. Re-running them can
 change the curated metadata the evidence system reads, which is why every manifest row records the
 SHA-256 it was built from.
