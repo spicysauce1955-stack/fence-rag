@@ -129,6 +129,8 @@ python3 -m fence_evidence.cli review --accept CROP --reviewer NAME   # record a 
 python3 -m fence_evidence.cli review --export    # the durable review ledger (G49)
 python3 -m fence_evidence.cli review --import PATH --apply   # replay it into this store
 python3 -m fence_evidence.cli fact-review --queue    # 266 OCR-flagged facts waiting
+python3 -m fence_evidence.cli steps --propose --document PATH [--page N]  # split bullets into step candidates
+python3 -m fence_evidence.cli steps --queue          # step candidates waiting for a person
 python3 -m fence_evidence.cli snapshot --verify-stored   # do PUBLISHED snapshots still pass?
 python3 -m fence_evidence.cli backfill-spans --apply     # recover merged cells (G41)
 python3 -m fence_evidence.cli serve --token TOK  # the API behind Planning's screens
@@ -315,6 +317,14 @@ Things that will bite you if you don't know them (all measured, see the corpus a
 - **`retain_until` is deliberately outside the snapshot hash.** It moves with the clock, so
   hashing it would mean two builds over identical knowledge never matched. What exactly belongs
   in "the canonical member list" is not fully specified; that is a reading, not a quote.
+- **`segment_kind` on a `step_candidate` classifies STRUCTURE, not semantics.** `step` means
+  "this is a bullet that reads like an instruction", not "this is an `AssemblyStep`". On the
+  slice page 5 of 54 such rows are an ordering permission, a rationale, a cross-reference, a
+  resulting behaviour and a dimension — a person decides, and `docs/state-and-gaps.md` G69
+  lists them. `prohibition` is separate because the design's worked example says
+  `Never strike the PVC post…` publishes as a `Warning`, and typing it `step` was a real
+  defect. Note the ordering trap it exposed: the damage HIDES the prohibition, because
+  `N\never` flattens to `N ever`, so the kind must be decided on the repaired reading.
 - **`crops.py` is wired as of 2026-08-28.** `cropcache.py` renders through it,
   `sourcerefs.py` builds the Discovery read model on top, and `api.py` serves
   `GET /source-refs/{id}` and `POST /source-refs:batch` behind a bearer allowlist.
