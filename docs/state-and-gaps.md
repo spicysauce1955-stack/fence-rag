@@ -3275,6 +3275,104 @@ and still short, so it stays opt-in.
 
 ---
 
+## 3e. Update, 2026-09-03 — adversarial audit of published data
+
+Five adversaries were dispatched over the extracted, digested and published data, each
+briefed to falsify rather than confirm and to verify against the source PDFs rather than
+against this repository's own prose. **Two completed; three died on an account session
+limit having produced nothing** — the facts/units sweep, the provenance-chain audit and the
+tables/dataset audit are therefore **not done** and must not be read as clean.
+
+### G66 — obligation 14's published value rests on a sentence the current edition deleted
+
+`[measured]` and independently confirmed against the PDFs. **This is a defect in data that
+has already crossed the boundary.**
+
+`shared/bt-rail-pr-3rail-color` publishes `nominal_length_mm = 3657600` milli-mm — 12 ft —
+for the Blend/CertaGrain Post & Rail rail. The arithmetic is right and the citations
+resolve. The problem is what they cite:
+
+| | |
+|---|---|
+| cited editions | `bufftech-install-guide-e-2201cts` (2023-10) and siblings |
+| the sentence relied on | *"Standard rails are supplied in 16 foot lengths for White (12 foot rails for Blend products)"* |
+| the successor edition, **in the same snapshot** | `bufftech-fence-installation-guide-2024.pdf`, `2024-07`, sha `71c42837fd50` |
+| what the successor says on p40 | the section is renamed CertaGrain → **TimberGrain** and **that sentence is deleted** |
+| what the successor says on p38 | *"Standard rails are supplied in 16 foot lengths"* — **unconditional, no White/Blend split** |
+| occurrences of "foot lengths" anywhere in the 2024 edition | **one**, the unconditional 16 |
+
+So the manufacturer's current guide states 16 ft for all Post & Rail rails, and this
+platform publishes 12 ft for the Blend variant on the strength of an edition its own
+author replaced.
+
+**Why nothing caught it, which is the actual defect.** Publishing from a superseded source
+is not forbidden — `contract.md` §1.4 exists for exactly that, and 40.7% of promoted facts
+already cite a superseded document. What is forbidden is publishing it *unmarked*, because
+Planning applies the source policy and cannot apply it to a document this platform calls
+`unknown`. `[measured]`:
+
+* **0 `superseded_by` edges touch any Bufftech installation guide.** All 24 edges in the
+  store cover NOAs — 23 `hvhz_noa` plus one `unspecified`. `relations.py` detects
+  supersession by approval number, and an installation guide has none, so **the entire
+  install-manual half of the corpus has no supersession detection at all.** That is 70 of
+  144 documents.
+* **132 of 144 documents are `version_status: "unknown"`**; only 3 are `active` and 9
+  `superseded`. For this document the curated metadata literally reads
+  `2024-07 (BOL-Bufftech-and-Simtek-Instructions-4-24)` against a
+  `version_status_basis` of *"no explicit version marker in curated metadata"*.
+
+At `on_center_in: 96` the difference between 12 ft and 16 ft is a rail spanning 1.5 bays
+versus 2 — a different cut plan and a different rail count on every Blend Post & Rail job.
+Obligation 14's stated purpose is that Planning derives continuity from stock length
+against spacing, so this is the value doing real work.
+
+**Not fixed in this session, deliberately.** Three courses exist and choosing between them
+is a curation decision, not a code change: re-cut the value against the current edition;
+keep it and publish the supersession so Planning's policy can see it; or withdraw it to a
+`Gap` citing both editions. What *is* clear is that dated editions of the same guide must
+carry a `superseded_by` edge, and that a `version_status_basis` claiming no marker exists
+where the metadata holds one is not honest under obligation 6.
+
+### G67 — the step splitter's repair proposal measured precision and never measured recall
+
+`[measured]`. `steps.py::_propose_repair` stakes its confidence model on *"all 249
+newline-form repairs are real damage"*. That is a **precision** claim, and recall was never
+measured: `SPLIT_CAP_RE`'s `[a-z]{2,}` requires a two-letter tail, so **`T\no lower a
+post` and `B\ne sure to call underground` are invisible to it** — 20 real newline-form
+damage sites silently dropped, a 7.1% recall hole in the class the module says it trusts
+absolutely.
+
+The corollary is worse than the miss. `docs/assembly-step-design.md` §2 recorded *"damaged
+words in the text layer on p8 | 11"* as a `[measured]` figure. The real count is **12**.
+The 11 was the number of repairs the regex emitted, relabelled as a property of the page —
+a measurement of the instrument reported as a measurement of the world, and the one word it
+cannot see is exactly the one it did not count.
+
+### G68 — the 44-vs-49 bullet discrepancy is resolved: the ratified audit is wrong
+
+`docs/assembly-step-design.md` §2 recorded the disagreement and declined to chase it. It
+has now been chased. **44 is correct**, reproducible six ways: `pdftotext` in all four
+modes, the store, and a visual count of a 150-dpi render matching the store element by
+element (`5,3,5,5,6,3,2 | 4,3,5,1,2`). Every visible bullet has a text-layer counterpart;
+none is vector art.
+
+**49 is reproducible by no counting rule at all.** `•` = 44; `•` plus the lettered labels,
+the `Note:` and the `*Caution` = 48; `•` plus `-` sub-bullets = 55; every leader-led row
+including headings = 71. It is not another page (no page in the guide has 49) and not the
+OCR'd twin.
+
+`audit/01-audit-response.md` §2.4 writes it as `13 panel | 11 bay | 25 neither`, summing to
+49 with `25 = 51%` computed against it — so it is not a typo in a total, the error is
+inside the classification, and §5 of the design records that the working file holding that
+classification was never committed. An unverifiable count therefore sits in a **signed,
+ratified document delivered to Planning**, beside the words *"transcribed bullet by
+bullet"*. The 44–51% headline that N10 was argued from inherits the error, though not
+enough to change N10's conclusion — 25 of 44 is still 57%.
+
+The audit is history and is not being rewritten. This entry is the correction of record.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

@@ -202,9 +202,6 @@ class TestSegmentIsAValue(unittest.TestCase):
         self.assertEqual(a, b)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 class TestDefectsFoundByAdversarialValidation(unittest.TestCase):
     """Eight defects found by running the splitter over all 6,105 `list`
@@ -320,3 +317,6 @@ class TestDefectsFoundByAdversarialValidation(unittest.TestCase):
         from fence_evidence.steps import LEADER_GAP
         self.assertEqual([hex(ord(c)) for c in LEADER_GAP],
                          ["0x20", "0x9", "0x2002", "0xa0"])
+
+if __name__ == "__main__":
+    unittest.main()
