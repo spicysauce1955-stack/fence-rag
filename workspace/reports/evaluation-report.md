@@ -9,8 +9,8 @@ Every gold question was runnable.
 | Document recall@10 | 0.8049 | A3 ≥ 0.80 — PASS |
 | Page recall@10 | 0.659 | reported |
 | MRR | 0.557 | reported |
-| Evidence support (terms in the retrieved unit) | 0.6499 | A3 ≥ 0.70 — FAIL |
-| Page evidence support (terms anywhere on a retrieved page) | 0.777 | reported |
+| Evidence support (terms in the retrieved unit) | 0.6450 | A3 ≥ 0.70 — FAIL |
+| Page evidence support (terms anywhere on a retrieved page) | 0.769 | reported |
 | No-answer precision | 0.3243 | A4 ≥ 0.66 — FAIL |
 | False-unsupported rate (answerable questions wrongly declared unsupported) | 0.1463 | A4b ≤ 0.20 — PASS |
 
@@ -19,7 +19,7 @@ Every gold question was runnable.
 | Category | n | doc hits | passed | mean support | failing ids |
 |---|---|---|---|---|---|
 | comparison | 4 | 4 | 1 | 0.467 | gq-119, gq-120, gq-017 |
-| conditional_table_lookup | 7 | 5 | 4 | 0.581 | gq-113, gq-004, gq-006 |
+| conditional_table_lookup | 7 | 5 | 3 | 0.552 | gq-113, gq-004, gq-006, gq-007 |
 | conflict | 2 | 1 | 0 | 0.298 | gq-015, gq-016 |
 | current_version | 2 | 1 | 1 | 0.6 | gq-011 |
 | exact_identifier | 3 | 3 | 3 | 1.0 | — |
@@ -70,9 +70,9 @@ The search rows for these questions are unchanged and still appear in the by-cat
 
 Only categories that actually failed appear here. Nothing below is built.
 
-### conditional_table_lookup — 3 of 7 failing
+### conditional_table_lookup — 4 of 7 failing
 
-- **Problem**: conditional_table_lookup questions fail lexical retrieval (failing ids: gq-113, gq-004, gq-006).
+- **Problem**: conditional_table_lookup questions fail lexical retrieval (failing ids: gq-113, gq-004, gq-006, gq-007).
 - **Experiment**: Table-aware structured lookup keyed on conditions (wind speed, exposure, height) resolved against table_cells and facts.
 - **Acceptance**: Answers the conditional questions with the correct cell, and returns 'outside documented range' rather than a nearest-neighbour value.
 
@@ -390,6 +390,14 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 - doc rank: 8 · unit support: 0.2 · page support: 0.4 · missing terms: ['130MPH WIND', 'EXPOSURE D', '1.67FT (20in)', '46.7 psf wind']
 - top hit: manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf p4 score 24.3478
 
+### gq-007 — conditional_table_lookup
+*With the Illusions 75 MPH wind kit, how deep and how wide does the post hole have to be for 8x8 posts versus 5x5 posts?*
+
+- query: `Illusions 75 mph wind kit post hole depth 8x8 post how deep post hole vinyl fence wind kit post hole diameter 5x5 vs 8x8`
+- expected: manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf
+- doc rank: 1 · unit support: 0.4 · page support: 1.0 · missing terms: ['42', '30', '3000 PSI']
+- top hit: manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf p4 score 26.8314
+
 ### gq-009 — table_retrieval
 *Show me the maximum post spacing and footing dimensions table from the current CertainTeed / Bufftech extruded PVC vinyl fence NOA.*
 
@@ -403,7 +411,7 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 
 - query: `post spacing table 130 mph privacy railing recommended post spacing O.C. governing load table Barrette privacy panel post spacing wind table`
 - expected: manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf
-- doc rank: 8 · unit support: 0.4 · page support: 1.0 · missing terms: ['130MPH WIND', 'RECOMMENDED POST SPACING (O.C.)', '38.5 psf wind']
+- doc rank: 8 · unit support: 0.4 · page support: 1.0 · missing terms: ['RECOMMENDED POST SPACING (O.C.)', '38.5 psf wind', '46.7 psf wind']
 - top hit: manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf p4 score 25.7889
 
 ### gq-011 — current_version

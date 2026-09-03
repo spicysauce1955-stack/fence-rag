@@ -7,8 +7,8 @@
     "recall_at_k": 0.805,
     "page_recall_at_k": 0.659,
     "mrr": 0.557,
-    "evidence_support": 0.65,
-    "page_evidence_support": 0.777,
+    "evidence_support": 0.645,
+    "page_evidence_support": 0.769,
     "no_answer_precision": 0.324,
     "false_unsupported_rate": 0.146,
     "false_unsupported_ids": [
@@ -19,7 +19,7 @@
       "gq-015",
       "gq-019"
     ],
-    "passed": 35,
+    "passed": 34,
     "by_category": {
       "comparison": {
         "n": 4,
@@ -35,13 +35,14 @@
       "conditional_table_lookup": {
         "n": 7,
         "doc_hits": 5,
-        "passed": 4,
+        "passed": 3,
         "failures": [
           "gq-113",
           "gq-004",
-          "gq-006"
+          "gq-006",
+          "gq-007"
         ],
-        "mean_support": 0.581
+        "mean_support": 0.552
       },
       "conflict": {
         "n": 2,
@@ -225,8 +226,8 @@
     },
     "raw": {
       "recall_at_k": 0.8048780487804879,
-      "mrr": 0.5569396051103368,
-      "evidence_support": 0.6499024390243903,
+      "mrr": 0.5566008517228029,
+      "evidence_support": 0.6450243902439025,
       "no_answer_precision": 0.32432432432432434,
       "false_unsupported_rate": 0.14634146341463414
     }
@@ -306,14 +307,14 @@
         },
         {
           "source_path": "manuals/wam-bam/cambridge-BL19110-install-guide.pdf",
-          "page": 12,
+          "page": 6,
           "element_type": "paragraph",
           "score": 27.649,
           "matched_terms": [
             "BL19110",
             "BL19110"
           ],
-          "snippet": "12\nBL19110"
+          "snippet": "BL19110"
         }
       ]
     },
@@ -1274,11 +1275,11 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "table",
-        "paragraph",
         "paragraph",
         "table",
         "paragraph",
+        "paragraph",
+        "table",
         "paragraph",
         "paragraph"
       ],
@@ -1313,16 +1314,16 @@
         },
         {
           "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
-          "page": 17,
+          "page": 19,
           "element_type": "paragraph",
-          "score": 16.6567,
+          "score": 16.7737,
           "matched_terms": [
             "post",
             "depth",
             "wind",
             "footing"
           ],
-          "snippet": "Wind Footing Max. Post 30 2\nExposure Depth Spacing A\nB 30\" 97\""
+          "snippet": "Wind Footing Max. Post 30\nExposure Depth Spacing A\nB 30\" 97\""
         }
       ]
     },
@@ -1404,8 +1405,8 @@
       "query": "Augusta 8 ft privacy panel dimensions Weatherables Augusta CAD detail U channel rail reinforcement vinyl privacy panel",
       "answerable": true,
       "n_results": 10,
-      "doc_rank": 8,
-      "page_rank": 8,
+      "doc_rank": 9,
+      "page_rank": 9,
       "expected_documents": [
         "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png"
       ],
@@ -1428,11 +1429,11 @@
         "caption",
         "list",
         "paragraph",
+        "paragraph",
         "drawing",
         "table",
         "drawing_label",
-        "drawing_label",
-        "list"
+        "drawing_label"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -1749,8 +1750,8 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "table",
         "paragraph",
+        "table",
         "paragraph"
       ],
       "reported_unsupported": false,
@@ -2082,14 +2083,14 @@
       "element_types": [
         "paragraph",
         "paragraph",
-        "table",
-        "paragraph",
-        "table",
         "paragraph",
         "table",
         "table",
+        "paragraph",
         "table",
-        "drawing"
+        "table",
+        "table",
+        "paragraph"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -2100,6 +2101,22 @@
           "page": 29,
           "element_type": "paragraph",
           "score": 38.8762,
+          "matched_terms": [
+            "footing",
+            "depth",
+            "exposure",
+            "max",
+            "post",
+            "spacing",
+            "wind"
+          ],
+          "snippet": "Wind Footing Max. Post 30\nExposure Depth Spacing A\nB 30\" 97\""
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+          "page": 19,
+          "element_type": "paragraph",
+          "score": 38.5648,
           "matched_terms": [
             "footing",
             "depth",
@@ -2126,22 +2143,6 @@
             "wind"
           ],
           "snippet": "Wind Footing Max. Post 30 2\nExposure Depth Spacing A\nB 30\" 97\""
-        },
-        {
-          "source_path": "manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf",
-          "page": 17,
-          "element_type": "table",
-          "score": 27.0347,
-          "matched_terms": [
-            "footing",
-            "depth",
-            "exposure",
-            "max",
-            "post",
-            "spacing",
-            "wind"
-          ],
-          "snippet": "Wind Exposure | Footing Depth | Max. Post Spacing\nB | 30\" | 97\" | NON HVHZ\nB | 24\" | 66\"\nC | 36\" | 88\" | HVHZ and NON HVHZ\nC | 30\" | 68\"\nD | 36\" | 75 \u2026 "
         }
       ]
     },
@@ -2567,11 +2568,11 @@
         "paragraph",
         "paragraph",
         "paragraph",
+        "paragraph",
         "ocr_supplement",
         "ocr_supplement",
         "paragraph",
-        "list",
-        "paragraph"
+        "list"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -2670,7 +2671,7 @@
         "list",
         "paragraph",
         "list",
-        "paragraph"
+        "list"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -2752,8 +2753,8 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "table",
         "paragraph",
+        "table",
         "paragraph",
         "paragraph",
         "paragraph",
@@ -3235,7 +3236,7 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "list"
+        "paragraph"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -4392,13 +4393,14 @@
           "snippet": " \u2026 Intended for Outdoor Applications\nD4216 \u2013 Material Class Number1-32333-3.\nTo establish Cell Classification of PVC\nmaterial. Illusions compounds have higher cell\nclassification because one or more properties \u2026 "
         },
         {
-          "source_path": "manuals/industry-standards/ASTM-Info-Flyer_Illusions-F964-D4216-Summary.pdf",
-          "page": 1,
+          "source_path": "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf",
+          "page": 4,
           "element_type": "paragraph",
-          "score": 35.0775,
+          "score": 35.2393,
           "matched_terms": [
             "D4216",
             "D1784",
+            "ASTM",
             "D4216",
             "cell",
             "classification",
@@ -4411,7 +4413,7 @@
             "PVC",
             "D1784"
           ],
-          "snippet": " \u2026 Intended for Outdoor Applications\nD4216 \u2013 Material Class Number1-32333-3. To establish\nCell Classification of PVC material. Illusions compounds\nhave higher cell classification because one or more prop \u2026 "
+          "snippet": " \u2026 Intended for Outdoor Applications\nD4216 \u2013 Material Class Number1-32333-3.\nTo establish Cell Classification of PVC\nmaterial. Illusions compounds have higher cell\nclassification because one or more properties \u2026 "
         }
       ]
     },
@@ -4701,13 +4703,13 @@
         "paragraph",
         "list",
         "list",
+        "list",
         "paragraph",
         "paragraph",
         "list",
         "paragraph",
         "paragraph",
-        "table",
-        "paragraph"
+        "table"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -5123,11 +5125,11 @@
       "element_types": [
         "table",
         "table",
+        "table",
         "paragraph",
         "drawing",
         "paragraph",
         "paragraph",
-        "table",
         "table",
         "table",
         "paragraph"
@@ -5141,6 +5143,24 @@
           "page": 17,
           "element_type": "table",
           "score": 31.3999,
+          "matched_terms": [
+            "Exposure",
+            "36",
+            "footing",
+            "post",
+            "spacing",
+            "depth",
+            "HVHZ",
+            "max",
+            "exposure"
+          ],
+          "snippet": "Wind Exposure | Footing Depth | Max. Post Spacing\nB | 30\" | 97\" | NON HVHZ\nB | 24\" | 66\"\nC | 36\" | 88\" | HVHZ and NON HVHZ\nC | 30\" | 68\"\nD | 36\" | 75 \u2026 "
+        },
+        {
+          "source_path": "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
+          "page": 19,
+          "element_type": "table",
+          "score": 31.0799,
           "matched_terms": [
             "Exposure",
             "36",
@@ -5171,22 +5191,6 @@
             "exposure"
           ],
           "snippet": "Wind Exposure | Footing Depth | Max. Post Spacing\nB | 30\" | 97\" | NON HVHZ\nB | 24\" | 66\"\nC | 36\" | 88\" | HVHZ and NON HVHZ\nC | 30\" | 68\"\nD | 36\" | 75 \u2026 "
-        },
-        {
-          "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
-          "page": 29,
-          "element_type": "paragraph",
-          "score": 29.9845,
-          "matched_terms": [
-            "Exposure",
-            "footing",
-            "post",
-            "spacing",
-            "depth",
-            "max",
-            "exposure"
-          ],
-          "snippet": "Wind Footing Max. Post 30\nExposure Depth Spacing A\nB 30\" 97\""
         }
       ]
     },
@@ -5392,15 +5396,15 @@
         "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf"
       ],
       "equivalent_documents": [],
-      "support": 0.6,
+      "support": 0.4,
       "page_support": 1.0,
       "found_terms": [
         "15",
-        "30",
         "12"
       ],
       "missing_terms": [
         "42",
+        "30",
         "3000 PSI"
       ],
       "element_type_ok": true,
@@ -5421,7 +5425,7 @@
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
-      "passed": true,
+      "passed": false,
       "top_hits": [
         {
           "source_path": "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf",
@@ -5444,11 +5448,11 @@
         },
         {
           "source_path": "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf",
-          "page": 1,
+          "page": 4,
           "element_type": "paragraph",
-          "score": 24.5845,
+          "score": 24.8599,
           "matched_terms": [],
-          "snippet": "TM"
+          "snippet": "\u00ae"
         }
       ]
     },
@@ -5579,13 +5583,13 @@
         "paragraph",
         "paragraph",
         "paragraph",
+        "paragraph",
         "drawing",
         "paragraph",
         "paragraph",
         "table",
         "table",
-        "paragraph",
-        "paragraph"
+        "table"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -5596,6 +5600,21 @@
           "page": 29,
           "element_type": "paragraph",
           "score": 32.0071,
+          "matched_terms": [
+            "post",
+            "spacing",
+            "footing",
+            "depth",
+            "wind",
+            "exposure"
+          ],
+          "snippet": "Wind Footing Max. Post 30\nExposure Depth Spacing A\nB 30\" 97\""
+        },
+        {
+          "source_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+          "page": 19,
+          "element_type": "paragraph",
+          "score": 31.7544,
           "matched_terms": [
             "post",
             "spacing",
@@ -5620,21 +5639,6 @@
             "exposure"
           ],
           "snippet": "Wind Footing Max. Post 30 2\nExposure Depth Spacing A\nB 30\" 97\""
-        },
-        {
-          "source_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
-          "page": 17,
-          "element_type": "paragraph",
-          "score": 29.6241,
-          "matched_terms": [
-            "maximum",
-            "post",
-            "spacing",
-            "footing",
-            "dimensions",
-            "wind"
-          ],
-          "snippet": "MAXIMUM POST SPACING AND FOOTING DIMENSIONS : | | Ne\nWIND |FOOTING | MAX. POST Ge | |"
         }
       ]
     },
@@ -5647,7 +5651,7 @@
       "answerable": true,
       "n_results": 10,
       "doc_rank": 8,
-      "page_rank": 10,
+      "page_rank": 9,
       "expected_documents": [
         "manuals/freedom-outdoor-living/structural/Barrette-Privacy-Railing-2021-Engineering-Report-PE.pdf"
       ],
@@ -5655,13 +5659,13 @@
       "support": 0.4,
       "page_support": 1.0,
       "found_terms": [
-        "GOVERNING LOAD",
-        "46.7 psf wind"
+        "130MPH WIND",
+        "GOVERNING LOAD"
       ],
       "missing_terms": [
-        "130MPH WIND",
         "RECOMMENDED POST SPACING (O.C.)",
-        "38.5 psf wind"
+        "38.5 psf wind",
+        "46.7 psf wind"
       ],
       "element_type_ok": false,
       "image_evidence_ok": null,
@@ -6402,8 +6406,8 @@
         "paragraph",
         "caption",
         "paragraph",
-        "drawing",
-        "drawing_label"
+        "paragraph",
+        "drawing"
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
@@ -6646,7 +6650,7 @@
       ],
       "equivalent_documents": [],
       "support": 0.667,
-      "page_support": 1.0,
+      "page_support": 0.667,
       "found_terms": [
         "17.71",
         "DESIGN PRESSURE",
@@ -6669,8 +6673,8 @@
         "paragraph",
         "paragraph",
         "paragraph",
-        "list",
         "paragraph",
+        "list",
         "paragraph"
       ],
       "reported_unsupported": false,

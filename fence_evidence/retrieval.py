@@ -339,25 +339,56 @@ FILTER_COLUMNS = {
 }
 
 
-def _normalized_unit_text(text: str | None) -> str:
-    """The key two units are duplicates under. Whitespace and case only.
-
-    Deliberately not a fuzzy match: R3 is about *identical* boilerplate spending
-    result slots, and anything looser would start suppressing evidence that
-    merely resembles other evidence.
-    """
+def _norm_ws(text: str | None) -> str:
     return " ".join((text or "").split()).lower()
+
+
+def _dedupe_key(row) -> str:
+    """The key two rows are duplicates under: the whole record a caller gets back.
+
+    Not `text` alone. `SearchResult` returns `heading_path` beside `text`, and
+    `evaluate._returned_evidence` measures support over both, because in this
+    corpus the condition a table row applies under is printed in the heading
+    rather than in the row. Keyed on text alone, the two rows
+
+        HEIGHT OF THE PANEL (in) / <=42 / 48   under  ... > 130MPH WIND-EXPOSURE D
+        HEIGHT OF THE PANEL (in) / <=42 / 48   under  ... > 120MPH WIND-EXPOSURE D
+
+    are one duplicate, and R3 discards a governing load. That was the first
+    version of this key, and it cost `gq-010` the answer term `130MPH WIND`;
+    11 of the 78 gold questions lost at least one `heading_path` to it.
+
+    Keying on exactly what the caller receives is also what makes R3 safe to
+    have on by default: two rows sharing this key are indistinguishable in the
+    response, so dropping one removes nothing the reader could have used.
+
+    Whitespace and case only -- deliberately not a fuzzy match. R3 is about
+    *identical* boilerplate spending result slots, and anything looser would
+    start suppressing evidence that merely resembles other evidence.
+    """
+    try:
+        heading = " > ".join(json.loads(row["heading_path"] or "[]"))
+    except (TypeError, ValueError):
+        heading = ""
+    return _norm_ws(row["text"]) + "\x00" + _norm_ws(heading)
 
 
 def _slot_filtered(rows, *, limit: int, dedupe_text: bool, page_cap: int | None):
     """Spend `limit` result slots on distinct evidence — the audit's R3 and R5.
 
-    Walks the ranked rows in order and keeps a row unless it repeats text
+    Walks the ranked rows in order and keeps a row unless it repeats a record
     already kept (R3) or comes from a page already at its quota (R5). A
-    suppressed row is *replaced* by the next-best row rather than leaving the
-    list short, which is why `search_evidence` over-fetches when either filter
-    is on. Rank order among the kept rows is untouched: this decides which rows
-    are shown, never in what order.
+    suppressed row is replaced by the next-best row, which is why
+    `search_evidence` over-fetches when either filter is on. Rank order among
+    the kept rows is untouched: this decides which rows are shown, never in what
+    order.
+
+    Backfill is bounded by the pool, not guaranteed. Where fewer than `limit`
+    distinct records match -- a narrow filter over one NOA and a query like
+    `none` is the real case -- the list comes back short, because there was no
+    k-th distinct thing to show. Measured: that query over one structural
+    subdirectory returns 10 rows unfiltered and 6 with R3. Callers that need the
+    unfiltered ranking ask for it (`dedupe_text=False`).
 
     With both filters off it truncates and nothing else, so the shipped
     behaviour is reproduced exactly rather than approximately.
@@ -368,16 +399,16 @@ def _slot_filtered(rows, *, limit: int, dedupe_text: bool, page_cap: int | None)
     for row in rows:
         if len(kept) >= limit:
             break
-        norm = _normalized_unit_text(row["text"]) if dedupe_text else ""
-        # An empty unit says nothing, so it is not evidence that a later unit
+        norm = _dedupe_key(row) if dedupe_text else ""
+        # An empty record says nothing, so it is not evidence that a later row
         # repeats it. Without this, two blank units collapse into one.
-        if dedupe_text and norm and norm in seen_text:
+        if dedupe_text and norm.strip("\x00 ") and norm in seen_text:
             continue
         page_key = (row["document_id"], row["page_no"])
         if page_cap is not None and per_page.get(page_key, 0) >= page_cap:
             continue
         kept.append(row)
-        if norm:
+        if norm.strip("\x00 "):
             seen_text.add(norm)
         if page_cap is not None:
             per_page[page_key] = per_page.get(page_key, 0) + 1
@@ -388,25 +419,41 @@ def _slot_filtered(rows, *, limit: int, dedupe_text: bool, page_cap: int | None)
 # only choose among the rows they are given, so under-fetching would cap the
 # benefit and shorten lists; over-fetching costs one wider BM25 scan and no
 # extra per-result work, because the expensive per-row lookups happen after
-# filtering. 8x covers the worst duplication measured in this corpus
-# (`1. None.`, 194 units across 14 documents) at k=10.
+# filtering.
+#
+# 8x is a bounded pool, not a guarantee of a full list -- the worst boilerplate
+# here is bigger than the pool (`1. None.` is 150 units across 14 documents,
+# 194 counting the OCR variant `1, None.`), so a query dominated by it still
+# comes back short. It is sized to be generous at k=10 rather than to cover any
+# particular duplicate group; `_slot_filtered` documents the short-list case.
+#
+# `[measured]` 2026-09-03, 78 gold queries at k=10: 15.0 ms per query without
+# the over-fetch, 18.1 ms with it (+3.1 ms, +21%). R3 is on by default, so
+# every search pays this. Acceptable for a human-facing Discovery call, and it
+# is on no path a planning run takes -- a plan reads a published snapshot and
+# never calls search.
 SLOT_FILTER_OVERFETCH = 8
 
 # R3 ships on; R5 does not. Measured over the 78-question gold set at k=10:
 #
 #   variant       recall@10   MRR     unit support   page support   passed
 #   baseline      0.805       0.552   0.623          0.769          33
-#   R3            0.805       0.557   0.650          0.777          35
+#   R3            0.805       0.557   0.645          0.769          34
 #   R5 cap=1      0.805       0.555   0.583          0.782          33
 #   R5 cap=2      0.805       0.553   0.606          0.777          33
-#   R3 + cap=2    0.805       0.558   0.637          0.777          35
+#   R3 + cap=2    0.805       0.557   0.632          0.777          34
 #
-# R3 improved three questions and worsened none, which is structural rather than
-# lucky: a suppressed row's text is still in the list through the row that kept
-# it, so the returned text can only grow. R5 buys page diversity (0.769 ->
-# 0.782) by discarding a better second unit on a page already returned -- eight
-# questions worse, `gq-003` from 1.0 to 0.5 -- which is the risk the audit
-# itself named. `docs/state-and-gaps.md` G64 has the full account.
+# R3 improved two questions and worsened none, and that is structural rather
+# than lucky *because of how `_dedupe_key` is defined*: two rows sharing the key
+# are indistinguishable in the response, so dropping one removes nothing the
+# reader could have used. Measured across all 78 questions, R3 loses returned
+# evidence on zero of them. Read `_dedupe_key` before changing it -- the first
+# version keyed on `text` alone and quietly discarded governing loads.
+#
+# R5 buys page diversity (0.769 -> 0.782) by discarding a better second unit on
+# a page already returned -- eight questions worse, `gq-003` from 1.0 to 0.5 --
+# which is the risk the audit itself named. `docs/state-and-gaps.md` G64 has the
+# full account.
 DEDUPE_TEXT_DEFAULT = True
 
 

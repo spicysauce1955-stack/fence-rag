@@ -9,8 +9,8 @@ Every gold question was runnable.
 | Document recall@10 | 0.8049 | A3 ≥ 0.80 — PASS |
 | Page recall@10 | 0.659 | reported |
 | MRR | 0.557 | reported |
-| Evidence support (terms in the retrieved unit) | 0.6995 | A3 ≥ 0.70 — FAIL |
-| Page evidence support (terms anywhere on a retrieved page) | 0.777 | reported |
+| Evidence support (terms in the retrieved unit) | 0.6946 | A3 ≥ 0.70 — FAIL |
+| Page evidence support (terms anywhere on a retrieved page) | 0.769 | reported |
 | No-answer precision | 0.3243 | A4 ≥ 0.66 — FAIL |
 | False-unsupported rate (answerable questions wrongly declared unsupported) | 0.1463 | A4b ≤ 0.20 — PASS |
 
@@ -28,7 +28,7 @@ Every gold question was runnable.
 | no_answer | 37 | 0 | 12 | None | gq-116, gq-117, gq-118, gq-201, gq-202, gq-203, gq-204, gq-206, gq-207, gq-208, gq-210, gq-215, gq-222, gq-223, gq-224, gq-225, gq-226, gq-227, gq-228, gq-229, gq-230, gq-231, gq-232, gq-233, gq-234 |
 | paraphrase | 5 | 3 | 3 | 0.6 | gq-106, gq-108 |
 | source_verification | 4 | 4 | 4 | 0.834 | — |
-| table_retrieval | 4 | 3 | 3 | 0.95 | gq-009 |
+| table_retrieval | 4 | 3 | 3 | 0.9 | gq-009 |
 | visual_evidence | 4 | 3 | 3 | 0.938 | gq-019 |
 
 ## Routed interfaces

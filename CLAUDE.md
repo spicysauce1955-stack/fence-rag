@@ -279,7 +279,11 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   relevance audit lists this and six other defects; **most of its recommendations are still
   deliberately unapplied** pending review, so do not "fix" the projection casually. Three have now
   been measured and settled: R1 built and rejected (G51), R3 built and **on by default** as a
-  retrieval-time filter, R5 built and rejected (both G64). Note what R3 taught — the audit scopes it
+  retrieval-time filter, R5 built and rejected (both G64). **R3's dedupe key is the whole
+  returned record — `text` AND `heading_path` — not `text` alone.** Keyed on text, it treats
+  two table rows printed under different governing loads as one duplicate and discards a
+  wind exposure; that was the first cut, it cost `gq-010` an answer term on 11 of 78
+  questions, and only code review caught it. The key is what makes R3 safe to default on. Note what R3 taught — the audit scopes it
   *within a document*, which reaches 5.5% of top-10 slots, where the duplication that actually
   spends slots is cross-document and reaches 35.3%. Read a recommendation's scope before costing it.
 - **The relevance audit measures F2/F3 by calling `search_evidence`, so it asks for
@@ -288,7 +292,8 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   filter needs the same treatment.
 - **Acceptance criteria are graded on unrounded means** (`evaluate.acceptance_flags`), and
   `summary["raw"]` carries them. Grading the three-decimal display value once reported PASS for
-  0.699512 against a 0.70 threshold. See G65.
+  0.699512 against a 0.70 threshold. Nothing sits on a boundary today; that is not a reason to
+  grade a rounded number. See G65.
 - A `superseded_by` edge reads subject → object: its *from* side is the superseded document. Marking
   the wrong side once labelled every current NOA superseded; `tests/test_versions.py` guards it.
 - No-answer detection does not work on near-miss questions and cannot be fixed with a threshold —

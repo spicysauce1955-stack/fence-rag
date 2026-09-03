@@ -7,13 +7,14 @@ Criterion: unit support >= 0.70 with no reduction in document recall,
            page support, or no-answer precision.
 Update 2026-09-03: every number below was measured before R3 (duplicate
            suppression) shipped on by default. With R3 the second stage
-           measures 0.6995 unit support, not 0.672, and 39 questions pass
-           rather than 32 -- 0.0005 short of the criterion instead of 0.028
+           measures 0.6946 unit support, not 0.672, and 39 questions pass
+           rather than 38 -- 0.005 short of the criterion instead of 0.028
            short. STILL SHORT, so the verdict is unchanged and the flag stays
-           opt-in. The §5 argument for why 0.70 is out of reach for this
-           mechanism is weakened but not falsified by 0.0005; do not read
-           0.6995 as a pass. See docs/state-and-gaps.md G64 and G65 -- G65 is
-           the gate that DID read it as a pass, and the defect that let it.
+           opt-in. Note the comparison: 38 and 39 are both on the current
+           78-question gold set; §4 below says 32, which is the older
+           59-question set and is NOT the baseline for this update. The §5
+           argument for why 0.70 is out of reach for this mechanism is
+           weakened but not falsified. See docs/state-and-gaps.md G64 and G65.
 ```
 
 ## 1. What it does
@@ -144,7 +145,7 @@ What would change the answer, in order of expected effect:
    `workspace/reports/projection-relevance-audit.md`.
 2. ~~**The audit's F2/F3 recommendations**~~ — **done, 2026-09-03 (G64).** This
    was right about the direction and about the size: recovering the duplicated
-   slots moved the second stage 0.672 → 0.6995 on its own, more than any tuning
+   slots moved the second stage 0.672 → 0.6946 on its own, more than any tuning
    of the mechanism itself achieved. The per-page cap was measured too and
    rejected — it costs more unit support than it returns. Original text: 29.5% of
    top-10 slots currently hold text duplicated elsewhere and 20.2% repeat a page

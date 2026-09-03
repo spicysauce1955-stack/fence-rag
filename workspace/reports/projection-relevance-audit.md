@@ -4,8 +4,13 @@
 Status: Audit. Findings only.
 Action taken: none at the time of writing. Three recommendations have since
               been measured and settled, and this document has NOT been
-              re-measured against them -- every number below is the projection
-              as audited, which is still what the projection is:
+              re-measured against them. The §2/§4 unit-level figures still
+              hold exactly -- neither change touched the projection. The §3
+              RESULT-LIST figures (29.5%, 20.2%, 7.98 distinct pages) were
+              measured over 440 slots from a 44-question gold set; that set is
+              now 78 questions, and `cli audit` currently reports 31.2%, 15.1%
+              and 8.49 over 780 slots. Same corpus, larger sample -- read the
+              shares, not the counts.
                 R1  built, measured, REJECTED (state-and-gaps G51)
                 R3  built as a retrieval-time filter, ACCEPTED, on by default
                 R5  built as a retrieval-time filter, measured, REJECTED
@@ -153,7 +158,7 @@ no-answer precision, 0.667 → 0.333.
 | R1 | Project a heading as a unit only when no other unit on that page would carry it in `heading_path` — a fallback, not a general re-admission | F1, F6 | reintroduces some short units; needs the no-answer metric watched, per the weight experiment |
 | R2 | Alternatively, attach the nearest heading text to the *first* unit beneath it as a prefix, rather than indexing headings separately | F1 | duplicates heading text into unit `text`, double-counting it against the `heading_path` column |
 | R3 | Collapse exact-duplicate unit text within a document to one unit, linking the others; keep every canonical element | F2 | none to canonical data; changes result ids, so anything caching them must be rebuilt |
-| | **Outcome 2026-09-03: accepted, but not as specified.** Within-document collapse reaches 5.5% of top-10 slots; the duplication that spends slots is cross-document and reaches 35.3%. Built instead as a retrieval-time filter over the whole ranking, on by default, projection untouched. Unit support 0.623 → 0.650, three questions better and none worse. G64. | | |
+| | **Outcome 2026-09-03: accepted, but not as specified.** Within-document collapse reaches 5.5% of top-10 slots; the duplication that spends slots is cross-document and reaches 35.3%. Built instead as a retrieval-time filter over the whole ranking, on by default, projection untouched. Unit support 0.623 → 0.645, two questions better and none worse. Note for anyone implementing something like it: the key must be the whole returned record, `heading_path` included — keyed on `text` alone it discards the governing load a table row applies under. G64. | | |
 | R4 | Suppress units whose text is below a minimum information threshold (e.g. under 12 characters, or matching known boilerplate) from the *index only* | F2, F4 | a hard threshold will drop some genuine short answers such as a bare dimension |
 | R5 | Cap results per page in `search_evidence` (one unit per page, or two) | F3 | reduces recall for pages that genuinely hold two distinct answers |
 | | **Outcome 2026-09-03: built, measured, rejected — this risk column was right.** Page support 0.769 → 0.782, unit support 0.623 → 0.583, eight gold questions worse against two better. Kept as `--page-cap N`, off. G64. | | |

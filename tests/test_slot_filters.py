@@ -3,14 +3,17 @@
 `workspace/reports/projection-relevance-audit.md` measured two ways a ten-result
 list wastes its slots: F2, text that duplicates another unit's, and F3, a second
 or third unit from a page already in the list. R3 and R5 are the audit's
-recommendations against them, and both are **off by default** — they change what
-a search returns, so they publish nothing until measurement says they should.
+recommendations against them. Both were measured over the gold set (G64): **R3
+is on by default** and R5 is not, and these tests pin that decision rather than
+leaving it to a comment.
 
 The filters run over the ranked rows before the result objects are built, so a
-suppressed row is *backfilled* by the next-best row rather than leaving a short
-list. That backfill is the whole point: dropping a redundant slot without
-refilling it would trade redundancy for a shorter list, not for better evidence.
+suppressed row is *backfilled* by the next-best row. Backfill is bounded by the
+over-fetched pool, not guaranteed: where the pool holds fewer than k distinct
+records the list is genuinely shorter, because there was no k-th distinct thing
+to show. `test_a_short_list_means_the_pool_ran_out` covers that case.
 """
+import json
 import sqlite3
 import unittest
 
@@ -19,14 +22,21 @@ from fence_evidence.retrieval import _slot_filtered, search_evidence
 from fence_evidence.store import connect
 
 
-def rows(*triples) -> list[sqlite3.Row]:
+def rows(*items) -> list[sqlite3.Row]:
     """Real `sqlite3.Row`s in rank order, so the filter is tested on the shape
-    it actually receives from `search_evidence` rather than on a stand-in."""
+    it actually receives from `search_evidence` rather than on a stand-in.
+
+    Each item is `(text, document_id, page_no)` or, where the heading matters,
+    `(text, document_id, page_no, heading_path)`.
+    """
     conn = sqlite3.connect(":memory:")
     conn.row_factory = sqlite3.Row
-    conn.execute("CREATE TABLE r(ord INTEGER, text TEXT, document_id TEXT, page_no INTEGER)")
-    conn.executemany("INSERT INTO r VALUES (?,?,?,?)",
-                     [(i, t, d, p) for i, (t, d, p) in enumerate(triples)])
+    conn.execute("CREATE TABLE r(ord INTEGER, text TEXT, document_id TEXT, "
+                 "page_no INTEGER, heading_path TEXT)")
+    conn.executemany("INSERT INTO r VALUES (?,?,?,?,?)",
+                     [(i, it[0], it[1], it[2],
+                       json.dumps(it[3]) if len(it) > 3 else "[]")
+                      for i, it in enumerate(items)])
     return conn.execute("SELECT * FROM r ORDER BY ord").fetchall()
 
 
@@ -50,6 +60,33 @@ class TestSlotFilters(unittest.TestCase):
 
     def test_dedupe_ignores_case_and_whitespace(self):
         got = _slot_filtered(rows(("1. None.", "d1", 1), ("1.  none.\n", "d2", 2)),
+                             limit=10, dedupe_text=True, page_cap=None)
+        self.assertEqual(len(got), 1)
+
+    def test_two_units_with_the_same_text_under_different_headings_are_not_duplicates(self):
+        """The defect this key was written wrong for the first time.
+
+        `evaluate._returned_evidence` measures support over the whole returned
+        record — `text` AND `heading_path` — because in this corpus the
+        condition a table row applies under is printed in the heading, not in
+        the row. A key over `text` alone therefore discards real evidence and
+        calls it a duplicate. Measured on the live store before the fix:
+        `gq-010` lost the answer term `130MPH WIND` this way, and 11 of the 78
+        gold questions lost at least one `heading_path` the raw list carried.
+        """
+        got = _slot_filtered(
+            rows(("HEIGHT OF THE PANEL (in)\n≤42\n48", "d1", 4,
+                  ["Tesco", "GOVERNING LOAD", "130MPH WIND-EXPOSURE D"]),
+                 ("HEIGHT OF THE PANEL (in)\n≤42\n48", "d1", 5,
+                  ["Tesco", "GOVERNING LOAD", "120MPH WIND-EXPOSURE D"])),
+            limit=10, dedupe_text=True, page_cap=None)
+        self.assertEqual(len(got), 2,
+                         "identical rows under different governing loads are two "
+                         "different facts, not one fact twice")
+
+    def test_the_same_text_under_the_same_heading_is_still_a_duplicate(self):
+        got = _slot_filtered(rows(("1. None.", "d1", 4, ["Evidence Submitted"]),
+                                  ("1. None.", "d2", 9, ["Evidence Submitted"])),
                              limit=10, dedupe_text=True, page_cap=None)
         self.assertEqual(len(got), 1)
 
@@ -100,6 +137,13 @@ class TestSlotFilters(unittest.TestCase):
         self.assertEqual([r["text"] for r in got], ["a", "b", "c"])
 
 
+def _returned(r) -> str:
+    """What the caller actually receives, the way `evaluate._returned_evidence`
+    counts it: the text and the heading path together."""
+    return (" ".join((r.text or "").split()).lower() + "\x00"
+            + " ".join(" > ".join(r.heading_path or []).split()).lower())
+
+
 QUERIES = [
     "footing depth exposure C Chesterfield",
     "post spacing 130 mph wind",
@@ -111,7 +155,7 @@ QUERIES = [
 
 @requires_store
 class TestAgainstTheStore(unittest.TestCase):
-    """The filters are opt-in, so the shipped behaviour must not move."""
+    """R3 on, R5 off — and the properties that justify that split."""
 
     @classmethod
     def setUpClass(cls):
@@ -150,26 +194,35 @@ class TestAgainstTheStore(unittest.TestCase):
                            "this query is the one that exhibits F2; if it no longer "
                            "repeats text with the filter off, the fixture is stale")
 
-    def test_dedupe_never_drops_text_the_raw_list_carried(self):
+    def test_dedupe_never_drops_evidence_the_raw_list_carried(self):
         """Why the default is safe: R3 replaces a slot, it never removes evidence.
 
-        A suppressed row's text is by construction still present in the list
-        through the row that kept it, and the backfilled row can only add terms.
-        So the distinct text returned with R3 on is a superset of the text
-        returned with it off — which is why no gold question got worse.
+        A suppressed row's record is by construction still in the list through
+        the row that kept it, and the backfilled row can only add. So the
+        distinct evidence returned with R3 on is a superset of the evidence
+        returned with it off.
+
+        This must compare what `evaluate._returned_evidence` measures, not
+        `r.text`. Comparing `r.text` alone made this assertion near-tautological
+        — the first dedupe key was over `r.text` too, so the test could not see
+        that the heading half was being discarded. It is the reason that defect
+        reached a commit.
         """
-        for q in QUERIES:
+        for q in QUERIES + ["governing load 130 mph wind exposure D panel height"]:
             raw = search_evidence(q, limit=10, conn=self.conn, dedupe_text=False)
             got = search_evidence(q, limit=10, conn=self.conn, dedupe_text=True)
-            before = {" ".join((r.text or "").split()).lower() for r in raw}
-            after = {" ".join((r.text or "").split()).lower() for r in got}
-            self.assertTrue(before <= after, f"{q!r} lost {sorted(before - after)[:2]}")
+            before = {_returned(r) for r in raw}
+            after = {_returned(r) for r in got}
+            self.assertTrue(before <= after,
+                            f"{q!r} lost {sorted(before - after)[:1]}")
 
-    def test_dedupe_leaves_no_repeated_text_in_a_list(self):
+    def test_dedupe_leaves_no_repeated_record_in_a_list(self):
+        """Records, not texts. Two rows with the same text under different
+        headings are different evidence and both belong in the list."""
         for q in QUERIES:
             got = search_evidence(q, limit=10, conn=self.conn, dedupe_text=True)
-            texts = [" ".join((r.text or "").split()).lower() for r in got]
-            self.assertEqual(len(texts), len(set(texts)), q)
+            keys = [_returned(r) for r in got]
+            self.assertEqual(len(keys), len(set(keys)), q)
 
     def test_page_cap_leaves_no_repeated_page_in_a_list(self):
         for q in QUERIES:
@@ -177,14 +230,32 @@ class TestAgainstTheStore(unittest.TestCase):
             pages = [(r.document_id, r.page) for r in got]
             self.assertEqual(len(pages), len(set(pages)), q)
 
-    def test_a_filtered_list_is_not_shorter_than_the_baseline(self):
-        """Backfill, measured against the real index rather than asserted."""
+    def test_a_filtered_list_is_not_shorter_than_the_unfiltered_one(self):
+        """Backfill, measured against the real index rather than asserted.
+
+        The baseline must be taken with the filters OFF. Read from the default
+        it would compare R3 against itself and could not fail.
+        """
         for q in QUERIES:
-            base = search_evidence(q, limit=10, conn=self.conn)
+            base = search_evidence(q, limit=10, conn=self.conn,
+                                   dedupe_text=False, page_cap=None)
             for kwargs in ({"dedupe_text": True}, {"page_cap": 1},
                            {"dedupe_text": True, "page_cap": 1}):
                 got = search_evidence(q, limit=10, conn=self.conn, **kwargs)
                 self.assertEqual(len(got), len(base), f"{q!r} with {kwargs}")
+
+    def test_a_short_list_means_the_pool_ran_out(self):
+        """Backfill is bounded by the over-fetched pool, and where a query has
+        fewer than k distinct records to show, the list is shorter. That is the
+        honest answer, not a bug — but it is real, so it is pinned here rather
+        than claimed away in a docstring."""
+        one_noa = {"source_path_prefix": "manuals/certainteed-bufftech/structural/"}
+        raw = search_evidence("none", limit=10, conn=self.conn, filters=one_noa,
+                              dedupe_text=False)
+        got = search_evidence("none", limit=10, conn=self.conn, filters=one_noa)
+        self.assertLessEqual(len(got), len(raw))
+        self.assertEqual(len({_returned(r) for r in got}), len(got),
+                         "whatever its length, the list holds no duplicate record")
 
     def test_filtering_does_not_reorder_what_it_keeps(self):
         for q in QUERIES:

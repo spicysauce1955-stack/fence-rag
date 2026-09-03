@@ -641,7 +641,7 @@ def _routed_summary(routed_rows: list[dict], search_rows: list[dict]) -> dict:
 
 
 def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
-                   only_ingested: bool = False, report_name: str = "evaluation",
+                   only_ingested: bool = False, report_name: str | None = None,
                    second_stage: bool = False, db_path: Path | None = None,
                    write: bool = True, dedupe_text: bool = DEDUPE_TEXT_DEFAULT,
                    page_cap: int | None = None) -> dict:
@@ -757,21 +757,28 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
         "second_stage_attachments": sum(r.get("second_stage_attachments") or 0 for r in rows),
         "acceptance": {},
         # The values the gate was applied to, unrounded. `evidence_support`
-        # above is rounded for reading and 0.699512 reads as 0.700; a reader
-        # checking a verdict needs the number the verdict was made on.
+        # above is rounded for reading, and a value like 0.699512 reads as
+        # 0.700; a reader checking a verdict needs the number it was made on.
         "raw": {"recall_at_k": recall, "mrr": mrr, "evidence_support": raw_support,
                 "no_answer_precision": raw_no_answer_precision,
                 "false_unsupported_rate": raw_false_unsupported},
     }
     # Graded on the measured means, never on the three-decimal display values
-    # in `summary`. Reading the rounded number let 0.699512 report as a pass
-    # against a 0.70 threshold, which is how this was found.
+    # in `summary`. Reading the rounded number once let 0.699512 report as a
+    # pass against a 0.70 threshold; see G65.
     summary["acceptance"] = acceptance_flags(
         recall_at_k=recall, evidence_support=raw_support,
         no_answer_precision=raw_no_answer_precision,
         false_unsupported_rate=raw_false_unsupported)
     out = {"summary": summary, "results": rows, "routed_results": routed_rows}
     if write:
+        # Derived here, not only in the CLI. A programmatic
+        # `run_evaluation(page_cap=1)` used to inherit `report_name="evaluation"`
+        # and overwrite the shipped configuration's committed artifacts -- the
+        # exact failure `default_report_name` exists to prevent, left open on
+        # the one path that does not go through argument parsing.
+        report_name = default_report_name(report_name, second_stage,
+                                          dedupe_text=dedupe_text, page_cap=page_cap)
         with open_write(TESTS_DIR / f"{report_name}-results.json") as f:
             json.dump(out, f, indent=2)
         _write_report(out, report_name)
@@ -961,10 +968,12 @@ def acceptance_flags(*, recall_at_k: float, evidence_support: float | None,
     """The Phase 4 gate, graded on measured values rather than displayed ones.
 
     `summary` rounds every metric to three decimals for reading. Grading that
-    rounded number is a different question from grading the measurement: mean
+    rounded number is a different question from grading the measurement: a mean
     unit support of 0.699512 displays as 0.700 and would report PASS against a
-    0.70 threshold it does not reach. Take the raw means here and round only for
-    display.
+    0.70 threshold it does not reach. That is the case that exposed this (G65);
+    no shipped configuration sits on a boundary today, which is exactly why the
+    gate has to be right before one does. Take the raw means here and round only
+    for display.
 
     `None` means the run measured nothing -- no answerable questions, or no
     no-answer questions -- and never grades as a pass. The ceiling criterion is
@@ -986,8 +995,8 @@ def default_report_name(explicit: str | None, second_stage: bool, *,
                         page_cap: int | None = None) -> str:
     """Where a run's artifacts land, when the caller did not say.
 
-    Configurations that measure different things must not share a path -- 0.650
-    unit support against 0.6995 -- and all of these are committed artifacts, so
+    Configurations that measure different things must not share a path -- 0.645
+    unit support against 0.6946 -- and all of these are committed artifacts, so
     sharing one means the file says whatever the last run happened to be. Every
     switch that changes what is measured therefore changes the name. An explicit
     `--name` still wins; this only supplies the default nobody should have to

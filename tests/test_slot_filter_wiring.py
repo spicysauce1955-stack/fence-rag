@@ -15,16 +15,32 @@ from fence_evidence.retrieval import search_evidence
 from fence_evidence.store import connect
 
 
+def _scratch():
+    """A throwaway connection, so these tests never touch the real store."""
+    import sqlite3
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
 class TestPageCapValidation(unittest.TestCase):
+    """Store-free on purpose. `search_evidence` opens the evidence store the
+    moment it is called without a connection, and `store.connect` CREATES an
+    empty database rather than failing — so a validation test that omitted the
+    connection would leave a stray `workspace/indexes/evidence.db` behind on a
+    checkout that has none, and make `requires_store` half true for every test
+    that ran afterwards."""
+
     def test_a_cap_below_one_is_refused(self):
         for bad in (0, -1):
             with self.assertRaises(ValueError, msg=f"page_cap={bad}"):
-                search_evidence("footing depth", page_cap=bad)
+                search_evidence("footing depth", page_cap=bad, conn=_scratch())
 
     def test_a_cap_of_one_is_allowed(self):
         """The guard must reject nonsense without rejecting R5's headline value."""
         try:
-            search_evidence("", page_cap=1)
+            # An empty query short-circuits before any SQL, so no schema needed.
+            search_evidence("", page_cap=1, conn=_scratch())
         except ValueError as exc:            # pragma: no cover - guards the guard
             self.fail(f"page_cap=1 refused: {exc}")
 
@@ -143,6 +159,39 @@ class TestSummaryRecordsTheVariant(unittest.TestCase):
         out = run_evaluation(k=10, write=False)
         self.assertEqual(out["summary"]["dedupe_text"], True)
         self.assertIsNone(out["summary"]["page_cap"])
+
+
+@requires_store
+class TestAVariantRunCannotOverwriteTheShippedArtifacts(unittest.TestCase):
+    """The naming guard has to hold on the programmatic path too.
+
+    `run_evaluation` used to default `report_name="evaluation"`, so
+    `run_evaluation(page_cap=1)` wrote a variant's numbers over the committed
+    shipped-configuration report — the exact failure `default_report_name`
+    exists to prevent, left open on the one path that does not parse arguments.
+    """
+
+    def setUp(self):
+        from fence_evidence.paths import REPORTS_DIR, TESTS_DIR
+        self.shipped = TESTS_DIR / "evaluation-results.json"
+        self.before = self.shipped.read_bytes() if self.shipped.is_file() else None
+        self.strays = [TESTS_DIR / "evaluation-pagecap1-results.json",
+                       REPORTS_DIR / "evaluation-pagecap1-report.md"]
+
+    def tearDown(self):
+        for path in self.strays:
+            if path.is_file():
+                path.unlink()
+
+    def test_a_page_cap_run_writes_its_own_files_and_leaves_the_baseline_alone(self):
+        from fence_evidence.evaluate import run_evaluation
+        run_evaluation(k=10, page_cap=1)
+        for path in self.strays:
+            self.assertTrue(path.is_file(), f"{path.name} was not written")
+        if self.before is not None:
+            self.assertEqual(self.shipped.read_bytes(), self.before,
+                             "a variant run overwrote the shipped configuration's "
+                             "committed results")
 
 
 if __name__ == "__main__":
