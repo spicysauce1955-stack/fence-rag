@@ -77,8 +77,11 @@ computing them surfaced a corpus-wide `unit_normalized` defect (G63, 33 of 62
 number twelve times too small. A same-day attempt to fix it at the extractor was
 itself wrong — it made `unit_normalized` name the source's unit, contradicting this
 platform's real invariant that the column always names `value_normalized`'s unit
-instead — caught by adversarial review and reverted; `unit_original`, unchanged
-throughout, is and always was the reliable source-unit column. Still fully
+instead — caught by adversarial review and reverted. `unit_original` is the column to
+read for a source's unit, and it is right for all 62 `stock_length_in` facts — but
+**"always reliable" is overstated and G70 bounds it**: 3 facts elsewhere say `in` for a
+page that printed feet. Their values are correct and none is published, but do not reuse
+`unit_original` for a new fact type without re-measuring it. Still fully
 unbuilt: `FenceModel`, `Procedure`, `Rule`,
 `Combination`. `docs/state-and-gaps.md` G62/G63 has the full account. Curation level 2 is
 **no longer thin as of 2026-08-31**: a person has reviewed 37 of 44 flagged crops (up

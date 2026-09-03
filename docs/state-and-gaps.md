@@ -3409,6 +3409,61 @@ which is what the design's §6 worked example always said). These five remain:
 person decides whether a line is an `AssemblyStep`, which is what §5 always said and what
 the classification proposer (still unbuilt) will offer a starting point for.
 
+### G70 — `unit_original` is not the reliable source-unit column after all
+
+`[measured]` 2026-09-03, run by hand after all three redeployed adversaries died on API
+529s. **This is the facts/units audit §3e recorded as not done; it is now done, and the
+provenance-chain and ParameterTable audits remain outstanding.**
+
+`CLAUDE.md` and G63 both say: *"`unit_original`, unchanged throughout, is and always was
+the reliable source-unit column."* That is the claim `parts.py::_stock_length_quantity`
+rests on — reading `unit_original` is the whole G63 workaround that stopped 16 ft
+publishing as 406,400 milli-mm instead of 4,876,800. **The claim is false, for three
+facts.**
+
+| fact | `value_original` | `unit_original` | what the source says |
+|---|---|---|---|
+| 21708 `post_spacing_in` | `10 ft.\n(3.05 m) on center` | **`in`** | feet |
+| 21841 `footing_diameter_in` | `2'dia.` | **`in`** | feet |
+| 21849 `footing_diameter_in` | `2'dia.` | **`in`** | feet |
+
+`value_normalized` is **correct in all three** — 120.0 and 24.0 inches respectively — so no
+number is wrong. What is wrong is the column that names the source's unit, in the direction
+that would matter: a consumer trusting `unit_original` to say what the page said gets
+`inches` for a page that printed feet.
+
+**Bounded, and none of it published.** All three have `from_candidate_id IS NULL`, none is
+promoted, and none of their elements appears in the current snapshot. Two are `flagged`
+(already in the OCR review queue) and one is `extracted`.
+
+**What this changes.** The workaround is still right — `unit_original` is right for all 62
+`stock_length_in` facts, which is the case it was built for — but the *reasoning* recorded
+in G63 and CLAUDE.md is stronger than the evidence. "Reliable" should read "reliable for
+`stock_length_in`, and wrong in 3 of 1,826 facts elsewhere." A reader who took the
+universal claim at face value and reused `unit_original` for a new fact type would inherit
+a defect nobody had bounded.
+
+**The rest of the facts audit, measured and clean:**
+
+* **Round-trip of every numeric fact.** 62 of 62 `stock_length_in` convert exactly
+  (0 mismatches), and 663 other numeric facts round-trip with only the 3 above deviating —
+  and those deviate because the source unit is mislabelled, not because the arithmetic is
+  wrong. **No factor-of-12, ×25.4 or ×304.8 error exists anywhere in the fact layer.**
+* **`unit_original` vs `unit_normalized` per type.** `stock_length_in` is the ONLY type
+  where they differ, 62 of 62 — exactly as G63 describes, and every other type is
+  identical on both. The G63 defect is contained to the type it was found in.
+* **Duplicate assertions.** 52 groups share `(element, fact_type, value)`, but 17 of those
+  are legitimate: one table cell genuinely asserts the same value under several condition
+  combinations — `footing_diameter_in 12.0` appears 4× from one element under
+  `fence_height` × `exposure_category`, which is correct table data, and its conditions
+  carry `hvhz_applicability: "no bracket printed"`, so G53's fix is working in the store.
+  **35 groups (73 rows) are identical on conditions too** and are real duplication: 33
+  `reinforcement`, 1 `exposure_category`, 1 `stock_length_in`. **0 are promoted and 0 are
+  published.** The `stock_length_in` one (`106.0`, `{"part": "post"}`, ×2) is worth naming
+  because it is in the type that does publish, and `_stock_length_evidence` takes its value
+  from the first row by `fact_id` while citing every row — agreeing duplicates are
+  harmless, but the multi-row case is not hypothetical in that type.
+
 ---
 
 ## 4. If work resumes, in order
