@@ -86,6 +86,7 @@ Two provisions bind this slice:
 | elements on the slice page (p8) | 28 |
 | numbered step headings there | 12 |
 | bullets (`•`) inside those elements | 44 |
+| list elements with **no** bullet (12 section headers + 1 footnote) | 13 |
 | elements carrying a bbox | 28 of 28 |
 | elements with a pre-rendered crop | 0 of 28 — review renders on demand |
 | damaged words in the text layer on p8 | 11 (`I nsert`, `T ape`, `L evel`, …) |
@@ -121,6 +122,79 @@ Three options, and the choice is where the citation lands and how many scopes su
 into its element; the `SourceRef` names the containing block. The weakness is a *stated
 limitation* rather than a wrong number, and the block crop still shows the reviewer the
 bullet it is judging.
+
+### 3a. What `text.split("•")` actually gets wrong — `[measured]` 2026-09-03
+
+Measured across all 70 installation manuals (6,105 `list` elements, 4,629 bullets) and
+then against the slice page specifically. A naive split is wrong in six ways, three of
+which are present on p8:
+
+1. **`•` is not the only leader, and the disambiguator is `text_source`.** OCR emits
+   **zero** `•` — not once in 834 OCR'd list elements; tesseract renders the glyph as `*`
+   (464 leader-shaped uses). But in the *text layer* `*` is a **footnote marker, not a
+   bullet** (71 elements, nearly all the same `* Caution – In climates that experience
+   freeze-thaw cycles…` string, which is on p8 at ordinal 27). Treating text-layer `*` as
+   a bullet manufactures steps; ignoring OCR `*` loses 464 real ones.
+2. **`-` is a real second-level bullet** — 753 text-layer elements. On p8, ordinal 5:
+   `• Dig holes 30" deep or to frost line` / `- Hole size for 4x4 posts = approximately 10"`.
+3. **One `•` segment can contain an entire nested procedure.** p8 ordinal 24 is a single
+   871-character bullet holding a two-branch lettered choice (`a. Aluminum gate post
+   stiffener`, `b. Concrete and rebar*`) with **13 `-` sub-steps** beneath them, including
+   the 72-hour cure the contract quotes. One bullet → one step would publish a 900-character
+   "step" that is really thirteen, and would lose the fact that a and b are *alternatives*.
+   60 such segments exist corpus-wide.
+4. **The whitespace after a leader is three different characters** — U+0020 (2,656),
+   **U+2002 EN SPACE (1,921)** and TAB (52). All three occur on p8.
+5. **A trailing `Note:` rider is not part of the instruction.** 14 segments end with one,
+   never start with one. p8 ordinal 9: `• Insert rail into post` + `Note: Pickets will
+   attach to rail on the side with the small (¼") holes`.
+6. **834 list elements carry their text only in `ocr_text`** (`text IS NULL`). A splitter
+   reading `elements.text` alone silently drops 13.7% of the seam.
+
+**And the damaged-word artifact is five times bigger than §2 reported.** The newline form —
+`T\namp`, `L\nevel`, `H\nang` — is **263 occurrences in 221 list elements** against 113 for
+the space form, and both are one defect: pdftotext emitting a bullet's leading character
+as its own text run. **195 of 4,629 segments (4.2%) begin with a split capital**, which is
+precisely the token any verb-based classifier reads first.
+
+Repairing it automatically is *not* safe: of the 20 distinct space-form artifacts, **only 7
+are real damage**. The rest are legitimate text the pattern over-matches — `Insert post A
+into hole`, `Post B may be loosely laying`, `Coloque el canal en U en el poste`. A naive
+normaliser corrupts real text at a 65%-of-distinct false-positive rate. So the splitter
+**proposes** a repair and the reviewer disposes, and the proposal's precision is measured
+against their decisions like every other proposal here.
+
+**One document is excluded from the seam entirely.** `bufftech-installation-guide-afence.pdf`
+is an OCR'd scan of the same two-column layout as the slice document, and the OCR read
+*across the gutter*: `1. Getting Started 7. Install Top Rail` is one element, and
+`• Clean holes and check for straight walls • Square pickets and rails` merges two
+unrelated steps from two sections. It is a redundant scan of a document already held with
+a clean text layer, so it is excluded rather than parsed.
+
+### 3b. What the splitter actually produces on p8 — `[measured]`
+
+| | |
+|---|---|
+| step candidates | **55** |
+| — from `•` bullets | 44 |
+| — from `-` sub-bullets | 11 (all inside ordinal 24) |
+| section headers | 12 |
+| lettered branch labels | 2 (`a.`, `b.` in ordinal 24) |
+| `Note:` riders | 1 (ordinal 9) |
+| footnotes (text-layer `*`) | 1 (ordinal 27) |
+| text repairs **proposed** | 10 of 55 steps (18%) |
+
+The arithmetic is the argument for splitting nested bullets: 44 + 11 = 55. Ordinal 24's
+single 871-character bullet becomes 1 step plus 2 branch labels plus 11 sub-steps, and the
+**72-hour cure the contract argues from is one of those 11** — a naive `split("•")` would
+have buried it inside a 900-character blob along with the other twelve.
+
+The slice's review is therefore **55 judgements, not 44**. That is the honest number and it
+is the one to plan the sitting against.
+
+**Also measured, and it changes nothing but should be recorded:** 46 `paragraph` elements
+contain real bulleted steps the layout classifier did not type as `list`, so a `list`-only
+splitter drops them. Out of scope for this slice; a gap names it.
 
 **B is rejected for now, not forever.** Giving each bullet a real bbox means a new
 extraction edition under G38 — and `ref_id` embeds a bbox, which `CLAUDE.md` names as the
