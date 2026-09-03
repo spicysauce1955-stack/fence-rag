@@ -3968,6 +3968,48 @@ dedupe key changed the id of all 67 carried-over gaps. Nothing in `contract.md` 
 id stability across builds, but a consumer diffing two snapshots by gap id would see 67
 removed and 67 added that are in fact the same 67.
 
+### G81 — the `procedures` member is built; it publishes 0 because 0 are reviewed
+
+`[measured]`, snapshot with `procedures` wired. The slice is finished as far as it can go
+without a person, and the honest state is: **the pipeline is complete and proven, the queue
+is not.**
+
+What exists now, end to end:
+
+* `step_candidates` — 71 on the slice page, from `steps.propose`.
+* `step_reviews` + `submit_step_review` — a person's judgement, keyed on
+  `(element_id, char_start, char_end)` and never on `candidate_id`, which the splitter
+  re-mints on every run and re-minted four times in one day. `rebuild_step_projection`
+  restores the projection from the record alone, and a test proves a review survives a full
+  re-cut of the queue.
+* `cli steps --accept` — refuses a blank reviewer, a machine verdict, a `kind`/`scope`
+  outside the published vocabularies, an anchor naming nothing, and text that has moved
+  since the reviewer looked. Exit 2 on bad input.
+* `procedures.build_procedures` — the member, plus `verify()` checks for duplicate
+  `Procedure.id`, the `kind`/`scope`/`Edge.kind` vocabularies, and `requires` naming a key
+  inside its own procedure.
+
+**`procedures` publishes `[]` and a gap says why**: *"p8 … 71 step candidates are waiting for
+a person; until somebody confirms what each line is, none of them publishes."* That is the
+rule working, not the pipeline failing — `AssemblyStep.kind` and `scope` are required by the
+shape, so a candidate without a review cannot publish even partially. A half-classified step
+would be this platform asserting something nobody decided, which is A1/C0 in a new seam.
+
+**One defect found in this work, by running it rather than by a test.** `build_procedures`
+wrapped its query in `except sqlite3.Error: return [], []`, reasoning that a store predating
+the tables should publish nothing. `step_reviews` did not exist on the live store, the
+`LEFT JOIN` raised, the handler swallowed it, and the member published nothing **while
+reporting success** — no gap, no error, a snapshot id identical to the previous build. The
+same swallowed-failure shape this session has been fixing all day, written by me twenty
+minutes earlier. It now asks `sqlite_master` which tables exist and lets every other error
+raise.
+
+**Not built, and named rather than left implied:** the review ledger does not yet carry step
+reviews. `LEDGER_SCHEMA` is 1 and its header counts are per-kind, so adding them is a tested
+migration of a committed file (§7a). Until that lands, a step review lives only in the store
+— it survives a re-cut of the queue but not a rebuilt store, which is the one thing the
+ledger exists to guarantee.
+
 ---
 
 ## 4. If work resumes, in order

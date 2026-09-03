@@ -1311,6 +1311,48 @@ def verify(snapshot: dict) -> None:
         if parent.get("namespace") != "shared" or parent.get("key") not in SPINE:
             fail.append(f"{at}: parent {parent} does not terminate in the spine")
 
+    # `procedures`. The shape is `knowledge-datamodel.md` §3.6 and the
+    # vocabularies are closed, so a value outside them is refused here rather
+    # than reaching a consumer that has no case for it.
+    STEP_KINDS = frozenset({"assembly", "installation", "preparation",
+                            "part_modification", "maintenance"})
+    STEP_SCOPES = frozenset({"panel", "bay", "post", "run", "site"})
+    EDGE_KINDS = frozenset({"after", "not_before", "before", "exclusive_with"})
+    procedure_ids = set()
+    for i, proc in enumerate(snapshot.get("procedures", [])):
+        at = f"procedures[{i}]"
+        pid = proc.get("id")
+        if not pid:
+            fail.append(f"{at}: no id. N13 makes it load-bearing -- without one "
+                        f"`Warning.attaches_to{{kind: procedure}}` cannot address "
+                        f"this procedure and a correction reaches no siblings")
+        if pid in procedure_ids:
+            fail.append(f"{at}: duplicate Procedure.id {pid!r}")
+        procedure_ids.add(pid)
+        keys = {st.get("key") for st in proc.get("steps") or []}
+        if len(keys) != len(proc.get("steps") or []):
+            fail.append(f"{at}: two steps share a key")
+        for j, st in enumerate(proc.get("steps") or []):
+            sat = f"{at}.steps[{j}]"
+            if st.get("kind") not in STEP_KINDS:
+                fail.append(f"{sat}: kind {st.get('kind')!r} is not one of "
+                            f"{sorted(STEP_KINDS)}")
+            if st.get("scope") not in STEP_SCOPES:
+                fail.append(f"{sat}: scope {st.get('scope')!r} is not one of "
+                            f"{sorted(STEP_SCOPES)}")
+            if not (st.get("cites") or []):
+                fail.append(f"{sat}: no cites; a published step must say where "
+                            f"it was read from")
+            if not (st.get("text_i18n") or "").strip():
+                fail.append(f"{sat}: empty text")
+            for edge in st.get("requires") or []:
+                if edge.get("kind") not in EDGE_KINDS:
+                    fail.append(f"{sat}: requires kind {edge.get('kind')!r} is not "
+                                f"one of {sorted(EDGE_KINDS)}")
+                if edge.get("step") not in keys:
+                    fail.append(f"{sat}: requires names {edge.get('step')!r}, which "
+                                f"is not a step of this procedure")
+
     PART_STATUSES = frozenset({"draft", "active", "retired"})
     SPEC_AGREE = frozenset({"==", "!=", "<=", ">=", "in", "supplies"})
     declared_part_types = [{"namespace": pt.get("namespace"), "key": pt.get("key")}
@@ -1405,6 +1447,17 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
         # meaning. `retain_until` is deliberately outside it: it moves with the
         # clock, and hashing it would mean two builds over identical knowledge
         # never matched -- which is the opposite of what obligation 1 asks for.
+        from .procedures import build_procedures
+        procedures, procedure_gaps = build_procedures(
+            conn, tenant=tenant,
+            source_ref_page=lambda d, pg: asdict(b.source_ref_page(d, pg)))
+        for g in procedure_gaps:
+            b.gap(kind=g["kind"], subject=g["subject"],
+                  code=g["because"]["code"], params=g["because"].get("params"),
+                  cites=[SourceRef(**c) for c in g.get("cites") or []],
+                  would_close=g["would_close"], closes_by=g["closes_by"],
+                  severity=g["severity"], on=g.get("on"))
+
         # G78. Every extraction failure this platform already DETECTED,
         # published as a gap. Runs LAST of the ref-minting passes, and that
         # ordering is load-bearing: its severity rule asks whether a document
@@ -1424,7 +1477,7 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
             # declared and empty rather than absent: an absent key reads as an
             # oversight, an empty list reads as "we publish none of these yet".
             "part_types": part_types, "parts": parts,
-            "models": [], "procedures": [],
+            "models": [], "procedures": procedures,
             "parameters": parameters, "combinations": [], "rules": [],
         }
         canonical_bytes(members)           # refuses floats, sets, unsortable keys

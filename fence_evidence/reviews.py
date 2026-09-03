@@ -1401,3 +1401,160 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
     out["projection"] = {"tables": rebuild_projection(conn),
                          "facts": rebuild_fact_projection(conn)}
     return out
+
+
+# ------------------------------------------------- step reviews (the slice)
+# The vocabularies a reviewer may choose from, straight out of
+# `knowledge-datamodel.md` §3.6. Closed sets: a value outside them cannot be
+# published, so it is refused at the door rather than at the wire.
+STEP_KINDS = ("assembly", "installation", "preparation", "part_modification",
+              "maintenance")
+STEP_SCOPES = ("panel", "bay", "post", "run", "site")
+STEP_VERDICTS = ("accepted", "corrected", "rejected")
+STEP_STATUS_FOR_VERDICT = {"accepted": "accepted", "corrected": "corrected",
+                           "rejected": "rejected"}
+# What a rebuild may overwrite. `unreviewed` is the default a candidate is born
+# with; anything else here was written by a review and only a review may move
+# it. Same reasoning as REVIEW_STATUSES for the table loop.
+STEP_STATUSES = tuple(STEP_STATUS_FOR_VERDICT.values())
+
+
+def ensure_step_reviews(conn: sqlite3.Connection) -> None:
+    """Create `step_reviews` if this store predates it."""
+    from .store import STEP_REVIEWS_DDL
+    conn.executescript(STEP_REVIEWS_DDL)
+
+
+def _step_anchor(element_id: str, char_start: int, char_end: int) -> tuple:
+    """The evidence a step review is about: a span of one element.
+
+    NOT `candidate_id`. The splitter re-runs and re-mints every id -- four times
+    in one day on the slice page -- so a review keyed on a row id would be
+    silently orphaned by an ordinary re-proposal.
+    """
+    return (element_id, char_start, char_end)
+
+
+def submit_step_review(conn: sqlite3.Connection, *, element_id: str,
+                       char_start: int, char_end: int, text_seen: str,
+                       reviewer: str, verdict: str, step_kind: str | None = None,
+                       step_scope: str | None = None,
+                       slot_target: dict | None = None,
+                       text_final: str | None = None,
+                       notes: str | None = None) -> dict:
+    """Record one person's judgement about one step candidate.
+
+    Refuses rather than guesses: a blank reviewer, a verdict outside
+    `STEP_VERDICTS`, a `kind`/`scope` outside the published vocabularies, an
+    anchor naming no candidate, or text that is not what the candidate holds
+    now. That last is the echo check -- if the splitter has moved since the
+    person looked, the review is of something that no longer exists.
+    """
+    from .store import now
+    ensure_step_reviews(conn)
+    if not (reviewer or "").strip():
+        raise ReviewRefused(
+            "error.missing_reviewer",
+            "a step review needs a reviewer: the name is the only thing "
+            "separating 'software read this' from 'a person confirmed it'")
+    if verdict not in STEP_VERDICTS:
+        raise ReviewRefused(
+            "error.bad_verdict",
+            f"verdict must be one of {', '.join(STEP_VERDICTS)}; got {verdict!r}. "
+            f"No machine verdict belongs here -- that is what A1/C0 revoked.")
+    if step_kind is not None and step_kind not in STEP_KINDS:
+        raise ReviewRefused("error.bad_step_kind",
+                            f"kind must be one of {', '.join(STEP_KINDS)}")
+    if step_scope is not None and step_scope not in STEP_SCOPES:
+        raise ReviewRefused("error.bad_step_scope",
+                            f"scope must be one of {', '.join(STEP_SCOPES)}")
+
+    row = conn.execute(
+        """SELECT * FROM step_candidates
+            WHERE element_id=? AND char_start=? AND char_end=?""",
+        _step_anchor(element_id, char_start, char_end)).fetchone()
+    if row is None:
+        raise ReviewRefused(
+            "error.no_such_candidate",
+            f"no step candidate at {element_id} chars {char_start}-{char_end}")
+    if row["text_raw"] != text_seen:
+        raise ReviewRefused(
+            "error.text_moved",
+            f"the candidate at {element_id} chars {char_start}-{char_end} no "
+            f"longer holds the text this review is about; it was re-cut after "
+            f"the reviewer looked, so the review is of something that is gone")
+
+    reviewed_at = now()
+    payload = json.dumps({"verdict": verdict, "kind": step_kind,
+                          "scope": step_scope, "slot": slot_target,
+                          "text": text_final, "notes": notes},
+                         sort_keys=True, separators=(",", ":"))
+    # The payload is folded into the id for the reason `review_id` folds it in:
+    # `now()` has one-second resolution, so two submissions in one second would
+    # otherwise collide and INSERT OR REPLACE would drop the first.
+    step_review_id = hashlib.sha256(
+        f"{element_id}:{char_start}:{char_end}:{reviewer}:{reviewed_at}:{payload}"
+        .encode()).hexdigest()[:16]
+
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        conn.execute(
+            """INSERT OR REPLACE INTO step_reviews
+               (step_review_id, element_id, char_start, char_end, text_seen,
+                document_id, page_no, reviewer, reviewed_at, verdict, step_kind,
+                step_scope, slot_target, text_final, status_before, notes)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (step_review_id, element_id, char_start, char_end, text_seen,
+             row["document_id"], row["page_no"], reviewer, reviewed_at, verdict,
+             step_kind, step_scope,
+             json.dumps(slot_target, sort_keys=True) if slot_target else None,
+             text_final, row["review_status"], notes))
+        _project_step(conn, element_id, char_start, char_end,
+                      STEP_STATUS_FOR_VERDICT[verdict], reviewer, reviewed_at)
+        conn.execute("COMMIT")
+    except Exception:
+        conn.execute("ROLLBACK")
+        raise
+    return {"step_review_id": step_review_id, "verdict": verdict,
+            "reviewer": reviewer, "reviewed_at": reviewed_at}
+
+
+def _project_step(conn, element_id, char_start, char_end, status, reviewer,
+                  reviewed_at) -> None:
+    """The ONLY writer of the projection columns. Sets every one on every call,
+    including back to NULL, so a rebuild cannot leave a stale half-state."""
+    conn.execute(
+        """UPDATE step_candidates
+              SET review_status=?, reviewer=?, reviewed_at=?
+            WHERE element_id=? AND char_start=? AND char_end=?""",
+        (status, reviewer, reviewed_at, element_id, char_start, char_end))
+
+
+def rebuild_step_projection(conn: sqlite3.Connection) -> dict:
+    """Regenerate the projection from `step_reviews` alone.
+
+    This is what makes a review survive a re-cut of the queue: the candidates
+    are rebuildable, the reviews are not, and the anchor is evidence rather
+    than a row id. Replays in arrival order, so the last word wins.
+    """
+    ensure_step_reviews(conn)
+    conn.execute(
+        f"""UPDATE step_candidates SET review_status='unreviewed',
+                   reviewer=NULL, reviewed_at=NULL
+             WHERE review_status IN ({','.join('?' * len(STEP_STATUSES))})""",
+        STEP_STATUSES)
+    applied = orphaned = 0
+    for r in conn.execute("""SELECT * FROM step_reviews ORDER BY rowid"""):
+        hit = conn.execute(
+            """SELECT 1 FROM step_candidates
+                WHERE element_id=? AND char_start=? AND char_end=?""",
+            (r["element_id"], r["char_start"], r["char_end"])).fetchone()
+        if hit is None:
+            orphaned += 1
+            continue
+        _project_step(conn, r["element_id"], r["char_start"], r["char_end"],
+                      STEP_STATUS_FOR_VERDICT[r["verdict"]], r["reviewer"],
+                      r["reviewed_at"])
+        applied += 1
+    conn.commit()
+    return {"applied": applied, "orphaned": orphaned}

@@ -433,6 +433,44 @@ CREATE INDEX IF NOT EXISTS ix_fact_reviews_ref ON fact_reviews(ref_id);
 #
 # Pointers run DOWN: a candidate names its element; nothing on `elements` names
 # a candidate.
+# A person's judgement about one step candidate. The RECORD; the four columns on
+# `step_candidates` are its projection, exactly as `table_reviews` is to
+# `table_read_candidates`.
+#
+# Keyed on evidence, never on a row id: `candidate_id` moves whenever the
+# splitter is re-run, and it has been re-run four times in one day. The anchor
+# is (element_id, char_start, char_end, text_raw) -- the element, the span
+# within it, and the text the reviewer actually saw. A crop digest cannot serve
+# here (0 of 28 elements on the slice page have a rendered crop) and neither can
+# `ref_id`, which embeds a bbox and does not survive a re-extraction (G38).
+#
+# `kind`/`scope`/`slot` are what the person decided; `text_final` is the text
+# they confirmed, which may be a repair the proposer offered or their own
+# correction. `*_before` make the record self-contained so a rebuild can restore
+# the pre-review state, which is what makes a rejection reversible (G47).
+STEP_REVIEWS_DDL = """
+CREATE TABLE IF NOT EXISTS step_reviews (
+    step_review_id  TEXT PRIMARY KEY,
+    element_id      TEXT NOT NULL,
+    char_start      INTEGER NOT NULL,
+    char_end        INTEGER NOT NULL,
+    text_seen       TEXT NOT NULL,      -- the anchor: what the reviewer looked at
+    document_id     TEXT NOT NULL,
+    page_no         INTEGER NOT NULL,
+    reviewer        TEXT NOT NULL,      -- asserted; unverifiable here
+    reviewed_at     TEXT NOT NULL,
+    verdict         TEXT NOT NULL,      -- accepted | corrected | rejected
+    step_kind       TEXT,               -- AssemblyStep.kind
+    step_scope      TEXT,               -- AssemblyStep.scope
+    slot_target     TEXT,               -- SlotTarget, JSON
+    text_final      TEXT,               -- the text the person confirmed
+    status_before   TEXT NOT NULL,
+    notes           TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_step_reviews_anchor
+    ON step_reviews(element_id, char_start, char_end);
+"""
+
 STEP_CANDIDATES_DDL = """
 CREATE TABLE IF NOT EXISTS step_candidates (
     candidate_id    INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -481,7 +519,7 @@ CREATE INDEX IF NOT EXISTS ix_step_candidates_element
 # `executescript(SCHEMA)`, so a store that predates a new TABLE meets it as
 # `no such table` in whatever command runs next -- the table-shaped version of
 # the silent no-op ADDED_COLUMNS exists for.
-SCHEMA = SCHEMA + FACT_REVIEWS_DDL + STEP_CANDIDATES_DDL
+SCHEMA = SCHEMA + FACT_REVIEWS_DDL + STEP_CANDIDATES_DDL + STEP_REVIEWS_DDL
 
 
 def now() -> str:

@@ -117,6 +117,19 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--document", help="document_id or source_path")
     p.add_argument("--page", type=int, help="one page only")
     p.add_argument("--limit", type=int, default=200)
+    p.add_argument("--accept", metavar="CANDIDATE_ID",
+                   help="record a person's judgement about one step candidate")
+    p.add_argument("--reviewer", help="the name that separates 'software read "
+                                      "this' from 'a person confirmed it'")
+    p.add_argument("--verdict", choices=("accepted", "corrected", "rejected"),
+                   default="accepted")
+    p.add_argument("--step-kind", choices=("assembly", "installation", "preparation",
+                                           "part_modification", "maintenance"))
+    p.add_argument("--step-scope", choices=("panel", "bay", "post", "run", "site"))
+    p.add_argument("--slot", help="SlotTarget as JSON, e.g. "
+                                  "'{\"kind\": \"PostSlot\", \"key\": \"post\"}'")
+    p.add_argument("--text", help="the text you confirmed, if you corrected it")
+    p.add_argument("--notes")
 
     p = sub.add_parser("audit", help="relevance audit of the retrieval projection (read-only)")
     p.add_argument("-k", type=int, default=10)
@@ -438,14 +451,47 @@ def main(argv: list[str] | None = None) -> int:
                                             dedupe_text=args.dedupe_text,
                                             page_cap=args.page_cap))["summary"])
     elif args.cmd == "steps":
-        if sum([args.propose, args.queue]) != 1:
-            _print({"error": "choose exactly one of --propose or --queue"})
+        if sum([args.propose, args.queue, bool(args.accept)]) != 1:
+            _print({"error": "choose exactly one of --propose, --queue or --accept"})
+            return 2
+        if args.accept and not (args.reviewer or "").strip():
+            _print({"error": "--accept needs --reviewer: the name is the only thing "
+                             "separating 'software read this' from 'a person "
+                             "confirmed it'"})
+            return 2
+        if args.accept and args.verdict != "rejected" and not (
+                args.step_kind and args.step_scope):
+            _print({"error": "--accept needs --step-kind and --step-scope; "
+                             "AssemblyStep requires both and a half-classified "
+                             "step would assert something nobody decided"})
             return 2
         from .steps import propose
         from .store import connect as _connect
         conn = _connect()
         try:
-            if args.propose:
+            if args.accept:
+                from .reviews import ReviewRefused, submit_step_review
+                row = conn.execute(
+                    "SELECT * FROM step_candidates WHERE candidate_id=?",
+                    (args.accept,)).fetchone()
+                if row is None:
+                    _print({"error": f"no step candidate {args.accept}"})
+                    return 1
+                try:
+                    out = submit_step_review(
+                        conn, element_id=row["element_id"],
+                        char_start=row["char_start"], char_end=row["char_end"],
+                        text_seen=row["text_raw"], reviewer=args.reviewer,
+                        verdict=args.verdict, step_kind=args.step_kind,
+                        step_scope=args.step_scope,
+                        slot_target=json.loads(args.slot) if args.slot else None,
+                        text_final=args.text, notes=args.notes)
+                except ReviewRefused as exc:
+                    _print({"error": exc.code, "message": str(exc)})
+                    return 1
+                _print({**out, "candidate_id": args.accept,
+                        "text": row["text_raw"]})
+            elif args.propose:
                 if not args.document:
                     _print({"error": "--propose needs --document"})
                     return 2
