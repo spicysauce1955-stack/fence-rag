@@ -303,6 +303,24 @@ def main(argv: list[str] | None = None) -> int:
             return 1
     elif args.cmd == "search":
         from .retrieval import search_evidence
+        if args.element_type:
+            # No fixed enum -- the real vocabulary is whatever `extract.py`
+            # has actually assigned in THIS store, the same reason `fetch
+            # --subset` validates against the fetched manifest rather than a
+            # list hardcoded here. An unrecognised value is bad input (exit
+            # 2); a recognised type with zero matches for this query is a
+            # normal empty result and must stay exit 0.
+            from .store import connect
+            conn = connect()
+            try:
+                known = {r[0] for r in conn.execute(
+                    "SELECT DISTINCT element_type FROM elements")}
+            finally:
+                conn.close()
+            if args.element_type not in known:
+                _print({"error": f"unknown --element-type {args.element_type!r}; "
+                                 f"known: {sorted(known)}"})
+                return 2
         filters = {}
         for key, val in (("manufacturer", args.manufacturer), ("doc_type", args.doc_type),
                          ("version_status", args.version_status),
@@ -320,7 +338,11 @@ def main(argv: list[str] | None = None) -> int:
         _print(out)
     elif args.cmd == "document":
         from .retrieval import get_document
-        _print(get_document(args.identifier))
+        doc = get_document(args.identifier)
+        if doc is None:
+            _print({"error": f"no document matching {args.identifier!r}"})
+            return 1
+        _print(doc)
     elif args.cmd == "page":
         from .retrieval import get_page
         _print(get_page(args.document_id, args.page_no))
@@ -332,7 +354,11 @@ def main(argv: list[str] | None = None) -> int:
         _print(get_element_context(args.element_id, before=args.before, after=args.after))
     elif args.cmd == "resolve":
         from .retrieval import resolve_document_version
-        _print(resolve_document_version(args.identifier, at=args.at, as_of=args.as_of))
+        resolved = resolve_document_version(args.identifier, at=args.at, as_of=args.as_of)
+        if resolved is None:
+            _print({"error": f"no document matching {args.identifier!r}"})
+            return 1
+        _print(resolved)
     elif args.cmd == "facts":
         from .facts import extract_facts, query_facts
         if args.extract:

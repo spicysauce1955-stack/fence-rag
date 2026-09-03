@@ -2592,6 +2592,25 @@ bad-input handling already uses. Fixed the one reported instance
 found" signal) is named but not fixed — a larger, CLI-wide pattern that
 deserves its own pass, not a rushed one bolted onto this session.
 
+**Fixed — the named `resolve`/`document`/`search --element-type` pattern
+itself, closed 2026-09-03.** `document`/`resolve` on an identifier that
+matches nothing now print `{"error": "no document matching ..."}` and
+exit 1, instead of `null` and exit 0 — the same ambiguity `fetch`'s fix
+closed (a script cannot tell "found nothing to say" from "found nothing").
+`search --element-type` has no fixed enum to validate against — matching
+`fetch --subset`'s own reasoning, an unknown value is now checked against
+`SELECT DISTINCT element_type FROM elements` in the live store rather
+than a list hardcoded here, so it tracks whatever `extract.py` actually
+assigns rather than drifting stale. An unrecognised value is bad input
+(exit 2, `fetch`'s own convention); a *recognised* type with zero matches
+for a given query stays exit 0 — that is a normal empty result, not bad
+input, and `tests/test_cli_not_found.py` pins the distinction explicitly
+so the two cannot be conflated later. `page`/`region`/`context` share the
+identical `dict | None` + silent-`null` shape and were deliberately left
+alone — not in the pattern this gap named, and widening to them here
+would be scope creep on an unrequested pass. 1151 tests (6 new), same one
+pre-existing error (G58), 1 expected failure.
+
 **CLAUDE.md corrected**, not just the code: "FROZEN and RATIFIED at v1.1"
 → v1.3, "3 of 44 crops reviewed" → 37 of 44, the removed
 `condition_point_uncovered` gap type no longer mentioned, stale reading
