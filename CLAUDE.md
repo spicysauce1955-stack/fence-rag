@@ -134,6 +134,10 @@ python3 -m fence_evidence.cli review --import PATH --apply   # replay it into th
 python3 -m fence_evidence.cli fact-review --queue    # 266 OCR-flagged facts waiting
 python3 -m fence_evidence.cli steps --propose --document PATH [--page N]  # split bullets into step candidates
 python3 -m fence_evidence.cli steps --queue          # step candidates waiting for a person
+
+# the review console -- what is waiting for a person, generated from the store
+python3 scripts/render_console_images.py   # page images, once (poppler, ~2.3 MB)
+python3 scripts/build_review_console.py    # -> workspace/reports/review-console.html
 python3 -m fence_evidence.cli snapshot --verify-stored   # do PUBLISHED snapshots still pass?
 python3 -m fence_evidence.cli backfill-spans --apply     # recover merged cells (G41)
 python3 -m fence_evidence.cli serve --token TOK  # the API behind Planning's screens

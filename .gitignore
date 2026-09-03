@@ -14,3 +14,5 @@ workspace/tests/snapstore/
 
 # Agent process artifacts (SDD ledgers, review packages, task reports)
 .superpowers/
+workspace/reports/review-console.html
+workspace/derived/console-img/
