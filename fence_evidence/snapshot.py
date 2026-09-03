@@ -338,6 +338,100 @@ class SnapshotBuilder:
                                      f"make anything wrongly admissible until it is",
                          closes_by="knowledge", severity="informational")
 
+    # Which detected extraction failures publish, and how. Every `kind` in
+    # `quality_issues` must appear here: a class that is neither published nor
+    # deliberately excluded is the exact defect G78 found, where 73
+    # unreconstructed tables produced no gap at all.
+    #
+    # `because.code` values are registry additions, which `AMENDING.md` §4
+    # states are explicitly NOT amendments and need no negotiation.
+    QUALITY_GAP_KINDS = {
+        "table_not_reconstructed": (
+            "illegible_source", "table_not_reconstructed",
+            "a person should read the table on this page and record its cells; "
+            "the page names conditional data that no cell grid was recovered from"),
+        "mojibake_text_layer": (
+            "illegible_source", "text_layer_mojibake",
+            "the text layer on this page decodes to mojibake and was rejected; "
+            "a person should read the page image"),
+        "low_ocr_confidence": (
+            "illegible_source", "ocr_below_confidence_floor",
+            "this page was read by OCR below the confidence floor; a person "
+            "should confirm what it says against the page image"),
+        "empty_page_after_ocr": (
+            "illegible_source", "empty_after_ocr",
+            "neither the text layer nor OCR recovered any text from this page"),
+        "empty_page": (
+            "illegible_source", "empty_page",
+            "this page yielded no text at all"),
+        "ocr_supplement_failed": (
+            "illegible_source", "ocr_supplement_failed",
+            "the OCR supplement for this page did not run to completion"),
+        "encrypted_pdf": (
+            "illegible_source", "encrypted_pdf",
+            "this document is encrypted and could not be read"),
+    }
+    # Detected, and deliberately NOT published: a DOCX has no page image by
+    # construction, which is a property of the format rather than a failure to
+    # read the source. Named here so the set stays exhaustive.
+    QUALITY_NOT_PUBLISHED = frozenset({"no_page_image_for_docx"})
+
+    def quality_gaps(self) -> int:
+        """Publish a `Gap` for every extraction failure this platform detected.
+
+        `warnings()` only inspects text that matches a warning lexeme, so until
+        G78 an entire class of KNOWN failure was invisible to a consumer
+        reading `gaps[]` -- 73 unreconstructed tables across 13 documents, 172
+        low-OCR passages, 81 mojibake pages. Silence read as coverage, which is
+        the one thing this member exists to prevent.
+
+        The subject carries the page, not just the document: `gap()` dedupes on
+        `[kind, subject]`, so a document-scoped subject would collapse every
+        affected page of a document into one gap and lose the rest.
+
+        The gap cites the page it is about, which only became expressible with
+        `source_ref_page` (G73). A page whose `pages` row is missing, or which
+        belongs to another tenant, raises no gap rather than taking the build
+        down -- a citation that cannot be minted must not become a citation
+        that lies.
+        """
+        raised = 0
+        for row in self.conn.execute("""
+                SELECT q.document_id, q.page_no, q.kind, q.severity, q.detail,
+                       d.title
+                  FROM quality_issues q
+                  JOIN documents d ON d.document_id = q.document_id
+                 WHERE q.page_no IS NOT NULL
+                 ORDER BY q.document_id, q.page_no, q.kind"""):
+            spec = self.QUALITY_GAP_KINDS.get(row["kind"])
+            if spec is None:
+                continue
+            gap_kind, code, advice = spec
+            try:
+                ref = self.source_ref_page(row["document_id"], row["page_no"])
+            except (KeyError, TenantLeak):
+                continue
+            title = row["title"] or row["document_id"]
+            self.gap(kind=gap_kind,
+                     subject={"kind": "page",
+                              "id": f"{row['document_id']}#p{row['page_no']}",
+                              "tenant": None},
+                     code=code,
+                     params={"page_no": row["page_no"], "detail": row["detail"] or ""},
+                     cites=[ref],
+                     # `pN`, not `page N`: G40's guard looks for `\bp\d+\b`,
+                     # and every other gap in the snapshot reads that way.
+                     would_close=f"p{row['page_no']} of \"{title}\": {advice}",
+                     closes_by="knowledge",
+                     # `warns_line` means a line of a plan gets a warning. A
+                     # page this platform read badly is a statement about its
+                     # OWN knowledge, attached to no line -- and 372 of them at
+                     # `warns_line` would drown the channel G74 just finished
+                     # making trustworthy. The signal is the gap's existence.
+                     severity="informational")
+            raised += 1
+        return raised
+
     def source_ref_page(self, document_id: str, page_no: int) -> SourceRef:
         """Mint a reference to a WHOLE PAGE, registering its document.
 
@@ -502,7 +596,13 @@ class SnapshotBuilder:
         # `subject` is a dict (amendment 004) -- canonical_bytes() gives a
         # deterministic byte key the same way parameters.py's own group key
         # already does for a [parameter, scope] pair.
-        key = canonical_bytes([kind, subject])
+        # Keyed on `code` as well as `[kind, subject]`, matching
+        # `parameters._Gaps.add`. Two collectors with two different rules for
+        # one concept is how 53 of 73 unreconstructed tables were silently
+        # dropped by the change written to publish them: every quality gap is
+        # `illegible_source`, so a page with two distinct failures collapsed to
+        # one and the second vanished. One concept, one rule.
+        key = canonical_bytes([kind, subject, code])
         if key in self._gap_keys:      # one gap per subject per kind
             return
         self._gap_keys.add(key)
@@ -990,7 +1090,11 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
     conn = conn or connect(read_only=True)
     try:
         b = SnapshotBuilder(conn, tenant=tenant, regime=regime)
-        warnings = b.warnings()            # mints refs, registers docs, raises gaps
+        warnings = b.warnings()   # mints refs, registers docs, raises gaps
+        # G78. Every extraction failure this platform already DETECTED,
+        # published as a gap. Runs with the other ref-minting passes and before
+        # `source_docs()` is read -- see the ordering note above.
+        b.quality_gaps()
 
         # Parameter tables are built through the SAME ref minter, so §1.2.1's
         # closure rule stays STRUCTURAL rather than merely checked: minting a

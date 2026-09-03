@@ -3815,6 +3815,33 @@ and it is larger than everything the member currently publishes: a Planning cons
 signal whatever that 13 documents hold tables this platform could not reconstruct — the same
 tables G2 calls the corpus's highest-value numbers.
 
+**FIXED 2026-09-03.** `SnapshotBuilder.quality_gaps()` publishes a gap for every extraction
+failure this platform detects, citing the page it is about — expressible only because
+`source_ref_page` now exists (G73). Published in snapshot `1899fbe2`: gaps **67 → 441**, and
+every class matches its store count exactly — 172 `ocr_below_confidence_floor`, 81
+`text_layer_mojibake`, **73 `table_not_reconstructed`**, 34 `ocr_supplement_failed`, 9
+`empty_after_ocr`, 3 `empty_page`. `source_docs` 75 → 85, as ten documents are now cited that
+nothing had cited before. All citations resolve; 0 dangling.
+
+They publish at `informational`, not `warns_line`. A page this platform read badly is a
+statement about its own knowledge, attached to no plan line, and 372 of them at `warns_line`
+would drown the channel G74 had just finished making trustworthy. `QUALITY_NOT_PUBLISHED`
+names the one class deliberately excluded — a DOCX has no page image by construction, which
+is a property of the format rather than a failure to read it — so the set stays exhaustive
+rather than merely long.
+
+**And the first cut of this fix reproduced the disease it was fixing.** `SnapshotBuilder.gap`
+deduped on `[kind, subject]` while `parameters._Gaps.add` deduped on `[kind, subject, code]`.
+Every quality gap is `illegible_source`, so a page carrying two distinct failures collapsed
+into one and the second vanished: **53 of 73 unreconstructed tables were silently dropped by
+the change written to publish them**, and the run reported `raised=372` against 291 gaps
+actually held. Research earlier in this session had explicitly warned that these two
+collectors disagree and that a builder raising two findings about one subject must fold a
+discriminator in or accept the loss knowingly. The warning was read and not heeded. Both
+collectors now key on `[kind, subject, code]` — one concept, one rule — and a test asserts
+they agree by behaviour rather than by reading their source, which is the third time this
+session a test has been caught asserting against itself.
+
 The category is not uniformly wrong: two sampled `illegible_source` gaps are correct and
 well-triaged, including one where OCR genuinely garbled an italic note interleaved with
 diagram graphics. And G40's disease has not recurred — no two `would_close` strings are

@@ -787,9 +787,12 @@ class _Gaps:
 
     Deliberately NOT `snapshot.Gap`: importing it at module level would make the
     wiring a cycle, and the integrator can pass these straight through
-    `SnapshotBuilder.gap(**g)` or extend the list. One difference worth knowing:
-    `snapshot` keys its dedupe on `kind:subject` alone, while these ids fold in
-    `because.code`, so two different findings about one parameter both survive.
+    `SnapshotBuilder.gap(**g)` or extend the list. Both collectors fold
+    `because.code` into the dedupe key, so two different findings about one
+    subject both survive. They did NOT always agree: `snapshot` keyed on
+    `kind:subject` alone until G78, and the divergence silently dropped 53 of
+    73 unreconstructed-table gaps -- every one is `illegible_source`, so a page
+    with two distinct failures collapsed to one.
     """
 
     def __init__(self):
