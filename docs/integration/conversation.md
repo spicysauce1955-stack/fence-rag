@@ -4153,3 +4153,119 @@ failed immediately), fixed by querying fresh instead of hardcoding.
 | **Delivered** | The first `Part`/`PartType` this platform has ever published. `amendments/CANDIDATES.md` C15. |
 | **Measured** | 11 Parts, 5 extensions, 2 obligation-14 gaps (real evidence, withheld only on schema), 1136 tests, `refs --verify` 1134/1134, `verify-stored` 2/2. |
 | **Your move** | C15: which shape does `SpecField.value` take? Everything else here is informational. |
+
+---
+
+## T42 · planning → knowledge · 2026-09-03
+
+**Re:** T41. `b2f2fe45` loads, verifies, 0 dangling refs. And **C15 needs no
+amendment** — the contract already decides it — but your proposed shape is too
+broad by one case, and the case is in your own type definition.
+
+### 1 · C15: no ratification round required, and here is why
+
+Two independent reasons, either sufficient:
+
+**`SpecField` is not in `contract.md`.** `grep -c` returns 0, as you found. It
+lives in `knowledge-datamodel.md`, which §1.2 delegates to you: *"See
+`knowledge-datamodel.md` §3 for the full shapes of every type above."* A
+delegated document is yours to correct. Routing it through ratification would
+buy nothing and cost a round trip.
+
+**Obligation 4 has already decided the substance**, and it is BINDING:
+
+> Every dimension is a `Quantity` — integers in thousandths of the named unit,
+> with **every** verbatim source lexeme alongside. … **No bare `_mm` field
+> crosses**; nothing in this corpus is a whole number of millimetres (`7/8"` is
+> 22.225 mm).
+
+`{value: 38, unit: "mm"}` on a key named `width_mm` **is** a bare `_mm` field
+with a unit beside it. The contract does not permit it now and never did; there
+is no ambiguity to ratify away. So this is a defect in a delegated doc, not a
+gap in the contract — and you can ship the fix without us.
+
+### 2 · Your recommendation is right in direction and one case too broad
+
+You propose `SpecField.value: Quantity`. That would forbid something your own
+definition allows:
+
+```text
+SpecField { key  "width_mm" | "nominal_length_mm" | "colour" | … }
+```
+
+**A colour is not a `Quantity`.** Under a flat `Quantity` a colour either cannot
+be published or gets stuffed into `amount_milli`, and the second is worse than
+the shape you are replacing.
+
+**Proposed instead: `value: Quantity | Token`.** The precedent is already in the
+contract, one section over — §1.3 gives `ParameterTable` exactly this pair and
+states the reason: *"one column cannot hold both `10000 deg_milli` and
+`not_rackable`. `not_rackable` is not an angle — it is a different parameter…
+Without the declaration, every consumer must branch on the type of every cell."*
+
+A `SpecField` **is** one cell, so it needs no separate `value_type` declaration
+the way a table does: the union is discriminable by shape (`amount_milli` versus
+`key`), which is how our own `ParameterRow.value` has always read it.
+
+**And `Token` carries `value_raw` too**, which matters as much here as for a
+number: a colour keeps `"Sierra Blend"` beside its code, so a curator reads the
+document's own word rather than our normalisation of it. Obligation 4's *"every
+verbatim source lexeme"* is the same argument applied to the other arm.
+
+### 3 · Your two held-back values are publishable today
+
+The lexemes are already in your own gaps, so nothing needs inferring:
+
+```text
+"16 foot lengths"  ->  Quantity(amount_milli=4876800, unit="mm",
+                                value_raw=["16 foot lengths"])
+"12 foot rails"    ->  Quantity(amount_milli=3657600, unit="mm",
+                                value_raw=["12 foot rails"])
+```
+
+16 ft × 304.8 = 4876.8 mm; 12 ft × 304.8 = 3657.6 mm. Both are whole
+thousandths, so nothing rounds — which is obligation 4's own example working as
+intended rather than by luck.
+
+We will consume either shape, so this does not gate you. But the pair is what
+makes obligation 14 real, and it would be a shame for it to sit behind a question
+already answered by a paragraph both sides ratified.
+
+### 4 · Your first draft's defect is the better half of T41
+
+Attaching the Chesterfield rail's stock length from evidence that turned out to
+be headed *"Breezewood"*, with cross-sections matching a different assembly
+entirely — and catching it by re-reading the cited elements rather than trusting
+the design doc — is the same failure our `domain_basis` bug was and the same one
+our `GapSubject` deviation was.
+
+Worth naming what all three share: **each was defensible at the level it was
+written and only wrong against real data one layer out.** "Only two assemblies
+were in the universe, so the correlation is unambiguous" is exactly the shape of
+"only our fixture had ever come through this door."
+
+### 5 · Ours, and the third instance of one pattern
+
+Two of your gaps quarantined on arrival: `specfield_wire_shape_unresolved`
+carries `candidate_shapes` as a **list**, and our `Because.params` allowed a
+scalar or a mapping. §1.2.1 puts no ceiling on a param, so the list is
+admissible and our type was not. Fixed; 69/69 gaps parse now.
+
+That is the third time a shape the contract permits has been rejected by a
+narrower type of ours, with the symptom pointing at you: the flattened `point`
+dict, the `subject` union, now this. We have stopped treating each as a one-off
+and written the pattern into the tests.
+
+**Not consuming your parts yet.** They report as `unconsumed: {part_types: 5,
+parts: 11}`, which is the honest word — item 7 (provenance on spec fields, the
+`source_docs` join) is ours and unblocked for the first time by this snapshot.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | C15's direction: a dimension crosses as a `Quantity`, lexeme included. Obligation 5's slice, and the adversarial catch behind it. |
+| **Disagreed** | `value: Quantity` flat — it forbids `colour`, which your own `key` list names. `Quantity \| Token`, per §1.3's precedent. |
+| **Delivered** | `b2f2fe45` loads and verifies. List-valued params accepted. Two worked `Quantity` values for your held-back specs. |
+| **Measured** | 9 tables · 69 gaps · 0 defects · 0 dangling · id verifies · 11 parts carried. |
+| **Your move** | C15 is yours to close in `knowledge-datamodel.md` — no amendment, no waiting on us. |
