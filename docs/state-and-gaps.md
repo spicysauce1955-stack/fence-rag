@@ -3552,6 +3552,91 @@ wrong — but the docstring's justification is falsified, and the next citation 
 of these NOA drawing pages is the one that breaks. Those pages are exactly the corpus's
 highest-value, hardest-to-read content (G2), so it is not an unlikely place to cite next.
 
+### G73 — every citation behind every published `ParameterTable` points at the page heading
+
+`[measured]` and confirmed in code. **The most serious finding of the audit, and it is in
+published data.**
+
+`promote_tables.py` binds a promoted fact's `element_id` like this:
+
+```sql
+(SELECT element_id FROM elements WHERE document_id=? AND page_no=? ORDER BY ordinal LIMIT 1)
+```
+
+— unconditionally **the first element on the page in reading order**, with no reference to
+where the table crop actually is. On a scanned NOA page the first OCR'd element is the page
+banner. `[measured]`: **108 of 108 promoted facts have `ordinal = 0`.**
+
+So every one of the 9 published `ParameterTable`s cites a heading:
+
+| table | cite resolves to |
+|---|---|
+| `footing_depth_mm`, `footing_diameter_mm` (Barrette NOA 24-0117.06) | *"Sherwood / Ashland Six Foot Fence Panel drawing"* — the title |
+| `footing_depth_mm`, `footing_diameter_mm` (CertainTeed NOA 22-0616.10) | *"Allegheny / EcoStone Six Foot Fence Panel drawing"* — the title |
+| `footing_schedule` (NOA 24-0117.05, 12-1106.11, 23-0314.05) | *"PARTS AND COMPONENTS (CONT.)"* — a heading |
+| `footing_schedule` (NOA 21-0125.07) | `"4908829980295,"` — **OCR noise** |
+| `footing_schedule` (Bufftech install guide) | *"Privacy Fence"* / *"Semi-Private Fence"* — a section banner |
+
+**`ref_id` resolves, and resolves to the wrong evidence.** A reader following
+`GET /source-refs/{id}` to see where a footing depth came from is shown the page title. The
+whole point of this platform — prohibition 11, obligation 3 — is that a number arrives with
+the region it was read from. Nine tables, 108 facts, every citation.
+
+**Why the provenance audit missed it, which is worth keeping.** That audit resolved all 427
+published text-layer `ref_id`s and checked that each bbox *contains the element's claimed
+text*. It does. The citation is internally consistent: it points at a heading and reports
+the heading's text. The check can only catch a ref that disagrees with **itself**, never
+one that agrees with itself and disagrees with the **fact it is attached to**. Two audits
+looked at these citations and only the one that asked *"is this the right element?"* found
+it.
+
+**The values are right.** Every published depth, diameter and post-spacing number was
+verified digit-for-digit against its source page, and the promotion gate held: all 108 trace
+to `table_read_candidates` rows with `review_status='accepted'` and a named human reviewer,
+and 10 sampled `crop_sha256` values still match their files on disk. The number is right;
+the pointer to where it came from is not.
+
+**Not fixed here.** The fix is to bind `element_id` to the element the crop actually covers
+— intersecting the crop's bbox with `elements.bbox` on that page. That changes 108 facts'
+`element_id`, therefore their `ref_id`, therefore every citation in the published snapshot.
+It is a correction of wrong data rather than churn for its own sake, but it is a re-publish
+and wants a deliberate decision, like G66.
+
+### G74 — `uncovered` claims gaps the source explicitly closes
+
+`[measured]`, same audit. 16 of the 20 `uncovered` points published across the four
+`footing_schedule` tables are false.
+
+`_footing_schedules()` computes coverage with raw byte equality:
+
+```python
+covered_points = {canonical_bytes(r["conditions"]) for r in rows}
+uncovered = [p for p in points if canonical_bytes(p) not in covered_points]
+```
+
+A row that legitimately omits a dimension therefore covers nothing. The published rows are
+correct — the NOA page brackets exposure **B** as `NON HVHZ` but **C and D** as
+`HVHZ AND NON HVHZ`, so those rows carry `{"exposure_category": "C"}` with no `hvhz` key,
+which under `_matches()`'s documented semantics means *matches every `hvhz` value*. Byte
+equality cannot see that:
+
+```
+rows:      {"exposure_category":"B","hvhz":false}  {"exposure_category":"C"}  {"exposure_category":"D"}
+uncovered: {B,hvhz:true}  {C,hvhz:false}  {C,hvhz:true}  {D,hvhz:false}  {D,hvhz:true}
+                ^ genuine   ^^^^^^^^^^^^^^ all four false — the page answers them
+```
+
+The same file already has the right tool: `_matches(conditions, point)` — *"a row matches a
+point when every key it STATES agrees with it"* — and `_finish()` uses it for exactly this
+purpose. `_footing_schedules()` does not. It also contradicts `_translate_conditions`'s own
+docstring, which explains that keeping an omitted dimension in the domain exists precisely
+so these cases are **not** misreported as uncovered.
+
+This is the inverse of a silent wrong answer: it makes Planning warn on lines the source
+actually covers. Cheap to fix — use `_matches()` — and worth fixing, because `uncovered` is
+one of the two channels by which this platform tells its consumer what it does not know, and
+a channel that cries wolf stops being read.
+
 ---
 
 ## 4. If work resumes, in order
