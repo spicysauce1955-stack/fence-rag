@@ -318,5 +318,96 @@ class TestDefectsFoundByAdversarialValidation(unittest.TestCase):
         self.assertEqual([hex(ord(c)) for c in LEADER_GAP],
                          ["0x20", "0x9", "0x2002", "0xa0"])
 
+
+class TestRecallNotJustPrecision(unittest.TestCase):
+    """G67. The repair proposal measured precision and never recall.
+
+    `[a-z]{2,}` requires a two-letter tail, so the two commonest single-letter
+    tails in the corpus were invisible: `T\\no lower a post` (12 sites) and
+    `B\\ne sure to call underground` (8). 20 real newline-form damage sites
+    silently dropped — a 7.1% hole in the class the module claims to trust
+    absolutely. `B e sure` is the same sentence as the slice page's first
+    bullet, so one copy was repaired and the other was not.
+    """
+
+    def test_a_one_letter_tail_is_still_damage(self):
+        got = split_block("• T\no lower a post, place a wood block",
+                          text_source="pdf_text_layer")
+        self.assertEqual(got[0].repair, "To lower a post, place a wood block")
+        self.assertEqual(got[0].repair_confidence, "high")
+
+    def test_the_other_one_letter_family(self):
+        got = split_block("• B\ne sure to call underground (811) prior to digging",
+                          text_source="pdf_text_layer")
+        self.assertEqual(got[0].repair,
+                         "Be sure to call underground (811) prior to digging")
+
+    def test_a_space_form_one_letter_tail_is_not_proposed(self):
+        """A bare space before a single letter is ordinary English far more
+        often than damage — `post A to the left`. The newline form is the one
+        with the evidence behind it, so only it is widened."""
+        got = split_block("• Insert post A to the left of the gate",
+                          text_source="pdf_text_layer")
+        self.assertIsNone(got[0].repair)
+
+
+class TestProhibitionsAreNotSteps(unittest.TestCase):
+    """The design's own worked example (§6) says `Never strike the PVC post
+    without a wood support` becomes a `Warning`, not a step — and the shipped
+    data typed it `step`, because the splitter had no kind for a prohibition
+    and `RIDER_RE` only covers Note/Caution/Tip."""
+
+    def test_never_is_a_prohibition(self):
+        got = split_block("• N\never strike the PVC post without a wood support",
+                          text_source="pdf_text_layer")
+        self.assertEqual(kinds(got), ["prohibition"])
+
+    def test_do_not_is_a_prohibition(self):
+        for text in ("• Do not add concrete to second hole until later",
+                     "• DO NOT pre-dig all post holes"):
+            self.assertEqual(kinds(split_block(text, text_source="pdf_text_layer")),
+                             ["prohibition"], text)
+
+    def test_an_ordinary_imperative_is_still_a_step(self):
+        got = split_block("• Insert post in hole", text_source="pdf_text_layer")
+        self.assertEqual(kinds(got), ["step"])
+
+    def test_a_prohibition_is_still_carried_to_the_reader(self):
+        from fence_evidence.steps import CARRIES_CONTENT
+        self.assertIn("prohibition", CARRIES_CONTENT)
+
+
+class TestWhatAReaderMustNotLose(unittest.TestCase):
+    """`INSTRUCTION_KINDS` excluded `note`, and the note it excluded on the
+    slice page is `Note: Pickets will attach to rail on the side with the small
+    (¼") holes` — a rail-orientation constraint. Losing it builds the fence
+    with the pickets on the wrong face."""
+
+    def test_a_note_is_content(self):
+        from fence_evidence.steps import CARRIES_CONTENT
+        self.assertIn("note", CARRIES_CONTENT)
+
+    def test_structural_chrome_is_not_content(self):
+        from fence_evidence.steps import CARRIES_CONTENT
+        for chrome in ("section", "prose"):
+            self.assertNotIn(chrome, CARRIES_CONTENT)
+
+
+class TestBranchScopeDoesNotLeak(unittest.TestCase):
+    """F13. `current_branch` was set at a label and cleared by nothing, so a
+    depth-0 bullet after `a. …` inherited branch `a`. Measured at 0 occurrences
+    today, which makes it latent rather than absent — and it is one document
+    layout away from a fitter being told to do both mutually exclusive
+    gate-post methods, the exact failure the branch fix was for."""
+
+    def test_a_top_level_bullet_ends_the_branch(self):
+        block = ("• Two methods are available:\n"
+                 "a. Aluminum gate post stiffener\n"
+                 "- Slide the stiffener inside the post\n"
+                 "• Install post caps")
+        segs = split_block(block, text_source="pdf_text_layer")
+        self.assertEqual([s.branch for s in segs], [None, "a", "a", None],
+                         "a new top-level bullet inherited a stale branch")
+
 if __name__ == "__main__":
     unittest.main()

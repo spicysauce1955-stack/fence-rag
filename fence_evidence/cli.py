@@ -109,6 +109,15 @@ def main(argv: list[str] | None = None) -> int:
                    help="report basename (default: `evaluation`, or "
                         "`evaluation-second-stage` with --second-stage)")
 
+    p = sub.add_parser("steps", help="propose or list AssemblyStep candidates")
+    p.add_argument("--propose", action="store_true",
+                   help="split list elements into step candidates (idempotent; "
+                        "never overwrites a review)")
+    p.add_argument("--queue", action="store_true", help="what is waiting for a person")
+    p.add_argument("--document", help="document_id or source_path")
+    p.add_argument("--page", type=int, help="one page only")
+    p.add_argument("--limit", type=int, default=200)
+
     p = sub.add_parser("audit", help="relevance audit of the retrieval projection (read-only)")
     p.add_argument("-k", type=int, default=10)
 
@@ -428,6 +437,56 @@ def main(argv: list[str] | None = None) -> int:
             report_name=default_report_name(args.name, args.second_stage,
                                             dedupe_text=args.dedupe_text,
                                             page_cap=args.page_cap))["summary"])
+    elif args.cmd == "steps":
+        if sum([args.propose, args.queue]) != 1:
+            _print({"error": "choose exactly one of --propose or --queue"})
+            return 2
+        from .steps import propose
+        from .store import connect as _connect
+        conn = _connect()
+        try:
+            if args.propose:
+                if not args.document:
+                    _print({"error": "--propose needs --document"})
+                    return 2
+                row = conn.execute(
+                    "SELECT document_id FROM documents WHERE document_id=? OR source_path=?",
+                    (args.document, args.document)).fetchone()
+                if row is None:
+                    _print({"error": f"no such document: {args.document!r}"})
+                    return 1
+                total = propose(conn, document_id=row[0], page_no=args.page)
+                by_kind = {r[0]: r[1] for r in conn.execute(
+                    """SELECT segment_kind, COUNT(*) FROM step_candidates
+                        WHERE document_id=? GROUP BY 1""", (row[0],))}
+                _print({"document_id": row[0], "page": args.page,
+                        "candidates": total, "by_kind": by_kind,
+                        "reviewed": conn.execute(
+                            "SELECT COUNT(*) FROM step_candidates "
+                            "WHERE document_id=? AND reviewer IS NOT NULL",
+                            (row[0],)).fetchone()[0]})
+            else:
+                where, params = "", []
+                if args.document:
+                    row = conn.execute(
+                        "SELECT document_id FROM documents "
+                        "WHERE document_id=? OR source_path=?",
+                        (args.document, args.document)).fetchone()
+                    if row is None:
+                        _print({"error": f"no such document: {args.document!r}"})
+                        return 1
+                    where, params = "AND document_id=?", [row[0]]
+                rows = conn.execute(
+                    f"""SELECT candidate_id, page_no, ordinal, seq, segment_kind,
+                               depth, branch, repair_confidence, text_repair, text_raw
+                          FROM step_candidates
+                         WHERE review_status='unreviewed' {where}
+                         ORDER BY page_no, ordinal, seq LIMIT ?""",
+                    params + [args.limit]).fetchall()
+                _print({"unreviewed": len(rows),
+                        "queue": [dict(r) for r in rows]})
+        finally:
+            conn.close()
     elif args.cmd == "audit":
         _warn_unfetched()
         from .audit import run_audit

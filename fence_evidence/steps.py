@@ -54,10 +54,24 @@ from dataclasses import dataclass
 # newline that ends the previous segment, and `.lstrip(" ")` misses two of them.
 LEADER_GAP = " \t  "
 
-# Which kinds carry an instruction a reader must not lose. `branch` is one:
-# `[measured]` 664 segments are branch-kind and 627 of them hold a full
-# instruction, so a consumer filtering `kind == "step"` silently drops 8.4% of
-# everything. Filter on this, not on a literal.
+# Which kinds carry content a reader must not lose, as opposed to structural
+# chrome. Filter on this, not on a literal.
+#
+# `branch` is here because `[measured]` 791 segments are branch-kind and 626 of
+# them hold a full instruction, not just a label -- filtering `kind == "step"`
+# dropped 10.0% of everything. `note` is here because the note it excluded on
+# the slice page is `Note: Pickets will attach to rail on the side with the
+# small holes`, a rail-orientation constraint: lose it and the fence is built
+# with the pickets on the wrong face. `prohibition` is here for the same
+# reason in reverse -- it is the one kind whose omission is dangerous rather
+# than merely wrong.
+#
+# `section` and `prose` are chrome. `footnote` is deliberately NOT chrome
+# either, but it needs its anchor before it can be placed; see G69.
+CARRIES_CONTENT = ("step", "branch", "note", "prohibition", "footnote")
+
+# Retained name for the narrower question "is this an action". Prefer
+# CARRIES_CONTENT for anything user-facing.
 INSTRUCTION_KINDS = ("step", "branch")
 
 # `N. Title` typed as `list` rather than `heading` — the section spine a bullet
@@ -83,10 +97,23 @@ SECTION_MAX_CHARS = 45
 BRANCH_RE = re.compile(r"^([A-Za-z])[.)]\s+\S")
 # A rider the guide prints under an instruction; never the start of one.
 RIDER_RE = re.compile(r"^(Note|NOTE|Caution|CAUTION|Tip|TIP)\b\s*[:.-]?", re.ASCII)
+# A prohibition is not a step, and the design's own worked example says so:
+# `Never strike the PVC post without a wood support` publishes as a `Warning`.
+# `RIDER_RE` only covers labelled riders, so an imperative negative was typed
+# `step` -- 6 of the slice page's 55 "steps" were not steps, and this was the
+# one that mattered.
+PROHIBITION_RE = re.compile(r"^(never|do not|don't|do +n[o']t|avoid)\b", re.I)
 # pdftotext emitting a leading character as its own run, in both spellings.
 # The optional `N. ` prefix lets a numbered section heading be repaired too:
 # `10. H ang Gate/Install Hardware` is on the slice page.
-SPLIT_CAP_RE = re.compile(r"^(?:\d{1,2}[.)]\s+)?([A-Z])([ \n])([a-z]{2,})\b")
+# The tail length differs by separator, and that is measured rather than tidy.
+# A NEWLINE after a lone capital is damage even with a one-letter tail: `T\no
+# lower a post` (12 sites) and `B\ne sure to call underground` (8) were
+# invisible to a `{2,}` tail and account for a 7.1% recall hole (G67). A bare
+# SPACE before a single letter is ordinary English far more often than damage
+# -- `Insert post A to the left` -- so the space form keeps `{2,}`.
+SPLIT_CAP_NEWLINE_RE = re.compile(r"^(?:\d{1,2}[.)]\s+)?([A-Z])(\n)([a-z]+)\b")
+SPLIT_CAP_SPACE_RE = re.compile(r"^(?:\d{1,2}[.)]\s+)?([A-Z])( )([a-z]{2,})\b")
 # A capital that is a word on its own, so a space after it is ordinary English
 # rather than damage. `[measured]`: the ONLY false-positive families in 320
 # proposals are `A cut panel bracket` (9) and `A template can speed
@@ -179,7 +206,7 @@ def _propose_repair(text: str) -> tuple[str | None, str | None]:
     in its own right is not proposed at all.
     """
     stripped = text.lstrip()
-    m = SPLIT_CAP_RE.match(stripped)
+    m = SPLIT_CAP_NEWLINE_RE.match(stripped) or SPLIT_CAP_SPACE_RE.match(stripped)
     if not m:
         return None, None
     cap, sep, tail = m.group(1), m.group(2), m.group(3)
@@ -198,6 +225,15 @@ def _classify(body: str, leader: str, depth: int, branch: str | None,
     `Caution` is an ordinary note. Keying this on the leader alone was right by
     luck on the one line it hit and wrong as a mechanism.
     """
+    # Classify the REPAIRED reading where one is proposed. The damage hides the
+    # very word this rule looks for: `• N\never strike the PVC post` flattens to
+    # `N ever strike`, so a prohibition detector reading the raw text cannot see
+    # `never` and types the page's one dangerous line as an ordinary step. This
+    # is why the repair is computed before the kind and not after it.
+    repair, _ = _propose_repair(body)
+    flat = repair or " ".join(body.split())
+    if PROHIBITION_RE.match(flat):
+        return "prohibition"
     if not RIDER_RE.match(body.lstrip()):
         return "step"
     if leader == "*" and depth == 0 and branch is None and text_source != "ocr":
@@ -293,6 +329,13 @@ def split_block(block: str, *, text_source: str = "pdf_text_layer") -> list[Segm
             out.append(Segment(text=text, start=start, end=end, leader="", depth=0,
                                kind="branch", branch=label, repair=None))
             continue
+        if depth == 0 and leader:
+            # A new top-level bullet closes any open lettered alternative.
+            # Without this, `current_branch` was set at a label and cleared by
+            # nothing, so a later depth-0 bullet inherited a branch it does not
+            # belong to. 0 occurrences today; one document layout away from
+            # publishing a step under the wrong alternative.
+            current_branch = None
         body = text[1:].lstrip(LEADER_GAP) if leader else text
         kind = _classify(body, leader, depth, current_branch, text_source)
         out.extend(_split_rider(text, start, leader, depth, kind, current_branch))
@@ -380,11 +423,13 @@ def propose(conn, *, document_id: str, page_no: int | None = None) -> int:
             conn.execute(
                 """INSERT OR IGNORE INTO step_candidates
                    (document_id, version_id, page_no, element_id, ordinal, seq,
-                    char_start, char_end, text_raw, text_repair, segment_kind,
+                    char_start, char_end, text_raw, text_repair,
+                    repair_confidence, text_source, segment_kind,
                     leader, depth, branch, created_at)
-                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (document_id, row["version_id"], row["page_no"], row["element_id"],
                  row["ordinal"], seq, seg.start, seg.end, seg.text, seg.repair,
+                 seg.repair_confidence, row["text_source"],
                  seg.kind, seg.leader, seg.depth, seg.branch, stamp))
     conn.commit()
     scope = "AND page_no = ?" if page_no is not None else ""

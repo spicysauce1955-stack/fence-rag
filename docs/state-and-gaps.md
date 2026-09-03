@@ -3371,6 +3371,44 @@ enough to change N10's conclusion — 25 of 44 is still 57%.
 
 The audit is history and is not being rewritten. This entry is the correction of record.
 
+### G69 — two structural links are printed on the page and exist in no column
+
+`[measured]` on the slice page, and neither is fixed.
+
+**A footnote is orphaned from the branch it governs.** Candidate 71 is
+`* Caution – In climates that experience freeze-thaw cycles, this installation method
+could result in post cracking over time. This would not be covered by the warranty.` It
+applies to **method b only**, whose label reads `b. Concrete and rebar*`. The only trace
+of the link is a bare `*` inside a `text_raw`. **A consumer publishing branch b's six
+steps ships a concrete-and-rebar procedure with the warranty exclusion silently
+detached** — the single worst thing in the slice, because the omission is the kind that
+costs somebody money rather than merely being wrong.
+
+**A `-` sub-bullet outside a lettered branch has no parent.** Candidate 9,
+`- Hole size for 4x4 posts = approximately 10"`, `depth=1`, `branch=NULL`, qualifies
+candidate 8, `Dig holes 30" deep or to frost line`. Branch sub-steps get a `branch`
+column; this one gets nothing, so parentage is recoverable only as "the previous depth-0
+sibling", which is a convention rather than data.
+
+Both want a column — a footnote marker and a parent — and both are deferred rather than
+guessed, because a wrong link is worse than an absent one.
+
+**Also left for the reviewer rather than another regex: 5 of the 54 steps are not
+actions.** The prohibition is now typed (`Never strike the PVC post…` → `prohibition`,
+which is what the design's §6 worked example always said). These five remain:
+
+| Candidate | What it actually is |
+|---|---|
+| `Assembly may be continued by installing all bottom rails first, or one section at a time` | an ordering **permission** — and the contract's own example of a guide denying its print order |
+| `It is critical that gate hinge and latch posts are solid… Two methods are available:` | rationale plus a branch header |
+| `For complete details, see gate installation instructions in hardware box` | a cross-reference to another document |
+| `Tabs will recoil to hold rail in post` | resulting behaviour, not an action |
+| `Hole size for 4x4 posts = approximately 10"` | a dimension |
+
+`segment_kind` classifies **structure** — what kind of line this is — not semantics. A
+person decides whether a line is an `AssemblyStep`, which is what §5 always said and what
+the classification proposer (still unbuilt) will offer a starting point for.
+
 ---
 
 ## 4. If work resumes, in order

@@ -53,9 +53,24 @@ class TestTheTableShape(unittest.TestCase):
         self.assertIn("char_end", cols)
 
     def test_nothing_on_elements_names_a_candidate(self):
-        conn = scratch()
-        cols = {r["name"] for r in conn.execute("PRAGMA table_info(elements)")}
-        self.assertFalse([c for c in cols if "candidate" in c or "step" in c],
+        """Against the REAL declaration, not a fixture.
+
+        The first version of this test read `PRAGMA table_info(elements)` on the
+        two-column `elements` table this file defines by hand forty lines up. It
+        was a tautology over its own fixture — it could never fail whatever the
+        real schema said — while its docstring claimed to enforce
+        `docs/layering.md`. Same class of error as the dedupe test the earlier
+        review caught: an assertion that reads the thing it is asserting about.
+        """
+        import re as _re
+        from fence_evidence.store import SCHEMA
+        m = _re.search(r"CREATE TABLE IF NOT EXISTS elements\s*\((.*?)\n\);",
+                       SCHEMA, _re.S)
+        self.assertIsNotNone(m, "could not find the elements declaration")
+        offenders = [line.strip() for line in m.group(1).splitlines()
+                     if _re.match(r"\s*(step|candidate)\w*", line)
+                     or "step_candidate" in line]
+        self.assertEqual(offenders, [],
                          "a pointer up a layer; docs/layering.md forbids it")
 
     def test_a_new_candidate_is_unreviewed(self):
@@ -116,8 +131,14 @@ class TestProposing(unittest.TestCase):
 @requires_full_store
 class TestAgainstTheSlicePage(unittest.TestCase):
     def test_the_slice_page_proposes_the_measured_number(self):
-        """55 candidates: 44 from bullets, 11 from the sub-bullets nested inside
-        ordinal 24. If this moves, the design's arithmetic moved with it."""
+        """54 steps: 44 bullets + 11 sub-bullets nested inside ordinal 24, minus
+        the one prohibition. `Never strike the PVC post without a wood support`
+        is typed `prohibition`, which is what the design's §6 worked example
+        always said it should be and what the first cut got wrong.
+
+        Five of the remaining 54 are still not actions — an ordering permission,
+        a rationale, a cross-reference, a resulting behaviour and a dimension.
+        Those are for the reviewer, not for another regex; see G69."""
         conn = connect()
         try:
             doc = conn.execute("SELECT document_id FROM documents WHERE source_path=?",
@@ -134,7 +155,68 @@ class TestAgainstTheSlicePage(unittest.TestCase):
         n = sum(1 for r in rows if r["element_type"] == "list"
                 for s in steps.split_block(r["t"], text_source=r["text_source"])
                 if s.kind == "step")
-        self.assertEqual(n, 55)
+        self.assertEqual(n, 54)
+
+
+@requires_full_store
+class TestTheRowsActuallyInTheStore(unittest.TestCase):
+    """Nothing tested the 71 rows on disk — only that `split_block` returns the
+    right count if you call it again inside the test. A wrong `version_id`,
+    `seq`, `ordinal` or `page_no` written by `propose()` was uncaught."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.conn = connect()
+        row = cls.conn.execute("SELECT document_id FROM documents WHERE source_path=?",
+                               (SLICE_DOC,)).fetchone()
+        if row is None:
+            raise unittest.SkipTest("slice document not ingested")
+        cls.doc = row[0]
+        cls.rows = cls.conn.execute(
+            """SELECT * FROM step_candidates WHERE document_id=? AND page_no=8
+                ORDER BY ordinal, seq""", (cls.doc,)).fetchall()
+        if not cls.rows:
+            raise unittest.SkipTest("slice not proposed; run `cli steps --propose`")
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.conn.close()
+
+    def test_every_stored_span_slices_back_to_its_element(self):
+        for r in self.rows:
+            src = self.conn.execute(
+                "SELECT COALESCE(NULLIF(text,''), ocr_text) FROM elements "
+                "WHERE element_id=?", (r["element_id"],)).fetchone()[0]
+            self.assertEqual(src[r["char_start"]:r["char_end"]], r["text_raw"],
+                             r["element_id"])
+
+    def test_every_row_names_a_real_element_and_version(self):
+        for r in self.rows:
+            got = self.conn.execute(
+                "SELECT version_id, page_no, ordinal FROM elements WHERE element_id=?",
+                (r["element_id"],)).fetchone()
+            self.assertIsNotNone(got, r["element_id"])
+            self.assertEqual((got["version_id"], got["page_no"], got["ordinal"]),
+                             (r["version_id"], r["page_no"], r["ordinal"]),
+                             f"{r['element_id']} disagrees with its element")
+
+    def test_seq_is_dense_and_ordered_within_each_element(self):
+        by_element = {}
+        for r in self.rows:
+            by_element.setdefault(r["element_id"], []).append(r["seq"])
+        for element_id, seqs in by_element.items():
+            self.assertEqual(seqs, list(range(len(seqs))), element_id)
+
+    def test_a_confidence_is_recorded_wherever_a_repair_is(self):
+        for r in self.rows:
+            if r["text_repair"] is not None:
+                self.assertIn(r["repair_confidence"], ("high", "low"),
+                              f"{r['element_id']} proposes a repair worth nothing")
+
+    def test_nothing_is_reviewed_so_nothing_may_publish(self):
+        statuses = {r["review_status"] for r in self.rows}
+        self.assertEqual(statuses, {"unreviewed"})
+        self.assertEqual({r["reviewer"] for r in self.rows}, {None})
 
 
 if __name__ == "__main__":

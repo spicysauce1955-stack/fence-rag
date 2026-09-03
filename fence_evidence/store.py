@@ -21,7 +21,7 @@ from .lang import detect_lang
 from .tenancy import TenantLeak, validate_owner
 from .paths import EVIDENCE_DB, ensure_writable
 
-SCHEMA_VERSION = 7
+SCHEMA_VERSION = 8
 
 SCHEMA = """
 PRAGMA journal_mode=WAL;
@@ -446,6 +446,16 @@ CREATE TABLE IF NOT EXISTS step_candidates (
     char_end        INTEGER NOT NULL,
     text_raw        TEXT NOT NULL,        -- verbatim slice; never rewritten
     text_repair     TEXT,                 -- proposed, never applied
+    -- How much the proposal is worth. Computed by `steps._propose_repair` and
+    -- for one commit thrown away on write, which left a reviewer working the
+    -- queue with no signal at all: the `low` class is the one that contains
+    -- the `A cut panel bracket` false positives.
+    repair_confidence TEXT,               -- high | low
+    -- WHICH column the offsets index. `propose()` reads
+    -- COALESCE(NULLIF(text,''), ocr_text), and 834 `list` elements corpus-wide
+    -- have text IS NULL -- for those the span indexes `ocr_text`, and anyone
+    -- slicing `elements.text` gets None with nothing to explain why.
+    text_source     TEXT,
     segment_kind    TEXT NOT NULL,        -- step | note | branch | footnote | section | prose
     leader          TEXT NOT NULL,
     depth           INTEGER NOT NULL,
@@ -491,6 +501,14 @@ def now() -> str:
 # byte-compare serialised rows between a migrated and a re-ingested store.
 # Additive only: no drops, no renames, no type changes. Those need a rebuild.
 ADDED_COLUMNS = [
+    # schema_version 8 -- step_candidates gained two columns it was already
+    # computing. `repair_confidence` was produced by `steps._propose_repair`
+    # and thrown away on write, leaving a reviewer with no way to tell the
+    # trusted newline-form repairs from the `A cut panel bracket` class;
+    # `text_source` records WHICH text column the spans index, which matters
+    # for the 834 `list` elements whose text lives only in `ocr_text`.
+    ("step_candidates", "repair_confidence", "TEXT"),
+    ("step_candidates", "text_source", "TEXT"),
     # schema_version 2 -- build-plan A2/A3/A4
     ("elements", "lang", "TEXT"),
     ("elements", "lang_basis", "TEXT"),
