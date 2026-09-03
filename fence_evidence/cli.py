@@ -54,11 +54,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--full", action="store_true", help="print full element text")
     p.add_argument("--second-stage", action="store_true",
                    help="also search within each retrieved page for elements covering "
-                        "query terms the matched unit missed (opt-in: measured at 0.672 "
+                        "query terms the matched unit missed (opt-in: measured at 0.6946 "
                         "unit support against a 0.70 acceptance target, see "
                         "docs/second-stage-evaluation.md)")
     # The projection audit's R3 and R5, measured 2026-09-03 (state-and-gaps
-    # G64). R3 earned its default -- three gold questions better, none worse --
+    # G64). R3 earned its default -- two gold questions better, none worse --
     # so the flag turns it OFF; R5 did not, so its flag turns it on.
     p.add_argument("--no-dedupe-text", dest="dedupe_text", action="store_false",
                    help="turn off R3, which is on by default: without it a list may "

@@ -2,6 +2,8 @@
 
 Questions: **78** (41 answerable, 37 no-answer) · k = 10
 
+Configuration: second stage on, R3 duplicate suppression on, R5 page cap off.
+
 Every gold question was runnable.
 
 | Metric | Value | Acceptance |

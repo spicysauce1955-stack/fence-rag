@@ -283,7 +283,11 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   returned record — `text` AND `heading_path` — not `text` alone.** Keyed on text, it treats
   two table rows printed under different governing loads as one duplicate and discards a
   wind exposure; that was the first cut, it cost `gq-010` an answer term on 11 of 78
-  questions, and only code review caught it. The key is what makes R3 safe to default on. Note what R3 taught — the audit scopes it
+  questions, and only code review caught it. **And because the key deliberately spans
+  documents, every row R3 suppresses is reported on the row that replaced it as
+  `retrieval_reason["duplicates_suppressed"]`** — without that, R3 dropped 8 genuinely
+  distinct documents from result lists and no metric noticed, because term support and
+  recall@10 cannot see a lost citation. Both halves are what make R3 safe to default on. Note what R3 taught — the audit scopes it
   *within a document*, which reaches 5.5% of top-10 slots, where the duplication that actually
   spends slots is cross-document and reaches 35.3%. Read a recommendation's scope before costing it.
 - **The relevance audit measures F2/F3 by calling `search_evidence`, so it asks for

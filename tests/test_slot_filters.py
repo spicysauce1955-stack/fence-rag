@@ -42,24 +42,24 @@ def rows(*items) -> list[sqlite3.Row]:
 
 class TestSlotFilters(unittest.TestCase):
     def test_both_filters_off_only_truncates(self):
-        got = _slot_filtered(rows(("a", "d1", 1), ("a", "d1", 1), ("b", "d1", 2)),
+        got, _links = _slot_filtered(rows(("a", "d1", 1), ("a", "d1", 1), ("b", "d1", 2)),
                              limit=2, dedupe_text=False, page_cap=None)
         self.assertEqual([r["text"] for r in got], ["a", "a"])
 
     def test_dedupe_keeps_the_highest_ranked_member_of_a_group(self):
-        got = _slot_filtered(rows(("keep", "d1", 1), ("keep", "d2", 9)),
+        got, _links = _slot_filtered(rows(("keep", "d1", 1), ("keep", "d2", 9)),
                              limit=10, dedupe_text=True, page_cap=None)
         self.assertEqual([(r["document_id"], r["page_no"]) for r in got], [("d1", 1)])
 
     def test_dedupe_backfills_the_freed_slot(self):
-        got = _slot_filtered(rows(("a", "d1", 1), ("a", "d2", 2), ("b", "d3", 3)),
+        got, _links = _slot_filtered(rows(("a", "d1", 1), ("a", "d2", 2), ("b", "d3", 3)),
                              limit=2, dedupe_text=True, page_cap=None)
         self.assertEqual([r["text"] for r in got], ["a", "b"],
                          "a suppressed duplicate must be replaced by the next-best row, "
                          "not leave the list one short")
 
     def test_dedupe_ignores_case_and_whitespace(self):
-        got = _slot_filtered(rows(("1. None.", "d1", 1), ("1.  none.\n", "d2", 2)),
+        got, _links = _slot_filtered(rows(("1. None.", "d1", 1), ("1.  none.\n", "d2", 2)),
                              limit=10, dedupe_text=True, page_cap=None)
         self.assertEqual(len(got), 1)
 
@@ -74,7 +74,7 @@ class TestSlotFilters(unittest.TestCase):
         `gq-010` lost the answer term `130MPH WIND` this way, and 11 of the 78
         gold questions lost at least one `heading_path` the raw list carried.
         """
-        got = _slot_filtered(
+        got, _links = _slot_filtered(
             rows(("HEIGHT OF THE PANEL (in)\n≤42\n48", "d1", 4,
                   ["Tesco", "GOVERNING LOAD", "130MPH WIND-EXPOSURE D"]),
                  ("HEIGHT OF THE PANEL (in)\n≤42\n48", "d1", 5,
@@ -85,29 +85,29 @@ class TestSlotFilters(unittest.TestCase):
                          "different facts, not one fact twice")
 
     def test_the_same_text_under_the_same_heading_is_still_a_duplicate(self):
-        got = _slot_filtered(rows(("1. None.", "d1", 4, ["Evidence Submitted"]),
+        got, _links = _slot_filtered(rows(("1. None.", "d1", 4, ["Evidence Submitted"]),
                                   ("1. None.", "d2", 9, ["Evidence Submitted"])),
                              limit=10, dedupe_text=True, page_cap=None)
         self.assertEqual(len(got), 1)
 
     def test_dedupe_never_collapses_empty_text(self):
-        got = _slot_filtered(rows(("", "d1", 1), ("", "d2", 2)),
+        got, _links = _slot_filtered(rows(("", "d1", 1), ("", "d2", 2)),
                              limit=10, dedupe_text=True, page_cap=None)
         self.assertEqual(len(got), 2,
                          "an empty unit is not evidence that another unit is a duplicate")
 
     def test_page_cap_of_one_keeps_one_unit_per_page(self):
-        got = _slot_filtered(rows(("a", "d1", 1), ("b", "d1", 1), ("c", "d1", 2)),
+        got, _links = _slot_filtered(rows(("a", "d1", 1), ("b", "d1", 1), ("c", "d1", 2)),
                              limit=10, dedupe_text=False, page_cap=1)
         self.assertEqual([r["text"] for r in got], ["a", "c"])
 
     def test_page_cap_of_two_keeps_two(self):
-        got = _slot_filtered(rows(("a", "d1", 1), ("b", "d1", 1), ("c", "d1", 1)),
+        got, _links = _slot_filtered(rows(("a", "d1", 1), ("b", "d1", 1), ("c", "d1", 1)),
                              limit=10, dedupe_text=False, page_cap=2)
         self.assertEqual([r["text"] for r in got], ["a", "b"])
 
     def test_page_cap_is_scoped_to_the_document(self):
-        got = _slot_filtered(rows(("a", "d1", 1), ("b", "d2", 1)),
+        got, _links = _slot_filtered(rows(("a", "d1", 1), ("b", "d2", 1)),
                              limit=10, dedupe_text=False, page_cap=1)
         self.assertEqual(len(got), 2,
                          "page 1 of two different documents is two different pages")
@@ -119,20 +119,46 @@ class TestSlotFilters(unittest.TestCase):
         nothing and row 3 — the first real evidence on that page — is kept. If a
         suppressed row consumed the quota, R3 would silently cost a page.
         """
-        got = _slot_filtered(rows(("a", "d1", 1), ("a", "d1", 2), ("b", "d1", 2),
+        got, _links = _slot_filtered(rows(("a", "d1", 1), ("a", "d1", 2), ("b", "d1", 2),
                                   ("c", "d1", 3)),
                              limit=10, dedupe_text=True, page_cap=1)
         self.assertEqual([r["text"] for r in got], ["a", "b", "c"])
 
     def test_filters_compose(self):
-        got = _slot_filtered(rows(("a", "d1", 1), ("b", "d1", 1), ("a", "d2", 5),
+        got, _links = _slot_filtered(rows(("a", "d1", 1), ("b", "d1", 1), ("a", "d2", 5),
                                   ("c", "d3", 7)),
                              limit=10, dedupe_text=True, page_cap=1)
         self.assertEqual([r["text"] for r in got], ["a", "c"],
                          "'b' is capped out by page (d1,1); the second 'a' is a duplicate")
 
+    def test_a_suppressed_duplicate_is_linked_not_lost(self):
+        """The audit specifies R3 as "collapse ... to one unit, LINKING the
+        others". The linking half is not decoration: two rows sharing a key
+        still differ in `document_id`, `source_path`, `page` and `bbox`, which
+        is the entire product of this platform. Measured on the live store
+        before this: R3 removed 8 genuinely distinct documents (not
+        `same_content_as` twins) from the gold set's top-10 lists — among them
+        the weatherables 2-rail and 4-rail installation guides, dropped because
+        the 3-rail guide shares their text and outranked them.
+        """
+        kept, links = _slot_filtered(
+            rows(("shared boilerplate", "d1", 1), ("shared boilerplate", "d2", 7),
+                 ("other", "d3", 2)),
+            limit=10, dedupe_text=True, page_cap=None)
+        self.assertEqual([r["document_id"] for r in kept], ["d1", "d3"])
+        self.assertEqual([[(x["document_id"], x["page_no"]) for x in group]
+                          for group in links],
+                         [[("d2", 7)], []],
+                         "the row that lost the slot must still be reachable "
+                         "through the row that took it")
+
+    def test_nothing_is_linked_when_nothing_is_suppressed(self):
+        kept, links = _slot_filtered(rows(("a", "d1", 1), ("b", "d2", 2)),
+                                     limit=10, dedupe_text=True, page_cap=None)
+        self.assertEqual(links, [[], []])
+
     def test_rank_order_is_preserved(self):
-        got = _slot_filtered(rows(("a", "d1", 1), ("b", "d2", 2), ("c", "d3", 3)),
+        got, _links = _slot_filtered(rows(("a", "d1", 1), ("b", "d2", 2), ("c", "d3", 3)),
                              limit=3, dedupe_text=True, page_cap=1)
         self.assertEqual([r["text"] for r in got], ["a", "b", "c"])
 

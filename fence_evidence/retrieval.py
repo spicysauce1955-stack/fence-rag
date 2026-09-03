@@ -358,9 +358,24 @@ def _dedupe_key(row) -> str:
     version of this key, and it cost `gq-010` the answer term `130MPH WIND`;
     11 of the 78 gold questions lost at least one `heading_path` to it.
 
-    Keying on exactly what the caller receives is also what makes R3 safe to
-    have on by default: two rows sharing this key are indistinguishable in the
-    response, so dropping one removes nothing the reader could have used.
+    The key deliberately does NOT include provenance. Two rows carrying the
+    same words from different documents are the case R3 exists for -- `1. None.`
+    prints in 14 NOAs -- and keying on `document_id` would reduce R3 to the
+    audit's within-document version, which reaches 5.5% of top-10 slots instead
+    of 35.3%.
+
+    But they are not interchangeable, and this is the second thing this key got
+    wrong. Rows sharing it still differ in `document_id`, `source_path`, `page`,
+    `bbox` and `page_image_path` -- which is the entire product of this
+    platform. Suppressing one therefore costs a citation unless it is linked,
+    and `[measured]` it did: R3 removed 8 genuinely distinct documents (not
+    `same_content_as` twins) from the gold set's top-10 lists, including the
+    weatherables 2-rail and 4-rail guides, dropped because the 3-rail guide
+    shares their text and outranked them. That is why `_slot_filtered` returns
+    what it suppressed and `search_evidence` reports it as
+    `retrieval_reason["duplicates_suppressed"]` -- the audit's own R3 says
+    "collapse ... to one unit, LINKING the others", and the linking half is
+    what makes the collapse safe.
 
     Whitespace and case only -- deliberately not a fuzzy match. R3 is about
     *identical* boilerplate spending result slots, and anything looser would
@@ -376,8 +391,10 @@ def _dedupe_key(row) -> str:
 def _slot_filtered(rows, *, limit: int, dedupe_text: bool, page_cap: int | None):
     """Spend `limit` result slots on distinct evidence — the audit's R3 and R5.
 
-    Walks the ranked rows in order and keeps a row unless it repeats a record
-    already kept (R3) or comes from a page already at its quota (R5). A
+    Returns `(kept, links)`: the rows to build results from, and per kept row
+    the rows R3 suppressed in its favour, so no citation is lost to a saved
+    slot. Walks the ranked rows in order and keeps a row unless it repeats a
+    record already kept (R3) or comes from a page already at its quota (R5). A
     suppressed row is replaced by the next-best row, which is why
     `search_evidence` over-fetches when either filter is on. Rank order among
     the kept rows is untouched: this decides which rows are shown, never in what
@@ -394,7 +411,8 @@ def _slot_filtered(rows, *, limit: int, dedupe_text: bool, page_cap: int | None)
     behaviour is reproduced exactly rather than approximately.
     """
     kept: list = []
-    seen_text: set[str] = set()
+    links: list[list] = []
+    holder: dict[str, int] = {}          # dedupe key -> index of the row holding the slot
     per_page: dict[tuple, int] = {}
     for row in rows:
         if len(kept) >= limit:
@@ -402,17 +420,22 @@ def _slot_filtered(rows, *, limit: int, dedupe_text: bool, page_cap: int | None)
         norm = _dedupe_key(row) if dedupe_text else ""
         # An empty record says nothing, so it is not evidence that a later row
         # repeats it. Without this, two blank units collapse into one.
-        if dedupe_text and norm.strip("\x00 ") and norm in seen_text:
+        if dedupe_text and norm.strip("\x00 ") and norm in holder:
+            links[holder[norm]].append(row)
             continue
         page_key = (row["document_id"], row["page_no"])
         if page_cap is not None and per_page.get(page_key, 0) >= page_cap:
+            # Not linked: a capped row is on a page the list already carries, so
+            # its document and page are reachable from the row that took the
+            # slot. R3's suppressions are the ones that can cost a document.
             continue
-        kept.append(row)
         if norm.strip("\x00 "):
-            seen_text.add(norm)
+            holder[norm] = len(kept)
+        kept.append(row)
+        links.append([])
         if page_cap is not None:
             per_page[page_key] = per_page.get(page_key, 0) + 1
-    return kept
+    return kept, links
 
 
 # How many ranked rows to consider when a slot filter is on. The filters can
@@ -515,14 +538,15 @@ def search_evidence(query: str, *, limit: int = 10, filters: dict | None = None,
         slot_filtering = dedupe_text or page_cap is not None
         params.append(limit * SLOT_FILTER_OVERFETCH if slot_filtering else limit)
         rows = conn.execute(sql, params).fetchall()
+        suppressed: list[list] = []
         if slot_filtering:
             # `min_score` first: a row that would be dropped below must not
             # spend a slot the filters are trying to free.
-            rows = _slot_filtered(
+            rows, suppressed = _slot_filtered(
                 [r for r in rows if round(-float(r["bm25"]), 4) >= min_score],
                 limit=limit, dedupe_text=dedupe_text, page_cap=page_cap)
         results: list[SearchResult] = []
-        for r in rows:
+        for index, r in enumerate(rows):
             score = round(-float(r["bm25"]), 4)
             if score < min_score:
                 continue
@@ -545,7 +569,16 @@ def search_evidence(query: str, *, limit: int = 10, filters: dict | None = None,
                 retrieval_reason={"mode": "fts5",
                                   "matched_terms": _matched_terms(r["text"], sources),
                                   "bm25": round(float(r["bm25"]), 4),
-                                  "match_expression": match}))
+                                  "match_expression": match,
+                                  # What R3 collapsed into this row. Empty when
+                                  # nothing was, and absent-as-empty is still a
+                                  # list so callers need no special case.
+                                  "duplicates_suppressed": [
+                                      {"document_id": d["document_id"],
+                                       "page": d["page_no"],
+                                       "element_id": d["element_id"]}
+                                      for d in (suppressed[index]
+                                                if index < len(suppressed) else [])]}))
         if second_stage:
             results = _second_stage(results, sources, conn)
         return results

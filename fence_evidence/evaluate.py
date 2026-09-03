@@ -778,7 +778,8 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
         # exact failure `default_report_name` exists to prevent, left open on
         # the one path that does not go through argument parsing.
         report_name = default_report_name(report_name, second_stage,
-                                          dedupe_text=dedupe_text, page_cap=page_cap)
+                                          dedupe_text=dedupe_text, page_cap=page_cap,
+                                          only_ingested=only_ingested)
         with open_write(TESTS_DIR / f"{report_name}-results.json") as f:
             json.dump(out, f, indent=2)
         _write_report(out, report_name)
@@ -928,6 +929,17 @@ def _routed_section(out: dict) -> list[str]:
     return lines
 
 
+def _configuration_line(s: dict) -> str:
+    """What produced these numbers, in the report itself and not only its name."""
+    parts = [f"second stage {'on' if s.get('second_stage') else 'off'}",
+             f"R3 duplicate suppression {'on' if s.get('dedupe_text') else 'off'}",
+             ("R5 page cap off" if s.get("page_cap") is None
+              else f"R5 page cap {s['page_cap']}")]
+    if s.get("skipped_not_ingested"):
+        parts.append("restricted to ingested documents")
+    return ", ".join(parts) + "."
+
+
 def acceptance_table(s: dict) -> list[str]:
     """The acceptance table's markdown rows.
 
@@ -992,15 +1004,18 @@ def acceptance_flags(*, recall_at_k: float, evidence_support: float | None,
 
 def default_report_name(explicit: str | None, second_stage: bool, *,
                         dedupe_text: bool = DEDUPE_TEXT_DEFAULT,
-                        page_cap: int | None = None) -> str:
+                        page_cap: int | None = None,
+                        only_ingested: bool = False) -> str:
     """Where a run's artifacts land, when the caller did not say.
 
     Configurations that measure different things must not share a path -- 0.645
     unit support against 0.6946 -- and all of these are committed artifacts, so
     sharing one means the file says whatever the last run happened to be. Every
-    switch that changes what is measured therefore changes the name. An explicit
-    `--name` still wins; this only supplies the default nobody should have to
-    remember.
+    switch that changes what is measured therefore changes the name -- with two
+    exceptions that cannot be named usefully and are the caller's to handle:
+    `gold_paths` (a different question set) and `db_path` (a different store).
+    Pass an explicit name for those. An explicit `--name` still wins; this only
+    supplies the default nobody should have to remember.
     """
     if explicit:
         return explicit
@@ -1013,6 +1028,10 @@ def default_report_name(explicit: str | None, second_stage: bool, *,
         parts.append("dedupe" if dedupe_text else "nodedupe")
     if page_cap is not None:
         parts.append(f"pagecap{page_cap}")
+    if only_ingested:
+        # A pilot-restricted run measures a different corpus, not a different
+        # retrieval configuration, and must not land on the full-corpus baseline.
+        parts.append("pilot")
     return "-".join(parts)
 
 
@@ -1025,6 +1044,11 @@ def _write_report(out: dict, report_name: str = "evaluation") -> None:
         "",
         f"Questions: **{s['questions']}** ({s['answerable']} answerable, "
         f"{s['no_answer']} no-answer) · k = {s['k']}",
+        "",
+        # Only the filename distinguished two configurations' reports, which is
+        # the same hazard `default_report_name` exists against -- a renamed or
+        # copied file lost the one thing that said what it measured.
+        "Configuration: " + _configuration_line(s),
         "",
         (f"{len(s['skipped_not_ingested'])} questions were skipped because none of their "
          f"expected documents are in the store yet: "
@@ -1068,7 +1092,11 @@ if __name__ == "__main__":
     ap.add_argument("-k", type=int, default=DEFAULT_K)
     ap.add_argument("--only-ingested", action="store_true")
     ap.add_argument("--second-stage", action="store_true")
-    ap.add_argument("--name", default="evaluation")
+    # None, not "evaluation": an explicit name wins over `default_report_name`,
+    # so hardcoding one here would let `-m fence_evidence.evaluate --second-stage`
+    # write second-stage numbers over the shipped configuration's committed
+    # artifacts -- the very hole `report_name=None` was introduced to close.
+    ap.add_argument("--name", default=None)
     args = ap.parse_args()
     out = run_evaluation(k=args.k, only_ingested=args.only_ingested,
                          report_name=args.name, second_stage=args.second_stage)

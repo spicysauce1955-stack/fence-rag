@@ -38,8 +38,11 @@ class TestAcceptanceGradesTheRawValue(unittest.TestCase):
                          "0.2004 displays as 0.200 but exceeds the 0.20 ceiling")
 
     def test_a_missing_measurement_is_not_a_pass(self):
-        """`None` means nothing was measured, which must never grade as success —
-        except for the ceiling, where nothing measured is not a breach either."""
+        """`None` means nothing was measured, which must never grade as success.
+
+        That includes the ceiling criterion: an unmeasured false-unsupported
+        rate is not evidence that the ceiling was respected, so it fails too.
+        """
         flags = acceptance_flags(recall_at_k=0.0, evidence_support=None,
                                  no_answer_precision=None, false_unsupported_rate=None)
         self.assertFalse(flags["A3_evidence_support_ge_0.70"])

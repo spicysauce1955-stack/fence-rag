@@ -121,6 +121,37 @@ class TestSearchCli(unittest.TestCase):
 
 
 @requires_store
+class TestSuppressedDuplicatesStayCitable(unittest.TestCase):
+    """R3 saves a slot; it must not cost a citation. Every row it suppresses is
+    reported on the row that took the slot, so a reader can still reach the
+    other documents that print the same text."""
+
+    def test_a_suppressed_document_is_named_on_the_result_that_replaced_it(self):
+        conn = connect()
+        try:
+            raw = search_evidence("weatherables rail fence installation bracket",
+                                  limit=10, conn=conn, dedupe_text=False)
+            got = search_evidence("weatherables rail fence installation bracket",
+                                  limit=10, conn=conn)
+            dropped = {r.document_id for r in raw} - {r.document_id for r in got}
+            linked = {d["document_id"] for r in got
+                      for d in r.retrieval_reason.get("duplicates_suppressed", [])}
+            self.assertTrue(dropped <= linked,
+                            f"unreachable after R3: {sorted(dropped - linked)}")
+        finally:
+            conn.close()
+
+    def test_a_list_with_no_duplicates_reports_none(self):
+        conn = connect()
+        try:
+            for r in search_evidence("footing depth exposure C", limit=5, conn=conn):
+                self.assertIsInstance(
+                    r.retrieval_reason.get("duplicates_suppressed", []), list)
+        finally:
+            conn.close()
+
+
+@requires_store
 class TestTheAuditStillMeasuresTheProjection(unittest.TestCase):
     """The relevance audit measures F2/F3 *through* `search_evidence`, so once R3
     ships on by default the instrument would read its own fix and report that
@@ -173,8 +204,14 @@ class TestAVariantRunCannotOverwriteTheShippedArtifacts(unittest.TestCase):
 
     def setUp(self):
         from fence_evidence.paths import REPORTS_DIR, TESTS_DIR
-        self.shipped = TESTS_DIR / "evaluation-results.json"
-        self.before = self.shipped.read_bytes() if self.shipped.is_file() else None
+        # Both shipped artifacts are snapshotted, not just the JSON: if the
+        # guard regresses, this test's own run is what overwrites them, and a
+        # test that reports a bug by causing it and leaving it behind is worse
+        # than no test. tearDown restores whatever the run touched.
+        self.guarded = {
+            path: (path.read_bytes() if path.is_file() else None)
+            for path in (TESTS_DIR / "evaluation-results.json",
+                         REPORTS_DIR / "evaluation-report.md")}
         self.strays = [TESTS_DIR / "evaluation-pagecap1-results.json",
                        REPORTS_DIR / "evaluation-pagecap1-report.md"]
 
@@ -182,16 +219,22 @@ class TestAVariantRunCannotOverwriteTheShippedArtifacts(unittest.TestCase):
         for path in self.strays:
             if path.is_file():
                 path.unlink()
+        for path, before in self.guarded.items():
+            if before is not None and path.read_bytes() != before:
+                path.write_bytes(before)
+            elif before is None and path.is_file():
+                path.unlink()
 
     def test_a_page_cap_run_writes_its_own_files_and_leaves_the_baseline_alone(self):
         from fence_evidence.evaluate import run_evaluation
         run_evaluation(k=10, page_cap=1)
         for path in self.strays:
             self.assertTrue(path.is_file(), f"{path.name} was not written")
-        if self.before is not None:
-            self.assertEqual(self.shipped.read_bytes(), self.before,
-                             "a variant run overwrote the shipped configuration's "
-                             "committed results")
+        for path, before in self.guarded.items():
+            if before is not None:
+                self.assertEqual(path.read_bytes(), before,
+                                 f"a variant run overwrote the shipped "
+                                 f"configuration's committed {path.name}")
 
 
 if __name__ == "__main__":

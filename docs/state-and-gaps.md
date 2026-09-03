@@ -70,7 +70,7 @@ plus 81 whose text layer decoded to mojibake and was rejected.
 | A1 pilot preservation assertions | all | all | pass |
 | A2 retrieval contract | all fields, images resolve | all | pass |
 | A3 document recall@10 | ≥ 0.80 | 0.805 | pass |
-| A3 evidence support | ≥ 0.70 | **0.623** (0.672 with the second stage) | **fail** |
+| A3 evidence support | ≥ 0.70 | **0.645** (0.6946 with the second stage) | **fail** |
 | A4 no-answer precision | ≥ 0.66 | **0.324** on 37 negatives | **fail** |
 | A4b false-unsupported rate | ≤ 0.20 | 0.146 | pass |
 | A5 full-corpus coverage report | no silent skips | 0 skipped, 0 failures | pass |
@@ -80,7 +80,9 @@ plus 81 whose text layer decoded to mojibake and was rejected.
 
 Eight of eleven met. A3's evidence support and A4's no-answer precision both
 fail, and A4's earlier 0.667 turned out to be an artefact of a three-question
-negative set — see G1 and G7 below. A4b is new: it is the other half of A4, added
+negative set — see G1 and G7 below. A3's support figures moved 0.623 → 0.645 and
+0.672 → 0.6946 on 2026-09-03 when R3 shipped on (G64); the verdict did not, and
+both are graded on the unrounded mean rather than the shown one (G65). A4b is new: it is the other half of A4, added
 because a no-answer detector can score well by declaring almost everything
 unsupported.
 
@@ -88,9 +90,15 @@ unsupported.
 
 ## 2. Gaps
 
-### G1 — Evidence support misses its target (0.623 against 0.70)
+### G1 — Evidence support misses its target (0.645 against 0.70)
 
-**The gap.** Page evidence support is 0.769 while unit support is 0.623. For
+*Heading and first figure updated 2026-09-03: unit support was 0.623 when this
+gap was written and is 0.645 since R3 shipped on (G64). The failing-question
+table below is the original 44-question measurement and has NOT been re-cut; the
+gold set is now 78. The diagnosis is unchanged — the residual is a first-stage
+recall deficit, which G51 confirmed and R3 does not address.*
+
+**The gap.** Page evidence support is 0.769 while unit support is 0.645. For
 most misses the system retrieves the right document and the right page but not
 the specific retrieval unit carrying the value. A reader looking at the returned
 page image has the answer; a consumer reading only the matched unit's text does
@@ -3161,7 +3169,32 @@ questions: R3 loses returned evidence on **zero** of them.
 asserts that superset property directly. `search --no-dedupe-text` reaches the raw
 ranking.
 
-**That property was not true in the first version of this work, and the difference is
+**The key does not include provenance, and that is deliberate — but it took a second
+review to get the consequence right.** Two rows carrying the same words from different
+documents are exactly what R3 exists for (`1. None.` prints in 14 NOAs), so keying on
+`document_id` would collapse R3 back to the audit's within-document version and its 5.5%.
+But such rows are *not* interchangeable: they differ in `document_id`, `source_path`,
+`page`, `bbox` and `page_image_path`, which is the entire product of this platform.
+`[measured]` on the version that shipped in this branch's first two commits: R3 removed
+**8 genuinely distinct documents** from the gold set's top-10 lists — not
+`same_content_as` twins, which account for the other 60 — including the weatherables
+2-rail and 4-rail installation guides, dropped because the 3-rail guide prints the same
+text and outranked them. Neither recall@10 nor unit support noticed: they measure terms
+and expected documents, not citations.
+
+The fix is the half of the audit's own R3 that had been dropped — it says "collapse …
+to one unit, **linking the others**". `_slot_filtered` now returns what it suppressed and
+`search_evidence` reports it as `retrieval_reason["duplicates_suppressed"]`, so the slot
+is saved and the citation is still reachable. `[measured]` after: **0 documents
+unreachable** across all 78 questions, 147 suppressed rows linked. A page-capped row is
+not linked, because R5 only ever suppresses a row on a page the list already carries.
+
+**Neither of R3's two defects was caught by the gold set, and both were caught by review.**
+That is the reusable lesson here, not the 0.022. Term-based support cannot see a lost
+citation, and a "no question got worse" result is evidence about the metric as much as
+about the mechanism.
+
+**The first version was wrong in a second way too, and the difference is
 instructive.** The key was `text` alone. `SearchResult` also returns `heading_path`, and
 `evaluate._returned_evidence` counts it — in this corpus the condition a table row
 applies under is printed in the heading, not in the row. So two rows reading
