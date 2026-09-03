@@ -31,7 +31,7 @@ class TestTheUnconditionalCase(unittest.TestCase):
         got = stock_lengths("Standard rails are supplied in 16 foot lengths")
         self.assertEqual(len(got), 1)
         self.assertEqual(got[0]["value_normalized"], 192.0)      # 16 ft in inches
-        self.assertEqual(got[0]["unit_normalized"], "ft")        # G63: the SOURCE's unit
+        self.assertEqual(got[0]["unit_normalized"], "in")   # labels value_normalized, not the source (G63)
         self.assertEqual(got[0]["conditions"], {})
 
     def test_the_verbatim_lexeme_is_kept(self):
@@ -40,40 +40,42 @@ class TestTheUnconditionalCase(unittest.TestCase):
         self.assertIn("16 foot", got[0]["value_original"])
 
 
-class TestUnitNormalizedNamesTheStatedUnit(unittest.TestCase):
-    """G63: `unit_normalized` must mean what it means for every other fact
-    type -- the SOURCE's stated unit, canonicalized -- not "the unit
-    `value_normalized` happens to be expressed in" (always inches here,
-    regardless of what the source said). A foot-stated rail must not carry
-    `unit_normalized: "in"`; a caller trusting that column (`parameters.
-    _unit_of()`, and anyone after it) would compute 16 feet as 16 inches."""
+class TestUnitNormalizedLabelsValueNormalizedNotTheSource(unittest.TestCase):
+    """G63, corrected after an adversarial review caught the first version of
+    this fix pushing the pair the other way: `unit_normalized` names the unit
+    `value_normalized` is expressed in -- confirmed against `facts._normalise`'s
+    own feet-conversion branch, which converts a feet-stated `footing_depth_in`
+    with `value * 12.0` and STILL labels it `"in"`. That is the codebase's
+    real, existing invariant, not something stock lengths may depart from.
+    `value_normalized` here is always inches (`_to_inches` converts every
+    unit), so `unit_normalized` must always be `"in"` too, or the pair
+    contradicts itself the moment anything reads them together (`reports.
+    _to_mm(value_normalized, unit_normalized)` does exactly that for every
+    OTHER fact type). The source's own unit lives in `unit_original`,
+    unconverted, for every fact type -- that is what `parts.
+    _stock_length_quantity` reads, and it never needed a column that
+    contradicts `value_normalized` to do it correctly."""
 
-    def test_a_foot_stated_plain_length_is_normalized_to_ft_not_in(self):
+    def test_a_foot_stated_plain_length_is_still_normalized_to_in(self):
         got = stock_lengths("Standard rails are supplied in 16 foot lengths")
-        self.assertEqual(got[0]["unit_normalized"], "ft")
-
-    def test_an_inch_stated_plain_length_is_still_normalized_to_in(self):
-        got = stock_lengths('Standard rails are supplied in 96 inch lengths')
         self.assertEqual(got[0]["unit_normalized"], "in")
+        self.assertEqual(got[0]["unit_original"], "foot")
 
-    def test_both_colours_in_the_conditional_case_get_ft(self):
+    def test_both_colours_in_the_conditional_case_stay_in(self):
         got = stock_lengths(
             "Standard rails are supplied in 16 foot lengths for White "
             "(12 foot rails for Blend products)")
         for f in got:
-            self.assertEqual(f["unit_normalized"], "ft")
+            self.assertEqual(f["unit_normalized"], "in")
 
-    def test_a_foot_stated_triple_is_normalized_to_ft(self):
+    def test_a_foot_stated_triple_stays_in(self):
         got = stock_lengths('1-1/2" x 5-1/2" x 16\' Rail (STANDARD)')
-        self.assertEqual(got[0]["unit_normalized"], "ft")
-
-    def test_an_inch_stated_triple_is_normalized_to_in(self):
-        got = stock_lengths('5in. x 5in. x 108in. Line Post')
         self.assertEqual(got[0]["unit_normalized"], "in")
+        self.assertEqual(got[0]["unit_original"], "'")
 
-    def test_the_curly_apostrophe_variant_is_still_ft(self):
+    def test_the_curly_apostrophe_variant_also_stays_in(self):
         got = stock_lengths('1-1/2" x 5-1/2" x 15-1/2’ Rail - White')
-        self.assertEqual(got[0]["unit_normalized"], "ft")
+        self.assertEqual(got[0]["unit_normalized"], "in")
 
 
 class TestTheConditionalCase(unittest.TestCase):

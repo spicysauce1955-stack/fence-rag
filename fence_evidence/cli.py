@@ -310,11 +310,22 @@ def main(argv: list[str] | None = None) -> int:
             # list hardcoded here. An unrecognised value is bad input (exit
             # 2); a recognised type with zero matches for this query is a
             # normal empty result and must stay exit 0.
+            #
+            # Validated against `retrieval_units`, not `elements`: the filter
+            # (`retrieval.FILTER_COLUMNS["element_type"]`) is applied to the
+            # projection, and `heading`/`figure` are real `elements.
+            # element_type` values structurally excluded from it
+            # (`store.UNIT_EXCLUDED_TYPES`, and figures carry no unit at
+            # all). Validating against `elements` would accept both and then
+            # return `[]` forever, for every query -- the same silent-empty
+            # failure this check exists to remove, moved one column over. A
+            # read-only connection, matching `refs`/`gc`'s own guards: this
+            # is a lookup, not a write.
             from .store import connect
-            conn = connect()
+            conn = connect(read_only=True)
             try:
                 known = {r[0] for r in conn.execute(
-                    "SELECT DISTINCT element_type FROM elements")}
+                    "SELECT DISTINCT element_type FROM retrieval_units")}
             finally:
                 conn.close()
             if args.element_type not in known:
@@ -345,13 +356,26 @@ def main(argv: list[str] | None = None) -> int:
         _print(doc)
     elif args.cmd == "page":
         from .retrieval import get_page
-        _print(get_page(args.document_id, args.page_no))
+        page = get_page(args.document_id, args.page_no)
+        if page is None:
+            _print({"error": f"no page {args.page_no} for document "
+                             f"{args.document_id!r}"})
+            return 1
+        _print(page)
     elif args.cmd == "region":
         from .retrieval import get_region
-        _print(get_region(args.element_id))
+        region = get_region(args.element_id)
+        if region is None:
+            _print({"error": f"no element matching {args.element_id!r}"})
+            return 1
+        _print(region)
     elif args.cmd == "context":
         from .retrieval import get_element_context
-        _print(get_element_context(args.element_id, before=args.before, after=args.after))
+        ctx = get_element_context(args.element_id, before=args.before, after=args.after)
+        if ctx is None:
+            _print({"error": f"no element matching {args.element_id!r}"})
+            return 1
+        _print(ctx)
     elif args.cmd == "resolve":
         from .retrieval import resolve_document_version
         resolved = resolve_document_version(args.identifier, at=args.at, as_of=args.as_of)
