@@ -1,4 +1,5 @@
 {
+  "probe_kind": "consumer_boundary_diagnostic_not_assembly_acceptance",
   "consumer_repository": "https://github.com/spicysauce1955-stack/BOM",
   "consumer_revision": "9de94eb06d8e997d9be098dedd5b6a6b2eb4024d",
   "snapshot_id": "5b25c3b6c40e67c204a9de8ee37471310c42ea68d6fcc73c295d3a3971777488",
@@ -8,6 +9,91 @@
   "gap_defects": [],
   "part_defects": [],
   "unconsumed": {},
+  "inactive_parts": [],
+  "published_part_spec_counts": {
+    "mfr/certainteed/bt-drop-rod-48": 0,
+    "mfr/certainteed/bt-hinge-ss": 0,
+    "mfr/certainteed/bt-latch-ss": 0,
+    "mfr/certainteed/bt-picket-7-7-tg": 0,
+    "mfr/certainteed/bt-stiffener-alum": 0,
+    "mfr/freedom-outdoor-living/freedom-5x5-corner-post": 0,
+    "mfr/freedom-outdoor-living/freedom-5x5-end-post": 0,
+    "mfr/freedom-outdoor-living/freedom-5x5-line-post": 0,
+    "mfr/freedom-outdoor-living/freedom-5x5-post-top": 0,
+    "mfr/freedom-outdoor-living/freedom-emblem-board": 0,
+    "mfr/freedom-outdoor-living/freedom-emblem-rail": 0,
+    "shared/bt-post-5x5": 0,
+    "shared/bt-post-5x5-pr": 0,
+    "shared/bt-postcap-various": 0,
+    "shared/bt-rail-chesterfield": 0,
+    "shared/bt-rail-pr-3rail-color": 1,
+    "shared/bt-rail-pr-3rail-white": 1
+  },
+  "draft_part_ids_present": [],
+  "draft_part_ids_missing": [
+    "mfr/freedom-outdoor-living/73013956",
+    "mfr/freedom-outdoor-living/73045783",
+    "mfr/freedom-outdoor-living/73045784",
+    "mfr/freedom-outdoor-living/73045785",
+    "mfr/freedom-outdoor-living/emblem-73014714-board",
+    "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+    "mfr/freedom-outdoor-living/emblem-73014714-rail-b"
+  ],
+  "actual_model_probe": {
+    "private_parser_errors": [
+      {
+        "location": [
+          "default_spec",
+          "frame",
+          0,
+          "placement"
+        ],
+        "type": "missing",
+        "message": "Field required"
+      },
+      {
+        "location": [
+          "default_spec",
+          "frame",
+          0,
+          "joint"
+        ],
+        "type": "literal_error",
+        "message": "Input should be 'butt', 'channel', 'groove', 'bracket' or 'overlap'"
+      },
+      {
+        "location": [
+          "default_spec",
+          "frame",
+          1,
+          "placement"
+        ],
+        "type": "missing",
+        "message": "Field required"
+      },
+      {
+        "location": [
+          "default_spec",
+          "frame",
+          1,
+          "joint"
+        ],
+        "type": "literal_error",
+        "message": "Input should be 'butt', 'channel', 'groove', 'bracket' or 'overlap'"
+      },
+      {
+        "location": [
+          "post",
+          "requirement"
+        ],
+        "type": "missing",
+        "message": "Field required"
+      }
+    ],
+    "unconsumed": {
+      "models": 1
+    }
+  },
   "private_requirement_example": {
     "part_id": "probe/rail",
     "qty": 1,

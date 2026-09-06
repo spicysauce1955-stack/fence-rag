@@ -110,9 +110,24 @@ binding and the two layout cases through generation.
 Reproduce with the checked-out consumer's Python environment:
 
 ```sh
-/path/to/BOM/.venv/bin/python scripts/probe_planning_consumer.py --consumer-root /path/to/BOM --snapshot workspace/snapshots/5b25c3b6c40e67c204a9de8ee37471310c42ea68d6fcc73c295d3a3971777488.json --report workspace/reports/planning-consumer-probe.json
+/path/to/BOM/.venv/bin/python scripts/probe_planning_consumer.py --consumer-root /path/to/BOM --snapshot workspace/snapshots/5b25c3b6c40e67c204a9de8ee37471310c42ea68d6fcc73c295d3a3971777488.json --model workspace/catalog/emblem-73014714-model-draft.json --report workspace/reports/planning-consumer-probe.json
 ```
 
 The report pins the consumer revision and includes a valid private
 `PartRequirement` example and refusal controls. It does not select a length rule
 for Emblem or reinterpret unknown overlaps as the private parser's zero default.
+
+The adversarial assembly review in G87 adds four distinctions. Kit description
+and SKU must occupy the same source row, just as post identities do. The supported
+panel shape must contain frame and infill slots. Quantity rules still execute as
+authored inputs, with `quantity_semantics_verified: false`; citation identity does
+not approve a changed multiplier or establish relevance. Inventory is now named
+`authored_kit_inventory_per_bay`, with `inventory_completeness_verified: false`.
+
+The example assembly audit requires its supported nine-action workflow and retains
+the source action/evidence on simulated events. It refuses missing/reordered actions
+and missing unresolved material entries. This is a check of the authored example,
+not a claim that other valid manufacturer workflows must have that total order.
+The actual consumer probe reports zero overlap between the seven draft Part IDs
+and the published Parts, six published Emblem identities with no specs, and the
+actual model's private-parser errors. These prevent an end-to-end assembly claim.

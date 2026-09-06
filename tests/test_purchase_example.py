@@ -15,8 +15,13 @@ class TestPurchaseExample(unittest.TestCase):
                 for sku, qty in [('73014714', 1), ('73045785', 2), ('73013956', 2)]],
             'kit_contents': [{'component_key': 'end_u_channel', 'quantity_each': 2,
                               'edges': ['first_board_tongue', 'last_board_groove']}],
-            'assembly_trace': [{'key': key} for key in ['attach_end_channels', 'insert_boards',
-                                                       'place_top_rail', 'engage_second_post', 'fix_second_post']],
+            'assembly_trace': [{'key': key, 'evidence': {'fixture': key}} for key in
+                               ['prepare_holes', 'fix_first_post', 'insert_bottom_rail',
+                                'attach_end_channels', 'insert_boards', 'place_top_rail',
+                                'engage_second_post', 'fix_second_post', 'glue_caps']],
+            'installation_materials': [{'item': item, 'required': True,
+                                        'purchase_quantity': None, 'blocker': 'Unresolved site input'}
+                                       for item in ['concrete', 'gravel/filler', 'vinyl adhesive']],
             'complete_installation_order': False,
         }
 
@@ -45,7 +50,7 @@ class TestPurchaseExample(unittest.TestCase):
 
     def test_second_post_cannot_be_fixed_before_panel_engages(self):
         trace = self.example['assembly_trace']
-        trace[-1], trace[-2] = trace[-2], trace[-1]
+        trace[-2], trace[-3] = trace[-3], trace[-2]
         self.assertIn('engage_second_post before fix_second_post', str(audit(self.example)['errors']))
 
     def test_missing_channel_inventory_detected(self):
@@ -150,3 +155,55 @@ class TestPurchaseExample(unittest.TestCase):
         e = self.complex_example()
         e['build_runs'][1]['id'] = e['build_runs'][0]['id']
         self.assertIn('duplicate build-run identity', audit(e)['errors'])
+
+    def test_each_required_action_must_be_present(self):
+        for step in self.example['assembly_trace']:
+            with self.subTest(action=step['key']):
+                e = self.complex_example()
+                e['assembly_trace'] = [s for s in e['assembly_trace'] if s['key'] != step['key']]
+                result = audit(e)
+                self.assertIn(f"missing assembly action: {step['key']}", result['errors'])
+                self.assertEqual(result['assembly_simulation'], [])
+
+    def test_panel_cannot_engage_before_assembly(self):
+        e = self.complex_example()
+        trace = e['assembly_trace']
+        step = next(s for s in trace if s['key'] == 'engage_second_post')
+        trace.remove(step)
+        trace.insert(0, step)
+        result = audit(e)
+        self.assertIn('place_top_rail before engage_second_post', str(result['errors']))
+        self.assertEqual(result['assembly_simulation'], [])
+
+    def test_first_post_must_be_fixed_before_bottom_rail(self):
+        self.example['assembly_trace'][1:3] = reversed(self.example['assembly_trace'][1:3])
+        self.assertIn('fix_first_post before insert_bottom_rail', str(audit(self.example)['errors']))
+
+    def test_missing_material_registry_or_item_rejected(self):
+        for removed in [None, 'concrete', 'gravel/filler', 'vinyl adhesive']:
+            with self.subTest(removed=removed):
+                e = self.complex_example()
+                e['installation_materials'] = [m for m in e['installation_materials']
+                                               if removed is not None and m['item'] != removed]
+                result = audit(e)
+                self.assertIn('installation-material registry', str(result['errors']))
+                self.assertEqual(result['assembly_simulation'], [])
+
+    def test_unresolved_material_cannot_be_marked_unnecessary_or_quantified(self):
+        for change in [{'required': False}, {'purchase_quantity': 0}, {'blocker': ''}]:
+            with self.subTest(change=change):
+                e = self.complex_example()
+                e['installation_materials'][0].update(change)
+                self.assertIn('unresolved quantity and blocker', str(audit(e)['errors']))
+
+    def test_simulation_preserves_trace_evidence_and_prepares_every_hole_once(self):
+        e = self.complex_example()
+        result = audit(e)
+        self.assertTrue(result['example_checks_passed'], result['errors'])
+        prepared = []
+        for event in result['assembly_simulation']:
+            self.assertEqual(event['evidence'], {'fixture': event['source_trace_key']})
+            if event['action'] == 'prepare_holes':
+                prepared.extend(event['stations'])
+        self.assertCountEqual(prepared, [s['id'] for s in e['stations']])
+        self.assertEqual(result['unresolved_installation_materials'], e['installation_materials'])

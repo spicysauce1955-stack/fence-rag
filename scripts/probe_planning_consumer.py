@@ -18,6 +18,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--consumer-root', type=Path, required=True)
     parser.add_argument('--snapshot', type=Path, required=True)
+    parser.add_argument('--model', type=Path, required=True)
     parser.add_argument('--report', type=Path, required=True)
     args = parser.parse_args()
     root = args.consumer_root.resolve()
@@ -31,6 +32,20 @@ def main():
     raw = json.loads(args.snapshot.read_text())
     loaded, defects = load(raw)
     consumed = ingest(loaded, as_of='2026-09-06', gap_defects=defects)
+    package = json.loads(args.model.read_text())
+    published_ids = {part.id for part in loaded.parts}
+    draft_ids = {part['id'] for part in package['part_fragments']}
+    actual_model_errors = []
+    try:
+        FenceModel.model_validate(package['model_fragment'])
+    except ValidationError as exc:
+        actual_model_errors = [{'location': list(e['loc']), 'type': e['type'], 'message': e['msg']}
+                               for e in exc.errors()]
+    actual = deepcopy(raw)
+    actual['models'] = [package['model_fragment']]
+    actual['snapshot_id'] = canonical_snapshot_id(actual)
+    actual_loaded, actual_defects = load(actual)
+    actual_result = ingest(actual_loaded, as_of='2026-09-06', gap_defects=actual_defects)
     example = {'part_id': 'probe/rail', 'qty': 1, 'length_rule': 'centre_to_centre'}
     requirement = PartRequirement.model_validate(example)
     refusals = {}
@@ -58,11 +73,18 @@ def main():
         private_model_refused = False
 
     report = {
+        'probe_kind': 'consumer_boundary_diagnostic_not_assembly_acceptance',
         'consumer_repository': 'https://github.com/spicysauce1955-stack/BOM',
         'consumer_revision': revision, 'snapshot_id': raw['snapshot_id'],
         'snapshot_loaded': True, 'loaded_parts': len(loaded.parts),
         'loaded_part_types': len(loaded.part_types), 'gap_defects': defects,
         'part_defects': consumed.part_defects, 'unconsumed': consumed.unconsumed,
+        'inactive_parts': consumed.inactive_parts,
+        'published_part_spec_counts': {part.id: len(part.spec) for part in loaded.parts},
+        'draft_part_ids_present': sorted(draft_ids & published_ids),
+        'draft_part_ids_missing': sorted(draft_ids - published_ids),
+        'actual_model_probe': {'private_parser_errors': actual_model_errors,
+                               'unconsumed': actual_result.unconsumed},
         'private_requirement_example': example,
         'private_requirement_roundtrip': requirement.model_dump(),
         'registered_length_rules': list(LENGTH_RULES.names()),
@@ -79,6 +101,8 @@ def main():
     if not (all(refusals.values()) and private_model_refused
             and probe_result.unconsumed.get('models') == 1):
         raise RuntimeError('Consumer behavior changed; reassess the adapter boundary before recording success.')
+    if defects or consumed.part_defects:
+        raise RuntimeError('Snapshot has Part or gap defects; inspect the consumer errors before recording success.')
     with open_write(args.report) as handle:
         json.dump(report, handle, indent=2)
         handle.write('\n')

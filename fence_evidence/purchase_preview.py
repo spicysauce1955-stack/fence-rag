@@ -147,7 +147,16 @@ def generate(package, layout, *, conn=None):
     kit_anchor = kit_anchors[0]
     _require(kit_anchor['text_raw'] == kit_sku, 'kit identity differs from source anchor')
     cited(kit_anchor)
+    kit_description = package['scope'].get('product_description')
+    description_anchors = [a for a in package['identity_anchors']
+                           if a['text_raw'] == kit_description]
+    _require(isinstance(kit_description, str) and kit_description and len(description_anchors) == 1,
+             'kit product description anchor is missing or ambiguous')
+    kit_description_anchor = description_anchors[0]
+    cited(kit_description_anchor)
     coverage = package.get('purchase_projection', {}).get('panel_kit_covers', [])
+    _require(model['default_spec']['frame'] and model['default_spec']['infill']['pattern'],
+             'supported panel shape requires nonempty frame and infill')
     for kind, slots in [('frame', model['default_spec']['frame']),
                         ('infill', model['default_spec']['infill']['pattern'])]:
         _unique(slots, 'key', f'{kind} slot')
@@ -217,7 +226,7 @@ def generate(package, layout, *, conn=None):
             line['covers_panel_slots'] = deepcopy(covered_slots)
     demand(kit_sku, model['name_i18n']['en'],
            [{'kind': 'bay', 'id': bid, 'model_id': model['id']} for bid in sorted(bays)],
-           [cited(kit_anchor)], 'panel_kit', covered_slots=coverage)
+           [cited(kit_description_anchor), cited(kit_anchor)], 'panel_kit', covered_slots=coverage)
     for role in sorted(set(roles.values())):
         _require(role in candidates, f'no product binding for post role {role}')
         part_id = candidates[role]['part_id']
@@ -262,7 +271,8 @@ def generate(package, layout, *, conn=None):
                 for value in node:
                     check_evidence(value)
         check_evidence(package)
-        for identity in identities.values():
+        kit_identity = {'description': kit_description_anchor, 'model_number': kit_anchor}
+        for identity in [kit_identity, *identities.values()]:
             description = index[identity['description']['cite']['id']]
             number = index[identity['model_number']['cite']['id']]
             _require(description.sha256 == number.sha256 and description.page_no == number.page_no
@@ -276,9 +286,14 @@ def generate(package, layout, *, conn=None):
             'model_id': model['id'], 'model_package_hash': content_hash(package),
             'layout_hash': content_hash(layout), 'source_docs': deepcopy(package['source_docs']),
             'source_identity_verified': verified,
+            'quantity_rule_admission': 'unreviewed_authored',
+            'quantity_semantics_verified': False,
             'purchase_lines': [lines[sku] for sku in sorted(lines)],
             'station_roles': roles, 'connected_runs': runs,
-            'covered_kit_inventory_per_bay': deepcopy(package['packaged_assembly_inventory']),
+            'authored_kit_inventory_per_bay': deepcopy(package['packaged_assembly_inventory']),
+            'inventory_validation': 'unreviewed_authored',
+            'inventory_completeness_verified': False,
             'installation_ready': False, 'contract_consumer_verified': False,
             'limitations': ['Private post bindings and kit coverage are not contract eligibility or Product matching.',
+                            'Source identity checks do not approve quantity derivations or inventory claims; these remain unreviewed authored inputs.',
                             'Supplier pack sizes, material quantities and physical fit remain unresolved.']}

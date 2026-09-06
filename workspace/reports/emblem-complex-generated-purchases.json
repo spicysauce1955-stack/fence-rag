@@ -2,7 +2,7 @@
   "artifact_kind": "private_model_backed_purchase_preview",
   "publishable": false,
   "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
-  "model_package_hash": "d8979b3c3355c0d499503873b872006920eccc544b4bc6126aaf0149e58913f2",
+  "model_package_hash": "2a40d62828ae7da4c5018efb48efea6fbb52683c72a69211467534eb2537c768",
   "layout_hash": "1f5cca90fe705f5eb5c0ef50909ad15f5c5fd1c24852682ed425dbbef168c6cd",
   "source_docs": [
     {
@@ -37,6 +37,8 @@
     }
   ],
   "source_identity_verified": true,
+  "quantity_rule_admission": "unreviewed_authored",
+  "quantity_semantics_verified": false,
   "purchase_lines": [
     {
       "manufacturer_model_number": "73013956",
@@ -166,11 +168,11 @@
       "part_ids": [],
       "cites": [
         {
-          "id": "304c96b69b330708",
+          "id": "5d7cfd7597583e43",
           "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
         },
         {
-          "id": "5d7cfd7597583e43",
+          "id": "304c96b69b330708",
           "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
         }
       ],
@@ -432,7 +434,7 @@
       "B2"
     ]
   ],
-  "covered_kit_inventory_per_bay": [
+  "authored_kit_inventory_per_bay": [
     {
       "component_key": "top_rail",
       "quantity_each": 1,
@@ -507,10 +509,13 @@
       "contract_mapping": "Part type and handed slot representation remain unresolved; this is private kit inventory"
     }
   ],
+  "inventory_validation": "unreviewed_authored",
+  "inventory_completeness_verified": false,
   "installation_ready": false,
   "contract_consumer_verified": false,
   "limitations": [
     "Private post bindings and kit coverage are not contract eligibility or Product matching.",
+    "Source identity checks do not approve quantity derivations or inventory claims; these remain unreviewed authored inputs.",
     "Supplier pack sizes, material quantities and physical fit remain unresolved."
   ]
 }

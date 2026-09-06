@@ -4251,6 +4251,113 @@ is claimed for this probe/documentation checkpoint.
 
 ---
 
+### G87 — fresh adversarial assembly review found defects beyond passing tests
+
+`[measured]`, 2026-09-06. Three independent agents reviewed the current work as
+an installer, a quantity/source adversary, and a Planning-boundary adversary.
+The parent also ran 80 deterministic layout transformations over the single-panel
+and seven-panel L-plus-separate-run cases. Input permutations, reversed bay
+directions, rotation, scaling and translation preserve demand and post roles;
+each line's derivations still sum to its total. These are schematic checks.
+
+**Reproduced and fixed.** A real line-post SKU substituted for the panel-kit SKU
+passed source checking. Kit description and SKU now must share a source row.
+An empty frame/infill/coverage graph passed vacuously; it is now refused for this
+supported panel shape. The assembly audit accepted missing or wrongly ordered
+actions, then invented the missing events from its hardcoded simulation. It now
+requires the supported nine-action workflow and constructs events from the
+validated trace, retaining source keys, instructions and evidence. Deleting the
+concrete, gravel/filler or adhesive entries is refused; unresolved quantities and
+their blockers must stay visible. This workflow is an example-specific check,
+not a newly asserted universal installation sequence.
+
+**Not fixed by a citation.** A 99-caps-per-station authored rule with the old
+one-cap explanation still computes 198 caps for two stations. Replacing a rule's
+evidence with an unrelated but real source phrase also passes identity checking.
+Those are semantic-admission gaps, not arithmetic errors. Output now explicitly
+marks quantity rules `unreviewed_authored` and `quantity_semantics_verified: false`.
+Kit inventory can likewise contain unreviewed claims; it is renamed
+`authored_kit_inventory_per_bay` and completeness is explicitly unverified. No
+automated source-identity check is represented as quantity or inventory approval.
+
+**The published graph cannot yet assemble this fence.** None of the seven draft
+Part IDs match the 17 published Part IDs. The six published Emblem Parts have
+empty specs. The actual Emblem fragment fails Planning's private parser in five
+locations: two missing rail placements, two incompatible Joint shapes, and a
+missing post requirement. Its snapshot loader carries the fragment as one
+unconsumed model instead. The probe now measures these facts directly and refuses
+Part/gap defects before recording a successful loader diagnostic. It still does
+not claim assembly acceptance or BOM generation.
+
+The baseline purchase counts remain 7 kits, 4 end posts, 4 line posts, 1 corner
+post and 9 caps; the authored kit inventory includes 14 end channels over seven
+panels. Physical clearance at the corner, effective board count/pitch, engagement
+dimensions, material quantities and site-dependent reinforcement remain unknown.
+Agent review is logical/source review; nobody physically assembled a fence.
+
+Reproduction evidence is in `workspace/reports/emblem-adversarial-assembly-check.json`
+and the expanded `workspace/reports/planning-consumer-probe.json`. New regression
+tests cover the refusal paths, source-row substitution and the 80 transformations.
+The complex simulation now has 60 events, all carrying source evidence, and
+prepares nine unique post holes. Final `python3 tests/run_tests.py`: **1,456 tests,
+OK (1 expected failure)** in 45.923 seconds. The expanded actual-consumer probe
+passes; both frozen boundary checksums and `git diff --check` pass.
+
+---
+
+### G88 — every published date was `iso: null`, and obligation 16 could not run
+
+`[measured]`, 2026-09-06. Found while looking at G79's crop, not by a test.
+
+`dates.normalize_date` anchored both of its patterns `^...$`, so it resolved a
+bare `03/13/2018` and returned `iso: null` for `Expiration Date: 03/13/2018`.
+The corpus prints the label with the date, `SnapshotBuilder` passes the original
+lexeme deliberately — `value_raw` is specified to keep it whole — and so the
+parser was never given a string it could match.
+
+```text
+'03/13/2018'                   -> 2018-03-13
+'Expiration Date: 03/13/2018'  -> None
+```
+
+`[measured]` on the published snapshot: **24 of 24 dates carried `iso: null`.
+16 were unambiguous and should have resolved**; the other 8 are the amendment's
+own cited case and are correctly refused. Because `iso` was null everywhere,
+obligation 16's lapse check had nothing to run on — a consumer could not detect
+that a sealed approval had expired, though the raw lexeme said so in words.
+After the fix, **3 documents are machine-detectably lapsed: 2013-03-13,
+2018-03-13 and 2024-03-13.**
+
+The fix searches inside the lexeme when the whole string is not itself a date.
+Three refusals are deliberate rather than incidental:
+
+- **Two different dates in one lexeme refuse.** A string carrying both an
+  approval and an expiration does not say which one the field means, and taking
+  the first is guessing. The same date printed twice is one candidate.
+- **Digit lookarounds bound the search**, so an acceptance number
+  (`12-1106.11`) is not mined for a date and `03/13/20188` is not read as 2018.
+- **Ambiguity is unchanged.** `Approval Date: 05/04/2023` still resolves to
+  null; the label must not change what amendment 002 refuses.
+
+Ten tests were added. Honest about which discriminate: **four fail against the
+old parser** (the labelled-date cases); the other six assert refusals the broken
+code also produced, so they guard the fix from over-reaching rather than detect
+the bug. `versions.parse_date` is untouched — G80 fix 3 established that the two
+parsers disagree and that `normalize_date` is the one implementing 002.
+
+**This moves published data and is visible at the boundary.** A rebuild produces
+`c772aaf8…` where the stored cut is `5b25c3b6…`; 16 date fields populate and
+three documents become detectably lapsed. T46 was already committed when this
+was found, so it is **not** in that turn and Planning has not been told. It
+needs a T47, or an addendum, before or with the next snapshot they pin.
+
+Not established: that any lapsed approval should stop publishing. Three
+documents now report a past expiration; what a consumer does with that is
+obligation 16's business and Planning's policy, and nothing here changes either.
+`python3 tests/run_tests.py`: **1,466 tests, OK (1 expected failure)**.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

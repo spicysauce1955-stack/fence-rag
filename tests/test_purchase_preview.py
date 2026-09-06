@@ -1,8 +1,12 @@
 """Model changes must affect preview output; input layouts contain no answers."""
 import copy
+import json
+import sqlite3
 import unittest
 
 import context  # noqa: F401
+from context import requires_store
+from fence_evidence.paths import EVIDENCE_DB, REPO_ROOT
 from fence_evidence.purchase_preview import generate, PreviewError
 
 
@@ -13,7 +17,8 @@ class TestPurchasePreview(unittest.TestCase):
         def part(pid, kind):
             return {'id': pid, 'type': {'namespace': 'shared', 'key': kind}, 'name_i18n': {'en': pid}}
         self.package = {
-            'scope': {'model_number': 'KIT-X'}, 'identity_anchors': [anchor('KIT-X')],
+            'scope': {'model_number': 'KIT-X', 'product_description': 'Kit product'},
+            'identity_anchors': [anchor('KIT-X'), anchor('Kit product')],
             'source_docs': [{'content_hash': 'source'}],
             'part_fragments': [part(pid, kind) for pid, kind in [('rail', 'rail'), ('board', 'infill'),
                               ('end', 'post'), ('line', 'post'), ('corner', 'post'), ('cap', 'post_cap')]],
@@ -59,6 +64,34 @@ class TestPurchasePreview(unittest.TestCase):
         del self.package['purchase_quantity_rules']
         with self.assertRaisesRegex(PreviewError, 'explicit quantity rules'):
             self.counts()
+
+    def test_missing_kit_description_refused(self):
+        self.package['identity_anchors'].pop()
+        with self.assertRaisesRegex(PreviewError, 'kit product description anchor'):
+            self.counts()
+
+    def test_empty_panel_does_not_pass_vacuous_coverage(self):
+        self.package['model_fragment']['default_spec']['frame'] = []
+        self.package['model_fragment']['default_spec']['infill']['pattern'] = []
+        self.package['purchase_projection']['panel_kit_covers'] = []
+        with self.assertRaisesRegex(PreviewError, 'nonempty frame and infill'):
+            self.counts()
+
+    def test_unsupported_inventory_count_is_explicitly_unvalidated(self):
+        self.package['packaged_assembly_inventory'] = [
+            {'component_key': 'boards', 'quantity_each': 999}]
+        out = generate(self.package, self.layout)
+        self.assertEqual(out['inventory_validation'], 'unreviewed_authored')
+        self.assertFalse(out['inventory_completeness_verified'])
+        self.assertFalse(out['quantity_semantics_verified'])
+
+    def test_rule_arithmetic_does_not_claim_source_supported_admission(self):
+        self.package['purchase_quantity_rules'][2]['quantity_per_basis']['amount_milli'] = 99000
+        out = generate(self.package, self.layout)
+        self.assertEqual(out['quantity_rule_admission'], 'unreviewed_authored')
+        self.assertFalse(out['quantity_semantics_verified'])
+        self.assertEqual(next(line['quantity_each'] for line in out['purchase_lines']
+                              if line['manufacturer_model_number'] == 'CAP-X'), 198)
 
     def test_invalid_quantity_rule_refused(self):
         for patch in ({'basis': 'per_run'}, {'model_id': 'other'}, {'evidence': []},
@@ -131,7 +164,7 @@ class TestPurchasePreview(unittest.TestCase):
 
     def test_unknown_board_count_preserved(self):
         out = generate(self.package, self.layout)
-        self.assertIsNone(out['covered_kit_inventory_per_bay'][0]['quantity_each'])
+        self.assertIsNone(out['authored_kit_inventory_per_bay'][0]['quantity_each'])
         self.assertFalse(out['publishable'])
         self.assertFalse(out['source_identity_verified'])
 
@@ -179,3 +212,26 @@ class TestPurchasePreview(unittest.TestCase):
         self.package['sources'] = []
         with self.assertRaisesRegex(PreviewError, 'source manifest does not cover'):
             generate(self.package, self.layout, conn=object())
+
+
+@requires_store
+class TestRealKitIdentityBinding(unittest.TestCase):
+    def test_post_sku_cannot_masquerade_as_panel_kit(self):
+        draft = REPO_ROOT / 'workspace/catalog/emblem-73014714-model-draft.json'
+        layout_path = REPO_ROOT / 'workspace/catalog/emblem-single-layout.json'
+        if not draft.is_file() or not layout_path.is_file():
+            self.skipTest('Emblem private draft/layout unavailable')
+        package = json.loads(draft.read_text())
+        layout = json.loads(layout_path.read_text())
+        package['scope']['product_description'] = '6x8 Emblem Privacy Fence Kit - White (F)'
+        with sqlite3.connect(f'file:{EVIDENCE_DB}?mode=ro', uri=True) as conn:
+            conn.row_factory = sqlite3.Row
+            valid = generate(package, layout, conn=conn)
+            self.assertTrue(valid['source_identity_verified'])
+            self.assertFalse(valid['quantity_semantics_verified'])
+            line_anchor = next(a['model_number'] for a in package['part_identity_anchors']
+                               if a.get('post_role') == 'line')
+            package['scope']['model_number'] = line_anchor['text_raw']
+            package['identity_anchors'].append(copy.deepcopy(line_anchor))
+            with self.assertRaisesRegex(PreviewError, 'different source rows'):
+                generate(package, layout, conn=conn)

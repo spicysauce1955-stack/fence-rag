@@ -4,6 +4,7 @@ This is a private example check, not a Planning resolver or supplier cart builde
 """
 import argparse
 from collections import Counter
+from copy import deepcopy
 import json
 from pathlib import Path
 import sys
@@ -131,33 +132,61 @@ def audit(example):
     keys = [step['key'] for step in sequence]
     if len(set(keys)) != len(keys):
         errors.append('duplicate assembly action key')
-    # Explicit source constraint: first post only is fixed before panel engagement.
-    for before, after in [('engage_second_post', 'fix_second_post'),
-                          ('attach_end_channels', 'insert_boards'),
-                          ('insert_boards', 'place_top_rail')]:
+    required_actions = ['prepare_holes', 'fix_first_post', 'insert_bottom_rail',
+                        'attach_end_channels', 'insert_boards', 'place_top_rail',
+                        'engage_second_post', 'fix_second_post', 'glue_caps']
+    for key in required_actions:
+        if key not in keys:
+            errors.append(f'missing assembly action: {key}')
+    if set(keys) - set(required_actions):
+        errors.append('unsupported assembly actions need explicit simulation handling')
+    for before, after in zip(required_actions, required_actions[1:]):
         if before not in keys or after not in keys or keys.index(before) >= keys.index(after):
             errors.append(f'assembly constraint violated: {before} before {after}')
+    materials = example.get('installation_materials', [])
+    material_names = [item.get('item') for item in materials]
+    if (len(set(material_names)) != len(material_names) or
+            set(material_names) != {'concrete', 'gravel/filler', 'vinyl adhesive'}):
+        errors.append('required installation-material registry is missing or unsupported')
+    for item in materials:
+        if (item.get('required') is not True or 'purchase_quantity' not in item or
+                item['purchase_quantity'] is not None or not item.get('blocker')):
+            errors.append('installation material must retain its unresolved quantity and blocker')
     if example.get('complete_installation_order') is not False:
         errors.append('unquantified installation materials prevent a complete order claim')
     simulation = []
     if not errors and 'build_runs' in example:
+        trace = {step['key']: step for step in sequence}
+        def event(key, **scope):
+            result = {'action': 'glue_cap' if key == 'glue_caps' else key,
+                      'source_trace_key': key, **scope}
+            if 'evidence' in trace[key]:
+                result['evidence'] = deepcopy(trace[key]['evidence'])
+            if 'action' in trace[key]:
+                result['instruction'] = trace[key]['action']
+            return result
+
         bay_ids = {frozenset((b['from'], b['to'])): b.get('id', f'bay_{i}')
                    for i, b in enumerate(example['bays'])}
         for run in example['build_runs']:
             path = run['station_order']
-            simulation.append({'action': 'fix_first_post', 'station': path[0], 'run': run['id']})
-            for start, end in zip(path, path[1:]):
+            simulation.append(event('prepare_holes', stations=path[:2], run=run['id']))
+            simulation.append(event('fix_first_post', station=path[0], run=run['id']))
+            for index, (start, end) in enumerate(zip(path, path[1:])):
                 bay = bay_ids[frozenset((start, end))]
-                for action in ('insert_bottom_rail', 'attach_end_channels', 'insert_boards',
-                               'place_top_rail', 'engage_second_post', 'fix_second_post'):
-                    simulation.append({'action': action, 'bay': bay, 'run': run['id'],
-                                       'start_station': start, 'receiving_station': end})
-            simulation.extend({'action': 'glue_cap', 'station': sid, 'run': run['id']} for sid in path)
+                if index:
+                    simulation.append(event('prepare_holes', stations=[end], run=run['id']))
+                for step in sequence:
+                    if step['key'] in required_actions[2:-1]:
+                        simulation.append(event(step['key'], bay=bay, run=run['id'],
+                                                start_station=start, receiving_station=end))
+            simulation.extend(event('glue_caps', station=sid, run=run['id']) for sid in path)
     return {'example_checks_passed': not errors, 'errors': errors,
             'expected_catalog_item_counts': dict(expected),
             'connected_runs': len(components), 'unique_stations': len(roles),
             'kit_contained_u_channels': 2 * len(example['bays']),
             'assembly_simulation': simulation,
+            'unresolved_installation_materials': deepcopy(materials),
             'installation_ready': False,
             'limitations': ['Authored example only; no fit or structural verification.',
                             'Retailer packaging/multipacks are not established.',
