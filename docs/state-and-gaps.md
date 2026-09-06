@@ -4206,6 +4206,51 @@ Final `python3 tests/run_tests.py`: **1,443 tests, OK (1 expected failure)**,
 
 ---
 
+### G86 — actual Planning consumer located and exercised
+
+`[measured]`, 2026-09-06. Read-only GitHub discovery located
+`spicysauce1955-stack/BOM`; a temporary checkout at
+`9de94eb06d8e997d9be098dedd5b6a6b2eb4024d` supplied the real loader and model types.
+No consumer code or remote state was changed. Its locked dependencies were
+installed into the temporary checkout to run the code, not inferred from docs.
+
+`scripts/probe_planning_consumer.py` loaded the actual G85 snapshot through
+`fenceai.knowledge.snapshot.load` and `ingest`: **17 Parts, 6 PartTypes, zero
+Part defects and zero gap defects**. The checked-in report pins both revisions
+and records the executed private requirement example. The consumer's 54 focused
+snapshot and part-aware model-validation tests pass.
+
+**One ambiguity resolved; a larger boundary measured.** The private requirement
+parser accepts integer `qty: 1` and `length_rule: centre_to_centre`; it refuses
+an unregistered name and a Quantity-valued length rule. The mutable datamodel
+documentation incorrectly grouped `length_rule` with Quantity; corrected without
+changing either frozen boundary document. Private `overlap_mm: 0` and other
+parser defaults are not source facts or approved public defaults.
+
+The snapshot loader deliberately carries `models`, `procedures`, `combinations`
+and `rules` without parsing them into private types. A hash-valid probe carrying
+a deliberately incomplete model loads and returns **models: 1 unconsumed**;
+the private FenceModel parser refuses that same object. The probe exists only
+in memory and is never stored as a published snapshot. Thus loading cannot
+be used as proof of model validity or BOM support.
+
+The missing input is no longer the repository location. The next work is a
+published-model adapter in Planning: agree the public requirement serialization,
+convert quantities explicitly, preserve provenance and refuse incomplete geometry,
+then bind published Parts/kit contents to products and run the two layouts.
+The existing source/geometry and family-to-SKU gaps remain. The saved report
+explicitly says `published_models_consumed: false` and `bom_generation_verified:
+false`; no successful BOM generation is claimed from this checkpoint.
+
+Validation: the executable consumer probe passes both negative controls and the
+carry-vs-parse control. Source-backed draft audit still reports zero integrity
+errors with incomplete field diagnostics (exit 2).
+The 17 local draft-audit tests pass, as do both frozen boundary checksums and
+`git diff --check`. The consumer checkout remains clean. No full-suite result
+is claimed for this probe/documentation checkpoint.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

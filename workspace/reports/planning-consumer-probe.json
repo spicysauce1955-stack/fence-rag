@@ -1,0 +1,57 @@
+{
+  "consumer_repository": "https://github.com/spicysauce1955-stack/BOM",
+  "consumer_revision": "9de94eb06d8e997d9be098dedd5b6a6b2eb4024d",
+  "snapshot_id": "5b25c3b6c40e67c204a9de8ee37471310c42ea68d6fcc73c295d3a3971777488",
+  "snapshot_loaded": true,
+  "loaded_parts": 17,
+  "loaded_part_types": 6,
+  "gap_defects": [],
+  "part_defects": [],
+  "unconsumed": {},
+  "private_requirement_example": {
+    "part_id": "probe/rail",
+    "qty": 1,
+    "length_rule": "centre_to_centre"
+  },
+  "private_requirement_roundtrip": {
+    "part_id": "probe/rail",
+    "role": "",
+    "qty": 1,
+    "length_rule": "centre_to_centre",
+    "overlap_mm": 0,
+    "option_axis": null,
+    "sku_by_option": {},
+    "eligibility": {
+      "group": null,
+      "members": [],
+      "predicate": null
+    },
+    "contained": [],
+    "credits": {}
+  },
+  "registered_length_rules": [
+    "between_frame",
+    "centre_to_centre",
+    "clear_between_posts",
+    "overlap",
+    "panel_height"
+  ],
+  "length_rule_refusals": {
+    "unknown_name": true,
+    "quantity_object": true
+  },
+  "invalid_model_probe": {
+    "snapshot_loader_accepted": true,
+    "private_model_parser_refused": true,
+    "unconsumed": {
+      "models": 1
+    }
+  },
+  "published_models_consumed": false,
+  "bom_generation_verified": false,
+  "limitations": [
+    "Internal parser shape is not a published-model wire contract.",
+    "The example tests syntax; it does not select an Emblem rail length rule.",
+    "Loaded Part identity does not establish catalog matching or BOM consumption."
+  ]
+}

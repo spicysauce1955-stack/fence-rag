@@ -929,13 +929,25 @@ or a reader cannot tell a measured cavity from a computed one.
 PartRequirement {
   part_id      "" means this slot names no part
   role         filled from Part.type during resolution — never authored
-  qty · length_rule · overlap    Quantity
+  qty · overlap                 Quantity
+  length_rule                   registered rule name | null
   option_axis · sku_by_option
   eligibility  Eligibility{ members | predicate }
 }
 ```
 
-Unchanged. Four shapes, derived from the fields rather than stored: `part`,
+`length_rule` names a computation, not a measured length. The earlier grouping
+of it with `Quantity` was erroneous. Measured against Planning commit
+`9de94eb06d8e997d9be098dedd5b6a6b2eb4024d`, its private parser accepts registered
+names (`between_frame`, `centre_to_centre`, `clear_between_posts`, `overlap`,
+`panel_height`) or null and refuses a Quantity object. That private type uses
+integer `qty` and `overlap_mm`; it is not a published-wire adapter. Planning's
+snapshot loader currently carries `models` unconsumed. Do not copy private
+defaults or treat private parsing as agreement on published serialization.
+The executable probe and pinned evidence are recorded in
+`workspace/reports/planning-consumer-probe.json` (repository-root path).
+
+Four shapes, derived from the fields rather than stored: `part`,
 `authored_predicate`, `authored_members` (tenant commerce, not yours to publish),
 and `unspecified` (refused at load).
 

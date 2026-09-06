@@ -77,10 +77,11 @@ aliases for the exact white-SKU draft: one dataset rail component represents bot
 rail positions, and family posts span variants. Exact product binding remains
 separate work. No researched dimensions are silently promoted with identity.
 
-The next publication step remains blocked. Current `PartRequirement` documentation
-groups `length_rule` as Quantity while its predecessor used named rules. The actual
-consumer representation is needed, alongside the missing joint/placement and
-infill fitting information. A draft status does not make an incomplete FenceModel
+The next publication step remains blocked. The consumer probe resolved the
+`length_rule` documentation error: Planning's private parser uses named rules,
+not Quantity. Its snapshot loader still carries models unconsumed, so the
+published-model adapter is missing alongside joint/placement and infill fitting
+information. A draft status does not make an incomplete FenceModel
 publishable. The audit's absent-field count is a syntactic diagnostic, not a list
 of mandatory facts: it currently includes mutually exclusive requirement modes.
 
@@ -97,8 +98,21 @@ requirements and nonempty fixings/containment it cannot consume. It must not be
 used as a replacement for Planning when those semantics are introduced. It also
 does not derive bay count from lengths, check cuts, or prove physical/structural fit.
 
-The next required input is the actual Planning repository. Verify its Product/kit
-coverage representation and loader there, then replace private preview bindings
-with the supported adapter and run these same cases through the consumer. The
-repository path or URL has been requested from the user. No contract amendment
-or new public kit schema was invented to bypass that check.
+The Planning repository is [BOM](https://github.com/spicysauce1955-stack/BOM),
+inspected at commit `9de94eb06d8e997d9be098dedd5b6a6b2eb4024d`. Its loader accepts
+our 17 Parts and 6 PartTypes without Part or gap defects. This confirms parsing
+and ingestion, not product matching or BOM generation. A deliberately invalid
+model passes the snapshot loader as unconsumed data while failing the private
+model parser. The next implementation is the published-model adapter in Planning,
+with explicit Quantity conversion and source preservation, followed by product/kit
+binding and the two layout cases through generation.
+
+Reproduce with the checked-out consumer's Python environment:
+
+```sh
+/path/to/BOM/.venv/bin/python scripts/probe_planning_consumer.py --consumer-root /path/to/BOM --snapshot workspace/snapshots/5b25c3b6c40e67c204a9de8ee37471310c42ea68d6fcc73c295d3a3971777488.json --report workspace/reports/planning-consumer-probe.json
+```
+
+The report pins the consumer revision and includes a valid private
+`PartRequirement` example and refusal controls. It does not select a length rule
+for Emblem or reinterpret unknown overlaps as the private parser's zero default.

@@ -15,9 +15,10 @@
   "quantity_rule_count": 3,
   "draft_citation_occurrences": 121,
   "model_publication_blockers": [
-    "PartRequirement length_rule wire shape is unresolved.",
+    "Planning carries published models unconsumed; private length_rule is a registered name but no published-model adapter exists.",
     "Family component IDs are not exact-SKU draft identities.",
     "Joint, placement, infill geometry and fitting policies remain incomplete."
   ],
-  "contract_consumer_verified": false
+  "contract_consumer_verified": false,
+  "consumer_probe": "workspace/reports/planning-consumer-probe.json"
 }
