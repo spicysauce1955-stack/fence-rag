@@ -17,7 +17,7 @@
   },
   "private_model_parser_errors": [],
   "whole_model_parses": true,
-  "candidate_hash": "b769316821cbbc0928406872f25b01a171ccc8ce9255ad064c6b33cad867fdf9",
+  "candidate_hash": "2c9af13bba4b5a88b32552cead6140f74e8cb9eed77ea8fd994f20b1a002a2e2",
   "partial_semantic_validation": {
     "executed": true,
     "errors": [
@@ -46,6 +46,24 @@
       "contributing_sources"
     ]
   ],
+  "component_resolution_probe": {
+    "scope": "isolated rail dimensions and channel counts, no physical panel fit",
+    "active_parts_are_in_memory_test_copies": true,
+    "rail_face_heights_mm": {
+      "bottom_rail": 178,
+      "top_rail": 178
+    },
+    "u_channel_counts_per_panel": {
+      "u_channel_first_board_tongue": 1,
+      "u_channel_last_board_groove": 1
+    },
+    "u_channels_for_1_and_7_panels": {
+      "1": 2,
+      "7": 14
+    },
+    "handed_placement_consumed": false,
+    "kit_purchase_credit_consumed": false
+  },
   "placement_confirmed": true,
   "placement_confirmation_kind": "user_confirmed_interpretation",
   "resolved_centrelines_mm_at_rounded_1829_mm_panel_height": {

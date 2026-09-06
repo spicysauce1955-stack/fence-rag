@@ -79,6 +79,43 @@ class TestConsumerCandidate(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'exact package and reviewed datum'):
                     prepare(self.package, changed)
 
+    def test_rail_mapping_uses_vertical_height_and_preserves_source_dimensions(self):
+        result = prepare(self.package)['component_authoring']
+        for mapping in result['rail_dimension_mappings']:
+            self.assertEqual(mapping['exact_mm'], '177.8')
+            self.assertEqual(mapping['projected_mm'], 178)
+            self.assertEqual(mapping['rounding_error_mm'], '0.2')
+            original = {s['key']: s['value'] for s in mapping['original_part_specs']}
+            self.assertEqual(original['width_mm']['amount_milli'], 57150)
+            self.assertEqual(original['height_mm']['amount_milli'], 177800)
+            self.assertTrue(mapping['source_spec']['provenance']['cites'])
+        self.assertTrue(all(p['status'] == 'draft' for p in result['private_parts']))
+
+    def test_u_channel_requirements_preserve_two_distinct_end_placements(self):
+        result = prepare(self.package)
+        authoring = result['component_authoring']
+        self.assertEqual([p['edge'] for p in authoring['u_channel_placements']],
+                         ['first_board_tongue', 'last_board_groove'])
+        channel = authoring['private_parts'][-1]
+        self.assertEqual(channel['type'], 'end_channel')
+        self.assertEqual(channel['spec'], [])
+        self.assertEqual([r['requirement']['part_id'] for r in result['model']['default_spec']['fixings']],
+                         [channel['id'], channel['id']])
+        self.assertFalse(authoring['handed_placement_consumed'])
+        self.assertFalse(authoring['kit_purchase_credit_consumed'])
+
+    def test_ambiguous_rail_height_and_changed_channel_inventory_are_refused(self):
+        rail = self.package['part_fragments'][0]
+        rail['spec'].append(deepcopy(next(s for s in rail['spec'] if s['key'] == 'height_mm')))
+        with self.assertRaisesRegex(ValueError, 'exactly one sourced height'):
+            prepare(self.package)
+        rail['spec'].pop()
+        inventory = next(i for i in self.package['packaged_assembly_inventory']
+                         if i['component_key'] == 'end_u_channel')
+        inventory['quantity_each'] = 4
+        with self.assertRaisesRegex(ValueError, 'two handed end placements'):
+            prepare(self.package)
+
 
 class TestConsumerCandidateIntegration(unittest.TestCase):
     def test_real_consumer_refuses_incomplete_candidate_and_exposes_lost_fields(self):
@@ -104,6 +141,14 @@ class TestConsumerCandidateIntegration(unittest.TestCase):
                     self.assertEqual(result['whole_model_parses'], confirmed)
                     self.assertEqual(result['partial_semantic_validation']['executed'], confirmed)
                     if confirmed:
+                        probe = result['component_resolution_probe']
+                        self.assertEqual(probe['rail_face_heights_mm'],
+                                         {'bottom_rail': 178, 'top_rail': 178})
+                        self.assertEqual(probe['u_channel_counts_per_panel'],
+                                         {'u_channel_first_board_tongue': 1,
+                                          'u_channel_last_board_groove': 1})
+                        self.assertEqual(probe['u_channels_for_1_and_7_panels'], {'1': 2, '7': 14})
+                        self.assertFalse(probe['handed_placement_consumed'])
                         errors = result['partial_semantic_validation']['errors']
                         self.assertTrue(any('bottom_rail' in e and 'channel_depth_mm=0' in e for e in errors))
                         self.assertTrue(any('top_rail' in e and 'channel_depth_mm=0' in e for e in errors))

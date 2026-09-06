@@ -18,6 +18,71 @@ from fence_evidence.canonical import content_hash
 from fence_evidence.paths import open_write
 
 
+def author_components(package, model):
+    """Map only evidenced horizontal rail heights and full-panel end channels."""
+    source_parts = {part['id']: part for part in package['part_fragments']}
+    parts, dimensions = [], []
+    for slot in model['default_spec']['frame']:
+        if slot['orientation'] != 'horizontal':
+            raise ValueError('Rail face-height mapping requires horizontal rails.')
+        source = source_parts[slot['requirement']['part_id']]
+        heights = [s for s in source['spec'] if s['key'] == 'height_mm']
+        if len(heights) != 1:
+            raise ValueError('Rail mapping requires exactly one sourced height.')
+        height = heights[0]
+        value = height['value']
+        if (height['agree'] != '==' or value['unit'] != 'mm'
+                or type(value['amount_milli']) is not int or value['amount_milli'] <= 0
+                or not height['provenance']['cites']):
+            raise ValueError('Rail mapping requires a positive cited millimetre height.')
+        exact = Decimal(value['amount_milli']) / 1000
+        projected = int(exact.quantize(Decimal('1'), rounding=ROUND_HALF_UP))
+        parts.append({'id': source['id'], 'version': source['version'], 'status': 'draft',
+                      'type': 'rail', 'name_i18n': source['name_i18n'],
+                      'spec': [{'key': 'thickness_mm', 'agree': '==',
+                                'value': projected, 'unit': 'mm'}]})
+        dimensions.append({'part_id': source['id'], 'slot_key': slot['key'],
+                           'source_spec': deepcopy(height),
+                           'original_part_specs': deepcopy(source['spec']),
+                           'consumer_key': 'thickness_mm',
+                           'datum': 'vertical face height of horizontal rail, not wall thickness',
+                           'exact_mm': str(exact), 'projected_mm': projected,
+                           'rounding_error_mm': str(Decimal(projected) - exact),
+                           'rounding_policy': 'nearest whole millimetre, half up'})
+    inventories = [i for i in package['packaged_assembly_inventory']
+                   if i['component_key'] == 'end_u_channel']
+    if len(inventories) != 1:
+        raise ValueError('Expected one end U-channel inventory record.')
+    inventory = inventories[0]
+    edges = ['first_board_tongue', 'last_board_groove']
+    if (type(inventory['quantity_each']) is not int or inventory['quantity_each'] != 2
+            or inventory['edges'] != edges
+            or any(not inventory[key].get('cite') or not inventory[key].get('text_raw')
+                   for key in ('evidence', 'count_evidence', 'edge_evidence'))):
+        raise ValueError('U-channels require the evidenced two handed end placements.')
+    channel_id = model['id'].replace('-emblem-73014714', '/emblem-73014714-end-u-channel')
+    parts.append({'id': channel_id, 'version': 1, 'status': 'draft',
+                  'type': 'end_channel', 'name_i18n': {'en': 'Emblem end U-channel'}, 'spec': []})
+    if model['default_spec'].get('fixings'):
+        raise ValueError('Cannot overwrite existing fixing requirements.')
+    placements = []
+    for edge in edges:
+        key = 'u_channel_' + edge
+        placements.append({'slot_key': key, 'part_id': channel_id, 'edge': edge,
+                           'quantity_each': 1, 'evidence': deepcopy(inventory['edge_evidence'])})
+    model['default_spec']['fixings'] = [
+        {'key': p['slot_key'], 'basis': 'per_panel', 'qty_per_basis': p['quantity_each'],
+         'requirement': {'part_id': channel_id, 'qty': 1}} for p in placements]
+    return {'private_parts': parts, 'rail_dimension_mappings': dimensions,
+            'u_channel_placements': placements, 'u_channel_inventory_evidence': deepcopy(inventory),
+            'scope': 'full panel only; incomplete private component representation',
+            'handed_placement_consumed': False, 'kit_purchase_credit_consumed': False,
+            'limitations': ['Consumer counts channels but does not enforce their handed edge placement.',
+                            'Channels ship in the panel kit; separate component demand must not become extra purchases.',
+                            'Private Parts are partial geometry/count definitions, not exact product selectors: rail width/colour constraints remain in source specs and channel specs are empty.',
+                            'Channel dimensions and remaining exact Parts are unresolved.']}
+
+
 def prepare(package, placement_confirmation=None):
     model = deepcopy(package['model_fragment'])
     source_joints = {}
@@ -104,6 +169,7 @@ def prepare(package, placement_confirmation=None):
         result['placement_datum_note'] = (
             'User-confirmed interpretation; source pages do not explicitly dimension the endpoints. '
             'Integer-mm approximation is adapter authoring, not a manufacturer tolerance.')
+    result['component_authoring'] = author_components(package, model)
     return result
 
 
@@ -159,7 +225,7 @@ def main():
         errors = [{'location': list(e['loc']), 'message': e['msg']} for e in exc.errors()]
     else:
         errors = []
-    positions, semantic_errors, unconsumed = {}, [], []
+    positions, semantic_errors, unconsumed, component_probe = {}, [], [], {}
     if not errors:
         semantic_errors = validate_model(parsed, Catalog(), library=None)
         unconsumed = unconsumed_paths(result['model'], parsed.model_dump())
@@ -172,6 +238,37 @@ def main():
         offset = result['placement_projection']['consumer_inward_offset_mm']
         if positions != {'bottom_rail': [offset], 'top_rail': [height - offset]}:
             raise ValueError('Consumer rail positions disagree with the confirmed datum projection.')
+        from fenceai.parts.model import Part, PartLibrary
+        from fenceai.parts.resolve import resolve_model_parts
+        from fenceai.fencemodel.model import PanelSpec
+        from fenceai.fencemodel.resolve import PanelContext, resolve_panel
+        # Activate copies only in an isolated diagnostic, never the authored Parts.
+        authored = result['component_authoring']
+        library = PartLibrary(parts=[Part.model_validate(dict(p, status='active'))
+                                     for p in authored['private_parts']])
+        probe_model = parsed.model_copy(deep=True)
+        probe_model.post = None
+        probe_model.default_spec.infill = None
+        probe_model.variants = []
+        resolved, _ = resolve_model_parts(probe_model, library)
+        rail_heights = {s.key: s.thickness_mm for s in resolved.default_spec.frame}
+        expected_heights = {m['slot_key']: m['projected_mm'] for m in authored['rail_dimension_mappings']}
+        if rail_heights != expected_heights:
+            raise ValueError('Consumer lost the sourced vertical rail face height.')
+        # Count only channel requirements: no invented panel/infill fit is executed.
+        channels = resolve_panel(PanelSpec(fixings=resolved.default_spec.fixings),
+                                 PanelContext(centre_width_mm=1, clear_width_mm=1, height_mm=1))
+        counts = {s.slot_key: s.qty for s in channels.slots}
+        expected_counts = {p['slot_key']: p['quantity_each'] for p in authored['u_channel_placements']}
+        if counts != expected_counts:
+            raise ValueError('Consumer U-channel count differs from authored end placements.')
+        component_probe = {'scope': 'isolated rail dimensions and channel counts, no physical panel fit',
+                           'active_parts_are_in_memory_test_copies': True,
+                           'rail_face_heights_mm': rail_heights,
+                           'u_channel_counts_per_panel': counts,
+                           'u_channels_for_1_and_7_panels': {str(n): n * sum(counts.values()) for n in (1, 7)},
+                           'handed_placement_consumed': False,
+                           'kit_purchase_credit_consumed': False}
     report = {
         'consumer_revision': subprocess.check_output(
             ['git', '-C', str(args.consumer_root), 'rev-parse', 'HEAD'], text=True).strip(),
@@ -184,6 +281,7 @@ def main():
             'part_library_basis': 'absent; Part-dependent checks skipped',
         },
         'unconsumed_authored_paths': unconsumed,
+        'component_resolution_probe': component_probe,
         'placement_confirmed': confirmation is not None,
         'placement_confirmation_kind': 'user_confirmed_interpretation' if confirmation else None,
         'resolved_centrelines_mm_at_rounded_1829_mm_panel_height': positions,

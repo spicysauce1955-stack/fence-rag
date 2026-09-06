@@ -4672,6 +4672,39 @@ admission/publication and consumption remain implementation work.
 
 ---
 
+### G96 — Map rail face height and represent two end U-channels (2026-09-06)
+
+The private preparer now authors three draft consumer Parts: two rails and one
+end U-channel. Horizontal rail source height_mm 177.8 maps to consumer thickness_mm
+178, retaining the source SpecField, original specs and explicit 0.2 mm rounding
+error. The 57.15 mm source width is not mistaken for elevation face height.
+Ambiguous heights, non-horizontal rails and uncited/invalid heights refuse.
+
+Two source-backed U-channels become two per-panel fixing requirements naming one
+Part: first board tongue and last board groove, one each. Handedness is retained
+in authoring evidence but not enforced by the current consumer. These are component
+requirements, not additional purchases: the kit contains both, and purchase credit
+remains unimplemented. Private matching specs remain incomplete; source rail width
+and colour survive in metadata, and channel geometry remains unknown.
+
+**Measured:** 11 focused tests pass, including real-consumer execution and refusals
+for duplicate height and changed channel inventory. A diagnostic activates only
+in-memory draft copies, resolves rail heights through resolve_model_parts, then
+runs resolve_panel on the channel-only fixing spec. Both heights resolve to 178 mm;
+channel counts resolve to one per named end, 2 per panel and 14 for seven panels.
+The synthetic 1 mm context cannot affect per-panel counts; it is not Emblem geometry.
+An independent reviewer reproduced the results and found no blocking defect in
+this limited probe. Both frozen checksums and git diff --check pass.
+
+The same three semantic errors remain: two channel depths and the board length
+rule. Full validation, handed placement consumption and kit purchase credit remain
+false; CLI exits 2. Original source package and user confirmation are unchanged.
+Updated candidate/report: `workspace/catalog/emblem-73014714-consumer-model.json`
+and `workspace/reports/emblem-73014714-consumer-model-check.json`. No published
+model, full panel fit or exact supplier BOM is claimed.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

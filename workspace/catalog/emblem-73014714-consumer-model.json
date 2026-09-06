@@ -79,7 +79,27 @@
           }
         ],
         "supply": "components"
-      }
+      },
+      "fixings": [
+        {
+          "key": "u_channel_first_board_tongue",
+          "basis": "per_panel",
+          "qty_per_basis": 1,
+          "requirement": {
+            "part_id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
+            "qty": 1
+          }
+        },
+        {
+          "key": "u_channel_last_board_groove",
+          "basis": "per_panel",
+          "qty_per_basis": 1,
+          "requirement": {
+            "part_id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
+            "qty": 1
+          }
+        }
+      ]
     },
     "post": {
       "key": "post",
@@ -326,5 +346,326 @@
     "consumer_inward_offset_mm": 89,
     "rounding_policy": "nearest whole millimetre, half up; authored adapter policy",
     "offset_rounding_error_mm": "0.1"
+  },
+  "component_authoring": {
+    "private_parts": [
+      {
+        "id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+        "version": 1,
+        "status": "draft",
+        "type": "rail",
+        "name_i18n": {
+          "en": "Emblem 73014714 rail A (provisional identity)"
+        },
+        "spec": [
+          {
+            "key": "thickness_mm",
+            "agree": "==",
+            "value": 178,
+            "unit": "mm"
+          }
+        ]
+      },
+      {
+        "id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+        "version": 1,
+        "status": "draft",
+        "type": "rail",
+        "name_i18n": {
+          "en": "Emblem 73014714 rail B (provisional identity)"
+        },
+        "spec": [
+          {
+            "key": "thickness_mm",
+            "agree": "==",
+            "value": 178,
+            "unit": "mm"
+          }
+        ]
+      },
+      {
+        "id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
+        "version": 1,
+        "status": "draft",
+        "type": "end_channel",
+        "name_i18n": {
+          "en": "Emblem end U-channel"
+        },
+        "spec": []
+      }
+    ],
+    "rail_dimension_mappings": [
+      {
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+        "slot_key": "bottom_rail",
+        "source_spec": {
+          "key": "height_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 177800,
+            "unit": "mm",
+            "value_raw": [
+              "7 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        "original_part_specs": [
+          {
+            "key": "width_mm",
+            "agree": "==",
+            "value": {
+              "amount_milli": 57150,
+              "unit": "mm",
+              "value_raw": [
+                "2-\u00bc in."
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "b2766cd38e5d8624",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          },
+          {
+            "key": "height_mm",
+            "agree": "==",
+            "value": {
+              "amount_milli": 177800,
+              "unit": "mm",
+              "value_raw": [
+                "7 in."
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "b2766cd38e5d8624",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          },
+          {
+            "key": "colour",
+            "agree": "==",
+            "value": {
+              "key": "white",
+              "value_raw": [
+                "White"
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "5d7cfd7597583e43",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          }
+        ],
+        "consumer_key": "thickness_mm",
+        "datum": "vertical face height of horizontal rail, not wall thickness",
+        "exact_mm": "177.8",
+        "projected_mm": 178,
+        "rounding_error_mm": "0.2",
+        "rounding_policy": "nearest whole millimetre, half up"
+      },
+      {
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+        "slot_key": "top_rail",
+        "source_spec": {
+          "key": "height_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 177800,
+            "unit": "mm",
+            "value_raw": [
+              "7 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        "original_part_specs": [
+          {
+            "key": "width_mm",
+            "agree": "==",
+            "value": {
+              "amount_milli": 57150,
+              "unit": "mm",
+              "value_raw": [
+                "2-\u00bc in."
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "b2766cd38e5d8624",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          },
+          {
+            "key": "height_mm",
+            "agree": "==",
+            "value": {
+              "amount_milli": 177800,
+              "unit": "mm",
+              "value_raw": [
+                "7 in."
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "b2766cd38e5d8624",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          },
+          {
+            "key": "colour",
+            "agree": "==",
+            "value": {
+              "key": "white",
+              "value_raw": [
+                "White"
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "5d7cfd7597583e43",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          }
+        ],
+        "consumer_key": "thickness_mm",
+        "datum": "vertical face height of horizontal rail, not wall thickness",
+        "exact_mm": "177.8",
+        "projected_mm": 178,
+        "rounding_error_mm": "0.2",
+        "rounding_policy": "nearest whole millimetre, half up"
+      }
+    ],
+    "u_channel_placements": [
+      {
+        "slot_key": "u_channel_first_board_tongue",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
+        "edge": "first_board_tongue",
+        "quantity_each": 1,
+        "evidence": {
+          "element_id": "element-15b181bc58-0008",
+          "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+          "cite": {
+            "id": "57482180d5ddbd37",
+            "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+          }
+        }
+      },
+      {
+        "slot_key": "u_channel_last_board_groove",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
+        "edge": "last_board_groove",
+        "quantity_each": 1,
+        "evidence": {
+          "element_id": "element-15b181bc58-0008",
+          "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+          "cite": {
+            "id": "57482180d5ddbd37",
+            "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+          }
+        }
+      }
+    ],
+    "u_channel_inventory_evidence": {
+      "component_key": "end_u_channel",
+      "quantity_each": 2,
+      "edges": [
+        "first_board_tongue",
+        "last_board_groove"
+      ],
+      "coverage": "included_in_manual_kit_component_list; exact-SKU applicability supported by linked manual",
+      "evidence": {
+        "element_id": "element-efcc3971c4-0017",
+        "text_raw": "U-Channels",
+        "cite": {
+          "id": "a63ff62245d7c789",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      },
+      "count_evidence": {
+        "element_id": "element-15b181bc58-0006",
+        "text_raw": "Attach U-channels to two end boards (Fig. 6).",
+        "cite": {
+          "id": "aeaf7e66a05b4d28",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      },
+      "edge_evidence": {
+        "element_id": "element-15b181bc58-0008",
+        "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+        "cite": {
+          "id": "57482180d5ddbd37",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      },
+      "contract_mapping": "Part type and handed slot representation remain unresolved; this is private kit inventory"
+    },
+    "scope": "full panel only; incomplete private component representation",
+    "handed_placement_consumed": false,
+    "kit_purchase_credit_consumed": false,
+    "limitations": [
+      "Consumer counts channels but does not enforce their handed edge placement.",
+      "Channels ship in the panel kit; separate component demand must not become extra purchases.",
+      "Private Parts are partial geometry/count definitions, not exact product selectors: rail width/colour constraints remain in source specs and channel specs are empty.",
+      "Channel dimensions and remaining exact Parts are unresolved."
+    ]
   }
 }
