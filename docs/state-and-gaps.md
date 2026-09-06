@@ -4098,6 +4098,36 @@ Final `python3 tests/run_tests.py`: **1,416 tests, OK (1 expected failure)**,
 
 ---
 
+### G83 — procedure verification now exercises refusals on nonempty procedures
+
+`[measured]`, 2026-09-06. Review correctly identified that the procedure
+publisher had tests but its snapshot verification gate had no refusal tests:
+the verifier fixtures all carried `procedures: []`. The real-build test even
+looked for `verify(` in source text instead of executing a failing build.
+
+Twelve new verifier tests start from a valid two-step procedure and exercise
+missing/duplicate procedure IDs, duplicate/missing/blank step keys,
+missing/unknown kind and scope, missing citations, blank text, invalid edge
+kind, a dependency pointing into another procedure, and citation closure.
+The positive fixture must pass before each negative control is applied.
+The build test now injects that procedure through the publisher boundary:
+the complete object returns a snapshot, while removing the first step's kind
+raises `VerificationFailed` before any snapshot is returned.
+
+**A real omission surfaced.** Null, empty and whitespace-only step keys all
+passed the existing gate. The new test failed in all three cases before the
+fix. The gate now requires a nonempty string key; those cases are refused.
+Focused verification: **57 tests pass**, including the real-store build gate.
+Full `python3 tests/run_tests.py`: **1,428 tests, OK (1 expected failure)**,
+45.557 seconds. `git diff --check` passes.
+These are structural checks, not proof of source correctness, complete graph
+validation, or Planning compatibility. No live human step review was created.
+
+The three additional prose corrections referenced in the external review were
+not included in its supplied excerpt; they remain pending the actual findings.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

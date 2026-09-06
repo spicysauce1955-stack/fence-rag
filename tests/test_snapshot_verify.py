@@ -16,6 +16,8 @@ person accepted and the person was wrong. A green verify proves the object is
 well-formed. It proves nothing about whether it is true.
 """
 import unittest
+from copy import deepcopy
+from unittest.mock import patch
 
 import context  # noqa: F401  -- puts the repo root on sys.path
 from context import requires_store
@@ -40,6 +42,87 @@ def _ok():
         "gaps": [], "part_types": [], "parts": [], "models": [],
         "procedures": [], "parameters": [], "combinations": [], "rules": [],
     }
+
+
+def _procedure():
+    cite = {"id": "r1", "belongs_to": "h1"}
+    return {"id": "installation", "scope": None, "cites": [cite], "steps": [
+        {"key": "prepare", "kind": "preparation", "scope": "site",
+         "slots": [], "requires": [], "cites": [cite], "text_i18n": "Prepare the site."},
+        {"key": "install", "kind": "installation", "scope": "post",
+         "slots": [], "requires": [{"kind": "after", "step": "prepare"}],
+         "cites": [cite], "text_i18n": "Install the post."}]}
+
+
+class TestProcedureVerificationGate(unittest.TestCase):
+    def setUp(self):
+        self.snapshot = _ok()
+        self.snapshot["procedures"] = [_procedure()]
+        verify(self.snapshot)  # Each negative control starts from a valid object.
+
+    def refuses(self, fragment):
+        with self.assertRaises(VerificationFailed) as caught:
+            verify(self.snapshot)
+        self.assertIn(fragment, str(caught.exception))
+
+    def test_nonempty_procedure_passes(self):
+        verify(self.snapshot)
+
+    def test_missing_procedure_id(self):
+        del self.snapshot["procedures"][0]["id"]
+        self.refuses("no id")
+
+    def test_duplicate_procedure_id(self):
+        self.snapshot["procedures"].append(deepcopy(self.snapshot["procedures"][0]))
+        self.refuses("duplicate Procedure.id")
+
+    def test_duplicate_step_key(self):
+        self.snapshot["procedures"][0]["steps"][1]["key"] = "prepare"
+        self.refuses("two steps share a key")
+
+    def test_missing_or_blank_step_key(self):
+        for key in (None, "", "   "):
+            with self.subTest(key=key):
+                self.snapshot["procedures"][0]["steps"][1]["key"] = key
+                self.refuses("key must be a nonempty string")
+
+    def test_missing_or_unknown_kind(self):
+        for value in (None, "unknown"):
+            with self.subTest(value=value):
+                self.snapshot["procedures"][0]["steps"][0]["kind"] = value
+                self.refuses("steps[0]: kind")
+
+    def test_missing_or_unknown_scope(self):
+        for value in (None, "unknown"):
+            with self.subTest(value=value):
+                self.snapshot["procedures"][0]["steps"][0]["scope"] = value
+                self.refuses("steps[0]: scope")
+
+    def test_missing_cites(self):
+        self.snapshot["procedures"][0]["steps"][0]["cites"] = []
+        self.refuses("no cites")
+
+    def test_blank_text(self):
+        self.snapshot["procedures"][0]["steps"][0]["text_i18n"] = "  "
+        self.refuses("empty text")
+
+    def test_unknown_edge_kind(self):
+        self.snapshot["procedures"][0]["steps"][1]["requires"][0]["kind"] = "maybe_after"
+        self.refuses("requires kind")
+
+    def test_edge_outside_its_procedure(self):
+        other = deepcopy(self.snapshot["procedures"][0])
+        other["id"] = "other"
+        other["steps"][0]["key"] = "elsewhere"
+        other["steps"][1]["requires"][0]["step"] = "elsewhere"
+        self.snapshot["procedures"].append(other)
+        self.snapshot["procedures"][0]["steps"][1]["requires"][0]["step"] = "elsewhere"
+        self.refuses("not a step of this procedure")
+
+    def test_step_citation_must_close(self):
+        self.snapshot["procedures"][0]["steps"][0]["cites"] = [
+            {"id": "external", "belongs_to": "absent"}]
+        self.refuses("closure")
 
 
 class TestVerifyAccepts(unittest.TestCase):
@@ -138,9 +221,27 @@ class TestTheRealBuildPasses(unittest.TestCase):
 
     def test_build_runs_verify_itself(self):
         """The gate is inside the builder, so a caller cannot skip it."""
-        import inspect
         from fence_evidence import snapshot
-        self.assertIn("verify(", inspect.getsource(snapshot.build_snapshot))
+
+        def published(conn, *, source_ref_page, **kwargs):
+            anchor = conn.execute("SELECT document_id, page_no FROM elements "
+                                  "WHERE page_no IS NOT NULL LIMIT 1").fetchone()
+            cite = source_ref_page(anchor["document_id"], anchor["page_no"])
+            proc = _procedure()
+            proc["cites"] = [cite]
+            for step in proc["steps"]:
+                step["cites"] = [cite]
+            if invalid:
+                del proc["steps"][0]["kind"]
+            return [proc], []
+
+        with patch("fence_evidence.procedures.build_procedures", side_effect=published):
+            invalid = False
+            built = snapshot.build_snapshot(tenant="acme")
+            self.assertEqual(len(built["procedures"][0]["steps"]), 2)
+            invalid = True
+            with self.assertRaisesRegex(VerificationFailed, r"steps\[0\]: kind"):
+                snapshot.build_snapshot(tenant="acme")
 
 
 if __name__ == "__main__":
@@ -366,4 +467,3 @@ class TestTheGateEnforcesWhatTheContractBinds(unittest.TestCase):
         self._fails(lambda s: s.__setitem__(
             "gaps", [_gap(because={"code": "c", "params": "not a dict"})]),
             "must be an object")
-

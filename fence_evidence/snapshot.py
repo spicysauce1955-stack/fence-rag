@@ -1334,6 +1334,8 @@ def verify(snapshot: dict) -> None:
             fail.append(f"{at}: two steps share a key")
         for j, st in enumerate(proc.get("steps") or []):
             sat = f"{at}.steps[{j}]"
+            if not isinstance(st.get("key"), str) or not st["key"].strip():
+                fail.append(f"{sat}: key must be a nonempty string")
             if st.get("kind") not in STEP_KINDS:
                 fail.append(f"{sat}: kind {st.get('kind')!r} is not one of "
                             f"{sorted(STEP_KINDS)}")
