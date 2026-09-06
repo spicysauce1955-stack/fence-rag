@@ -4421,6 +4421,50 @@ a line in the next turn. `python3 tests/run_tests.py`: **1,471 tests, OK
 
 ---
 
+### G90 — private FenceModel candidate closes joint and post parser gaps
+
+`[measured]`, 2026-09-06. The next requested slice was the three known parser
+gaps: rail placement, joint shape and post requirement. Two are now mapped in
+`workspace/catalog/emblem-73014714-consumer-model.json`; the source draft remains
+unchanged and the candidate records its hash and retained source joint objects.
+
+The private consumer uses `joint: channel`, not the published Joint object.
+The preparer translates only the existing kind-only shape; it refuses a Joint
+carrying additional numeric fields rather than silently dropping them. Post
+selection uses the consumer's own predicate AST: `post.kind` paired with
+`item.sku`, for end 73045785, line 73045783 and corner 73045784. This private
+catalog predicate names no Part, as required by the consumer's exclusivity rule.
+Its quantity is taken from the explicit one-post-per-station authored rule.
+This is not a published eligibility agreement or a claim of physical routing fit.
+
+Planning's parser now reports **two errors instead of five**, both missing rail
+placements. Its evaluator selects the intended SKU for each of the three roles
+and no SKU for gate, junction or transition, including an unrelated-product
+negative control. **23 consumer post-slot tests and 5 local mapping tests pass**.
+The preparation command exits 2 while the candidate is incomplete. No full
+FenceModel validation or BOM generation is claimed.
+
+**The remaining placement question is a real source gap.** Independent visual
+and text review of the exact project sheet, catalog and installation guide found
+72-inch actual panel height and 7-inch rails, but no explicit centreline offsets.
+Planning's placement represents a rail centreline. A 3.5-inch (88.9 mm) inward
+offset follows only if the panel height is outside-rail-face to outside-rail-face
+and each rail occupies a full 7-inch vertical envelope. The asymmetric profile's
+material centroid is not the datum. The manual's 2-inch ground clearance is not
+a substitute for a rail position within the panel. The user has been asked to
+confirm the datum or supply the two offsets; neither zero nor 3.5 inches is
+inserted while that answer is pending. Integer-mm projection would also need
+explicit treatment of 88.9 mm rather than silently truncating it.
+
+`scripts/prepare_emblem_consumer_model.py` reproduces the candidate and
+`workspace/reports/emblem-73014714-consumer-model-check.json` with the consumer's
+Python environment and `--consumer-root`, `--package`, `--output`, `--report`.
+Missing joint geometry, Part specs, fitting policies and unprovided private
+defaults remain listed as unresolved. Closing parser errors alone will not
+make a model physically complete. Both frozen boundary checksums pass.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and
