@@ -1,6 +1,10 @@
 """Private mapping must not fill unknown geometry or erase source assertions."""
 from copy import deepcopy
 import json
+import os
+from pathlib import Path
+import subprocess
+import tempfile
 import unittest
 
 from context import ROOT
@@ -74,3 +78,35 @@ class TestConsumerCandidate(unittest.TestCase):
                 changed = dict(confirmation, **{key: value})
                 with self.assertRaisesRegex(ValueError, 'exact package and reviewed datum'):
                     prepare(self.package, changed)
+
+
+class TestConsumerCandidateIntegration(unittest.TestCase):
+    def test_real_consumer_refuses_incomplete_candidate_and_exposes_lost_fields(self):
+        consumer = Path(os.environ.get('FENCE_PLANNING_ROOT', '/tmp/fence-planning-bom'))
+        python = consumer / '.venv/bin/python'
+        if not python.exists() or not (consumer / 'src/fenceai/fencemodel/model.py').exists():
+            self.skipTest('Set FENCE_PLANNING_ROOT to a Planning checkout with its Python environment.')
+        with tempfile.TemporaryDirectory(dir=ROOT / 'workspace') as directory:
+            report = Path(directory) / 'report.json'
+            command = [str(python), str(ROOT / 'scripts/prepare_emblem_consumer_model.py'),
+                       '--consumer-root', str(consumer), '--package',
+                       str(ROOT / 'workspace/catalog/emblem-73014714-model-draft.json'),
+                       '--output', str(Path(directory) / 'candidate.json'), '--report', str(report)]
+            for confirmed in (False, True):
+                with self.subTest(confirmed=confirmed):
+                    args = command + (['--placement-confirmation', str(ROOT / 'workspace/catalog/emblem-73014714-placement-confirmation.json')]
+                                      if confirmed else [])
+                    run = subprocess.run(args, cwd=ROOT, capture_output=True, text=True)
+                    self.assertEqual(run.returncode, 2, run.stderr or run.stdout)
+                    result = json.loads(report.read_text())
+                    self.assertFalse(result['candidate_complete'])
+                    self.assertFalse(result['bom_generation_verified'])
+                    self.assertEqual(result['whole_model_parses'], confirmed)
+                    self.assertEqual(result['partial_semantic_validation']['executed'], confirmed)
+                    if confirmed:
+                        errors = result['partial_semantic_validation']['errors']
+                        self.assertTrue(any('bottom_rail' in e and 'channel_depth_mm=0' in e for e in errors))
+                        self.assertTrue(any('top_rail' in e and 'channel_depth_mm=0' in e for e in errors))
+                        self.assertTrue(any('length_rule=None' in e for e in errors))
+                        self.assertIn(['default_spec', 'infill', 'pattern', 0, 'profile_edges'],
+                                      result['unconsumed_authored_paths'])

@@ -17,6 +17,35 @@
   },
   "private_model_parser_errors": [],
   "whole_model_parses": true,
+  "candidate_hash": "b769316821cbbc0928406872f25b01a171ccc8ce9255ad064c6b33cad867fdf9",
+  "partial_semantic_validation": {
+    "executed": true,
+    "errors": [
+      "infill member 'board': base_ref and top_ref with length_rule=None is not yet supported (phase 2): only 'between_frame' measures against the frame, so these refs would be read by nothing and the member would still be cut to the rule it declares",
+      "frame slot 'bottom_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have \u2014 the drawing would show a housed joint and the cut list would read as a butt one. Give the channel its depth, or call the joint 'butt'",
+      "frame slot 'top_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have \u2014 the drawing would show a housed joint and the cut list would read as a butt one. Give the channel its depth, or call the joint 'butt'"
+    ],
+    "catalog_basis": "empty diagnostic fixture, not supplier evidence",
+    "part_library_basis": "absent; Part-dependent checks skipped"
+  },
+  "unconsumed_authored_paths": [
+    [
+      "authorship"
+    ],
+    [
+      "cites"
+    ],
+    [
+      "default_spec",
+      "infill",
+      "pattern",
+      0,
+      "profile_edges"
+    ],
+    [
+      "contributing_sources"
+    ]
+  ],
   "placement_confirmed": true,
   "placement_confirmation_kind": "user_confirmed_interpretation",
   "resolved_centrelines_mm_at_rounded_1829_mm_panel_height": {
@@ -28,5 +57,11 @@
     ]
   },
   "full_model_validation": "not_run_exact_part_library_and_catalog_incomplete",
-  "bom_generation_verified": false
+  "bom_generation_verified": false,
+  "candidate_complete": false,
+  "completion_blockers": [
+    "Exact Part library and catalog unavailable",
+    "Authored geometry and fitting policies incomplete",
+    "Published model adapter unavailable"
+  ]
 }

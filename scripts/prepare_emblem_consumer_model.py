@@ -2,7 +2,8 @@
 
 Run with Planning's Python environment. This does not publish a Snapshot or
 apply private parser defaults as source facts. Rail placements require a bound
-user confirmation. Exit 0 means parser acceptance, not complete BOM validation.
+user confirmation. Exit 2 means the candidate remains incomplete, including when
+it parses but semantic checks fail or the exact Part library is unavailable.
 """
 import argparse
 from copy import deepcopy
@@ -106,6 +107,25 @@ def prepare(package, placement_confirmation=None):
     return result
 
 
+def unconsumed_paths(authored, parsed, path=()):
+    """Find authored fields silently discarded by the private consumer parser."""
+    missing = []
+    if isinstance(authored, dict) and isinstance(parsed, dict):
+        for key, value in authored.items():
+            child = (*path, key)
+            if key not in parsed:
+                missing.append(list(child))
+            else:
+                missing.extend(unconsumed_paths(value, parsed[key], child))
+    elif isinstance(authored, list) and isinstance(parsed, list):
+        for index, value in enumerate(authored):
+            if index >= len(parsed):
+                missing.append(list((*path, index)))
+            else:
+                missing.extend(unconsumed_paths(value, parsed[index], (*path, index)))
+    return missing
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--consumer-root', type=Path, required=True)
@@ -116,7 +136,8 @@ def main():
     args = parser.parse_args()
     sys.path.insert(0, str(args.consumer_root.resolve() / 'src'))
     from pydantic import ValidationError
-    from fenceai.fencemodel.model import FenceModel, PartRequirement
+    from fenceai.fencemodel.model import FenceModel, PartRequirement, validate_model
+    from fenceai.catalog.model import Catalog
     from fenceai.knowledge.ast import evaluate_expr
     confirmation = (json.loads(args.placement_confirmation.read_text())
                     if args.placement_confirmation else None)
@@ -138,7 +159,10 @@ def main():
         errors = [{'location': list(e['loc']), 'message': e['msg']} for e in exc.errors()]
     else:
         errors = []
-    positions = {}
+    positions, semantic_errors, unconsumed = {}, [], []
+    if not errors:
+        semantic_errors = validate_model(parsed, Catalog(), library=None)
+        unconsumed = unconsumed_paths(result['model'], parsed.model_dump())
     if not errors and confirmation is not None:
         from fenceai.fencemodel.resolve import placement_positions
         height = int((Decimal(confirmation['panel_height_inches']) * Decimal('25.4')).quantize(
@@ -153,18 +177,29 @@ def main():
             ['git', '-C', str(args.consumer_root), 'rev-parse', 'HEAD'], text=True).strip(),
         'post_requirement_parses': True, 'post_role_matrix': matrix,
         'private_model_parser_errors': errors, 'whole_model_parses': not errors,
+        'candidate_hash': content_hash(result),
+        'partial_semantic_validation': {
+            'executed': not errors, 'errors': semantic_errors,
+            'catalog_basis': 'empty diagnostic fixture, not supplier evidence',
+            'part_library_basis': 'absent; Part-dependent checks skipped',
+        },
+        'unconsumed_authored_paths': unconsumed,
         'placement_confirmed': confirmation is not None,
         'placement_confirmation_kind': 'user_confirmed_interpretation' if confirmation else None,
         'resolved_centrelines_mm_at_rounded_1829_mm_panel_height': positions,
         'full_model_validation': 'not_run_exact_part_library_and_catalog_incomplete',
         'bom_generation_verified': False,
+        'candidate_complete': False,
+        'completion_blockers': ['Exact Part library and catalog unavailable',
+                                'Authored geometry and fitting policies incomplete',
+                                'Published model adapter unavailable'],
     }
     for path, value in [(args.output, result), (args.report, report)]:
         with open_write(path) as handle:
             json.dump(value, handle, indent=2)
             handle.write('\n')
     print(json.dumps(report, indent=2))
-    return 2 if errors else 0
+    return 2  # No complete model-validation path exists in this draft preparer.
 
 
 if __name__ == '__main__':

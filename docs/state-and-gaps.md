@@ -4501,6 +4501,94 @@ the three known private syntax blockers, not the contract publication work.
 
 ---
 
+### G92 — Cross-source evidence improves Emblem coverage; revision identity still matters (2026-09-06)
+
+The renewed external search found the manufacturer's Emblem family page states
+7/8-inch board thickness and directly links the exact 73014714 project plan.
+This improves the previously rejected legacy-dataset claim to a manufacturer
+family assertion with an explicit model link. It has not yet been captured with
+content hashes, admitted through review or published as an exact Part spec.
+
+The exact SKU retailer page links a cutdown guide stating a 3-inch rail allowance
+beyond finished panel width. That supports a scoped cutting rule, not an automatic
+97-inch stock length or board engagement depth. A newer manufacturer Emblem
+manual, 34118672 REV 5.25, explicitly lists 15 boards, 2 rails and 2 U-channels
+in both language tables. Transfer to the legacy SKU remains unproven: the current
+manufacturer shopping link selects 73058414. Its link labelled Emblem instructions
+actually opens a Manchester composite manual, which was rejected.
+
+**Measured:** two promising gap candidates (board thickness and kit board count),
+one strengthened cutdown applicability link, zero new published facts or model
+fields. Live source text and destination identities were checked; the attempted
+PDF screenshot failed. No implementation changes or test-suite claim. Numeric
+board engagement, channel depth, effective pitch and stock board length remain
+unresolved in this bounded search. Exact source links, locators, scope decisions
+and next capture/review steps are in
+`workspace/reports/emblem-cross-source-findings.md`. No PDF bytes were committed.
+
+---
+
+### G93 — Execute partial semantic validation of the parsed Emblem candidate (2026-09-06)
+
+Actual consumer `validate_model` was executed on the G91 candidate with an empty
+Catalog and no PartLibrary. It returned three errors: the board's base/top refs
+have no supported length rule, and both rails declare channel joints with zero
+channel depth. Parser acceptance remains true; semantic acceptance is false even
+before Part-dependent dimensional checks. The empty catalog is a diagnostic
+fixture, not supplier evidence, and omitting the library skips dimensional checks.
+`workspace/reports/emblem-semantic-gap-check.json` binds the findings to the
+candidate hash. This is not full validation or BOM execution.
+
+The producer independently hardcodes `models: []` in `snapshot.py`; collecting
+geometry alone cannot make it publish a model. Completion requires reviewed,
+source-linked exact Part specs, joint depth/engagement and clearance, infill
+fitting and length rules, explicit quantities, a truthful authored-model admission
+and publication path, and the consumer's published-wire adapter. Then validate
+with the real Part library/catalog and generate single and complex layout BOMs.
+Neither channel-to-butt substitution nor parser defaults closes an evidence gap.
+No production behavior changed in this diagnostic checkpoint.
+
+---
+
+### G94 — Independent adversarial review exposes parser loss and fitting hazards (2026-09-06)
+
+Three read-only agents independently checked source applicability, geometry and
+assembly/BOM logic. Root reproduced the three semantic errors and four fields
+silently discarded by the private parser: authorship, cites, contributing_sources,
+and infill profile_edges. The last discards tongue/groove information. Consumer
+fit defaults can spread residual width into privacy gaps. This is a demonstrated
+synthetic hazard, not a claim that a published Emblem BOM was generated incorrectly.
+
+The preparer now executes partial semantic validation, lists unconsumed authored
+paths, binds the report to the candidate hash, and exits 2 for an incomplete
+candidate even when parsing succeeds. This supersedes G91's parser-only exit-0
+behavior. Eight focused tests pass, including actual-consumer CLI refusal with
+and without the placement confirmation. Exact Part-library/catalog checks and
+BOM generation remain explicitly unexecuted. Both frozen checksums pass.
+
+Reviewers also established that horizontal rail face height must map to the
+consumer's Part.thickness_mm: a direct height_mm/width_mm transfer loses that
+geometry. A kit's board count must not become multiplicity per fitted board.
+U-channels remain absent from the executable component graph. Source review
+supports a family-to-model 7/8-inch board-thickness assertion and independently
+corroborates the 3-inch TOTAL rail allowance; the newer 15-board kit's applicability
+remains unresolved. No speculative dimensions, fixed board count or fitting policy
+were inserted to clear a validation error.
+
+Detailed evidence and dispositions:
+`workspace/reports/emblem-independent-review.md` and
+`workspace/reports/emblem-cross-source-findings.md`. Reviewers report 39 consumer
+geometry/post tests and 54 purchase plus two assembly adversarial tests passing;
+these scopes are separate, not a combined full-suite count. Root's full suite
+then passed: 1479 tests in 53.389 seconds, one expected failure. The first sandboxed
+run had 14 local-socket permission errors; the authorized rerun resolved them.
+Other work was concurrently modifying the shared checkout, so this full-suite
+measurement is for the working tree, not an isolated commit. Missing numeric
+channel depth, engagement and effective pitch remain source work; public model
+admission/publication and consumption remain implementation work.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and
