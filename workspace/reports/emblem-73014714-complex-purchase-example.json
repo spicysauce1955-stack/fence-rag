@@ -1,0 +1,570 @@
+{
+  "artifact_kind": "private_purchase_count_worked_example",
+  "objective": "Purchase complete kits and separately supplied posts/caps",
+  "scenario": "Five full panels in an L-shaped run plus a separate two-panel straight run; no gates, cuts or slopes",
+  "layout_is": "authored hypothetical topology; not user site measurements",
+  "stations": [
+    {
+      "id": "A0",
+      "role": "end",
+      "schematic_point": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "A1",
+      "role": "line",
+      "schematic_point": [
+        1,
+        0
+      ]
+    },
+    {
+      "id": "A2",
+      "role": "line",
+      "schematic_point": [
+        2,
+        0
+      ]
+    },
+    {
+      "id": "A3",
+      "role": "corner",
+      "schematic_point": [
+        3,
+        0
+      ]
+    },
+    {
+      "id": "A4",
+      "role": "line",
+      "schematic_point": [
+        3,
+        1
+      ]
+    },
+    {
+      "id": "A5",
+      "role": "end",
+      "schematic_point": [
+        3,
+        2
+      ]
+    },
+    {
+      "id": "B0",
+      "role": "end",
+      "schematic_point": [
+        0,
+        4
+      ]
+    },
+    {
+      "id": "B1",
+      "role": "line",
+      "schematic_point": [
+        1,
+        4
+      ]
+    },
+    {
+      "id": "B2",
+      "role": "end",
+      "schematic_point": [
+        2,
+        4
+      ]
+    }
+  ],
+  "bays": [
+    {
+      "id": "A-panel-1",
+      "from": "A0",
+      "to": "A1",
+      "panel_model_number": "73014714"
+    },
+    {
+      "id": "A-panel-2",
+      "from": "A1",
+      "to": "A2",
+      "panel_model_number": "73014714"
+    },
+    {
+      "id": "A-panel-3",
+      "from": "A2",
+      "to": "A3",
+      "panel_model_number": "73014714"
+    },
+    {
+      "id": "A-panel-4",
+      "from": "A3",
+      "to": "A4",
+      "panel_model_number": "73014714"
+    },
+    {
+      "id": "A-panel-5",
+      "from": "A4",
+      "to": "A5",
+      "panel_model_number": "73014714"
+    },
+    {
+      "id": "B-panel-1",
+      "from": "B0",
+      "to": "B1",
+      "panel_model_number": "73014714"
+    },
+    {
+      "id": "B-panel-2",
+      "from": "B1",
+      "to": "B2",
+      "panel_model_number": "73014714"
+    }
+  ],
+  "purchase_lines": [
+    {
+      "manufacturer_model_number": "73014714",
+      "description": "Emblem White full panel kit",
+      "quantity_each": 7,
+      "derived_from_bays": [
+        "A-panel-1",
+        "A-panel-2",
+        "A-panel-3",
+        "A-panel-4",
+        "A-panel-5",
+        "B-panel-1",
+        "B-panel-2"
+      ],
+      "quantity_basis": "manufacturer_catalog_item_count; not retailer cartons",
+      "supplier_pack_quantity": null,
+      "evidence": {
+        "element_id": "element-b540e75926-0018",
+        "text_raw": "73014714",
+        "cite": {
+          "id": "304c96b69b330708",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      },
+      "description_evidence": {
+        "element_id": "element-b540e75926-0016",
+        "text_raw": "6x8 Emblem Privacy Fence Kit - White (F)",
+        "cite": {
+          "id": "5d7cfd7597583e43",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      }
+    },
+    {
+      "manufacturer_model_number": "73045785",
+      "description": "White end post",
+      "quantity_each": 4,
+      "derived_from_stations": [
+        "A0",
+        "A5",
+        "B0",
+        "B2"
+      ],
+      "quantity_basis": "manufacturer_catalog_item_count; not retailer cartons",
+      "supplier_pack_quantity": null,
+      "evidence": {
+        "element_id": "element-b540e75926-0044",
+        "text_raw": "73045785",
+        "cite": {
+          "id": "3299b0fb58f9d53c",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      },
+      "description_evidence": {
+        "element_id": "element-b540e75926-0043",
+        "text_raw": "5in. x 5in. x 108in. End Post - White (F)",
+        "cite": {
+          "id": "70bb914fc3e9c02a",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      }
+    },
+    {
+      "manufacturer_model_number": "73045783",
+      "description": "White line post",
+      "quantity_each": 4,
+      "derived_from_stations": [
+        "A1",
+        "A2",
+        "A4",
+        "B1"
+      ],
+      "quantity_basis": "manufacturer_catalog_item_count; not retailer cartons",
+      "supplier_pack_quantity": null,
+      "evidence": {
+        "element_id": "element-b540e75926-0036",
+        "text_raw": "73045783",
+        "cite": {
+          "id": "e27012dc3edf290f",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      },
+      "description_evidence": {
+        "element_id": "element-b540e75926-0035",
+        "text_raw": "5in. x 5in. x 108in. Line Post - White (F)",
+        "cite": {
+          "id": "df7d58fbdfa124b1",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      }
+    },
+    {
+      "manufacturer_model_number": "73045784",
+      "description": "White corner post",
+      "quantity_each": 1,
+      "derived_from_stations": [
+        "A3"
+      ],
+      "quantity_basis": "manufacturer_catalog_item_count; not retailer cartons",
+      "supplier_pack_quantity": null,
+      "evidence": {
+        "element_id": "element-b540e75926-0040",
+        "text_raw": "73045784",
+        "cite": {
+          "id": "8ec72dda71224b68",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      },
+      "description_evidence": {
+        "element_id": "element-b540e75926-0039",
+        "text_raw": "5in. x 5in. x 108in. Corner Post - White (F)",
+        "cite": {
+          "id": "b456ffc7928e48c4",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      }
+    },
+    {
+      "manufacturer_model_number": "73013956",
+      "description": "White contemporary post top",
+      "quantity_each": 9,
+      "derived_from_stations": [
+        "A0",
+        "A1",
+        "A2",
+        "A3",
+        "A4",
+        "A5",
+        "B0",
+        "B1",
+        "B2"
+      ],
+      "quantity_basis": "manufacturer_catalog_item_count; not retailer cartons",
+      "supplier_pack_quantity": null,
+      "evidence": {
+        "element_id": "element-b540e75926-0052",
+        "text_raw": "73013956",
+        "cite": {
+          "id": "1356341c0f1a6c05",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      },
+      "description_evidence": {
+        "element_id": "element-b540e75926-0051",
+        "text_raw": "5in. x 5in. Contemporary Post Top - White",
+        "cite": {
+          "id": "a437381210d0e693",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      }
+    }
+  ],
+  "source_counting_rule": {
+    "element_id": "element-b540e75926-0070",
+    "text_raw": "3. Calculate # of posts needed:\n• 1 post per panel + 1 end post to end the fence run\n• 1 end/gate post per gate (don’t forget 2 post\ninserts for each gate)",
+    "cite": {
+      "id": "5f2efc0cc9661d0c",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+    }
+  },
+  "counting_rule_interpretation": "Count one kit per explicit full-panel bay; count each unique post station once and one selected cap per station. The N+1 shortcut applies to this open path only.",
+  "not_a_complete_installation_order": [
+    "Footing concrete and gravel quantities need site and installation requirements",
+    "Post-cap adhesive consumption is not established",
+    "Conditional reinforcement needs applicability assessment",
+    "No pricing, waste allowance, field cuts or placement dimensions have been selected"
+  ],
+  "contract_assessment": {
+    "status": "worked_example_not_Planning_execution",
+    "kit_mapping": "Whole-kit purchase coverage requires verified Product/kit credit support in Planning. InfillSpec.supply=assembly alone does not represent rails plus boards as one panel kit.",
+    "post_mapping": "PostSlot is per station under FenceModel, outside PanelSpec; cap nests under post.",
+    "references": [
+      "docs/integration/knowledge-datamodel.md §3.3",
+      "docs/integration/knowledge-datamodel.md §3.4"
+    ]
+  },
+  "checks": {},
+  "review_status": "assistant_and_independent_agent_checked_complex_example; not user layout approval",
+  "review_scope": "Hypothetical extension of the accepted single-panel case; no actual site or supplier order.",
+  "complete_installation_order": false,
+  "kit_contents": [
+    {
+      "component_key": "top_rail",
+      "quantity_each": 1,
+      "coverage": "included_in_panel_kit",
+      "evidence": {
+        "element_id": "element-b540e75926-0008",
+        "text_raw": "• 2-¼ in. x 7 in. top & bottom rails",
+        "cite": {
+          "id": "b2766cd38e5d8624",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      }
+    },
+    {
+      "component_key": "bottom_rail",
+      "quantity_each": 1,
+      "coverage": "included_in_panel_kit",
+      "evidence": {
+        "element_id": "element-b540e75926-0008",
+        "text_raw": "• 2-¼ in. x 7 in. top & bottom rails",
+        "cite": {
+          "id": "b2766cd38e5d8624",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      }
+    },
+    {
+      "component_key": "tongue_and_groove_boards",
+      "quantity_each": null,
+      "coverage": "included_in_panel_kit; exact count unverified",
+      "evidence": {
+        "element_id": "element-b540e75926-0007",
+        "text_raw": "• 6 in. tongue & groove boards",
+        "cite": {
+          "id": "e00d82aba830a6eb",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      }
+    },
+    {
+      "component_key": "end_u_channel",
+      "quantity_each": 2,
+      "edges": [
+        "first_board_tongue",
+        "last_board_groove"
+      ],
+      "coverage": "included_in_manual_kit_component_list; exact-SKU applicability supported by linked manual",
+      "evidence": {
+        "element_id": "element-efcc3971c4-0017",
+        "text_raw": "U-Channels",
+        "cite": {
+          "id": "a63ff62245d7c789",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      },
+      "count_evidence": {
+        "element_id": "element-15b181bc58-0006",
+        "text_raw": "Attach U-channels to two end boards (Fig. 6).",
+        "cite": {
+          "id": "aeaf7e66a05b4d28",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      },
+      "edge_evidence": {
+        "element_id": "element-15b181bc58-0008",
+        "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+        "cite": {
+          "id": "57482180d5ddbd37",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      },
+      "contract_mapping": "Part type and handed slot representation remain unresolved; this is private kit inventory"
+    }
+  ],
+  "installation_materials": [
+    {
+      "item": "concrete",
+      "required": true,
+      "purchase_quantity": null,
+      "blocker": "site footing dimensions and selected concrete yield",
+      "evidence": {
+        "element_id": "element-66549cef10-0009",
+        "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+        "cite": {
+          "id": "ca6879cdc1cc3790",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      }
+    },
+    {
+      "item": "gravel/filler",
+      "required": true,
+      "purchase_quantity": null,
+      "blocker": "site footing dimensions and resolve guide gravel-depth passages",
+      "evidence": {
+        "element_id": "element-744c97279b-0012",
+        "text_raw": "Dig first two post holes in diameter based on size\nchart below* and down to your specified frost line.\nInsert filler/gravel into the bottom of both holes and\nthen set first post in post hole.",
+        "cite": {
+          "id": "00a6d694d9457a85",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      }
+    },
+    {
+      "item": "vinyl adhesive",
+      "required": true,
+      "manufacturer_model_candidate": "73047688",
+      "purchase_quantity": null,
+      "blocker": "adhesive coverage and chosen supplier package size",
+      "evidence": {
+        "element_id": "element-b540e75926-0055",
+        "text_raw": "4 oz. Tube Vinyl Adhesive",
+        "cite": {
+          "id": "716f5e54296d8f1d",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      },
+      "use_evidence": {
+        "element_id": "element-66549cef10-0011",
+        "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+        "cite": {
+          "id": "f67db6fc7eef1aa8",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      }
+    }
+  ],
+  "assembly_trace": [
+    {
+      "key": "prepare_holes",
+      "action": "Prepare two holes and required foundation material.",
+      "evidence": {
+        "element_id": "element-744c97279b-0012",
+        "text_raw": "Dig first two post holes in diameter based on size\nchart below* and down to your specified frost line.\nInsert filler/gravel into the bottom of both holes and\nthen set first post in post hole.",
+        "cite": {
+          "id": "00a6d694d9457a85",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      }
+    },
+    {
+      "key": "fix_first_post",
+      "action": "Level and concrete the FIRST post; keep the second movable for panel engagement.",
+      "evidence": {
+        "element_id": "element-744c97279b-0013",
+        "text_raw": "Add wet or dry concrete mix according to the\nmanufacturer’s instruction to the top of the hole for\nfirst post only and level it.",
+        "cite": {
+          "id": "50f0603a94782ab0",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      }
+    },
+    {
+      "key": "insert_bottom_rail",
+      "action": "Insert bottom rail into first post route; apply the correct style branch for inserts.",
+      "evidence": {
+        "element_id": "element-15b181bc58-0001",
+        "text_raw": "When included in kit, place aluminum insert into\nbottom rail, then insert bottom rail into bottom\npost route hole of first post only (Fig. 5). Panels\nwith 7\" rails and 8x6 panels do not require\naluminum inserts.",
+        "cite": {
+          "id": "a1a497f768e428c9",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      }
+    },
+    {
+      "key": "attach_end_channels",
+      "action": "Attach one U-channel to first-board tongue edge and one to last-board groove edge.",
+      "evidence": {
+        "element_id": "element-15b181bc58-0008",
+        "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+        "cite": {
+          "id": "57482180d5ddbd37",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      }
+    },
+    {
+      "key": "insert_boards",
+      "action": "Insert boards into bottom rail, with U-channels at the two ends.",
+      "evidence": {
+        "element_id": "element-15b181bc58-0015",
+        "text_raw": "Insert boards into bottom rail ensuring\nU-channels are on both ends. Start from first\ninstalled post and work towards second post\n(Fig. 7).",
+        "cite": {
+          "id": "e856d15ed6bcbc68",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      }
+    },
+    {
+      "key": "place_top_rail",
+      "action": "Engage first post upper route and guide top rail over boards.",
+      "evidence": {
+        "element_id": "element-15b181bc58-0020",
+        "text_raw": "a. Insert the top rail into the first top hole post\nroute then guide over top of boards (Fig. 8).",
+        "cite": {
+          "id": "d3ce088342977ece",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      }
+    },
+    {
+      "key": "engage_second_post",
+      "action": "Engage completed panel with second post routes before fixing that post.",
+      "evidence": {
+        "element_id": "element-66549cef10-0009",
+        "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+        "cite": {
+          "id": "ca6879cdc1cc3790",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      }
+    },
+    {
+      "key": "fix_second_post",
+      "action": "Plumb, level and concrete the second post.",
+      "evidence": {
+        "element_id": "element-66549cef10-0009",
+        "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+        "cite": {
+          "id": "ca6879cdc1cc3790",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      }
+    },
+    {
+      "key": "glue_caps",
+      "action": "Apply adhesive inside cap rims and attach to posts.",
+      "evidence": {
+        "element_id": "element-66549cef10-0011",
+        "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+        "cite": {
+          "id": "f67db6fc7eef1aa8",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      }
+    }
+  ],
+  "assembly_trace_status": "assistant walkthrough of explicit full-privacy branch, not published Procedure or complete installation instructions",
+  "layout_kind": "orthogonal_open_runs",
+  "expected_run_count": 2,
+  "schematic_coordinates": "Dimensionless drawing coordinates used only for connectivity and 90-degree turn classification; not measured station locations or post spacing.",
+  "build_runs": [
+    {
+      "id": "A",
+      "station_order": [
+        "A0",
+        "A1",
+        "A2",
+        "A3",
+        "A4",
+        "A5"
+      ]
+    },
+    {
+      "id": "B",
+      "station_order": [
+        "B0",
+        "B1",
+        "B2"
+      ]
+    }
+  ],
+  "source_counting_rule_scope": "For these two open paths, posts = bays + connected runs = 7 + 2. Never apply the single-run +1 rule to the whole layout.",
+  "corner_assembly_note": "A3 is one shared corner post: orient its two routed faces toward A2 and A4 before fixing. After receiving A-panel-3 it becomes the starting post for A-panel-4. Catalog compatibility is supported; corner rail-end interference and clearances remain unverified.",
+  "assembly_trace_scope": "Template instantiated for each bay; each run starts independently. This is a logical trace, not dimensional or structural simulation."
+}

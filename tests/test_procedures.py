@@ -11,11 +11,12 @@ the queue is not.
 """
 import sqlite3
 import unittest
+from unittest.mock import patch
 
 from context import ROOT  # noqa: F401
 from fence_evidence import steps
 from fence_evidence.procedures import build_procedures
-from fence_evidence.reviews import submit_step_review
+from fence_evidence.reviews import rebuild_step_projection, submit_step_review
 from fence_evidence.store import STEP_CANDIDATES_DDL, STEP_REVIEWS_DDL
 
 BLOCK = ("• I nsert post in hole\n• Determine rough height\n"
@@ -171,6 +172,76 @@ class TestItIsDeterministic(unittest.TestCase):
         procedures, gaps = build_procedures(conn, source_ref_page=mint(conn))
         canonical_bytes(procedures)   # raises on a float, a set, a bad key
         canonical_bytes(gaps)
+
+
+class TestLatestReviewWins(unittest.TestCase):
+    def test_second_review_publishes_one_corrected_step_without_self_dependency(self):
+        conn = scratch()
+        with patch('fence_evidence.store.now', return_value='2026-01-01T00:00:00Z'):
+            review(conn, 0)
+        with patch('fence_evidence.store.now', return_value='2026-01-02T00:00:00Z'):
+            review(conn, 0, verdict='corrected', text_final='Insert post in hole')
+        published = build_procedures(conn)[0][0]['steps']
+        self.assertEqual(len(published), 1)
+        self.assertEqual(published[0]['text_i18n'], 'Insert post in hole')
+        self.assertEqual(published[0]['requires'], [])
+
+    def test_older_arriving_rejection_does_not_override_newer_acceptance(self):
+        conn = scratch()
+        with patch('fence_evidence.store.now', return_value='2026-01-02T00:00:00Z'):
+            review(conn, 0)
+        with patch('fence_evidence.store.now', return_value='2026-01-01T00:00:00Z'):
+            review(conn, 0, verdict='rejected', step_kind=None, step_scope=None,
+                   slot_target=None)
+        before = build_procedures(conn)
+        self.assertEqual(len(before[0][0]['steps']), 1)
+        rebuild_step_projection(conn)
+        self.assertEqual(build_procedures(conn), before)
+
+    def test_newer_rejection_suppresses_older_acceptance(self):
+        conn = scratch()
+        with patch('fence_evidence.store.now', return_value='2026-01-01T00:00:00Z'):
+            review(conn, 0)
+        with patch('fence_evidence.store.now', return_value='2026-01-02T00:00:00Z'):
+            review(conn, 0, verdict='rejected', step_kind=None, step_scope=None,
+                   slot_target=None)
+        self.assertEqual(build_procedures(conn)[0], [])
+        rebuild_step_projection(conn)
+        self.assertEqual(build_procedures(conn)[0], [])
+
+    def test_same_timestamp_tie_is_stable_after_reverse_insertion(self):
+        conn = scratch()
+        with patch('fence_evidence.store.now', return_value='2026-01-01T00:00:00Z'):
+            review(conn, 0, verdict='corrected', text_final='First correction')
+            review(conn, 0, verdict='corrected', text_final='Second correction')
+        rows = conn.execute('SELECT * FROM step_reviews ORDER BY rowid').fetchall()
+        winner = max(rows, key=lambda row: row['step_review_id'])
+        before = build_procedures(conn)
+        self.assertEqual(len(before[0][0]['steps']), 1)
+        self.assertEqual(before[0][0]['steps'][0]['text_i18n'], winner['text_final'])
+        conn.execute('DELETE FROM step_reviews')
+        for row in reversed(rows):
+            conn.execute('INSERT INTO step_reviews VALUES (' + ','.join('?' * len(row))
+                         + ')', tuple(row))
+        conn.commit()
+        rebuild_step_projection(conn)
+        self.assertEqual(build_procedures(conn), before)
+
+    def test_rebuild_uses_review_time_after_reverse_insertion(self):
+        conn = scratch()
+        with patch('fence_evidence.store.now', return_value='2026-01-01T00:00:00Z'):
+            review(conn, 0)
+        with patch('fence_evidence.store.now', return_value='2026-01-02T00:00:00Z'):
+            review(conn, 0, verdict='corrected', text_final='Latest correction')
+        before = build_procedures(conn)
+        rows = conn.execute('SELECT * FROM step_reviews ORDER BY rowid DESC').fetchall()
+        conn.execute('DELETE FROM step_reviews')
+        for row in rows:
+            conn.execute('INSERT INTO step_reviews VALUES (' + ','.join('?' * len(row))
+                         + ')', tuple(row))
+        conn.commit()
+        rebuild_step_projection(conn)
+        self.assertEqual(build_procedures(conn), before)
 
 
 if __name__ == "__main__":

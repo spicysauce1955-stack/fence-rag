@@ -1,0 +1,371 @@
+{
+  "example_checks_passed": true,
+  "errors": [],
+  "expected_catalog_item_counts": {
+    "73014714": 7,
+    "73013956": 9,
+    "73045785": 4,
+    "73045783": 4,
+    "73045784": 1
+  },
+  "connected_runs": 2,
+  "unique_stations": 9,
+  "kit_contained_u_channels": 14,
+  "assembly_simulation": [
+    {
+      "action": "fix_first_post",
+      "station": "A0",
+      "run": "A"
+    },
+    {
+      "action": "insert_bottom_rail",
+      "bay": "A-panel-1",
+      "run": "A",
+      "start_station": "A0",
+      "receiving_station": "A1"
+    },
+    {
+      "action": "attach_end_channels",
+      "bay": "A-panel-1",
+      "run": "A",
+      "start_station": "A0",
+      "receiving_station": "A1"
+    },
+    {
+      "action": "insert_boards",
+      "bay": "A-panel-1",
+      "run": "A",
+      "start_station": "A0",
+      "receiving_station": "A1"
+    },
+    {
+      "action": "place_top_rail",
+      "bay": "A-panel-1",
+      "run": "A",
+      "start_station": "A0",
+      "receiving_station": "A1"
+    },
+    {
+      "action": "engage_second_post",
+      "bay": "A-panel-1",
+      "run": "A",
+      "start_station": "A0",
+      "receiving_station": "A1"
+    },
+    {
+      "action": "fix_second_post",
+      "bay": "A-panel-1",
+      "run": "A",
+      "start_station": "A0",
+      "receiving_station": "A1"
+    },
+    {
+      "action": "insert_bottom_rail",
+      "bay": "A-panel-2",
+      "run": "A",
+      "start_station": "A1",
+      "receiving_station": "A2"
+    },
+    {
+      "action": "attach_end_channels",
+      "bay": "A-panel-2",
+      "run": "A",
+      "start_station": "A1",
+      "receiving_station": "A2"
+    },
+    {
+      "action": "insert_boards",
+      "bay": "A-panel-2",
+      "run": "A",
+      "start_station": "A1",
+      "receiving_station": "A2"
+    },
+    {
+      "action": "place_top_rail",
+      "bay": "A-panel-2",
+      "run": "A",
+      "start_station": "A1",
+      "receiving_station": "A2"
+    },
+    {
+      "action": "engage_second_post",
+      "bay": "A-panel-2",
+      "run": "A",
+      "start_station": "A1",
+      "receiving_station": "A2"
+    },
+    {
+      "action": "fix_second_post",
+      "bay": "A-panel-2",
+      "run": "A",
+      "start_station": "A1",
+      "receiving_station": "A2"
+    },
+    {
+      "action": "insert_bottom_rail",
+      "bay": "A-panel-3",
+      "run": "A",
+      "start_station": "A2",
+      "receiving_station": "A3"
+    },
+    {
+      "action": "attach_end_channels",
+      "bay": "A-panel-3",
+      "run": "A",
+      "start_station": "A2",
+      "receiving_station": "A3"
+    },
+    {
+      "action": "insert_boards",
+      "bay": "A-panel-3",
+      "run": "A",
+      "start_station": "A2",
+      "receiving_station": "A3"
+    },
+    {
+      "action": "place_top_rail",
+      "bay": "A-panel-3",
+      "run": "A",
+      "start_station": "A2",
+      "receiving_station": "A3"
+    },
+    {
+      "action": "engage_second_post",
+      "bay": "A-panel-3",
+      "run": "A",
+      "start_station": "A2",
+      "receiving_station": "A3"
+    },
+    {
+      "action": "fix_second_post",
+      "bay": "A-panel-3",
+      "run": "A",
+      "start_station": "A2",
+      "receiving_station": "A3"
+    },
+    {
+      "action": "insert_bottom_rail",
+      "bay": "A-panel-4",
+      "run": "A",
+      "start_station": "A3",
+      "receiving_station": "A4"
+    },
+    {
+      "action": "attach_end_channels",
+      "bay": "A-panel-4",
+      "run": "A",
+      "start_station": "A3",
+      "receiving_station": "A4"
+    },
+    {
+      "action": "insert_boards",
+      "bay": "A-panel-4",
+      "run": "A",
+      "start_station": "A3",
+      "receiving_station": "A4"
+    },
+    {
+      "action": "place_top_rail",
+      "bay": "A-panel-4",
+      "run": "A",
+      "start_station": "A3",
+      "receiving_station": "A4"
+    },
+    {
+      "action": "engage_second_post",
+      "bay": "A-panel-4",
+      "run": "A",
+      "start_station": "A3",
+      "receiving_station": "A4"
+    },
+    {
+      "action": "fix_second_post",
+      "bay": "A-panel-4",
+      "run": "A",
+      "start_station": "A3",
+      "receiving_station": "A4"
+    },
+    {
+      "action": "insert_bottom_rail",
+      "bay": "A-panel-5",
+      "run": "A",
+      "start_station": "A4",
+      "receiving_station": "A5"
+    },
+    {
+      "action": "attach_end_channels",
+      "bay": "A-panel-5",
+      "run": "A",
+      "start_station": "A4",
+      "receiving_station": "A5"
+    },
+    {
+      "action": "insert_boards",
+      "bay": "A-panel-5",
+      "run": "A",
+      "start_station": "A4",
+      "receiving_station": "A5"
+    },
+    {
+      "action": "place_top_rail",
+      "bay": "A-panel-5",
+      "run": "A",
+      "start_station": "A4",
+      "receiving_station": "A5"
+    },
+    {
+      "action": "engage_second_post",
+      "bay": "A-panel-5",
+      "run": "A",
+      "start_station": "A4",
+      "receiving_station": "A5"
+    },
+    {
+      "action": "fix_second_post",
+      "bay": "A-panel-5",
+      "run": "A",
+      "start_station": "A4",
+      "receiving_station": "A5"
+    },
+    {
+      "action": "glue_cap",
+      "station": "A0",
+      "run": "A"
+    },
+    {
+      "action": "glue_cap",
+      "station": "A1",
+      "run": "A"
+    },
+    {
+      "action": "glue_cap",
+      "station": "A2",
+      "run": "A"
+    },
+    {
+      "action": "glue_cap",
+      "station": "A3",
+      "run": "A"
+    },
+    {
+      "action": "glue_cap",
+      "station": "A4",
+      "run": "A"
+    },
+    {
+      "action": "glue_cap",
+      "station": "A5",
+      "run": "A"
+    },
+    {
+      "action": "fix_first_post",
+      "station": "B0",
+      "run": "B"
+    },
+    {
+      "action": "insert_bottom_rail",
+      "bay": "B-panel-1",
+      "run": "B",
+      "start_station": "B0",
+      "receiving_station": "B1"
+    },
+    {
+      "action": "attach_end_channels",
+      "bay": "B-panel-1",
+      "run": "B",
+      "start_station": "B0",
+      "receiving_station": "B1"
+    },
+    {
+      "action": "insert_boards",
+      "bay": "B-panel-1",
+      "run": "B",
+      "start_station": "B0",
+      "receiving_station": "B1"
+    },
+    {
+      "action": "place_top_rail",
+      "bay": "B-panel-1",
+      "run": "B",
+      "start_station": "B0",
+      "receiving_station": "B1"
+    },
+    {
+      "action": "engage_second_post",
+      "bay": "B-panel-1",
+      "run": "B",
+      "start_station": "B0",
+      "receiving_station": "B1"
+    },
+    {
+      "action": "fix_second_post",
+      "bay": "B-panel-1",
+      "run": "B",
+      "start_station": "B0",
+      "receiving_station": "B1"
+    },
+    {
+      "action": "insert_bottom_rail",
+      "bay": "B-panel-2",
+      "run": "B",
+      "start_station": "B1",
+      "receiving_station": "B2"
+    },
+    {
+      "action": "attach_end_channels",
+      "bay": "B-panel-2",
+      "run": "B",
+      "start_station": "B1",
+      "receiving_station": "B2"
+    },
+    {
+      "action": "insert_boards",
+      "bay": "B-panel-2",
+      "run": "B",
+      "start_station": "B1",
+      "receiving_station": "B2"
+    },
+    {
+      "action": "place_top_rail",
+      "bay": "B-panel-2",
+      "run": "B",
+      "start_station": "B1",
+      "receiving_station": "B2"
+    },
+    {
+      "action": "engage_second_post",
+      "bay": "B-panel-2",
+      "run": "B",
+      "start_station": "B1",
+      "receiving_station": "B2"
+    },
+    {
+      "action": "fix_second_post",
+      "bay": "B-panel-2",
+      "run": "B",
+      "start_station": "B1",
+      "receiving_station": "B2"
+    },
+    {
+      "action": "glue_cap",
+      "station": "B0",
+      "run": "B"
+    },
+    {
+      "action": "glue_cap",
+      "station": "B1",
+      "run": "B"
+    },
+    {
+      "action": "glue_cap",
+      "station": "B2",
+      "run": "B"
+    }
+  ],
+  "installation_ready": false,
+  "limitations": [
+    "Authored example only; no fit or structural verification.",
+    "Retailer packaging/multipacks are not established.",
+    "Installation-material quantities remain unresolved."
+  ]
+}

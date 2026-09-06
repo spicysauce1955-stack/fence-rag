@@ -1,0 +1,122 @@
+{
+  "kind": "full_panel_schematic",
+  "scenario": "Five full panels in an L-shaped run plus a separate two-panel straight run; no gates, cuts or slopes",
+  "coordinates": "dimensionless topology only; no lengths or spacing",
+  "expected_run_count": 2,
+  "stations": [
+    {
+      "id": "A0",
+      "schematic_point": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "A1",
+      "schematic_point": [
+        1,
+        0
+      ]
+    },
+    {
+      "id": "A2",
+      "schematic_point": [
+        2,
+        0
+      ]
+    },
+    {
+      "id": "A3",
+      "schematic_point": [
+        3,
+        0
+      ]
+    },
+    {
+      "id": "A4",
+      "schematic_point": [
+        3,
+        1
+      ]
+    },
+    {
+      "id": "A5",
+      "schematic_point": [
+        3,
+        2
+      ]
+    },
+    {
+      "id": "B0",
+      "schematic_point": [
+        0,
+        4
+      ]
+    },
+    {
+      "id": "B1",
+      "schematic_point": [
+        1,
+        4
+      ]
+    },
+    {
+      "id": "B2",
+      "schematic_point": [
+        2,
+        4
+      ]
+    }
+  ],
+  "bays": [
+    {
+      "id": "A-panel-1",
+      "from": "A0",
+      "to": "A1",
+      "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+      "supply": "full_kit"
+    },
+    {
+      "id": "A-panel-2",
+      "from": "A1",
+      "to": "A2",
+      "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+      "supply": "full_kit"
+    },
+    {
+      "id": "A-panel-3",
+      "from": "A2",
+      "to": "A3",
+      "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+      "supply": "full_kit"
+    },
+    {
+      "id": "A-panel-4",
+      "from": "A3",
+      "to": "A4",
+      "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+      "supply": "full_kit"
+    },
+    {
+      "id": "A-panel-5",
+      "from": "A4",
+      "to": "A5",
+      "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+      "supply": "full_kit"
+    },
+    {
+      "id": "B-panel-1",
+      "from": "B0",
+      "to": "B1",
+      "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+      "supply": "full_kit"
+    },
+    {
+      "id": "B-panel-2",
+      "from": "B1",
+      "to": "B2",
+      "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+      "supply": "full_kit"
+    }
+  ]
+}

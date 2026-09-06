@@ -1605,8 +1605,14 @@ def submit_step_review(conn: sqlite3.Connection, *, element_id: str,
              step_kind, step_scope,
              json.dumps(slot_target, sort_keys=True) if slot_target else None,
              text_final, row["review_status"], notes))
+        latest = conn.execute(
+            """SELECT * FROM step_reviews
+                WHERE element_id=? AND char_start=? AND char_end=?
+                ORDER BY reviewed_at DESC, step_review_id DESC LIMIT 1""",
+            (element_id, char_start, char_end)).fetchone()
         _project_step(conn, element_id, char_start, char_end,
-                      STEP_STATUS_FOR_VERDICT[verdict], reviewer, reviewed_at)
+                      STEP_STATUS_FOR_VERDICT[latest["verdict"]],
+                      latest["reviewer"], latest["reviewed_at"])
         conn.execute("COMMIT")
     except Exception:
         conn.execute("ROLLBACK")
@@ -1631,7 +1637,8 @@ def rebuild_step_projection(conn: sqlite3.Connection) -> dict:
 
     This is what makes a review survive a re-cut of the queue: the candidates
     are rebuildable, the reviews are not, and the anchor is evidence rather
-    than a row id. Replays in arrival order, so the last word wins.
+    than a row id. Latest review time wins; review id breaks timestamp ties
+    deterministically, including after an import with a different arrival order.
     """
     ensure_step_reviews(conn)
     conn.execute(
@@ -1640,7 +1647,8 @@ def rebuild_step_projection(conn: sqlite3.Connection) -> dict:
              WHERE review_status IN ({','.join('?' * len(STEP_STATUSES))})""",
         STEP_STATUSES)
     applied = orphaned = 0
-    for r in conn.execute("""SELECT * FROM step_reviews ORDER BY rowid"""):
+    for r in conn.execute("""SELECT * FROM step_reviews
+                             ORDER BY reviewed_at, step_review_id"""):
         hit = conn.execute(
             """SELECT 1 FROM step_candidates
                 WHERE element_id=? AND char_start=? AND char_end=?""",

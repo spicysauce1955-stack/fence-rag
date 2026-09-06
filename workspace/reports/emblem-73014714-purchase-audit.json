@@ -1,0 +1,19 @@
+{
+  "example_checks_passed": true,
+  "errors": [],
+  "expected_catalog_item_counts": {
+    "73014714": 1,
+    "73013956": 2,
+    "73045785": 2
+  },
+  "connected_runs": 1,
+  "unique_stations": 2,
+  "kit_contained_u_channels": 2,
+  "assembly_simulation": [],
+  "installation_ready": false,
+  "limitations": [
+    "Authored example only; no fit or structural verification.",
+    "Retailer packaging/multipacks are not established.",
+    "Installation-material quantities remain unresolved."
+  ]
+}

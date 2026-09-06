@@ -1,0 +1,33 @@
+{
+  "scenarios": [
+    {
+      "scenario": "single",
+      "counts_match_independent_example": true,
+      "independent_purchase_audit_passed": true,
+      "source_identity_verified": true,
+      "model_package_hash": "a6490f23ba14bcc1b845c446798be41a90b986089ac895764174000c3c10f4b9",
+      "layout_hash": "d9bdbbf211516d642e0ad486343578cc4e67f18033bd37cd75755b0ed197de0a",
+      "counts": {
+        "73013956": 2,
+        "73014714": 1,
+        "73045785": 2
+      }
+    },
+    {
+      "scenario": "complex",
+      "counts_match_independent_example": true,
+      "independent_purchase_audit_passed": true,
+      "source_identity_verified": true,
+      "model_package_hash": "a6490f23ba14bcc1b845c446798be41a90b986089ac895764174000c3c10f4b9",
+      "layout_hash": "1f5cca90fe705f5eb5c0ef50909ad15f5c5fd1c24852682ed425dbbef168c6cd",
+      "counts": {
+        "73013956": 9,
+        "73014714": 7,
+        "73045783": 4,
+        "73045784": 1,
+        "73045785": 4
+      }
+    }
+  ],
+  "contract_consumer_verified": false
+}

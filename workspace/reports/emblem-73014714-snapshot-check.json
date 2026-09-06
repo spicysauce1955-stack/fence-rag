@@ -1,0 +1,9 @@
+{
+  "artifact_kind": "withdrawn_snapshot_check",
+  "snapshot_id": "27cb8b01fb9b23a5908d72030c7233d76906fa5be3139c258193944dd0615389",
+  "snapshot_path": "workspace/snapshots/27cb8b01fb9b23a5908d72030c7233d76906fa5be3139c258193944dd0615389.json",
+  "tombstoned": true,
+  "published_width_active": false,
+  "reason": "Manual width fact/review removed with user authorization; narrow publisher withdrawn. Earlier snapshot verification applied to the now-excised payload and is not a current publication claim.",
+  "draft_reading": "workspace/catalog/emblem-73014714-reviewed-width.json"
+}

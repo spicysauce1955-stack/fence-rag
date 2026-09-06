@@ -1,0 +1,779 @@
+{
+  "audit_date": "2026-09-06",
+  "snapshot_id": "27cb8b01fb9b23a5908d72030c7233d76906fa5be3139c258193944dd0615389",
+  "store_counts": {
+    "documents": 144,
+    "pages": 2147,
+    "elements": 81794,
+    "facts": 1827,
+    "table_reviews": 71,
+    "fact_reviews": 205,
+    "step_candidates": 71,
+    "step_reviews": 0
+  },
+  "snapshot_counts": {
+    "source_docs": 85,
+    "warnings": 287,
+    "gaps": 404,
+    "part_types": 5,
+    "parts": 11,
+    "models": 0,
+    "procedures": 0,
+    "parameters": 10,
+    "combinations": 0,
+    "rules": 0
+  },
+  "snapshot_bytes": 510839,
+  "linked_excerpt_bytes": 1708,
+  "part_spec_count": 2,
+  "model_scopes_without_model": [
+    "mfr/barrette-outdoor-living-inc-simtek-molded-stone-look-fence-family",
+    "mfr/certainteed-simtek-molded-composite-not-extruded-pvc",
+    "mfr/barrette-outdoor-living-inc-simtek-molded-stone-look-fence-family",
+    "mfr/certainteed-simtek-molded-composite-not-extruded-pvc",
+    "mfr/barrette-outdoor-living-inc-vinyl-privacy-semi-privacy-fence-family-certainteed-era-model-names",
+    "mfr/certainteed-columbia-imperial-chesterfield",
+    "mfr/certainteed-columbia-imperial-chesterfield-breezewood-brookline",
+    "mfr/certainteed-columbia-imperial-chesterfield-chesterfield-w-lattice-breezewood-brookline",
+    "mfr/certainteed-general-bufftech-fence-installation-posts-rails-racking-stepping",
+    "mfr/freedom-outdoor-living-emblem-73014714"
+  ],
+  "validator_probes": {
+    "models": {
+      "accepted": true,
+      "input": [
+        {
+          "id": "incomplete-object"
+        }
+      ]
+    },
+    "rules": {
+      "accepted": true,
+      "input": [
+        {
+          "id": "incomplete-object"
+        }
+      ]
+    },
+    "combinations": {
+      "accepted": true,
+      "input": [
+        {
+          "id": "incomplete-object"
+        }
+      ]
+    },
+    "parameters": {
+      "accepted": true,
+      "input": [
+        {
+          "id": "incomplete-object"
+        }
+      ]
+    }
+  },
+  "procedure_order_probe": {
+    "source": "tests/test_procedures.py BLOCK fixture",
+    "source_text": "Insert post in hole; Determine rough height (separate bullets, no stated dependency)",
+    "published_steps": [
+      {
+        "key": "step-526eaa971a40",
+        "kind": "installation",
+        "scope": "post",
+        "slots": [
+          {
+            "key": "post",
+            "kind": "PostSlot"
+          }
+        ],
+        "requires": [],
+        "cites": [
+          {
+            "id": "7e03acc4f1b0d5a7",
+            "belongs_to": "abc123"
+          }
+        ],
+        "text_i18n": "I nsert post in hole"
+      },
+      {
+        "key": "step-d825857a65ba",
+        "kind": "installation",
+        "scope": "post",
+        "slots": [
+          {
+            "key": "post",
+            "kind": "PostSlot"
+          }
+        ],
+        "requires": [
+          {
+            "kind": "after",
+            "step": "step-526eaa971a40"
+          }
+        ],
+        "cites": [
+          {
+            "id": "7e03acc4f1b0d5a7",
+            "belongs_to": "abc123"
+          }
+        ],
+        "text_i18n": "Determine rough height"
+      }
+    ],
+    "procedure_scope": null
+  },
+  "regime_comparison": {
+    "parts": true,
+    "part_types": true,
+    "parameters": true,
+    "models": true,
+    "procedures": true,
+    "warnings": true,
+    "source_docs": true
+  },
+  "snapshot_http_status": 404,
+  "module_inventory": [
+    {
+      "path": "fence_evidence/__init__.py",
+      "lines": 20,
+      "summary": "Source-preserving evidence system for the vinyl fence BOM corpus.",
+      "public_symbols": []
+    },
+    {
+      "path": "fence_evidence/api.py",
+      "lines": 371,
+      "summary": "HTTP transport for the three calls Planning makes into this platform.",
+      "public_symbols": [
+        "dispatch",
+        "make_server",
+        "serve"
+      ]
+    },
+    {
+      "path": "fence_evidence/assets.py",
+      "lines": 108,
+      "summary": "Re-render a derived page image from its source PDF or source image.",
+      "public_symbols": [
+        "render_page_image"
+      ]
+    },
+    {
+      "path": "fence_evidence/audit.py",
+      "lines": 228,
+      "summary": "Relevance audit of the retrieval projection.",
+      "public_symbols": [
+        "coverage",
+        "unit_shape",
+        "result_list_composition",
+        "within_page_ceiling",
+        "run_audit"
+      ]
+    },
+    {
+      "path": "fence_evidence/canonical.py",
+      "lines": 86,
+      "summary": "Turn a published object into bytes, the same way every time.",
+      "public_symbols": [
+        "CanonicalError",
+        "canonical_bytes",
+        "content_hash"
+      ]
+    },
+    {
+      "path": "fence_evidence/cli.py",
+      "lines": 956,
+      "summary": "Command line interface: python3 -m fence_evidence.cli <command>",
+      "public_symbols": [
+        "main"
+      ]
+    },
+    {
+      "path": "fence_evidence/config.py",
+      "lines": 79,
+      "summary": "Configuration for publishing to object storage.",
+      "public_symbols": [
+        "ConfigError",
+        "load_env",
+        "R2Config"
+      ]
+    },
+    {
+      "path": "fence_evidence/cropcache.py",
+      "lines": 335,
+      "summary": "A render-through cache for source crops. No HTTP, no store writes.",
+      "public_symbols": [
+        "CropUnavailable",
+        "cache_path",
+        "relative_url",
+        "fingerprint_for",
+        "ensure_crop",
+        "realign_review_crops"
+      ]
+    },
+    {
+      "path": "fence_evidence/crops.py",
+      "lines": 168,
+      "summary": "Render a rectangle of a source page, on demand, with poppler.",
+      "public_symbols": [
+        "CropError",
+        "Window",
+        "window_px",
+        "render_crop"
+      ]
+    },
+    {
+      "path": "fence_evidence/dataset.py",
+      "lines": 125,
+      "summary": "The hand-researched dataset, treated as what it is: a source, not a spine.",
+      "public_symbols": [
+        "DatasetChanged",
+        "digest_dataset",
+        "write_digests",
+        "load_digests",
+        "verify_dataset"
+      ]
+    },
+    {
+      "path": "fence_evidence/dates.py",
+      "lines": 65,
+      "summary": "Amendment 002 -- a typed `Date`: `{iso: str | null, value_raw: [str]}`.",
+      "public_symbols": [
+        "normalize_date"
+      ]
+    },
+    {
+      "path": "fence_evidence/dimensions.py",
+      "lines": 152,
+      "summary": "Publish the reviewed actual width of Emblem model 73014714.",
+      "public_symbols": [
+        "build_dimension_tables"
+      ]
+    },
+    {
+      "path": "fence_evidence/distribution.py",
+      "lines": 108,
+      "summary": "Project the corpus manifest into a distribution manifest.",
+      "public_symbols": [
+        "object_key",
+        "load_corpus_manifest",
+        "build_manifest",
+        "files_for_subset",
+        "manifest_bytes",
+        "write_manifest"
+      ]
+    },
+    {
+      "path": "fence_evidence/evaluate.py",
+      "lines": 1103,
+      "summary": "Phase 4 — the evaluation gate.",
+      "public_symbols": [
+        "question_interface",
+        "load_gold",
+        "evaluate_question",
+        "evaluate_routed_question",
+        "run_evaluation",
+        "acceptance_table",
+        "acceptance_flags",
+        "default_report_name"
+      ]
+    },
+    {
+      "path": "fence_evidence/extract.py",
+      "lines": 655,
+      "summary": "Extractors: source file -> :class:`ExtractedDocument`.",
+      "public_symbols": [
+        "derived_dir",
+        "extract_pdf",
+        "extract_docx",
+        "extract_image",
+        "extract"
+      ]
+    },
+    {
+      "path": "fence_evidence/facts.py",
+      "lines": 757,
+      "summary": "Phase 6 — structured technical facts with mandatory provenance.",
+      "public_symbols": [
+        "blank_unit_parentheticals",
+        "publish_condition_basis",
+        "dual_units",
+        "alternate_for",
+        "stock_lengths",
+        "extract_facts",
+        "query_facts"
+      ]
+    },
+    {
+      "path": "fence_evidence/fetch.py",
+      "lines": 227,
+      "summary": "Fetch corpus objects from public object storage.",
+      "public_symbols": [
+        "download_object",
+        "copy_object",
+        "fetch_subset",
+        "load_remote_manifest"
+      ]
+    },
+    {
+      "path": "fence_evidence/gc.py",
+      "lines": 526,
+      "summary": "Collect orphaned images out of `workspace/derived/`. G11, last bullet.",
+      "public_symbols": [
+        "referenced_paths",
+        "referenced_digests",
+        "unfinished_runs",
+        "published_cites",
+        "text_references",
+        "remove_derived_file",
+        "collect"
+      ]
+    },
+    {
+      "path": "fence_evidence/hocr.py",
+      "lines": 51,
+      "summary": "hOCR parsing: word text, bounding box and per-word confidence.",
+      "public_symbols": [
+        "parse_hocr",
+        "mean_confidence"
+      ]
+    },
+    {
+      "path": "fence_evidence/ids.py",
+      "lines": 35,
+      "summary": "Stable identifiers.",
+      "public_symbols": [
+        "sha256_file",
+        "doc_id_for",
+        "version_id_for",
+        "page_id_for",
+        "element_id_for"
+      ]
+    },
+    {
+      "path": "fence_evidence/ingest.py",
+      "lines": 207,
+      "summary": "Ingestion orchestration: manifest -> extraction -> canonical store.",
+      "public_symbols": [
+        "StaleManifestError",
+        "partition_targets",
+        "ingest"
+      ]
+    },
+    {
+      "path": "fence_evidence/lang.py",
+      "lines": 90,
+      "summary": "What language a piece of source text is in, and how confident that is.",
+      "public_symbols": [
+        "detect_lang"
+      ]
+    },
+    {
+      "path": "fence_evidence/layout.py",
+      "lines": 240,
+      "summary": "Layout analysis: words -> lines -> blocks -> canonical elements.",
+      "public_symbols": [
+        "union",
+        "parse_bbox_layout",
+        "line_text",
+        "line_height",
+        "body_text_size",
+        "HeadingClassifier",
+        "HeadingStack",
+        "looks_like_table_block",
+        "build_elements"
+      ]
+    },
+    {
+      "path": "fence_evidence/manifest.py",
+      "lines": 274,
+      "summary": "Phase 0 — corpus inspection.",
+      "public_symbols": [
+        "inspect_file",
+        "build_manifest",
+        "load_manifest"
+      ]
+    },
+    {
+      "path": "fence_evidence/model.py",
+      "lines": 86,
+      "summary": "Intermediate representation produced by extractors and consumed by the store.",
+      "public_symbols": [
+        "Word",
+        "Element",
+        "Cell",
+        "Table",
+        "Page",
+        "ExtractedDocument"
+      ]
+    },
+    {
+      "path": "fence_evidence/noa_tables.py",
+      "lines": 175,
+      "summary": "Task 3 input: locate and crop the scanned table regions that OCR could not rebuild.",
+      "public_symbols": [
+        "candidate_pages",
+        "distinct_work",
+        "export_crops"
+      ]
+    },
+    {
+      "path": "fence_evidence/parameters.py",
+      "lines": 1441,
+      "summary": "Conditional knowledge, published as tables Planning can evaluate.",
+      "public_symbols": [
+        "quantity",
+        "build_parameter_tables"
+      ]
+    },
+    {
+      "path": "fence_evidence/part_types.py",
+      "lines": 171,
+      "summary": "The `PartType` spine: obligation 5 -- \"every part type in a snapshot resolves\nto a spine type through its parent chain, and extension ids are namespaced\n`shared` / `mfr/<manufacturer>` / `<tenant>`\" (contract.md §3.1, §2.1).",
+      "public_symbols": [
+        "mfr_namespace",
+        "load_slice_components",
+        "PartTypeRegistry",
+        "build_part_types"
+      ]
+    },
+    {
+      "path": "fence_evidence/parts.py",
+      "lines": 210,
+      "summary": "`Part` (obligation 5, and obligation 14): one row per component in the\nvertical slice `part_types.py` defines, typed against the spine. Identity and\nmembership are authored structure, not a value -- C3, `part_types.py`'s\nmodule docstring -- and carry no `SourceRef` of their own.",
+      "public_symbols": [
+        "build_parts"
+      ]
+    },
+    {
+      "path": "fence_evidence/paths.py",
+      "lines": 197,
+      "summary": "Repository paths and the read-only corpus guard.",
+      "public_symbols": [
+        "CorpusWriteError",
+        "ensure_writable",
+        "fetch_target",
+        "open_write",
+        "rel",
+        "is_lfs_pointer",
+        "lfs_pointer_info",
+        "unfetched_corpus_files",
+        "resolve_asset",
+        "init_workspace"
+      ]
+    },
+    {
+      "path": "fence_evidence/pilot.py",
+      "lines": 103,
+      "summary": "The Phase 1 pilot document set.",
+      "public_symbols": []
+    },
+    {
+      "path": "fence_evidence/procedures.py",
+      "lines": 165,
+      "summary": "`Procedure` and `AssemblyStep` — the snapshot member, built from reviewed steps.",
+      "public_symbols": [
+        "build_procedures"
+      ]
+    },
+    {
+      "path": "fence_evidence/promote_tables.py",
+      "lines": 481,
+      "summary": "Turn verified table readings into conditioned facts.",
+      "public_symbols": [
+        "hvhz_for_exposure",
+        "bracket_from_span",
+        "reviewed_brackets",
+        "effective_value",
+        "one_reading_per_cell",
+        "promote_verified",
+        "revoke_machine_promotions"
+      ]
+    },
+    {
+      "path": "fence_evidence/publish.py",
+      "lines": 110,
+      "summary": "Publish corpus objects to Cloudflare R2. Maintainer-only.",
+      "public_symbols": [
+        "head_object",
+        "publish_objects",
+        "publish_manifest"
+      ]
+    },
+    {
+      "path": "fence_evidence/quality.py",
+      "lines": 66,
+      "summary": "Text-quality checks that decide whether a source text layer can be trusted.",
+      "public_symbols": [
+        "control_ratio",
+        "ascii_token_ratio",
+        "cjk_share",
+        "text_quality",
+        "is_mojibake"
+      ]
+    },
+    {
+      "path": "fence_evidence/refs.py",
+      "lines": 273,
+      "summary": "The evidence identifier, and its inverse. One owner.",
+      "public_symbols": [
+        "ref_id",
+        "Locus",
+        "build_index",
+        "resolve",
+        "verify_snapshots"
+      ]
+    },
+    {
+      "path": "fence_evidence/relations.py",
+      "lines": 192,
+      "summary": "Document-to-document relations.",
+      "public_symbols": [
+        "primary_approval_id",
+        "derive_relations",
+        "supersession_chain"
+      ]
+    },
+    {
+      "path": "fence_evidence/reports.py",
+      "lines": 792,
+      "summary": "Report generation: the Phase 0 inspection reports and the Phase 5 coverage report.",
+      "public_symbols": [
+        "environment_report",
+        "corpus_audit_report",
+        "dependency_options_report",
+        "pilot_selection_report",
+        "coverage_report",
+        "facts_report",
+        "write_all_reports"
+      ]
+    },
+    {
+      "path": "fence_evidence/retrieval.py",
+      "lines": 793,
+      "summary": "Phase 3 — lexical retrieval over the evidence store.",
+      "public_symbols": [
+        "SearchResult",
+        "build_match_expression",
+        "search_evidence",
+        "get_document",
+        "get_page",
+        "get_region",
+        "get_element_context",
+        "resolve_document_version"
+      ]
+    },
+    {
+      "path": "fence_evidence/reviews.py",
+      "lines": 1656,
+      "summary": "The review loop: a person accepts or corrects a machine reading of a table.",
+      "public_symbols": [
+        "ReviewRefused",
+        "submit_review",
+        "rebuild_projection",
+        "review_queue",
+        "review_summary",
+        "ensure_fact_reviews",
+        "fact_ref_id",
+        "fact_source_ref",
+        "effective_fact_value",
+        "effective_fact_normalized",
+        "submit_fact_review",
+        "rebuild_fact_projection",
+        "reviewed_without_a_reviewer",
+        "fact_review_queue",
+        "fact_review_summary",
+        "reattach_fact_reviews",
+        "build_ledger",
+        "ledger_bytes",
+        "export_reviews",
+        "read_ledger",
+        "import_reviews",
+        "ensure_step_reviews",
+        "submit_step_review",
+        "rebuild_step_projection"
+      ]
+    },
+    {
+      "path": "fence_evidence/sigv4.py",
+      "lines": 71,
+      "summary": "AWS Signature Version 4, standard library only.",
+      "public_symbols": [
+        "derive_signing_key",
+        "canonical_request",
+        "sign_request"
+      ]
+    },
+    {
+      "path": "fence_evidence/snapshot.py",
+      "lines": 1496,
+      "summary": "Build a published snapshot from the store.",
+      "public_symbols": [
+        "SourceRef",
+        "SourceDoc",
+        "Gap",
+        "SnapshotBuilder",
+        "VerificationFailed",
+        "verify",
+        "build_snapshot"
+      ]
+    },
+    {
+      "path": "fence_evidence/snapshot_store.py",
+      "lines": 193,
+      "summary": "Hold published snapshots. Write once, never overwrite, tombstone rather than delete.",
+      "public_symbols": [
+        "SnapshotExists",
+        "SnapshotMissing",
+        "put_snapshot",
+        "get_snapshot",
+        "tombstone",
+        "list_snapshots",
+        "verify_stored"
+      ]
+    },
+    {
+      "path": "fence_evidence/sourcerefs.py",
+      "lines": 484,
+      "summary": "The Discovery read model behind `GET /source-refs/{id}`. No HTTP.",
+      "public_symbols": [
+        "source_ref",
+        "source_refs_batch"
+      ]
+    },
+    {
+      "path": "fence_evidence/steps.py",
+      "lines": 455,
+      "summary": "Splitting an installation-guide bullet block into step candidates.",
+      "public_symbols": [
+        "Segment",
+        "split_block",
+        "ensure_step_candidates",
+        "propose"
+      ]
+    },
+    {
+      "path": "fence_evidence/store.py",
+      "lines": 1613,
+      "summary": "Canonical evidence store (SQLite) and the rebuildable retrieval projection.",
+      "public_symbols": [
+        "now",
+        "ensure_columns",
+        "ensure_edition_unique",
+        "ensure_views",
+        "backfill_tool_fingerprint",
+        "run_fingerprint",
+        "version_id_for_edition",
+        "next_edition",
+        "editions_of",
+        "current_edition",
+        "backfill_lang",
+        "connect",
+        "retire_columns",
+        "migrate",
+        "tool_fingerprint",
+        "start_run",
+        "finish_run",
+        "upsert_document",
+        "version_exists",
+        "delete_version_rows",
+        "write_extracted",
+        "add_relation",
+        "heading_fallback_enabled",
+        "build_retrieval_units",
+        "stats"
+      ]
+    },
+    {
+      "path": "fence_evidence/table_review.py",
+      "lines": 395,
+      "summary": "Review-gated readings of the scanned tables OCR could not rebuild.",
+      "public_symbols": [
+        "reader_family",
+        "normalise",
+        "load_reading",
+        "agreement",
+        "mark_cross_family_verified",
+        "mark_agent_verified",
+        "ReviewRequired",
+        "promote",
+        "summary",
+        "compare_with_pipeline",
+        "load_directory"
+      ]
+    },
+    {
+      "path": "fence_evidence/tables.py",
+      "lines": 637,
+      "summary": "Table and figure detection.",
+      "public_symbols": [
+        "looks_tabular",
+        "spans_from",
+        "cell_bboxes_from",
+        "TableBackend",
+        "detect_page_tables_and_figures",
+        "detect_vector_figures",
+        "detect_ocr_tables",
+        "backfill_spans",
+        "backfill_cell_bboxes"
+      ]
+    },
+    {
+      "path": "fence_evidence/tenancy.py",
+      "lines": 165,
+      "summary": "Obligation 7 — the tenant axis, and the rule that makes it enforceable.",
+      "public_symbols": [
+        "TenantLeak",
+        "validate_tenant",
+        "validate_owner",
+        "visible_to",
+        "visible_sql"
+      ]
+    },
+    {
+      "path": "fence_evidence/tools.py",
+      "lines": 72,
+      "summary": "Thin, non-shell wrappers around the external extraction tools.",
+      "public_symbols": [
+        "ToolError",
+        "run",
+        "tool_versions",
+        "have_pdfplumber",
+        "render_page",
+        "ocr_hocr"
+      ]
+    },
+    {
+      "path": "fence_evidence/versions.py",
+      "lines": 567,
+      "summary": "Conservative, date-aware version resolution.",
+      "public_symbols": [
+        "parse_date",
+        "date_confidence",
+        "document_dates",
+        "expiry_status",
+        "enrich_chain",
+        "effective_at",
+        "parse_edition",
+        "document_edition",
+        "select_active",
+        "chain_for"
+      ]
+    },
+    {
+      "path": "fence_evidence/worklist.py",
+      "lines": 183,
+      "summary": "Split the unresolved material into who can actually resolve it.",
+      "public_symbols": [
+        "build"
+      ]
+    }
+  ],
+  "limits": [
+    "No source-PDF corpus-wide visual review was performed.",
+    "Planning repository implementation was not inspected; consumer claims here are limited to local code and integration documents.",
+    "Validator probes were in-memory only; no invalid snapshot was stored."
+  ],
+  "report_status": "historical_measurements_before_width_rollback",
+  "snapshot_status": "tombstoned",
+  "current_status_note": "Measurements below describe the original experiment. Manual width fact and review have since been removed; dimension publisher withdrawn. Refer to emblem-73014714-width-rollback.json for current checks."
+}

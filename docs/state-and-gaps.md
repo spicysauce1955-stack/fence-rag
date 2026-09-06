@@ -4027,6 +4027,77 @@ been reviewed yet.
 
 ---
 
+### G82 — Emblem purchase previews work; authored model publication remains open
+
+`[measured]`, 2026-09-06. The Emblem 73014714 work added a private model draft,
+source-linked packaged-item bindings, and executable purchase previews. It did
+not complete the contract datamodel or demonstrate its use in Planning. The
+initial commit omitted this measured gap entry and overstated the durability
+of one reviewed width. The follow-up review found three concrete defects.
+
+**Supplementary PDF.** A 1,444,864-byte retailer-linked installation PDF was
+unnecessarily added through LFS. Its URL and SHA-256 remain in the draft as
+the reproducible locator for the historical four-statement comparison. The
+PDF is now an ignored optional cache, removed from disk and Git tracking. The
+audit reports `not_checked_cache_missing` when absent; it never calls that a
+successful hash or text check. A cached file must still pass both checks.
+Removing its pointer from this branch's commit history prevents subsequent
+branch checkouts from fetching it; it does not purge GitHub's uploaded LFS object.
+
+**Two step reviews caused invalid publication.** Joining every review to its
+candidate duplicated the step key and could create an `after` edge to itself.
+Submission, projection replay, and publication now select the latest
+`reviewed_at`, with `step_review_id` breaking equal-time ties deterministically.
+Contrary to the assumption in the review request, replay previously used arrival
+order too. Five regression tests cover correction, newer rejection, backdated
+rejection, reversed insertion, and equal timestamps. Table and fact review
+ordering is unchanged.
+
+**The Developer width was not replayable.** Fact 22751 was hand-inserted as
+`manual-curation-v1`, and review 78fe49766acc86a1 claimed
+`status_before: extracted`, although no extractor produced it. The export itself
+acknowledged that there was no importer. With the user's authorization, the
+fact and review are withdrawn, along with the special width publisher and its
+registry additions. The earlier snapshot is tombstoned using the existing
+snapshot-store withdrawal mechanism. The source reading and the user's page
+confirmation remain draft evidence, not an active ledger review. No replacement
+review, extractor event, or importer is invented. An authored-fact ingestion
+path with validated anchors and fresh-store replay tests is still needed before
+this reading can publish through the ledger.
+
+**What remains open.** The preview derives supplier packages for a single panel
+and a seven-panel layout (a five-panel L plus a separate two-panel run), but the
+bindings and kit coverage remain private authoring data. `publishable` and
+`contract_consumer_verified` remain false. The model still lacks fitting inputs
+and required contract fields; no board count, cut list, installation readiness,
+or consumer compatibility follows from correct package counts. The separate
+Planning consumer is unavailable here. Existing procedure ownership and the
+derivation of dependencies from source order also remain outside this fix.
+
+`[measured]`: the corrected ledger parses at 71 table reviews, 204 fact reviews,
+and 0 step reviews. The local store has 1,826 facts; the withdrawn fact and
+review are absent. A rebuilt snapshot verifies with 9 parameters, and no live
+snapshot contains `actual_panel_width_mm`. The draft audit checks 118 citation
+occurrences, 3 corpus hashes and 23 spec fields: zero integrity errors, but
+55 required contract locations and 15 fitting inputs remain missing. External
+manual corroboration is explicitly unchecked in this run. The single-panel
+preview yields 1 kit, 2 end posts and 2 caps; the seven-panel preview yields
+7 kits, 4 end posts, 4 line posts, 1 corner post and 9 caps. Both match the
+independent examples. Corpus/dataset files and both frozen boundary documents
+are unchanged from the branch parent.
+
+The first full-suite run caught a rollback error: its removed ledger row still
+counted in the header (205 versus 204). Re-exporting with
+`python3 -m fence_evidence.cli review --export` corrected it, and `read_ledger`
+now accepts the result. This is why parsing and replay checks, rather than just
+counting rows in a report, belong in the completion checkpoint.
+
+Final `python3 tests/run_tests.py`: **1,416 tests, OK (1 expected failure)**,
+45.770 seconds. This includes 17 procedure tests and 17 draft-audit tests.
+`git diff --check` passes.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

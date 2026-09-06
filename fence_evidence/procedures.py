@@ -95,9 +95,13 @@ def build_procedures(conn: sqlite3.Connection, *, source_ref_page=None,
               FROM step_candidates c
               JOIN documents d ON d.document_id = c.document_id
               LEFT JOIN step_reviews r
-                ON r.element_id = c.element_id
-               AND r.char_start = c.char_start
-               AND r.char_end = c.char_end
+                ON r.step_review_id = (
+                    SELECT latest.step_review_id FROM step_reviews latest
+                     WHERE latest.element_id = c.element_id
+                       AND latest.char_start = c.char_start
+                       AND latest.char_end = c.char_end
+                     ORDER BY latest.reviewed_at DESC, latest.step_review_id DESC
+                     LIMIT 1)
              ORDER BY c.document_id, c.page_no, c.ordinal, c.seq""").fetchall()
 
     by_page: dict[tuple, list] = {}
@@ -106,7 +110,8 @@ def build_procedures(conn: sqlite3.Connection, *, source_ref_page=None,
     for r in rows:
         page = (r["document_id"], r["page_no"])
         titles[page] = r["title"] or r["document_id"]
-        if r["review_status"] in PUBLISHABLE and r["step_kind"] and r["step_scope"]:
+        if (r["review_status"] in PUBLISHABLE and r["verdict"] in PUBLISHABLE
+                and r["step_kind"] and r["step_scope"]):
             by_page.setdefault(page, []).append(r)
         elif r["review_status"] == "unreviewed":
             waiting[page] = waiting.get(page, 0) + 1

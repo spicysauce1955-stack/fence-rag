@@ -1,0 +1,261 @@
+{
+  "draft_integrity_passed": true,
+  "errors": [],
+  "external_applicability_check": "not_checked_cache_missing",
+  "missing_contract_fields": [
+    {
+      "path": "/model_fragment/grade",
+      "shape": "FenceModel"
+    },
+    {
+      "path": "/model_fragment/height_support",
+      "shape": "FenceModel"
+    },
+    {
+      "path": "/model_fragment/option_axes",
+      "shape": "FenceModel"
+    },
+    {
+      "path": "/model_fragment/variants",
+      "shape": "FenceModel"
+    },
+    {
+      "path": "/model_fragment/layout_policy",
+      "shape": "FenceModel"
+    },
+    {
+      "path": "/model_fragment/assembly",
+      "shape": "FenceModel"
+    },
+    {
+      "path": "/model_fragment/default_spec/fixings",
+      "shape": "PanelSpec"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/0/placement",
+      "shape": "FrameSlot"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/0/contains",
+      "shape": "FrameSlot"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/0/joint/channel_depth",
+      "shape": "Joint"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/0/joint/insertion_margin",
+      "shape": "Joint"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/0/joint/shared_host_gap",
+      "shape": "Joint"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/0/joint/gap_reason",
+      "shape": "Joint"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/0/requirement/qty",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/0/requirement/length_rule",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/0/requirement/overlap",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/0/requirement/option_axis",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/0/requirement/sku_by_option",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/0/requirement/eligibility",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/1/placement",
+      "shape": "FrameSlot"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/1/contains",
+      "shape": "FrameSlot"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/1/joint/channel_depth",
+      "shape": "Joint"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/1/joint/insertion_margin",
+      "shape": "Joint"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/1/joint/shared_host_gap",
+      "shape": "Joint"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/1/joint/gap_reason",
+      "shape": "Joint"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/1/requirement/qty",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/1/requirement/length_rule",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/1/requirement/overlap",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/1/requirement/option_axis",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/1/requirement/sku_by_option",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/frame/1/requirement/eligibility",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/justification",
+      "shape": "InfillSpec"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/excess",
+      "shape": "InfillSpec"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/edge_margin",
+      "shape": "InfillSpec"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/pattern/0/joint",
+      "shape": "Member"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/pattern/0/base_engagement",
+      "shape": "Member"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/pattern/0/top_engagement",
+      "shape": "Member"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/pattern/0/gap_after",
+      "shape": "Member"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/pattern/0/face_offset",
+      "shape": "Member"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/pattern/0/contains",
+      "shape": "Member"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/pattern/0/requirement/qty",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/pattern/0/requirement/length_rule",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/pattern/0/requirement/overlap",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/pattern/0/requirement/option_axis",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/pattern/0/requirement/sku_by_option",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/default_spec/infill/pattern/0/requirement/eligibility",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/post/joint",
+      "shape": "PostSlot"
+    },
+    {
+      "path": "/model_fragment/post/requirement",
+      "shape": "PostSlot"
+    },
+    {
+      "path": "/model_fragment/post/contains",
+      "shape": "PostSlot"
+    },
+    {
+      "path": "/model_fragment/post/cap/qty",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/post/cap/length_rule",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/post/cap/overlap",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/post/cap/option_axis",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/post/cap/sku_by_option",
+      "shape": "PartRequirement"
+    },
+    {
+      "path": "/model_fragment/post/cap/eligibility",
+      "shape": "PartRequirement"
+    }
+  ],
+  "missing_contract_field_count": 55,
+  "citations_checked": 118,
+  "source_hashes_checked": 3,
+  "spec_fields_checked": 23,
+  "fitting_readiness": {
+    "status": "blocked",
+    "missing_inputs": [
+      "board[0].Part.spec.width_mm",
+      "board[0].Part.spec.thickness_mm",
+      "board[0].Part.spec.nominal_length_mm",
+      "board[0].base_engagement",
+      "board[0].top_engagement",
+      "board[0].gap_after",
+      "frame.bottom_rail.placement",
+      "frame.bottom_rail.joint.channel_depth",
+      "frame.bottom_rail.Part.spec.nominal_length_mm",
+      "frame.top_rail.placement",
+      "frame.top_rail.joint.channel_depth",
+      "frame.top_rail.Part.spec.nominal_length_mm",
+      "infill.edge_margin",
+      "infill.justification",
+      "infill.excess"
+    ],
+    "authored_frame_positions": 2,
+    "board_count": null,
+    "cut_lengths": null,
+    "reason": "No fitting/BOM engine is present here. Nominal board width is not effective pitch; panel width is not clear infill width. Field presence alone never proves fit."
+  },
+  "contract_validity": "incomplete",
+  "limitations": [
+    "Presence checks cover this draft shape only, not a full contract schema.",
+    "No Planning consumer, fit or BOM execution is performed.",
+    "Source applicability and authored choices still require semantic review."
+  ]
+}

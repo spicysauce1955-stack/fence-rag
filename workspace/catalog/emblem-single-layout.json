@@ -1,0 +1,31 @@
+{
+  "kind": "full_panel_schematic",
+  "scenario": "One standalone full Emblem 73014714 panel, two end posts, no gates or corners",
+  "coordinates": "dimensionless topology only; no lengths or spacing",
+  "expected_run_count": 1,
+  "stations": [
+    {
+      "id": "P1",
+      "schematic_point": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "P2",
+      "schematic_point": [
+        1,
+        0
+      ]
+    }
+  ],
+  "bays": [
+    {
+      "id": "B1",
+      "from": "P1",
+      "to": "P2",
+      "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+      "supply": "full_kit"
+    }
+  ]
+}

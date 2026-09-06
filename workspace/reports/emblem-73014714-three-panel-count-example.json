@@ -1,0 +1,149 @@
+{
+  "artifact_kind": "private_purchase_count_worked_example",
+  "objective": "Purchase complete kits and separately supplied posts/caps",
+  "scenario": "Three full Emblem 73014714 panels, straight open run, no gates or corners",
+  "layout_is": "authored hypothetical topology; not user site measurements",
+  "stations": [
+    {
+      "id": "P1",
+      "role": "end"
+    },
+    {
+      "id": "P2",
+      "role": "line"
+    },
+    {
+      "id": "P3",
+      "role": "line"
+    },
+    {
+      "id": "P4",
+      "role": "end"
+    }
+  ],
+  "bays": [
+    {
+      "id": "B1",
+      "from": "P1",
+      "to": "P2",
+      "panel_model_number": "73014714"
+    },
+    {
+      "id": "B2",
+      "from": "P2",
+      "to": "P3",
+      "panel_model_number": "73014714"
+    },
+    {
+      "id": "B3",
+      "from": "P3",
+      "to": "P4",
+      "panel_model_number": "73014714"
+    }
+  ],
+  "purchase_lines": [
+    {
+      "manufacturer_model_number": "73014714",
+      "description": "6x8 Emblem White complete panel kit",
+      "quantity_each": 3,
+      "derived_from_bays": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "evidence": {
+        "element_id": "element-b540e75926-0018",
+        "text_raw": "73014714",
+        "cite": {
+          "id": "304c96b69b330708",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      }
+    },
+    {
+      "manufacturer_model_number": "73045785",
+      "description": "White end post, 5 x 5 x 108 inches",
+      "quantity_each": 2,
+      "derived_from_stations": [
+        "P1",
+        "P4"
+      ],
+      "evidence": {
+        "element_id": "element-b540e75926-0044",
+        "text_raw": "73045785",
+        "cite": {
+          "id": "3299b0fb58f9d53c",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      }
+    },
+    {
+      "manufacturer_model_number": "73045783",
+      "description": "White line post, 5 x 5 x 108 inches",
+      "quantity_each": 2,
+      "derived_from_stations": [
+        "P2",
+        "P3"
+      ],
+      "evidence": {
+        "element_id": "element-b540e75926-0036",
+        "text_raw": "73045783",
+        "cite": {
+          "id": "e27012dc3edf290f",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      }
+    },
+    {
+      "manufacturer_model_number": "73013956",
+      "description": "White contemporary post top, nominal 5 x 5 inches",
+      "quantity_each": 4,
+      "derived_from_stations": [
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "evidence": {
+        "element_id": "element-b540e75926-0052",
+        "text_raw": "73013956",
+        "cite": {
+          "id": "1356341c0f1a6c05",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      }
+    }
+  ],
+  "source_counting_rule": {
+    "element_id": "element-b540e75926-0070",
+    "text_raw": "3. Calculate # of posts needed:\n\u2022 1 post per panel + 1 end post to end the fence run\n\u2022 1 end/gate post per gate (don\u2019t forget 2 post\ninserts for each gate)",
+    "cite": {
+      "id": "5f2efc0cc9661d0c",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+    }
+  },
+  "counting_rule_interpretation": "Count one kit per explicit full-panel bay; count each unique post station once and one selected cap per station. The N+1 shortcut applies to this open path only.",
+  "not_a_complete_installation_order": [
+    "Footing concrete and gravel quantities need site and installation requirements",
+    "Post-cap adhesive consumption is not established",
+    "Conditional reinforcement needs applicability assessment",
+    "No pricing, waste allowance, field cuts or placement dimensions have been selected"
+  ],
+  "contract_assessment": {
+    "status": "worked_example_not_Planning_execution",
+    "kit_mapping": "Whole-kit purchase coverage requires verified Product/kit credit support in Planning. InfillSpec.supply=assembly alone does not represent rails plus boards as one panel kit.",
+    "post_mapping": "PostSlot is per station under FenceModel, outside PanelSpec; cap nests under post.",
+    "references": [
+      "docs/integration/knowledge-datamodel.md \u00a73.3",
+      "docs/integration/knowledge-datamodel.md \u00a73.4"
+    ]
+  },
+  "checks": {
+    "source_refs_resolve": true,
+    "unique_station_count": 4,
+    "shared_posts_counted_once": true,
+    "no_board_or_rail_purchase_lines": true,
+    "expected_quantities_match": true
+  },
+  "review_status": "awaiting_user_review_of_worked_example"
+}
