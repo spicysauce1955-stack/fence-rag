@@ -161,6 +161,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--get", metavar="ID", help="fetch one by hash")
     p.add_argument("--dry-run", action="store_true",
                    help="build and report without storing")
+    p.add_argument("--authored-model", action="append", default=[], metavar="JSON",
+                   help="preflight an authored model record; excluded models publish actionable gaps")
     p.add_argument("--verify-stored", action="store_true",
                    help="re-run the obligations over every snapshot already on "
                         "disk; exits non-zero if any fails. The build-time gate "
@@ -580,6 +582,9 @@ def main(argv: list[str] | None = None) -> int:
             _print({"error": "choose one of --build, --dry-run, --list, --get, "
                              "--verify-stored"})
             return 2
+        if args.authored_model and not (args.build or args.dry_run):
+            _print({"error": "--authored-model requires --build or --dry-run"})
+            return 2
         if args.verify_stored:
             from .snapshot_store import verify_stored
             res = verify_stored()
@@ -597,13 +602,28 @@ def main(argv: list[str] | None = None) -> int:
         elif args.list:
             _print(list_snapshots())
         else:
-            snap = build_snapshot(tenant=args.tenant, regime=args.regime)
+            records = []
+            for path in args.authored_model:
+                try:
+                    with open(path, encoding="utf-8") as source:
+                        record = json.load(source)
+                    if not isinstance(record, dict):
+                        raise ValueError("authored model record must be an object")
+                    records.append(record)
+                except (OSError, ValueError) as exc:
+                    _print({"error": f"cannot read authored model {path}: {exc}"})
+                    return 2
+            snap = build_snapshot(tenant=args.tenant, regime=args.regime,
+                                  **({"authored_records": records} if records else {}))
             summary = {"snapshot_id": snap["snapshot_id"],
                        "tenant": snap["tenant"], "regime": snap["regime"],
                        "retain_until": snap["retain_until"],
                        "source_docs": len(snap["source_docs"]),
                        "warnings": len(snap["warnings"]),
                        "gaps": len(snap["gaps"]),
+                       "models": len(snap["models"]),
+                       "authored_model_gaps": [g for g in snap["gaps"]
+                                               if g["because"]["code"].startswith("authored_model_")],
                        "stored": False}
             if args.build:
                 put_snapshot(snap)

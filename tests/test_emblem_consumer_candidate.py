@@ -26,6 +26,13 @@ class TestConsumerCandidate(unittest.TestCase):
             self.assertNotIn('channel_depth_mm', slot)
             self.assertEqual(result['source_joints'][slot['key']], {'kind': 'channel'})
 
+    def test_handed_bindings_name_the_actual_pattern_member(self):
+        model = prepare(self.package)['model']
+        key = model['default_spec']['infill']['pattern'][0]['key']
+        self.assertEqual([f['edge_binding'] for f in model['default_spec']['fixings']], [
+            {'member_key': key, 'position': 'first', 'profile_edge': 'tongue'},
+            {'member_key': key, 'position': 'last', 'profile_edge': 'groove'}])
+
     def test_numeric_joint_fields_cannot_be_silently_dropped(self):
         self.package['model_fragment']['default_spec']['frame'][0]['joint']['channel_depth'] = {
             'amount_milli': 1000, 'unit': 'mm', 'value_raw': ['fixture']}
@@ -116,6 +123,49 @@ class TestConsumerCandidate(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'two handed end placements'):
             prepare(self.package)
 
+    def test_board_length_rule_and_quantities_are_authored_without_seating_defaults(self):
+        result = prepare(self.package)
+        spec = result['model']['default_spec']
+        board = spec['infill']['pattern'][0]
+        self.assertEqual(board['requirement']['length_rule'], 'between_frame')
+        self.assertEqual(board['requirement']['qty'], 1)
+        self.assertEqual(spec['infill']['justification'], 'start')
+        self.assertNotIn('base_engagement_mm', board)
+        self.assertNotIn('excess', spec['infill'])
+        self.assertTrue(all(s['requirement']['qty'] == 1 for s in spec['frame']))
+        self.assertEqual(result['model']['post']['cap']['qty'], 1)
+        self.assertEqual(result['assembly_authoring']['review_status'], 'unreviewed_authored')
+
+    def test_boolean_rail_count_and_wrong_model_cap_rule_refused(self):
+        inventory = next(i for i in self.package['packaged_assembly_inventory'] if i['component_key'] == 'top_rail')
+        inventory['quantity_each'] = True
+        with self.assertRaisesRegex(ValueError, 'Rail quantity'):
+            prepare(self.package)
+        inventory['quantity_each'] = 1
+        rule = next(r for r in self.package['purchase_quantity_rules'] if r['target'] == 'post_cap')
+        rule['model_id'] = 'another-model'
+        with self.assertRaisesRegex(ValueError, 'Cap quantity'):
+            prepare(self.package)
+
+    def test_adversarial_assembly_mutations_are_refused(self):
+        mutations = [
+            lambda p: p['model_fragment']['default_spec']['infill'].update(orientation='horizontal'),
+            lambda p: p['model_fragment']['default_spec']['infill']['pattern'][0]['requirement'].update(part_id='cap'),
+            lambda p: p['model_fragment']['default_spec']['infill']['pattern'][0]['requirement'].update(qty=99),
+            lambda p: p['model_fragment']['default_spec']['infill']['pattern'][0]['requirement'].update(length_rule='panel_height'),
+            lambda p: p['purchase_quantity_rules'][-1].update(condition={'only_when': 'gate'}),
+            lambda p: p['packaged_assembly_inventory'].append(deepcopy(p['packaged_assembly_inventory'][0])),
+            lambda p: p['connection_evidence'].append(deepcopy(p['connection_evidence'][0])),
+            lambda p: p['part_fragments'][0]['type'].update(key='post'),
+            lambda p: next(s for s in p['part_fragments'][0]['spec'] if s['key'] == 'height_mm')['value'].update(amount_milli=57150),
+        ]
+        for i, mutate in enumerate(mutations):
+            with self.subTest(i=i):
+                package = deepcopy(self.package)
+                mutate(package)
+                with self.assertRaises(ValueError):
+                    prepare(package)
+
 
 class TestConsumerCandidateIntegration(unittest.TestCase):
     def test_real_consumer_refuses_incomplete_candidate_and_exposes_lost_fields(self):
@@ -152,6 +202,6 @@ class TestConsumerCandidateIntegration(unittest.TestCase):
                         errors = result['partial_semantic_validation']['errors']
                         self.assertTrue(any('bottom_rail' in e and 'channel_depth_mm=0' in e for e in errors))
                         self.assertTrue(any('top_rail' in e and 'channel_depth_mm=0' in e for e in errors))
-                        self.assertTrue(any('length_rule=None' in e for e in errors))
-                        self.assertIn(['default_spec', 'infill', 'pattern', 0, 'profile_edges'],
-                                      result['unconsumed_authored_paths'])
+                        self.assertFalse(any('length_rule=None' in e for e in errors))
+                        lost = ['default_spec', 'infill', 'pattern', 0, 'profile_edges'] in result['unconsumed_authored_paths']
+                        self.assertEqual(result['profile_edges_preserved_by_parser'], not lost)

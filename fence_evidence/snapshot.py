@@ -542,7 +542,7 @@ class SnapshotBuilder:
             raised += 1
         return raised
 
-    def source_ref_page(self, document_id: str, page_no: int) -> SourceRef:
+    def source_ref_page(self, document_id: str, page_no: int, *, content_hash: str | None = None) -> SourceRef:
         """Mint a reference to a WHOLE PAGE, registering its document.
 
         The page is a first-class locus: `refs.ref_id(sha, page_no, None)` is
@@ -564,6 +564,8 @@ class SnapshotBuilder:
         before registration for the same reason it is there.
         """
         key = f"page:{document_id}:{page_no}"
+        if content_hash is not None:
+            key += f":{content_hash}"
         if key in self._refs:
             return self._refs[key]
         row = self.conn.execute("""
@@ -573,8 +575,9 @@ class SnapshotBuilder:
               FROM pages p
               JOIN document_versions v ON v.version_id = p.version_id
               JOIN documents d         ON d.document_id = v.document_id
-             WHERE d.document_id = ? AND p.page_no = ?""",
-            (document_id, page_no)).fetchone()
+             WHERE d.document_id = ? AND p.page_no = ?
+               AND (? IS NULL OR v.sha256 = ?)""",
+            (document_id, page_no, content_hash, content_hash)).fetchone()
         if row is None:
             raise KeyError(f"no such page: {document_id} p{page_no}")
         if not visible_to(row["owner_tenant"], self.tenant):
@@ -1485,7 +1488,8 @@ def verify(snapshot: dict) -> None:
 
 
 def build_snapshot(*, tenant: str, regime: str = "us_astm",
-                   conn: sqlite3.Connection | None = None) -> dict:
+                   conn: sqlite3.Connection | None = None, authored_records=(),
+                   authored_reviews=(), authored_model_validator=None) -> dict:
     """Assemble, canonicalise and hash. Provenance first -- closure needs it."""
     validate_tenant(tenant)     # before a connection is opened, not after
     own = conn is None
@@ -1569,6 +1573,11 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
                   would_close=g["would_close"], closes_by=g["closes_by"],
                   severity=g["severity"], on=g.get("on"))
 
+        from .authored_publication import build_authored_models
+        models = build_authored_models(
+            b, list(authored_records), parts, reviews=authored_reviews,
+            model_validator=authored_model_validator)
+
         # G78. Every extraction failure this platform already DETECTED,
         # published as a gap. Runs LAST of the ref-minting passes, and that
         # ordering is load-bearing: its severity rule asks whether a document
@@ -1588,7 +1597,7 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
             # declared and empty rather than absent: an absent key reads as an
             # oversight, an empty list reads as "we publish none of these yet".
             "part_types": part_types, "parts": parts,
-            "models": [], "procedures": procedures,
+            "models": models, "procedures": procedures,
             "parameters": parameters, "combinations": [], "rules": [],
         }
         canonical_bytes(members)           # refuses floats, sets, unsortable keys

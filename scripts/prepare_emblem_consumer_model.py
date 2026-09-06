@@ -9,6 +9,8 @@ import argparse
 from copy import deepcopy
 from decimal import Decimal, ROUND_HALF_UP
 import json
+import hashlib
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -18,19 +20,108 @@ from fence_evidence.canonical import content_hash
 from fence_evidence.paths import open_write
 
 
+def unique_records(records, key):
+    result = {}
+    for record in records:
+        value = record[key]
+        if value in result:
+            raise ValueError('Duplicate authored ' + key + ': ' + str(value))
+        result[value] = record
+    return result
+
+
+def set_authored(node, key, value):
+    if key in node and (type(node[key]) is not type(value) or node[key] != value):
+        raise ValueError('Conflicting authored value: ' + key)
+    node[key] = value
+
+
+def check_rail_reading(quantity):
+    raw = quantity.get('value_raw')
+    if not isinstance(raw, list) or len(raw) != 1 or not isinstance(raw[0], str):
+        raise ValueError('Rail dimension needs one original inch reading.')
+    match = re.fullmatch(r'(\d+)(?:-([¼½¾]))?\s+in\.', raw[0])
+    if not match:
+        raise ValueError('Unsupported rail dimension reading; review its conversion explicitly.')
+    inches = Decimal(match[1]) + {'¼': Decimal('.25'), '½': Decimal('.5'),
+                                  '¾': Decimal('.75'), None: Decimal(0)}[match[2]]
+    if (quantity.get('unit') != 'mm' or type(quantity.get('amount_milli')) is not int
+            or quantity['amount_milli'] != inches * 25400):
+        raise ValueError('Rail dimension contradicts its retained original inch reading.')
+
+
+def author_assembly_rules(package, model):
+    """State supported rules explicitly without filling missing fitting geometry."""
+    relations = unique_records(package['connection_evidence'], 'relationship')
+    bottom = relations['boards_into_bottom_rail']
+    top = relations['top_rail_over_boards']
+    if (bottom['targets'] != ['board', 'bottom_rail']
+            or top['targets'] != ['top_rail', 'board']
+            or not bottom['evidence_anchor']['cite'] or not top['evidence_anchor']['cite']):
+        raise ValueError('Board length rule requires both cited rail connections.')
+    infill = model['default_spec']['infill']
+    if infill['orientation'] != 'vertical' or len(infill['pattern']) != 1:
+        raise ValueError('Only the evidenced single-board repeat is supported.')
+    board = infill['pattern'][0]
+    expected_board = model['id'].replace('-emblem-73014714', '/emblem-73014714-board')
+    if board['key'] != 'board' or board['requirement']['part_id'] != expected_board:
+        raise ValueError('Board rule requires the exact authored Emblem board Part.')
+    if board['base_ref'] != 'bottom_rail' or board['top_ref'] != 'top_rail':
+        raise ValueError('Board references disagree with the cited assembly.')
+    set_authored(board['requirement'], 'length_rule', 'between_frame')
+    set_authored(board['requirement'], 'qty', 1)
+    set_authored(infill, 'justification', 'start')
+    evidence = [{'target': 'default_spec.infill.pattern.0.requirement',
+                 'authorship': 'third_party_authored',
+                 'derivation': 'One physical board per fitted repeat; cut length between rail faces plus separately evidenced seating at both ends.',
+                 'anchors': [deepcopy(bottom['evidence_anchor']), deepcopy(top['evidence_anchor'])]},
+                {'target': 'default_spec.infill.justification',
+                 'authorship': 'third_party_authored',
+                 'derivation': 'Author the local start axis at the first installed post to follow the instructed assembly direction; this axis convention is not a manufacturer coordinate datum.',
+                 'anchors': [deepcopy(bottom['evidence_anchor'])]}]
+    inventory = unique_records(package['packaged_assembly_inventory'], 'component_key')
+    for slot in model['default_spec']['frame']:
+        source = inventory[slot['key']]
+        if type(source['quantity_each']) is not int or source['quantity_each'] != 1 or not source['evidence']['cite']:
+            raise ValueError('Rail quantity requires its cited one-per-panel inventory.')
+        set_authored(slot['requirement'], 'qty', 1)
+        evidence.append({'target': 'default_spec.frame.' + slot['key'] + '.requirement.qty',
+                         'authorship': 'third_party_authored',
+                         'derivation': 'One of each named top and bottom rail per full panel.',
+                         'anchors': [deepcopy(source['evidence'])]})
+    caps = [r for r in package['purchase_quantity_rules'] if r['target'] == 'post_cap']
+    if (len(caps) != 1 or caps[0]['model_id'] != model['id']
+            or caps[0]['basis'] != 'unique_post_station'
+            or type(caps[0]['quantity_per_basis']['amount_milli']) is not int
+            or caps[0]['quantity_per_basis']['amount_milli'] != 1000
+            or caps[0]['quantity_per_basis']['unit'] != 'each' or not caps[0]['evidence']):
+        raise ValueError('Cap quantity requires the cited one-per-post-station rule.')
+    set_authored(model['post']['cap'], 'qty', 1)
+    evidence.append({'target': 'post.cap.qty', 'authorship': 'third_party_authored',
+                     'derivation': caps[0]['derivation'], 'anchors': deepcopy(caps[0]['evidence'])})
+    return {'field_evidence': evidence,
+            'remaining_inputs': ['effective board pitch/overlap', 'end allowance and excess policy',
+                                 'base/top engagement', 'receiving channel depths',
+                                 'stock lengths and source-defined cut allowances'],
+            'review_status': 'unreviewed_authored', 'physical_fit_verified': False}
+
+
 def author_components(package, model):
     """Map only evidenced horizontal rail heights and full-panel end channels."""
-    source_parts = {part['id']: part for part in package['part_fragments']}
-    parts, dimensions = [], []
+    source_parts = unique_records(package['part_fragments'], 'id')
+    parts, dimensions, matching = [], [], []
     for slot in model['default_spec']['frame']:
         if slot['orientation'] != 'horizontal':
             raise ValueError('Rail face-height mapping requires horizontal rails.')
         source = source_parts[slot['requirement']['part_id']]
+        if source['type']['key'] != 'rail':
+            raise ValueError('Rail slot must reference a rail Part.')
         heights = [s for s in source['spec'] if s['key'] == 'height_mm']
         if len(heights) != 1:
             raise ValueError('Rail mapping requires exactly one sourced height.')
         height = heights[0]
         value = height['value']
+        check_rail_reading(value)
         if (height['agree'] != '==' or value['unit'] != 'mm'
                 or type(value['amount_milli']) is not int or value['amount_milli'] <= 0
                 or not height['provenance']['cites']):
@@ -41,6 +132,34 @@ def author_components(package, model):
                       'type': 'rail', 'name_i18n': source['name_i18n'],
                       'spec': [{'key': 'thickness_mm', 'agree': '==',
                                 'value': projected, 'unit': 'mm'}]})
+        matching_specs = [s for s in source['spec'] if s['key'] in ('width_mm', 'colour')]
+        if len(matching_specs) != 2 or {s['key'] for s in matching_specs} != {'width_mm', 'colour'}:
+            raise ValueError('Rail matching requires one width and one colour constraint.')
+        for spec in matching_specs:
+            if spec['key'] not in ('width_mm', 'colour'):
+                continue
+            if spec['agree'] != '==' or not spec['provenance']['cites']:
+                raise ValueError('Rail matching requires cited equality constraints.')
+            raw = spec['value']
+            field = {'key': spec['key'], 'agree': '=='}
+            mapping = {'part_id': source['id'], 'source_spec': deepcopy(spec)}
+            if spec['key'] == 'width_mm':
+                check_rail_reading(raw)
+                if (raw.get('unit') != 'mm' or type(raw.get('amount_milli')) is not int
+                        or raw['amount_milli'] <= 0):
+                    raise ValueError('Rail width requires integer-milli millimetres.')
+                exact_width = Decimal(raw['amount_milli']) / 1000
+                rounded_width = int(exact_width.quantize(Decimal('1'), rounding=ROUND_HALF_UP))
+                field.update(value=rounded_width, unit='mm')
+                mapping.update(exact_mm=str(exact_width), projected_mm=rounded_width,
+                               rounding_error_mm=str(Decimal(rounded_width) - exact_width))
+            else:
+                if not isinstance(raw.get('key'), str) or not raw['key']:
+                    raise ValueError('Rail colour requires a source token.')
+                field['value'] = raw['key']
+            parts[-1]['spec'].append(field)
+            mapping['private_spec'] = deepcopy(field)
+            matching.append(mapping)
         dimensions.append({'part_id': source['id'], 'slot_key': slot['key'],
                            'source_spec': deepcopy(height),
                            'original_part_specs': deepcopy(source['spec']),
@@ -72,18 +191,29 @@ def author_components(package, model):
                            'quantity_each': 1, 'evidence': deepcopy(inventory['edge_evidence'])})
     model['default_spec']['fixings'] = [
         {'key': p['slot_key'], 'basis': 'per_panel', 'qty_per_basis': p['quantity_each'],
+         'edge_binding': {'member_key': model['default_spec']['infill']['pattern'][0]['key'],
+                          'position': 'first' if p['edge'].startswith('first') else 'last',
+                          'profile_edge': 'tongue' if p['edge'].endswith('tongue') else 'groove'},
          'requirement': {'part_id': channel_id, 'qty': 1}} for p in placements]
     return {'private_parts': parts, 'rail_dimension_mappings': dimensions,
+            'rail_matching_mappings': matching,
             'u_channel_placements': placements, 'u_channel_inventory_evidence': deepcopy(inventory),
             'scope': 'full panel only; incomplete private component representation',
             'handed_placement_consumed': False, 'kit_purchase_credit_consumed': False,
-            'limitations': ['Consumer counts channels but does not enforce their handed edge placement.',
+            'limitations': ['Handed bindings are authored; actual placement remains unverified until panel fitting inputs are sourced.',
                             'Channels ship in the panel kit; separate component demand must not become extra purchases.',
-                            'Private Parts are partial geometry/count definitions, not exact product selectors: rail width/colour constraints remain in source specs and channel specs are empty.',
+                            'Private rail dimensions and colour constrain matching, but component SKU identities and channel matching specs remain incomplete.',
                             'Channel dimensions and remaining exact Parts are unresolved.']}
 
 
 def prepare(package, placement_confirmation=None):
+    # Same closed rule shape as purchase_preview; no ignored conditions or packs.
+    unique_records(package['purchase_quantity_rules'], 'target')
+    for rule in package['purchase_quantity_rules']:
+        if (set(rule) != {'id', 'target', 'model_id', 'basis', 'quantity_per_basis',
+                         'authorship', 'derivation', 'evidence'}
+                or set(rule['quantity_per_basis']) != {'amount_milli', 'unit', 'value_raw'}):
+            raise ValueError('Unsupported quantity-rule fields must not be ignored.')
     model = deepcopy(package['model_fragment'])
     source_joints = {}
     for slot in model['default_spec']['frame']:
@@ -133,7 +263,7 @@ def prepare(package, placement_confirmation=None):
         'placement_datum_note': '72-inch panel and 7-inch rails do not explicitly establish rail centre offsets.',
         'private_defaults_are_not_source_facts': [
             'channel depth and insertion margin', 'board engagements/gap/face offset',
-            'infill fitting policies', 'rail, board and cap quantity defaults',
+            'infill excess and margin policies',
             'requirement length rule and overlap', 'grade and height support'],
         'publishable': False, 'installation_ready': False, 'bom_generation_verified': False,
         'limitations': ['Private SKU predicate is catalog authoring, not a published PartRequirement.',
@@ -170,6 +300,7 @@ def prepare(package, placement_confirmation=None):
             'User-confirmed interpretation; source pages do not explicitly dimension the endpoints. '
             'Integer-mm approximation is adapter authoring, not a manufacturer tolerance.')
     result['component_authoring'] = author_components(package, model)
+    result['assembly_authoring'] = author_assembly_rules(package, model)
     return result
 
 
@@ -205,6 +336,7 @@ def main():
     from fenceai.fencemodel.model import FenceModel, PartRequirement, validate_model
     from fenceai.catalog.model import Catalog
     from fenceai.knowledge.ast import evaluate_expr
+    from scripts.emblem_consumer_adapter import inspect_candidate
     confirmation = (json.loads(args.placement_confirmation.read_text())
                     if args.placement_confirmation else None)
     result = prepare(json.loads(args.package.read_text()), confirmation)
@@ -240,12 +372,25 @@ def main():
             raise ValueError('Consumer rail positions disagree with the confirmed datum projection.')
         from fenceai.parts.model import Part, PartLibrary
         from fenceai.parts.resolve import resolve_model_parts
+        from fenceai.parts.compile import compile_spec
         from fenceai.fencemodel.model import PanelSpec
         from fenceai.fencemodel.resolve import PanelContext, resolve_panel
         # Activate copies only in an isolated diagnostic, never the authored Parts.
         authored = result['component_authoring']
         library = PartLibrary(parts=[Part.model_validate(dict(p, status='active'))
                                      for p in authored['private_parts']])
+        matching_checks = {}
+        for part in library.parts:
+            if part.type != 'rail':
+                continue
+            item = {s.key: s.value for s in part.spec}
+            expr = compile_spec(part)
+            checks = {'declared_attributes_match': evaluate_expr(expr, {'item': item}),
+                      'wrong_colour_refused': not evaluate_expr(expr, {'item': dict(item, colour='other')}),
+                      'wrong_width_refused': not evaluate_expr(expr, {'item': dict(item, width_mm=item['width_mm'] + 1)})}
+            if not all(checks.values()):
+                raise ValueError('Consumer lost rail matching constraints.')
+            matching_checks[part.id] = checks
         probe_model = parsed.model_copy(deep=True)
         probe_model.post = None
         probe_model.default_spec.infill = None
@@ -256,7 +401,9 @@ def main():
         if rail_heights != expected_heights:
             raise ValueError('Consumer lost the sourced vertical rail face height.')
         # Count only channel requirements: no invented panel/infill fit is executed.
-        channels = resolve_panel(PanelSpec(fixings=resolved.default_spec.fixings),
+        count_fixings = [f.model_copy(update={'edge_binding': None})
+                         for f in resolved.default_spec.fixings]
+        channels = resolve_panel(PanelSpec(fixings=count_fixings),
                                  PanelContext(centre_width_mm=1, clear_width_mm=1, height_mm=1))
         counts = {s.slot_key: s.qty for s in channels.slots}
         expected_counts = {p['slot_key']: p['quantity_each'] for p in authored['u_channel_placements']}
@@ -264,7 +411,9 @@ def main():
             raise ValueError('Consumer U-channel count differs from authored end placements.')
         component_probe = {'scope': 'isolated rail dimensions and channel counts, no physical panel fit',
                            'active_parts_are_in_memory_test_copies': True,
+                           'edge_bindings_removed_for_count_only_probe': True,
                            'rail_face_heights_mm': rail_heights,
+                           'synthetic_rail_attribute_matching': matching_checks,
                            'u_channel_counts_per_panel': counts,
                            'u_channels_for_1_and_7_panels': {str(n): n * sum(counts.values()) for n in (1, 7)},
                            'handed_placement_consumed': False,
@@ -272,6 +421,8 @@ def main():
     report = {
         'consumer_revision': subprocess.check_output(
             ['git', '-C', str(args.consumer_root), 'rev-parse', 'HEAD'], text=True).strip(),
+        'consumer_source_diff_sha256': hashlib.sha256(subprocess.check_output(
+            ['git', '-C', str(args.consumer_root), 'diff', 'HEAD', '--', 'src'])).hexdigest(),
         'post_requirement_parses': True, 'post_role_matrix': matrix,
         'private_model_parser_errors': errors, 'whole_model_parses': not errors,
         'candidate_hash': content_hash(result),
@@ -281,7 +432,11 @@ def main():
             'part_library_basis': 'absent; Part-dependent checks skipped',
         },
         'unconsumed_authored_paths': unconsumed,
+        'profile_edges_preserved_by_parser': (not errors and
+            parsed.model_dump()['default_spec']['infill']['pattern'][0].get('profile_edges') ==
+            result['model']['default_spec']['infill']['pattern'][0]['profile_edges']),
         'component_resolution_probe': component_probe,
+        'consumer_boundary': inspect_candidate(result, FenceModel),
         'placement_confirmed': confirmation is not None,
         'placement_confirmation_kind': 'user_confirmed_interpretation' if confirmation else None,
         'resolved_centrelines_mm_at_rounded_1829_mm_panel_height': positions,

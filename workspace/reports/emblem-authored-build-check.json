@@ -1,0 +1,173 @@
+{
+  "snapshot_id": "39881bfc7ef5c380fb76fcf6aa862fc49db9e365b604ce52fc67761283e2d951",
+  "tenant": "default",
+  "regime": "us_astm",
+  "retain_until": "2028-09-05",
+  "source_docs": 85,
+  "warnings": 287,
+  "gaps": 405,
+  "models": 0,
+  "authored_model_gaps": [
+    {
+      "id": "104c898b9bb7b89d",
+      "kind": "missing_value",
+      "subject": {
+        "kind": "model",
+        "id": "mfr/freedom-outdoor-living-emblem-73014714",
+        "tenant": "default"
+      },
+      "because": {
+        "code": "authored_model_not_admitted",
+        "params": {
+          "paths": [
+            "/assembly",
+            "/default_spec/fixings",
+            "/default_spec/frame/0/joint/channel_depth",
+            "/default_spec/frame/0/joint/insertion_margin",
+            "/default_spec/frame/0/joint/kind",
+            "/default_spec/frame/0/orientation",
+            "/default_spec/frame/0/placement",
+            "/default_spec/frame/0/requirement/length_rule",
+            "/default_spec/frame/0/requirement/overlap",
+            "/default_spec/frame/0/requirement/part_id",
+            "/default_spec/frame/0/requirement/qty",
+            "/default_spec/frame/1/joint/channel_depth",
+            "/default_spec/frame/1/joint/insertion_margin",
+            "/default_spec/frame/1/joint/kind",
+            "/default_spec/frame/1/orientation",
+            "/default_spec/frame/1/placement",
+            "/default_spec/frame/1/requirement/length_rule",
+            "/default_spec/frame/1/requirement/overlap",
+            "/default_spec/frame/1/requirement/part_id",
+            "/default_spec/frame/1/requirement/qty",
+            "/default_spec/infill/edge_margin",
+            "/default_spec/infill/excess",
+            "/default_spec/infill/justification",
+            "/default_spec/infill/orientation",
+            "/default_spec/infill/pattern/0/base_engagement",
+            "/default_spec/infill/pattern/0/face_offset",
+            "/default_spec/infill/pattern/0/gap_after",
+            "/default_spec/infill/pattern/0/profile_edges",
+            "/default_spec/infill/pattern/0/requirement/length_rule",
+            "/default_spec/infill/pattern/0/requirement/overlap",
+            "/default_spec/infill/pattern/0/requirement/part_id",
+            "/default_spec/infill/pattern/0/requirement/qty",
+            "/default_spec/infill/pattern/0/top_engagement",
+            "/default_spec/infill/supply",
+            "/grade",
+            "/height_support",
+            "/layout_policy",
+            "/option_axes",
+            "/post/cap/length_rule",
+            "/post/cap/overlap",
+            "/post/cap/part_id",
+            "/post/cap/qty",
+            "/post/joint",
+            "/post/requirement",
+            "/review",
+            "/status",
+            "/variants",
+            "/version"
+          ],
+          "reasons": [
+            "inactive_model",
+            "invalid_grade",
+            "invalid_length_rule",
+            "invalid_quantity",
+            "invalid_shape",
+            "missing_joint",
+            "missing_requirement",
+            "missing_value",
+            "uncited",
+            "unresolved_part",
+            "unreviewed_authored_model",
+            "unsupported_fitting",
+            "unsupported_height_support",
+            "unsupported_placement"
+          ]
+        }
+      },
+      "cites": [
+        {
+          "id": "54e47378f4737168",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "57482180d5ddbd37",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        },
+        {
+          "id": "5ec7031e0f3bd7b3",
+          "belongs_to": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b"
+        },
+        {
+          "id": "aeaf7e66a05b4d28",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        },
+        {
+          "id": "d3ce088342977ece",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        },
+        {
+          "id": "e856d15ed6bcbc68",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      ],
+      "would_close": "Resolve the listed source, geometry and schema gaps, then review the exact authored model and Part digest.",
+      "closes_by": "knowledge",
+      "severity": "warns_line",
+      "on": null
+    },
+    {
+      "id": "960a5c4bde18abd2",
+      "kind": "unmodellable_entity",
+      "subject": {
+        "kind": "model",
+        "id": "mfr/freedom-outdoor-living-emblem-73014714",
+        "tenant": "default"
+      },
+      "because": {
+        "code": "authored_model_consumer_unavailable",
+        "params": {
+          "paths": [
+            "/"
+          ],
+          "reasons": [
+            "consumer_validation_missing"
+          ]
+        }
+      },
+      "cites": [
+        {
+          "id": "54e47378f4737168",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "57482180d5ddbd37",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        },
+        {
+          "id": "5ec7031e0f3bd7b3",
+          "belongs_to": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b"
+        },
+        {
+          "id": "aeaf7e66a05b4d28",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        },
+        {
+          "id": "d3ce088342977ece",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        },
+        {
+          "id": "e856d15ed6bcbc68",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      ],
+      "would_close": "Implement a lossless consumer adapter and validate this model with its exact Part library.",
+      "closes_by": "planning",
+      "severity": "warns_line",
+      "on": null
+    }
+  ],
+  "stored": false
+}

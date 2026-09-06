@@ -41,7 +41,8 @@
           "key": "bottom_rail",
           "orientation": "horizontal",
           "requirement": {
-            "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a"
+            "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+            "qty": 1
           },
           "joint": "channel",
           "placement": {
@@ -53,7 +54,8 @@
           "key": "top_rail",
           "orientation": "horizontal",
           "requirement": {
-            "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b"
+            "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+            "qty": 1
           },
           "joint": "channel",
           "placement": {
@@ -70,7 +72,9 @@
             "base_ref": "bottom_rail",
             "top_ref": "top_rail",
             "requirement": {
-              "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board"
+              "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+              "length_rule": "between_frame",
+              "qty": 1
             },
             "profile_edges": {
               "start": "tongue",
@@ -78,13 +82,19 @@
             }
           }
         ],
-        "supply": "components"
+        "supply": "components",
+        "justification": "start"
       },
       "fixings": [
         {
           "key": "u_channel_first_board_tongue",
           "basis": "per_panel",
           "qty_per_basis": 1,
+          "edge_binding": {
+            "member_key": "board",
+            "position": "first",
+            "profile_edge": "tongue"
+          },
           "requirement": {
             "part_id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
             "qty": 1
@@ -94,6 +104,11 @@
           "key": "u_channel_last_board_groove",
           "basis": "per_panel",
           "qty_per_basis": 1,
+          "edge_binding": {
+            "member_key": "board",
+            "position": "last",
+            "profile_edge": "groove"
+          },
           "requirement": {
             "part_id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
             "qty": 1
@@ -104,7 +119,8 @@
     "post": {
       "key": "post",
       "cap": {
-        "part_id": "mfr/freedom-outdoor-living/73013956"
+        "part_id": "mfr/freedom-outdoor-living/73013956",
+        "qty": 1
       },
       "requirement": {
         "part_id": "",
@@ -305,8 +321,7 @@
   "private_defaults_are_not_source_facts": [
     "channel depth and insertion margin",
     "board engagements/gap/face offset",
-    "infill fitting policies",
-    "rail, board and cap quantity defaults",
+    "infill excess and margin policies",
     "requirement length rule and overlap",
     "grade and height support"
   ],
@@ -363,6 +378,17 @@
             "agree": "==",
             "value": 178,
             "unit": "mm"
+          },
+          {
+            "key": "width_mm",
+            "agree": "==",
+            "value": 57,
+            "unit": "mm"
+          },
+          {
+            "key": "colour",
+            "agree": "==",
+            "value": "white"
           }
         ]
       },
@@ -380,6 +406,17 @@
             "agree": "==",
             "value": 178,
             "unit": "mm"
+          },
+          {
+            "key": "width_mm",
+            "agree": "==",
+            "value": 57,
+            "unit": "mm"
+          },
+          {
+            "key": "colour",
+            "agree": "==",
+            "value": "white"
           }
         ]
       },
@@ -594,6 +631,134 @@
         "rounding_policy": "nearest whole millimetre, half up"
       }
     ],
+    "rail_matching_mappings": [
+      {
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+        "source_spec": {
+          "key": "width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 57150,
+            "unit": "mm",
+            "value_raw": [
+              "2-\u00bc in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        "exact_mm": "57.15",
+        "projected_mm": 57,
+        "rounding_error_mm": "-0.15",
+        "private_spec": {
+          "key": "width_mm",
+          "agree": "==",
+          "value": 57,
+          "unit": "mm"
+        }
+      },
+      {
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+        "source_spec": {
+          "key": "colour",
+          "agree": "==",
+          "value": {
+            "key": "white",
+            "value_raw": [
+              "White"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        "private_spec": {
+          "key": "colour",
+          "agree": "==",
+          "value": "white"
+        }
+      },
+      {
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+        "source_spec": {
+          "key": "width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 57150,
+            "unit": "mm",
+            "value_raw": [
+              "2-\u00bc in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        "exact_mm": "57.15",
+        "projected_mm": 57,
+        "rounding_error_mm": "-0.15",
+        "private_spec": {
+          "key": "width_mm",
+          "agree": "==",
+          "value": 57,
+          "unit": "mm"
+        }
+      },
+      {
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+        "source_spec": {
+          "key": "colour",
+          "agree": "==",
+          "value": {
+            "key": "white",
+            "value_raw": [
+              "White"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        "private_spec": {
+          "key": "colour",
+          "agree": "==",
+          "value": "white"
+        }
+      }
+    ],
     "u_channel_placements": [
       {
         "slot_key": "u_channel_first_board_tongue",
@@ -662,10 +827,106 @@
     "handed_placement_consumed": false,
     "kit_purchase_credit_consumed": false,
     "limitations": [
-      "Consumer counts channels but does not enforce their handed edge placement.",
+      "Handed bindings are authored; actual placement remains unverified until panel fitting inputs are sourced.",
       "Channels ship in the panel kit; separate component demand must not become extra purchases.",
-      "Private Parts are partial geometry/count definitions, not exact product selectors: rail width/colour constraints remain in source specs and channel specs are empty.",
+      "Private rail dimensions and colour constrain matching, but component SKU identities and channel matching specs remain incomplete.",
       "Channel dimensions and remaining exact Parts are unresolved."
     ]
+  },
+  "assembly_authoring": {
+    "field_evidence": [
+      {
+        "target": "default_spec.infill.pattern.0.requirement",
+        "authorship": "third_party_authored",
+        "derivation": "One physical board per fitted repeat; cut length between rail faces plus separately evidenced seating at both ends.",
+        "anchors": [
+          {
+            "element_id": "element-15b181bc58-0015",
+            "text_raw": "Insert boards into bottom rail ensuring\nU-channels are on both ends. Start from first\ninstalled post and work towards second post\n(Fig. 7).",
+            "cite": {
+              "id": "e856d15ed6bcbc68",
+              "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+            }
+          },
+          {
+            "element_id": "element-15b181bc58-0020",
+            "text_raw": "a. Insert the top rail into the first top hole post\nroute then guide over top of boards (Fig. 8).",
+            "cite": {
+              "id": "d3ce088342977ece",
+              "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+            }
+          }
+        ]
+      },
+      {
+        "target": "default_spec.infill.justification",
+        "authorship": "third_party_authored",
+        "derivation": "Author the local start axis at the first installed post to follow the instructed assembly direction; this axis convention is not a manufacturer coordinate datum.",
+        "anchors": [
+          {
+            "element_id": "element-15b181bc58-0015",
+            "text_raw": "Insert boards into bottom rail ensuring\nU-channels are on both ends. Start from first\ninstalled post and work towards second post\n(Fig. 7).",
+            "cite": {
+              "id": "e856d15ed6bcbc68",
+              "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+            }
+          }
+        ]
+      },
+      {
+        "target": "default_spec.frame.bottom_rail.requirement.qty",
+        "authorship": "third_party_authored",
+        "derivation": "One of each named top and bottom rail per full panel.",
+        "anchors": [
+          {
+            "element_id": "element-b540e75926-0008",
+            "text_raw": "\u2022 2-\u00bc in. x 7 in. top & bottom rails",
+            "cite": {
+              "id": "b2766cd38e5d8624",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          }
+        ]
+      },
+      {
+        "target": "default_spec.frame.top_rail.requirement.qty",
+        "authorship": "third_party_authored",
+        "derivation": "One of each named top and bottom rail per full panel.",
+        "anchors": [
+          {
+            "element_id": "element-b540e75926-0008",
+            "text_raw": "\u2022 2-\u00bc in. x 7 in. top & bottom rails",
+            "cite": {
+              "id": "b2766cd38e5d8624",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          }
+        ]
+      },
+      {
+        "target": "post.cap.qty",
+        "authorship": "third_party_authored",
+        "derivation": "Author one selected post top per post station from the instruction to attach post tops to posts; the instruction does not print a numeric kit count.",
+        "anchors": [
+          {
+            "element_id": "element-66549cef10-0011",
+            "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+            "cite": {
+              "id": "f67db6fc7eef1aa8",
+              "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+            }
+          }
+        ]
+      }
+    ],
+    "remaining_inputs": [
+      "effective board pitch/overlap",
+      "end allowance and excess policy",
+      "base/top engagement",
+      "receiving channel depths",
+      "stock lengths and source-defined cut allowances"
+    ],
+    "review_status": "unreviewed_authored",
+    "physical_fit_verified": false
   }
 }

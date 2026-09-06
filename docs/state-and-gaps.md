@@ -4826,6 +4826,70 @@ model, full panel fit or exact supplier BOM is claimed.
 
 ---
 
+### G98 — Emblem assembly rules and executable kit/edge capabilities; publication still blocked
+
+Measured 2026-09-06. G96 left the board length rule implicit and the consumer
+unable to retain physical members while crediting their purchase from a kit.
+The private candidate now authors `between_frame` from the cited bottom/top rail
+assembly steps, one board per fitted occurrence, one rail per named slot and one
+cap per station. These are unreviewed authored rules, not extracted ledger facts.
+Rail width and colour matching constraints accompany the sourced face-height
+projection. Conflicting quantities, conditional rules, duplicate inventory and
+numeric readings inconsistent with raw inch tokens refuse preparation.
+
+First-tongue/last-groove U-channel bindings are now explicit. The consumer patch
+preserves profile edges, binds accessory positions to fitted board ends and
+separates physical from purchase quantities for kit-supplied geometry. Exact Part
+identity and sufficient explicit packaged stock length are required for cut-member
+credits. Synthetic tests cover partial/full/surplus supplies, rails, boards,
+channels, generation, demand, fulfillment and elevation. An adversary found a
+known tongue/groove edge could neighbour an unclassified board; fixed and retested.
+Unsupported profiled/handed `trim_last` and `extension_clip` now refuse direct
+resolution rather than silently leaving a residual opening. This does not implement
+end-board trimming or prove any Emblem dimension.
+
+Authored records can enter snapshot preflight through `--authored-model`. Admission
+requires cited explicit geometry, referenced published Parts, a trusted external
+human review bound to model/evidence/Part content and a supplied semantic validator.
+The CLI does not import trusted reviews or supply a completed adapter. Exclusions
+now emit cited Knowledge/Planning gaps; deduplicating gaps does not lose their
+reasons. Page references are bound to the cited source version. Independent review
+caught unchecked grade/height citations, unsupported containment/assembly and
+malformed/inactive Parts; negative controls now refuse them. Nested containment
+and ambiguous Part IDs remain explicitly unsupported rather than falsely reviewed.
+
+Measured checks: **1,529 repository tests pass, one existing expected failure**;
+**41 focused producer/candidate/adapter tests pass** after final changes;
+**2,549 full consumer tests pass**; a subsequently added seven-panel regression
+raises focused capability coverage to **15 passing tests**, independently rerun.
+The seven-panel L-shaped plus detached fixture produces nine posts, purchases
+seven kits, and retains fourteen rails and fourteen channels without duplicate
+component purchases. Both frozen boundary
+checksums and `git diff --check` pass. Consumer patch base is
+`9de94eb06d8e997d9be098dedd5b6a6b2eb4024d`; it includes the new tests and is delivered
+as `workspace/reports/emblem-consumer-capabilities.patch`, not a consumer deployment.
+
+Actual Emblem remains incomplete: the private parser accepts it, but partial
+semantic validation still refuses **two missing rail-channel depths**. Board
+engagement, effective pitch, exact stock dimensions/component identities and
+fitting policy also remain unresolved; fewer validator messages do not mean those
+checks ran. The exact-source cross-reference found useful replacement-product
+leads but no justified numerical substitution. A concrete measurement request is
+prepared and unsent. Original source package, confirmation and review ledger are
+unchanged. Snapshot dry-run returns **models=[]** with two actionable authored-model
+gaps; this is expected refusal, not a finished datamodel/BOM.
+
+A further software boundary is now measured: public `PostSlot.joint` is silently
+dropped by the private consumer. A post receiving rails is distinct from a rail
+receiving boards; copying those fields to rail slots would change their meaning.
+Post-host/shared-bay receiving semantics and a lossless public adapter remain work,
+separate from manufacturer evidence collection. See
+`workspace/reports/emblem-public-adapter-boundary.md` and the completion/source audit
+reports for exact mismatches and rejected shortcuts. No full Emblem physical fit,
+public model admission or installation-ready purchase list is claimed.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

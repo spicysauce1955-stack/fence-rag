@@ -1,0 +1,671 @@
+diff --git a/src/fenceai/demand/derive.py b/src/fenceai/demand/derive.py
+index 3a6fcde..1e3919f 100644
+--- a/src/fenceai/demand/derive.py
++++ b/src/fenceai/demand/derive.py
+@@ -135,7 +135,7 @@ def derive_requirements(
+                 # every member placed or reported `unplaced` — is answered by
+                 # `report/assembly.py` over the panel's slots, where this member IS.
+                 continue
+-            if slot.qty <= 0:
++            if slot.purchase_qty <= 0:
+                 # A slot that asks for nothing asks for NOTHING. A zero line
+                 # would tell `fulfill()` to buy nothing and then be a requirement
+                 # no BOM line pegs to — a hole in `covered == req_ids`, which the
+@@ -162,7 +162,7 @@ def derive_requirements(
+             # counted in eaches. Only the chosen product knows, and the product
+             # is not chosen yet — resolve_supply stamps the unit when it is.
+             add(
+-                slot.qty, [span.id],
++                slot.purchase_qty, [span.id],
+                 cut_length_mm=slot.length_mm, length_basis=slot.length_basis,
+                 role=slot.role, slot_key=slot.slot_key, eligibility=slot.eligibility,
+             )
+diff --git a/src/fenceai/fencemodel/model.py b/src/fenceai/fencemodel/model.py
+index d9ee41d..ef6b9a9 100644
+--- a/src/fenceai/fencemodel/model.py
++++ b/src/fenceai/fencemodel/model.py
+@@ -225,6 +225,8 @@ class PartRequirement(BaseModel):
+     # exists to refuse. The keys are RELATIVE (`hinge`, `hinge/pin`) because a
+     # part cannot know the key of the slot it happens to be placed in.
+     credits: dict[str, str] = {}
++    # Opt in to supplied drawn members; physical quantities remain on their slots.
++    geometry_credits: bool = False
+
+     @property
+     def eligibility_source(self) -> Literal[
+@@ -407,7 +409,19 @@ class FrameSlot(BaseModel):
+         return _refuse_authored_dimensions(self, ("thickness_mm",))
+
+
++class ProfileEdges(BaseModel):
++    start: Literal["tongue", "groove", "square", "ship_lap", "none"]
++    end: Literal["tongue", "groove", "square", "ship_lap", "none"]
++
++
++class EdgeBinding(BaseModel):
++    member_key: str
++    position: Literal["first", "last"]
++    profile_edge: Literal["tongue", "groove"]
++
++
+ class Member(BaseModel):
++    profile_edges: ProfileEdges | None = None
+     key: str
+     # Undeclared (0) until `parts.resolve.resolve_model_parts` fills it from the
+     # part's dimensions — the same lifetime `thickness_mm` and `eligibility` have.
+@@ -447,6 +461,7 @@ class InfillSpec(BaseModel):
+
+
+ class FixingRule(BaseModel):
++    edge_binding: EdgeBinding | None = None
+     key: str
+     # registry-validated, for `LengthRule`'s reasons
+     basis: str
+@@ -1641,6 +1656,31 @@ def _step_order_errors(steps: list[AssemblyStep]) -> list[str]:
+     return errors
+
+
++def _edge_binding_errors(model: FenceModel) -> list[str]:
++    errors = []
++    for spec in [model.default_spec, *(v.spec for v in model.variants)]:
++        members = {m.key: m for m in spec.infill.pattern} if spec.infill else {}
++        seen = set()
++        for fixing in spec.fixings:
++            binding = fixing.edge_binding
++            if binding is None:
++                continue
++            if binding.position in seen:
++                errors.append(f"fixing {fixing.key}: duplicate handed binding at {binding.position} edge")
++            seen.add(binding.position)
++            if (fixing.basis != "per_panel" or fixing.qty_per_basis != 1
++                    or fixing.requirement.qty != 1 or fixing.qty_param):
++                errors.append(f"fixing {fixing.key}: handed binding requires exactly one per-panel piece")
++            member = members.get(binding.member_key)
++            side = "start" if binding.position == "first" else "end"
++            if (member is None or member.profile_edges is None
++                    or getattr(member.profile_edges, side) != binding.profile_edge):
++                errors.append(f"fixing {fixing.key}: handed binding does not match member profile")
++            if member is not None and member.requirement.qty != 1:
++                errors.append(f"fixing {fixing.key}: handed binding cannot select multiple pieces per position")
++    return errors
++
++
+ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
+     """Containment and its credits, checked where an author can still fix them.
+
+@@ -1679,11 +1719,11 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
+     # may not aim at one of these: see the refusal below.
+     inside = {path for spec in specs for key, req in spec_requirements(spec)
+               for path, _ in walk_contained(req.contained, key)}
+-    # Slots DRAWN at a position: a frame member sits at a placement, an infill
+-    # member sits in the fitted pattern. A credit may not aim at one of these
+-    # either — see the refusal below.
++    # Drawn members retain their geometry when explicitly supplied by kit credits.
++    # Legacy credits still refuse them; the opt-in also checks identity and length.
+     drawn = {s.key for spec in specs for s in spec.frame}
+     drawn |= {m.key for spec in specs if spec.infill for m in spec.infill.pattern}
++    drawn |= {f.key for spec in specs for f in spec.fixings if f.edge_binding is not None}
+     # Slots that CONTAIN a credit source. A credit may not aim at one of these:
+     # crediting a container would change how many boxes the panel buys, which
+     # changes how many pieces are in them, which changes the credit — a loop with
+@@ -1718,6 +1758,8 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
+                 )
+     for spec in specs:
+         for key, req in spec_requirements(spec):
++            if req.geometry_credits and req.qty != 1:
++                errors.append(f"slot {key}: geometry credit container requirement qty must be one")
+             contained = dict(walk_contained(req.contained, key))
+             for path, piece in contained.items():
+                 if not piece.part_id and not piece.role:
+@@ -1776,28 +1818,31 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
+                     )
+                     continue
+                 if target in drawn:
+-                    # A contained piece has an IDENTITY but no PLACE. A frame or
+-                    # infill slot's members are drawn at positions and its count
+-                    # is what `report/elevation.py` weights every fastener by, so
+-                    # crediting one leaves the drawing with no honest answer:
+-                    # draw the full count and the panel buys fewer than it shows,
+-                    # or draw what it buys and the fence is missing members that
+-                    # are physically there. Measured, not argued — a 4-rail slot
+-                    # credited 2 drew 3 fasteners instead of 5 and invented two
+-                    # `fixings_unplaced`, on a fence that had not changed.
+-                    #
+-                    # Hardware is the case this feature is for (hinges, latches,
+-                    # screws, brackets), and a fixing slot has no drawn extent, so
+-                    # the restriction costs it nothing. Lifting it means giving a
+-                    # contained piece a position, which is a different feature.
+-                    errors.append(
+-                        f"slot {key}: {relative!r} credits slot {target}, which is "
+-                        "drawn at a position. A contained piece has no place of "
+-                        "its own, so the elevation would either draw members the "
+-                        "panel does not buy or omit members the fence has. Credit "
+-                        "a slot with no drawn extent (a fixing)"
+-                    )
+-                    continue
++                    target_req = dict(spec_requirements(spec)).get(target)
++                    target_member = next((s for s in spec.frame if s.key == target), None)
++                    if target_member is None and spec.infill:
++                        target_member = next((m for m in spec.infill.pattern if m.key == target), None)
++                    if target_member is None:
++                        target_member = next((f for f in spec.fixings if f.key == target and f.edge_binding is not None), None)
++                    if not req.geometry_credits:
++                        errors.append(
++                            f"slot {key}: {relative!r} credits slot {target}, which is "
++                            "drawn at a position. Explicit geometry_credits is required"
++                        )
++                        continue
++                    if target_member is None or target_req is None:
++                        errors.append(f"slot {key}: geometry credit target must exist in the same spec")
++                        continue
++                    if (getattr(target_member, "post_joint", "unstated") == "through"
++                            or getattr(target_member, "continuity", "derived") != "derived"):
++                        errors.append(f"slot {key}: geometry credits cannot supply continuous members")
++                    if resolved and (piece is None or not piece.part_id
++                                     or piece.part_id != target_req.part_id):
++                        errors.append(f"slot {key}: geometry credit must supply the exact target Part ID")
++                    if resolved and target_req.length_rule and (piece is None or piece.stock_length_mm is None):
++                        errors.append(f"slot {key}: geometry credit requires packaged stock_length_mm")
++                    if resolved and (target_req.contained or (piece is not None and piece.contains)):
++                        errors.append(f"slot {key}: geometry credits with nested contents are unsupported")
+                 if target in containers:
+                     errors.append(
+                         f"slot {key}: {relative!r} credits slot {target}, which "
+@@ -2014,6 +2059,7 @@ def validate_model(
+     errors += _warning_errors(model, catalog)
+     errors += _site_dimension_errors(model)
+     errors += _containment_errors(model, resolved=library is not None)
++    errors += _edge_binding_errors(model)
+
+     for axis in model.option_axes:
+         for value in axis.values:
+diff --git a/src/fenceai/fencemodel/resolve.py b/src/fenceai/fencemodel/resolve.py
+index 2296e0a..f2082a4 100644
+--- a/src/fenceai/fencemodel/resolve.py
++++ b/src/fenceai/fencemodel/resolve.py
+@@ -18,7 +18,7 @@ from fenceai.fencemodel.lengths import LENGTH_RULES
+ from fenceai.fencemodel.fit import FitResult, fit_pattern
+ from fenceai.fencemodel.model import (
+     Distributed, Eligibility, FenceModel, Fraction, FromBottom, FromTop,
+-    HeightSupport, Member, PanelSpec, PartRequirement, spec_requirements,
++    HeightSupport, Member, PanelSpec, PartRequirement, ProfileEdges, EdgeBinding, spec_requirements,
+ )
+ from fenceai.knowledge.ast import MissingField, evaluate_expr, field_paths
+ from fenceai.parts.model import PATH_SEP, contained_path, walk_contained_qty
+@@ -96,6 +96,15 @@ def clear_opening_mm(centre_width_mm: Mm, face_start_mm: Mm, face_end_mm: Mm) ->
+
+
+ class ResolvedSlot(BaseModel):
++    profile_edges: ProfileEdges | None = None
++    edge_binding: EdgeBinding | None = None
++    bound_position_mm: Mm | None = None
++
++    @property
++    def purchase_qty(self) -> int:
++        """Drawn members keep physical qty; credits only reduce their purchases."""
++        return self.qty - self.credited_qty if (self.slot_kind in ("frame", "infill") or self.edge_binding is not None) else self.qty
++
+     slot_key: str
+     role: str
+     qty: int
+@@ -225,12 +234,16 @@ class ResolvedSlot(BaseModel):
+     # arrived inside a container and `credited_by` names the path keys that
+     # brought them — a LIST, because two different containers in one panel may
+     # each contribute, and a single field would silently keep whichever was
+-    # applied last. `qty` is what is LEFT to buy. Both are here so that the
++    # applied last. For ordinary fixings `qty` is what is LEFT to buy. Drawn
++    # frame/infill and edge-bound slots retain physical qty; purchase_qty subtracts
++    # credits there and the contained source reports only unused physical stock.
++    # Both are here so that the
+     # smaller purchase is a fact with a source rather than a quantity that
+     # quietly shrank — a reduced count nobody can trace back is the thing these
+     # fields exist instead of.
+     #
+-    # `qty + credited_qty` is the original requirement; `credited_qty` is NOT a
++    # `purchase_qty + credited_qty` is the original requirement; on ordinary
++    # fixing targets `credited_qty` is NOT a
+     # member count on this slot, because those members are the contained ones and
+     # counting them at both ends would place every credited hinge twice.
+     credits_slot_key: str = ""
+@@ -696,6 +709,10 @@ def resolve_panel(
+         frame[frame_slot.key] = resolved
+
+     if spec.infill and spec.infill.pattern:
++        if spec.infill.excess in ("trim_last", "extension_clip") and (
++                any(m.profile_edges is not None for m in spec.infill.pattern)
++                or any(f.edge_binding is not None for f in spec.fixings)):
++            raise ValueError("Profiled/handed infill requires an implemented fitting policy; trimming is unsupported")
+         axis = (ctx.clear_width_mm if spec.infill.orientation == "vertical"
+                 else ctx.height_mm)
+         fit = fit_pattern(
+@@ -706,6 +723,16 @@ def resolve_panel(
+             excess=spec.infill.excess,
+             edge_margin_mm=spec.infill.edge_margin_mm,
+         )
++        for i, gap in enumerate(fit.gaps_mm):
++            left = spec.infill.pattern[i % len(spec.infill.pattern)].profile_edges
++            right = spec.infill.pattern[(i + 1) % len(spec.infill.pattern)].profile_edges
++            known_joint = ((left is not None and left.end in ("tongue", "groove"))
++                           or (right is not None and right.start in ("tongue", "groove")))
++            if known_joint:
++                if left is None or right is None:
++                    raise ValueError("Known tongue/groove edge requires its neighboring profile")
++                if {left.end, right.start} != {"tongue", "groove"} or gap > 0:
++                    raise ValueError("Fitted tongue/groove edges must mate without a positive gap")
+         for offset, member in enumerate(spec.infill.pattern):
+             # how many of THIS member of the repeating sequence were placed
+             n = sum(1 for i in range(fit.count) if i % len(spec.infill.pattern) == offset)
+@@ -744,7 +771,7 @@ def resolve_panel(
+                 base_ref=member.base_ref, top_ref=member.top_ref,
+                 base_engagement_mm=member.base_engagement_mm,
+                 top_engagement_mm=member.top_engagement_mm,
+-                pattern_index=offset,
++                pattern_index=offset, profile_edges=member.profile_edges,
+             ))
+
+     frame_count = sum(s.qty for s in slots if s.fit is None)
+@@ -766,7 +793,9 @@ def resolve_panel(
+             continue
+         eligibility, option_axis, option_value = _chosen_option(rule.requirement, ctx)
+         eligibility, pinned = _pinned_sku(rule.key, eligibility, ctx)
++        binding_position = _edge_binding_position(rule, spec, slots)
+         slots.append(ResolvedSlot(
++            edge_binding=rule.edge_binding, bound_position_mm=binding_position,
+             slot_key=rule.key, role=rule.requirement.role, slot_kind="fixing",
+             qty=per * basis, basis=rule.basis, qty_per_basis=per,
+             eligibility=eligibility,
+@@ -794,6 +823,32 @@ def resolve_panel(
+                          slots=slots, credit_notes=notes)
+
+
++def _edge_binding_position(rule, spec, slots):
++    binding = rule.edge_binding
++    if binding is None:
++        return None
++    if rule.basis != "per_panel" or rule.qty_per_basis != 1 or rule.requirement.qty != 1 or rule.qty_param:
++        raise ValueError("A handed edge binding requires exactly one per-panel piece")
++    if spec.infill is None or not spec.infill.pattern:
++        raise ValueError("A handed edge binding requires fitted infill")
++    fitted = next((s for s in slots if s.fit is not None), None)
++    if fitted is None or fitted.fit.count == 0:
++        raise ValueError("A handed edge binding cannot attach to an empty fitted panel")
++    fit = fitted.fit
++    index = 0 if binding.position == "first" else fit.count - 1
++    member = spec.infill.pattern[index % len(spec.infill.pattern)]
++    side = "start" if binding.position == "first" else "end"
++    if (member.key != binding.member_key or member.profile_edges is None
++            or getattr(member.profile_edges, side) != binding.profile_edge):
++        raise ValueError("Handed binding does not match the actual fitted end member profile")
++    if member.requirement.qty != 1:
++        raise ValueError("Handed binding cannot choose between multiple pieces at one position")
++    cursor = fit.edge_margin_start_mm
++    for i in range(index):
++        cursor += spec.infill.pattern[i % len(spec.infill.pattern)].width_mm + fit.gaps_mm[i]
++    return cursor if binding.position == "first" else cursor + member.width_mm
++
++
+ def _contained_slots(
+     slots: list[ResolvedSlot], spec: PanelSpec, credited: dict[str, tuple[str, int]]
+ ) -> list[ResolvedSlot]:
+@@ -810,7 +865,7 @@ def _contained_slots(
+     `qty` MULTIPLIES, through `walk_contained_qty` — the one place that
+     arithmetic lives, shared with the credit that is sized from it.
+
+-    Runs AFTER `_plan_credits`, so `slot.qty` here is already what the panel
++    Runs AFTER `_plan_credits`; `slot.purchase_qty` is what the panel
+     BUYS for that slot. That is what a credited slot's own contents must be a
+     multiple of: the hinges that arrive inside a kit bring their washers under
+     the kit's path, and counting them again under the slot they credit is twelve
+@@ -827,18 +882,21 @@ def _contained_slots(
+             # contents anyway would put members in the panel that arrived in a
+             # box nobody bought.
+             continue
+-        out += _flatten(req.contained, key, slot.qty, credited)
++        out += _flatten(req.contained, key, slot.purchase_qty, credited,
++                        {s.slot_key for s in slots if s.slot_kind in ("frame", "infill") or s.edge_binding is not None})
+     return out
+
+
+ def _flatten(
+-    contained, container_key: str, factor: int, credited: dict[str, tuple[str, int]]
++    contained, container_key: str, factor: int, credited: dict[str, tuple[str, int]],
++    drawn: set[str] | None = None
+ ) -> list[ResolvedSlot]:
+     out: list[ResolvedSlot] = []
+     for path, piece, qty in walk_contained_qty(contained, container_key, factor):
+         target, applied = credited.get(path, ("", 0))
+         out.append(ResolvedSlot(
+-            slot_key=path, role=piece.role, qty=qty, slot_kind="contained",
++            slot_key=path, role=piece.role,
++            qty=qty - applied if target in (drawn or set()) else qty, slot_kind="contained",
+             # `contained_in` names the IMMEDIATE container, not the root: the
+             # question a reader asks of a nested piece is which box it came out
+             # of, and the root is one split away from the path either way.
+@@ -886,10 +944,13 @@ def _plan_credits(
+     credited: dict[str, tuple[str, int]] = {}
+     for key, req in spec_requirements(spec):
+         container = by_key.get(key)
+-        if container is None or container.qty <= 0:
++        if req.geometry_credits and req.qty != 1:
++            raise ValueError("Geometry credit container requirement qty must be one; use fixing basis count")
++        if container is None or container.purchase_qty <= 0:
+             continue          # a slot this bay placed none of brings no box
+-        available = {path: qty for path, _, qty
+-                     in walk_contained_qty(req.contained, key, container.qty)}
++        inventory = {path: (piece, qty) for path, piece, qty
++                     in walk_contained_qty(req.contained, key, container.purchase_qty)}
++        available = {path: value[1] for path, value in inventory.items()}
+         for relative, target_key in sorted(req.credits.items()):
+             path = contained_path(key, relative)
+             have = available.get(path, 0)
+@@ -900,9 +961,21 @@ def _plan_credits(
+                 notes.append(CreditNote(kind="unmatched", contained_key=path,
+                                         slot_key=target_key, qty=have))
+                 continue
+-            applied = min(have, target.qty)
++            if (target.slot_kind in ("frame", "infill") or target.edge_binding is not None) and not req.geometry_credits:
++                raise ValueError("Drawn target credits require explicit geometry_credits")
++            if target.slot_kind in ("frame", "infill") or target.edge_binding is not None:
++                piece = inventory[path][0]
++                target_req = dict(spec_requirements(spec))[target_key]
++                if not piece.part_id or piece.part_id != target_req.part_id:
++                    raise ValueError("Geometry credit must supply the exact target Part ID")
++                if target.length_unresolved:
++                    raise ValueError("Geometry credit cannot supply an unresolved cut length")
++                if target.length_mm is not None and (piece.stock_length_mm is None or target.length_mm > piece.stock_length_mm):
++                    raise ValueError("Packaged stock_length_mm is missing or too short for geometry credit")
++            applied = min(have, target.purchase_qty)
+             if applied > 0:
+-                target.qty -= applied
++                if target.slot_kind not in ("frame", "infill") and target.edge_binding is None:
++                    target.qty -= applied
+                 target.credited_qty += applied
+                 target.credited_by.append(path)
+                 credited[path] = (target_key, applied)
+diff --git a/src/fenceai/parts/model.py b/src/fenceai/parts/model.py
+index c108341..8d7b506 100644
+--- a/src/fenceai/parts/model.py
++++ b/src/fenceai/parts/model.py
+@@ -139,6 +139,8 @@ class ContainedPart(BaseModel):
+     part_id: str = ""
+     role: str = ""
+     qty: int = Field(default=1, ge=1)
++    # Length of each supplied piece in this package, not total linear inventory.
++    stock_length_mm: int | None = Field(default=None, gt=0, strict=True)
+     # Nesting is real and is not decoration: a kit ships a hinge, and the hinge
+     # ships its own pin. The path key composes, so depth costs the readers
+     # nothing — `gate_kit/hinge/pin` is one string like every other slot key.
+diff --git a/src/fenceai/report/elevation.py b/src/fenceai/report/elevation.py
+index 99ea50d..f297f91 100644
+--- a/src/fenceai/report/elevation.py
++++ b/src/fenceai/report/elevation.py
+@@ -300,6 +300,19 @@ def _fixings(panel: ResolvedPanel, members: list[ElevationMember],
+     for slot in panel.slots:
+         if slot.slot_kind != "fixing" or not slot.basis or not slot.qty_per_basis:
+             continue
++        if slot.edge_binding is not None:
++            bound = next((s for s in panel.slots if s.slot_key == slot.edge_binding.member_key), None)
++            if bound is None or slot.bound_position_mm is None:
++                unplaced.append(UnplacedFixing(slot_key=slot.slot_key, role=slot.role,
++                                               basis=slot.basis, qty=slot.qty))
++                continue
++            extent = bound.length_mm if bound.length_mm is not None else (height_mm if bound.orientation == "vertical" else width_mm)
++            middle = (bound.span_start_mm or 0) + extent // 2
++            x, y = (slot.bound_position_mm, middle) if bound.orientation == "vertical" else (middle, slot.bound_position_mm)
++            if slot.qty > 0:
++                placed.append(ElevationFixing(slot_key=slot.slot_key, role=slot.role,
++                    basis=slot.basis, index=0, x_mm=x, y_mm=y, qty=slot.qty))
++            continue
+         drawn = 0
+         for index, (x, y, weight) in enumerate(
+                 _places(slot.basis, frame, infill, width_mm, height_mm, parts)):
+diff --git a/src/fenceai/strategy/generator.py b/src/fenceai/strategy/generator.py
+index 5af9caf..ed53260 100644
+--- a/src/fenceai/strategy/generator.py
++++ b/src/fenceai/strategy/generator.py
+@@ -2822,9 +2822,9 @@ def _generate_run(
+                              # what the slot asked for, what arrived in a box, and
+                              # what is left to buy. All three, because a reader
+                              # given only the difference cannot check it.
+-                             "of": slot.qty + slot.credited_qty,
++                             "of": slot.purchase_qty + slot.credited_qty,
+                              "qty": slot.credited_qty,
+-                             "remaining": slot.qty,
++                             "remaining": slot.purchase_qty,
+                              "contained": ", ".join(slot.credited_by)},
+                     scope_refs=[span.id], inputs=[sm.select_node_id, span_node.id],
+                 ).id)
+diff --git a/src/fenceai/web/static/js/panel-model.js b/src/fenceai/web/static/js/panel-model.js
+index e05ba92..117954a 100644
+--- a/src/fenceai/web/static/js/panel-model.js
++++ b/src/fenceai/web/static/js/panel-model.js
+@@ -129,7 +129,7 @@ export function defaultRequirement(role) {
+     // rather than authored here — sending it back empty on a part-named slot is
+     // harmless (resolution overwrites it) and sending it back MISSING is how the
+     // editor silently drops a field on every save.
+-    contained: [], credits: {},
++    contained: [], credits: {}, geometry_credits: false,
+   };
+ }
+
+diff --git a/tests/api/test_authoring_gaps.py b/tests/api/test_authoring_gaps.py
+index 972da8f..3378363 100644
+--- a/tests/api/test_authoring_gaps.py
++++ b/tests/api/test_authoring_gaps.py
+@@ -234,6 +234,7 @@ def test_the_editors_payload_for_a_part_named_slot_validates():
+         # part's — it is simply empty on a slot that contains nothing.
+         "contained": [],
+         "credits": {},
++        "geometry_credits": False,
+     }
+     assert set(payload) == set(PartRequirement.model_fields)
+     req = PartRequirement(**payload)    # raises if the editor's shape is refused
+diff --git a/tests/fencemodel/test_emblem_capabilities.py b/tests/fencemodel/test_emblem_capabilities.py
+new file mode 100644
+index 0000000..36426e6
+--- /dev/null
++++ b/tests/fencemodel/test_emblem_capabilities.py
+@@ -0,0 +1,203 @@
++"""Synthetic geometry only: these numbers are not Emblem manufacturer facts."""
++import pytest
++
++from fenceai.fencemodel.model import (
++    EdgeBinding, FixingRule, InfillSpec, Member, PanelSpec, PartRequirement,
++    ProfileEdges, validate_model,
++)
++from fenceai.fencemodel.resolve import PanelContext, resolve_panel
++from fenceai.parts.model import ContainedPart
++from fenceai.catalog.demo import demo_catalog
++from tests.fencemodel.test_containment import _parts, _spec, _model, _priced, _slot
++
++
++def _kit_model(count=2):
++    parts = _parts()
++    kit = next(p for p in parts.parts if p.id == 'kit-gate')
++    kit.contains = [ContainedPart(key='rails', part_id='rail-3000', qty=count, stock_length_mm=3000)]
++    spec = _spec(0, credits={'rails': 'rail'}, with_hinge_slot=False)
++    spec.fixings[0].requirement.geometry_credits = True
++    return _model(spec), parts
++
++
++@pytest.mark.parametrize('supplied,remaining', [(1, 1), (2, 0), (3, 0)])
++def test_geometry_credit_preserves_rails_and_reduces_real_demand(supplied, remaining):
++    model, parts = _kit_model(supplied)
++    assert validate_model(model, demo_catalog(), parts) == []
++    result, resolution, bom = _priced(model, parts)
++    for span in result.strategy.spans:
++        rail = _slot(span.panel, 'rail')
++        assert rail.qty == 2
++        assert len(rail.positions_mm) == 2
++        assert rail.purchase_qty == remaining
++        assert rail.credited_qty == min(supplied, 2)
++        contents = _slot(span.panel, 'kit/rails')
++        assert contents.qty == max(supplied - 2, 0)
++        assert contents.credited_qty == min(supplied, 2)
++    rails = [r for r in resolution.requirements if r.slot_key == 'rail']
++    assert sum(r.engineering_qty for r in rails) == remaining * len(result.strategy.spans)
++    assert any(line.sku == 'GATE-KIT-1000' for line in bom.lines)
++    if not remaining:
++        assert all(line.sku != 'RAIL-3000' for line in bom.lines)
++    for node in result.graph.nodes:
++        if node.action == 'credit_contained':
++            assert node.payload['of'] == 2
++            assert node.payload['remaining'] == remaining
++    covered = {p for line in bom.lines for p in line.pegs} | {p for a in bom.allocations for p in a.pegs}
++    assert covered == {r.id for r in resolution.requirements}
++
++
++def test_geometry_credit_requires_identical_part_and_noncontinuous_geometry():
++    model, parts = _kit_model()
++    next(p for p in parts.parts if p.id == 'kit-gate').contains[0].part_id = 'fix-hinge'
++    assert any('exact target Part ID' in e for e in validate_model(model, demo_catalog(), parts))
++    model, parts = _kit_model()
++    model.default_spec.frame[0].post_joint = 'through'
++    assert any('continuous members' in e for e in validate_model(model, demo_catalog(), parts))
++
++
++def _handed_spec():
++    return PanelSpec(infill=InfillSpec(
++        orientation='vertical', justification='start', excess='truncate',
++        pattern=[Member(key='board', width_mm=100, thickness_mm=10,
++                        profile_edges=ProfileEdges(start='tongue', end='groove'),
++                        requirement=PartRequirement(role='infill', qty=1))]),
++        fixings=[FixingRule(key=position, basis='per_panel', qty_per_basis=1,
++                           requirement=PartRequirement(role='end_channel', qty=1),
++                           edge_binding=EdgeBinding(member_key='board', position=position,
++                                                    profile_edge=edge))
++                 for position, edge in [('first', 'tongue'), ('last', 'groove')]])
++
++
++def _resolve(spec, width=500):
++    return resolve_panel(spec, PanelContext(centre_width_mm=width, clear_width_mm=width, height_mm=1000))
++
++
++def test_handed_bindings_follow_actual_fit_and_survive_serialization():
++    for width in (100, 500, 1000):
++        panel = _resolve(_handed_spec(), width)
++        assert _slot(panel, 'first').bound_position_mm == 0
++        assert _slot(panel, 'last').bound_position_mm == width
++        assert _slot(panel, 'board').qty == width // 100
++        assert _slot(panel, 'board').profile_edges.start == 'tongue'
++        dumped = panel.model_dump()
++        assert next(s for s in dumped['slots'] if s['slot_key'] == 'last')['edge_binding']['profile_edge'] == 'groove'
++
++
++@pytest.mark.parametrize('mutation', ['wrong_edge', 'wrong_member', 'empty_fit', 'multiple_pieces', 'positive_gap'])
++def test_handed_binding_refuses_ambiguous_or_impossible_fit(mutation):
++    spec = _handed_spec()
++    width = 500
++    if mutation == 'wrong_edge':
++        spec.fixings[0].edge_binding.profile_edge = 'groove'
++    elif mutation == 'wrong_member':
++        spec.fixings[0].edge_binding.member_key = 'absent'
++    elif mutation == 'empty_fit':
++        width = 1
++    elif mutation == 'multiple_pieces':
++        spec.infill.pattern[0].requirement.qty = 2
++    else:
++        spec.infill.pattern[0].gap_after_mm = 10
++    with pytest.raises(ValueError):
++        _resolve(spec, width)
++
++
++def _full_kit_model():
++    from fenceai.parts.model import Part, SpecField
++    model, parts = _kit_model()
++    parts.parts.append(Part(id='synthetic-board', version=1, type='infill', spec=[
++        SpecField(key='sku', value=['SLAT-100'], agree='among'),
++        SpecField(key='width_mm', value=100, unit='mm')]))
++    spec = _handed_spec()
++    spec.infill.pattern[0] = Member(key='board',
++        profile_edges=ProfileEdges(start='tongue', end='groove'),
++        requirement=PartRequirement(part_id='synthetic-board', qty=1, length_rule='panel_height'))
++    model.default_spec.infill = spec.infill
++    for fixing in spec.fixings:
++        fixing.requirement = PartRequirement(part_id='fix-hinge', qty=1)
++    model.default_spec.fixings.extend(spec.fixings)
++    kit = next(p for p in parts.parts if p.id == 'kit-gate')
++    kit.contains.extend([
++        ContainedPart(key='boards', part_id='synthetic-board', qty=20, stock_length_mm=3000),
++        ContainedPart(key='first', part_id='fix-hinge', qty=1),
++        ContainedPart(key='last', part_id='fix-hinge', qty=1)])
++    model.default_spec.fixings[0].requirement.credits.update(
++        boards='board', first='first', last='last')
++    return model, parts
++
++
++def test_full_synthetic_kit_credits_boards_and_handed_channels_without_losing_geometry():
++    from fenceai.report.elevation import panel_elevation
++    model, parts = _full_kit_model()
++    assert validate_model(model, demo_catalog(), parts) == []
++    result, resolution, bom = _priced(model, parts)
++    assert not {'RAIL-3000', 'SLAT-100', 'HINGE-SET'} & {line.sku for line in bom.lines}
++    for span in result.strategy.spans:
++        board = _slot(span.panel, 'board')
++        assert board.qty > 1 and board.purchase_qty == 0
++        assert board.qty + _slot(span.panel, 'kit/boards').qty == 20
++        elevation = panel_elevation(span.panel, width_mm=span.clear_width_mm, height_mm=span.height_mm)
++        assert len([m for m in elevation.members if m.slot_key == 'board']) == board.qty
++        assert len([m for m in elevation.members if m.slot_key == 'rail']) == 2
++        for key in ('first', 'last'):
++            channel = _slot(span.panel, key)
++            assert channel.qty == 1 and channel.purchase_qty == 0
++            assert _slot(span.panel, 'kit/' + key).qty == 0
++            drawn = next(f for f in elevation.fixings if f.slot_key == key)
++            assert drawn.x_mm == channel.bound_position_mm
++            assert drawn.qty == 1
++
++
++def test_kit_cannot_credit_missing_or_insufficient_stock_length():
++    from tests.fencemodel.test_containment import _panel
++    for length in (None, 100):
++        model, parts = _kit_model()
++        next(p for p in parts.parts if p.id == 'kit-gate').contains[0].stock_length_mm = length
++        with pytest.raises(ValueError, match='stock_length_mm'):
++            _panel(model, parts)
++
++
++def test_known_tongue_groove_cannot_mate_to_unknown_neighbor():
++    spec = _handed_spec()
++    spec.fixings = []
++    spec.infill.pattern[0].gap_after_mm = 10
++    spec.infill.pattern.append(Member(key="unknown", width_mm=100,
++                                     requirement=PartRequirement(role="infill")))
++    with pytest.raises(ValueError, match="neighboring profile"):
++        _resolve(spec)
++
++
++def test_profiled_trim_policy_cannot_silently_leave_remainder():
++    spec = _handed_spec()
++    spec.infill.excess = "trim_last"
++    with pytest.raises(ValueError, match="trimming is unsupported"):
++        _resolve(spec, 550)
++
++
++def test_seven_panel_corner_and_disconnected_run_buy_seven_kits_and_keep_all_geometry():
++    from fenceai.topology.model import Topology, Node, Run
++    from fenceai.fencemodel.library import FenceModelLibrary
++    from fenceai.fencemodel.selection import FenceModelChoice
++    from fenceai.knowledge.demo import demo_knowledge
++    from fenceai.strategy.generator import generate
++    from fenceai.demand.derive import derive_requirements
++    from fenceai.fulfillment.supply import resolve_supply
++    from fenceai.fulfillment.fulfill import fulfill
++    model, parts = _full_kit_model()
++    topology = Topology(nodes=[Node(id=key, x_mm=x, y_mm=y)
++        for key, x, y in [('a',0,0), ('b',4500,0), ('c',4500,3000), ('d',8000,0), ('e',11000,0)]],
++        runs=[Run(id=key, start_node_id=start, end_node_id=end)
++              for key, start, end in [('ab','a','b'), ('bc','b','c'), ('de','d','e')]])
++    catalog = demo_catalog()
++    result = generate(topology, demo_knowledge(), catalog,
++        models=FenceModelLibrary(models=[model]), parts=parts,
++        default_model=FenceModelChoice(model_id=model.id))
++    assert len(result.strategy.spans) == 7
++    assert len(result.strategy.posts) == 9
++    demand = derive_requirements(result.strategy, catalog)
++    resolution = resolve_supply(demand, catalog)
++    bom = fulfill(resolution.requirements, catalog)
++    assert sum(line.purchase_qty for line in bom.lines if line.sku == 'GATE-KIT-1000') == 7
++    assert not {'RAIL-3000', 'SLAT-100', 'HINGE-SET'} & {line.sku for line in bom.lines}
++    assert sum(_slot(span.panel, 'rail').qty for span in result.strategy.spans) == 14
++    assert sum(_slot(span.panel, key).qty for span in result.strategy.spans for key in ('first','last')) == 14
