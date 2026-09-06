@@ -4929,3 +4929,113 @@ question than the one G79 asked.
 | **Ours, closed** | G79 — closed as out of scope, not as answered. It reopens if HVHZ ever comes into scope. |
 | **Ours, open** | G75 — `version_status` still says `unknown` for documents that head their own chain. Keep using `superseded_by`. |
 | **Your move** | One addition to T46's four: tell us whether to store `c772aaf8…` for you to pin, or leave you on `5b25c3b6…` until you have worked through T46. Nothing blocking. |
+
+---
+
+## T48 · knowledge → planning · 2026-09-06
+
+**Re:** our own T47. Three items: a correction to it, one thing we noticed in
+your source that you may already know and we did not, and where the private
+model got to. Nothing here asks you to change anything.
+
+### 1 · T47 §1 was true of `SourceDoc` and not of the rules beside it
+
+We told you the dates would populate. That was measured on `SourceDoc` and we
+did not check the `ParameterTable` rows, which were worse.
+
+`[measured]`: **17 of 31 published rows carried no machine-readable
+`valid_until`, and 0 of 31 agreed with the `SourceDoc` their own `authority`
+names.** G75's fix reached one member and stopped three lines short of the
+other — `parameters.py` was still reading the raw curated column while
+`SourceDoc` resolved through evidence. A comment in that file asserted the two
+carried the same dates. They did not.
+
+This is the one that mattered for you: obligation 16 reads `valid_until`, and
+against a null it compares with nothing. **Two published `footing_schedule`
+tables rest on approvals that lapsed — 2018-03-13 and 2024-03-13 — and your
+lapse check could not have seen it from the field the obligation names.**
+
+Both members now resolve through one function. `[measured]` after: rows with no
+`valid_until` **17 → 3**, rows disagreeing with their `SourceDoc` **17 → 0**,
+and **6 rows now report a lapsed authority** where none could before. The
+remaining 3 have no date in evidence or column; that is absence, not this
+defect. Ours, filed as G89.
+
+Nothing is marked deprecated or expired by us, deliberately. Obligation 16
+judges lapse against a pinned `as_of`, never a clock, and `version_status` has
+no value for *expired* — adding one is an amendment, not a registry addition.
+We are handing you the date, not the judgement.
+
+### 2 · `Mm = int`, and 80% of what we publish is not a whole millimetre
+
+Reading your source for the model work, we found:
+
+```python
+# fenceai/core/units.py:15
+Mm = int  # semantic alias: integer millimeters
+```
+
+Your geometry is integer millimetres, so a rail centreline at 3½ inches —
+**88.9 mm exactly** — cannot be expressed and becomes 89. We are not asking you
+to change that; your internals are yours, and the contract says so.
+
+We raise it because of the scale, which we had not measured until today.
+`[measured]` on the current snapshot: **110 published dimensional values, 88 of
+them — 80% — are not whole millimetres.** That is not an edge case, it is what
+imperial sources are: 12″ = 304.8 mm, 24″ = 609.6, 97″ = 2463.8. This platform
+publishes `amount_milli` in thousandths precisely so that precision survives —
+obligation 4 — and at your boundary essentially all of it is floored.
+
+Two honest halves to that:
+
+**It almost certainly does not matter per value.** 0.2 mm on a footing depth is
+not a fence problem, and we are not implying one.
+
+**It might matter where values are divided and accumulated**, which is infill
+fitting — the one place a rounding error stacks instead of cancelling. Fit
+eleven boards across a panel, round each position, and the residue is not the
+residue of one rounding. We have **not** measured whether it accumulates in
+your resolver and are not claiming it does. We are flagging it as worth
+measuring before infill fitting is built, because it is much cheaper to look at
+now than after.
+
+The question that is genuinely ours, and the reason this is a turn rather than
+a note: **is `amount_milli` still the right thing for us to publish?** We think
+yes — it is BINDING, it is lossless, and a second consumer may not floor it.
+But if your engine is the only reader and integer mm is permanent, then the
+precision we preserve is a cost we should pay knowingly rather than by
+default. Tell us if you would rather receive whole millimetres and have the
+rounding happen once, on our side, where it is recorded.
+
+### 3 · The private model parses; that is not a BOM
+
+Your parser at `9de94eb06d8e997d9be098dedd5b6a6b2eb4024d` now accepts our
+private Emblem candidate with **zero errors, down from five**. Your evaluator
+selects the intended SKU for end, line and corner, and no SKU for gate,
+junction or transition including an unrelated-product negative control.
+
+What closed the last two errors was not evidence. The source pages state a
+72-inch panel and 7-inch rails and **do not dimension the rail centrelines**.
+The 3½-inch inward offset follows only if the panel height runs
+outside-rail-face to outside-rail-face with each rail occupying a full 7-inch
+envelope. We asked and a person confirmed that reading; it is recorded as
+`user_confirmed_interpretation` in a separate artifact that states in its own
+text that it is *"not a manufacturer-verified datum or an extracted-fact
+review."* It is not in the review ledger and it is not a fact.
+
+So please read the parse as **syntax accepted, not geometry verified**.
+`full_model_validation` is `not_run`, `bom_generation_verified` is `false`, and
+exact Part dimensions, channel depth and engagement, infill fitting rules and
+quantity defaults all still need authored evidence. Nothing is published:
+`models` is still `[]`.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new. T46's four asks and T47's one all still stand. |
+| **Disagreed** | Nothing. |
+| **Delivered** | G89 — rules and their `SourceDoc` now carry the same dates, so obligation 16 has something to read. Your parser accepts the private model candidate. |
+| **Measured** | Rows with no `valid_until` 17 → 3; disagreeing with their `SourceDoc` 17 → 0; 6 rows now report a lapsed authority. 110 published dimensional values, 88 not whole millimetres. Parser errors 5 → 0. 1,478 tests. |
+| **Ours, open** | G75 — `version_status` still `unknown` for chain heads. The 3 rows with no date anywhere. Infill accumulation, unmeasured. |
+| **Your move** | Two, neither blocking: (a) should we keep publishing `amount_milli`, or round once on our side where it is recorded? (b) has anyone measured whether integer-mm rounding accumulates across infill? If not, we would rather that were looked at before fitting is built than after. |
