@@ -49,3 +49,28 @@ class TestConsumerCandidate(unittest.TestCase):
         self.assertEqual(result['post_quantity_rule']['target'], 'post')
         self.assertEqual(result['expected_post_skus'],
                          {'end': '73045785', 'line': '73045783', 'corner': '73045784'})
+
+    def test_confirmed_offsets_preserve_exact_value_and_disclose_rounding(self):
+        confirmation = json.loads((ROOT / 'workspace/catalog/emblem-73014714-placement-confirmation.json').read_text())
+        before = deepcopy(self.package)
+        result = prepare(self.package, confirmation)
+        self.assertEqual(self.package, before)
+        self.assertEqual([s['placement'] for s in result['model']['default_spec']['frame']],
+                         [{'kind': 'from_bottom', 'offset_mm': 89},
+                          {'kind': 'from_top', 'offset_mm': 89}])
+        projection = result['placement_projection']
+        self.assertEqual(projection['exact_inward_offset_mm'], '88.9')
+        self.assertEqual(projection['offset_rounding_error_mm'], '0.1')
+        self.assertEqual(result['placement_inputs_required'], [])
+        self.assertFalse(result['publishable'])
+        self.assertFalse(result['bom_generation_verified'])
+
+    def test_stale_or_different_confirmation_is_refused(self):
+        confirmation = json.loads((ROOT / 'workspace/catalog/emblem-73014714-placement-confirmation.json').read_text())
+        for key, value in [('source_package_hash', 'stale'), ('model_id', 'another-model'),
+                           ('datum', 'above_ground'), ('rail_vertical_envelope_inches', '6'),
+                           ('status', 'extracted'), ('reviewer', '')]:
+            with self.subTest(key=key):
+                changed = dict(confirmation, **{key: value})
+                with self.assertRaisesRegex(ValueError, 'exact package and reviewed datum'):
+                    prepare(self.package, changed)

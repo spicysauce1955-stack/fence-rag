@@ -4465,6 +4465,42 @@ make a model physically complete. Both frozen boundary checksums pass.
 
 ---
 
+### G91 — User-confirmed rail datum closes private parser gaps, not physical validation (2026-09-06)
+
+The user, identified in this session as Developer, answered “yes” to the precise
+interpretation that the 72-inch panel height runs between the outside bottom and
+top rail edges, each rail having a 7-inch vertical envelope. The separate
+`workspace/catalog/emblem-73014714-placement-confirmation.json` records that
+interpretation, the original response, source references and exact draft package
+hash. It is not an extracted fact, manufacturer-dimensioned datum or ledger review.
+G90's pending placement question is answered at this authoring level.
+
+The private preparer accepts `--placement-confirmation`. It rejects stale package
+hashes, different models/datums and incompatible confirmation inputs. The exact
+inward centre offset is 88.9 mm. An explicit authored nearest-whole-mm, half-up
+adapter policy projects it to 89 mm, retaining the 0.1 mm offset error. This is
+not a manufacturer tolerance. The 72-inch panel height is 1828.8 mm, projected to
+1829 mm for the diagnostic consumer placement check: actual consumer code returns
+bottom and top centres of 89 and 1740 mm respectively. The exact top centre would
+be 1739.9 mm. No ground clearance is added to either panel-relative position.
+
+**Measured:** seven focused tests pass (two added methods, including six refusal
+subcases). The actual consumer at `9de94eb06d8e997d9be098dedd5b6a6b2eb4024d`
+now parses the whole private candidate with zero parser errors, down from two.
+Its placement resolver and all six post-role cases execute successfully. Both
+frozen boundary checksums pass. Exit 0 from the preparer means parser acceptance
+only; the report explicitly records full model validation as not run because the
+exact Part library and catalog are incomplete. No full-suite claim is made here.
+
+**Remaining:** exact Part dimensions, channel depth and insertion/engagement,
+infill fitting rules, quantity/length defaults and grade/height support still
+require authored evidence. Private parser defaults remain unverified; publication,
+installation readiness and BOM-generation verification remain false. No published
+model adapter or reviewed model import path has been added. This checkpoint closes
+the three known private syntax blockers, not the contract publication work.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

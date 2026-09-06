@@ -1,10 +1,12 @@
 """Prepare an explicitly incomplete private Planning model for author review.
 
 Run with Planning's Python environment. This does not publish a Snapshot or
-apply private parser defaults as source facts. Rail placements require input.
+apply private parser defaults as source facts. Rail placements require a bound
+user confirmation. Exit 0 means parser acceptance, not complete BOM validation.
 """
 import argparse
 from copy import deepcopy
+from decimal import Decimal, ROUND_HALF_UP
 import json
 from pathlib import Path
 import subprocess
@@ -15,7 +17,7 @@ from fence_evidence.canonical import content_hash
 from fence_evidence.paths import open_write
 
 
-def prepare(package):
+def prepare(package, placement_confirmation=None):
     model = deepcopy(package['model_fragment'])
     source_joints = {}
     for slot in model['default_spec']['frame']:
@@ -54,7 +56,7 @@ def prepare(package):
         'part_id': '', 'role': 'post',
         'qty': quantities[0]['quantity_per_basis']['amount_milli'] // 1000,
         'eligibility': {'predicate': {'op': 'or', 'items': branches}}}
-    return {
+    result = {
         'artifact_kind': 'private_consumer_model_authoring_candidate',
         'source_package_hash': content_hash(package), 'model': model,
         'source_joints': source_joints, 'post_binding_evidence': evidence,
@@ -71,6 +73,37 @@ def prepare(package):
         'limitations': ['Private SKU predicate is catalog authoring, not a published PartRequirement.',
                         'Exact-SKU Part library and physical geometry remain incomplete.'],
     }
+    if placement_confirmation is not None:
+        confirmation = placement_confirmation
+        if (confirmation.get('source_package_hash') != content_hash(package)
+                or confirmation.get('model_id') != model['id']
+                or confirmation.get('status') != 'user_confirmed_interpretation'
+                or confirmation.get('datum') != 'outside_bottom_rail_to_outside_top_rail'
+                or confirmation.get('panel_height_inches') != '72'
+                or confirmation.get('rail_vertical_envelope_inches') != '7'
+                or not confirmation.get('reviewer')):
+            raise ValueError('Placement confirmation must bind the exact package and reviewed datum.')
+        exact = Decimal(confirmation['rail_vertical_envelope_inches']) * Decimal('25.4') / 2
+        projected = int(exact.quantize(Decimal('1'), rounding=ROUND_HALF_UP))
+        kinds = {'bottom_rail': 'from_bottom', 'top_rail': 'from_top'}
+        slots = model['default_spec']['frame']
+        if len(slots) != 2 or {s['key'] for s in slots} != set(kinds):
+            raise ValueError('Placement confirmation only covers the two reviewed rails.')
+        for slot in slots:
+            if slot['orientation'] != 'horizontal' or 'placement' in slot:
+                raise ValueError('Placement confirmation cannot override existing or vertical placement.')
+            slot['placement'] = {'kind': kinds[slot['key']], 'offset_mm': projected}
+        result['placement_confirmation'] = deepcopy(confirmation)
+        result['placement_inputs_required'] = []
+        result['placement_projection'] = {
+            'exact_inward_offset_mm': str(exact), 'consumer_inward_offset_mm': projected,
+            'rounding_policy': 'nearest whole millimetre, half up; authored adapter policy',
+            'offset_rounding_error_mm': str(Decimal(projected) - exact),
+        }
+        result['placement_datum_note'] = (
+            'User-confirmed interpretation; source pages do not explicitly dimension the endpoints. '
+            'Integer-mm approximation is adapter authoring, not a manufacturer tolerance.')
+    return result
 
 
 def main():
@@ -79,12 +112,15 @@ def main():
     parser.add_argument('--package', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--report', type=Path, required=True)
+    parser.add_argument('--placement-confirmation', type=Path)
     args = parser.parse_args()
     sys.path.insert(0, str(args.consumer_root.resolve() / 'src'))
     from pydantic import ValidationError
     from fenceai.fencemodel.model import FenceModel, PartRequirement
     from fenceai.knowledge.ast import evaluate_expr
-    result = prepare(json.loads(args.package.read_text()))
+    confirmation = (json.loads(args.placement_confirmation.read_text())
+                    if args.placement_confirmation else None)
+    result = prepare(json.loads(args.package.read_text()), confirmation)
     requirement = PartRequirement.model_validate(result['model']['post']['requirement'])
     expected = result['expected_post_skus']
     matrix = {}
@@ -97,17 +133,31 @@ def main():
             raise ValueError(f'Post selector mismatch for {role}: {matches}')
         matrix[role] = matches
     try:
-        FenceModel.model_validate(result['model'])
+        parsed = FenceModel.model_validate(result['model'])
     except ValidationError as exc:
         errors = [{'location': list(e['loc']), 'message': e['msg']} for e in exc.errors()]
     else:
         errors = []
+    positions = {}
+    if not errors and confirmation is not None:
+        from fenceai.fencemodel.resolve import placement_positions
+        height = int((Decimal(confirmation['panel_height_inches']) * Decimal('25.4')).quantize(
+            Decimal('1'), rounding=ROUND_HALF_UP))
+        positions = {s.key: placement_positions(s.placement, 1, height)
+                     for s in parsed.default_spec.frame}
+        offset = result['placement_projection']['consumer_inward_offset_mm']
+        if positions != {'bottom_rail': [offset], 'top_rail': [height - offset]}:
+            raise ValueError('Consumer rail positions disagree with the confirmed datum projection.')
     report = {
         'consumer_revision': subprocess.check_output(
             ['git', '-C', str(args.consumer_root), 'rev-parse', 'HEAD'], text=True).strip(),
         'post_requirement_parses': True, 'post_role_matrix': matrix,
         'private_model_parser_errors': errors, 'whole_model_parses': not errors,
-        'placement_confirmed': False, 'bom_generation_verified': False,
+        'placement_confirmed': confirmation is not None,
+        'placement_confirmation_kind': 'user_confirmed_interpretation' if confirmation else None,
+        'resolved_centrelines_mm_at_rounded_1829_mm_panel_height': positions,
+        'full_model_validation': 'not_run_exact_part_library_and_catalog_incomplete',
+        'bom_generation_verified': False,
     }
     for path, value in [(args.output, result), (args.report, report)]:
         with open_write(path) as handle:

@@ -1,0 +1,24 @@
+{
+  "artifact_kind": "private_model_placement_confirmation",
+  "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+  "source_package_hash": "2a40d62828ae7da4c5018efb48efea6fbb52683c72a69211467534eb2537c768",
+  "status": "user_confirmed_interpretation",
+  "reviewer": "Developer",
+  "confirmed_on": "2026-09-06",
+  "user_response": "yes",
+  "confirmed_statement": "72 inches is the height from the bottom outside edge of the bottom rail to the top outside edge of the top rail; each rail has a 7-inch vertical envelope.",
+  "datum": "outside_bottom_rail_to_outside_top_rail",
+  "panel_height_inches": "72",
+  "rail_vertical_envelope_inches": "7",
+  "source_cites": [
+    {
+      "id": "54e47378f4737168",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+    },
+    {
+      "id": "5ec7031e0f3bd7b3",
+      "belongs_to": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b"
+    }
+  ],
+  "source_limit": "The source pages state panel and rail dimensions but do not explicitly dimension these endpoints. This records the user confirmation, not a manufacturer-verified datum or an extracted-fact review."
+}

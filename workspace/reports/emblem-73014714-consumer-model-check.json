@@ -15,27 +15,18 @@
     "junction": [],
     "transition": []
   },
-  "private_model_parser_errors": [
-    {
-      "location": [
-        "default_spec",
-        "frame",
-        0,
-        "placement"
-      ],
-      "message": "Field required"
-    },
-    {
-      "location": [
-        "default_spec",
-        "frame",
-        1,
-        "placement"
-      ],
-      "message": "Field required"
-    }
-  ],
-  "whole_model_parses": false,
-  "placement_confirmed": false,
+  "private_model_parser_errors": [],
+  "whole_model_parses": true,
+  "placement_confirmed": true,
+  "placement_confirmation_kind": "user_confirmed_interpretation",
+  "resolved_centrelines_mm_at_rounded_1829_mm_panel_height": {
+    "bottom_rail": [
+      89
+    ],
+    "top_rail": [
+      1740
+    ]
+  },
+  "full_model_validation": "not_run_exact_part_library_and_catalog_incomplete",
   "bom_generation_verified": false
 }
