@@ -61,5 +61,59 @@ class TestUnparseable(unittest.TestCase):
                          {"iso": None, "value_raw": ["sometime in spring"]})
 
 
+class TestLabelledLexeme(unittest.TestCase):
+    """A source prints its date with the label attached, and `value_raw` keeps
+    the lexeme whole. Requiring the WHOLE string to be a date made every
+    published `SourceDoc` date `iso: null` -- 16 of 24 of them unambiguous --
+    so obligation 16's lapse check could not run on anything. See G87."""
+
+    def test_the_lexeme_the_corpus_actually_prints(self):
+        self.assertEqual(
+            normalize_date("Expiration Date: 03/13/2018"),
+            {"iso": "2018-03-13",
+             "value_raw": ["Expiration Date: 03/13/2018"]})
+
+    def test_value_raw_keeps_the_whole_lexeme_not_the_extracted_date(self):
+        got = normalize_date("Approval Date: 05/25/2027")
+        self.assertEqual(got["value_raw"], ["Approval Date: 05/25/2027"])
+        self.assertEqual(got["iso"], "2027-05-25")
+
+    def test_a_labelled_iso_date_also_resolves(self):
+        self.assertEqual(normalize_date("Issued 2015-01-01"),
+                         {"iso": "2015-01-01", "value_raw": ["Issued 2015-01-01"]})
+
+    def test_ambiguity_still_refuses_when_labelled(self):
+        # Amendment 002's own cited case; the label must not change the answer.
+        self.assertEqual(
+            normalize_date("Approval Date: 05/04/2023"),
+            {"iso": None, "value_raw": ["Approval Date: 05/04/2023"]})
+
+    def test_two_dates_in_one_lexeme_are_refused_not_guessed(self):
+        raw = "Approval Date: 03/13/2018 Expiration Date: 03/13/2023"
+        self.assertEqual(normalize_date(raw), {"iso": None, "value_raw": [raw]})
+
+    def test_the_same_date_twice_is_one_candidate(self):
+        raw = "Expiration 03/13/2018 (03/13/2018)"
+        self.assertEqual(normalize_date(raw),
+                         {"iso": "2018-03-13", "value_raw": [raw]})
+
+    def test_an_invalid_calendar_date_stays_null_when_labelled(self):
+        self.assertEqual(normalize_date("Expiration Date: 02/30/2020"),
+                         {"iso": None, "value_raw": ["Expiration Date: 02/30/2020"]})
+
+    def test_a_day_first_lexeme_is_still_not_guessed(self):
+        self.assertEqual(normalize_date("Approval Date: 13/05/2023"),
+                         {"iso": None, "value_raw": ["Approval Date: 13/05/2023"]})
+
+    def test_a_longer_digit_run_is_not_mined_for_a_date(self):
+        # An acceptance number must not become a date.
+        raw = "Acceptance No 12-1106.11"
+        self.assertEqual(normalize_date(raw), {"iso": None, "value_raw": [raw]})
+
+    def test_a_five_digit_year_is_not_a_date(self):
+        raw = "Expiration Date: 03/13/20188"
+        self.assertEqual(normalize_date(raw), {"iso": None, "value_raw": [raw]})
+
+
 if __name__ == "__main__":
     unittest.main()

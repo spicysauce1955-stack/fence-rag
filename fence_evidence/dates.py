@@ -21,34 +21,64 @@ from datetime import date
 _ISO = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
 _SLASH = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
 
+# The same two shapes, found INSIDE a longer lexeme. The corpus prints a date
+# with its label attached -- "Expiration Date: 03/13/2018" -- and `value_raw`
+# keeps that lexeme whole, so the parser has to look inside it. The digit
+# lookarounds stop an acceptance number ("12-1106.11") or an over-long year
+# ("03/13/20188") from being mined for a date it does not contain.
+_ISO_IN = re.compile(r"(?<!\d)(\d{4})-(\d{2})-(\d{2})(?!\d)")
+_SLASH_IN = re.compile(r"(?<!\d)(\d{1,2})/(\d{1,2})/(\d{4})(?!\d)")
+
 
 def normalize_date(raw: str | None) -> dict | None:
     """`raw` -> `{"iso": str | None, "value_raw": [str]}`, or `None` if absent."""
     if not raw:
         return None
     if m := _ISO.match(raw):
-        year, month, day = (int(g) for g in m.groups())
-        iso = raw if _valid(year, month, day) else None
-        return {"iso": iso, "value_raw": [raw]}
+        return {"iso": _resolve_iso(*m.groups()), "value_raw": [raw]}
     if m := _SLASH.match(raw):
-        first, second, year = (int(g) for g in m.groups())
-        year_s = m.group(3)
-        if first == second:
-            # symmetric: month/day order cannot matter
-            iso = _iso_if_valid(year, first, second, year_s)
-        elif second > 12:
-            # second token cannot be a month -> MM/DD/YYYY, unambiguous
-            iso = _iso_if_valid(year, first, second, year_s)
-        elif first > 12:
-            # first token cannot be a month under the MM/DD convention this
-            # corpus uses -- do not guess DD/MM
-            iso = None
-        else:
-            # both <= 12 and unequal: genuinely ambiguous, the amendment's own
-            # cited case ("05/04/2023")
-            iso = None
-        return {"iso": iso, "value_raw": [raw]}
-    return {"iso": None, "value_raw": [raw]}
+        return {"iso": _resolve_slash(*m.groups()), "value_raw": [raw]}
+    return {"iso": _inside(raw), "value_raw": [raw]}
+
+
+def _inside(raw: str) -> str | None:
+    """The one date a longer lexeme contains, or None.
+
+    Two DIFFERENT dates in one lexeme is refused rather than resolved to
+    whichever came first: a lexeme carrying both an approval and an expiration
+    does not say which one this field means, and picking is guessing. The same
+    date printed twice is one candidate, not a conflict.
+    """
+    found = {("iso",) + m.groups() for m in _ISO_IN.finditer(raw)}
+    found |= {("slash",) + m.groups() for m in _SLASH_IN.finditer(raw)}
+    if len(found) != 1:
+        return None
+    kind, *groups = found.pop()
+    return _resolve_iso(*groups) if kind == "iso" else _resolve_slash(*groups)
+
+
+def _resolve_iso(year_s: str, month_s: str, day_s: str) -> str | None:
+    year, month, day = int(year_s), int(month_s), int(day_s)
+    if not _valid(year, month, day):
+        return None
+    return f"{year_s}-{month_s}-{day_s}"
+
+
+def _resolve_slash(first_s: str, second_s: str, year_s: str) -> str | None:
+    first, second, year = int(first_s), int(second_s), int(year_s)
+    if first == second:
+        # symmetric: month/day order cannot matter
+        return _iso_if_valid(year, first, second, year_s)
+    if second > 12:
+        # second token cannot be a month -> MM/DD/YYYY, unambiguous
+        return _iso_if_valid(year, first, second, year_s)
+    if first > 12:
+        # first token cannot be a month under the MM/DD convention this
+        # corpus uses -- do not guess DD/MM
+        return None
+    # both <= 12 and unequal: genuinely ambiguous, the amendment's own
+    # cited case ("05/04/2023")
+    return None
 
 
 def _valid(year: int, month: int, day: int) -> bool:
