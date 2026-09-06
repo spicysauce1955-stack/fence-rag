@@ -430,7 +430,7 @@
       "doc_type": "installation_manual",
       "title": "Assembled Vinyl Fence Panel Installation Instructions",
       "url": "https://illusionsfence.com/wp-content/uploads/2024/02/Illusions-Vinyl-Fence-Installation-Instructions_0224.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/installation-instructions-assembled-panel.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/installation-instructions-assembled-panel.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "V44xx / V55xx / V88xx posts, all Classic Series panel styles",
       "date_or_version": "0224 (Feb 2024)"
@@ -439,7 +439,7 @@
       "doc_type": "installation_manual",
       "title": "Illusions Vinyl Fence Gate Installation Instructions",
       "url": "https://illusionsfence.com/wp-content/uploads/2011/06/Illusions-Vinyl-Fence-GATES-Instructions.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/gate-installation-instructions.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/gate-installation-instructions.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "V300-46, V300-48, VBG2-46, VBG4-46 gate styles",
       "date_or_version": "0912 (2012)"
@@ -448,7 +448,7 @@
       "doc_type": "installation_manual",
       "title": "75 MPH Wind Kit Installation Instructions",
       "url": "https://illusionsfence.com/wp-content/uploads/2012/04/Illusions-75MPH-Instructions_120426.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "VH55xx / VH88xx Heavy Duty posts, V300/V3215/V3700/V350/V401/V700/VO100 series",
       "date_or_version": "0412 (April 2012)"
@@ -457,7 +457,7 @@
       "doc_type": "csi_spec",
       "title": "75MPH Miami-Dade County Notice of Acceptance (NOA)",
       "url": "https://illusionsfence.com/wp-content/uploads/2015/07/NOA-14-1209.01.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/75mph-wind-kit-noa-miami-dade.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/75mph-wind-kit-noa-miami-dade.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "75 MPH Wind Kit certified installations",
       "date_or_version": "NOA-14-1209.01 (2015)"
@@ -466,7 +466,7 @@
       "doc_type": "warranty",
       "title": "Illusions Vinyl Fence Warranty (Classic Illusions Fence Limited Warranty & Grand Illusions Fence Limited Warranty)",
       "url": "https://illusionsfence.com/wp-content/uploads/2026/06/Illusions-Vinyl-Fence-Warranty-0626.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/product-warranty.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/product-warranty.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "Edge/Advantage/Classic Illusions Fence and Grand Illusions Fence",
       "date_or_version": "0626 (June 2026)"
@@ -475,7 +475,7 @@
       "doc_type": "spec_sheet",
       "title": "Illusions Vinyl Fence ASTM Info Flyer (ASTM F964-13 compliance)",
       "url": "https://illusionsfence.com/wp-content/uploads/2011/06/Illusions-Vinyl-Fence-ASTM-Info-Flyer.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/astm-info-flyer.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/astm-info-flyer.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "All Illusions Vinyl Fence products / EverStrong Profiles",
       "date_or_version": "2011"
@@ -484,7 +484,7 @@
       "doc_type": "installation_manual",
       "title": "Illusions Vinyl Fence Pergola Kit Installation Instructions",
       "url": "https://illusionsfence.com/wp-content/uploads/2025/07/Illusions-Vinyl-Pergola-Kit-Instructions-0425.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/pergola-kit-installation-instructions.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/pergola-kit-installation-instructions.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "Vinyl Fence Pergola Kits",
       "date_or_version": "0425 (2025)"
@@ -493,7 +493,7 @@
       "doc_type": "cut_sheet",
       "title": "Illusions Vinyl Fence Product and Price Guide (item-by-item product code catalog, no pricing)",
       "url": "https://illusionsfence.com/wp-content/uploads/2020/04/EWF-Product-Catalog-04-20-20-ILLUSIONS-FENCE-NO-PRICING.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/product-price-catalog-186pg.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/product-price-catalog-186pg.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "All product lines - panels, gates, posts, hardware, accessories",
       "date_or_version": "04-20-20 (April 2020), 186 pages"
@@ -502,7 +502,7 @@
       "doc_type": "spec_sheet",
       "title": "Illusions Vinyl Fence Classic Product Brochure",
       "url": "https://illusionsfence.com/wp-content/uploads/2026/01/Illusions-Fence-Classic-Product-Brochure-0126.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/classic-product-brochure.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/classic-product-brochure.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "Classic White/Beige/Gray/Clay colors",
       "date_or_version": "0126 (Jan 2026), 24 pages"
@@ -511,7 +511,7 @@
       "doc_type": "spec_sheet",
       "title": "Grand Illusions Advantage Product Brochure",
       "url": "https://illusionsfence.com/wp-content/uploads/2026/05/Grand-Illusions-Advantage-Tri-Fold-0426.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/grand-illusions-advantage-brochure.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/grand-illusions-advantage-brochure.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "Grand Illusions Advantage (Mahogany, Walnut, Rosewood, Driftwood, Aspen, Sahara, Black)",
       "date_or_version": "0426 (April 2026), 6 pages"
@@ -520,7 +520,7 @@
       "doc_type": "spec_sheet",
       "title": "Illusions Vinyl Gates Flyer (Uni-Weld vs Assembled Gate comparison)",
       "url": "https://illusionsfence.com/wp-content/uploads/2023/06/Illusions-Uni-Weld-and-Assembled-Gate-Flyer-0623.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/gate-types-flyer-uniweld-vs-assembled.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/gate-types-flyer-uniweld-vs-assembled.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "All gate styles",
       "date_or_version": "0623 (June 2023)"
@@ -529,7 +529,7 @@
       "doc_type": "spec_sheet",
       "title": "Illusions Vinyl PVC Fence Extra Strong Hinge Brochure",
       "url": "https://illusionsfence.com/wp-content/uploads/2011/07/Illusions_Extra_Strong_Hinge.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/extra-strong-hinge-brochure.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/extra-strong-hinge-brochure.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "X-Tra Strong Hinge (IESH), for larger/heavier Uni-Weld gates",
       "date_or_version": "2011"
@@ -538,7 +538,7 @@
       "doc_type": "spec_sheet",
       "title": "Traverse Gravity Latch Flyer",
       "url": "https://illusionsfence.com/wp-content/uploads/2022/09/Traverse-Gravity-Latch-Flyer-0822-1.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/traverse-gravity-latch-flyer.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/traverse-gravity-latch-flyer.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "Traverse Lockable Gravity Latch (compatible with Illusions Vinyl Fence and Eastern Ornamental Aluminum)",
       "date_or_version": "0822 (Aug 2022)"
@@ -547,7 +547,7 @@
       "doc_type": "cut_sheet",
       "title": "Gate Hardware catalog page (Magnetic Gate Latch, Drop Rods, Hinges)",
       "url": "https://illusionsfence.com/wp-content/uploads/2014/05/EWF_CATALOG_ILLUSIONS_FENCE_I-38.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/gate-hardware-catalog-page.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/gate-hardware-catalog-page.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "Gate hardware - hinges, latches, drop rods",
       "date_or_version": "050414 (May 2014)"
@@ -556,7 +556,7 @@
       "doc_type": "spec_sheet",
       "title": "Illusions Majestic Entranceway 8\" x 8\" PVC Vinyl Posts Tri-Fold Brochure",
       "url": "https://illusionsfence.com/wp-content/uploads/2012/03/Illusions_Majestic_Entranceway.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/majestic-entranceway-8x8-posts-brochure.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/majestic-entranceway-8x8-posts-brochure.pdf",
       "manufacturer": "Illusions Fence",
       "model_or_line": "V88xx / VH88xx 8\"x8\" Majestic posts",
       "date_or_version": "2012"

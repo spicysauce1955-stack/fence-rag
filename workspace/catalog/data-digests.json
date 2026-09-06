@@ -9,28 +9,28 @@
       "sha256": "237ed2fa2122ad6aae104484e517097570d290b3fdb566d4cda86116e05d3ec7"
     },
     "data/barrette-outdoor-living.json": {
-      "bytes": 45640,
-      "sha256": "ee1e6e90272819d1b77023c6b374c69a6eaf6a813520df680e43be954ff8b486"
+      "bytes": 44467,
+      "sha256": "ed2529da91c2400bed8d14c77928efe646a27f57e8c9a5b1a37f3e1cf01a6fd0"
     },
     "data/certainteed-bufftech.json": {
-      "bytes": 41724,
-      "sha256": "730f60e008e85367aa79528e0d4061a26ce1389707e902e92707d2a8cb699483"
+      "bytes": 41316,
+      "sha256": "5b75990ed20a3e81f88d8b7198981e297540fbb6dff1623efc165c46bc97edec"
     },
     "data/freedom-outdoor-living.json": {
-      "bytes": 42359,
-      "sha256": "c26804bfc94fa989735cd753471e36105cba9eb8ca75e8a9ccdb0833e71cbd4b"
+      "bytes": 41135,
+      "sha256": "f9ec850f71b0f89be63200cc52a31e8308dfc186561cf1c5681c647c5d6a8062"
     },
     "data/illusions-vinyl-fence.json": {
-      "bytes": 30496,
-      "sha256": "4e3ace10d39f72cf56395371da63390b216005ed767e49b9f8b27d162bad4a58"
+      "bytes": 29731,
+      "sha256": "8bbcb9ce1b981351aed9e4d995f3614b6f3852cc02433d54980b13ba65d03e66"
     },
     "data/industry-standards.json": {
-      "bytes": 27017,
-      "sha256": "9ee070e708036738a9e362c43b821ae7864427f51de1767d931dbc97aa066687"
+      "bytes": 26558,
+      "sha256": "9537c437adabd92b5aebdf6c70c2662a8ccaf9a978895945f13082de01a9f1c7"
     },
     "data/structural/barrette-outdoor-living-structural.json": {
-      "bytes": 28319,
-      "sha256": "61c14439efefeda73529074a33a7d8751906629158e6ee197df6506d027e48e0"
+      "bytes": 27809,
+      "sha256": "b5c9f0c15abb1981d6d1cc67363f17d1bb0a9fd73f285d7dd8f508ed2c3b6a31"
     },
     "data/structural/certainteed-bufftech-structural.json": {
       "bytes": 28802,
@@ -41,12 +41,12 @@
       "sha256": "75494c51a24077211f0dfadf54ff013ed5bb43921bcd20b33cc4bf83ac60751e"
     },
     "data/structural/illusions-vinyl-fence-structural.json": {
-      "bytes": 14228,
-      "sha256": "b2e1e2ceac9b756d1efce79e911a86c93cd883dcfb9c332ba33094a4bf3450b3"
+      "bytes": 14126,
+      "sha256": "0ce040d71425688f36666ee9b7ddeda25b6a15688d843c33853d5194fe50cfb3"
     },
     "data/structural/industry-standards-structural.json": {
-      "bytes": 30599,
-      "sha256": "9055e99c408b8d21f4ec2cbc766219e9acaafc8823fe83b39f6b7756dfcf9927"
+      "bytes": 30446,
+      "sha256": "7a8a5e134c39a7f2c79ed1b98327b181fc5c432ae79cb2d8aba4e0935545cbd4"
     },
     "data/structural/wam-bam-structural.json": {
       "bytes": 19800,
@@ -57,12 +57,12 @@
       "sha256": "bf70bab18759d460e61062a90aebcd367ca7a202889cb18823c54739f1acb668"
     },
     "data/wam-bam.json": {
-      "bytes": 54232,
-      "sha256": "5fbdc5ac204f74b2f6f3fb00e7a96e35de4497c1c342553569d4e25af7c95ecf"
+      "bytes": 53620,
+      "sha256": "e51a3ae0e4cafa42432878dec122baecfa23b197c44c0b358bff28cb5597bd48"
     },
     "data/weatherables.json": {
-      "bytes": 59007,
-      "sha256": "09e52ff01e9d1f1dea7e36dc472563ffe6f49a26c4e832a2833fee3c9d85d3f1"
+      "bytes": 58038,
+      "sha256": "200ae413357bc3dc1f8998fdd6e8720e1473a85834fcdea0d39118fd622531f0"
     }
   },
   "why": "A baseline of the hand-researched dataset before any curation phase touches it. `data/` has one commit in its history and carries four claims contradicted by their own sources (state-and-gaps G16), which are still present verbatim because correcting someone's research is their call. If a value is ever silently amended, this is what makes the change visible rather than invisible. Acceptance criterion P1b."

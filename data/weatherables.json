@@ -870,7 +870,7 @@
       "doc_type": "installation_manual",
       "title": "Vinyl Fencing Installation Guide (Master Guide - Layout/Post Install, Panel Assembly by Style, Gate Assembly, High-Wind Installation)",
       "url": "https://images.thdstatic.com/catalog/pdfImages/31/3163487c-38fc-4874-83b6-f9685b6a0bfc.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf",
+      "local_path": "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "All vinyl privacy/semi-privacy/pool/picket panel styles",
       "date_or_version": "WEA01-2017 (also distributed as 2024 CDN copy; identical content, byte-identical to Home Depot-hosted PDF)"
@@ -879,7 +879,7 @@
       "doc_type": "warranty",
       "title": "Weatherables by USAVinyl LLC Limited Non-Prorated Warranty",
       "url": "https://images.thdstatic.com/catalog/pdfImages/b5/b5ef8e38-53f1-4aa8-9677-77ebda071033.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-limited-warranty.pdf",
+      "local_path": "manuals/weatherables/weatherables-limited-warranty.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "All vinyl fencing/railing/aluminum railing/outdoor products",
       "date_or_version": "2017"
@@ -888,7 +888,7 @@
       "doc_type": "cut_sheet",
       "title": "FENCING Brochure (full product catalog, Home Depot-hosted copy)",
       "url": "https://images.thdstatic.com/catalog/pdfImages/7f/7ff3997d-c392-463f-8182-6876f5805a99.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-fencing-brochure.pdf",
+      "local_path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "All lines",
       "date_or_version": null
@@ -897,7 +897,7 @@
       "doc_type": "cut_sheet",
       "title": "Privacy Fencing Spec Sheet (Premium and Classic style dimensions, weights, color options)",
       "url": "https://www.bostadfence.com/uploads/b/fa0d8cc0-2166-11ed-83a8-792519b8e025/Weatherables_PrivacyFencing.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
+      "local_path": "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "Savannah, Ashton, Largo, Clearwater, Mason, Augusta, Halifax, Bradford, Scottsdale (Premium); Pembroke, Glenshire, Tuscany, Dora, Calgary, Gideon (Classic)",
       "date_or_version": null
@@ -906,7 +906,7 @@
       "doc_type": "cut_sheet",
       "title": "Full Line Catalog 2026 (digital compressed)",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/WEA-FulLine-2026_ForDigital-compressed.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-full-line-catalog-2026.pdf",
+      "local_path": "manuals/weatherables/weatherables-full-line-catalog-2026.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "All lines",
       "date_or_version": "2026"
@@ -915,7 +915,7 @@
       "doc_type": "installation_manual",
       "title": "2-Rail Horse Fence Installation Guide",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/2_Rail_Fence_Installation_Instructions_2024.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-2-rail-fence-installation-2024.pdf",
+      "local_path": "manuals/weatherables/weatherables-2-rail-fence-installation-2024.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "2-Rail Horse Fence",
       "date_or_version": "2024"
@@ -924,7 +924,7 @@
       "doc_type": "installation_manual",
       "title": "2-Rail Horse Fence Gate Installation Guide",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/2_Rail_Gate_Installation_Instructions.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-2-rail-gate-installation.pdf",
+      "local_path": "manuals/weatherables/weatherables-2-rail-gate-installation.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "2-Rail Horse Fence Gate",
       "date_or_version": null
@@ -933,7 +933,7 @@
       "doc_type": "installation_manual",
       "title": "3-Rail Horse Fence Installation Guide",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/3_Rail_Fence_Installation_Instructions_Final_2024.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-3-rail-fence-installation-2024.pdf",
+      "local_path": "manuals/weatherables/weatherables-3-rail-fence-installation-2024.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "3-Rail Horse Fence",
       "date_or_version": "2024"
@@ -942,7 +942,7 @@
       "doc_type": "installation_manual",
       "title": "3-Rail Horse Fence Gate Installation Guide",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/3_Rail_Gate_Installation_Instructions_Final_1.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-3-rail-gate-installation.pdf",
+      "local_path": "manuals/weatherables/weatherables-3-rail-gate-installation.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "3-Rail Horse Fence Gate",
       "date_or_version": null
@@ -951,7 +951,7 @@
       "doc_type": "installation_manual",
       "title": "4-Rail Horse Fence Installation Guide",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/4_Rail_Fence_Installation_Instructions_2024.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-4-rail-fence-installation-2024.pdf",
+      "local_path": "manuals/weatherables/weatherables-4-rail-fence-installation-2024.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "4-Rail Horse Fence",
       "date_or_version": "2024"
@@ -960,7 +960,7 @@
       "doc_type": "installation_manual",
       "title": "4-Rail Horse Fence Gate Installation Guide",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/4_Rail_Gate_Installation_Instructions.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-4-rail-gate-installation.pdf",
+      "local_path": "manuals/weatherables/weatherables-4-rail-gate-installation.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "4-Rail Horse Fence Gate",
       "date_or_version": null
@@ -969,7 +969,7 @@
       "doc_type": "installation_manual",
       "title": "Crossbuck Horse Fence Installation Guide",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Crossbuck_Fence_Installation_Instructions_2024.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-crossbuck-fence-installation-2024.pdf",
+      "local_path": "manuals/weatherables/weatherables-crossbuck-fence-installation-2024.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "Crossbuck Horse Fence",
       "date_or_version": "2024"
@@ -978,7 +978,7 @@
       "doc_type": "installation_manual",
       "title": "Crossbuck Horse Fence Gate Installation Guide",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/CrossBuck_Gate_Installation_Instructions.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-crossbuck-gate-installation.pdf",
+      "local_path": "manuals/weatherables/weatherables-crossbuck-gate-installation.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "Crossbuck Horse Fence Gate",
       "date_or_version": null
@@ -987,7 +987,7 @@
       "doc_type": "cad_detail",
       "title": "Concrete Post Mount Installation Instructions",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/POST_MOUNT_INSTRUCTIONS_CONCRETE.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-post-mount-instructions-concrete.pdf",
+      "local_path": "manuals/weatherables/weatherables-post-mount-instructions-concrete.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "Surface-mount post base (concrete substrate)",
       "date_or_version": null
@@ -996,7 +996,7 @@
       "doc_type": "cad_detail",
       "title": "Wood Post Mount Installation Instructions",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/POST_MOUNT_INSTRUCTIONS_WOOD.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-post-mount-instructions-wood.pdf",
+      "local_path": "manuals/weatherables/weatherables-post-mount-instructions-wood.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "Surface-mount post base (wood substrate)",
       "date_or_version": null
@@ -1005,7 +1005,7 @@
       "doc_type": "installation_manual",
       "title": "General Mount Instructions",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/General_Mount.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-general-mount-instructions.pdf",
+      "local_path": "manuals/weatherables/weatherables-general-mount-instructions.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "General surface-mount hardware",
       "date_or_version": null
@@ -1014,7 +1014,7 @@
       "doc_type": "installation_manual",
       "title": "Black WeatherGrain Panels Installation Guide",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Black_Weathergrain_Panels_v4.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-black-weathergrain-panels-install.pdf",
+      "local_path": "manuals/weatherables/weatherables-black-weathergrain-panels-install.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "Black / WeatherGrain woodgrain-finish panels",
       "date_or_version": null
@@ -1023,7 +1023,7 @@
       "doc_type": "installation_manual",
       "title": "Premium Gate Installation Guide (2017)",
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Premium_Gate_Installation_2017.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/weatherables-premium-gate-installation-2017.pdf",
+      "local_path": "manuals/weatherables/weatherables-premium-gate-installation-2017.pdf",
       "manufacturer": "Weatherables",
       "model_or_line": "Premium gate (fencing/railing)",
       "date_or_version": "2017"
@@ -1032,7 +1032,7 @@
       "doc_type": "spec_sheet",
       "title": "Vinyl Fencing Reference Guide (third-party dealer catalog; picket/rail/post dimensions match common industry vinyl-fence tooling but are NOT confirmed to be Weatherables-branded specs)",
       "url": "https://www.triwestfencing.com/VinylReferenceGuide.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/weatherables/triwest-vinyl-reference-guide.pdf",
+      "local_path": "manuals/weatherables/triwest-vinyl-reference-guide.pdf",
       "manufacturer": "TriWest Fencing (dealer/distributor, not Weatherables) - included for reference only, not used as a data source for this Weatherables dataset",
       "model_or_line": null,
       "date_or_version": null

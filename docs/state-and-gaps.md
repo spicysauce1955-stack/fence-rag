@@ -3464,7 +3464,7 @@ a defect nobody had bounded.
   from the first row by `fact_id` while citing every row — agreeing duplicates are
   harmless, but the multi-row case is not hypothetical in that type.
 
-### G71 — 125 dataset paths point outside the repository, and the guard cannot see it
+### G71 — 125 dataset paths point outside the repository, and the guard cannot see it — FIXED (2026-09-06)
 
 `[measured]` 2026-09-03, found by an adversarial audit and verified by hand. **This is the
 "prove it on a clean checkout" failure in its purest form.**
@@ -3510,6 +3510,89 @@ system is insulated; the dataset itself is not.
 Not fixed here: correcting 250 paths across eleven committed files is a mechanical change,
 but it rewrites the hand-researched dataset and re-baselines `data-digests.json`, which is
 a decision about curated input rather than a bug fix.
+
+**`[measured]` 2026-09-06 — fixed, and the original entry overstated the damage.**
+
+The 250 paths are now repo-relative. Before the change, all 250 shared one prefix,
+`/home/user/Workspace/play/vinyl-fence-bom-pipeline/`, and stripping it is the whole fix:
+125 values in ten hand-researched source files (seven per-manufacturer, three structural),
+and the same 125 re-emitted into `master-dataset.json` by the builder, which embeds the
+source objects verbatim. The two China source files and four structural files were already
+correct and were not touched.
+
+**What the original entry got wrong.** *"On a fresh clone those 125 resolve to nothing"* is
+true of the path **strings** and false of the **content**, and the difference matters for how
+urgent this was:
+
+| | |
+|---|---|
+| distinct files behind the 250 absolute paths | **118** |
+| …present in this repo at the same tail after `manuals/` | **118 of 118** |
+| …listed in `workspace/catalog/distribution-manifest.json`, i.e. `cli fetch`-able from R2 | **118 of 118** |
+
+Nothing was unreachable and nothing had to be re-sourced. The defect was that a path which
+should have been repo-relative was written machine-absolute — a portability bug in metadata,
+not a hole in the corpus. Saying "resolve to nothing" invited a recovery effort that was
+never needed. State the failure at the layer it actually occupies.
+
+**What the original entry understated.** Its table records `Files on disk but NOT referenced:
+0`, and CLAUDE.md repeats that both guard lines are 0 today. Both numbers are read off the
+**committed** `data/documents-index.json`, which was generated back when the sources were
+still relative — they are not what a rebuild produces. Re-running `build_master.py` against
+the pre-fix sources actually printed:
+
+```
+Missing (broken local_path): 0            <- still accidental, /…/play/… happens to exist
+Files on disk but NOT referenced: 117     <- NOT 0
+```
+
+The orphan guard *was* firing, on 117 of 140 `manuals/` files, because the escaping
+`../play/…` strings never match the repo-relative on-disk set. Nobody had run the builder
+since the drift. Read a guard by running it, not by reading its last committed output.
+
+**After the fix, both guard numbers are 0 and both mean it:**
+
+```
+Total document entries indexed: 145      Verified on disk: 141
+Missing (broken local_path): 0           URL-only (no download): 4
+Non-portable (local_path escapes the repository root): 0
+Files on disk but NOT referenced in any documents[] entry: 0
+```
+
+All **485** path values across the 16 source files and the four generated artifacts are now
+repo-relative; **0** absolute, **0** escaping via `..`, **0** failing to resolve under the
+repository root. All 141 `local_path` values in `documents-index.json` resolve on disk *and*
+appear in the distribution manifest.
+
+**The rebuild is its own portability proof.** `data/documents-index.json`,
+`china/china-dataset.json` and `china/data/china-documents-index.json` came back
+**byte-identical** to their committed versions, and only `master-dataset.json` changed
+(125 insertions, 125 deletions, all path strings). That is the direct confirmation of this
+entry's own observation that the index had been generated from a state the sources no longer
+matched: correcting the sources reconciles the two generated artifacts without touching
+either one by hand. `china/data/` needed no edit, so `build_china.py` was re-run only to
+confirm it is a no-op.
+
+**The builder was also fixed, because the source fix alone does not stop this returning.**
+`build_master.py` and `build_china.py` computed `os.path.relpath(local_path, BASE)` for an
+absolute path and then asked `os.path.isfile(BASE + "/" + rel)`. For a path outside the
+repository that normalises straight back onto the foreign checkout, so an unportable
+reference was recorded as `file_exists: true` and counted in `Verified on disk`. Both
+scripts now share a `repo_relative()` helper that reports whether a path stays inside the
+root, never counts an escaping path as present, and prints a
+`Non-portable (local_path escapes the repository root)` line in the reconciliation summary.
+The generated JSON shape is unchanged — the new guard is a stdout line, so the artifacts
+stay comparable across this fix.
+
+`workspace/catalog/data-digests.json` was re-baselined with `cli dataset --write`;
+`cli dataset --verify` reports `{"files": 16, "unchanged": true}`. The whole suite passes
+(1,479 tests, 1 expected failure). Nothing under `manuals/` or `china/manuals/` was touched.
+
+Still open, and deliberately not fixed here: `cli dataset --verify` remains a byte baseline
+and still cannot see a portability defect — it answers "unchanged since baseline", never
+"internally consistent". A `local_path` that is repo-relative but names a file that does not
+exist would pass it. The builder's reconciliation summary is the only thing that checks that,
+and nothing runs the builder automatically.
 
 ### G72 — supersession has holes the NOA lineage hides, and `ref_id` can collide on scanned pages
 

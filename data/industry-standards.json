@@ -72,14 +72,14 @@
       "section": "32 31 23",
       "title": "Plastic Fences and Gates (subsection title on the real downloaded spec: 'Vinyl Fencing and Gates')",
       "source_url": "https://www.arcat.com/sdspecs/htm04/32_31_23spp.htm",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx",
+      "local_path": "manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx",
       "key_provisions": "Real, manufacturer-submitted (Superior Outdoor Products) CSI 3-part master spec downloaded in full (.docx). Part 1 General: section includes picket/yard/privacy/post-&-rail fence systems + post caps + pergolas; references ASTM D1784 as the sole material standard; requires 5-yr manufacturer track record, 2-yr installer experience, product data/shop drawing/sample/certificate submittals, delivery/storage/warranty (lifetime limited material, 5-yr prorated labor) clauses typical of Division 01-linked commercial specs. Part 2 Products: 'PVC formulated to resist impact and for UV stabilization... meets or exceeds ASTM D1784'; enumerates dozens of style/height/rail-section/post-size/color options (6ft and 8ft rail sections are the two standard on-center spacing units across every style listed). Part 3 Execution: set posts and gate posts per drawings; 'Center and align posts, place concrete around posts and vibrate or tamp for consolidation. Recheck vertical and top alignment of posts and make necessary corrections'; install gates plumb/level/secure, drop rod for double gates; cleaning includes muriatic-acid mortar removal from posts."
     },
     {
       "section": "32 31 13",
       "title": "Chain Link Fences and Gates -- downloaded as a cross-material CSI Division 32 template",
       "source_url": "https://www.chainlinkinfo.org/wp-content/uploads/2015/08/CLFMI-Product-Manual-2-Section-32-31-13.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf",
+      "local_path": "manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf",
       "key_provisions": "Not vinyl-specific (chain link), but downloaded as a real, fully worked CLFMI-published 3-part CSI master spec because it demonstrates the generic Division 32 Fences-and-Gates document architecture (References/Submittals/Quality Assurance/Post-spacing citation to CLFMI WLG2445 wind-load guide/Execution) that any Fences-and-Gates subsection, including 32 31 23, is expected to follow. Useful as a structural template for what a rigorous fence CSI spec's References and Execution articles look like."
     }
   ],
@@ -131,49 +131,49 @@
       "doc_type": "astm_compliance_summary_flyer",
       "title": "What is ASTM F964-13? (ASTM Info Flyer -- summarizes F964 scope, D4216 cell classification, D4226 impact test, weathering-table requirements)",
       "url": "https://illusionsfence.com/wp-content/uploads/2011/06/Illusions-Vinyl-Fence-ASTM-Info-Flyer.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/ASTM-Info-Flyer_Illusions-F964-D4216-Summary.pdf",
+      "local_path": "manuals/industry-standards/ASTM-Info-Flyer_Illusions-F964-D4216-Summary.pdf",
       "date_or_version": "Undated manufacturer flyer (Illusions Fence), references ASTM F964-13"
     },
     {
       "doc_type": "industry_spec_reference_guide",
       "title": "Fence SpecCheck: ASTM, AASHTO, and Federal Specifications (RR-F-191) -- cross-material index of fence-related ASTM/AASHTO/Federal standards including F1999-14(2024) and F964-13(2024)",
       "url": "https://www.wheatland.com/wp-content/uploads/2017/12/Fence-SpecCheck-ASTM-AASHTO-and-Federal-Specifications-RR-F-191.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/Wheatland-Fence-SpecCheck_ASTM-AASHTO-Federal-Specs_Jan2025.pdf",
+      "local_path": "manuals/industry-standards/Wheatland-Fence-SpecCheck_ASTM-AASHTO-Federal-Specs_Jan2025.pdf",
       "date_or_version": "January 2025 (Wheatland Tube Company)"
     },
     {
       "doc_type": "astm_standards_compilation",
       "title": "ASTM Standards for Fence Materials and Products (compilation index, all fence materials incl. PVC F964/F1999)",
       "url": "https://public-admin-files.s3.us-east-2.amazonaws.com/Compilations/FENCE21.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/ASTM-Standards-for-Fence-Materials-and-Products_Compilation-FENCE21.pdf",
+      "local_path": "manuals/industry-standards/ASTM-Standards-for-Fence-Materials-and-Products_Compilation-FENCE21.pdf",
       "date_or_version": "Undated compilation (identifier FENCE21)"
     },
     {
       "doc_type": "association_technical_bulletin",
       "title": "Chain Link Fence Wind Load Guide for the Selection of Line Post and Line Post Spacing (WLG 2445) -- NOT vinyl-specific, downloaded as the closest real cross-manufacturer 'association engineering rule' precedent for post-spacing-vs-wind-load methodology in the fence industry",
       "url": "https://chainlinkinfo.org/wp-content/uploads/2023/02/WLG-Final-2.12-23-ml.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
+      "local_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
       "date_or_version": "Updated January 2023 (Chain Link Fence Manufacturers Institute)"
     },
     {
       "doc_type": "csi_masterspec_template",
       "title": "CLFMI Product Manual -- CSI Section 32 31 13 Chain Link Fence and Gates (full 3-part master spec; not vinyl, downloaded as a real worked example of Division 32 Fences-and-Gates document structure)",
       "url": "https://www.chainlinkinfo.org/wp-content/uploads/2015/08/CLFMI-Product-Manual-2-Section-32-31-13.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf",
+      "local_path": "manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf",
       "date_or_version": "2015 publication (Chain Link Fence Manufacturers Institute)"
     },
     {
       "doc_type": "manufacturer_brochure_with_engineering_data",
       "title": "Digger Specialties Polyvinyl Fence Brochure -- includes generic-applicable racking tolerance and 8 ft on-center post spacing data across multiple vinyl fence product lines",
       "url": "https://northindyfence.com/wp-content/uploads/2024/04/Polyvinyl-Fence-Brochure-NIF.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/Digger-Specialties-Polyvinyl-Fence-Brochure_Racking-Post-Spacing.pdf",
+      "local_path": "manuals/industry-standards/Digger-Specialties-Polyvinyl-Fence-Brochure_Racking-Post-Spacing.pdf",
       "date_or_version": "2024 (Digger Specialties, Inc., distributed via North Indy Fence)"
     },
     {
       "doc_type": "csi_masterspec_vinyl",
       "title": "SECTION 32 31 23 - Plastic/Vinyl Fencing and Gates -- real manufacturer-submitted (Superior Outdoor Products) CSI 3-part master specification, full Part 1/2/3 text",
       "url": "https://www.arcat.com/sdspecs/docx04/32_31_23spp.docx",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx",
+      "local_path": "manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx",
       "date_or_version": "Copyright 2017-2025 ARCAT, Inc. / MasterFormat 2020 edition"
     }
   ]
