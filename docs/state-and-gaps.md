@@ -4004,11 +4004,26 @@ same swallowed-failure shape this session has been fixing all day, written by me
 minutes earlier. It now asks `sqlite_master` which tables exist and lets every other error
 raise.
 
-**Not built, and named rather than left implied:** the review ledger does not yet carry step
-reviews. `LEDGER_SCHEMA` is 1 and its header counts are per-kind, so adding them is a tested
-migration of a committed file (§7a). Until that lands, a step review lives only in the store
-— it survives a re-cut of the queue but not a rebuilt store, which is the one thing the
-ledger exists to guarantee.
+**The ledger now carries step reviews, at `LEDGER_SCHEMA` 2.** A store is rebuildable and a
+judgement is not, so a review that lived only in `step_reviews` was one `ingest --all` away
+from being gone. Adding a third kind moves the schema because the header carries one count
+per kind — which is exactly why it is a bump rather than a field nobody notices, and the
+existing test pinning the empty-ledger header caught it as designed.
+
+`read_ledger` accepts **schemas 1 and 2**: a file exported before today is a valid ledger
+that predates step reviews, and refusing it would strand every export already taken. A
+schema-1 header has no `step_reviews` key and no step lines, so its counts reconcile at 0
+with no special case. The line carries no `candidate_id` — the splitter re-mints it on every
+run — and `read_ledger` refuses one that does, the same guard the fact loop has against
+`fact_id`. On import the anchor must name exactly one candidate in the receiving store;
+zero or several is `unresolvable`, reported and skipped, never guessed at.
+
+`[measured]`: a review recorded in one store, exported, and replayed into a fresh store
+built from the same corpus reproduces exactly — `step_reviews.new = 1`, the candidate comes
+back `accepted` with its reviewer — and replaying a second time reports `identical`, which
+is what makes a replay idempotent. The committed ledger is re-exported at schema 2:
+71 table reviews, 204 fact reviews, 0 step reviews, because nothing on the slice page has
+been reviewed yet.
 
 ---
 

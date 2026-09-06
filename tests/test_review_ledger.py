@@ -334,8 +334,12 @@ class TestLedgerShape(unittest.TestCase):
     def test_an_empty_ledger_is_a_header_and_nothing_else(self):
         lines = self.lines()
         self.assertEqual(len(lines), 1)
+        # `step_reviews` joined at schema 2. The header carries one count per
+        # kind, which is why adding a kind is a schema bump rather than a field
+        # nobody notices.
         self.assertEqual(lines[0], {"kind": "ledger", "schema": reviews.LEDGER_SCHEMA,
-                                    "fact_reviews": 0, "table_reviews": 0})
+                                    "fact_reviews": 0, "table_reviews": 0,
+                                    "step_reviews": 0})
 
     def test_a_fact_review_line_carries_no_fact_id(self):
         fid = add_fact(self.conn)

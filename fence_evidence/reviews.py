@@ -1132,10 +1132,16 @@ def reattach_fact_reviews(conn: sqlite3.Connection, *, superseded=None,
 # the Phase 2 design says of a table review. See G46.
 
 LEDGER_PATH = CATALOG_DIR / "review-ledger.jsonl"
-LEDGER_SCHEMA = 1
+# 2 since step reviews joined: the header carries per-kind counts, so a third
+# kind changes its shape. `read_ledger` accepts 1 as well -- a file exported
+# before step reviews existed is a valid ledger, and refusing it would strand
+# every export already taken.
+LEDGER_SCHEMA = 2
+LEDGER_SCHEMAS_READABLE = (1, 2)
 LEDGER_HEADER_KIND = "ledger"
 KIND_TABLE_REVIEW = "table_review"
 KIND_FACT_REVIEW = "fact_review"
+KIND_STEP_REVIEW = "step_review"
 
 _TABLE_REVIEW_COLUMNS = ("review_id", "crop_sha256", "document_id", "page_no",
                          "reviewer", "reviewed_at", "verdict", "grid", "spans",
@@ -1146,6 +1152,13 @@ _FACT_REVIEW_COLUMNS = ("fact_review_id", "ref_id", "document_id", "page_no",
                         "element_id", "fact_type", "reviewer", "reviewed_at",
                         "verdict", "value_before", "status_before",
                         "reviewed_value", "notes")
+# `candidate_id` is deliberately absent for the same reason `fact_id` is: the
+# splitter re-mints it on every run. The anchor is the evidence -- the element,
+# the span within it, and the text the reviewer actually saw.
+_STEP_REVIEW_COLUMNS = ("step_review_id", "element_id", "char_start", "char_end",
+                        "text_seen", "document_id", "page_no", "reviewer",
+                        "reviewed_at", "verdict", "step_kind", "step_scope",
+                        "slot_target", "text_final", "status_before", "notes")
 
 
 def _table_review_record(row) -> dict:
@@ -1168,9 +1181,20 @@ def _fact_review_record(row) -> dict:
     return rec
 
 
+def _step_review_record(row) -> dict:
+    rec = {"kind": KIND_STEP_REVIEW}
+    for col in _STEP_REVIEW_COLUMNS:
+        rec[col] = row[col]
+    return rec
+
+
 def _ledger_sort_key(rec):
     if rec["kind"] == KIND_TABLE_REVIEW:
         return (rec["kind"], rec["crop_sha256"], rec["reviewed_at"], rec["review_id"])
+    if rec["kind"] == KIND_STEP_REVIEW:
+        # Ordered on fields that do not move, like the other two.
+        return (rec["kind"], rec["element_id"], str(rec["char_start"]),
+                str(rec["char_end"]), rec["reviewed_at"], rec["step_review_id"])
     return (rec["kind"], rec["element_id"], rec["fact_type"],
             rec["value_before"] or "", rec["reviewed_at"], rec["fact_review_id"])
 
@@ -1183,14 +1207,18 @@ def build_ledger(conn: sqlite3.Connection) -> list[dict]:
     has been recorded in this store"* is a statement worth committing.
     """
     ensure_fact_reviews(conn)
-    body = [_table_review_record(r) for r in
-            conn.execute("SELECT * FROM table_reviews")]
+    ensure_step_reviews(conn)
+    tables = [_table_review_record(r) for r in
+              conn.execute("SELECT * FROM table_reviews")]
     facts = [_fact_review_record(r) for r in
              conn.execute("SELECT * FROM fact_reviews")]
-    body.extend(facts)
+    steps_ = [_step_review_record(r) for r in
+              conn.execute("SELECT * FROM step_reviews")]
+    body = tables + facts + steps_
     body.sort(key=_ledger_sort_key)
     header = {"kind": LEDGER_HEADER_KIND, "schema": LEDGER_SCHEMA,
-              "fact_reviews": len(facts), "table_reviews": len(body) - len(facts)}
+              "fact_reviews": len(facts), "table_reviews": len(tables),
+              "step_reviews": len(steps_)}
     return [header] + body
 
 
@@ -1243,13 +1271,13 @@ def read_ledger(path) -> tuple[dict, list[dict]]:
     if not isinstance(header, dict) or header.get("kind") != LEDGER_HEADER_KIND:
         raise ReviewRefused("error.malformed_ledger",
                             f"{p} does not begin with a ledger header")
-    if header.get("schema") != LEDGER_SCHEMA:
+    if header.get("schema") not in LEDGER_SCHEMAS_READABLE:
         raise ReviewRefused(
             "error.malformed_ledger",
             f"{p} is schema {header.get('schema')!r}; this build reads "
             f"{LEDGER_SCHEMA}")
     body = parsed[1:]
-    counts = {KIND_TABLE_REVIEW: 0, KIND_FACT_REVIEW: 0}
+    counts = {KIND_TABLE_REVIEW: 0, KIND_FACT_REVIEW: 0, KIND_STEP_REVIEW: 0}
     for i, rec in enumerate(body, start=2):
         if not isinstance(rec, dict):
             raise ReviewRefused("error.malformed_ledger",
@@ -1259,6 +1287,7 @@ def read_ledger(path) -> tuple[dict, list[dict]]:
             raise ReviewRefused("error.malformed_ledger",
                                 f"{p} line {i} has kind {kind!r}")
         required = (_TABLE_REVIEW_COLUMNS if kind == KIND_TABLE_REVIEW
+                    else _STEP_REVIEW_COLUMNS if kind == KIND_STEP_REVIEW
                     else _FACT_REVIEW_COLUMNS)
         missing = [c for c in required if c not in rec]
         if missing:
@@ -1270,10 +1299,19 @@ def read_ledger(path) -> tuple[dict, list[dict]]:
                 f"{p} line {i} carries a fact_id. A fact id moves on every "
                 f"re-extraction and is resolved from the evidence on import; "
                 f"a ledger that names one is describing a store, not a review")
+        if kind == KIND_STEP_REVIEW and "candidate_id" in rec:
+            raise ReviewRefused(
+                "error.malformed_ledger",
+                f"{p} line {i} carries a candidate_id. The splitter re-mints it "
+                f"on every run; a ledger that names one is describing a store, "
+                f"not a review")
         counts[kind] += 1
     for kind, key in ((KIND_TABLE_REVIEW, "table_reviews"),
-                      (KIND_FACT_REVIEW, "fact_reviews")):
-        if header.get(key) != counts[kind]:
+                      (KIND_FACT_REVIEW, "fact_reviews"),
+                      (KIND_STEP_REVIEW, "step_reviews")):
+        # A schema-1 header has no `step_reviews` key and no step lines, which
+        # reconciles at 0 without needing a special case.
+        if header.get(key, 0) != counts[kind]:
             raise ReviewRefused(
                 "error.malformed_ledger",
                 f"{p} header says {header.get(key)!r} {key} and the body holds "
@@ -1309,6 +1347,9 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
     """
     header, body = read_ledger(path)
     ensure_fact_reviews(conn)
+    ensure_step_reviews(conn)
+    per_kind = {k: {"new": 0, "identical": 0, "unresolvable": 0}
+                for k in (KIND_TABLE_REVIEW, KIND_FACT_REVIEW, KIND_STEP_REVIEW)}
 
     inserts: list[tuple[str, dict, int | None]] = []
     identical = conflicts = unresolvable = 0
@@ -1327,8 +1368,47 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
                                                 "differs": differs})
                 else:
                     identical += 1
+                    per_kind[KIND_TABLE_REVIEW]["identical"] += 1
                 continue
             inserts.append((KIND_TABLE_REVIEW, rec, None))
+            per_kind[KIND_TABLE_REVIEW]["new"] += 1
+            continue
+
+        if rec["kind"] == KIND_STEP_REVIEW:
+            existing = conn.execute(
+                "SELECT * FROM step_reviews WHERE step_review_id = ?",
+                (rec["step_review_id"],)).fetchone()
+            if existing is not None:
+                differs = _differences(rec, _step_review_record(existing))
+                if differs:
+                    conflicts += 1
+                    detail["conflicts"].append({"kind": rec["kind"],
+                                                "id": rec["step_review_id"],
+                                                "differs": differs})
+                else:
+                    identical += 1
+                    per_kind[KIND_STEP_REVIEW]["identical"] += 1
+                continue
+            # The anchor must name exactly one candidate in THIS store. A
+            # review whose span no longer exists is reported, never guessed at
+            # -- the same rule the fact loop applies to its own anchor.
+            hit = conn.execute(
+                """SELECT COUNT(*) FROM step_candidates
+                    WHERE element_id=? AND char_start=? AND char_end=?""",
+                (rec["element_id"], rec["char_start"], rec["char_end"])).fetchone()[0]
+            if hit != 1:
+                unresolvable += 1
+                per_kind[KIND_STEP_REVIEW]["unresolvable"] += 1
+                detail["unresolvable"].append({
+                    "kind": rec["kind"], "id": rec["step_review_id"],
+                    "element_id": rec["element_id"],
+                    "span": [rec["char_start"], rec["char_end"]],
+                    "why": ("no step candidate in this store covers that span"
+                            if hit == 0 else
+                            "more than one candidate covers that span")})
+                continue
+            inserts.append((KIND_STEP_REVIEW, rec, None))
+            per_kind[KIND_STEP_REVIEW]["new"] += 1
             continue
 
         existing = conn.execute("SELECT * FROM fact_reviews WHERE fact_review_id = ?",
@@ -1342,11 +1422,13 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
                                             "differs": differs})
             else:
                 identical += 1
+                per_kind[KIND_FACT_REVIEW]["identical"] += 1
             continue
         candidates, others = _facts_matching(conn, rec["element_id"],
                                              rec["fact_type"], rec["value_before"])
         if len(candidates) != 1:
             unresolvable += 1
+            per_kind[KIND_FACT_REVIEW]["unresolvable"] += 1
             detail["unresolvable"].append({
                 "kind": rec["kind"], "id": rec["fact_review_id"],
                 "element_id": rec["element_id"], "fact_type": rec["fact_type"],
@@ -1359,11 +1441,15 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
                         "did not")})
             continue
         inserts.append((KIND_FACT_REVIEW, rec, candidates[0]))
+        per_kind[KIND_FACT_REVIEW]["new"] += 1
 
     out = {"records": len(body), "inserted": len(inserts), "identical": identical,
            "conflicts": conflicts, "unresolvable": unresolvable,
            "applied": False, "refused": bool(conflicts), "detail": detail,
-           "projection": None, "dry_run": bool(dry_run)}
+           "projection": None, "dry_run": bool(dry_run),
+           "table_reviews": per_kind[KIND_TABLE_REVIEW],
+           "fact_reviews": per_kind[KIND_FACT_REVIEW],
+           "step_reviews": per_kind[KIND_STEP_REVIEW]}
     if dry_run or conflicts:
         return out
 
@@ -1372,6 +1458,15 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
         conn.execute("BEGIN IMMEDIATE")
     try:
         for kind, rec, fact_id in inserts:
+            if kind == KIND_STEP_REVIEW:
+                conn.execute("""INSERT INTO step_reviews
+                    (step_review_id, element_id, char_start, char_end, text_seen,
+                     document_id, page_no, reviewer, reviewed_at, verdict,
+                     step_kind, step_scope, slot_target, text_final,
+                     status_before, notes)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    tuple(rec[c] for c in _STEP_REVIEW_COLUMNS))
+                continue
             if kind == KIND_TABLE_REVIEW:
                 conn.execute("""INSERT INTO table_reviews
                     (review_id, crop_sha256, document_id, page_no, reviewer,
@@ -1399,7 +1494,8 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
         raise
     out["applied"] = True
     out["projection"] = {"tables": rebuild_projection(conn),
-                         "facts": rebuild_fact_projection(conn)}
+                         "facts": rebuild_fact_projection(conn),
+                         "steps": rebuild_step_projection(conn)}
     return out
 
 
