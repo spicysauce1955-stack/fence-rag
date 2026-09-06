@@ -565,3 +565,45 @@ def chain_for(conn: sqlite3.Connection, document_id: str,
         if d:
             rows.append(dict(d))
     return enrich_chain(conn, rows, as_of=as_of)
+
+
+def resolved_document_dates(conn: sqlite3.Connection, document_id: str,
+                            issue_raw: str | None,
+                            expiration_raw: str | None) -> tuple:
+    """`(issue_date, expiration_date, evidence_note)` for one document.
+
+    G75's rule in ONE place: evidence beats the curated column, and every value
+    is re-normalised through `dates.normalize_date` before publication. That is
+    not belt and braces -- `parse_date` above and `normalize_date` are two
+    independent parsers that DISAGREE, and `normalize_date` is the one
+    implementing amendment 002's refusal to guess.
+
+    G89: this function exists because G75's fix reached `SourceDoc` and not the
+    `ParameterTable` rows beside it. `parameters.py` kept reading the raw
+    `documents` column, so a rule and the `SourceDoc` its `authority` names
+    published DIFFERENT dates -- 17 of 31 rows carried no expiry while their
+    document carried one, and two of those documents had lapsed. Both callers
+    now resolve here, which is what makes `parameters.py`'s claim that the
+    `SourceDoc` "carries the same dates" true rather than aspirational.
+    """
+    from .dates import normalize_date
+
+    try:
+        found = document_dates(conn, document_id)
+    except sqlite3.Error:
+        found = {}
+    out, seen = [], []
+    for key, column in (("effective", issue_raw), ("expiration", expiration_raw)):
+        raw = None
+        entry = (found or {}).get(key) or {}
+        for source in entry.get("sources") or []:
+            raw = source.get("original") or source.get("value") or raw
+            if raw:
+                break
+        date = normalize_date(raw) if raw else None
+        if date is None:
+            date = normalize_date(column)
+        else:
+            seen.append(f"{key} {date['iso'] or 'ambiguous'}")
+        out.append(date)
+    return out[0], out[1], ", ".join(seen)

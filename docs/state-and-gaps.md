@@ -4358,6 +4358,69 @@ obligation 16's business and Planning's policy, and nothing here changes either.
 
 ---
 
+### G89 — G75's fix reached `SourceDoc` and stopped one member short
+
+`[measured]`, 2026-09-06. G75 established that a published date comes from
+evidence, not from the curated `documents` column. That landed in
+`SnapshotBuilder._document_dates`. `parameters.py` was three lines away and
+kept calling `normalize_date(fact["issue_date"])` on the raw column, so the two
+members of the same snapshot published different dates for the same document —
+while a comment in `parameters.py` asserted the opposite:
+
+> *"`belongs_to` joins it to the `SourceDoc` in the snapshot, which carries the
+> same dates."*
+
+`[measured]` on the built snapshot, before: **17 of 31 published rows carried
+no machine-readable `valid_until`, and 0 of 31 agreed with the `SourceDoc`
+their own `authority` names.** Two of those documents had lapsed —
+2018-03-13 and 2024-03-13.
+
+**Why that mattered rather than being untidy.** Obligation 16 is BINDING and
+reads `valid_until`: *"Planning pins `as_of` … and warns when a line's backing
+`valid_until` precedes it."* Against a null it compares with nothing and warns
+about nothing. Two published `footing_schedule` tables were backed by expired
+approvals and no consumer could see it from the field the obligation names.
+This is the project's recurring shape — silence reading as coverage — arriving
+in the one member that carries engineering numbers.
+
+The fix is one resolver, `versions.resolved_document_dates`, that both members
+call. Not a third parser: it is `_document_dates`' body moved down a layer, so
+`parse_date` still never reaches publication and amendment 002's refusal still
+holds. `[measured]` after: rows with no `valid_until` **17 → 3**, rows
+disagreeing with their `SourceDoc` **17 → 0**, and **6 rows now report a lapsed
+authority** where none could before.
+
+**What this does NOT do, deliberately.** It does not mark anything deprecated,
+expired or superseded. Obligation 16 says lapse is judged against a pinned
+`as_of`, *"never a clock"*, because generation must be a pure function — a
+clock read here would make the same project against the same snapshot warn
+differently on different days. And `version_status` is a closed BINDING
+vocabulary, `active | superseded | unknown`, with no value for *expired*;
+adding one is an amendment, not a registry addition. The decision that expired
+sources are deprecated is correct and is **Planning's to apply**; this change
+only gives them the date to apply it to. Note the contract's own figure before
+treating deprecation as deletion: **40.7% of this platform's human-gated facts
+come from a superseded document.**
+
+Five tests. Honest about which discriminate: three exercise the resolver
+directly (evidence beats a blank column, the column is still the fallback,
+002 still refuses through this path) and two assert the cross-member invariant
+on a real cut. The first draft of the fifth test asserted that both modules
+*mention* `resolved_document_dates` via `inspect.getsource` — the same
+source-text assertion this session already replaced once in
+`test_build_runs_verify_itself`, and it would pass against two functions that
+disagree. It compares published values instead.
+
+Still open: 3 rows carry no `valid_until` because no evidence and no column
+holds one. That is honest absence, not this defect.
+
+**Boundary-visible.** T47 told Planning the dates would populate; it was
+written before this was found, so the row-level change is not in it and needs
+a line in the next turn. `python3 tests/run_tests.py`: **1,471 tests, OK
+(1 expected failure)**.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

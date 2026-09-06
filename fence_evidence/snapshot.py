@@ -369,27 +369,9 @@ class SnapshotBuilder:
         collapsing an inference into the same word a document uses about itself
         is the kind of overclaim obligation 6 exists to prevent.
         """
-        from .versions import document_dates
-        try:
-            found = document_dates(self.conn, row["document_id"])
-        except sqlite3.Error:
-            found = {}
-        out, seen = [], []
-        for key, column in (("effective", "issue_date"),
-                            ("expiration", "expiration_date")):
-            raw = None
-            entry = (found or {}).get(key) or {}
-            for source in entry.get("sources") or []:
-                raw = source.get("original") or source.get("value") or raw
-                if raw:
-                    break
-            date = normalize_date(raw) if raw else None
-            if date is None:
-                date = normalize_date(row[column])
-            else:
-                seen.append(f"{key} {date['iso'] or 'ambiguous'}")
-            out.append(date)
-        return out[0], out[1], ", ".join(seen)
+        from .versions import resolved_document_dates
+        return resolved_document_dates(self.conn, row["document_id"],
+                                       row["issue_date"], row["expiration_date"])
 
     def _register_doc(self, row) -> None:
         """Register the `SourceDoc` a ref belongs to. Idempotent per hash.

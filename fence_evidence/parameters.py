@@ -72,6 +72,7 @@ from fractions import Fraction
 
 from .canonical import canonical_bytes
 from .dates import normalize_date
+from .versions import resolved_document_dates
 from .promote_tables import NO_BRACKET_PRINTED
 from .refs import ref_id
 from .reviews import effective_fact_value
@@ -1012,8 +1013,16 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
             # the nearest addressable authority this store holds is the document
             # itself -- there is no issuer field. `belongs_to` joins it to the
             # `SourceDoc` in the snapshot, which carries the same dates.
-            "valid_from": normalize_date(fact["issue_date"]),
-            "valid_until": normalize_date(fact["expiration_date"]),
+            #
+            # G89: "the same dates" was false. This read the raw `documents`
+            # column while `SourceDoc` resolved through evidence, so 17 of 31
+            # rows published no expiry beside a document that had one -- two of
+            # them lapsed, which obligation 16's check could not see because it
+            # reads `valid_until`. Both members now resolve in one place.
+            **dict(zip(("valid_from", "valid_until"),
+                       resolved_document_dates(conn, fact["document_id"],
+                                               fact["issue_date"],
+                                               fact["expiration_date"])[:2])),
             "authority": cites[0]["belongs_to"],
         }
         group["rows"].append(row)

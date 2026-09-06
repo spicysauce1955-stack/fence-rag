@@ -19,7 +19,7 @@ including NOA 23-0314.05, whose `Approval Date: 05/04/2023` is published as
 import sqlite3
 import unittest
 
-from context import ROOT  # noqa: F401
+from context import ROOT, requires_full_store  # noqa: F401
 from fence_evidence.snapshot import SnapshotBuilder
 
 
@@ -166,6 +166,78 @@ class TestTheBasisStopsDenyingWhatWeHold(unittest.TestCase):
         it; the dates let a consumer judge."""
         doc = published(scratch(), "doc-blank")
         self.assertEqual(doc.version_status, "unknown")
+
+
+class TestG89OneResolverForBothMembers(unittest.TestCase):
+    """G75's fix reached `SourceDoc` and stopped there.
+
+    `parameters.py` kept reading the raw `documents` column, so a published
+    rule and the `SourceDoc` its `authority` names carried DIFFERENT dates --
+    17 of 31 rows published no expiry beside a document that had one, and two
+    of those documents had lapsed. Obligation 16's check reads `valid_until`,
+    so it compared against a null and found nothing wrong.
+    """
+
+    def test_evidence_beats_a_blank_column_for_a_rule_too(self):
+        from fence_evidence.versions import resolved_document_dates
+        conn = scratch()
+        # doc-blank's curated columns are NULL; its facts carry both dates.
+        issue, expiry, note = resolved_document_dates(conn, "doc-blank", None, None)
+        self.assertEqual(expiry["iso"], "2029-03-13")
+        self.assertEqual(issue["iso"], "2025-04-24")
+        self.assertIn("expiration", note)
+
+    def test_the_column_is_still_the_fallback_when_no_evidence_exists(self):
+        from fence_evidence.versions import resolved_document_dates
+        conn = scratch(with_facts=False)
+        _, expiry, note = resolved_document_dates(
+            conn, "doc-filled", "04/24/2025", "03/13/2029")
+        self.assertEqual(expiry["iso"], "2029-03-13")
+        self.assertEqual(note, "")  # nothing was resolved FROM evidence
+
+    def test_amendment_002_still_refuses_through_this_path(self):
+        from fence_evidence.versions import resolved_document_dates
+        conn = scratch(with_facts=False)
+        _, expiry, _ = resolved_document_dates(
+            conn, "doc-filled", None, "05/04/2023")
+        self.assertIsNone(expiry["iso"])
+        self.assertEqual(expiry["value_raw"], ["05/04/2023"])
+
+@requires_full_store
+class TestG89TheInvariantOnTheRealSnapshot(unittest.TestCase):
+    """The claim `parameters.py` makes in a comment -- that the `SourceDoc` its
+    `authority` names "carries the same dates" -- asserted against a real cut.
+
+    Deliberately NOT a source-text assertion: checking that both modules
+    mention one function name would pass against two functions that disagree.
+    This compares the published values.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        from fence_evidence.snapshot import build_snapshot
+        cls.snap = build_snapshot(tenant="default")
+        cls.docs = {d["content_hash"]: d for d in cls.snap["source_docs"]}
+
+    def test_every_rule_agrees_with_the_document_it_names(self):
+        for table in self.snap["parameters"]:
+            for row in table["rows"]:
+                doc = self.docs.get(row["authority"], {})
+                for field, published in (("expiration_date", "valid_until"),
+                                         ("issue_date", "valid_from")):
+                    self.assertEqual(
+                        (row.get(published) or {}).get("iso"),
+                        (doc.get(field) or {}).get("iso"),
+                        f"{table['parameter']} row disagrees with its "
+                        f"SourceDoc on {field}")
+
+    def test_a_lapsed_authority_is_visible_on_the_rule_not_only_the_document(self):
+        """Obligation 16 reads `valid_until`. While that was null on a rule
+        backed by a lapsed approval, the check compared against nothing."""
+        lapsed = [t["parameter"] for t in self.snap["parameters"] for r in t["rows"]
+                  if (r.get("valid_until") or {}).get("iso", "9999") < "2026-09-06"]
+        self.assertTrue(lapsed, "no rule reports a lapsed authority; if the "
+                                "corpus really has none, this guard is stale")
 
 
 if __name__ == "__main__":
