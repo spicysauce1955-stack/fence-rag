@@ -1,6 +1,8 @@
 """Conservative authored-model admission; never promotes draft review assertions.
 
 This is a producer preflight, not a public-model adapter or a physical-fit proof.
+Publication currently always refuses: numeric model provenance has no agreed
+lossless wire mapping in this profile. A successful callback cannot waive it.
 Reviews must come from a caller-owned trusted ledger, not the candidate payload.
 Every used Part is included in the review digest. Unsupported authoring branches
 are refused rather than accepted through consumer defaults.
@@ -40,6 +42,7 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
     reviewed_at (ISO datetime), and review_id. Latest review wins per digest.
     A human's acceptance attests source interpretation; this function cannot.
     """
+    from .snapshot import SOURCE_CLASSES, VERSION_STATUSES
     models, exclusions = [], []
     part_map = {p.get('id'): p for p in parts if isinstance(p, dict) and isinstance(p.get('id'), str)}
     duplicate_parts = set()
@@ -124,6 +127,10 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
                 fail(path, 'invalid_quantity', 'Quantity is outside the supported nonnegative range.')
                 return None
             return n
+        def valid_version(value):
+            return (type(value) is int and value > 0) or (isinstance(value, str) and bool(value.strip()))
+        def localized(value):
+            return isinstance(value, dict) and bool(value) and all(isinstance(k, str) and k and isinstance(v, str) and v.strip() for k, v in value.items())
         def requirement(req, path, needs_length=False):
             if not isinstance(req, dict):
                 fail(path, 'missing_requirement', 'Explicit PartRequirement required.')
@@ -147,17 +154,51 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
                     fail(path + '/part_id', 'unsupported_part_contains', 'Contained Part references require transitive review binding; this profile refuses them.')
                 if part_map[pid].get('status') != 'active':
                     fail(path + '/part_id', 'inactive_part', 'Referenced Part must be explicitly active.')
-                specs = part_map[pid].get('spec', [])
+                part = part_map[pid]
+                check_tree(part, path + '/part')
+                if not valid_version(part.get('version')) or not localized(part.get('name_i18n')) or part.get('authorship') != 'third_party_authored':
+                    fail(path + '/part', 'invalid_part_shape', 'Part requires version, localized name and producer authorship.')
+                part_type = part.get('type')
+                if (not isinstance(part_type, dict) or not isinstance(part_type.get('namespace'), str) or not part_type['namespace']
+                        or not isinstance(part_type.get('key'), str) or not part_type['key']):
+                    fail(path + '/part/type', 'invalid_part_type', 'Part requires a namespaced PartTypeRef; registry closure remains the snapshot validator responsibility.')
+                cited(part.get('cites'), path + '/part/cites')
+                rollup = part.get('contributing_sources')
+                if not isinstance(rollup, list) or not rollup or any(not isinstance(h, str) or h not in docs for h in rollup):
+                    fail(path + '/part/contributing_sources', 'citation_closure', 'Part requires a resolvable source roll-up.')
+                specs = part.get('spec', [])
                 if not isinstance(specs, list) or not specs or any(not isinstance(sf, dict) for sf in specs):
                     fail(path + '/part_id', 'missing_part_dimensions', 'Identity-only Part cannot establish physical geometry.')
                 for spec in specs if isinstance(specs, list) else []:
                     if isinstance(spec, dict):
                         provenance = spec.get('provenance')
                         cited(provenance.get('cites') if isinstance(provenance, dict) else None, path + '/part/spec')
+                        if (not isinstance(provenance, dict) or not isinstance(provenance.get('source_class'), str)
+                                or provenance['source_class'] not in SOURCE_CLASSES
+                                or type(provenance.get('curation_level')) is not int or provenance['curation_level'] not in (0, 1, 2)
+                                or not isinstance(provenance.get('version_status'), str) or provenance['version_status'] not in VERSION_STATUSES
+                                or 'admitted_by' in provenance):
+                            fail(path + '/part/spec/provenance', 'invalid_provenance', 'Frozen contract requires source class, curation level and version status; admitted_by is a run output, never published provenance.')
+                        if not isinstance(spec.get('key'), str) or not spec['key'] or spec.get('agree') not in ('==', '!=', '<=', '>=', 'in', 'supplies'):
+                            fail(path + '/part/spec', 'invalid_spec', 'SpecField needs a named key and supported agreement.')
+                        value = spec.get('value')
+                        if spec.get('agree') == 'supplies':
+                            if value is not None:
+                                fail(path + '/part/spec/value', 'invalid_spec', 'A supplies rule carries no measured value.')
+                        elif isinstance(spec.get('key'), str) and spec['key'].endswith('_mm'):
+                            quantity(value, path + '/part/spec/value', positive=True)
+                        elif (not isinstance(value, dict) or not isinstance(value.get('key'), str) or not value['key']
+                              or not isinstance(value.get('value_raw'), list) or not value['value_raw']
+                              or any(not isinstance(v, str) or not v for v in value['value_raw'])):
+                            fail(path + '/part/spec/value', 'unsupported_spec_value', 'This profile supports millimetre dimensions and lexeme-preserving Tokens.')
         def joint(node, path):
             if not isinstance(node, dict):
                 fail(path, 'missing_joint', 'Explicit Joint object required.')
                 return None, None
+            shared = field(node, 'shared_host_gap', path)
+            reason = field(node, 'gap_reason', path)
+            if shared is not None or reason is not None:
+                fail(path, 'unsupported_shared_host_joint', 'Shared-host gap behavior has no lossless consumer mapping; explicit null records no supported constraint.')
             kind = field(node, 'kind', path)
             if kind not in ('butt', 'channel', 'groove', 'bracket', 'overlap'):
                 fail(path, 'invalid_joint', 'Unsupported joint kind.')
@@ -177,10 +218,9 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
         for key in ('option_axes', 'variants', 'layout_policy', 'assembly'):
             if not isinstance(model.get(key), list):
                 fail('/' + key, 'invalid_shape', 'Explicit list required.')
-        for key in ('version', 'authorship'):
-            if not isinstance(model.get(key), str) or not model[key].strip():
-                fail('/' + key, 'invalid_shape', 'Nonempty authored string required.')
-        if not isinstance(model.get('name_i18n'), dict) or not model['name_i18n']:
+        if not valid_version(model.get('version')):
+            fail('/version', 'invalid_shape', 'Positive integer or nonempty version string required; public prose does not fix a wire scalar type.')
+        if not localized(model.get('name_i18n')):
             fail('/name_i18n', 'invalid_shape', 'Nonempty localized name required.')
         if not isinstance(model.get('height_support'), dict) or not model['height_support']:
             fail('/height_support', 'missing_value', 'Explicit height support required.')
@@ -211,6 +251,7 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
             fail('/default_spec', 'missing_spec', 'Explicit panel spec required.')
         frame = spec.get('frame')
         frames = {}
+        frame_orientations = {}
         if not isinstance(frame, list) or not frame:
             fail('/default_spec/frame', 'empty_frame', 'A nonempty frame is required by this profile.')
             frame = []
@@ -224,6 +265,7 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
                 fail(path, 'invalid_key', 'Unique nonempty slot key required.')
             else:
                 frames[key] = joint(slot.get('joint'), path + '/joint')
+                frame_orientations[key] = slot.get('orientation')
             if field(slot, 'orientation', path) not in ('horizontal', 'vertical'):
                 fail(path, 'invalid_orientation', 'Explicit orientation required.')
             placement = field(slot, 'placement', path)
@@ -258,12 +300,17 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
                 fail(p + '/key', 'invalid_key', 'Unique nonempty member key required.')
             else:
                 member_keys.add(key)
+            joint(member.get('joint'), p + '/joint')
+            if member.get('base_ref') == member.get('top_ref'):
+                fail(p, 'invalid_support_relationship', 'Member endpoints must reference distinct supporting frames.')
             for side in ('base', 'top'):
                 ref = member.get(side + '_ref')
                 engagement = quantity(field(member, side + '_engagement', p), p + '/' + side + '_engagement', positive=True)
                 if not isinstance(ref, str) or ref not in frames:
                     fail(p + '/' + side + '_ref', 'unresolved_slot', 'Member must reference its supporting frame.')
                 else:
+                    if frame_orientations[ref] == infill.get('orientation'):
+                        fail(p, 'invalid_support_relationship', 'Supporting frame must run perpendicular to this infill.')
                     depth, margin = frames[ref]
                     if None not in (depth, margin, engagement) and engagement + margin > depth:
                         fail(p, 'engagement_exceeds_channel', 'Engagement plus insertion margin exceeds receiving depth.')
@@ -331,6 +378,8 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
                         fail('/', 'consumer_validation_failed', error)
             except Exception as exc:
                 fail('/', 'consumer_validation_failed', type(exc).__name__ + ': ' + str(exc))
+        fail('/', 'consumer_numeric_provenance_mapping_unresolved',
+             'Numeric model values need published provenance under contract obligation 6; this profile only stores private field citations and has no agreed lossless publication mapping.')
         if issues:
             exclusions.append({'model_id': mid, 'content_hash': digest, 'issues': issues,
                                'would_close': 'Resolve the listed source, geometry and schema gaps, then review the exact authored model and Part digest.'})

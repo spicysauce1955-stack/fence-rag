@@ -1,6 +1,6 @@
 {
   "consumer_revision": "9de94eb06d8e997d9be098dedd5b6a6b2eb4024d",
-  "consumer_source_diff_sha256": "0ee588a9a25f016e5e25f2ab6c8504bdd8fe12f30c917eb991ad2e2c2781dffd",
+  "consumer_source_diff_sha256": "f904ca0bab8fcf2bdc3d213f9e36067da6252423d32dd3b8631a8bf48c94d35f",
   "post_requirement_parses": true,
   "post_role_matrix": {
     "end": [

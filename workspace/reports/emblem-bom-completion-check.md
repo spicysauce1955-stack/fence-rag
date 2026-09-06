@@ -1,5 +1,10 @@
 # Emblem BOM checkpoint — 2026-09-06
 
+**Historical G98 checkpoint.** The subsequent datamodel/relationship review found
+and repaired additional preflight and synthetic coverage defects. Current results:
+`emblem-datamodel-validation-review.md`. The patch file is cumulative and has
+advanced; the checksum below identifies the historical G98 patch.
+
 Target: Freedom Emblem Privacy White 6×8, model 73014714.
 This is an implementation and evidence checkpoint, not installation approval.
 

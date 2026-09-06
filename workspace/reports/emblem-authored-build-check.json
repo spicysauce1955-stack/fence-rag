@@ -1,5 +1,5 @@
 {
-  "snapshot_id": "39881bfc7ef5c380fb76fcf6aa862fc49db9e365b604ce52fc67761283e2d951",
+  "snapshot_id": "a36fa7fc342e67ff4667c7c02ffdade1a9679518780e268e4410d651d7633812",
   "tenant": "default",
   "regime": "us_astm",
   "retain_until": "2028-09-05",
@@ -23,8 +23,10 @@
             "/assembly",
             "/default_spec/fixings",
             "/default_spec/frame/0/joint/channel_depth",
+            "/default_spec/frame/0/joint/gap_reason",
             "/default_spec/frame/0/joint/insertion_margin",
             "/default_spec/frame/0/joint/kind",
+            "/default_spec/frame/0/joint/shared_host_gap",
             "/default_spec/frame/0/orientation",
             "/default_spec/frame/0/placement",
             "/default_spec/frame/0/requirement/length_rule",
@@ -32,8 +34,10 @@
             "/default_spec/frame/0/requirement/part_id",
             "/default_spec/frame/0/requirement/qty",
             "/default_spec/frame/1/joint/channel_depth",
+            "/default_spec/frame/1/joint/gap_reason",
             "/default_spec/frame/1/joint/insertion_margin",
             "/default_spec/frame/1/joint/kind",
+            "/default_spec/frame/1/joint/shared_host_gap",
             "/default_spec/frame/1/orientation",
             "/default_spec/frame/1/placement",
             "/default_spec/frame/1/requirement/length_rule",
@@ -47,6 +51,7 @@
             "/default_spec/infill/pattern/0/base_engagement",
             "/default_spec/infill/pattern/0/face_offset",
             "/default_spec/infill/pattern/0/gap_after",
+            "/default_spec/infill/pattern/0/joint",
             "/default_spec/infill/pattern/0/profile_edges",
             "/default_spec/infill/pattern/0/requirement/length_rule",
             "/default_spec/infill/pattern/0/requirement/overlap",
@@ -66,8 +71,7 @@
             "/post/requirement",
             "/review",
             "/status",
-            "/variants",
-            "/version"
+            "/variants"
           ],
           "reasons": [
             "inactive_model",
@@ -133,6 +137,7 @@
             "/"
           ],
           "reasons": [
+            "consumer_numeric_provenance_mapping_unresolved",
             "consumer_validation_missing"
           ]
         }

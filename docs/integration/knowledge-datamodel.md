@@ -261,9 +261,16 @@ Provenance {                                                            ← NEW
   cites           [SourceRef]
   source_class    SourceClass
   curation_level  0 | 1 | 2
-  admitted_by     { policy_version, rank }    which source-policy row won
+  version_status active | superseded | unknown
 }
 ```
+
+**Corrected against frozen contract v1.1, Amendment 001 (§1.1, §1.4 and
+obligation 6).** The earlier `admitted_by` field in this block contradicted the
+ratified contract: Knowledge publishes source classification and version status;
+Planning applies policy at run time and records `admitted_by` on the run output.
+It is not part of published Provenance. This correction follows the existing
+amendment and changes no boundary promise.
 
 **N15.** v0.1 put `source_class` and `curation_level` on `ParameterTable` rows and
 nowhere else, while invariant 8 said "every published value." You were right that
@@ -1410,7 +1417,7 @@ overstated what a validator can do.
    bare `_mm` field, and no exceptions for values that look small enough not to
    matter; that judgement is what produced twenty-three of them in v0.2.
 8. **Every published value carries a resolvable `SourceRef`, an honest
-   `Authorship`, and its `source_class` and `curation_level`.** *(C3, resolved
+   `Authorship`, and its `source_class`, `curation_level` and `version_status`.** *(C3, resolved
    `conversation.md` T39.) A membership or containment edge — this component
    belongs to this panel, this panel is a member of the Chesterfield line — is
    not itself a value: it is authored structure (invariant 10), and carries no

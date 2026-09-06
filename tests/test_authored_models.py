@@ -9,12 +9,19 @@ from fence_evidence.authored_models import admit_authored_models, content_hash
 class AuthoredModelTests(unittest.TestCase):
     def setUp(self):
         self.cite = {'id': 'test-ref', 'belongs_to': 'a' * 64}
-        self.parts = [{'id': 'test/part', 'status': 'active', 'spec': [
-            {'key': 'width_mm', 'value': self.q(10),
-             'provenance': {'cites': [self.cite]}}]}]
+        self.parts = []
+        for pid, role in [('test/part', 'rail'), ('test/board', 'infill'), ('test/post', 'post'), ('test/cap', 'post_cap')]:
+            self.parts.append({'id': pid, 'version': 1, 'status': 'active',
+                'type': {'namespace': 'shared', 'key': role},
+                'name_i18n': {'en': 'Synthetic ' + role}, 'authorship': 'third_party_authored',
+                'cites': [self.cite], 'contributing_sources': ['a' * 64], 'spec': [
+                    {'key': 'width_mm', 'agree': '==', 'value': self.q(10),
+                     'provenance': {'cites': [self.cite], 'source_class': 'company_authored',
+                                    'curation_level': 1, 'version_status': 'active'}}]})
         req = {'part_id': 'test/part', 'qty': self.q(1, 'each'),
-               'length_rule': 'between_frame', 'overlap': self.q(0)}
-        joint = {'kind': 'channel', 'channel_depth': self.q(10), 'insertion_margin': self.q(1)}
+               'length_rule': 'clear_between_posts', 'overlap': self.q(0)}
+        joint = {'kind': 'channel', 'channel_depth': self.q(10), 'insertion_margin': self.q(1),
+                 'shared_host_gap': None, 'gap_reason': None}
         slot = {'key': 'bottom', 'orientation': 'horizontal',
                 'placement': {'kind': 'from_bottom', 'offset': self.q(10)},
                 'joint': joint, 'requirement': req}
@@ -25,17 +32,20 @@ class AuthoredModelTests(unittest.TestCase):
                   'base_engagement': self.q(5), 'top_engagement': self.q(5),
                   'gap_after': self.q(0), 'face_offset': self.q(0),
                   'profile_edges': {'start': 'tongue', 'end': 'groove'},
-                  'requirement': req}
-        model = {'id': 'test/model', 'version': '1', 'status': 'active',
+                  'joint': {'kind': 'butt', 'channel_depth': self.q(0), 'insertion_margin': self.q(0),
+                            'shared_host_gap': None, 'gap_reason': None},
+                  'requirement': dict(req, part_id='test/board', length_rule='between_frame')}
+        model = {'id': 'test/model', 'version': 1, 'status': 'active',
                  'name_i18n': {'en': 'Synthetic'}, 'authorship': 'third_party_authored',
                  'grade': 'residential', 'height_support': {'kind': 'discrete', 'heights': [self.q(100)]},
                  'option_axes': [], 'variants': [], 'layout_policy': [], 'assembly': [],
                  'cites': [self.cite], 'contributing_sources': ['a' * 64],
                  'default_spec': {'frame': [slot, top], 'infill': {
                      'orientation': 'vertical', 'pattern': [member], 'justification': 'start',
-                     'excess': 'trim_last', 'edge_margin': self.q(0), 'supply': 'assembly'},
+                     'excess': 'truncate', 'edge_margin': self.q(0), 'supply': 'assembly'},
                      'fixings': []},
-                 'post': {'key': 'post', 'requirement': req, 'joint': joint, 'cap': None}}
+                 'post': {'key': 'post', 'requirement': dict(req, part_id='test/post', length_rule='panel_height'),
+                          'joint': joint, 'cap': dict(req, part_id='test/cap', length_rule=None)}}
         self.record = {'model': copy.deepcopy(model), 'field_evidence': {}}
         def evidence(node, path=''):
             if isinstance(node, dict):
@@ -67,11 +77,10 @@ class AuthoredModelTests(unittest.TestCase):
     def codes(self, result):
         return {i['code'] for e in result['exclusions'] for i in e['issues']}
 
-    def test_positive_requires_external_semantic_validation(self):
+    def test_preflight_only_requires_external_semantic_validation(self):
         result = self.run_gate()
-        self.assertEqual(result['exclusions'], [])
-        self.assertEqual(len(result['models']), 1)
-        result['models'][0]['id'] = 'changed'
+        self.assertEqual(result['models'], [])
+        self.assertEqual(self.codes(result), {'consumer_numeric_provenance_mapping_unresolved'})
         self.assertEqual(self.record['model']['id'], 'test/model')
         self.assertIn('consumer_validation_missing', self.codes(self.run_gate(model_validator=None)))
         self.assertIn('consumer_validation_failed', self.codes(self.run_gate(model_validator=lambda m, p: ['fit failed'])))
@@ -132,7 +141,7 @@ class AuthoredModelTests(unittest.TestCase):
         member['gap_after'] = self.q(-2)
         member['face_offset'] = self.q(-1)
         self.review = self.make_review()
-        self.assertEqual(self.run_gate()['exclusions'], [])
+        self.assertEqual(self.codes(self.run_gate()), {'consumer_numeric_provenance_mapping_unresolved'})
 
     def test_duplicate_models_exclude_both_definitions(self):
         result = admit_authored_models([self.record, self.record], parts=self.parts,
@@ -148,7 +157,7 @@ class AuthoredModelTests(unittest.TestCase):
         self.parts.append({'id': 'test/child', 'spec': []})
         self.review = self.make_review()
         self.assertIn('unsupported_part_contains', self.codes(self.run_gate()))
-        self.parts[1]['spec'] = [{'key': 'width_mm', 'value': self.q(100)}]
+        self.parts[-1]['spec'] = [{'key': 'width_mm', 'value': self.q(100)}]
         self.assertIn('unsupported_part_contains', self.codes(self.run_gate()))
         self.assertEqual(self.run_gate()['models'], [])
 
@@ -162,6 +171,50 @@ class AuthoredModelTests(unittest.TestCase):
         self.review = self.make_review()
         self.assertIn('duplicate_part_identity', self.codes(self.run_gate()))
         self.assertEqual(self.run_gate()['models'], [])
+
+    def test_schema_relationship_adversaries_with_fresh_reviews(self):
+        mutations = ['missing_member_joint', 'invalid_member_joint', 'same_support',
+                     'parallel_support', 'missing_part_type', 'missing_agree',
+                     'missing_provenance_version_status', 'shared_host_gap']
+        for mutation in mutations:
+            with self.subTest(mutation=mutation):
+                self.setUp()
+                member = self.record['model']['default_spec']['infill']['pattern'][0]
+                if mutation == 'missing_member_joint':
+                    member.pop('joint')
+                elif mutation == 'invalid_member_joint':
+                    member['joint']['kind'] = 'magic'
+                elif mutation == 'same_support':
+                    member['top_ref'] = 'bottom'
+                elif mutation == 'parallel_support':
+                    self.record['model']['default_spec']['infill']['orientation'] = 'horizontal'
+                elif mutation == 'missing_part_type':
+                    self.parts[0].pop('type')
+                elif mutation == 'missing_agree':
+                    self.parts[0]['spec'][0].pop('agree')
+                elif mutation == 'missing_provenance_version_status':
+                    self.parts[0]['spec'][0]['provenance'].pop('version_status')
+                else:
+                    member['joint']['shared_host_gap'] = self.q(2)
+                    member['joint']['gap_reason'] = 'thermal_expansion'
+                self.review = self.make_review()
+                self.assertEqual(self.run_gate()['models'], [])
+                self.assertTrue(self.run_gate()['exclusions'])
+
+    def test_published_provenance_follows_frozen_contract_not_stale_datamodel(self):
+        self.parts[0]['spec'][0]['provenance']['admitted_by'] = {'policy_version': 'test', 'rank': 1}
+        self.review = self.make_review()
+        self.assertIn('invalid_provenance', self.codes(self.run_gate()))
+
+    def test_version_profile_does_not_invent_string_only_wire_rule(self):
+        for value in (1, '1.0'):
+            self.record['model']['version'] = value
+            self.review = self.make_review()
+            self.assertEqual(self.codes(self.run_gate()), {'consumer_numeric_provenance_mapping_unresolved'})
+        for value in (0, True, '', [], {}):
+            self.record['model']['version'] = value
+            self.review = self.make_review()
+            self.assertIn('invalid_shape', self.codes(self.run_gate()))
 
     def test_adversarial_review_cannot_bypass_preflight(self):
         mutations = [

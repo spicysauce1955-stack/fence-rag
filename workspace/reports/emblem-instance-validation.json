@@ -1,0 +1,1226 @@
+{
+  "scope": "actual instance/reference audit; no complete physical-fit or wire-adapter claim",
+  "authority_files": [
+    {
+      "path": "docs/integration/contract.md",
+      "sha256": "fdaf7462fb3bfd704fa487753067ce9051c7efa1065d9ce7506e331d51723b40"
+    },
+    {
+      "path": "docs/integration/knowledge-datamodel.md",
+      "sha256": "506b80ced4dcdd2081f0953ef459124a07bd0c511b5fcd43bafeec701085daa1"
+    },
+    {
+      "path": "docs/integration/knowledge-design.md",
+      "sha256": "de3fe416a755efc187dd2ffad59af9ed6ae815e4b26225b3286fefe9c81c56eb"
+    },
+    {
+      "path": "docs/four-layer-model-design.md",
+      "sha256": "cdd8abdf9ffc644be525b5f7937af2e5ff86ddd5a33cf1286a7941c1618238d3"
+    }
+  ],
+  "artifact_hashes": {
+    "public_draft": "2a40d62828ae7da4c5018efb48efea6fbb52683c72a69211467534eb2537c768",
+    "private_candidate": "abe89223e04c5cad3a6e2bf3808680edfda4832f7ef9ddbf275cd2a3f7098768"
+  },
+  "candidate_declares_current_source_package_hash": true,
+  "candidate_reproduces_from_checked_inputs": true,
+  "source_file_checks": [
+    {
+      "path": "manuals/freedom-outdoor-living/73014714-6x8Emblem-White-ProjectPlanning.pdf",
+      "expected_sha256": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "actual_sha256": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "matches": true
+    },
+    {
+      "path": "manuals/freedom-outdoor-living/FREEDOM-WEB-PrivacyKit_Ready-to-Assemble-Privacy-Vinyl-Fence-Install.pdf",
+      "expected_sha256": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "actual_sha256": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "matches": true
+    },
+    {
+      "path": "manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf",
+      "expected_sha256": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b",
+      "actual_sha256": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b",
+      "matches": true
+    }
+  ],
+  "canonical_source_ref_checks": [
+    {
+      "id": "54e47378f4737168",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/sources/0/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/confirmed_readings/0/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/confirmed_readings/1/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/confirmed_readings/2/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/confirmed_readings/3/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/confirmed_readings/4/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/model_fragment/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/0/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/1/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/2/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/3/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/4/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/5/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/6/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/structural_proposals/0/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/structural_proposals/1/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/pending_bindings/0/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/conditional_candidates/1/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/model/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/placement_confirmation/source_cites/0"
+        }
+      ]
+    },
+    {
+      "id": "539216065abf32aa",
+      "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/sources/1/cites/0"
+        }
+      ]
+    },
+    {
+      "id": "165d88f170349566",
+      "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/sources/1/cites/1"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/conditional_candidates/0/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/conditional_candidates/2/cites/0"
+        }
+      ]
+    },
+    {
+      "id": "56813bd519986306",
+      "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/sources/1/cites/2"
+        }
+      ]
+    },
+    {
+      "id": "5ec7031e0f3bd7b3",
+      "belongs_to": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/sources/2/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/model_fragment/cites/1"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/connection_mapping_cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/model/cites/1"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/placement_confirmation/source_cites/1"
+        }
+      ]
+    },
+    {
+      "id": "55f8a0feb2a76bed",
+      "belongs_to": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/sources/2/cites/1"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/conditional_design_evidence/0/anchor/cite"
+        }
+      ]
+    },
+    {
+      "id": "2e8e21301a601e1e",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/confirmed_readings/0/evidence_anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/confirmed_readings/1/evidence_anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/identity_anchors/1/cite"
+        }
+      ]
+    },
+    {
+      "id": "e00d82aba830a6eb",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/confirmed_readings/2/evidence_anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/2/cites/1"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/2/spec/0/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/4/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/packaged_assembly_inventory/2/evidence/cite"
+        }
+      ]
+    },
+    {
+      "id": "b2766cd38e5d8624",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/confirmed_readings/3/evidence_anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/confirmed_readings/4/evidence_anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/0/cites/1"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/0/spec/0/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/0/spec/1/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/1/cites/1"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/1/spec/0/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/1/spec/1/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/0/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/1/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/2/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/3/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/packaged_assembly_inventory/0/evidence/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/packaged_assembly_inventory/1/evidence/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/rail_dimension_mappings/0/source_spec/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/rail_dimension_mappings/0/original_part_specs/0/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/rail_dimension_mappings/0/original_part_specs/1/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/rail_dimension_mappings/1/source_spec/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/rail_dimension_mappings/1/original_part_specs/0/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/rail_dimension_mappings/1/original_part_specs/1/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/rail_matching_mappings/0/source_spec/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/rail_matching_mappings/2/source_spec/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/assembly_authoring/field_evidence/2/anchors/0/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/assembly_authoring/field_evidence/3/anchors/0/cite"
+        }
+      ]
+    },
+    {
+      "id": "aeaf7e66a05b4d28",
+      "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/model_fragment/cites/2"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/connection_evidence/0/evidence_anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/connection_mapping_cites/1"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/packaged_assembly_inventory/3/count_evidence/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/model/cites/2"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/u_channel_inventory_evidence/count_evidence/cite"
+        }
+      ]
+    },
+    {
+      "id": "57482180d5ddbd37",
+      "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/model_fragment/cites/3"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/connection_evidence/1/evidence_anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/connection_mapping_cites/2"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/packaged_assembly_inventory/3/edge_evidence/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/model/cites/3"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/u_channel_placements/0/evidence/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/u_channel_placements/1/evidence/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/u_channel_inventory_evidence/edge_evidence/cite"
+        }
+      ]
+    },
+    {
+      "id": "e856d15ed6bcbc68",
+      "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/model_fragment/cites/4"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/connection_evidence/2/evidence_anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/connection_mapping_cites/3"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/model/cites/4"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/assembly_authoring/field_evidence/0/anchors/0/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/assembly_authoring/field_evidence/1/anchors/0/cite"
+        }
+      ]
+    },
+    {
+      "id": "d3ce088342977ece",
+      "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/model_fragment/cites/5"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/connection_evidence/3/evidence_anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/connection_mapping_cites/4"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/model/cites/5"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/assembly_authoring/field_evidence/0/anchors/1/cite"
+        }
+      ]
+    },
+    {
+      "id": "5d7cfd7597583e43",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/0/cites/2"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/0/spec/2/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/1/cites/2"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/1/spec/2/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/2/cites/2"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/2/spec/1/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/identity_anchors/0/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/16/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/17/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/18/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/purchase_quantity_rules/0/evidence/0/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/rail_dimension_mappings/0/original_part_specs/2/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/rail_dimension_mappings/1/original_part_specs/2/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/rail_matching_mappings/1/source_spec/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/rail_matching_mappings/3/source_spec/provenance/cites/0"
+        }
+      ]
+    },
+    {
+      "id": "df7d58fbdfa124b1",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/3/cites/1"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/3/spec/0/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/3/spec/1/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/3/spec/2/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/3/spec/3/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_identity_anchors/0/description/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/5/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/6/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/7/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/19/anchor/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/post_binding_evidence/0/cite"
+        }
+      ]
+    },
+    {
+      "id": "b456ffc7928e48c4",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/4/cites/1"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/4/spec/0/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/4/spec/1/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/4/spec/2/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/4/spec/3/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_identity_anchors/1/description/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/8/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/9/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/10/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/20/anchor/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/post_binding_evidence/2/cite"
+        }
+      ]
+    },
+    {
+      "id": "70bb914fc3e9c02a",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/5/cites/1"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/5/spec/0/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/5/spec/1/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/5/spec/2/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/5/spec/3/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_identity_anchors/2/description/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/11/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/12/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/13/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/21/anchor/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/post_binding_evidence/4/cite"
+        }
+      ]
+    },
+    {
+      "id": "a437381210d0e693",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/6/cites/1"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/6/spec/0/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/6/spec/1/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_fragments/6/spec/2/provenance/cites/0"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/part_identity_anchors/3/description/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/14/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/15/anchor/cite"
+        },
+        {
+          "artifact": "public_draft",
+          "path": "/spec_evidence/22/anchor/cite"
+        }
+      ]
+    },
+    {
+      "id": "304c96b69b330708",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/identity_anchors/2/cite"
+        }
+      ]
+    },
+    {
+      "id": "e27012dc3edf290f",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/part_identity_anchors/0/model_number/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/post_binding_evidence/1/cite"
+        }
+      ]
+    },
+    {
+      "id": "8ec72dda71224b68",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/part_identity_anchors/1/model_number/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/post_binding_evidence/3/cite"
+        }
+      ]
+    },
+    {
+      "id": "3299b0fb58f9d53c",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/part_identity_anchors/2/model_number/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/post_binding_evidence/5/cite"
+        }
+      ]
+    },
+    {
+      "id": "1356341c0f1a6c05",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/part_identity_anchors/3/model_number/cite"
+        }
+      ]
+    },
+    {
+      "id": "a63ff62245d7c789",
+      "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/packaged_assembly_inventory/3/evidence/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/u_channel_inventory_evidence/evidence/cite"
+        }
+      ]
+    },
+    {
+      "id": "5f2efc0cc9661d0c",
+      "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/purchase_quantity_rules/1/evidence/0/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/post_quantity_rule/evidence/0/cite"
+        }
+      ]
+    },
+    {
+      "id": "f67db6fc7eef1aa8",
+      "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "canonical_locus_matches": true,
+      "uses": [
+        {
+          "artifact": "public_draft",
+          "path": "/purchase_quantity_rules/2/evidence/0/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/assembly_authoring/field_evidence/4/anchors/0/cite"
+        }
+      ]
+    }
+  ],
+  "public_part_type_checks": [
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+      "type": {
+        "namespace": "shared",
+        "key": "rail"
+      },
+      "shared_spine_match": true
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+      "type": {
+        "namespace": "shared",
+        "key": "rail"
+      },
+      "shared_spine_match": true
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+      "type": {
+        "namespace": "shared",
+        "key": "infill"
+      },
+      "shared_spine_match": true
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/73045783",
+      "type": {
+        "namespace": "shared",
+        "key": "post"
+      },
+      "shared_spine_match": true
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/73045784",
+      "type": {
+        "namespace": "shared",
+        "key": "post"
+      },
+      "shared_spine_match": true
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/73045785",
+      "type": {
+        "namespace": "shared",
+        "key": "post"
+      },
+      "shared_spine_match": true
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/73013956",
+      "type": {
+        "namespace": "shared",
+        "key": "post_cap"
+      },
+      "shared_spine_match": true
+    }
+  ],
+  "public_draft_graph": {
+    "requirements": [
+      {
+        "path": "/default_spec/frame/0/requirement/part_id",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+        "definition_count": 1,
+        "published": false,
+        "selection": "literal"
+      },
+      {
+        "path": "/default_spec/frame/1/requirement/part_id",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+        "definition_count": 1,
+        "published": false,
+        "selection": "literal"
+      },
+      {
+        "path": "/default_spec/infill/pattern/0/requirement/part_id",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+        "definition_count": 1,
+        "published": false,
+        "selection": "literal"
+      },
+      {
+        "path": "/post/cap/part_id",
+        "part_id": "mfr/freedom-outdoor-living/73013956",
+        "definition_count": 1,
+        "published": false,
+        "selection": "literal"
+      }
+    ],
+    "support_edges": [
+      {
+        "member_key": "board",
+        "edge": "base_ref",
+        "frame_key": "bottom_rail",
+        "definition_count": 1
+      },
+      {
+        "member_key": "board",
+        "edge": "top_ref",
+        "frame_key": "top_rail",
+        "definition_count": 1
+      }
+    ],
+    "duplicate_part_ids": [],
+    "literal_part_closure": true,
+    "published_part_closure": false,
+    "support_reference_closure": true
+  },
+  "private_candidate_graph": {
+    "requirements": [
+      {
+        "path": "/default_spec/frame/0/requirement/part_id",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+        "definition_count": 1,
+        "published": false,
+        "selection": "literal"
+      },
+      {
+        "path": "/default_spec/frame/1/requirement/part_id",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+        "definition_count": 1,
+        "published": false,
+        "selection": "literal"
+      },
+      {
+        "path": "/default_spec/infill/pattern/0/requirement/part_id",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+        "definition_count": 0,
+        "published": false,
+        "selection": "literal"
+      },
+      {
+        "path": "/default_spec/fixings/0/requirement/part_id",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
+        "definition_count": 1,
+        "published": false,
+        "selection": "literal"
+      },
+      {
+        "path": "/default_spec/fixings/1/requirement/part_id",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
+        "definition_count": 1,
+        "published": false,
+        "selection": "literal"
+      },
+      {
+        "path": "/post/cap/part_id",
+        "part_id": "mfr/freedom-outdoor-living/73013956",
+        "definition_count": 0,
+        "published": false,
+        "selection": "literal"
+      },
+      {
+        "path": "/post/requirement/part_id",
+        "part_id": "",
+        "definition_count": 0,
+        "published": false,
+        "selection": "predicate_or_unresolved"
+      }
+    ],
+    "support_edges": [
+      {
+        "member_key": "board",
+        "edge": "base_ref",
+        "frame_key": "bottom_rail",
+        "definition_count": 1
+      },
+      {
+        "member_key": "board",
+        "edge": "top_ref",
+        "frame_key": "top_rail",
+        "definition_count": 1
+      }
+    ],
+    "duplicate_part_ids": [],
+    "literal_part_closure": false,
+    "published_part_closure": false,
+    "support_reference_closure": true
+  },
+  "snapshot": {
+    "verified": true,
+    "id": "a36fa7fc342e67ff4667c7c02ffdade1a9679518780e268e4410d651d7633812",
+    "parts": 17,
+    "models": 0,
+    "authored_model_gaps": [
+      {
+        "id": "104c898b9bb7b89d",
+        "kind": "missing_value",
+        "subject": {
+          "kind": "model",
+          "id": "mfr/freedom-outdoor-living-emblem-73014714",
+          "tenant": "default"
+        },
+        "because": {
+          "code": "authored_model_not_admitted",
+          "params": {
+            "paths": [
+              "/assembly",
+              "/default_spec/fixings",
+              "/default_spec/frame/0/joint/channel_depth",
+              "/default_spec/frame/0/joint/gap_reason",
+              "/default_spec/frame/0/joint/insertion_margin",
+              "/default_spec/frame/0/joint/kind",
+              "/default_spec/frame/0/joint/shared_host_gap",
+              "/default_spec/frame/0/orientation",
+              "/default_spec/frame/0/placement",
+              "/default_spec/frame/0/requirement/length_rule",
+              "/default_spec/frame/0/requirement/overlap",
+              "/default_spec/frame/0/requirement/part_id",
+              "/default_spec/frame/0/requirement/qty",
+              "/default_spec/frame/1/joint/channel_depth",
+              "/default_spec/frame/1/joint/gap_reason",
+              "/default_spec/frame/1/joint/insertion_margin",
+              "/default_spec/frame/1/joint/kind",
+              "/default_spec/frame/1/joint/shared_host_gap",
+              "/default_spec/frame/1/orientation",
+              "/default_spec/frame/1/placement",
+              "/default_spec/frame/1/requirement/length_rule",
+              "/default_spec/frame/1/requirement/overlap",
+              "/default_spec/frame/1/requirement/part_id",
+              "/default_spec/frame/1/requirement/qty",
+              "/default_spec/infill/edge_margin",
+              "/default_spec/infill/excess",
+              "/default_spec/infill/justification",
+              "/default_spec/infill/orientation",
+              "/default_spec/infill/pattern/0/base_engagement",
+              "/default_spec/infill/pattern/0/face_offset",
+              "/default_spec/infill/pattern/0/gap_after",
+              "/default_spec/infill/pattern/0/joint",
+              "/default_spec/infill/pattern/0/profile_edges",
+              "/default_spec/infill/pattern/0/requirement/length_rule",
+              "/default_spec/infill/pattern/0/requirement/overlap",
+              "/default_spec/infill/pattern/0/requirement/part_id",
+              "/default_spec/infill/pattern/0/requirement/qty",
+              "/default_spec/infill/pattern/0/top_engagement",
+              "/default_spec/infill/supply",
+              "/grade",
+              "/height_support",
+              "/layout_policy",
+              "/option_axes",
+              "/post/cap/length_rule",
+              "/post/cap/overlap",
+              "/post/cap/part_id",
+              "/post/cap/qty",
+              "/post/joint",
+              "/post/requirement",
+              "/review",
+              "/status",
+              "/variants"
+            ],
+            "reasons": [
+              "inactive_model",
+              "invalid_grade",
+              "invalid_length_rule",
+              "invalid_quantity",
+              "invalid_shape",
+              "missing_joint",
+              "missing_requirement",
+              "missing_value",
+              "uncited",
+              "unresolved_part",
+              "unreviewed_authored_model",
+              "unsupported_fitting",
+              "unsupported_height_support",
+              "unsupported_placement"
+            ]
+          }
+        },
+        "cites": [
+          {
+            "id": "54e47378f4737168",
+            "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          },
+          {
+            "id": "57482180d5ddbd37",
+            "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+          },
+          {
+            "id": "5ec7031e0f3bd7b3",
+            "belongs_to": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b"
+          },
+          {
+            "id": "aeaf7e66a05b4d28",
+            "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+          },
+          {
+            "id": "d3ce088342977ece",
+            "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+          },
+          {
+            "id": "e856d15ed6bcbc68",
+            "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+          }
+        ],
+        "would_close": "Resolve the listed source, geometry and schema gaps, then review the exact authored model and Part digest.",
+        "closes_by": "knowledge",
+        "severity": "warns_line",
+        "on": null
+      },
+      {
+        "id": "960a5c4bde18abd2",
+        "kind": "unmodellable_entity",
+        "subject": {
+          "kind": "model",
+          "id": "mfr/freedom-outdoor-living-emblem-73014714",
+          "tenant": "default"
+        },
+        "because": {
+          "code": "authored_model_consumer_unavailable",
+          "params": {
+            "paths": [
+              "/"
+            ],
+            "reasons": [
+              "consumer_numeric_provenance_mapping_unresolved",
+              "consumer_validation_missing"
+            ]
+          }
+        },
+        "cites": [
+          {
+            "id": "54e47378f4737168",
+            "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          },
+          {
+            "id": "57482180d5ddbd37",
+            "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+          },
+          {
+            "id": "5ec7031e0f3bd7b3",
+            "belongs_to": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b"
+          },
+          {
+            "id": "aeaf7e66a05b4d28",
+            "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+          },
+          {
+            "id": "d3ce088342977ece",
+            "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+          },
+          {
+            "id": "e856d15ed6bcbc68",
+            "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+          }
+        ],
+        "would_close": "Implement a lossless consumer adapter and validate this model with its exact Part library.",
+        "closes_by": "planning",
+        "severity": "warns_line",
+        "on": null
+      }
+    ]
+  },
+  "complete_model_admitted": false,
+  "limitations": [
+    "Reference closure proves identity/addressing, not interpretation of a source.",
+    "The public artifact is explicitly a fragment; missing fields remain missing.",
+    "The private candidate is not a contract-wire instance.",
+    "No trusted human review, synthetic dimensions or consumer result is created by this audit."
+  ]
+}

@@ -21,7 +21,7 @@ index 3a6fcde..1e3919f 100644
                  role=slot.role, slot_key=slot.slot_key, eligibility=slot.eligibility,
              )
 diff --git a/src/fenceai/fencemodel/model.py b/src/fenceai/fencemodel/model.py
-index d9ee41d..ef6b9a9 100644
+index d9ee41d..1e35953 100644
 --- a/src/fenceai/fencemodel/model.py
 +++ b/src/fenceai/fencemodel/model.py
 @@ -225,6 +225,8 @@ class PartRequirement(BaseModel):
@@ -53,7 +53,16 @@ index d9ee41d..ef6b9a9 100644
      key: str
      # Undeclared (0) until `parts.resolve.resolve_model_parts` fills it from the
      # part's dimensions — the same lifetime `thickness_mm` and `eligibility` have.
-@@ -447,6 +461,7 @@ class InfillSpec(BaseModel):
+@@ -438,6 +452,8 @@ class Member(BaseModel):
+
+
+ class InfillSpec(BaseModel):
++    # Explicit assembly policy: no uncovered edge or positive interior opening.
++    require_full_coverage: bool = False
+     orientation: Literal["vertical", "horizontal"]
+     pattern: list[Member] = []
+     justification: Literal["start", "end", "center", "spread_to_fit"] = "spread_to_fit"
+@@ -447,6 +463,7 @@ class InfillSpec(BaseModel):
 
 
  class FixingRule(BaseModel):
@@ -61,7 +70,18 @@ index d9ee41d..ef6b9a9 100644
      key: str
      # registry-validated, for `LengthRule`'s reasons
      basis: str
-@@ -1641,6 +1656,31 @@ def _step_order_errors(steps: list[AssemblyStep]) -> list[str]:
+@@ -929,6 +946,10 @@ def _unsupported_features(model: FenceModel) -> list[str]:
+                     "claimed otherwise"
+                 )
+
++        for fixing in spec.fixings:
++            if fixing.requirement.length_rule is not None:
++                errors.append(f"fixing {fixing.key}: length_rule is unsupported; a fixing has no resolved cut extent")
++
+         for slot in spec.frame:
+             wants_continuity = (slot.post_joint == "through"
+                                 or slot.continuity == "continuous")
+@@ -1641,6 +1662,33 @@ def _step_order_errors(steps: list[AssemblyStep]) -> list[str]:
      return errors
 
 
@@ -69,6 +89,8 @@ index d9ee41d..ef6b9a9 100644
 +    errors = []
 +    for spec in [model.default_spec, *(v.spec for v in model.variants)]:
 +        members = {m.key: m for m in spec.infill.pattern} if spec.infill else {}
++        if spec.infill and spec.infill.require_full_coverage and (not spec.infill.pattern or spec.infill.edge_margin_mm < 0):
++            errors.append("Full coverage requires nonempty infill and nonnegative edge margins")
 +        seen = set()
 +        for fixing in spec.fixings:
 +            binding = fixing.edge_binding
@@ -93,7 +115,7 @@ index d9ee41d..ef6b9a9 100644
  def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
      """Containment and its credits, checked where an author can still fix them.
 
-@@ -1679,11 +1719,11 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
+@@ -1679,11 +1727,11 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
      # may not aim at one of these: see the refusal below.
      inside = {path for spec in specs for key, req in spec_requirements(spec)
                for path, _ in walk_contained(req.contained, key)}
@@ -108,7 +130,7 @@ index d9ee41d..ef6b9a9 100644
      # Slots that CONTAIN a credit source. A credit may not aim at one of these:
      # crediting a container would change how many boxes the panel buys, which
      # changes how many pieces are in them, which changes the credit — a loop with
-@@ -1718,6 +1758,8 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
+@@ -1718,6 +1766,8 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
                  )
      for spec in specs:
          for key, req in spec_requirements(spec):
@@ -117,7 +139,7 @@ index d9ee41d..ef6b9a9 100644
              contained = dict(walk_contained(req.contained, key))
              for path, piece in contained.items():
                  if not piece.part_id and not piece.role:
-@@ -1776,28 +1818,31 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
+@@ -1776,28 +1826,31 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
                      )
                      continue
                  if target in drawn:
@@ -171,7 +193,7 @@ index d9ee41d..ef6b9a9 100644
                  if target in containers:
                      errors.append(
                          f"slot {key}: {relative!r} credits slot {target}, which "
-@@ -2014,6 +2059,7 @@ def validate_model(
+@@ -2014,6 +2067,7 @@ def validate_model(
      errors += _warning_errors(model, catalog)
      errors += _site_dimension_errors(model)
      errors += _containment_errors(model, resolved=library is not None)
@@ -180,7 +202,7 @@ index d9ee41d..ef6b9a9 100644
      for axis in model.option_axes:
          for value in axis.values:
 diff --git a/src/fenceai/fencemodel/resolve.py b/src/fenceai/fencemodel/resolve.py
-index 2296e0a..f2082a4 100644
+index 2296e0a..337ce2b 100644
 --- a/src/fenceai/fencemodel/resolve.py
 +++ b/src/fenceai/fencemodel/resolve.py
 @@ -18,7 +18,7 @@ from fenceai.fencemodel.lengths import LENGTH_RULES
@@ -227,21 +249,37 @@ index 2296e0a..f2082a4 100644
      # member count on this slot, because those members are the contained ones and
      # counting them at both ends would place every credited hinge twice.
      credits_slot_key: str = ""
-@@ -696,6 +709,10 @@ def resolve_panel(
+@@ -695,7 +708,15 @@ def resolve_panel(
+         slots.append(resolved)
          frame[frame_slot.key] = resolved
 
++    if spec.infill and spec.infill.require_full_coverage:
++        span = ctx.clear_width_mm if spec.infill.orientation == "vertical" else ctx.height_mm
++        if not spec.infill.pattern or span <= 0 or spec.infill.edge_margin_mm < 0:
++            raise GenerationFailure("Full coverage requires nonempty infill, a positive opening and nonnegative edge margins")
      if spec.infill and spec.infill.pattern:
 +        if spec.infill.excess in ("trim_last", "extension_clip") and (
 +                any(m.profile_edges is not None for m in spec.infill.pattern)
 +                or any(f.edge_binding is not None for f in spec.fixings)):
-+            raise ValueError("Profiled/handed infill requires an implemented fitting policy; trimming is unsupported")
++            raise GenerationFailure("Profiled/handed infill requires an implemented fitting policy; trimming is unsupported")
          axis = (ctx.clear_width_mm if spec.infill.orientation == "vertical"
                  else ctx.height_mm)
          fit = fit_pattern(
-@@ -706,6 +723,16 @@ def resolve_panel(
+@@ -706,6 +727,27 @@ def resolve_panel(
              excess=spec.infill.excess,
              edge_margin_mm=spec.infill.edge_margin_mm,
          )
++        if spec.infill.require_full_coverage and (fit.count <= 0
++                or fit.openings_mm[0] != 0 or fit.openings_mm[-1] != 0
++                or any(opening > 0 for opening in fit.gaps_mm)):
++            raise GenerationFailure(f"Infill requires full coverage but leaves openings {fit.openings_mm} mm")
++        if spec.infill.require_full_coverage:
++            cursor = fit.edge_margin_start_mm
++            for i in range(fit.count):
++                width = spec.infill.pattern[i % len(spec.infill.pattern)].width_mm
++                if width <= 0 or cursor < 0 or cursor + width > axis:
++                    raise GenerationFailure("Full coverage places an infill member outside the opening")
++                cursor += width + (fit.gaps_mm[i] if i < len(fit.gaps_mm) else 0)
 +        for i, gap in enumerate(fit.gaps_mm):
 +            left = spec.infill.pattern[i % len(spec.infill.pattern)].profile_edges
 +            right = spec.infill.pattern[(i + 1) % len(spec.infill.pattern)].profile_edges
@@ -249,13 +287,13 @@ index 2296e0a..f2082a4 100644
 +                           or (right is not None and right.start in ("tongue", "groove")))
 +            if known_joint:
 +                if left is None or right is None:
-+                    raise ValueError("Known tongue/groove edge requires its neighboring profile")
++                    raise GenerationFailure("Known tongue/groove edge requires its neighboring profile")
 +                if {left.end, right.start} != {"tongue", "groove"} or gap > 0:
-+                    raise ValueError("Fitted tongue/groove edges must mate without a positive gap")
++                    raise GenerationFailure("Fitted tongue/groove edges must mate without a positive gap")
          for offset, member in enumerate(spec.infill.pattern):
              # how many of THIS member of the repeating sequence were placed
              n = sum(1 for i in range(fit.count) if i % len(spec.infill.pattern) == offset)
-@@ -744,7 +771,7 @@ def resolve_panel(
+@@ -744,7 +786,7 @@ def resolve_panel(
                  base_ref=member.base_ref, top_ref=member.top_ref,
                  base_engagement_mm=member.base_engagement_mm,
                  top_engagement_mm=member.top_engagement_mm,
@@ -264,7 +302,16 @@ index 2296e0a..f2082a4 100644
              ))
 
      frame_count = sum(s.qty for s in slots if s.fit is None)
-@@ -766,7 +793,9 @@ def resolve_panel(
+@@ -757,6 +799,8 @@ def resolve_panel(
+     member_count = sum(s.qty for s in slots if s.fit is not None)
+     placed_count = next((s.fit.count for s in slots if s.fit is not None), 0)
+     for rule in spec.fixings:
++        if rule.requirement.length_rule is not None:
++            raise GenerationFailure(f"Fixing {rule.key}: length_rule is unsupported; no cut extent is resolved")
+         per = _qty(rule.qty_per_basis, rule.qty_param, ctx.params)
+         basis = FIXING_BASES.get(rule.basis)(PanelCounts(
+             member_count=member_count, placed_count=placed_count,
+@@ -766,7 +810,9 @@ def resolve_panel(
              continue
          eligibility, option_axis, option_value = _chosen_option(rule.requirement, ctx)
          eligibility, pinned = _pinned_sku(rule.key, eligibility, ctx)
@@ -274,7 +321,7 @@ index 2296e0a..f2082a4 100644
              slot_key=rule.key, role=rule.requirement.role, slot_kind="fixing",
              qty=per * basis, basis=rule.basis, qty_per_basis=per,
              eligibility=eligibility,
-@@ -794,6 +823,32 @@ def resolve_panel(
+@@ -794,6 +840,32 @@ def resolve_panel(
                           slots=slots, credit_notes=notes)
 
 
@@ -283,21 +330,21 @@ index 2296e0a..f2082a4 100644
 +    if binding is None:
 +        return None
 +    if rule.basis != "per_panel" or rule.qty_per_basis != 1 or rule.requirement.qty != 1 or rule.qty_param:
-+        raise ValueError("A handed edge binding requires exactly one per-panel piece")
++        raise GenerationFailure("A handed edge binding requires exactly one per-panel piece")
 +    if spec.infill is None or not spec.infill.pattern:
-+        raise ValueError("A handed edge binding requires fitted infill")
++        raise GenerationFailure("A handed edge binding requires fitted infill")
 +    fitted = next((s for s in slots if s.fit is not None), None)
 +    if fitted is None or fitted.fit.count == 0:
-+        raise ValueError("A handed edge binding cannot attach to an empty fitted panel")
++        raise GenerationFailure("A handed edge binding cannot attach to an empty fitted panel")
 +    fit = fitted.fit
 +    index = 0 if binding.position == "first" else fit.count - 1
 +    member = spec.infill.pattern[index % len(spec.infill.pattern)]
 +    side = "start" if binding.position == "first" else "end"
 +    if (member.key != binding.member_key or member.profile_edges is None
 +            or getattr(member.profile_edges, side) != binding.profile_edge):
-+        raise ValueError("Handed binding does not match the actual fitted end member profile")
++        raise GenerationFailure("Handed binding does not match the actual fitted end member profile")
 +    if member.requirement.qty != 1:
-+        raise ValueError("Handed binding cannot choose between multiple pieces at one position")
++        raise GenerationFailure("Handed binding cannot choose between multiple pieces at one position")
 +    cursor = fit.edge_margin_start_mm
 +    for i in range(index):
 +        cursor += spec.infill.pattern[i % len(spec.infill.pattern)].width_mm + fit.gaps_mm[i]
@@ -307,7 +354,7 @@ index 2296e0a..f2082a4 100644
  def _contained_slots(
      slots: list[ResolvedSlot], spec: PanelSpec, credited: dict[str, tuple[str, int]]
  ) -> list[ResolvedSlot]:
-@@ -810,7 +865,7 @@ def _contained_slots(
+@@ -810,7 +882,7 @@ def _contained_slots(
      `qty` MULTIPLIES, through `walk_contained_qty` — the one place that
      arithmetic lives, shared with the credit that is sized from it.
 
@@ -316,7 +363,7 @@ index 2296e0a..f2082a4 100644
      BUYS for that slot. That is what a credited slot's own contents must be a
      multiple of: the hinges that arrive inside a kit bring their washers under
      the kit's path, and counting them again under the slot they credit is twelve
-@@ -827,18 +882,21 @@ def _contained_slots(
+@@ -827,18 +899,21 @@ def _contained_slots(
              # contents anyway would put members in the panel that arrived in a
              # box nobody bought.
              continue
@@ -341,13 +388,13 @@ index 2296e0a..f2082a4 100644
              # `contained_in` names the IMMEDIATE container, not the root: the
              # question a reader asks of a nested piece is which box it came out
              # of, and the root is one split away from the path either way.
-@@ -886,10 +944,13 @@ def _plan_credits(
+@@ -886,10 +961,13 @@ def _plan_credits(
      credited: dict[str, tuple[str, int]] = {}
      for key, req in spec_requirements(spec):
          container = by_key.get(key)
 -        if container is None or container.qty <= 0:
 +        if req.geometry_credits and req.qty != 1:
-+            raise ValueError("Geometry credit container requirement qty must be one; use fixing basis count")
++            raise GenerationFailure("Geometry credit container requirement qty must be one; use fixing basis count")
 +        if container is None or container.purchase_qty <= 0:
              continue          # a slot this bay placed none of brings no box
 -        available = {path: qty for path, _, qty
@@ -358,22 +405,26 @@ index 2296e0a..f2082a4 100644
          for relative, target_key in sorted(req.credits.items()):
              path = contained_path(key, relative)
              have = available.get(path, 0)
-@@ -900,9 +961,21 @@ def _plan_credits(
+@@ -900,9 +978,25 @@ def _plan_credits(
                  notes.append(CreditNote(kind="unmatched", contained_key=path,
                                          slot_key=target_key, qty=have))
                  continue
 -            applied = min(have, target.qty)
 +            if (target.slot_kind in ("frame", "infill") or target.edge_binding is not None) and not req.geometry_credits:
-+                raise ValueError("Drawn target credits require explicit geometry_credits")
++                raise GenerationFailure("Drawn target credits require explicit geometry_credits")
 +            if target.slot_kind in ("frame", "infill") or target.edge_binding is not None:
 +                piece = inventory[path][0]
 +                target_req = dict(spec_requirements(spec))[target_key]
 +                if not piece.part_id or piece.part_id != target_req.part_id:
-+                    raise ValueError("Geometry credit must supply the exact target Part ID")
++                    raise GenerationFailure("Geometry credit must supply the exact target Part ID")
 +                if target.length_unresolved:
-+                    raise ValueError("Geometry credit cannot supply an unresolved cut length")
++                    raise GenerationFailure("Geometry credit cannot supply an unresolved cut length")
 +                if target.length_mm is not None and (piece.stock_length_mm is None or target.length_mm > piece.stock_length_mm):
-+                    raise ValueError("Packaged stock_length_mm is missing or too short for geometry credit")
++                    raise GenerationFailure(
++                        f"Slot {target.slot_key}: packaged stock_length_mm={piece.stock_length_mm} is missing or too short for cut {target.length_mm} mm",
++                        code="packaged_stock_too_short", slot=target.slot_key,
++                        required_mm=target.length_mm,
++                        available_mm=piece.stock_length_mm if piece.stock_length_mm is not None else "unstated")
 +            applied = min(have, target.purchase_qty)
              if applied > 0:
 -                target.qty -= applied
@@ -435,8 +486,32 @@ index 5af9caf..ed53260 100644
                               "contained": ", ".join(slot.credited_by)},
                      scope_refs=[span.id], inputs=[sm.select_node_id, span_node.id],
                  ).id)
+diff --git a/src/fenceai/web/static/i18n/en.json b/src/fenceai/web/static/i18n/en.json
+index 112597d..1b8b730 100644
+--- a/src/fenceai/web/static/i18n/en.json
++++ b/src/fenceai/web/static/i18n/en.json
+@@ -332,6 +332,7 @@
+   "error.model_changed": "These assembly steps belong to {model_ref}, and this panel was built to {panel_model_ref}. A step names slots, so laying one version's instructions over another version's panel would describe a panel nobody built.",
+   "error.no_item_covers_part_spec": "No product in the catalogue covers the {role} specification of model {model} at station {station_mm}. A fence cannot be built without a post there: add a product that meets the specification, or change the model's {slot_key} slot.",
+   "error.pattern_residual_large": "No strategy was generated: section {run_id} leaves {value_mm} {u} of the pattern unfilled, over the hard tolerance of {limit_mm} {u}.",
++  "error.packaged_stock_too_short": "The packaged component for {slot} cannot supply the required {required_mm} {u} cut. Check its stated stock length.",
+   "error.post_routing_mismatch": "The panel at station {station_mm} puts its rails at {wanted}, and the posts of model {model} are routed at {routed}. The holes are punched at the factory, so this fence cannot be assembled — change the height, the rail count, or the post product.",
+   "error.post_spec_conflict": "The bays either side of station {station_mm} are built to different models ({models}), and no post in the catalogue satisfies both specifications. Both apply to the one post that stands between them, so either the models must agree or the boundary must move.",
+   "error.rail_separation_insufficient": "No strategy was generated: the rail spacing in section {run_id} ({value_mm} {u}) is under the hard anti-climb limit of {limit_mm} {u}.",
+diff --git a/src/fenceai/web/static/i18n/he.json b/src/fenceai/web/static/i18n/he.json
+index 02a37d7..dee9b28 100644
+--- a/src/fenceai/web/static/i18n/he.json
++++ b/src/fenceai/web/static/i18n/he.json
+@@ -332,6 +332,7 @@
+   "error.model_changed": "שלבי ההרכבה האלה שייכים ל-{model_ref}, והפאנל הזה נבנה לפי {panel_model_ref}. שלב מציין משבצות, ולכן הנחת הוראות של גרסה אחת על פאנל של גרסה אחרת הייתה מתארת פאנל שאיש לא בנה.",
+   "error.no_item_covers_part_spec": "אין מוצר בקטלוג שעונה על מפרט {role} של הדגם {model} בתחנה {station_mm}. אי אפשר לבנות גדר בלי עמוד שם: הוסיפו מוצר שעונה על המפרט, או שנו את משבצת {slot_key} בדגם.",
+   "error.pattern_residual_large": "לא חושבה אסטרטגיה: בקטע {run_id} נותרו {value_mm} {u} לא ממולאים בתבנית, מעל הסבולת הקשיחה של {limit_mm} {u}.",
++  "error.packaged_stock_too_short": "החלק הארוז עבור {slot} אינו יכול לספק את אורך החיתוך הנדרש, {required_mm} {u}. בדקו את אורך החלק שמגיע באריזה.",
+   "error.post_routing_mismatch": "הפאנל בתחנה {station_mm} ממקם את הקורות ב-{wanted}, והעמודים של הדגם {model} מחורצים ב-{routed}. החירוץ נעשה במפעל, ולכן את הגדר הזו אי אפשר להרכיב — שנו את הגובה, את מספר הקורות או את מוצר העמוד.",
+   "error.post_spec_conflict": "המפתחים משני צדי תחנה {station_mm} בנויים לדגמים שונים ({models}), ואין בקטלוג עמוד שעונה על שני המפרטים. שניהם חלים על אותו עמוד שעומד ביניהם, ולכן או שהדגמים צריכים להסכים או שגבול הדגם צריך לזוז.",
+   "error.rail_separation_insufficient": "לא חושבה אסטרטגיה: ריווח המסילות בקטע {run_id} ({value_mm} {u}) נמוך ממגבלת מניעת הטיפוס הקשיחה של {limit_mm} {u}.",
 diff --git a/src/fenceai/web/static/js/panel-model.js b/src/fenceai/web/static/js/panel-model.js
-index e05ba92..117954a 100644
+index e05ba92..d0b4ff5 100644
 --- a/src/fenceai/web/static/js/panel-model.js
 +++ b/src/fenceai/web/static/js/panel-model.js
 @@ -129,7 +129,7 @@ export function defaultRequirement(role) {
@@ -448,8 +523,17 @@ index e05ba92..117954a 100644
    };
  }
 
+@@ -163,7 +163,7 @@ export function defaultInfill() {
+   return {
+     orientation: "vertical", pattern: [defaultMember("slat")],
+     justification: "spread_to_fit", excess: "space", edge_margin_mm: 0,
+-    supply: "components",
++    supply: "components", require_full_coverage: false,
+   };
+ }
+
 diff --git a/tests/api/test_authoring_gaps.py b/tests/api/test_authoring_gaps.py
-index 972da8f..3378363 100644
+index 972da8f..f3187a5 100644
 --- a/tests/api/test_authoring_gaps.py
 +++ b/tests/api/test_authoring_gaps.py
 @@ -234,6 +234,7 @@ def test_the_editors_payload_for_a_part_named_slot_validates():
@@ -460,12 +544,51 @@ index 972da8f..3378363 100644
      }
      assert set(payload) == set(PartRequirement.model_fields)
      req = PartRequirement(**payload)    # raises if the editor's shape is refused
+@@ -266,3 +267,26 @@ def test_a_slot_that_names_no_part_may_still_author_members():
+     reqs = dict(part_requirements(legacy_model()))
+     assert reqs["rail"].eligibility_source == "authored_members"
+     assert reqs["rail"].eligibility.members
++
++
++def test_insufficient_kit_stock_returns_structured_refusal_in_actual_generate_route(client, monkeypatch):
++    from fenceai.api.app import state
++    from tests.fencemodel.test_emblem_capabilities import _full_kit_model, demo_catalog as fixture_catalog
++    model, parts = _full_kit_model()
++    next(p for p in parts.parts if p.id == "kit-gate").contains[0].stock_length_mm = 100
++    assert validate_model(model, fixture_catalog(), parts) == []
++    # Substitute only stored fixture data; execute the actual route and generator.
++    monkeypatch.setattr(state.store, "load_catalog", fixture_catalog)
++    monkeypatch.setattr(state.store, "part_library", lambda: parts)
++    monkeypatch.setattr(state.store, "fence_model_library", lambda: FenceModelLibrary(models=[model]))
++    monkeypatch.setattr(state.store, "knowledge_base", demo_knowledge)
++    pid = client.post("/api/projects", json={"name": "synthetic short packaged stock"}).json()["id"]
++    project = state.store.load_project(pid)
++    project.topology = straight_topology(3000)
++    project.fence_model = FenceModelChoice(model_id=model.id)
++    state.store.save_project(project)
++    response = client.post(f"/api/projects/{pid}/generate")
++    assert response.status_code == 422, response.text
++    detail = response.json()["detail"]
++    assert detail["code"] == "packaged_stock_too_short"
++    assert detail["params"] == {"slot": "rail", "required_mm": 1500, "available_mm": 100}
+diff --git a/tests/web/test_locale_bundles.py b/tests/web/test_locale_bundles.py
+index feca311..763f2dd 100644
+--- a/tests/web/test_locale_bundles.py
++++ b/tests/web/test_locale_bundles.py
+@@ -224,6 +224,7 @@ def test_the_knowledge_surface_carries_english_in_both_bundles_on_purpose():
+ # can cause from the editors, which must not fall through to the client's
+ # generic "the action failed (422)".
+ REFUSAL_CODES = [
++    "packaged_stock_too_short",
+     # -- the published-snapshot door (§1.2, §3.2.3) ------------------------------
+     # A snapshot this engine will not load. All three reach a person as a typed
+     # 400 from `POST /api/knowledge/snapshot`, and the first two are INVISIBLE to
 diff --git a/tests/fencemodel/test_emblem_capabilities.py b/tests/fencemodel/test_emblem_capabilities.py
 new file mode 100644
-index 0000000..36426e6
+index 0000000..84813a1
 --- /dev/null
 +++ b/tests/fencemodel/test_emblem_capabilities.py
-@@ -0,0 +1,203 @@
+@@ -0,0 +1,290 @@
 +"""Synthetic geometry only: these numbers are not Emblem manufacturer facts."""
 +import pytest
 +
@@ -475,8 +598,39 @@ index 0000000..36426e6
 +)
 +from fenceai.fencemodel.resolve import PanelContext, resolve_panel
 +from fenceai.parts.model import ContainedPart
-+from fenceai.catalog.demo import demo_catalog
-+from tests.fencemodel.test_containment import _parts, _spec, _model, _priced, _slot
++from fenceai.catalog.demo import demo_catalog as _demo_catalog
++from fenceai.core.errors import GenerationFailure
++from tests.fencemodel.test_containment import _parts, _spec, _model, _slot
++
++
++def demo_catalog():
++    catalog = _demo_catalog()
++    catalog.products["SLAT-100"].attrs["width_mm"] = 20
++    catalog.products["SLAT-100"].name = "Synthetic 20 mm board stock; not manufacturer data"
++    channel = catalog.products["HINGE-SET"].model_copy(deep=True)
++    channel.sku = "SYNTHETIC-END-CHANNEL"
++    channel.name = "Synthetic end channel; no manufacturer dimensions"
++    channel.attrs = {"type": "end_channel"}
++    catalog.products[channel.sku] = channel
++    return catalog
++
++
++def _priced(model, library):
++    from fenceai.demand.derive import derive_requirements
++    from fenceai.fencemodel.library import FenceModelLibrary
++    from fenceai.fencemodel.selection import FenceModelChoice
++    from fenceai.fulfillment.fulfill import fulfill
++    from fenceai.fulfillment.supply import resolve_supply
++    from fenceai.knowledge.demo import demo_knowledge
++    from fenceai.strategy.generator import generate
++    from tests.conftest import straight_topology
++    catalog = demo_catalog()
++    result = generate(straight_topology(3000), demo_knowledge(), catalog,
++                      models=FenceModelLibrary(models=[model]), parts=library,
++                      default_model=FenceModelChoice(model_id=model.id))
++    demand = derive_requirements(result.strategy, catalog)
++    resolution = resolve_supply(demand, catalog)
++    return result, resolution, fulfill(resolution.requirements, catalog)
 +
 +
 +def _kit_model(count=2):
@@ -566,7 +720,7 @@ index 0000000..36426e6
 +        spec.infill.pattern[0].requirement.qty = 2
 +    else:
 +        spec.infill.pattern[0].gap_after_mm = 10
-+    with pytest.raises(ValueError):
++    with pytest.raises(GenerationFailure):
 +        _resolve(spec, width)
 +
 +
@@ -575,20 +729,23 @@ index 0000000..36426e6
 +    model, parts = _kit_model()
 +    parts.parts.append(Part(id='synthetic-board', version=1, type='infill', spec=[
 +        SpecField(key='sku', value=['SLAT-100'], agree='among'),
-+        SpecField(key='width_mm', value=100, unit='mm')]))
++        SpecField(key='width_mm', value=20, unit='mm')]))
++    parts.parts.append(Part(id="synthetic-end-channel", version=1, type="end_channel",
++        spec=[SpecField(key="sku", value=["SYNTHETIC-END-CHANNEL"], agree="among")]))
 +    spec = _handed_spec()
 +    spec.infill.pattern[0] = Member(key='board',
 +        profile_edges=ProfileEdges(start='tongue', end='groove'),
 +        requirement=PartRequirement(part_id='synthetic-board', qty=1, length_rule='panel_height'))
 +    model.default_spec.infill = spec.infill
++    model.default_spec.infill.require_full_coverage = True
 +    for fixing in spec.fixings:
-+        fixing.requirement = PartRequirement(part_id='fix-hinge', qty=1)
++        fixing.requirement = PartRequirement(part_id='synthetic-end-channel', qty=1)
 +    model.default_spec.fixings.extend(spec.fixings)
 +    kit = next(p for p in parts.parts if p.id == 'kit-gate')
 +    kit.contains.extend([
-+        ContainedPart(key='boards', part_id='synthetic-board', qty=20, stock_length_mm=3000),
-+        ContainedPart(key='first', part_id='fix-hinge', qty=1),
-+        ContainedPart(key='last', part_id='fix-hinge', qty=1)])
++        ContainedPart(key='boards', part_id='synthetic-board', qty=100, stock_length_mm=3000),
++        ContainedPart(key='first', part_id='synthetic-end-channel', qty=1),
++        ContainedPart(key='last', part_id='synthetic-end-channel', qty=1)])
 +    model.default_spec.fixings[0].requirement.credits.update(
 +        boards='board', first='first', last='last')
 +    return model, parts
@@ -599,17 +756,20 @@ index 0000000..36426e6
 +    model, parts = _full_kit_model()
 +    assert validate_model(model, demo_catalog(), parts) == []
 +    result, resolution, bom = _priced(model, parts)
-+    assert not {'RAIL-3000', 'SLAT-100', 'HINGE-SET'} & {line.sku for line in bom.lines}
++    assert not {'RAIL-3000', 'SLAT-100', 'SYNTHETIC-END-CHANNEL'} & {line.sku for line in bom.lines}
 +    for span in result.strategy.spans:
 +        board = _slot(span.panel, 'board')
 +        assert board.qty > 1 and board.purchase_qty == 0
-+        assert board.qty + _slot(span.panel, 'kit/boards').qty == 20
++        assert board.fit.residual_mm == 0
++        assert all(opening == 0 for opening in board.fit.openings_mm)
++        assert board.qty + _slot(span.panel, 'kit/boards').qty == 100
 +        elevation = panel_elevation(span.panel, width_mm=span.clear_width_mm, height_mm=span.height_mm)
 +        assert len([m for m in elevation.members if m.slot_key == 'board']) == board.qty
 +        assert len([m for m in elevation.members if m.slot_key == 'rail']) == 2
 +        for key in ('first', 'last'):
 +            channel = _slot(span.panel, key)
 +            assert channel.qty == 1 and channel.purchase_qty == 0
++            assert channel.role == "end_channel"
 +            assert _slot(span.panel, 'kit/' + key).qty == 0
 +            drawn = next(f for f in elevation.fixings if f.slot_key == key)
 +            assert drawn.x_mm == channel.bound_position_mm
@@ -621,7 +781,7 @@ index 0000000..36426e6
 +    for length in (None, 100):
 +        model, parts = _kit_model()
 +        next(p for p in parts.parts if p.id == 'kit-gate').contains[0].stock_length_mm = length
-+        with pytest.raises(ValueError, match='stock_length_mm'):
++        with pytest.raises(GenerationFailure, match='stock_length_mm'):
 +            _panel(model, parts)
 +
 +
@@ -631,14 +791,14 @@ index 0000000..36426e6
 +    spec.infill.pattern[0].gap_after_mm = 10
 +    spec.infill.pattern.append(Member(key="unknown", width_mm=100,
 +                                     requirement=PartRequirement(role="infill")))
-+    with pytest.raises(ValueError, match="neighboring profile"):
++    with pytest.raises(GenerationFailure, match="neighboring profile"):
 +        _resolve(spec)
 +
 +
 +def test_profiled_trim_policy_cannot_silently_leave_remainder():
 +    spec = _handed_spec()
 +    spec.infill.excess = "trim_last"
-+    with pytest.raises(ValueError, match="trimming is unsupported"):
++    with pytest.raises(GenerationFailure, match="trimming is unsupported"):
 +        _resolve(spec, 550)
 +
 +
@@ -666,6 +826,56 @@ index 0000000..36426e6
 +    resolution = resolve_supply(demand, catalog)
 +    bom = fulfill(resolution.requirements, catalog)
 +    assert sum(line.purchase_qty for line in bom.lines if line.sku == 'GATE-KIT-1000') == 7
-+    assert not {'RAIL-3000', 'SLAT-100', 'HINGE-SET'} & {line.sku for line in bom.lines}
++    assert not {'RAIL-3000', 'SLAT-100', 'SYNTHETIC-END-CHANNEL'} & {line.sku for line in bom.lines}
 +    assert sum(_slot(span.panel, 'rail').qty for span in result.strategy.spans) == 14
 +    assert sum(_slot(span.panel, key).qty for span in result.strategy.spans for key in ('first','last')) == 14
++
++
++def test_full_coverage_is_explicit_and_refuses_residual_without_inventing_trim():
++    spec = _handed_spec()
++    panel = _resolve(spec, 550)
++    assert _slot(panel, "board").fit.residual_mm == 50
++    spec.infill.require_full_coverage = True
++    with pytest.raises(GenerationFailure, match="full coverage"):
++        _resolve(spec, 550)
++
++
++def test_fixing_length_rule_cannot_erase_required_cut_or_bypass_kit_stock_check():
++    model, parts = _full_kit_model()
++    model.default_spec.fixings[1].requirement.length_rule = "panel_height"
++    assert any("length_rule is unsupported" in error for error in validate_model(model, demo_catalog(), parts))
++    spec = _handed_spec()
++    spec.fixings[0].requirement.length_rule = "panel_height"
++    with pytest.raises(GenerationFailure, match="length_rule is unsupported"):
++        _resolve(spec)
++
++
++def test_full_coverage_cannot_accept_empty_pattern():
++    spec = _handed_spec()
++    spec.infill.require_full_coverage = True
++    spec.infill.pattern = []
++    spec.fixings = []
++    with pytest.raises(GenerationFailure, match="nonempty infill"):
++        _resolve(spec)
++
++
++@pytest.mark.parametrize("width,margin", [(500,-50), (0,0), (-1,0)])
++def test_full_coverage_requires_positive_opening_and_no_overhanging_edge_margin(width, margin):
++    spec = _handed_spec()
++    spec.infill.require_full_coverage = True
++    spec.infill.edge_margin_mm = margin
++    with pytest.raises(GenerationFailure, match="positive opening"):
++        _resolve(spec, width)
++
++
++def test_full_coverage_checks_each_member_extent_not_only_endpoint_residual():
++    spec = _handed_spec()
++    spec.fixings = []
++    spec.infill.require_full_coverage = True
++    spec.infill.pattern[0].width_mm = 10
++    spec.infill.pattern[0].gap_after_mm = -20
++    spec.infill.pattern.append(Member(key="wide", width_mm=100,
++        profile_edges=ProfileEdges(start="tongue", end="groove"),
++        requirement=PartRequirement(role="infill")))
++    with pytest.raises(GenerationFailure, match="outside the opening"):
++        _resolve(spec, 90)

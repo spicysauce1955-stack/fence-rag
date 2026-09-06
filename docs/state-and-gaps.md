@@ -4890,6 +4890,81 @@ public model admission or installation-ready purchase list is claimed.
 
 ---
 
+### G99 — Validate the actual Emblem instances against definitions and relationships
+
+Measured 2026-09-06, following a requested adversarial and datamodel review.
+Three agents compared instances with the frozen contract, binding
+knowledge-datamodel definitions, relationship/ownership design and actual consumer
+classes; root checked canonical source and entity joins, and a separate agent
+independently reproduced key fixes made by their implementers. The earlier preflight
+positive fixture was not a complete public instance: Part fields/provenance and
+Member Joint were missing, one synthetic Part stood in for unrelated roles, and
+support relationships were insufficiently checked. These are real validation
+and fixture defects, even though the actual unreviewed Emblem never published.
+
+The document cross-reference also found delegated §2.4 still put `admitted_by`
+in published Provenance, contradicting frozen contract v1.1 Amendment 001.
+The mutable definition now follows the frozen contract: `version_status` is
+required, and policy admission belongs to a planning-run output. No frozen file
+changed. More importantly, private `field_evidence` would not preserve numeric
+values' full provenance on the returned model. The helper now always refuses
+`consumer_numeric_provenance_mapping_unresolved`, even after a successful external
+callback, until a lossless published mapping is defined and implemented. An
+independent fresh-review/callback test confirms zero published models.
+
+The preflight now checks complete referenced Part metadata, SpecField values and
+Provenance; requires Member Joint; refuses unsupported shared-host behavior; and
+requires distinct perpendicular supporting frames. Positive integer versions are
+no longer incorrectly rejected in favor of an invented string-only rule. The
+fixture uses distinct typed Parts and appropriate length rules, and explicitly
+states its positive result uses a stub semantic callback. It proves preflight,
+not a lossless wire adapter or physical fence. Independent fresh-review mutations
+refuse the repaired paths; a 1,463-case malformed-input sweep raised no crashes.
+
+The new `scripts/validate_emblem_instances.py` composes the actual snapshot gate,
+canonical reference index, source hashes, PartType spine and instance graph.
+**Three source PDFs match their recorded hashes; 26 SourceRefs resolve to the
+expected document bytes; seven draft Parts use valid shared PartTypes.** Existing
+literal draft requirements and base/top frame references close. That does not
+complete the instances: the private Part library lacks its referenced board and
+cap, the actual candidate has no kit-to-components credit relationship, and public
+Member/Post Joint, geometry, quantities and fitting remain incomplete. The public
+draft is a fragment; the private candidate is not a public-wire instance.
+
+An adversary showed that merely copying the source package hash can accompany an
+altered quantity. The audit now also regenerates the candidate from the original
+source package and confirmation and compares content. Eight tests cover real
+instances, dangling/duplicate/invalid references, empty noncoverage and stale or
+forged derivation claims. Source and review artifacts remain unchanged.
+
+Consumer review found G98's synthetic full-kit panels had a **20 mm opening**:
+those tests proved accounting, not privacy coverage. An explicit private full
+coverage policy and genuinely covered synthetic fixtures now test that separately;
+empty/invalid openings, negative margins and out-of-bounds fitted members refuse.
+Generic truncation remains permitted without the opt-in. A fixing length rule was
+silently ignored, and insufficient kit stock could escape generation as raw
+ValueError; unsupported fixing lengths now refuse and contextual GenerationFailure
+reaches the API as HTTP 422. These repairs do not author missing Emblem dimensions.
+
+Measured final root regression: **1,540 tests pass, one existing expected failure**.
+Consumer regression: **2,558 tests pass, seven existing warnings**; 22 focused
+capability tests independently pass. The 31 authored/publication/instance tests
+also pass against the committed snapshot code, excluding concurrent verifier work.
+Both frozen checksums and whitespace checks pass. Current measured consumer results,
+patch digest and bounded independent review are in
+`workspace/reports/emblem-consumer-adversarial-review.md` and
+`workspace/reports/emblem-datamodel-validation-review.md`. The cumulative consumer
+patch remains delivered against its recorded base, not deployed.
+
+**No complete Emblem model is admitted.** The generated instance audit and snapshot
+preflight expose Knowledge and Planning gaps rather than asserting success from an
+empty models list. Remaining work is exact fitting/stock/component evidence,
+public post-host/shared-bay receiving semantics, a lossless adapter and a real
+kit-component relationship, followed by review of the completed source-bound
+object. Fewer parser errors and passing synthetic tests do not close these gaps.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and
