@@ -68,6 +68,45 @@ class TestProcedureVerificationGate(unittest.TestCase):
     def test_nonempty_procedure_passes(self):
         verify(self.snapshot)
 
+    def test_missing_or_empty_steps(self):
+        for fields in ({}, {"steps": None}, {"steps": []}):
+            with self.subTest(fields=fields):
+                proc = _procedure()
+                del proc["steps"]
+                proc.update(fields)
+                self.snapshot["procedures"] = [proc]
+                self.refuses("steps must be a nonempty list")
+
+    def test_procedure_requires_its_own_citations(self):
+        for cites in (None, []):
+            with self.subTest(cites=cites):
+                self.snapshot["procedures"][0]["cites"] = cites
+                self.refuses("procedure must have cites")
+
+    def test_nonobject_procedure(self):
+        for proc in (None, "procedure", [], 7):
+            with self.subTest(proc=proc):
+                self.snapshot["procedures"] = [proc]
+                self.refuses("procedures[0]: must be an object")
+
+    def test_nonobject_step(self):
+        for step in (None, "step", [], 7):
+            with self.subTest(step=step):
+                self.snapshot["procedures"][0]["steps"] = [step]
+                self.refuses("steps[0]: must be an object")
+
+    def test_unhashable_step_key(self):
+        for key in ([], {}):
+            with self.subTest(key=key):
+                self.snapshot["procedures"][0]["steps"][0]["key"] = key
+                self.refuses("key must be a nonempty string")
+
+    def test_steps_must_be_a_list(self):
+        for steps in ("step", {"key": "step"}, 7):
+            with self.subTest(steps=steps):
+                self.snapshot["procedures"][0]["steps"] = steps
+                self.refuses("steps must be a nonempty list")
+
     def test_missing_procedure_id(self):
         del self.snapshot["procedures"][0]["id"]
         self.refuses("no id")

@@ -4105,7 +4105,8 @@ publisher had tests but its snapshot verification gate had no refusal tests:
 the verifier fixtures all carried `procedures: []`. The real-build test even
 looked for `verify(` in source text instead of executing a failing build.
 
-Twelve new verifier tests start from a valid two-step procedure and exercise
+Twelve new verifier test methods comprise one positive baseline and eleven
+negative controls. They start from a valid two-step procedure and exercise
 missing/duplicate procedure IDs, duplicate/missing/blank step keys,
 missing/unknown kind and scope, missing citations, blank text, invalid edge
 kind, a dependency pointing into another procedure, and citation closure.
@@ -4123,8 +4124,31 @@ Full `python3 tests/run_tests.py`: **1,428 tests, OK (1 expected failure)**,
 These are structural checks, not proof of source correctness, complete graph
 validation, or Planning compatibility. No live human step review was created.
 
-The three additional prose corrections referenced in the external review were
-not included in its supplied excerpt; they remain pending the actual findings.
+---
+
+### G84 — empty procedures and malformed shapes are explicit refusals
+
+`[measured]`, 2026-09-06. Follow-up review identified pre-existing omissions
+made visible by G83. A procedure with absent, null or empty steps passed
+verification; procedure-level citations were not required. Non-object procedures
+or steps raised `AttributeError`, and list/dict step keys raised `TypeError`
+before the key guard ran. These exceptions prevented publication but bypassed
+callers catching the documented `VerificationFailed`.
+
+Six new test methods reproduce these cases with subtests. Before the fix,
+the focused suite reported **5 assertion failures and 13 errors**. The gate
+now requires a nonempty steps list and procedure citations, checks procedure
+and step objects before accessing fields, and validates keys before hashing.
+The reported malformed shapes now raise `VerificationFailed` with their
+procedure/step location. An empty snapshot `procedures: []` remains valid;
+an empty procedure inside it is refused. Focused verification: **63 tests pass**.
+Full `python3 tests/run_tests.py`: **1,434 tests, OK (1 expected failure)**,
+45.972 seconds. Both frozen boundary checksums and `git diff --check` pass.
+
+G83's count is clarified: twelve new methods meant one positive baseline and
+eleven negative controls, plus the separately rewritten build test. These
+checks do not establish complete graph validation or source correctness; no
+live step review or contract amendment was made.
 
 ---
 

@@ -1321,19 +1321,35 @@ def verify(snapshot: dict) -> None:
     procedure_ids = set()
     for i, proc in enumerate(snapshot.get("procedures", [])):
         at = f"procedures[{i}]"
+        if not isinstance(proc, dict):
+            fail.append(f"{at}: must be an object")
+            continue
         pid = proc.get("id")
-        if not pid:
+        if not isinstance(pid, str) or not pid.strip():
             fail.append(f"{at}: no id. N13 makes it load-bearing -- without one "
                         f"`Warning.attaches_to{{kind: procedure}}` cannot address "
                         f"this procedure and a correction reaches no siblings")
-        if pid in procedure_ids:
+        elif pid in procedure_ids:
             fail.append(f"{at}: duplicate Procedure.id {pid!r}")
-        procedure_ids.add(pid)
-        keys = {st.get("key") for st in proc.get("steps") or []}
-        if len(keys) != len(proc.get("steps") or []):
+        else:
+            procedure_ids.add(pid)
+        if not isinstance(proc.get("cites"), list) or not proc["cites"]:
+            fail.append(f"{at}: procedure must have cites")
+        steps = proc.get("steps")
+        if not isinstance(steps, list) or not steps:
+            fail.append(f"{at}: steps must be a nonempty list")
+            continue
+        # Validate before hashing: malformed keys must be reported, not crash.
+        valid_keys = [st["key"] for st in steps if isinstance(st, dict)
+                      and isinstance(st.get("key"), str) and st["key"].strip()]
+        keys = set(valid_keys)
+        if len(keys) != len(valid_keys):
             fail.append(f"{at}: two steps share a key")
-        for j, st in enumerate(proc.get("steps") or []):
+        for j, st in enumerate(steps):
             sat = f"{at}.steps[{j}]"
+            if not isinstance(st, dict):
+                fail.append(f"{sat}: must be an object")
+                continue
             if not isinstance(st.get("key"), str) or not st["key"].strip():
                 fail.append(f"{sat}: key must be a nonempty string")
             if st.get("kind") not in STEP_KINDS:
