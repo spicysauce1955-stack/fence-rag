@@ -4672,6 +4672,127 @@ admission/publication and consumption remain implementation work.
 
 ---
 
+### G95 — A `Procedure`'s shape is checked once, before any field is read (2026-09-06)
+
+`[measured]`, 2026-09-06. G84 hardened three *reported* malformed shapes in
+`verify()`'s `procedures` block — a non-object procedure, a non-object step, an
+unhashable step key — one at a time. Field-by-field hardening does not converge
+here: twelve fields are each read as the type the reader assumes they have, and
+ten more shapes still escaped.
+
+**Before.** A scratch enumeration of 49 malformed shapes (kept in the session
+scratchpad, reproducible from `_ok()` + `_procedure()` in
+`tests/test_snapshot_verify.py`): **10 `AttributeError`, 10 `TypeError`, 19
+published silently, 10 already `VerificationFailed`.** The exceptions stop
+publication, but not through the documented `VerificationFailed` a caller
+catches, and with no procedure/step location on them. The silent nineteen are
+worse than the crashes: `cites = "r1"`, `7`, `[{}]`, `[None]` all published a
+step whose evidence resolves to nothing, because the check was a truthiness
+test on a value nobody had established was a list; `text_i18n = b"t"` published
+because bytes has `.strip()`; and `slots` — the one field carrying arbitrary
+JSON in from `cli steps --accept --slot` — was read by nothing at all.
+
+One case is the point of the exercise: `requires: [{"kind": "after", "step":
+[]}]` raised `TypeError: unhashable type: 'list'` at `edge["step"] not in
+keys`. That is the **same defect G84 fixed one level up**, at the step key,
+missed one level down. Validating before hashing is not a fix you can apply to
+one field.
+
+**After.** The shape is declared once, as three tables — `PROCEDURE_SHAPE`,
+`STEP_SHAPE`, `EDGE_SHAPE` — and checked once per object, before any field is
+touched; the caller stops on a shape failure rather than reading a field whose
+type it has just been told it cannot trust. Of the same 49 shapes, **46 now
+raise `VerificationFailed` with the procedure/step location on it**. The three
+that pass are intended: `id: "installation"` is a valid id (the enumeration's
+positive control), and absent or null `slots` reads as "no slots", the same way
+absent or null `requires` already read as "no edges". Absent and null are
+deliberately *not* shape failures anywhere: the semantic checks name the
+omission better than a type name can ("no id", "empty text", "kind None is not
+one of ...").
+
+`procedures: []` stays valid, which is not a detail: **9 of 9 stored,
+non-tombstoned snapshots publish `procedures: 0`** (the 6 tombstoned ones have
+no `procedures` key at all). `cli snapshot --verify-stored` → 9 checked, 9
+passed, 0 failed. `cli refs --verify` → 6,984 of 6,984 cites resolve, 0
+dangling. `TestTheRealBuildPasses` builds against the live store and verifies.
+Both frozen boundary checksums print OK. `tests/test_snapshot_verify.py`
+63 → **80 tests**; full `python3 tests/run_tests.py` 1,479 → **1,496 tests, OK
+(1 expected failure)**, 49.9 s.
+
+**What it deliberately does NOT do.**
+
+- It does not touch the other nine declared lists, which have the identical
+  hole. `[measured]`: a scalar in `source_docs`, `warnings`, `gaps`,
+  `part_types` or `parts` raises `TypeError`, and a scalar in `models`,
+  `parameters`, `combinations` or `rules` **passes verification entirely**.
+  Only `procedures` is guarded here. Fixing the rest is not one line — each
+  block would need the same stop-on-malformed discipline, or the type check
+  merely adds a message before the same crash.
+- It does not check `SlotTarget` variants. `slots` must be a list of objects;
+  `[{}]` and `[{"kind": "NotASlot"}]` publish. §3.6's union
+  (`PanelSlot | PostSlot | Footing | SiteFixture | Elapsed | Reused`) is not
+  enumerated in a closed vocabulary anywhere in this platform, and inventing
+  one here would be this side deciding a shape it does not own.
+- It does not validate `Procedure.scope` (`EntityRef | null`), which nothing
+  reads and every published procedure sets to `null`.
+- It does not check the `requires` graph: an `after` cycle between two steps of
+  one procedure still publishes. Only that each edge names a step of its own
+  procedure, which was already checked.
+- It changes no vocabulary, no `ref_id`, and nothing at the boundary. No
+  amendment; §1.5's surfaces do not move.
+- And it establishes nothing about whether a published step is TRUE. The note
+  at the top of `snapshot.py` still holds: structural validity is testable,
+  semantic correspondence is reviewable.
+
+**Which tests discriminate, and which merely guard.** 17 new methods in
+`TestProcedureShapeGate`. Reverting `snapshot.py` to `HEAD` and running them
+gives **62 subtest-level failures across 14 of the 17**: 24 of those are
+`ERROR`s — the wrong exception type escaping — and 38 are `FAIL`s, refusals
+that were not made. **Three methods are guards, not controls**, and pass equally
+against the broken code: `test_an_empty_procedures_list_still_passes`,
+`test_absent_or_null_slots_and_requires_pass`, and
+`test_a_well_formed_slot_passes`. They exist to fail if somebody tightens the
+rule without saying so — the first of them is the one standing between this
+change and every stored snapshot — but they discriminate nothing about the
+defect and are not counted as evidence that it is fixed.
+
+Mutation-tested: each new refusal disabled one at a time, focused module rerun.
+**16 of 17 go red; the no-op control mutation (an added comment) stays green**,
+so the harness does not produce false reds.
+
+| refusal disabled | result |
+| --- | --- |
+| control — a no-op comment | GREEN (as intended) |
+| `procedures` must be a list | RED (2 failures, 2 errors) |
+| `procedure.id` is a string | RED (4) |
+| `procedure.cites` are SourceRefs | RED (6) |
+| `step.key` is a string | **GREEN — see below** |
+| `step.kind` is a string | RED (3 failures, 2 errors) |
+| `step.scope` is a string | RED (3 failures, 2 errors) |
+| `step.cites` are SourceRefs | RED (10) |
+| a SourceRef is a nonempty `{id, belongs_to}` | RED (7) |
+| `step.text_i18n` is a string | RED (1 failure, 6 errors) |
+| `step.requires` is a list of objects | RED (2 failures, 7 errors) |
+| `step.slots` is a list of objects | RED (8) |
+| `edge.kind` is a string | RED (1 failure, 2 errors) |
+| `edge.step` is a string | RED (2 failures, 2 errors) |
+| stop on a malformed procedure (the `continue`) | RED (1) |
+| stop on a malformed step (the `continue`) | RED (18 errors) |
+| stop on a malformed edge (the `continue`) | RED (4 errors) |
+
+The one green is honest and is **redundancy, not an untested refusal**:
+`STEP_SHAPE`'s `key` entry refuses exactly the shapes G84's own `key` check
+already refuses, with the same wording, so no behaviour distinguishes them. It
+is kept so the table is a complete declaration of what the block reads rather
+than a list with one silent exception, and the line carries a comment saying
+so. Two refusals *became* discriminated only because the first mutation run
+found them green — the procedure-level `continue` now has
+`test_a_malformed_field_is_not_also_reported_as_a_missing_one`, which asserts
+that a wrong-typed `cites` is not ALSO reported as an absent one. Without the
+mutation run, that `continue` would have shipped as untested code.
+
+---
+
 ### G96 — Map rail face height and represent two end U-channels (2026-09-06)
 
 The private preparer now authors three draft consumer Parts: two rails and one

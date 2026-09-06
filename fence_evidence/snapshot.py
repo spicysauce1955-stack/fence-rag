@@ -1144,6 +1144,89 @@ def _also_filed_as(doc: dict, fail: list) -> None:
                     f"order; the list is hashed, so its order is not free")
 
 
+# --- the shape of a published `Procedure`, checked once, before it is read ---
+# G92. Every check in the `procedures` block below reads a field as the type it
+# assumes the field has: `for edge in requires` iterates, `text_i18n.strip()`
+# calls, `edge["step"] not in keys` HASHES. A value of the wrong type escaped as
+# `AttributeError` or `TypeError` — which stops publication, but not through the
+# documented `VerificationFailed` a caller can catch, and with no procedure/step
+# location on it — or, for the fields tested only for truthiness, published.
+#
+# The lesson G84 drew one level up ("validate before hashing") does not
+# generalise field by field: twelve fields would need twelve guards, and the
+# thirteenth field added would have none. So the shape is declared once and
+# checked once, before any field is touched. A field added to a table below is
+# covered by construction.
+#
+# Absent and null are deliberately NOT shape failures. The semantic checks name
+# the omission better than a type name can — "no id", "procedure must have
+# cites", "empty text", "kind None is not one of ..." — and refusing them twice
+# would say it worse.
+def _is_source_ref(v) -> bool:
+    """A published citation is `{id, belongs_to}`, both nonempty strings.
+
+    `[{}]` and `[None]` were the shapes that published: a truthiness test on
+    the list sees one element and stops looking. An empty object satisfies
+    obligation 3's letter (a cite is present) and nothing of its point.
+    """
+    return (isinstance(v, dict)
+            and isinstance(v.get("id"), str) and v["id"].strip() != ""
+            and isinstance(v.get("belongs_to"), str) and v["belongs_to"].strip() != "")
+
+
+def _list_of(predicate):
+    return lambda v: isinstance(v, list) and all(predicate(x) for x in v)
+
+
+_SOURCE_REFS = "a list of SourceRefs, each {id, belongs_to}"
+# (field, predicate, what the field must be). `steps` is absent on purpose: its
+# own check below refuses every non-list already, and says "nonempty" too.
+PROCEDURE_SHAPE = (
+    ("id", lambda v: isinstance(v, str), "a string"),
+    ("cites", _list_of(_is_source_ref), _SOURCE_REFS),
+)
+STEP_SHAPE = (
+    # Listed for completeness, and REDUNDANT: G84's own `key` check below
+    # refuses exactly these shapes, with this wording. No test can tell the two
+    # apart, and G92 says so rather than leaving it to be discovered.
+    ("key", lambda v: isinstance(v, str), "a nonempty string"),
+    ("kind", lambda v: isinstance(v, str), "a string"),
+    ("scope", lambda v: isinstance(v, str), "a string"),
+    ("cites", _list_of(_is_source_ref), _SOURCE_REFS),
+    ("text_i18n", lambda v: isinstance(v, str), "a string"),
+    ("requires", _list_of(lambda e: isinstance(e, dict)), "a list of Edge objects"),
+    # Defect 2: `slots` was read by nothing here, and it is the one field
+    # carrying arbitrary JSON in from `cli steps --accept --slot`. `SlotTarget`
+    # is a tagged union of objects (`knowledge-datamodel.md` §3.6) and
+    # `reviews.record_step_review` types its own parameter `dict | None`, so a
+    # list of objects is what the producer produces. The VARIANTS are not
+    # checked — see G92 for what that leaves open.
+    ("slots", _list_of(lambda s: isinstance(s, dict)),
+     "a list of SlotTarget objects"),
+)
+EDGE_SHAPE = (
+    ("kind", lambda v: isinstance(v, str), "a string"),
+    # The one that matters: `edge["step"] not in keys` is a set membership test,
+    # so an unhashable value here raised `TypeError` — the same defect G84 fixed
+    # one level up, at the step key, and missed one level down.
+    ("step", lambda v: isinstance(v, str), "a string"),
+)
+
+
+def _shape_failures(obj: dict, at: str, shape, fail: list) -> bool:
+    """Append one failure per declared field of the wrong type; True if any.
+
+    The caller stops on True: nothing below may read a field whose type it has
+    just been told it cannot trust.
+    """
+    before = len(fail)
+    for name, ok, described in shape:
+        value = obj.get(name)
+        if name in obj and value is not None and not ok(value):
+            fail.append(f"{at}: {name} must be {described}, not {value!r}")
+    return len(fail) > before
+
+
 def verify(snapshot: dict) -> None:
     """Run the obligations that are checkable over a finished object.
 
@@ -1301,10 +1384,20 @@ def verify(snapshot: dict) -> None:
     STEP_SCOPES = frozenset({"panel", "bay", "post", "run", "site"})
     EDGE_KINDS = frozenset({"after", "not_before", "before", "exclusive_with"})
     procedure_ids = set()
-    for i, proc in enumerate(snapshot.get("procedures", [])):
+    procedures = snapshot.get("procedures", [])
+    if not isinstance(procedures, list):
+        # `procedures: []` is the live value in every stored snapshot and stays
+        # valid; a scalar is not an empty list, it is an unpublishable payload.
+        fail.append(f"`procedures` must be a list, not "
+                    f"{type(procedures).__name__}; publish [] rather than a "
+                    f"value that cannot hold procedures")
+        procedures = []
+    for i, proc in enumerate(procedures):
         at = f"procedures[{i}]"
         if not isinstance(proc, dict):
             fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(proc, at, PROCEDURE_SHAPE, fail):
             continue
         pid = proc.get("id")
         if not isinstance(pid, str) or not pid.strip():
@@ -1332,6 +1425,8 @@ def verify(snapshot: dict) -> None:
             if not isinstance(st, dict):
                 fail.append(f"{sat}: must be an object")
                 continue
+            if _shape_failures(st, sat, STEP_SHAPE, fail):
+                continue
             if not isinstance(st.get("key"), str) or not st["key"].strip():
                 fail.append(f"{sat}: key must be a nonempty string")
             if st.get("kind") not in STEP_KINDS:
@@ -1345,7 +1440,9 @@ def verify(snapshot: dict) -> None:
                             f"it was read from")
             if not (st.get("text_i18n") or "").strip():
                 fail.append(f"{sat}: empty text")
-            for edge in st.get("requires") or []:
+            for k, edge in enumerate(st.get("requires") or []):
+                if _shape_failures(edge, f"{sat}.requires[{k}]", EDGE_SHAPE, fail):
+                    continue
                 if edge.get("kind") not in EDGE_KINDS:
                     fail.append(f"{sat}: requires kind {edge.get('kind')!r} is not "
                                 f"one of {sorted(EDGE_KINDS)}")
