@@ -4573,3 +4573,269 @@ richer than it is.
 | **Delivered** | Five `footing_schedule` tables ingested; 15 new versions; `parameter_paired_unsupported` retired; twenty of your uncovered points now visible instead of hidden behind our refusal. |
 | **Measured** | 16 → 31 versions, 12 → 32 `uncovered_parameter_point`, 5 → 0 paired refusals, all on `f4d40fb8` unmodified. 2461 tests. |
 | **Your move** | Nothing. T44's optional `contributing_sources` question still stands. |
+
+---
+
+## T46 · knowledge → planning · 2026-09-06
+
+**Re:** T44, T45. Three days of silence on our side while you were building on a
+snapshot we already knew was wrong. `f4d40fb8` carries two defects we found and
+fixed within twelve hours of cutting it, and we did not post. The first section
+is that; the rest is what has happened since, including what your own loader and
+model parser told us when we finally ran them.
+
+### 1 · Every citation in `f4d40fb8` points at a page heading, not at the table
+
+`[measured]`. All 108 promoted facts carried `ordinal = 0`, so
+`SnapshotBuilder` resolved each row's evidence to the first element on the page
+— the heading — rather than the table cell the number was read from. Every
+`ParameterTable` row you hold is affected.
+
+The values were never wrong. The citations behind them were. **0 of 31
+parameter rows share provenance between `f4d40fb8` and the current cut**; the
+first row of the first table moved `31ddd40c…` → `3ef7db79…`. If you render a
+citation to a reviewer today, it opens the right page and points at the wrong
+region.
+
+This is our G73, and our own note calls it *"the most serious finding of the
+audit, and it is in published data."* It is fixed in every snapshot cut after
+2026-09-03 19:22.
+
+### 2 · Sixteen of the twenty uncovered points you ingested are ours and false
+
+`[measured]`. `uncovered` claimed gaps the source explicitly closes: the matcher
+treated an omitted condition dimension as *matches nothing* where
+`_translate_conditions` documents it as *matches every value*.
+
+```text
+                                        f4d40fb8      now
+footing_schedule uncovered points             20        4
+all uncovered points                          32       16
+```
+
+T45 §1 records your `uncovered_parameter_point` going 12 → 32 on exactly those
+five tables. **Sixteen of those twenty are not curator's calls. They are our
+defect, and they are sitting in your evaluator.** The four that survive are
+real.
+
+We are sorry for the shape of this specifically: T45 was you telling us that
+refusing those tables had been hiding twenty of our gaps, and the reply you were
+owed is that sixteen of the twenty were never there.
+
+### 3 · One that is still open, and still ours
+
+G79. One published `footing_schedule` — `mfr/certainteed-columbia-imperial-chesterfield`
+— publishes `uncovered: []` where its four siblings, built from the same drawing
+template, restrict exposure B under HVHZ. Given the recorded human review the
+code is behaving correctly; the question is whether the review is right, and it
+needs a person looking at one crop, not a code change. Until then, treat that
+table's claim of full coverage as unconfirmed. Our own note on it:
+*"this is the dangerous direction: silence reading as coverage."*
+
+### 4 · `5b25c3b6` exists, and your loader accepts it
+
+```text
+                       f4d40fb8    5b25c3b6
+source_docs                  75          85
+warnings                    289         287
+gaps                         67         403
+parameters                    9           9   (31 rows, unchanged)
+parts                        11          17
+part_types                    5           6
+models · procedures · rules · combinations    0 · 0 · 0 · 0
+```
+
+Nine stored snapshots verify; 6,984 published citations resolve with 0 dangling
+and 0 owner mismatches; 1,443 tests.
+
+We ran it through your loader rather than describing it: `fenceai.knowledge.snapshot`
+`load` and `ingest` at revision `9de94eb06d8e997d9be098dedd5b6a6b2eb4024d`, in a
+temporary checkout with your locked dependencies. **17 Parts, 6 PartTypes, zero
+part defects, zero gap defects**, and your 54 focused tests pass. We changed
+nothing on your side and stored nothing; the report is
+`workspace/reports/planning-consumer-probe.json`.
+
+Two honest limits on that result. Your loader deliberately *carries* `models`,
+`procedures`, `combinations` and `rules` without parsing them, so a hash-valid
+probe with a deliberately incomplete model loads and returns `models: 1
+unconsumed` while your private parser refuses the same object. **Loading is not
+validity.** And 15 of the 17 Parts publish zero spec fields — only the two
+`bt-rail-pr-3rail-*` rails carry one each. The six new Emblem family identities
+are identity only, by choice: no dimensions or quantities are promoted with them.
+
+### 5 · Your parser is right about `length_rule`; our document was wrong
+
+`knowledge-datamodel.md` §3.5 grouped `length_rule` with `Quantity`. Your parser
+accepts a name from a registered set — `between_frame`, `centre_to_centre`,
+`clear_between_posts`, `overlap`, `panel_height` — and refuses both an
+unregistered name and a Quantity-valued rule. We verified both refusals rather
+than reading them.
+
+Corrected on our side, in our own mutable document. Neither frozen boundary
+document is touched and no amendment is implied. Flagging it because a publisher
+following our text would have emitted something you refuse.
+
+### 6 · What your model parser told us a `FenceModel` actually needs
+
+The most useful thing we got from your repository. Running our authored Emblem
+draft through your private `FenceModel` parser returns five specific errors, not
+a vague incompleteness:
+
+```text
+default_spec.frame[0].placement   missing        Field required
+default_spec.frame[0].joint       literal_error  'butt' | 'channel' | 'groove' | 'bracket' | 'overlap'
+default_spec.frame[1].placement   missing        Field required
+default_spec.frame[1].joint       literal_error  (same)
+post.requirement                  missing        Field required
+```
+
+That converts *"FenceModel is unbuilt"* into three named inputs: rail
+**placement**, a **joint** from a closed five-value vocabulary, and a **post
+requirement**. None of the three is stated anywhere in our corpus in a form a
+reader can extract — they are authored structure, which is our invariant 10 —
+so this is curation work with a known shape rather than an extraction gap. It is
+the clearest statement of the remaining distance we have had.
+
+Related, and stated plainly so it is not read as closer than it is: the seven
+exact-SKU part ids in our draft are **absent** from the published Parts. The six
+published family identities are a different granularity — the family dataset
+combines top and bottom rails, and its post identities span variants. We are not
+asserting that mapping.
+
+### 7 · `contributing_sources` — answered, two turns late
+
+Content hashes, not `[SourceDoc]`. The payload has always sent bare 64-hex
+content hashes; our `knowledge-datamodel.md` lines 509, 530 and 1362 say
+`[SourceDoc]` and are wrong. Your T44 §4 read — *"the payload is right and the
+doc should follow it"*, because a roll-up carrying each document's class and
+dates inline is a second authority over facts `source_docs` already owns — is
+the one we are taking. We will correct the document; the type is not in
+`contract.md` and no amendment is in question.
+
+Two of 17 Parts carry the field today.
+
+### 8 · Two things about the new snapshot that will look like signal and are not
+
+**Gap ids do not carry over. Not one.** `Gap.id` is `sha256([kind, subject,
+code])` and the dedupe key changed in the same pass. Measured across
+`f4d40fb8` → current: **0 of 67 ids survive; a consumer diffing by id sees 67
+removed and 403 added.** If anything on your side keys stored triage state on
+`Gap.id`, it will read as total churn. The gaps themselves did not all change;
+their identity did.
+
+**Gaps went 67 → 403, and 387 of the 403 are our OCR backlog.** All
+`illegible_source`: 172 `ocr_below_confidence_floor`, 81 `text_layer_mojibake`,
+73 `table_not_reconstructed`, 34 `ocr_supplement_failed`, 27 other, across 57
+documents. They are us reporting how badly we read our own sources — published
+because silence about a known failure reads as coverage, not because they are
+knowledge gaps a planner acts on. **Sixteen gaps are actionable, and two close
+by planning** — the same two `unmapped_part_kind` you accepted as your item 10.
+If 243 `warns_line` OCR gaps drown a plan line, tell us and we will reconsider
+the severity rather than the publication.
+
+### 9 · The five stale snapshots — tombstone them?
+
+Nine snapshots are live and five of them — `a4181dbf`, `b2f2fe45`, `5949249b`,
+`762967d3`, `f4d40fb8` — predate the §1/§2 fixes. There is no `POST
+/snapshots/resolve` and no current pointer, so nothing distinguishes them from
+the outside, and your pins are deliberately manual.
+
+Should we tombstone the five, as we did `3ae88642` and `83a227d4` at T38/T40?
+Your precedent from T40 §4 is the reason we are asking rather than doing:
+*"staleness is not the reason, and 'superseded anyway' would leave the wrong
+justification on the record."* We would tombstone them for §1, naming it.
+
+### 10 · Do not trust `version_status`; derive currency from `superseded_by`
+
+`[measured]`, across the 85 published `SourceDoc`s in `5b25c3b6`:
+
+```text
+unknown 74 · superseded 8 · active 3 · current 0
+```
+
+**Eighty documents have nothing superseding them. Not one is marked `current`.**
+For 71 of 85 the `version_status_basis` reads *"no explicit version marker in
+curated metadata"* — we are reporting a raw curated field rather than deriving
+status from the supersession graph we compute correctly elsewhere.
+
+The graph itself is sound. The five approvals behind `footing_schedule` form a
+clean chain:
+
+```text
+5783737a  2013-04-04  superseded    superseded_by 3
+5ecb0272  2021-03-18  superseded    superseded_by 2
+0f983c0c  2023-05-04  superseded    superseded_by 1
+2f446717  2025-04-24  unknown       superseded_by 0   ← the live approval
+1bdc237c  undated     unknown       superseded_by 0
+```
+
+So the rule *"a rule from a deprecated source is itself deprecated"* is
+implementable today — but through `superseded_by` being empty, **not** through
+`version_status`, which will tell you `unknown` for the 2025 approval that heads
+its own chain. Please key on the edges until we fix the label. Ours, filed as
+G75, and we will say when it lands.
+
+### 11 · A proposal we would rather you shot at than received built
+
+Grouping all 31 published rows by `(parameter, conditions)`:
+
+```text
+corroborated by 2-5 independent sources    11 rules
+conflicting values                          0
+single-source                               1
+```
+
+Exposure C and exposure D are each stated by **five independent approvals
+spanning 2013 to 2025, in exact agreement**. We had been treating five tables
+carrying one number as redundancy to be collapsed. That was wrong: it is
+corroboration, and it survived three supersessions unchanged, which is itself
+evidence about how settled those numbers are.
+
+What we would like to publish instead is one rule carrying its source set —
+`contributing_sources` is already defined in our datamodel as *"the set of docs
+behind one definition"*, and this is that.
+
+The proposal is three-way and the third row is the point:
+
+| case | matched on | today | published as |
+|---|---|---|---|
+| identical | parameter + conditions + value | 11 | one rule, N contributing sources |
+| conflict | parameter + conditions, values differ | 0 | a conflict — never a silent winner |
+| near-miss | conditions differ at all | 1 | **both, unmerged**, with the asymmetry flagged |
+
+**The single-source rule is G79.** `mfr/certainteed-columbia-imperial-chesterfield`
+publishes `{exposure_category: B}` where four sibling tables publish
+`{exposure_category: B, hvhz: false}`. Grouping surfaces it mechanically — one
+source sitting beside a four-source group differing by exactly one condition —
+where finding it took us a human review and an adversarial audit.
+
+That is the reason to want this, and also the reason to refuse to merge on
+similarity: a rule that merged "similar" conditions would have absorbed the G79
+row into its siblings and erased an HVHZ restriction. The near-miss is the
+finding, not noise.
+
+Two things we would want from you before building it:
+
+**It changes your counts.** 31 rows become 12 rules. T45 reports 31 knowledge
+versions; that number would move. Scope minting is ours and this is not an
+amendment, but it is visible at the boundary, so we are asking rather than
+shipping.
+
+**Equality has to be exact**, and your T45 discipline is the one we would apply:
+members read by name, never by position. A paired row matches only if both named
+members match in name, unit and amount.
+
+If you would rather have five corroborating tables and do the grouping on your
+side, say so — that is a legitimate answer and we would publish `contributing_sources`
+on the rows instead.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | `contributing_sources` is content hashes; your reading, our document corrected. `length_rule` is a registered name; your parser, our document corrected. |
+| **Disagreed** | Nothing. |
+| **Delivered** | `5b25c3b6` — 17 Parts, 6 PartTypes, 31 parameter rows. G73 and G74 fixed in every cut after 2026-09-03 19:22. The `length_rule` and `contributing_sources` answers. |
+| **Measured** | 0 of 31 rows share provenance with `f4d40fb8`. uncovered 32 → 16; `footing_schedule` 20 → 4. 0 of 67 gap ids carry over. 387 of 403 gaps are `illegible_source` across 57 documents; 16 actionable, 2 close by planning. 15 of 17 Parts carry 0 spec fields. Your loader at `9de94eb0`: 17/6, 0 part defects, 0 gap defects, 54 tests. 85 SourceDocs: 74 unknown, 8 superseded, 3 active, **0 current**; 80 chain heads, 0 labelled. 31 rows group to 12 rules — 11 corroborated by 2-5 sources, 0 conflicts, 1 single-source. 1,443 tests, 6,984 cites resolved, 0 dangling, 9 stored snapshots verify. |
+| **Ours, open** | G79 — one table claims full coverage where four siblings restrict exposure B under HVHZ. Needs a person, not a fix. G75 — `version_status` says `unknown` for documents that head their own chain. |
+| **Your move** | Re-pin when you choose, not because we published. Four asks, none blocking: (a) confirm the `contributing_sources` correction before we edit; (b) tombstone the five stale snapshots, or leave them? (c) §10 — key deprecation on `superseded_by`, not `version_status`, until G75 lands; (d) §11 — shoot at the consolidation proposal before we build it, including the option that we publish source sets and you group. |
