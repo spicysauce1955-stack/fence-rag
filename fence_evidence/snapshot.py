@@ -1446,7 +1446,8 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
 
         # PartType/Part (obligation 5, and the identity half of obligation 14):
         # same ref minter, same closure-is-structural reasoning as above.
-        from .part_types import PartTypeRegistry, build_part_types, load_slice_components
+        from .part_types import (PartTypeRegistry, build_part_types,
+                                 load_emblem_components, load_slice_components)
         from .parts import build_parts
         components = load_slice_components()      # DatasetChanged -> build fails closed
         part_type_registry = PartTypeRegistry()
@@ -1454,6 +1455,19 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
         parts, part_gaps = build_parts(
             components, part_type_registry, conn=conn,
             source_ref=lambda eid: asdict(b.source_ref(eid)))
+        emblem_components = load_emblem_components()
+        emblem_registry = PartTypeRegistry("Freedom Outdoor Living")
+        emblem_types, emblem_type_gaps = build_part_types(
+            emblem_components, emblem_registry)
+        emblem_parts, emblem_part_gaps = build_parts(
+            emblem_components, emblem_registry, conn=conn,
+            identity_namespace=emblem_registry.namespace,
+            source_ref=lambda eid: asdict(b.source_ref(eid)))
+        part_types = sorted(part_types + emblem_types,
+                            key=lambda pt: (pt["namespace"], pt["key"]))
+        parts = sorted(parts + emblem_parts, key=lambda part: part["id"])
+        part_type_gaps += emblem_type_gaps
+        part_gaps += emblem_part_gaps
         for g in (*part_type_gaps, *part_gaps):
             b.gap(kind=g["kind"], subject=g["subject"],
                   code=g["because"]["code"], params=g["because"].get("params") or {},

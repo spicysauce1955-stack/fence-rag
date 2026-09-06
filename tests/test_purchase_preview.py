@@ -36,6 +36,42 @@ class TestPurchasePreview(unittest.TestCase):
         self.layout = {'kind': 'full_panel_schematic', 'expected_run_count': 1,
                        'stations': [{'id': 'a', 'schematic_point': [0, 0]}, {'id': 'b', 'schematic_point': [1, 0]}],
                        'bays': [{'id': 'bay', 'from': 'a', 'to': 'b', 'model_id': 'model', 'supply': 'full_kit'}]}
+        self.package['purchase_quantity_rules'] = [
+            {'id': target, 'target': target, 'model_id': 'model',
+             'basis': 'full_panel_bay' if target == 'panel_kit' else 'unique_post_station',
+             'quantity_per_basis': {'amount_milli': 1000, 'unit': 'each', 'value_raw': ['fixture count']},
+             'authorship': 'third_party_authored', 'derivation': 'One item for each authored occurrence.',
+             'evidence': [anchor('fixture count')]}
+            for target in ['panel_kit', 'post', 'post_cap']]
+
+    def test_quantity_rule_change_changes_demand_and_preserves_derivation(self):
+        self.package['purchase_quantity_rules'][2]['quantity_per_basis']['amount_milli'] = 2000
+        self.package['purchase_quantity_rules'][2]['derivation'] = (
+            'Synthetic two-item rule to test arithmetic, not an Emblem source claim.')
+        self.assertEqual(self.counts()['CAP-X'], 4)
+        line = next(x for x in generate(self.package, self.layout)['purchase_lines']
+                    if x['manufacturer_model_number'] == 'CAP-X')
+        trace = line['quantity_derivations'][0]
+        self.assertEqual((trace['basis_count'], trace['quantity_each']), (2, 4))
+        self.assertEqual(trace['cites'], [{'id': 'r', 'belongs_to': 'source'}])
+
+    def test_missing_quantity_rules_refused(self):
+        del self.package['purchase_quantity_rules']
+        with self.assertRaisesRegex(PreviewError, 'explicit quantity rules'):
+            self.counts()
+
+    def test_invalid_quantity_rule_refused(self):
+        for patch in ({'basis': 'per_run'}, {'model_id': 'other'}, {'evidence': []},
+                      {'condition': {'post_role': 'corner'}},
+                      {'rounding': 'ceil_to_pack', 'pack_size': 10},
+                      {'quantity_per_basis': {'amount_milli': 1000, 'unit': 'each',
+                                              'value_raw': ['fixture count'], 'override': 10}},
+                      {'quantity_per_basis': {'amount_milli': 1500, 'unit': 'each'}}):
+            with self.subTest(patch=patch):
+                package = copy.deepcopy(self.package)
+                package['purchase_quantity_rules'][0].update(patch)
+                with self.assertRaises(PreviewError):
+                    generate(package, self.layout)
 
     def counts(self):
         return {line['manufacturer_model_number']: line['quantity_each']

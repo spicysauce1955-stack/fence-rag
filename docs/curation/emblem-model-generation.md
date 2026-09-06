@@ -51,13 +51,38 @@ identities cannot merge into a bogus larger kit count. Missing source manifests
 cannot claim that file hashes were verified. An actual-store negative control
 pairing a description with a different product row is rejected.
 
-Forty focused purchase tests pass: 21 generator tests plus 19 example checks.
-The final full suite passes **1,418 tests**, with one expected failure. Local
-HTTP tests required the previously authorized run outside the socket sandbox.
+The initial implementation passed 40 focused purchase tests (21 generator tests
+plus 19 example checks) and 1,418 full-suite tests with one expected failure.
+Current measurements are in `docs/state-and-gaps.md` G85.
 The generated results and comparison report are saved under `workspace/reports/`:
 [single](../../workspace/reports/emblem-single-generated-purchases.json),
 [complex](../../workspace/reports/emblem-complex-generated-purchases.json),
 [comparison](../../workspace/reports/emblem-purchase-generation-check.json).
+
+## Authored quantity checkpoint
+
+The model package now carries three `purchase_quantity_rules`: one kit per
+explicit full-kit bay, one post per unique station, and one selected cap per
+station. The preview requires those rules; it has no implicit multiplier fallback.
+Every purchase line carries `quantity_derivations`, including the rule ID,
+basis count, Quantity per basis, calculated total, evidence citations and authored
+rationale. Numeric multipliers are authored interpretations: the exact source
+phrases are preserved, including when the phrase does not print a numeric count.
+Source identity verification does not certify the authored arithmetic as a human
+reviewed fact. These are private rules, not invented contract rule syntax.
+
+The normal snapshot path now publishes six authored Emblem family Part identities,
+bringing the total to 17. Gate components are excluded. These family IDs are not
+aliases for the exact white-SKU draft: one dataset rail component represents both
+rail positions, and family posts span variants. Exact product binding remains
+separate work. No researched dimensions are silently promoted with identity.
+
+The next publication step remains blocked. Current `PartRequirement` documentation
+groups `length_rule` as Quantity while its predecessor used named rules. The actual
+consumer representation is needed, alongside the missing joint/placement and
+infill fitting information. A draft status does not make an incomplete FenceModel
+publishable. The audit's absent-field count is a syntactic diagnostic, not a list
+of mandatory facts: it currently includes mutually exclusive requirement modes.
 
 ## Remaining integration boundary
 

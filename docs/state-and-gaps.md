@@ -4152,6 +4152,60 @@ live step review or contract amendment was made.
 
 ---
 
+### G85 — Emblem identities publish; purchase quantities read cited authored rules
+
+`[measured]`, 2026-09-06. The existing component publisher now accepts an explicit
+manufacturer and assembly selection. The Emblem panel-family slice contributes
+six Parts (three posts, cap, rail, board) and one manufacturer PartType extension
+whose parent is `shared/infill`. Existing CertainTeed identities stay unchanged;
+gate kits, gate insert, hinges and latch are excluded. Dataset baseline checking
+still precedes reads. No research dimensions or quantities are promoted with
+component identity.
+
+The stored snapshot named in `workspace/reports/emblem-authored-publication-check.json`
+verifies with **17 Parts, 6 PartTypes and 0 FenceModels**. The six family IDs are
+not asserted to be the exact-SKU draft's seven Parts: the family dataset combines
+top/bottom rails, and its post identities span variants. This mapping is still
+needed before these objects can form one exact product model.
+
+The private model package now authors three quantity rules: kit per explicit
+full-kit bay, post per unique station, cap per selected post station. Each carries
+its source phrase, citation, model scope, Quantity per basis and authored rationale.
+`purchase_preview` requires these inputs and emits the basis count and calculation
+beside each purchase line. Citations support the reading; authored arithmetic
+is not represented as an extracted numeric fact or a new human review. A test
+changes a cap multiplier and proves both demand and derivation change; missing
+rules, unsupported bases, wrong model scopes, uncited and fractional-item rules
+are refused. Both saved layouts retain their independently checked counts:
+1 kit / 2 posts / 2 caps; 7 kits / 9 posts / 9 caps.
+
+**The requested FenceModel publication is not complete.** Reading the definitions
+found an actual wire ambiguity: current §3.5 groups `length_rule` as Quantity;
+the predecessor defines named length rules. No executable consumer schema here
+settles it. Rail placements, joint geometry, infill fitting inputs and exact
+post/kit bindings also remain unresolved. Publishing the fragment because
+`status: draft` bypasses none of those needs. The next input is the Planning
+loader/schema, followed by a supported requirement fixture and source-backed
+family quantity/geometry rules.
+
+**The audit overstated its missing-field count.** Its 55 absent paths include
+mutually exclusive PartRequirement modes. They are presence diagnostics, not
+55 established mandatory fields. The report and walkthrough now say so explicitly;
+this change does not claim to have built a complete schema validator. The draft
+audit checks 121 citation occurrences, 3 corpus hashes and 23 spec fields with
+zero integrity errors; external PDF bytes remain explicitly unchecked.
+
+The first full suite passed 1,443 tests. Additional review then reproduced a
+silent-ignore defect: rule conditions and pack-rounding fields changed no result.
+The evaluator now whitelists its supported rule and Quantity fields and refuses
+unsupported semantics. Regression cases cover both findings and quantity overrides.
+The focused generator has 24 test methods and the new Emblem identity slice has 5.
+Both frozen boundary checksums and `git diff --check` pass.
+Final `python3 tests/run_tests.py`: **1,443 tests, OK (1 expected failure)**,
+46.548 seconds.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

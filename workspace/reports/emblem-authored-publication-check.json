@@ -1,0 +1,23 @@
+{
+  "snapshot_id": "5b25c3b6c40e67c204a9de8ee37471310c42ea68d6fcc73c295d3a3971777488",
+  "snapshot_path": "workspace/snapshots/5b25c3b6c40e67c204a9de8ee37471310c42ea68d6fcc73c295d3a3971777488.json",
+  "part_count": 17,
+  "part_type_count": 6,
+  "model_count": 0,
+  "emblem_part_ids": [
+    "mfr/freedom-outdoor-living/freedom-5x5-corner-post",
+    "mfr/freedom-outdoor-living/freedom-5x5-end-post",
+    "mfr/freedom-outdoor-living/freedom-5x5-line-post",
+    "mfr/freedom-outdoor-living/freedom-5x5-post-top",
+    "mfr/freedom-outdoor-living/freedom-emblem-board",
+    "mfr/freedom-outdoor-living/freedom-emblem-rail"
+  ],
+  "quantity_rule_count": 3,
+  "draft_citation_occurrences": 121,
+  "model_publication_blockers": [
+    "PartRequirement length_rule wire shape is unresolved.",
+    "Family component IDs are not exact-SKU draft identities.",
+    "Joint, placement, infill geometry and fitting policies remain incomplete."
+  ],
+  "contract_consumer_verified": false
+}

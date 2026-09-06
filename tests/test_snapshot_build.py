@@ -423,6 +423,17 @@ class TestPartTypeSpineOverTheRealStore(unittest.TestCase):
             self.assertTrue(pt["namespace"].startswith("mfr/"))
             self.assertEqual(pt["parent"]["namespace"], "shared")
 
+    def test_emblem_family_parts_publish_without_a_partial_model(self):
+        parts = [p for p in self.snap['parts']
+                 if p['id'].startswith('mfr/freedom-outdoor-living/')]
+        self.assertEqual(len(parts), 6)
+        self.assertTrue(all(p['spec'] == [] for p in parts))
+        self.assertFalse(any('gate' in p['id'] for p in parts))
+        self.assertIn({'key': 'picket', 'namespace': 'mfr/freedom-outdoor-living',
+                       'parent': {'namespace': 'shared', 'key': 'infill'},
+                       'label_i18n': {'en': 'picket'}}, self.snap['part_types'])
+        self.assertFalse(any('emblem' in m['id'] for m in self.snap['models']))
+
     def test_obligation_14_publishes_the_two_real_stock_lengths(self):
         """C15 resolved (conversation.md T42): SpecField.value is Quantity |
         Token, so the two real, correctly-attributed stock lengths publish

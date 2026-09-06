@@ -2,7 +2,7 @@
   "artifact_kind": "private_model_backed_purchase_preview",
   "publishable": false,
   "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
-  "model_package_hash": "a6490f23ba14bcc1b845c446798be41a90b986089ac895764174000c3c10f4b9",
+  "model_package_hash": "d8979b3c3355c0d499503873b872006920eccc544b4bc6126aaf0149e58913f2",
   "layout_hash": "d9bdbbf211516d642e0ad486343578cc4e67f18033bd37cd75755b0ed197de0a",
   "source_docs": [
     {
@@ -63,13 +63,40 @@
         {
           "id": "1356341c0f1a6c05",
           "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "f67db6fc7eef1aa8",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
         }
       ],
-      "supplier_pack_quantity": null
+      "supplier_pack_quantity": null,
+      "quantity_derivations": [
+        {
+          "rule_id": "emblem-73014714-post_cap",
+          "basis": "unique_post_station",
+          "basis_count": 2,
+          "quantity_per_basis": {
+            "amount_milli": 1000,
+            "unit": "each",
+            "value_raw": [
+              "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted."
+            ]
+          },
+          "quantity_each": 2,
+          "authorship": "third_party_authored",
+          "derivation": "Author one selected post top per post station from the instruction to attach post tops to posts; the instruction does not print a numeric kit count.",
+          "cites": [
+            {
+              "id": "f67db6fc7eef1aa8",
+              "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+            }
+          ]
+        }
+      ]
     },
     {
       "manufacturer_model_number": "73014714",
-      "description": "Emblem Privacy Fence Kit — 6x8 White — 73014714",
+      "description": "Emblem Privacy Fence Kit \u2014 6x8 White \u2014 73014714",
       "quantity_each": 1,
       "origins": [
         {
@@ -83,9 +110,36 @@
         {
           "id": "304c96b69b330708",
           "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "5d7cfd7597583e43",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
         }
       ],
       "supplier_pack_quantity": null,
+      "quantity_derivations": [
+        {
+          "rule_id": "emblem-73014714-panel_kit",
+          "basis": "full_panel_bay",
+          "basis_count": 1,
+          "quantity_per_basis": {
+            "amount_milli": 1000,
+            "unit": "each",
+            "value_raw": [
+              "6x8 Emblem Privacy Fence Kit - White (F)"
+            ]
+          },
+          "quantity_each": 1,
+          "authorship": "third_party_authored",
+          "derivation": "One identified complete panel kit for each explicitly authored full-kit bay; this is a supply choice, not a board-count claim.",
+          "cites": [
+            {
+              "id": "5d7cfd7597583e43",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          ]
+        }
+      ],
       "covers_panel_slots": [
         {
           "slot_kind": "frame",
@@ -131,9 +185,36 @@
         {
           "id": "3299b0fb58f9d53c",
           "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "5f2efc0cc9661d0c",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
         }
       ],
-      "supplier_pack_quantity": null
+      "supplier_pack_quantity": null,
+      "quantity_derivations": [
+        {
+          "rule_id": "emblem-73014714-post",
+          "basis": "unique_post_station",
+          "basis_count": 2,
+          "quantity_per_basis": {
+            "amount_milli": 1000,
+            "unit": "each",
+            "value_raw": [
+              "3. Calculate # of posts needed:\n\u2022 1 post per panel + 1 end post to end the fence run\n\u2022 1 end/gate post per gate (don\u2019t forget 2 post\ninserts for each gate)"
+            ]
+          },
+          "quantity_each": 2,
+          "authorship": "third_party_authored",
+          "derivation": "One post at each unique station in the supported open paths. The source N+1 rule applies per run; shared internal stations are counted once.",
+          "cites": [
+            {
+              "id": "5f2efc0cc9661d0c",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          ]
+        }
+      ]
     }
   ],
   "station_roles": {
@@ -153,7 +234,7 @@
       "coverage": "included_in_panel_kit",
       "evidence": {
         "element_id": "element-b540e75926-0008",
-        "text_raw": "• 2-¼ in. x 7 in. top & bottom rails",
+        "text_raw": "\u2022 2-\u00bc in. x 7 in. top & bottom rails",
         "cite": {
           "id": "b2766cd38e5d8624",
           "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
@@ -166,7 +247,7 @@
       "coverage": "included_in_panel_kit",
       "evidence": {
         "element_id": "element-b540e75926-0008",
-        "text_raw": "• 2-¼ in. x 7 in. top & bottom rails",
+        "text_raw": "\u2022 2-\u00bc in. x 7 in. top & bottom rails",
         "cite": {
           "id": "b2766cd38e5d8624",
           "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
@@ -179,7 +260,7 @@
       "coverage": "included_in_panel_kit; exact count unverified",
       "evidence": {
         "element_id": "element-b540e75926-0007",
-        "text_raw": "• 6 in. tongue & groove boards",
+        "text_raw": "\u2022 6 in. tongue & groove boards",
         "cite": {
           "id": "e00d82aba830a6eb",
           "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"

@@ -262,6 +262,10 @@ def audit(package, conn):
     if (missing or errors) and package.get('publishable') is not False:
         errors.append('incomplete draft incorrectly claims publishable')
     return {'draft_integrity_passed': not errors, 'errors': errors,
+            'field_check_basis': 'syntactic_presence_diagnostics_not_mandatory_authoring_requirements',
+            'wire_shape_issues': [
+                'PartRequirement presence checks include mutually exclusive modes; not every absent field is required.',
+                'Current length_rule is grouped as Quantity; older documentation uses named rules. Consumer schema is needed.'],
             'external_applicability_check': external_check,
             'missing_contract_fields': missing, 'missing_contract_field_count': len(missing),
             'citations_checked': cites_checked, 'source_hashes_checked': len(sources),

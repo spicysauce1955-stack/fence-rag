@@ -130,13 +130,17 @@ def _stock_length_evidence(conn: sqlite3.Connection | None) -> dict:
 
 
 def build_parts(components: list[dict], registry, *, source_ref=None,
-                conn: sqlite3.Connection | None = None) -> tuple[list[dict], list[dict]]:
+                conn: sqlite3.Connection | None = None,
+                identity_namespace: str | None = None) -> tuple[list[dict], list[dict]]:
     """`(components, registry)` -> `([Part], [Gap])`.
 
     `registry` is a `part_types.PartTypeRegistry` already walked by
     `part_types.build_part_types` over the SAME `components` list -- reused,
     not rebuilt, so a component this platform already gapped as unmapped is
     skipped here rather than gapped twice.
+
+    New manufacturer slices may choose an identity namespace independently of
+    the shared PartType. The default preserves existing published identities.
     """
     from .parameters import CURATION_LEVEL, _source_class     # lazy: no cycle, matches parameters.py's own discipline
 
@@ -149,7 +153,7 @@ def build_parts(components: list[dict], registry, *, source_ref=None,
         ref = registry.resolve(c["component_type"])
         if ref is None:
             continue        # already gapped as unmapped_part_kind by build_part_types
-        part_id = _part_id(c["component_id"], ref["namespace"])
+        part_id = _part_id(c["component_id"], identity_namespace or ref["namespace"])
         parts_by_id[c["component_id"]] = {
             "id": part_id,
             "version": 1,

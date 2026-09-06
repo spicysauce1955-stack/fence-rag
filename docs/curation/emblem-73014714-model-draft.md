@@ -159,9 +159,15 @@ applicability. No wind configuration or structural approval was created.
 **Current audit after rollback:** zero integrity errors; 118 citation occurrences,
 three corpus hashes and all 23 spec fields checked. External applicability is
 `not_checked_cache_missing`; the linked PDF was not verified in this run.
-Seventeen scoped audit tests pass. The audit still exits **2**: 55 contract field locations are missing,
+Seventeen scoped audit tests pass. The audit still exits **2**: 55 field locations are absent,
 including newly inspected nested joint fields. Filling `joint.kind` no longer
 hides absent `joint.channel_depth`.
+
+This count is a syntactic diagnostic, not 55 mandatory authoring obligations:
+the checker includes mutually exclusive PartRequirement modes. Its report now
+states that limitation and the unresolved `length_rule` wire shape. The quantity
+rule checkpoint adds three cited authored rules, bringing checked citation
+occurrences to 121; it does not complete the contract model.
 
 The executable fitting preflight returns **blocked**, with 15 missing input
 locations. It deliberately returns no board count or cut lengths. Overall panel

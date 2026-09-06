@@ -20,8 +20,10 @@ this platform's `ParameterTable`s already cover), plus `BT-POSTRAIL-3RAIL` --
 included not because it is Chesterfield, but because it is the one assembly in
 this manufacturer file with real, correctly-attributable evidence for
 obligation 14 (see `parts.py`'s module docstring for what that evidence is and
-is not). Every other assembly, product line and manufacturer is out of scope;
-widening it is a future round's work, not a silent side effect of this one.
+is not). These remain the default loader's scope. `load_emblem_components`
+explicitly adds six basic-panel identities from Freedom's Emblem assembly;
+co-listed gates and their hardware remain outside that selection. Neither
+loader copies dimensional values or quantities from the research dataset.
 
 `dataset.py`'s own docstring already names the sharpest limitation here: "211
 of 225 `component_id` values appear nowhere in the corpus." `Part.id` does not
@@ -52,6 +54,13 @@ ASSEMBLY_IDS = ("BT-CHESTERFIELD-CERTAGRAIN", "BT-CHESTERFIELD-GATE",
 _DATASET_FILE = REPO_ROOT / "data" / "certainteed-bufftech.json"
 _MANUFACTURER = "CertainTeed"
 
+# Membership selection only: gate hardware co-listed in the family dataset is
+# outside the ordinary panel slice. These are authored component IDs, not SKUs.
+EMBLEM_COMPONENT_IDS = frozenset({
+    "freedom-5x5-line-post", "freedom-5x5-corner-post", "freedom-5x5-end-post",
+    "freedom-5x5-post-top", "freedom-emblem-rail", "freedom-emblem-board",
+})
+
 # `component_type` (this dataset's own vocabulary) -> where it resolves on the
 # spine. Measured against this slice's real data only -- 8 of the 13 distinct
 # component_types actually present; `gate_kit` deliberately absent (see
@@ -81,7 +90,8 @@ def mfr_namespace(manufacturer: str) -> str:
 MANUFACTURER_NAMESPACE = mfr_namespace(_MANUFACTURER)
 
 
-def load_slice_components(path=None) -> list[dict]:
+def load_slice_components(path=None, *, assembly_ids=ASSEMBLY_IDS,
+                          component_ids=None) -> list[dict]:
     """The vertical slice's components, flattened and content-sorted.
 
     Fails closed on a baseline mismatch (`dataset.verify_dataset()`,
@@ -94,9 +104,11 @@ def load_slice_components(path=None) -> list[dict]:
     out = []
     for line in data.get("product_lines", []):
         for assembly in line.get("assemblies", []):
-            if assembly["assembly_id"] not in ASSEMBLY_IDS:
+            if assembly["assembly_id"] not in assembly_ids:
                 continue
             for sub in assembly.get("sub_assemblies", []):
+                if component_ids is not None and sub["component_id"] not in component_ids:
+                    continue
                 out.append({
                     "assembly_id": assembly["assembly_id"],
                     "component_id": sub["component_id"],
@@ -107,13 +119,22 @@ def load_slice_components(path=None) -> list[dict]:
     return out
 
 
+def load_emblem_components() -> list[dict]:
+    """Authored Emblem panel-family identities; no exact-SKU value projection."""
+    return load_slice_components(
+        REPO_ROOT / "data" / "freedom-outdoor-living.json",
+        assembly_ids=("freedom-emblem-privacy-panel",),
+        component_ids=EMBLEM_COMPONENT_IDS)
+
+
 class PartTypeRegistry:
     """Resolves a `component_type` to a spine-terminating `PartTypeRef`,
     minting an `mfr/` extension row as a byproduct where the spine has no
     matching key. Idempotent: resolving the same `component_type` twice mints
     once."""
 
-    def __init__(self):
+    def __init__(self, manufacturer: str = _MANUFACTURER):
+        self.namespace = mfr_namespace(manufacturer)
         self._extensions: dict[str, dict] = {}   # component_type -> PartType row
 
     def resolve(self, component_type: str) -> dict | None:
@@ -128,11 +149,11 @@ class PartTypeRegistry:
         if component_type not in self._extensions:
             self._extensions[component_type] = {
                 "key": component_type,
-                "namespace": MANUFACTURER_NAMESPACE,
+                "namespace": self.namespace,
                 "parent": {"namespace": "shared", "key": key},
                 "label_i18n": {"en": component_type.replace("_", " ")},
             }
-        return {"namespace": MANUFACTURER_NAMESPACE, "key": component_type}
+        return {"namespace": self.namespace, "key": component_type}
 
     def rows(self) -> list[dict]:
         return sorted(self._extensions.values(),

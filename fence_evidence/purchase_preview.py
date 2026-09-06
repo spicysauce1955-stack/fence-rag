@@ -116,6 +116,31 @@ def generate(package, layout, *, conn=None):
         _require(cite.get('id') and cite.get('belongs_to') in sources, 'identity has no pinned source')
         return cite
 
+    rules = _unique(package.get('purchase_quantity_rules', []), 'target', 'quantity-rule target')
+    _require(set(rules) == {'panel_kit', 'post', 'post_cap'},
+             'explicit quantity rules are required for kit, post and cap')
+    _unique(list(rules.values()), 'id', 'quantity-rule id')
+    for target, rule in rules.items():
+        _require(set(rule) == {'id', 'target', 'model_id', 'basis', 'quantity_per_basis',
+                              'authorship', 'derivation', 'evidence'},
+                 'unsupported quantity-rule fields must not be silently ignored')
+        _require(rule.get('model_id') == model['id'], 'quantity rule belongs to another model')
+        expected_basis = 'full_panel_bay' if target == 'panel_kit' else 'unique_post_station'
+        _require(rule.get('basis') == expected_basis, 'unsupported quantity-rule basis')
+        quantity = rule.get('quantity_per_basis', {})
+        _require(set(quantity) == {'amount_milli', 'unit', 'value_raw'},
+                 'unsupported quantity fields must not be silently ignored')
+        amount = quantity.get('amount_milli')
+        _require(type(amount) is int and amount > 0 and amount % 1000 == 0
+                 and quantity.get('unit') == 'each', 'quantity rule must specify positive whole items')
+        _require(rule.get('evidence') and rule.get('derivation') and
+                 rule.get('authorship') == 'third_party_authored',
+                 'quantity rule needs evidence and an explicit authored derivation')
+        for anchor in rule['evidence']:
+            cited(anchor)
+        _require(quantity.get('value_raw') == [a['text_raw'] for a in rule['evidence']],
+                 'quantity-rule lexemes must preserve their evidence')
+
     kit_sku = package['scope']['model_number']
     kit_anchors = [a for a in package['identity_anchors'] if a['text_raw'] == kit_sku]
     _require(len(kit_anchors) == 1, 'kit identity is missing or ambiguous')
@@ -163,7 +188,10 @@ def generate(package, layout, *, conn=None):
         return part, identity, sku
 
     lines = {}
-    def demand(sku, description, origins, cites, part_id=None, covered_slots=None):
+    def demand(sku, description, origins, cites, rule_target, part_id=None, covered_slots=None):
+        rule = rules[rule_target]
+        multiplier = rule['quantity_per_basis']['amount_milli'] // 1000
+        cites = cites + [cited(anchor) for anchor in rule['evidence']]
         key = sku
         if key in lines:
             _require(lines[key]['description'] == description and
@@ -171,8 +199,14 @@ def generate(package, layout, *, conn=None):
                      'one product identity is assigned incompatible purchase meanings')
         line = lines.setdefault(key, {'manufacturer_model_number': sku, 'description': description,
                                      'quantity_each': 0, 'origins': [], 'part_ids': [], 'cites': [],
-                                     'supplier_pack_quantity': None})
-        line['quantity_each'] += len(origins)
+                                     'supplier_pack_quantity': None, 'quantity_derivations': []})
+        line['quantity_each'] += len(origins) * multiplier
+        line['quantity_derivations'].append({
+            'rule_id': rule['id'], 'basis': rule['basis'], 'basis_count': len(origins),
+            'quantity_per_basis': deepcopy(rule['quantity_per_basis']),
+            'quantity_each': len(origins) * multiplier,
+            'authorship': rule['authorship'], 'derivation': rule['derivation'],
+            'cites': [cited(anchor) for anchor in rule['evidence']]})
         line['origins'].extend(origins)
         if part_id and part_id not in line['part_ids']:
             line['part_ids'].append(part_id)
@@ -183,21 +217,21 @@ def generate(package, layout, *, conn=None):
             line['covers_panel_slots'] = deepcopy(covered_slots)
     demand(kit_sku, model['name_i18n']['en'],
            [{'kind': 'bay', 'id': bid, 'model_id': model['id']} for bid in sorted(bays)],
-           [cited(kit_anchor)], covered_slots=coverage)
+           [cited(kit_anchor)], 'panel_kit', covered_slots=coverage)
     for role in sorted(set(roles.values())):
         _require(role in candidates, f'no product binding for post role {role}')
         part_id = candidates[role]['part_id']
         part, identity, sku = product(part_id, 'post', role)
         demand(sku, part['name_i18n']['en'],
                [{'kind': 'post_station', 'id': sid, 'post_role': role} for sid in sorted(roles) if roles[sid] == role],
-               [cited(identity['description']), cited(identity['model_number'])], part_id)
+               [cited(identity['description']), cited(identity['model_number'])], 'post', part_id)
     if post['cap'] is not None:
         _require(set(post['cap']) == {'part_id'}, 'additional cap requirement semantics need the Planning adapter')
         part_id = post['cap']['part_id']
         part, identity, sku = product(part_id, 'post_cap')
         demand(sku, part['name_i18n']['en'],
                [{'kind': 'post_cap', 'id': sid} for sid in sorted(stations)],
-               [cited(identity['description']), cited(identity['model_number'])], part_id)
+               [cited(identity['description']), cited(identity['model_number'])], 'post_cap', part_id)
     verified = False
     if conn is not None:
         manifest = _unique(package.get('sources', []), 'content_hash', 'source manifest entry')
