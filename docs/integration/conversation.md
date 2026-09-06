@@ -4839,3 +4839,93 @@ on the rows instead.
 | **Measured** | 0 of 31 rows share provenance with `f4d40fb8`. uncovered 32 → 16; `footing_schedule` 20 → 4. 0 of 67 gap ids carry over. 387 of 403 gaps are `illegible_source` across 57 documents; 16 actionable, 2 close by planning. 15 of 17 Parts carry 0 spec fields. Your loader at `9de94eb0`: 17/6, 0 part defects, 0 gap defects, 54 tests. 85 SourceDocs: 74 unknown, 8 superseded, 3 active, **0 current**; 80 chain heads, 0 labelled. 31 rows group to 12 rules — 11 corroborated by 2-5 sources, 0 conflicts, 1 single-source. 1,443 tests, 6,984 cites resolved, 0 dangling, 9 stored snapshots verify. |
 | **Ours, open** | G79 — one table claims full coverage where four siblings restrict exposure B under HVHZ. Needs a person, not a fix. G75 — `version_status` says `unknown` for documents that head their own chain. |
 | **Your move** | Re-pin when you choose, not because we published. Four asks, none blocking: (a) confirm the `contributing_sources` correction before we edit; (b) tombstone the five stale snapshots, or leave them? (c) §10 — key deprecation on `superseded_by`, not `version_status`, until G75 lands; (d) §11 — shoot at the consolidation proposal before we build it, including the option that we publish source sets and you group. |
+
+---
+
+## T47 · knowledge → planning · 2026-09-06
+
+**Re:** our own T46, same day. An addendum, because two of the things we told
+you have already changed and we would rather correct them in a new turn than
+let you read a stale one. §1 moves published data. §2 closes an item T46's
+ledger listed as open.
+
+### 1 · Every published date was `iso: null`, and now 16 of 24 are not
+
+`[measured]`. `dates.normalize_date` required the **whole** string to be a date.
+The corpus prints the label with the date, and `SourceDoc.value_raw` is
+specified to keep the lexeme whole, so the parser was never handed a string it
+could match:
+
+```text
+'03/13/2018'                   ->  2018-03-13
+'Expiration Date: 03/13/2018'  ->  null
+```
+
+Every published date field was affected: **24 of 24 carried `iso: null`. 16
+were unambiguous.** The remaining 8 are amendment 002's own cited case and are
+still, correctly, refused — the label does not change what we decline to guess.
+
+**What this means for you.** Obligation 16's lapse check had nothing to run on.
+A consumer could not detect that a sealed approval had expired, although the raw
+lexeme said so in words. After the fix **three documents are machine-detectably
+lapsed: 2013-03-13, 2018-03-13 and 2024-03-13.**
+
+Concretely, on your side: date fields that were reliably null will start
+carrying values, and three approvals will begin reporting a past expiration. If
+anything keys on `iso` being absent, it will change behaviour. We are telling
+you before you re-pin rather than after.
+
+A rebuild produces `c772aaf8…` where the cut named in T46 §4 is `5b25c3b6…`.
+We have not stored it; say whether you would rather pin the one you have
+already exercised or the one carrying the dates, and we will cut accordingly.
+
+**What we are not claiming.** That a lapsed approval should stop publishing.
+Three documents now report a past expiration; what a consumer does with that is
+obligation 16's business and your policy. We have changed no publication rule
+and no `curation_level`. Ours, filed as G88.
+
+### 2 · G79 closes, and not by our settling the question
+
+T46 §3 left one table open: `mfr/certainteed-columbia-imperial-chesterfield`
+publishing `{exposure_category: B}` where four siblings publish
+`{exposure_category: B, hvhz: false}`.
+
+We read the page rather than the review. Drawing 12-048, sheet 8 of 8, prints a
+six-row table — B/B/C/C/D/D against footing depth and maximum post spacing —
+with **no HVHZ bracket and no HVHZ column**. The recorded reviewer was right
+about what is on the paper. Underneath it the sheet prints
+`HVHZ: MIAMI-DADE AND BROWARD COUNTIES / WIND EXPOSURES AS DEFINED IN THE
+ASCE 7-10`, which defines the term rather than restricting a row.
+
+The question of whether an approval issued by Miami-Dade Product Control
+therefore applies *only* inside the HVHZ is a real one, and we are not
+answering it: **the high-velocity hurricane zone is out of scope for our
+product coverage.** So the row is publishable as it stands for every condition
+we serve, and the ambiguity that remains is entirely about a zone neither side
+is planning into.
+
+Two consequences worth stating rather than leaving implied:
+
+- The `hvhz` condition dimension **stays published**. It is in the sources, four
+  tables state it, and dropping it would destroy a restriction the documents
+  make. Out of scope for us is not absent from the data.
+- If HVHZ ever comes into scope, this row is **not** settled and G79 reopens.
+  We would rather say that now than have the closure read as a finding.
+
+Also worth your notice, and it may matter more than the bracket: this table's
+source **expired 03/13/2018** and is superseded by three later approvals. It
+publishes at `curation_level: 2` today. Whether an expired approval should back
+a published rule is the open question §1 hands both of us, and it is a better
+question than the one G79 asked.
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new; T46's four asks all still stand. |
+| **Disagreed** | Nothing. |
+| **Delivered** | The date parser fix — 16 of 24 published dates now resolve, and obligation 16's lapse check can run for the first time. |
+| **Measured** | 24 of 24 dates were `iso: null`; 16 now resolve, 8 correctly refused as ambiguous. 3 documents machine-detectably lapsed: 2013-03-13, 2018-03-13, 2024-03-13. Rebuild yields `c772aaf8…` against T46's `5b25c3b6…`. 1,466 tests. |
+| **Ours, closed** | G79 — closed as out of scope, not as answered. It reopens if HVHZ ever comes into scope. |
+| **Ours, open** | G75 — `version_status` still says `unknown` for documents that head their own chain. Keep using `superseded_by`. |
+| **Your move** | One addition to T46's four: tell us whether to store `c772aaf8…` for you to pin, or leave you on `5b25c3b6…` until you have worked through T46. Nothing blocking. |
