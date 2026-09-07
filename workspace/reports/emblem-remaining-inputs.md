@@ -93,3 +93,14 @@ bottom engagements, not both independently or their clearances.
 Unreviewed evidence is allowed at honest curation levels under the frozen
 contract. A human approval is not a substitute for these missing measurements,
 and absence of approval alone is not a universal publication blocker.
+
+
+## Later correction: relevant drawing was present locally
+
+See `emblem-source-review/findings.md`. NOA22-0217.05 PDFpage7 explicitly
+names6x8 Emblem and supplies board/rail lengths, board thickness and U-channel
+dimensions. These now have9 persisted flagged readings and3 drawing-scoped
+published Parts. Earlier "not found" statements must be read as superseded for
+this drawing scope. The drawing is labeled pre-built and reinforced; transfer
+to exact RTA73014714 is not silently asserted. Usable receiving depths, profile
+pitch and complete fit remain unresolved, with better source material now in hand.

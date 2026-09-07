@@ -1,5 +1,20 @@
 # Source-to-model workflow handoff
 
+## Current workflow entry point
+
+Use [docs/workflows/source-to-contract.md](docs/workflows/source-to-contract.md).
+It now requires bounded source coverage before declaring data missing, including
+canonical OCR and visual drawing inspection. Empty extracted text is not a
+negative finding. Record whether a gap is uninspected, applicability/interpretation
+unresolved, conversion/consumer work pending, or not found after inspection.
+
+The later 2022 Emblem drawing discovery below supersedes earlier blanket
+missing-dimension conclusions. Publish its supported knowledge in drawing scope
+without silently equating it to the exact RTA SKU. Current source-specific
+instructions are in [the Emblem workflow](docs/curation/emblem-publication-workflow.md).
+Historical checkpoints below retain their original context; do not treat them
+as a current exhaustive search result.
+
 ## Objective and scope
 
 Formalize a repeatable conversion from source evidence into contract-valid data-model instances through fence-rag’s **Sources → Canonical → Claims → Published** layers. This session developed an Emblem prototype; it did **not** complete that layered conversion. The next session should formalize the workflow before extending the prototype.
@@ -124,3 +139,22 @@ Four existing Parts passed; four focused tests passed. No subagents, source
 ingestion, live review mutation, broad suite or consumer experiments were run
 for this checkpoint. Earlier assembly answer prose is explicitly excluded from
 the layered acceptance claim. New batch invocation is in the workflow document.
+
+
+Missed structural drawing recovered — 2026-09-07: the retained NOA22-0217.05
+PDFpage7/drawing001sheet4 explicitly names6x8 Emblem (pre-built panel style).
+Board0.875x6x61.5in, rail2.25x7x94in and U-channel0.99x1.34x53.875in are
+visible. Canonical OCR already existed in ocr_text despite empty text. These
+dimensions are no longer "not found"; exact RTA SKU/revision equivalence and
+reinforced construction applicability remain unresolved.2024 approval covers
+other named models and is not a blanket replacement for the2022 Emblem drawing.
+
+Nine flagged visual readings now persist in facts through
+`fence_evidence/emblem_drawing_claims.py`; normal publisher emits3 drawing-scoped
+draft Parts, preserving original exact-SKU Parts. New snapshot:
+55bc6c769a933079f37e7b5795bd0042ee52a66d5beefe95c9a9d079dcc05bda.
+70 focused tests pass. Source coverage/findings:
+`workspace/reports/emblem-source-review/findings.md`. Repeat with
+`python3 scripts/advance_emblem_drawing.py`, then
+`python3 scripts/check_conversion_batch.py workspace/catalog/emblem-drawing-conversion-batch.json`.
+No synthetic dimensions, human reviews, or consumer assembly approval were added.

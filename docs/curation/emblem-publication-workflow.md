@@ -3,9 +3,42 @@ This document retains Emblem-specific details and historical checkpoints.
 
 # Emblem publication and assembly workflow
 
-Target: Freedom Emblem Privacy White 6×8, exact model **73014714**. The first
-completion milestone includes a contract-valid FenceModel, validated physical
-assembly, and component quantities/cuts. Supplier-kit purchasing follows it.
+Target: useful knowledge for Freedom Emblem Privacy White 6×8, exact model
+**73014714**, plus separately scoped supporting drawings. Partial knowledge
+publication is the first milestone. Complete model mapping, physical assembly,
+component cuts/counts and supplier purchasing have separate acceptance checks.
+
+## Current source coverage and two conversion slices
+
+- **Exact-SKU project sheet:** seven persisted readings produce four draft Parts.
+- **2022 structural drawing:** PDF page 7 / drawing 001 sheet 4 explicitly names
+  6×8 Emblem, pre-built panel style. Nine flagged scan readings produce three
+  separate drawing-scoped Parts. They include board length/thickness, rail
+  length and end-channel dimensions; exact RTA component equivalence is not
+  asserted.
+
+[Coverage inventory](../../workspace/reports/emblem-source-review/coverage.json)
+and [findings](../../workspace/reports/emblem-source-review/findings.md) record
+what was inspected, how, and what it answered. Earlier blanket statements that
+these dimensions were not found are superseded for the drawing's scope.
+The 2024 approval names other models; it must not automatically replace the
+2022 Emblem drawing merely because their identifiers or filing names resemble
+one another. Canonical `ocr_text` must be checked when `text` is empty.
+
+The sell sheet and transition/cutdown guides also support scoped answers. Those
+research findings are distinct from the two slices actually persisted and
+published. Use the general workflow's gap states to distinguish uninspected
+sources, unresolved applicability/datums, conversion work, consumer work and
+information not found after inspection.
+
+```bash
+python3 scripts/advance_emblem_drawing.py
+python3 scripts/check_conversion_batch.py workspace/catalog/emblem-drawing-conversion-batch.json --round 1
+```
+
+The importer preserves original OCR evidence and records AI visual readings as
+flagged, not human reviewed. New quantities use `drawing_*` fields and scoped
+Part identities; they never silently become installed pitch or exact-SKU cuts.
 
 ## Implemented source-to-Part path
 
@@ -38,10 +71,8 @@ Each exact Part now has a `sha256:` version derived from all its public content
 except the version itself. A correction or changed classification produces a
 different version; replay of identical content preserves it. Archived snapshots
 with the earlier numeric version 1 remain unchanged. These hashes identify
-content, not chronology. Public preflight accepts string versions, but Planning's
-private Part types currently require integers: the missing public adapter must
-preserve these version identities, and direct private-parser compatibility is
-not claimed.
+content, not chronology. Planning's public Part receipt now preserves these string identities. Private
+generation revisions remain integers; public-to-generation mapping is separate.
 
 The rail dimensions remain exact at 57150 and 177800 milli-mm. Board nominal
 width does not become installed pitch. Cap nominal dimensions do not become

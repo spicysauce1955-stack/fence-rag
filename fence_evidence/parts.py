@@ -213,5 +213,6 @@ def build_parts(components: list[dict], registry, *, source_ref=None,
     parts = sorted(parts_by_id.values(), key=lambda p: p["id"])
     from .emblem_claims import NAMESPACE, build_emblem_parts
     if identity_namespace == NAMESPACE:
-        parts = sorted(parts + build_emblem_parts(conn, mint), key=lambda p: p['id'])
+        from .emblem_drawing_claims import build_parts as build_drawing_parts
+        parts = sorted(parts + build_emblem_parts(conn, mint) + build_drawing_parts(conn, mint), key=lambda p: p['id'])
     return parts, gaps.list()

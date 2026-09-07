@@ -26,16 +26,18 @@ class TestConversionCheckpoint(unittest.TestCase):
 
     def test_trace_requires_persisted_nonrejected_canonical_claim_and_published_cite(self):
         conn=sqlite3.connect(':memory:');self.addCleanup(conn.close);conn.row_factory=sqlite3.Row
-        conn.executescript('''CREATE TABLE elements(element_id,version_id,document_id,page_no,text,bbox);
+        conn.executescript('''CREATE TABLE elements(element_id,version_id,document_id,page_no,text,bbox,ocr_text);
         CREATE TABLE document_versions(version_id,sha256);
         CREATE TABLE facts(fact_id,extractor,fact_type,element_id,document_id,version_id,page_no,
             review_status,evidence_text,value_original,reviewed_value);
-        INSERT INTO elements VALUES('e','v','d',1,'6 inches','[]');
+        INSERT INTO elements VALUES('e','v','d',1,'6 inches','[]',NULL);
         INSERT INTO document_versions VALUES('v','sha');
         INSERT INTO facts VALUES(1,'recipe','width','e','d','v',1,'extracted','6 inches','6 in.',NULL);''')
         bindings=[{'part_id':'p','spec_key':'width','extractor':'recipe','fact_type':'width','element_id':'e'}]
         part={'id':'p','spec':[{'key':'width','value':{'amount_milli':152400},
             'provenance':{'cites':[{'id':ref_id('sha',1,'[]'),'belongs_to':'sha'}]}}]}
+        self.assertEqual(check_bindings(conn,bindings,[part])[0]['fact_id'],1)
+        conn.execute("UPDATE elements SET text='',ocr_text='6 inches'")
         self.assertEqual(check_bindings(conn,bindings,[part])[0]['fact_id'],1)
         with self.assertRaises(ValueError): check_bindings(conn,[],[part])
         changed=deepcopy(part);changed['spec'][0]['provenance']['cites']=[]

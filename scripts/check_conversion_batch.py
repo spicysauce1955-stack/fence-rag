@@ -33,7 +33,7 @@ def check_bindings(conn, bindings, parts):
             if len(candidates) != 1:
                 raise ValueError('Missing or ambiguous claim binding: ' + part['id'] + '/' + spec['key'])
             binding = candidates[0]
-            rows = conn.execute('''SELECT f.*, e.text AS canonical_text,e.bbox,
+            rows = conn.execute('''SELECT f.*, COALESCE(NULLIF(e.text,''),e.ocr_text,'') AS canonical_text,e.bbox,
                 e.page_no AS canonical_page,e.version_id AS canonical_version,
                 e.document_id AS canonical_document,v.sha256
                 FROM facts f JOIN elements e ON f.element_id=e.element_id

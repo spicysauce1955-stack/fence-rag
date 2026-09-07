@@ -24,13 +24,68 @@ Record the intended answer: component properties, assembly explanation, fitted
 counts/cuts, or purchasing. That determines which missing inputs actually matter.
 Do not demand a full engineering drawing to publish a supported nominal size.
 
+## Check source coverage before declaring a gap
+
+A small conversion slice does not establish that the available sources lack other
+answers. Before marking a requested value missing, make a bounded inventory of
+relevant product/family documents: project sheets, catalogs, installation and
+cutdown/transition guides, component drawings and structural filings. Limit
+inspection by the question and product scope, not just filenames or search hits.
+
+For each candidate record its path/URL, content hash, pages inspected, inspection
+method, product/configuration scope, findings and disposition. Reuse previous
+work where appropriate, but verify that its search actually covered the current
+question. Record uninspected candidates explicitly instead of treating them as
+negative evidence. The coverage record is run metadata, not a new claims store.
+
+If PDF text is empty or unhelpful, inspect canonical `ocr_text` and page images.
+Screen relevant drawing sheets with OCR, then visually verify selected labels,
+units, dimensions and datums. OCR is a navigation/extraction aid; its garbled
+output must not be silently corrected in canonical storage. Record an attributed
+visual reading through the claim lifecycle with its extraction/review status.
+Do not infer dimensions by measuring an image marked NTS (not to scale).
+
+Read each drawing's title, sheet number, revision and construction notes. A
+manufacturer name or similar approval number is not proof of component identity
+or succession. Pre-built, ready-to-assemble, reinforced, gate and transition
+configurations may share dimensions while differing in other details. Compare
+applicable sources without erasing those distinctions. Useful drawing/family
+knowledge can be published in its own scope while exact-SKU transfer remains
+unresolved; do not discard it merely because that bridge is missing.
+
+If relevant local sources do not settle a question, use available web/Tavily
+tools to follow manufacturer documents, component crosswalks and exact-product
+links. Try recovering a known missing download and compare its recorded hash
+before asking the user to supply it. A bounded search ending without a result
+means “not found in the inspected sources”, not “unavailable anywhere”. User
+questions can proceed alongside this work when they help identify the intended
+product or configuration; supplying a new document is not automatically the
+user's burden.
+
+Classify each open question explicitly:
+
+| State | Meaning and next action |
+|---|---|
+| Not yet inspected | A relevant source exists; inspect it or record the deferred scope. |
+| Found, applicability unresolved | Retain the scoped finding; investigate the product/revision/configuration bridge. |
+| Found, interpretation unresolved | Inspect the drawing or clarification needed to establish units or datums. |
+| Found, conversion pending | Persist/project through the owning layer; do not call this missing evidence. |
+| Found, consumer support pending | Implement or explicitly refuse the requested behavior; do not invent a source gap. |
+| Not found after bounded inspection | Record searched sources/pages and the specific remaining request. |
+
+When a discovery changes a gap, update the current coverage and handoff records.
+Keep historical runs immutable and identify which earlier conclusions are
+superseded. The checkpoint script verifies the declared conversion slice; it
+**does not establish search completeness or adjudicate applicability**. Those
+remain evidence-backed review duties in this workflow.
+
 ## Execute the stages
 
 | Stage | Work and existing owner | Acceptance evidence |
 |---|---|---|
 | Scope | Identify exact model, size, colour, source editions and target contract entities. Define partial success and unsupported tasks. | Explicit applicability; replacements and family statements are scoped separately. |
-| S — Sources | Reuse retained files; fetch additional sources through the existing corpus path. Preserve originals and hashes. | Actual bytes match recorded hashes. A web locator alone is a research lead, not a canonical SourceRef. |
-| C — Canonical | Reuse or run existing ingestion. Read text with relevant tables/figures; preserve page, element, region and extraction origin. Use `refs.py` to mint/resolve references. | Raw statements match their addressed edition and page region. Record ambiguous OCR or applicability as uncertainty. |
+| S — Sources | Reuse retained files; fetch additional sources through the existing corpus path. Preserve originals and hashes. | Actual bytes match recorded hashes; bounded coverage and uninspected leads are recorded. A web locator alone is not a canonical SourceRef. |
+| C — Canonical | Reuse or run existing ingestion. Read text, canonical OCR and relevant page images; preserve page, element, region and extraction origin. Use `refs.py` to mint/resolve references. | Raw statements match their addressed edition and page region. Record ambiguous OCR or applicability as uncertainty. |
 | K — Claims | Use the existing facts/table-reading import and review lifecycle. Retain original value, conditions, source, author/extractor and review state; corrections use the existing ledger. | A persisted claim exists; review projection agrees with its ledger. No generated JSON becomes a substitute claim store. |
 | Authored composition | Name entities and relationships through existing dataset/authoring structures. Map required fields to claims; label authored conventions separately from measured facts. | PartType, Part, support/member references and scopes close. Counts, stock contents, nominal dimensions and installed geometry are not conflated. Unsupported mappings remain proposals. |
 | P — Published | Use the existing publisher and snapshot verifier/store. Classification belongs on values; preserve exact Quantity units/raw text and source references. | Contract shape, identity, provenance and reference closure pass. Rejections/corrections appear in the actual output; source facts never point upward to generated objects. |
@@ -67,7 +122,8 @@ Only the `persisted-facts-to-parts-v1` checkpoint profile is implemented. It:
    It does not claim that every requested field, model or assembly is complete.
 
 The original-value/evidence equality check intentionally supports exact canonical
-fact recipes. A different extraction convention needs an explicit checked
+fact recipes. It reads canonical `text`, or `ocr_text` when text is empty; OCR
+readings remain separately classified and are never silently promoted. A different extraction convention needs an explicit checked
 profile, not silently weakened comparisons. Publication remains owned by the
 normal builder; this checker does not introduce a second conversion formula.
 
@@ -78,7 +134,9 @@ from four perspectives sequentially: source applicability, layer/schema closure,
 requested functionality, and an adverse case. No subagents or broad experiments
 are required. Pick an adverse case that could falsify this slice: changed source,
 rejected reading, correction rounding, missing reference, impossible engagement,
-or purchasing credits hiding physical parts.
+or purchasing credits hiding physical parts. Also challenge an evidence-gap
+claim: could an image-only sheet, existing OCR, a differently named filing or
+a recoverable download already contain the answer?
 
 For each finding, record the failing check, evidence and disposition. Correct
 only its owner: source acquisition/ingestion, claim review, authored composition,
@@ -137,3 +195,23 @@ this verified slice because its Claims→Published transition is unfinished.
 Full FenceModel geometry/provenance mapping, physical fit and purchase inventory
 remain separate limitations. This workflow does not ratify Amendment 008 or
 claim that the complete model conversion has been proven.
+
+A second representative batch demonstrates the source-coverage correction:
+[Emblem drawing manifest](../../workspace/catalog/emblem-drawing-conversion-batch.json)
+and [source review](../../workspace/reports/emblem-source-review/findings.md).
+The retained 2022 approval's PDF page 7 explicitly names a 6×8 Emblem pre-built
+panel. Its canonical OCR already existed despite empty text. Visual inspection
+recovered board, rail and U-channel dimensions; nine flagged facts were projected
+into three drawing-scoped Parts without changing the original exact-SKU Parts.
+The batch passed its layer checkpoint and 70 focused tests. These are recorded
+results from that batch, not new validation performed by editing this workflow.
+
+```bash
+# Imports the bounded drawing readings; creates no human reviews.
+python3 scripts/advance_emblem_drawing.py
+python3 scripts/check_conversion_batch.py workspace/catalog/emblem-drawing-conversion-batch.json --round 1
+```
+
+This second example does not prove pre-built/RTA equivalence or complete fit.
+It demonstrates why source coverage must precede claims that dimensions are
+missing, and why scoped publication can proceed while applicability is resolved.

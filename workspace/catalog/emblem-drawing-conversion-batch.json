@@ -1,0 +1,96 @@
+{
+  "batch_id": "emblem-drawing-002",
+  "profile": "persisted-facts-to-parts-v1",
+  "tenant": "default",
+  "scope": "NOA22-0217.05 pre-built Emblem drawing001 sheet4; exact SKU unverified",
+  "sources": [
+    {
+      "path": "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-22-0217.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+      "sha256": "13041c76330a3e6c6fb27f73bab982b2cd71c89f6eea842f30c174a4831a2a0b"
+    }
+  ],
+  "snapshot": "workspace/snapshots/55bc6c769a933079f37e7b5795bd0042ee52a66d5beefe95c9a9d079dcc05bda.json",
+  "part_ids": [
+    "mfr/freedom-outdoor-living/emblem-noa22021705-rail",
+    "mfr/freedom-outdoor-living/emblem-noa22021705-board",
+    "mfr/freedom-outdoor-living/emblem-noa22021705-end-channel"
+  ],
+  "bindings": [
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-rail",
+      "spec_key": "drawing_width_mm",
+      "extractor": "source-reading:emblem-noa22021705:v1",
+      "fact_type": "rail_drawing_width_mm",
+      "element_id": "element-44a8582188-0011"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-rail",
+      "spec_key": "drawing_height_mm",
+      "extractor": "source-reading:emblem-noa22021705:v1",
+      "fact_type": "rail_drawing_height_mm",
+      "element_id": "element-44a8582188-0013"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-rail",
+      "spec_key": "drawing_length_mm",
+      "extractor": "source-reading:emblem-noa22021705:v1",
+      "fact_type": "rail_drawing_length_mm",
+      "element_id": "element-44a8582188-0013"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-board",
+      "spec_key": "drawing_thickness_mm",
+      "extractor": "source-reading:emblem-noa22021705:v1",
+      "fact_type": "board_drawing_thickness_mm",
+      "element_id": "element-44a8582188-0017"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-board",
+      "spec_key": "drawing_profile_width_mm",
+      "extractor": "source-reading:emblem-noa22021705:v1",
+      "fact_type": "board_drawing_profile_width_mm",
+      "element_id": "element-44a8582188-0017"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-board",
+      "spec_key": "drawing_length_mm",
+      "extractor": "source-reading:emblem-noa22021705:v1",
+      "fact_type": "board_drawing_length_mm",
+      "element_id": "element-44a8582188-0017"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-end-channel",
+      "spec_key": "drawing_width_mm",
+      "extractor": "source-reading:emblem-noa22021705:v1",
+      "fact_type": "end_channel_drawing_width_mm",
+      "element_id": "element-44a8582188-0044"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-end-channel",
+      "spec_key": "drawing_depth_mm",
+      "extractor": "source-reading:emblem-noa22021705:v1",
+      "fact_type": "end_channel_drawing_depth_mm",
+      "element_id": "element-44a8582188-0044"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-end-channel",
+      "spec_key": "drawing_length_mm",
+      "extractor": "source-reading:emblem-noa22021705:v1",
+      "fact_type": "end_channel_drawing_length_mm",
+      "element_id": "element-44a8582188-0044"
+    }
+  ],
+  "implementation_files": [
+    "fence_evidence/emblem_drawing_claims.py",
+    "fence_evidence/parts.py",
+    "fence_evidence/reviews.py",
+    "fence_evidence/snapshot.py"
+  ],
+  "historical_evidence": [],
+  "limitations": [
+    "Exact-SKU/revision applicability and reinforced configuration differ from standard RTA instructions.",
+    "Receiving depths, usable seats and installed pitch are not inferred from undimensioned profile features.",
+    "Inherited document metadata says unspecified/superseded; its classification/lineage needs separate curation.",
+    "AI visual readings remain flagged at curation level0. No complete fit or purchase validation."
+  ]
+}

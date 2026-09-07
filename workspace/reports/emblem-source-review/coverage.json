@@ -1,0 +1,70 @@
+{
+  "documents": [
+    {
+      "path": "manuals/freedom-outdoor-living/2023_Emblem_Sell-Sheet.pdf",
+      "sha256": "e1775487112e187de5d87ec8dd1dffb58f274c40a8854719c7fed1d604534717",
+      "inspection": "text inspected,2 pages",
+      "scope": "Emblem family",
+      "findings": "Racking1 inch/foot; line/corner/end posts; gate width2in below opening; gate insert requirement.",
+      "disposition": "Supports additional family answers; not converted in this batch."
+    },
+    {
+      "path": "manuals/freedom-outdoor-living/VFTransitionPanelKit_SlopeAccommodation.pdf",
+      "sha256": "b5a88565013e63fe2ad328a53b0cf034a1a5203d57f46a2a291ff587477dd44e",
+      "inspection": "text inspected,English sequence and Spanish cross-check",
+      "scope": "Transition panel configuration",
+      "findings": "6to5ft transition15boards;6to4ft14boards; decorative rail route cut7-5/16in.",
+      "disposition": "Configuration-specific; not standard-panel inventory or post pocket depth."
+    },
+    {
+      "path": "manuals/freedom-outdoor-living/Freedom_RTA_Cutdown_Instructions.pdf",
+      "sha256": "0be90ecf57858c6fe8c8379efa7d7f78799dce234485baa24e686382ba7a2227",
+      "inspection": "text inspected,2 pages",
+      "scope": "RTA cutdown procedure",
+      "findings": "Rail cut allowance3in total; longitudinal board trimming; height/route changes.",
+      "disposition": "Instructions found; engine trimming remains unsupported, not a missing-source claim."
+    },
+    {
+      "path": "manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf",
+      "sha256": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b",
+      "inspection": "page14 reread",
+      "scope": "Exact73014714 white6x8",
+      "findings": "72x94in panel;2.25x7in rails; 5x5x108in line/corner/end posts and SKUs.",
+      "disposition": "Supports dimensional cross-checks; does not identify NOA drawing as the same retail revision."
+    },
+    {
+      "path": "manuals/freedom-outdoor-living/73014714-6x8Emblem-White-ProjectPlanning.pdf",
+      "sha256": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "inspection": "existing pinned readings reused",
+      "scope": "Exact73014714",
+      "findings": "6in boards and2.25x7in rails match drawing outer designations.",
+      "disposition": "Original Part claims unchanged; dimensional agreement alone is not internal equivalence."
+    },
+    {
+      "path": "manuals/freedom-outdoor-living/FREEDOM-WEB-PrivacyKit_Ready-to-Assemble-Privacy-Vinyl-Fence-Install.pdf",
+      "sha256": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "inspection": "existing canonical page4/7 readings reused",
+      "scope": "Full privacy RTA6ft branch",
+      "findings": "Board seating and handed channels; ordinary7in rail insert exception.",
+      "disposition": "Reinforced drawing requires inserts/screws; preserve construction branch distinction."
+    },
+    {
+      "path": "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-24-0117.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+      "sha256": "2f446717ee750908059bed45ce06552636671944ca8c1cbbe922092e8d769c3c",
+      "inspection": "page1 and drawing PDFpage7 visually inspected",
+      "scope": "Columbia/Imperial/Chesterfield/Breezewood/Brookline",
+      "findings": "Cover names other models; drawing page7 is Brookline6x6.",
+      "disposition": "Do not transfer geometry to Emblem. Remaining drawing sheets not reviewed after scope exclusion."
+    },
+    {
+      "path": "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-22-0217.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+      "sha256": "13041c76330a3e6c6fb27f73bab982b2cd71c89f6eea842f30c174a4831a2a0b",
+      "inspection": "page1 visually read; all9 drawing sheets OCR-screened; Emblem PDFpage7 visually inspected",
+      "scope": "6x8 Emblem pre-built reinforced drawing001sheet4",
+      "findings": "Board0.875x6x61.5in; rail2.25x7x94in; end-channel0.99x1.34x53.875in; post5x5x108in.",
+      "disposition": "Nine flagged facts now published as three drawing-scoped draft Parts; no exact-SKU transfer."
+    }
+  ],
+  "scope": "Bounded review of8 relevant retained PDFs; not an exhaustive corpus survey",
+  "no_new_canonical_edition": "Existing OCR elements retained; auxiliary OCR output only assists visual navigation."
+}
