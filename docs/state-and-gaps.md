@@ -5062,6 +5062,174 @@ gaps; removing real rails/boards/posts merely to fit a schema is not completion.
 See the corrected field-level request in emblem-remaining-inputs.md and current
 emblem-blocker-progress.md. Concurrent snapshot verifier edits remain separate.
 
+### G102 — Persist exact Emblem readings and publish four source-backed Parts
+
+`[measured]`, 2026-09-07. The agreed target now includes publication of exact
+Emblem 73014714 **and validated assembly/component BOM**. Kit-based purchasing
+is a subsequent checkpoint. Neither the complete model nor assembly is complete.
+
+Inspection confirmed that the unified `claims` table in the four-layer design
+has not shipped. `fence_evidence/emblem_claims.py` therefore uses the existing
+`facts` / `fact_reviews` lifecycle, with a deterministic pinned-source recipe,
+not a second claims store. Seven unreviewed readings are persisted: board nominal
+width, panel colour, rail width/height, cap nominal width/depth and cap colour.
+Each verifies canonical text, source SHA, shared ownership and same-page/edition
+applicability anchors. Re-import is idempotent, preserves decisions and refuses
+conflicting or ambiguous original readings. No live human review was created.
+
+The actual Part builder now emits the exact board, provisional rail A/B and cap
+73013956 from those persisted readings. Every spec carries classified provenance
+and canonical applicability references. Parts remain draft; published rail values
+are exactly 57150 and 177800 milli-mm. Board nominal width remains 152400 milli-mm
+and is not executable pitch; cap nominal width/depth are not mating clearances.
+Existing family Parts retain their separate IDs. The original source-bound draft,
+placement confirmation, source files and frozen boundary files were not edited.
+
+`python3 scripts/advance_emblem.py --apply` imported seven readings and stored
+verified local snapshot
+`d4017b1b21c32b4e625cfcfde8106037c617a6bb2d39bc209446e5fcd5b9b144`.
+An idempotent rerun inserted none. It contains four exact Parts and still
+`models=[]`. The same snapshot identity and verification succeed with committed
+HEAD `snapshot.py`, independently of the pre-existing working-tree verifier
+edits. No snapshot was sent to a remote service.
+
+The generated `workspace/reports/emblem-workflow-progress.{json,md}` records
+field-level exclusions and the six distinct missing receiving/engagement datums.
+The original draft also lacks authored shape fields and their lifecycle mapping;
+the geometry list is not a complete definition of remaining software work.
+The report includes the newly published Parts' refs when checking admission,
+avoiding false citation-closure errors from checking only the original draft.
+`docs/curation/emblem-publication-workflow.md` records reproduction and transitions.
+
+The actual consumer rerun (`emblem-workflow-consumer-check.json`) parses the
+private candidate and exercises bounded capabilities, but still fails on rail
+receiving depth and board width/fit inputs. The diagnostic catalog is empty;
+no-match errors are not evidence of product unavailability. Private parsing still
+drops authorship/citations; no lossless public model adapter or assembly was
+validated. Amendment 008 remains pending, and the numeric mapping guard remains.
+
+Validation: full repository suite **1,565 tests**, one existing expected failure
+(57.887 seconds), passing. After the checklist reference-closure correction,
+**11 focused lifecycle tests** pass (3.172 seconds). These include synthetic
+correction/rejection replay through the existing ledger into a fresh store with
+different fact IDs, independent cap-axis correction, duplicate/changed-source
+refusals, exact fractional rail conversion, and actual snapshot projection.
+Synthetic reviews were confined to test stores. Frozen checksums pass.
+
+### G103 — Adversarial agents expose and repair Emblem lifecycle defects
+
+`[measured]`, 2026-09-07. At the user's explicit request, three independent
+agents reviewed source integrity, fact/review/publication lifecycle, and
+verification/reporting. They found no discrepancy in the seven current source
+anchors, but reproduced defects beyond G102's single-review happy path.
+
+Fact-review export sorted by timestamp while live review precedence used arrival
+order. A backdated rejection could therefore replay as acceptance. Export now
+preserves arrival order per evidence anchor; imports refuse incompatible or
+incomplete histories that would make an older decision win. A second check inside
+the write transaction catches a competing review submitted after preflight. Old
+ledgers that already lost ordering cannot reconstruct it without another record.
+
+Emblem import checked existence before taking its lock: two callers could create
+14 readings. It now takes a write lock before validation, with savepoint handling
+for caller-owned transactions. Publication validates projected reviews against
+the latest ledger record and current source ref, refusing forged annotations and
+reviews whose evidence region moved. Exact Fraction arithmetic replaces Decimal
+context arithmetic, which silently rounded sufficiently long corrections.
+
+Part versions no longer stay at 1 when reviewed content changes. Each is now a
+`sha256:` hash of all public Part content except version. This fits the public
+validator's existing string-version support and is stable across replay with
+different local fact IDs. **Private Planning Part types still require integers**;
+direct compatibility is not claimed, and preserving these public version
+identities is explicitly part of the unfinished adapter. Hash versions identify
+content, not chronological order. Archived numeric-version snapshots are intact.
+
+Progress Markdown now reports actual published/withheld Parts after rejection.
+The canonical integration fixture resets only the Emblem recipe's rows inside a
+disposable copied store, so valid live reviews cannot break an original-value
+assertion. Rejection subtests are independent. New controls cover concurrency,
+rollback, source-region changes, forged/stale projections, precision, version
+identity and conflicting replay histories.
+
+Snapshot `b5048772101e18513a9cbd2c913978da05046fced986e03c42afddc5c5b19ec7`
+verifies using current and committed HEAD snapshot code. Its four exact Parts
+match G102 apart from version identities; all seven live readings remain
+unchanged and unreviewed. Full Emblem admission and assembly validation remain
+false. No source, placement confirmation, frozen file or live human review was
+changed; pre-existing snapshot and concurrent conversation edits remain separate.
+
+Review details: `workspace/reports/emblem-workflow-adversarial-review.md`.
+Independent reruns passed 60 Emblem tests and 132 review tests. The full suite
+before the final chronology-race regression ran 1,578 tests in 59.871 seconds,
+OK with one existing expected failure. The final full run is recorded below.
+
+Final full suite after the chronology-race fix: **1,579 tests in 59.536 seconds**,
+OK with one existing expected failure. Log:
+`workspace/tests/emblem-adversarial-final-suite.log`. Frozen checksums and diff
+whitespace checks pass.
+
+### G104 — Read actual Emblem Parts in Planning and make geometry disposition reviewable
+
+*2026-09-07.* Planning's public Part reader now preserves positive integer or
+nonempty opaque string versions without coercion. Ingestion retains inactive
+public definitions; judged specifications carry their original version and
+provenance. Private generation revisions and selection remain separate. The
+actual snapshot round-trips all four exact draft Parts, with no activation or
+assembly claim. SourceDoc receipts preserve typed citation joins, not unknown
+raw extension metadata.
+
+Adversarial reviews found and corrected an overly broad source-document report
+and an alias through the admission date that allowed receipt edits to mutate
+input. Six manual fault probes refuse missing Parts, dropped receipts, changed
+values/versions, missing source documents, and lost inactivity.
+
+The private geometry disposition packet adds executable examples and refusal
+vectors for Joint and FromBottom/FromTop numeric associations, including null
+obligations and precision loss. It is a bounded proposal checker, not complete
+model validation. Amendment 008 remains pending; both frozen documents verify
+unchanged. No manufacturer measurements or human reviews were fabricated.
+
+Reports: `workspace/reports/emblem-public-parts-consumer-check.json` and
+`workspace/reports/emblem-geometry-disposition.md`. Consumer edits are preserved
+as a cumulative patch with a base/hash receipt in
+`workspace/reports/emblem-consumer-public-receipts-patch.json`; they are local
+and have not been deployed. Public-to-generation geometry mapping and exact
+receiving depths, engagements, installed pitch and fitting evidence still block
+a complete model and validated assembly/component BOM.
+
+Root regression: **1,589 tests in 61.712 seconds**, OK with one existing
+expected failure (`workspace/tests/emblem-blockers-full-suite.log`). Final
+consumer regression: **2,603 passed, 7 warnings in 71.50 seconds**
+(`workspace/tests/emblem-blockers-consumer-final-suite.log`). The patch receipt
+records both runs and the verified base/hash.
+
+### G105 — Useful partial Emblem knowledge has its own completion gate
+
+*2026-09-07.* User clarified that missing geometry must not prevent supported
+knowledge from being supplied. `advance_emblem.py` now defaults to objective
+`knowledge`: a verified nonempty exact Part slice succeeds even when complete
+model/assembly validation remains false. `--objective assembly` retains the
+stricter outcome. No frozen shape or model admission rule was weakened.
+
+The generated knowledge JSON/Markdown carries current published specifications,
+original readings, classifications and citations, plus separately labeled,
+canonical-checked assembly interpretations. Rejected definitions do not reappear
+as defaults; corrected values retain exact milli-unit precision. Follow-up
+questions are tied to requested cuts/counts, purchases or layout instructions,
+not prerequisites to reading the available knowledge.
+
+Actual default run with `--apply` succeeded with four draft Parts and four
+source-checked assembly readings. Output:
+`workspace/reports/emblem-workflow-progress-knowledge.md`. This is a local
+answer document alongside the verified snapshot, not a new deployed endpoint or
+an admitted executable model. The assembly objective still refuses completion.
+
+Adversarial review found empty-card wording and hidden classifications; both
+were corrected with regressions. Full suite before these final presentation
+changes:1594 tests in60.045s, OK with one expected failure. Six focused knowledge
+cases pass after the changes. No fabricated measurements or human reviews.
+
 ---
 
 ## 4. If work resumes, in order

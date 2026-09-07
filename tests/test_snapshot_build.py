@@ -425,7 +425,7 @@ class TestPartTypeSpineOverTheRealStore(unittest.TestCase):
 
     def test_emblem_family_parts_publish_without_a_partial_model(self):
         parts = [p for p in self.snap['parts']
-                 if p['id'].startswith('mfr/freedom-outdoor-living/')]
+                 if p['id'].startswith('mfr/freedom-outdoor-living/freedom-')]
         self.assertEqual(len(parts), 6)
         self.assertTrue(all(p['spec'] == [] for p in parts))
         self.assertFalse(any('gate' in p['id'] for p in parts))

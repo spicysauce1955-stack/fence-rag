@@ -211,4 +211,7 @@ def build_parts(components: list[dict], registry, *, source_ref=None,
         part["contributing_sources"] = sorted({c["belongs_to"] for c in cites})
 
     parts = sorted(parts_by_id.values(), key=lambda p: p["id"])
+    from .emblem_claims import NAMESPACE, build_emblem_parts
+    if identity_namespace == NAMESPACE:
+        parts = sorted(parts + build_emblem_parts(conn, mint), key=lambda p: p['id'])
     return parts, gaps.list()

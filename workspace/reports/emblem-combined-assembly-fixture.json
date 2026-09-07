@@ -1,0 +1,250 @@
+{
+  "scope": "Synthetic combined engine fixture; not exact Emblem evidence",
+  "source_dimensions": false,
+  "emblem_assembly_validated": false,
+  "panel_clear_width_mm": 1420,
+  "rail_cut_mm": 1465,
+  "board_cut_mm": 1582,
+  "board_start_mm": 110,
+  "scenarios": [
+    {
+      "panels": 1,
+      "posts": 2,
+      "rails": 2,
+      "boards": 71,
+      "end_channels": 2,
+      "shared_post_checks": [],
+      "kit_purchases": 1
+    },
+    {
+      "panels": 2,
+      "posts": 3,
+      "rails": 4,
+      "boards": 142,
+      "end_channels": 4,
+      "shared_post_checks": [
+        {
+          "post_id": "post@node:1",
+          "rail_height_mm": 100,
+          "member_refs": [
+            "span@0:0-1500/bottom",
+            "span@1:0-1500/bottom"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        },
+        {
+          "post_id": "post@node:1",
+          "rail_height_mm": 1700,
+          "member_refs": [
+            "span@0:0-1500/top",
+            "span@1:0-1500/top"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        }
+      ],
+      "kit_purchases": 2
+    },
+    {
+      "panels": 7,
+      "posts": 8,
+      "rails": 14,
+      "boards": 497,
+      "end_channels": 14,
+      "shared_post_checks": [
+        {
+          "post_id": "post@node:1",
+          "rail_height_mm": 100,
+          "member_refs": [
+            "span@0:0-1500/bottom",
+            "span@1:0-1500/bottom"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        },
+        {
+          "post_id": "post@node:1",
+          "rail_height_mm": 1700,
+          "member_refs": [
+            "span@0:0-1500/top",
+            "span@1:0-1500/top"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        },
+        {
+          "post_id": "post@node:2",
+          "rail_height_mm": 100,
+          "member_refs": [
+            "span@1:0-1500/bottom",
+            "span@2:0-1500/bottom"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        },
+        {
+          "post_id": "post@node:2",
+          "rail_height_mm": 1700,
+          "member_refs": [
+            "span@1:0-1500/top",
+            "span@2:0-1500/top"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        },
+        {
+          "post_id": "post@node:3",
+          "rail_height_mm": 100,
+          "member_refs": [
+            "span@2:0-1500/bottom",
+            "span@3:0-1500/bottom"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        },
+        {
+          "post_id": "post@node:3",
+          "rail_height_mm": 1700,
+          "member_refs": [
+            "span@2:0-1500/top",
+            "span@3:0-1500/top"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        },
+        {
+          "post_id": "post@node:4",
+          "rail_height_mm": 100,
+          "member_refs": [
+            "span@3:0-1500/bottom",
+            "span@4:0-1500/bottom"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        },
+        {
+          "post_id": "post@node:4",
+          "rail_height_mm": 1700,
+          "member_refs": [
+            "span@3:0-1500/top",
+            "span@4:0-1500/top"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        },
+        {
+          "post_id": "post@node:5",
+          "rail_height_mm": 100,
+          "member_refs": [
+            "span@4:0-1500/bottom",
+            "span@5:0-1500/bottom"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        },
+        {
+          "post_id": "post@node:5",
+          "rail_height_mm": 1700,
+          "member_refs": [
+            "span@4:0-1500/top",
+            "span@5:0-1500/top"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        },
+        {
+          "post_id": "post@node:6",
+          "rail_height_mm": 100,
+          "member_refs": [
+            "span@5:0-1500/bottom",
+            "span@6:0-1500/bottom"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        },
+        {
+          "post_id": "post@node:6",
+          "rail_height_mm": 1700,
+          "member_refs": [
+            "span@5:0-1500/top",
+            "span@6:0-1500/top"
+          ],
+          "engagements_mm": [
+            25,
+            20
+          ],
+          "face_width_mm": 80,
+          "actual_gap_mm": 35,
+          "required_gap_mm": 35
+        }
+      ],
+      "kit_purchases": 7
+    }
+  ]
+}

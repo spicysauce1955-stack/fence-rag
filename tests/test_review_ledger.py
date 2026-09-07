@@ -32,6 +32,7 @@ import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import context  # noqa: F401  -- puts the repo root on sys.path
 from context import requires_store
@@ -566,6 +567,123 @@ class TestRoundTrip(unittest.TestCase):
             self.assertEqual(
                 fresh.execute("SELECT fact_id FROM fact_reviews").fetchone()[0],
                 row["fact_id"])
+
+
+class TestFactReviewChronology(unittest.TestCase):
+    def store(self):
+        conn = make_store()
+        self.addCleanup(conn.close)
+        add_fact(conn)
+        return conn
+
+    def history(self, *, same_timestamp=False):
+        conn = self.store()
+        fid = conn.execute('SELECT fact_id FROM facts').fetchone()[0]
+        review_a_fact(conn, fid, verdict='corrected', value='36"',
+                      at='2026-08-28T12:00:00+00:00')
+        review_a_fact(conn, fid, verdict='rejected',
+                      at=('2026-08-28T12:00:00+00:00' if same_timestamp
+                          else '2026-08-28T11:00:00+00:00'))
+        return conn, reviews.build_ledger(conn)
+
+    def replay(self, conn, ledger, *, body=None, dry_run=False):
+        rows = ledger[1:] if body is None else body
+        with patch.object(reviews, 'read_ledger', return_value=(ledger[0], rows)):
+            return reviews.import_reviews(conn, 'in-memory-ledger', dry_run=dry_run)
+
+    def assert_rejected(self, conn):
+        row = conn.execute('SELECT * FROM facts').fetchone()
+        self.assertEqual(row['review_status'], 'rejected')
+        self.assertIsNone(row['reviewed_value'])
+
+    def test_backdated_and_same_timestamp_decisions_replay_in_arrival_order(self):
+        for same_timestamp in (False, True):
+            with self.subTest(same_timestamp=same_timestamp):
+                source, ledger = self.history(same_timestamp=same_timestamp)
+                self.assertEqual([r['verdict'] for r in ledger[1:]],
+                                 ['corrected', 'rejected'])
+                fresh = self.store()
+                self.assertTrue(self.replay(fresh, ledger)['applied'])
+                self.assert_rejected(source)
+                self.assert_rejected(fresh)
+                self.assertEqual(reviews.ledger_bytes(reviews.build_ledger(fresh)),
+                                 reviews.ledger_bytes(ledger))
+
+    def test_missing_older_decision_is_refused_without_resurrecting_value(self):
+        _, ledger = self.history()
+        fresh = self.store()
+        self.replay(fresh, ledger, body=ledger[2:])
+        before = reviews.ledger_bytes(reviews.build_ledger(fresh))
+        for dry_run in (True, False):
+            result = self.replay(fresh, ledger, dry_run=dry_run)
+            self.assertTrue(result['refused'])
+            self.assertFalse(result['applied'])
+            self.assertEqual(result['detail']['conflicts'][0]['code'],
+                             'review_order_conflict')
+            self.assertEqual(reviews.ledger_bytes(reviews.build_ledger(fresh)), before)
+            self.assert_rejected(fresh)
+
+    def test_existing_prefix_can_receive_newer_decisions_idempotently(self):
+        _, ledger = self.history()
+        fresh = self.store()
+        self.replay(fresh, ledger, body=ledger[1:2])
+        result = self.replay(fresh, ledger)
+        self.assertTrue(result['applied'])
+        self.assertEqual(result['inserted'], 1)
+        self.assert_rejected(fresh)
+        self.assertEqual(self.replay(fresh, ledger)['inserted'], 0)
+        self.assert_rejected(fresh)
+
+    def test_conflicting_existing_order_is_refused_even_without_new_rows(self):
+        _, ledger = self.history()
+        fresh = self.store()
+        self.replay(fresh, ledger, body=list(reversed(ledger[1:])))
+        before = reviews.ledger_bytes(reviews.build_ledger(fresh))
+        self.assertTrue(self.replay(fresh, ledger)['refused'])
+        self.assertEqual(reviews.ledger_bytes(reviews.build_ledger(fresh)), before)
+
+    def test_known_subset_does_not_withdraw_a_later_local_decision(self):
+        _, ledger = self.history()
+        fresh = self.store()
+        self.replay(fresh, ledger)
+        result = self.replay(fresh, ledger, body=ledger[1:2])
+        self.assertTrue(result['applied'])
+        self.assertEqual(result['inserted'], 0)
+        self.assert_rejected(fresh)
+
+    def test_concurrent_new_decision_invalidates_the_preflight_prefix(self):
+        _, ledger = self.history()
+        seed = self.store()
+        uri = 'file:fact-review-chronology-race?mode=memory&cache=shared'
+        importing = sqlite3.connect(uri, uri=True)
+        competing = sqlite3.connect(uri, uri=True)
+        for conn in (importing, competing):
+            conn.row_factory = sqlite3.Row
+            self.addCleanup(conn.close)
+        seed.backup(importing)
+        self.replay(importing, ledger, body=ledger[1:2])
+        original = reviews._fact_review_order_conflicts
+        checks = []
+
+        def interleave(conn, body, inserts):
+            result = original(conn, body, inserts)
+            checks.append(result)
+            if len(checks) == 1:
+                fid = competing.execute('SELECT fact_id FROM facts').fetchone()[0]
+                review_a_fact(competing, fid, verdict='accepted',
+                              at='2026-08-28T10:00:00+00:00')
+            return result
+
+        with patch.object(reviews, '_fact_review_order_conflicts', side_effect=interleave):
+            result = self.replay(importing, ledger)
+        self.assertTrue(result['refused'])
+        self.assertFalse(result['applied'])
+        self.assertEqual(len(checks), 2)
+        self.assertFalse(importing.in_transaction)
+        self.assertEqual(importing.execute('SELECT COUNT(*) FROM fact_reviews').fetchone()[0], 2)
+        row = importing.execute('SELECT * FROM facts').fetchone()
+        self.assertEqual(row['review_status'], 'reviewed')
+        self.assertIsNone(row['reviewed_value'])
 
 
 # ======================================================================

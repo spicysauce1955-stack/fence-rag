@@ -1216,6 +1216,235 @@ EDGE_SHAPE = (
 )
 
 
+# --- the same gate for the other nine members -------------------------------
+# G97. G92 gave `procedures` a shape gate and left the other nine declared
+# members without one, which is the state the gap entry recorded and this
+# extends. Measured over 443 enumerated malformed shapes: `source_docs`,
+# `warnings`, `gaps`, `part_types` and `parts` escaped as `AttributeError` or
+# `TypeError` — publication stops, but not through the documented
+# `VerificationFailed`, and with no member/index on it — while `models`,
+# `parameters`, `combinations` and `rules` were read by NOTHING and published
+# whatever they were handed. `parameters` is the live one: it publishes 9
+# tables and 31 rows today.
+#
+# Every field below is one the contract or its delegated `knowledge-datamodel.md`
+# §3 declares a type for. Where the contract is silent, or the type is a union
+# this side does not own, the field is NOT checked and G97 says which and why —
+# the restraint G92 applied to `SlotTarget` is the same restraint here, and
+# `Gap.subject` is its sharpest case: §1.1 RESERVES `SlotRef` and leaves it
+# undefined, so a member of that union has no shape to check against at all.
+#
+# Absent and null are NOT shape failures here either, for G92's reason.
+def _is_str(v) -> bool:
+    return isinstance(v, str)
+
+
+def _is_dict(v) -> bool:
+    return isinstance(v, dict)
+
+
+def _is_list(v) -> bool:
+    return isinstance(v, list)
+
+
+def _is_int(v) -> bool:
+    """§1.1: quantities and levels are integers. `bool` is an `int` in Python.
+
+    `curation_level: True` would otherwise read as level 1 — a person compared
+    it to the source image — on a value nobody reviewed.
+    """
+    return isinstance(v, int) and not isinstance(v, bool)
+
+
+def _is_date(v) -> bool:
+    """§1.1 BINDING: `Date { iso: str | null, value_raw: [str] }`.
+
+    A bare `"2025-04-24"` is the shape somebody reaches for first, and it is
+    exactly what the typed `Date` replaced (amendment 002): a string carries no
+    `value_raw`, so the source's own stamp is gone and `null` cannot be told
+    from "the source states none".
+    """
+    return (isinstance(v, dict)
+            and (v.get("iso") is None or isinstance(v.get("iso"), str))
+            and (v.get("value_raw") is None
+                 or (isinstance(v["value_raw"], list)
+                     and all(isinstance(x, str) for x in v["value_raw"]))))
+
+
+def _seq_of(predicate):
+    """A JSON array, as the builders here actually produce one.
+
+    `SourceDoc.superseded_by` and `.also_filed_as` are declared `tuple` and
+    `canonical_bytes` writes a tuple as an array, so a tuple is a well-formed
+    payload at this boundary, not a malformed one. Refusing it fails the real
+    build -- measured: the first run of this gate refused every stored
+    snapshot's `superseded_by` for being `()`. `_also_filed_as` reached the
+    same conclusion independently and tests `isinstance(also, (list, tuple))`.
+
+    G92's `_list_of` deliberately keeps refusing a tuple for `procedures`; see
+    G97 for why that divergence is recorded rather than resolved here.
+    """
+    return lambda v: (isinstance(v, (list, tuple))
+                      and all(predicate(x) for x in v))
+
+
+_OBJECTS = _seq_of(_is_dict)
+_HASHES = _seq_of(_is_str)
+_REFS = _seq_of(_is_source_ref)
+_DATE = "a Date {iso, value_raw}"
+_I18N = "an i18n object of language to text"
+_REFS_DESC = _SOURCE_REFS
+
+# §1.1. `also_filed_as` is absent on purpose: `_also_filed_as` above already
+# refuses every non-list, with a message that names the field and the registry
+# rule behind it.
+SOURCE_DOC_SHAPE = (
+    ("content_hash", _is_str, "a string"),
+    ("source_class", _is_str, "a string"),
+    ("version_status", _is_str, "a string"),
+    ("version_status_basis", _is_str, "a string"),
+    ("issue_date", _is_date, _DATE),
+    ("expiration_date", _is_date, _DATE),
+    # Typed here rather than left alone because this platform is its only
+    # producer and `walk`'s HASH_BEARING pass already reads it as a list of
+    # content hashes -- `enumerate(7)` was a `TypeError` with no location.
+    ("superseded_by", _HASHES, "a list of content hashes"),
+)
+
+# Obligation 10 and `knowledge-datamodel.md` §3.7. `attaches_to.ref` is NOT
+# typed: §3.7 gives the field no type, and it is a content hash for a document
+# and an entity id otherwise -- `walk` already guards its own read with
+# `isinstance`.
+WARNING_SHAPE = (
+    ("text_raw", _is_str, "a string"),
+    ("lang", _is_str, "a string"),
+    ("cites", _list_of(_is_source_ref), _REFS_DESC),
+    ("attaches_to", _is_dict, "an object {kind, ref}"),
+    ("severity_lexeme", _is_str, "a string"),
+    ("code", _is_str, "a string"),
+    ("params", _is_dict, "an object"),
+)
+ATTACHES_TO_SHAPE = (
+    # `kind not in ATTACHES_TO_KINDS` is a frozenset membership test, so an
+    # unhashable kind raised `TypeError` before the vocabulary check could run.
+    ("kind", _is_str, "a string"),
+)
+
+# §1.2.1. `subject` is NOT typed -- see the block comment above.
+GAP_SHAPE = (
+    ("id", _is_str, "a string"),
+    ("kind", _is_str, "a string"),
+    ("because", _is_dict, "an object {code, params}"),
+    ("cites", _list_of(_is_source_ref), _REFS_DESC),
+    ("would_close", _is_str, "a string"),
+    ("closes_by", _is_str, "a string"),
+    ("severity", _is_str, "a string"),
+    ("on", _is_str, "a string"),
+)
+BECAUSE_SHAPE = (
+    # `params` keeps its own check below: "because.params must be an object" is
+    # the wording two tests already assert and says it no worse than this would.
+    ("code", _is_str, "a string"),
+)
+
+# §2.1 and `knowledge-datamodel.md` §2.1.
+PART_TYPE_SHAPE = (
+    ("key", _is_str, "a string"),
+    ("namespace", _is_str, "a string"),
+    ("parent", _is_dict, "a PartTypeRef object {namespace, key}"),
+    ("label_i18n", _is_dict, _I18N),
+)
+PART_TYPE_REF_SHAPE = (
+    ("namespace", _is_str, "a string"),
+    ("key", _is_str, "a string"),
+)
+
+# §1.1's `Provenance`, which rides on every published value.
+PROVENANCE_SHAPE = (
+    ("cites", _list_of(_is_source_ref), _REFS_DESC),
+    ("source_class", _is_str, "a string"),
+    ("curation_level", _is_int, "an integer 0, 1 or 2"),
+    ("version_status", _is_str, "a string"),
+)
+
+# `knowledge-datamodel.md` §3.1 and §2.2. `SpecField.value` is NOT typed:
+# §2.2 declares it `Quantity | Token` and gives `Token` no shape of its own.
+SPEC_FIELD_SHAPE = (
+    ("key", _is_str, "a string"),
+    ("agree", _is_str, "a string"),
+    ("provenance", _is_dict, "a Provenance object"),
+)
+PART_SHAPE = (
+    ("id", _is_str, "a string"),
+    ("status", _is_str, "a string"),
+    ("type", _is_dict, "a PartTypeRef object {namespace, key}"),
+    ("name_i18n", _is_dict, _I18N),
+    ("spec", _OBJECTS, "a list of SpecField objects"),
+    ("authorship", _is_str, "a string"),
+    ("cites", _list_of(_is_source_ref), _REFS_DESC),
+    ("contributing_sources", _HASHES, "a list of content hashes"),
+)
+
+# `knowledge-datamodel.md` §3.2. `height_support` and `default_spec` are typed
+# only as objects: the first is the union `Continuous(min,max,step) |
+# Discrete([heights])` and the second is `PanelSpec`, a tree this gate does not
+# descend. `version` is not typed at all -- §3.2 gives it none.
+FENCE_MODEL_SHAPE = (
+    ("id", _is_str, "a string"),
+    ("status", _is_str, "a string"),
+    ("name_i18n", _is_dict, _I18N),
+    ("grade", _is_str, "a string"),
+    ("height_support", _is_dict, "an object"),
+    ("option_axes", _OBJECTS, "a list of Axis objects"),
+    ("variants", _OBJECTS, "a list of Variant objects"),
+    ("layout_policy", _OBJECTS, "a list of PolicyContribution objects"),
+    ("default_spec", _is_dict, "a PanelSpec object"),
+    ("post", _is_dict, "a PostSlot object or null"),
+    ("assembly", _OBJECTS, "a list of AssemblyStep objects"),
+    ("authorship", _is_str, "a string"),
+    ("cites", _list_of(_is_source_ref), _REFS_DESC),
+    ("contributing_sources", _HASHES, "a list of content hashes"),
+)
+
+# §1.3. `rows[].value` is NOT typed: the contract declares it
+# `Quantity | Token | [[Quantity,Quantity], …]`, a three-way union whose middle
+# member has no shape here, and picking one would be this side deciding it.
+# `rows[].authority` is not typed either -- §1.3 names the field and no type.
+PARAMETER_TABLE_SHAPE = (
+    ("parameter", _is_str, "a string"),
+    ("scope", _is_dict, "an EntityRef object"),
+    ("task", _is_str, "a string"),
+    ("hit_policy", _is_str, "a string"),
+    ("value_type", _is_str, "a string"),
+    ("domain", _is_dict, "an object mapping each dimension to its values"),
+    ("domain_basis", _is_str, "a string"),
+    # Obligation 13: one scope per published condition key, so a mapping.
+    ("condition_scope", _is_dict, "an object mapping each dimension to its scope"),
+    ("rows", _OBJECTS, "a list of row objects"),
+    ("uncovered", _OBJECTS, "a list of uncovered-point objects"),
+)
+PARAMETER_ROW_SHAPE = (
+    ("conditions", _is_dict, "an object mapping each dimension to a value"),
+    ("condition_basis", _is_str, "a string"),
+    ("provenance", _is_dict, "a Provenance object"),
+    # §1.1 BINDING names these two by name as `Date`s.
+    ("valid_from", _is_date, _DATE),
+    ("valid_until", _is_date, _DATE),
+)
+
+# `knowledge-datamodel.md` §3.9. `members` and `claims` are typed as lists and
+# no further: `PartRef@version` and `ParameterTableRef` are named there and
+# defined nowhere. `valid_from`/`valid_until` are NOT typed as `Date`s -- §1.1's
+# BINDING date list names `SourceDoc`'s two and `ParameterTable.rows[]`'s two,
+# and does not name these.
+COMBINATION_SHAPE = (
+    ("id", _is_str, "a string"),
+    ("members", _is_list, "a list of PartRefs"),
+    ("claims", _is_list, "a list of ParameterTableRefs"),
+    ("cites", _list_of(_is_source_ref), _REFS_DESC),
+)
+
+
 def _shape_failures(obj: dict, at: str, shape, fail: list) -> bool:
     """Append one failure per declared field of the wrong type; True if any.
 
@@ -1249,11 +1478,41 @@ def verify(snapshot: dict) -> None:
         fail.append(f"regime {snapshot.get('regime')!r} is not one of the two. A "
                     f"snapshot serves exactly one standards regime and declares it.")
 
+    # G97. Every declared member is a list before anything iterates one. An
+    # empty list is the live value for five of the ten and stays valid; a scalar
+    # is not an empty list, it is an unpublishable payload. Substituting `[]`
+    # after the refusal is what lets the rest of this function collect the other
+    # failures rather than stopping at the first `enumerate(7)`.
+    members = {}
+    for key in DECLARED_LISTS:
+        value = snapshot.get(key, [])
+        if not isinstance(value, list):
+            fail.append(f"`{key}` must be a list, not "
+                        f"{type(value).__name__}; publish [] rather than a "
+                        f"value that cannot hold {key}")
+            value = []
+        members[key] = value
+
     held = set()
-    for d in snapshot.get("source_docs", []):
-        if d["content_hash"] in held:
-            fail.append(f"duplicate source_doc {d['content_hash'][:12]}...")
-        held.add(d["content_hash"])
+    for i, d in enumerate(members["source_docs"]):
+        at = f"source_docs[{i}]"
+        if not isinstance(d, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(d, at, SOURCE_DOC_SHAPE, fail):
+            continue
+        content_hash = d.get("content_hash")
+        if not isinstance(content_hash, str) or not content_hash.strip():
+            # No prior message said this, because `d["content_hash"]` raised
+            # `KeyError` instead. It is the join every `belongs_to` resolves
+            # through, so a doc without one is citable by nothing.
+            fail.append(f"{at}: no content_hash. §1.2.1's closure rule resolves "
+                        f"every SourceRef's belongs_to through it, so a doc "
+                        f"without one can be cited by nothing")
+        elif content_hash in held:
+            fail.append(f"duplicate source_doc {content_hash[:12]}...")
+        else:
+            held.add(content_hash)
         if d.get("source_class") not in SOURCE_CLASSES:
             fail.append(f"source_class {d.get('source_class')!r} is outside the "
                         f"closed vocabulary; the source policy ranks on it")
@@ -1281,7 +1540,14 @@ def verify(snapshot: dict) -> None:
                 fail.append(f"{path}.ref: closure - attaches_to names "
                             f"{ref[:12]}..., not in source_docs")
             for key in HASH_BEARING:
-                for i, h in enumerate(node.get(key) or []):
+                # G97: `enumerate` on a scalar raised `TypeError` here, before
+                # any shape gate below could name the member it came from. The
+                # gates type both fields; this guard is what lets a wrong type
+                # be REPORTED rather than crashed past.
+                hashes = node.get(key)
+                if not isinstance(hashes, (list, tuple)):
+                    hashes = ()
+                for i, h in enumerate(hashes):
                     if isinstance(h, str) and h not in held:
                         fail.append(f"{path}.{key}[{i}]: closure - {h[:12]}... is "
                                     f"not in source_docs")
@@ -1298,8 +1564,17 @@ def verify(snapshot: dict) -> None:
             fail.append(f"{path}: a float ({node!r}) cannot cross")
     walk(snapshot)
 
-    for i, w in enumerate(snapshot.get("warnings", [])):
+    for i, w in enumerate(members["warnings"]):
         at = f"warnings[{i}]"
+        if not isinstance(w, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(w, at, WARNING_SHAPE, fail):
+            continue
+        attaches_to = w.get("attaches_to")
+        if isinstance(attaches_to, dict) and _shape_failures(
+                attaches_to, f"{at}.attaches_to", ATTACHES_TO_SHAPE, fail):
+            continue
         if not w.get("cites"):
             fail.append(f"{at}: obligation 3 - every published value carries at "
                         f"least one resolvable SourceRef")
@@ -1311,8 +1586,17 @@ def verify(snapshot: dict) -> None:
         elif kind not in ATTACHES_TO_KINDS:
             fail.append(f"{at}: attaches_to.kind {kind!r} is not one of the seven")
 
-    for i, g in enumerate(snapshot.get("gaps", [])):
+    for i, g in enumerate(members["gaps"]):
         at = f"gaps[{i}]"
+        if not isinstance(g, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(g, at, GAP_SHAPE, fail):
+            continue
+        because = g.get("because")
+        if isinstance(because, dict) and _shape_failures(
+                because, f"{at}.because", BECAUSE_SHAPE, fail):
+            continue
         if not g.get("would_close"):
             fail.append(f"{at}: obligation 8 - a gap says what would close it")
         if g.get("closes_by") not in ("knowledge", "planning"):
@@ -1335,7 +1619,8 @@ def verify(snapshot: dict) -> None:
         # this check was added for.
         if g.get("cites") is None:
             fail.append(f"{at}: `cites` is absent; publish [] rather than omitting it")
-        elif not g["cites"] and (g.get("subject") or {}).get("kind") == "element":
+        elif (not g["cites"] and isinstance(g.get("subject"), dict)
+                and g["subject"].get("kind") == "element"):
             fail.append(f"{at}: obligation 8 - an element-scoped gap names a region "
                         f"and so has evidence; cite it")
         if g.get("severity") not in SEVERITIES:
@@ -1362,8 +1647,16 @@ def verify(snapshot: dict) -> None:
     # `_source_class`'s own discipline in parameters.py.
     from .part_types import SPINE
     part_type_keys = set()
-    for i, pt in enumerate(snapshot.get("part_types", [])):
+    for i, pt in enumerate(members["part_types"]):
         at = f"part_types[{i}]"
+        if not isinstance(pt, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(pt, at, PART_TYPE_SHAPE, fail):
+            continue
+        if isinstance(pt.get("parent"), dict) and _shape_failures(
+                pt["parent"], f"{at}.parent", PART_TYPE_REF_SHAPE, fail):
+            continue
         namespace = pt.get("namespace")
         if namespace == "shared":
             fail.append(f"{at}: obligation 5 - `shared` is Planning's namespace; "
@@ -1387,15 +1680,10 @@ def verify(snapshot: dict) -> None:
     STEP_SCOPES = frozenset({"panel", "bay", "post", "run", "site"})
     EDGE_KINDS = frozenset({"after", "not_before", "before", "exclusive_with"})
     procedure_ids = set()
-    procedures = snapshot.get("procedures", [])
-    if not isinstance(procedures, list):
-        # `procedures: []` is the live value in every stored snapshot and stays
-        # valid; a scalar is not an empty list, it is an unpublishable payload.
-        fail.append(f"`procedures` must be a list, not "
-                    f"{type(procedures).__name__}; publish [] rather than a "
-                    f"value that cannot hold procedures")
-        procedures = []
-    for i, proc in enumerate(procedures):
+    # `procedures: []` is the live value in every stored snapshot and stays
+    # valid. G97 moved the list-type refusal that stood here up to the one loop
+    # that now makes it for all ten members; the message is unchanged.
+    for i, proc in enumerate(members["procedures"]):
         at = f"procedures[{i}]"
         if not isinstance(proc, dict):
             fail.append(f"{at}: must be an object")
@@ -1456,9 +1744,18 @@ def verify(snapshot: dict) -> None:
     PART_STATUSES = frozenset({"draft", "active", "retired"})
     SPEC_AGREE = frozenset({"==", "!=", "<=", ">=", "in", "supplies"})
     declared_part_types = [{"namespace": pt.get("namespace"), "key": pt.get("key")}
-                           for pt in snapshot.get("part_types", [])]
-    for i, p in enumerate(snapshot.get("parts", [])):
+                           for pt in members["part_types"]
+                           if isinstance(pt, dict)]
+    for i, p in enumerate(members["parts"]):
         at = f"parts[{i}]"
+        if not isinstance(p, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(p, at, PART_SHAPE, fail):
+            continue
+        if isinstance(p.get("type"), dict) and _shape_failures(
+                p["type"], f"{at}.type", PART_TYPE_REF_SHAPE, fail):
+            continue
         if p.get("status") not in PART_STATUSES:
             fail.append(f"{at}: status {p.get('status')!r} is not "
                         f"draft|active|retired")
@@ -1474,12 +1771,59 @@ def verify(snapshot: dict) -> None:
                         f"in this snapshot")
         for j, sf in enumerate(p.get("spec") or []):
             sat = f"{at}.spec[{j}]"
+            # `spec` is typed a list of objects by PART_SHAPE, so `sf` is one.
+            if _shape_failures(sf, sat, SPEC_FIELD_SHAPE, fail):
+                continue
+            if isinstance(sf.get("provenance"), dict) and _shape_failures(
+                    sf["provenance"], f"{sat}.provenance", PROVENANCE_SHAPE, fail):
+                continue
             if sf.get("agree") not in SPEC_AGREE:
                 fail.append(f"{sat}: agree {sf.get('agree')!r} is not one of "
                             f"the six")
             if not (sf.get("provenance") or {}).get("cites"):
                 fail.append(f"{sat}: obligation 3 - a spec value carries a "
                             f"resolvable SourceRef")
+
+    # G97. The four members nothing read at all. There is no semantic check
+    # here yet to run after the shape gate -- the gate IS the check, which is
+    # exactly why a malformed one published rather than crashing.
+    for i, m in enumerate(members["models"]):
+        at = f"models[{i}]"
+        if not isinstance(m, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        _shape_failures(m, at, FENCE_MODEL_SHAPE, fail)
+
+    for i, table in enumerate(members["parameters"]):
+        at = f"parameters[{i}]"
+        if not isinstance(table, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(table, at, PARAMETER_TABLE_SHAPE, fail):
+            continue
+        for j, row in enumerate(table.get("rows") or []):
+            rat = f"{at}.rows[{j}]"
+            # `rows` is typed a list of objects above, so `row` is one.
+            if _shape_failures(row, rat, PARAMETER_ROW_SHAPE, fail):
+                continue
+            if isinstance(row.get("provenance"), dict):
+                _shape_failures(row["provenance"], f"{rat}.provenance",
+                                PROVENANCE_SHAPE, fail)
+
+    for i, c in enumerate(members["combinations"]):
+        at = f"combinations[{i}]"
+        if not isinstance(c, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        _shape_failures(c, at, COMBINATION_SHAPE, fail)
+
+    # `Rule` is named in §1.2's payload and defined in no document on either
+    # side, so object-ness is the whole of what can be checked without this
+    # side inventing the type. Obligation 17's reasoning for `Combination`
+    # applies harder here: nothing consumes one yet.
+    for i, r in enumerate(members["rules"]):
+        if not isinstance(r, dict):
+            fail.append(f"rules[{i}]: must be an object")
 
     if fail:
         raise VerificationFailed(

@@ -1,0 +1,1667 @@
+{
+  "target": "Exact Emblem 73014714 publication, validated assembly and component BOM",
+  "purchase_bom": "Subsequent checkpoint; complete kit inventory required for package credits",
+  "input_hashes": {
+    "public_draft": "2a40d62828ae7da4c5018efb48efea6fbb52683c72a69211467534eb2537c768",
+    "private_candidate": "da79a6ef0ecf7852fea7fc41cea10cd1b619c542606a27da16f996039514ffb8"
+  },
+  "source_checks": [
+    {
+      "path": "manuals/freedom-outdoor-living/73014714-6x8Emblem-White-ProjectPlanning.pdf",
+      "expected_sha256": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "actual_sha256": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+      "matches": true
+    },
+    {
+      "path": "manuals/freedom-outdoor-living/FREEDOM-WEB-PrivacyKit_Ready-to-Assemble-Privacy-Vinyl-Fence-Install.pdf",
+      "expected_sha256": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "actual_sha256": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "matches": true
+    },
+    {
+      "path": "manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf",
+      "expected_sha256": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b",
+      "actual_sha256": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b",
+      "matches": true
+    }
+  ],
+  "canonical_references_verified": 26,
+  "import": [
+    {
+      "fact_id": 22752,
+      "inserted": false
+    },
+    {
+      "fact_id": 22753,
+      "inserted": false
+    },
+    {
+      "fact_id": 22754,
+      "inserted": false
+    },
+    {
+      "fact_id": 22755,
+      "inserted": false
+    },
+    {
+      "fact_id": 22756,
+      "inserted": false
+    },
+    {
+      "fact_id": 22757,
+      "inserted": false
+    },
+    {
+      "fact_id": 22758,
+      "inserted": false
+    }
+  ],
+  "facts": [
+    {
+      "fact_id": 22758,
+      "fact_type": "cap_colour",
+      "element_id": "element-b540e75926-0051",
+      "value_original": "White",
+      "reviewed_value": null,
+      "review_status": "extracted",
+      "condition_basis": "assumed"
+    },
+    {
+      "fact_id": 22753,
+      "fact_type": "component_colour",
+      "element_id": "element-b540e75926-0016",
+      "value_original": "White",
+      "reviewed_value": null,
+      "review_status": "extracted",
+      "condition_basis": "assumed"
+    },
+    {
+      "fact_id": 22752,
+      "fact_type": "nominal_board_width_in",
+      "element_id": "element-b540e75926-0007",
+      "value_original": "6 in.",
+      "reviewed_value": null,
+      "review_status": "extracted",
+      "condition_basis": "assumed"
+    },
+    {
+      "fact_id": 22757,
+      "fact_type": "nominal_cap_depth_in",
+      "element_id": "element-b540e75926-0051",
+      "value_original": "5in.",
+      "reviewed_value": null,
+      "review_status": "extracted",
+      "condition_basis": "assumed"
+    },
+    {
+      "fact_id": 22756,
+      "fact_type": "nominal_cap_width_in",
+      "element_id": "element-b540e75926-0051",
+      "value_original": "5in.",
+      "reviewed_value": null,
+      "review_status": "extracted",
+      "condition_basis": "assumed"
+    },
+    {
+      "fact_id": 22755,
+      "fact_type": "rail_height_in",
+      "element_id": "element-b540e75926-0008",
+      "value_original": "7 in.",
+      "reviewed_value": null,
+      "review_status": "extracted",
+      "condition_basis": "assumed"
+    },
+    {
+      "fact_id": 22754,
+      "fact_type": "rail_width_in",
+      "element_id": "element-b540e75926-0008",
+      "value_original": "2-¼ in.",
+      "reviewed_value": null,
+      "review_status": "extracted",
+      "condition_basis": "assumed"
+    }
+  ],
+  "published_board": {
+    "id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+    "status": "draft",
+    "type": {
+      "namespace": "shared",
+      "key": "infill"
+    },
+    "name_i18n": {
+      "en": "Emblem 73014714 tongue-and-groove board"
+    },
+    "spec": [
+      {
+        "key": "nominal_width_mm",
+        "agree": "==",
+        "value": {
+          "amount_milli": 152400,
+          "unit": "mm",
+          "value_raw": [
+            "6 in."
+          ]
+        },
+        "provenance": {
+          "cites": [
+            {
+              "id": "e00d82aba830a6eb",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            },
+            {
+              "id": "3ac74d32d5347a55",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            },
+            {
+              "id": "5d7cfd7597583e43",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            },
+            {
+              "id": "304c96b69b330708",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          ],
+          "source_class": "spec_sheet",
+          "curation_level": 0,
+          "version_status": "unknown"
+        }
+      },
+      {
+        "key": "colour",
+        "agree": "==",
+        "value": {
+          "key": "white",
+          "value_raw": [
+            "White"
+          ]
+        },
+        "provenance": {
+          "cites": [
+            {
+              "id": "5d7cfd7597583e43",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            },
+            {
+              "id": "3ac74d32d5347a55",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            },
+            {
+              "id": "304c96b69b330708",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          ],
+          "source_class": "spec_sheet",
+          "curation_level": 0,
+          "version_status": "unknown"
+        }
+      }
+    ],
+    "authorship": "third_party_authored",
+    "cites": [
+      {
+        "id": "304c96b69b330708",
+        "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      },
+      {
+        "id": "3ac74d32d5347a55",
+        "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      },
+      {
+        "id": "5d7cfd7597583e43",
+        "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      },
+      {
+        "id": "e00d82aba830a6eb",
+        "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      }
+    ],
+    "contributing_sources": [
+      "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+    ],
+    "version": "sha256:cee2525fc36feba83d3380ce1b094b733570fbb9a77f5c4d1b875e1e39adb7d4"
+  },
+  "published_exact_parts": [
+    {
+      "id": "mfr/freedom-outdoor-living/73013956",
+      "status": "draft",
+      "type": {
+        "namespace": "shared",
+        "key": "post_cap"
+      },
+      "name_i18n": {
+        "en": "White contemporary post top"
+      },
+      "spec": [
+        {
+          "key": "nominal_width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 127000,
+            "unit": "mm",
+            "value_raw": [
+              "5in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "a437381210d0e693",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "1356341c0f1a6c05",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "nominal_depth_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 127000,
+            "unit": "mm",
+            "value_raw": [
+              "5in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "a437381210d0e693",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "1356341c0f1a6c05",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "colour",
+          "agree": "==",
+          "value": {
+            "key": "white",
+            "value_raw": [
+              "White"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "a437381210d0e693",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "1356341c0f1a6c05",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "authorship": "third_party_authored",
+      "cites": [
+        {
+          "id": "1356341c0f1a6c05",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "304c96b69b330708",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "3ac74d32d5347a55",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "5d7cfd7597583e43",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "a437381210d0e693",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      ],
+      "contributing_sources": [
+        "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      ],
+      "version": "sha256:fa54ad984e9e728fe264fc3c0b878b7f657e9d6e58467e24ed9e5e8948e837bb"
+    },
+    {
+      "id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+      "status": "draft",
+      "type": {
+        "namespace": "shared",
+        "key": "infill"
+      },
+      "name_i18n": {
+        "en": "Emblem 73014714 tongue-and-groove board"
+      },
+      "spec": [
+        {
+          "key": "nominal_width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 152400,
+            "unit": "mm",
+            "value_raw": [
+              "6 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "e00d82aba830a6eb",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "colour",
+          "agree": "==",
+          "value": {
+            "key": "white",
+            "value_raw": [
+              "White"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "authorship": "third_party_authored",
+      "cites": [
+        {
+          "id": "304c96b69b330708",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "3ac74d32d5347a55",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "5d7cfd7597583e43",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "e00d82aba830a6eb",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      ],
+      "contributing_sources": [
+        "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      ],
+      "version": "sha256:cee2525fc36feba83d3380ce1b094b733570fbb9a77f5c4d1b875e1e39adb7d4"
+    },
+    {
+      "id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+      "status": "draft",
+      "type": {
+        "namespace": "shared",
+        "key": "rail"
+      },
+      "name_i18n": {
+        "en": "Emblem 73014714 rail A (provisional identity)"
+      },
+      "spec": [
+        {
+          "key": "width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 57150,
+            "unit": "mm",
+            "value_raw": [
+              "2-¼ in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "height_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 177800,
+            "unit": "mm",
+            "value_raw": [
+              "7 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "colour",
+          "agree": "==",
+          "value": {
+            "key": "white",
+            "value_raw": [
+              "White"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "authorship": "third_party_authored",
+      "cites": [
+        {
+          "id": "304c96b69b330708",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "3ac74d32d5347a55",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "5d7cfd7597583e43",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "b2766cd38e5d8624",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      ],
+      "contributing_sources": [
+        "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      ],
+      "version": "sha256:da323da0d82bc736572d1e27c8c765ee87fcef124b9cb398d52e2b896431cbec"
+    },
+    {
+      "id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+      "status": "draft",
+      "type": {
+        "namespace": "shared",
+        "key": "rail"
+      },
+      "name_i18n": {
+        "en": "Emblem 73014714 rail B (provisional identity)"
+      },
+      "spec": [
+        {
+          "key": "width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 57150,
+            "unit": "mm",
+            "value_raw": [
+              "2-¼ in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "height_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 177800,
+            "unit": "mm",
+            "value_raw": [
+              "7 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "colour",
+          "agree": "==",
+          "value": {
+            "key": "white",
+            "value_raw": [
+              "White"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "authorship": "third_party_authored",
+      "cites": [
+        {
+          "id": "304c96b69b330708",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "3ac74d32d5347a55",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "5d7cfd7597583e43",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        },
+        {
+          "id": "b2766cd38e5d8624",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      ],
+      "contributing_sources": [
+        "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      ],
+      "version": "sha256:b0ad5809ac475d711805eb39db8e1bf5cac01d08c0d26a95829fbcf57ecf3bc1"
+    }
+  ],
+  "published_exact_part_count": 4,
+  "withheld_exact_parts": [],
+  "withheld_exact_part_count": 0,
+  "snapshot_id": "b5048772101e18513a9cbd2c913978da05046fced986e03c42afddc5c5b19ec7",
+  "snapshot_verified": true,
+  "full_model_admitted": false,
+  "assembly_validated": false,
+  "publication_exclusions": [
+    {
+      "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+      "content_hash": "6e2b7fb08a9418457fc0e08acfb675c0271ea988761828b944bc29baa32d7895",
+      "issues": [
+        {
+          "path": "/grade",
+          "code": "missing_value",
+          "message": "Required model field is absent."
+        },
+        {
+          "path": "/height_support",
+          "code": "missing_value",
+          "message": "Required model field is absent."
+        },
+        {
+          "path": "/option_axes",
+          "code": "missing_value",
+          "message": "Required model field is absent."
+        },
+        {
+          "path": "/variants",
+          "code": "missing_value",
+          "message": "Required model field is absent."
+        },
+        {
+          "path": "/layout_policy",
+          "code": "missing_value",
+          "message": "Required model field is absent."
+        },
+        {
+          "path": "/assembly",
+          "code": "missing_value",
+          "message": "Required model field is absent."
+        },
+        {
+          "path": "/option_axes",
+          "code": "invalid_shape",
+          "message": "Explicit list required."
+        },
+        {
+          "path": "/variants",
+          "code": "invalid_shape",
+          "message": "Explicit list required."
+        },
+        {
+          "path": "/layout_policy",
+          "code": "invalid_shape",
+          "message": "Explicit list required."
+        },
+        {
+          "path": "/assembly",
+          "code": "invalid_shape",
+          "message": "Explicit list required."
+        },
+        {
+          "path": "/height_support",
+          "code": "missing_value",
+          "message": "Explicit height support required."
+        },
+        {
+          "path": "/grade",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/grade",
+          "code": "invalid_grade",
+          "message": "Explicit supported grade required."
+        },
+        {
+          "path": "/height_support",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/height_support",
+          "code": "unsupported_height_support",
+          "message": "This profile requires explicit discrete supported heights."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/shared_host_gap",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/gap_reason",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/kind",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/channel_depth",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/insertion_margin",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/insertion_margin",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/0/orientation",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/frame/0/placement",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/placement",
+          "code": "unsupported_placement",
+          "message": "This profile requires an explicit edge offset."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/qty",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/qty",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/length_rule",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/length_rule",
+          "code": "invalid_length_rule",
+          "message": "Explicit supported length rule required for this member."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/overlap",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/overlap",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/shared_host_gap",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/gap_reason",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/kind",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/channel_depth",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/insertion_margin",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/insertion_margin",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/1/orientation",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/frame/1/placement",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/placement",
+          "code": "unsupported_placement",
+          "message": "This profile requires an explicit edge offset."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/qty",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/qty",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/length_rule",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/length_rule",
+          "code": "invalid_length_rule",
+          "message": "Explicit supported length rule required for this member."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/overlap",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/overlap",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/orientation",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/infill/justification",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/justification",
+          "code": "unsupported_fitting",
+          "message": "Explicit supported fitting policy required."
+        },
+        {
+          "path": "/default_spec/infill/excess",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/excess",
+          "code": "unsupported_fitting",
+          "message": "Explicit supported fitting policy required."
+        },
+        {
+          "path": "/default_spec/infill/supply",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/infill/edge_margin",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/edge_margin",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/joint",
+          "code": "missing_joint",
+          "message": "Explicit Joint object required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/base_engagement",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/base_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/top_engagement",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/top_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/gap_after",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/gap_after",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/face_offset",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/face_offset",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/profile_edges",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/qty",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/qty",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/length_rule",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/length_rule",
+          "code": "invalid_length_rule",
+          "message": "Explicit supported length rule required for this member."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/overlap",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/overlap",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/fixings",
+          "code": "missing_value",
+          "message": "Explicit fixing list required."
+        },
+        {
+          "path": "/post/requirement",
+          "code": "missing_requirement",
+          "message": "Explicit PartRequirement required."
+        },
+        {
+          "path": "/post/joint",
+          "code": "missing_joint",
+          "message": "Explicit Joint object required."
+        },
+        {
+          "path": "/post/cap/qty",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/post/cap/qty",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/post/cap/length_rule",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/post/cap/overlap",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/post/cap/overlap",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/",
+          "code": "consumer_numeric_provenance_mapping_unresolved",
+          "message": "Numeric model values need published provenance under contract obligation 6; this profile only stores private field citations and has no agreed lossless publication mapping."
+        }
+      ],
+      "would_close": "Resolve the listed required shape, source, provenance and any explicit review-integrity failures without inventing missing values."
+    }
+  ],
+  "publication_readiness": [
+    {
+      "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+      "content_hash": "6e2b7fb08a9418457fc0e08acfb675c0271ea988761828b944bc29baa32d7895",
+      "review_status": "unreviewed",
+      "generation_ready": false,
+      "consumer_validation_executed": false,
+      "publication_blocked": true,
+      "issues": [
+        {
+          "path": "/status",
+          "code": "inactive_model",
+          "message": "This valid published status does not select an active generation definition."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/post/cap/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/",
+          "code": "consumer_validation_missing",
+          "message": "No consumer validation was executed; this does not by itself forbid publication."
+        }
+      ],
+      "publication_blockers": [
+        {
+          "path": "/grade",
+          "code": "missing_value",
+          "message": "Required model field is absent."
+        },
+        {
+          "path": "/height_support",
+          "code": "missing_value",
+          "message": "Required model field is absent."
+        },
+        {
+          "path": "/option_axes",
+          "code": "missing_value",
+          "message": "Required model field is absent."
+        },
+        {
+          "path": "/variants",
+          "code": "missing_value",
+          "message": "Required model field is absent."
+        },
+        {
+          "path": "/layout_policy",
+          "code": "missing_value",
+          "message": "Required model field is absent."
+        },
+        {
+          "path": "/assembly",
+          "code": "missing_value",
+          "message": "Required model field is absent."
+        },
+        {
+          "path": "/option_axes",
+          "code": "invalid_shape",
+          "message": "Explicit list required."
+        },
+        {
+          "path": "/variants",
+          "code": "invalid_shape",
+          "message": "Explicit list required."
+        },
+        {
+          "path": "/layout_policy",
+          "code": "invalid_shape",
+          "message": "Explicit list required."
+        },
+        {
+          "path": "/assembly",
+          "code": "invalid_shape",
+          "message": "Explicit list required."
+        },
+        {
+          "path": "/height_support",
+          "code": "missing_value",
+          "message": "Explicit height support required."
+        },
+        {
+          "path": "/grade",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/grade",
+          "code": "invalid_grade",
+          "message": "Explicit supported grade required."
+        },
+        {
+          "path": "/height_support",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/height_support",
+          "code": "unsupported_height_support",
+          "message": "This profile requires explicit discrete supported heights."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/shared_host_gap",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/gap_reason",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/kind",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/channel_depth",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/insertion_margin",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/insertion_margin",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/0/orientation",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/frame/0/placement",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/placement",
+          "code": "unsupported_placement",
+          "message": "This profile requires an explicit edge offset."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/qty",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/qty",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/length_rule",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/length_rule",
+          "code": "invalid_length_rule",
+          "message": "Explicit supported length rule required for this member."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/overlap",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/overlap",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/shared_host_gap",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/gap_reason",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/kind",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/channel_depth",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/insertion_margin",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/insertion_margin",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/1/orientation",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/frame/1/placement",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/placement",
+          "code": "unsupported_placement",
+          "message": "This profile requires an explicit edge offset."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/qty",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/qty",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/length_rule",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/length_rule",
+          "code": "invalid_length_rule",
+          "message": "Explicit supported length rule required for this member."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/overlap",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/overlap",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/orientation",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/infill/justification",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/justification",
+          "code": "unsupported_fitting",
+          "message": "Explicit supported fitting policy required."
+        },
+        {
+          "path": "/default_spec/infill/excess",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/excess",
+          "code": "unsupported_fitting",
+          "message": "Explicit supported fitting policy required."
+        },
+        {
+          "path": "/default_spec/infill/supply",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/infill/edge_margin",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/edge_margin",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/joint",
+          "code": "missing_joint",
+          "message": "Explicit Joint object required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/base_engagement",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/base_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/top_engagement",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/top_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/gap_after",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/gap_after",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/face_offset",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/face_offset",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/profile_edges",
+          "code": "uncited",
+          "message": "Nonempty source citations are required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/qty",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/qty",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/length_rule",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/length_rule",
+          "code": "invalid_length_rule",
+          "message": "Explicit supported length rule required for this member."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/overlap",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/overlap",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/fixings",
+          "code": "missing_value",
+          "message": "Explicit fixing list required."
+        },
+        {
+          "path": "/post/requirement",
+          "code": "missing_requirement",
+          "message": "Explicit PartRequirement required."
+        },
+        {
+          "path": "/post/joint",
+          "code": "missing_joint",
+          "message": "Explicit Joint object required."
+        },
+        {
+          "path": "/post/cap/qty",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/post/cap/qty",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/post/cap/length_rule",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/post/cap/overlap",
+          "code": "missing_value",
+          "message": "Explicit authored value required; no consumer default is evidence."
+        },
+        {
+          "path": "/post/cap/overlap",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/",
+          "code": "consumer_numeric_provenance_mapping_unresolved",
+          "message": "Numeric model values need published provenance under contract obligation 6; this profile only stores private field citations and has no agreed lossless publication mapping."
+        }
+      ]
+    }
+  ],
+  "required_geometry": [
+    {
+      "path": "/default_spec/frame/0/joint/channel_depth",
+      "meaning": "Bottom rail board-pocket depth",
+      "state": "missing",
+      "value": null
+    },
+    {
+      "path": "/default_spec/frame/1/joint/channel_depth",
+      "meaning": "Top rail board-pocket depth",
+      "state": "missing",
+      "value": null
+    },
+    {
+      "path": "/default_spec/infill/pattern/0/base_engagement",
+      "meaning": "Board seating in bottom rail",
+      "state": "missing",
+      "value": null
+    },
+    {
+      "path": "/default_spec/infill/pattern/0/top_engagement",
+      "meaning": "Board seating in top rail",
+      "state": "missing",
+      "value": null
+    },
+    {
+      "path": "/default_spec/infill/pattern/0/joint/channel_depth",
+      "meaning": "Board groove receiving depth",
+      "state": "missing",
+      "value": null
+    },
+    {
+      "path": "/post/joint/channel_depth",
+      "meaning": "Post receiving depth for a rail end",
+      "state": "missing",
+      "value": null
+    }
+  ],
+  "assembly_remaining": [
+    "Installed board pitch/overlap and explicit end-fitting policy",
+    "Source-supported receiving depths and engagements on each axis",
+    "Rail-to-post engagements at each end and shared-post clearance",
+    "Lossless public geometry/provenance mapping and consumer support",
+    "Mapping public Part receipts to private generation definitions without treating opaque versions as sortable revisions",
+    "Single-panel and multi-panel assembly with shared posts, consistent cuts and component counts"
+  ],
+  "lifecycle": {
+    "storage": "facts",
+    "review": "fact_reviews",
+    "replay": "existing review export/import ledger",
+    "publication": "Part.spec + Provenance in the actual snapshot builder",
+    "unified_claims_table": "proposed, not implemented",
+    "numerical_model_mapping": "unresolved; Amendment 008 remains pending"
+  },
+  "limitations": [
+    "Published nominal width is not executable board pitch.",
+    "No human review is created by this command.",
+    "This Part slice does not admit the full FenceModel or validate assembly."
+  ],
+  "objective": "assembly",
+  "knowledge_available": true,
+  "knowledge_document": "workspace/reports/emblem-assembly-objective-check-knowledge.json",
+  "applied_to_store": false,
+  "snapshot_path": null
+}

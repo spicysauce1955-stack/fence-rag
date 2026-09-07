@@ -1195,8 +1195,10 @@ def _ledger_sort_key(rec):
         # Ordered on fields that do not move, like the other two.
         return (rec["kind"], rec["element_id"], str(rec["char_start"]),
                 str(rec["char_end"]), rec["reviewed_at"], rec["step_review_id"])
+    # Fact projection uses arrival order, including backdated decisions. The
+    # stable sort groups evidence without changing that order within a group.
     return (rec["kind"], rec["element_id"], rec["fact_type"],
-            rec["value_before"] or "", rec["reviewed_at"], rec["fact_review_id"])
+            rec["value_before"] or "")
 
 
 def build_ledger(conn: sqlite3.Connection) -> list[dict]:
@@ -1211,7 +1213,7 @@ def build_ledger(conn: sqlite3.Connection) -> list[dict]:
     tables = [_table_review_record(r) for r in
               conn.execute("SELECT * FROM table_reviews")]
     facts = [_fact_review_record(r) for r in
-             conn.execute("SELECT * FROM fact_reviews")]
+             conn.execute("SELECT * FROM fact_reviews ORDER BY rowid")]
     steps_ = [_step_review_record(r) for r in
               conn.execute("SELECT * FROM step_reviews")]
     body = tables + facts + steps_
@@ -1325,6 +1327,39 @@ def _differences(ledger_rec: dict, store_rec: dict) -> dict:
             if ledger_rec.get(k) != store_rec.get(k)}
 
 
+def _fact_review_order_conflicts(conn, body, inserts):
+    """Refuse replay histories that append an older decision after a newer one.
+
+    New decisions can extend an existing history only when the ledger includes
+    that history as its prefix. A subset containing only known decisions is safe
+    when its relative order agrees; it must not reorder the local history.
+    """
+    groups = {}
+    for rec in body:
+        if rec["kind"] == KIND_FACT_REVIEW:
+            anchor = (rec["element_id"], rec["fact_type"], rec["value_before"])
+            groups.setdefault(anchor, []).append(rec["fact_review_id"])
+    new_ids = {rec["fact_review_id"] for kind, rec, _ in inserts
+               if kind == KIND_FACT_REVIEW}
+    conflicts = []
+    for anchor, incoming in groups.items():
+        existing = [r[0] for r in conn.execute("""
+            SELECT fact_review_id FROM fact_reviews
+             WHERE element_id=? AND fact_type=? AND value_before IS ?
+             ORDER BY rowid""", anchor)]
+        positions = {rid: i for i, rid in enumerate(existing)}
+        shared = [positions[rid] for rid in incoming if rid in positions]
+        extends = any(rid in new_ids for rid in incoming)
+        if (shared != sorted(set(shared))
+                or (extends and incoming[:len(existing)] != existing)):
+            conflicts.append({"kind": KIND_FACT_REVIEW,
+                              "id": incoming[0], "code": "review_order_conflict",
+                              "existing_order": existing,
+                              "incoming_order": incoming,
+                              "why": "Ledger order conflicts with the existing fact-review history; no decisions were imported."})
+    return conflicts
+
+
 def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> dict:
     """Replay a ledger into this store. Dry run unless told otherwise.
 
@@ -1339,7 +1374,9 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
     * **conflict** -- the id is here and says something *else*. Two records of
       one person's decision disagree, and that is for a person to resolve. The
       whole import is refused; nothing at all is written, including the lines
-      that would have been fine.
+      that would have been fine. Incompatible fact-review order also refuses
+      the import: an older missing decision must not replace a newer one by
+      arriving last during a partial replay.
 
     On success the projections are rebuilt from the records, so the store's
     `facts` and `table_read_candidates` annotations follow the reviews rather
@@ -1443,6 +1480,9 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
         inserts.append((KIND_FACT_REVIEW, rec, candidates[0]))
         per_kind[KIND_FACT_REVIEW]["new"] += 1
 
+    order_conflicts = _fact_review_order_conflicts(conn, body, inserts)
+    conflicts += len(order_conflicts)
+    detail["conflicts"].extend(order_conflicts)
     out = {"records": len(body), "inserted": len(inserts), "identical": identical,
            "conflicts": conflicts, "unresolvable": unresolvable,
            "applied": False, "refused": bool(conflicts), "detail": detail,
@@ -1457,6 +1497,16 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
     if started_here:
         conn.execute("BEGIN IMMEDIATE")
     try:
+        # Another writer may have extended the history after the preflight.
+        # Check again while the write transaction protects its precedence.
+        order_conflicts = _fact_review_order_conflicts(conn, body, inserts)
+        if order_conflicts:
+            out['conflicts'] += len(order_conflicts)
+            out['detail']['conflicts'].extend(order_conflicts)
+            out['refused'] = True
+            if started_here:
+                conn.rollback()
+            return out
         for kind, rec, fact_id in inserts:
             if kind == KIND_STEP_REVIEW:
                 conn.execute("""INSERT INTO step_reviews

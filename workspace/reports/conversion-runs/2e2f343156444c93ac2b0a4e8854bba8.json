@@ -1,0 +1,532 @@
+{
+  "batch_id": "emblem-parts-001",
+  "batch_hash": "6972f63d97eab95b41573fe3ff37332d73592e597d154b354012274a90c6764d",
+  "run_id": "2e2f343156444c93ac2b0a4e8854bba8",
+  "at": "2026-09-07T10:02:47.475527+00:00",
+  "round": 2,
+  "stages": [
+    {
+      "stage": "S",
+      "status": "checked",
+      "sources": [
+        {
+          "path": "manuals/freedom-outdoor-living/73014714-6x8Emblem-White-ProjectPlanning.pdf",
+          "sha256": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      ]
+    },
+    {
+      "stage": "C/K",
+      "status": "checked",
+      "claim_traces": [
+        {
+          "part_id": "mfr/freedom-outdoor-living/73013956",
+          "spec_key": "nominal_width_mm",
+          "fact_id": 22756,
+          "element_id": "element-b540e75926-0051",
+          "source_ref": {
+            "id": "a437381210d0e693",
+            "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          },
+          "review_status": "extracted",
+          "value_original": "5in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 127000,
+            "unit": "mm",
+            "value_raw": [
+              "5in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "a437381210d0e693",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "1356341c0f1a6c05",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/freedom-outdoor-living/73013956",
+          "spec_key": "nominal_depth_mm",
+          "fact_id": 22757,
+          "element_id": "element-b540e75926-0051",
+          "source_ref": {
+            "id": "a437381210d0e693",
+            "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          },
+          "review_status": "extracted",
+          "value_original": "5in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 127000,
+            "unit": "mm",
+            "value_raw": [
+              "5in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "a437381210d0e693",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "1356341c0f1a6c05",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/freedom-outdoor-living/73013956",
+          "spec_key": "colour",
+          "fact_id": 22758,
+          "element_id": "element-b540e75926-0051",
+          "source_ref": {
+            "id": "a437381210d0e693",
+            "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          },
+          "review_status": "extracted",
+          "value_original": "White",
+          "reviewed_value": null,
+          "published_value": {
+            "key": "white",
+            "value_raw": [
+              "White"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "a437381210d0e693",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "1356341c0f1a6c05",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+          "spec_key": "nominal_width_mm",
+          "fact_id": 22752,
+          "element_id": "element-b540e75926-0007",
+          "source_ref": {
+            "id": "e00d82aba830a6eb",
+            "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          },
+          "review_status": "extracted",
+          "value_original": "6 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 152400,
+            "unit": "mm",
+            "value_raw": [
+              "6 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "e00d82aba830a6eb",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+          "spec_key": "colour",
+          "fact_id": 22753,
+          "element_id": "element-b540e75926-0016",
+          "source_ref": {
+            "id": "5d7cfd7597583e43",
+            "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          },
+          "review_status": "extracted",
+          "value_original": "White",
+          "reviewed_value": null,
+          "published_value": {
+            "key": "white",
+            "value_raw": [
+              "White"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+          "spec_key": "width_mm",
+          "fact_id": 22754,
+          "element_id": "element-b540e75926-0008",
+          "source_ref": {
+            "id": "b2766cd38e5d8624",
+            "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          },
+          "review_status": "extracted",
+          "value_original": "2-¼ in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 57150,
+            "unit": "mm",
+            "value_raw": [
+              "2-¼ in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+          "spec_key": "height_mm",
+          "fact_id": 22755,
+          "element_id": "element-b540e75926-0008",
+          "source_ref": {
+            "id": "b2766cd38e5d8624",
+            "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          },
+          "review_status": "extracted",
+          "value_original": "7 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 177800,
+            "unit": "mm",
+            "value_raw": [
+              "7 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+          "spec_key": "colour",
+          "fact_id": 22753,
+          "element_id": "element-b540e75926-0016",
+          "source_ref": {
+            "id": "5d7cfd7597583e43",
+            "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          },
+          "review_status": "extracted",
+          "value_original": "White",
+          "reviewed_value": null,
+          "published_value": {
+            "key": "white",
+            "value_raw": [
+              "White"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+          "spec_key": "width_mm",
+          "fact_id": 22754,
+          "element_id": "element-b540e75926-0008",
+          "source_ref": {
+            "id": "b2766cd38e5d8624",
+            "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          },
+          "review_status": "extracted",
+          "value_original": "2-¼ in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 57150,
+            "unit": "mm",
+            "value_raw": [
+              "2-¼ in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+          "spec_key": "height_mm",
+          "fact_id": 22755,
+          "element_id": "element-b540e75926-0008",
+          "source_ref": {
+            "id": "b2766cd38e5d8624",
+            "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          },
+          "review_status": "extracted",
+          "value_original": "7 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 177800,
+            "unit": "mm",
+            "value_raw": [
+              "7 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+          "spec_key": "colour",
+          "fact_id": 22753,
+          "element_id": "element-b540e75926-0016",
+          "source_ref": {
+            "id": "5d7cfd7597583e43",
+            "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          },
+          "review_status": "extracted",
+          "value_original": "White",
+          "reviewed_value": null,
+          "published_value": {
+            "key": "white",
+            "value_raw": [
+              "White"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "3ac74d32d5347a55",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              },
+              {
+                "id": "304c96b69b330708",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ]
+    },
+    {
+      "stage": "P",
+      "status": "checked",
+      "snapshot_id": "b5048772101e18513a9cbd2c913978da05046fced986e03c42afddc5c5b19ec7",
+      "selected_parts_reproduced": 4,
+      "missing_requested_parts": []
+    }
+  ],
+  "rerun": [
+    "source hashes",
+    "canonical/fact/spec joins",
+    "current publisher selected Part comparison",
+    "snapshot verification",
+    "frozen boundary checks"
+  ],
+  "reused_not_rerun": [
+    "workspace/reports/emblem-public-parts-consumer-check.json (consumer receipt run, not rerun here)",
+    "workspace/reports/emblem-recovered-manual-check.json (assembly applicability only; excluded from this Part slice)"
+  ],
+  "limitations": [
+    "Unified claims table remains proposed; this profile uses facts/fact_reviews.",
+    "Assembly relationships outside the claims lifecycle are excluded from the accepted slice.",
+    "Full model mapping, physical fit and purchasing are not verified by this checkpoint.",
+    "Only existing persisted-facts-to-Parts projections are supported; no generic extractor is introduced."
+  ],
+  "lessons": [
+    "Four focused checkpoint tests passed; selected output changes and broken claim evidence refuse, unrelated Parts do not block the slice."
+  ],
+  "proposed_improvements": [
+    "Extend to assembly only after its durable claims and public mapping are implemented."
+  ],
+  "runner_sha256": "726096bd29871c5fb7404d8d58205c2e3b32f002a9cc8b7ec98910c5aebd0e78",
+  "implementation_hashes": {
+    "fence_evidence/emblem_claims.py": "01b6d3d31c0208a0d44e1fe0da93f98fd56a82f1841eea4dfb2ec6a1f85a3c86",
+    "fence_evidence/parts.py": "e6b55ecdee2cbf960620cfec369f4267aea0829c42bbb4004f0933229528a07b",
+    "fence_evidence/reviews.py": "2ed049f3bcbef1950715756636585e75aa40dfad4f03b489a043779d4f376adc",
+    "fence_evidence/snapshot.py": "3bbf3dac8b657cb4303226603ac733b85e1084665747070d2fdada166af13ef5"
+  },
+  "status": "partial_knowledge_verified"
+}

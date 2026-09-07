@@ -1,0 +1,19 @@
+{
+  "patch": "workspace/reports/emblem-consumer-public-receipts.patch",
+  "base_commit": "9de94eb06d8e997d9be098dedd5b6a6b2eb4024d",
+  "sha256": "11649673b40a4af3767c7588d52feadb4dc46952d5de2e636827974c95b94d09",
+  "file_count": 20,
+  "scope": "Cumulative prior Emblem capabilities plus public Part receipts; local, not deployed",
+  "reverse_apply_check": "passed",
+  "source_document_guarantee": "Typed fields and citation hash joins only; unknown extensions excluded",
+  "full_model_admitted": false,
+  "assembly_validated": false,
+  "validation": {
+    "consumer": "2603 passed, 7 warnings in 71.50s",
+    "consumer_log": "workspace/tests/emblem-blockers-consumer-final-suite.log",
+    "evidence": "1589 tests in 61.712s; OK, expected failures=1",
+    "evidence_log": "workspace/tests/emblem-blockers-full-suite.log",
+    "frozen_boundary_checks": "contract.md and AMENDING.md pass in both repositories",
+    "adversarial_probes": "6 refusal probes passed; admission-date alias fixed with regression"
+  }
+}
