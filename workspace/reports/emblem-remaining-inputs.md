@@ -62,3 +62,34 @@ Validation: 19 candidate tests pass, including two new methods covering 13 adver
 The regenerated candidate now has five private Parts and all literal model references close. This does not make the post predicate a literal Part or establish physical fit. The membership proposal binds bottom rail 1, top rail 1, boards with count null, and end channels 2 to existing Parts. All stock lengths remain null, the cap remains separately purchased, and no executable kit requirement or purchase credit is added. The proposal remains unreviewed and explicitly blocked on inventory/stock evidence. Current candidate tests: 21 pass.
 
 Amendment 008 and its example are explicitly pending, hypothetical and unpublishable. The example uses the recognized `ai_proposal` source class, curation level 0 and version status unknown; its two citations resolve within its own synthetic source-ref/source-doc wrapper. Those synthetic IDs and hashes are illustrative, not canonical corpus evidence. The proposal creates no manufacturer claim, accepted schema or permission to publish. No source or frozen-contract files changed in this review.
+
+## G101 correction: minimum source geometry, not a purchase request
+
+No purchase is required. The first useful document is a dimensioned component
+cross-section applicable to exact model **73014714**. For the current authored
+assembly, the unresolved nonnullable geometry includes:
+
+| Field under model_fragment | Required interpretation |
+| --- | --- |
+| default_spec/frame/0/joint/channel_depth | Bottom rail board-pocket entry lip to internal stop |
+| default_spec/frame/1/joint/channel_depth | Top rail board-pocket entry lip to internal stop |
+| default_spec/infill/pattern/0/base_engagement | Board seating in bottom rail |
+| default_spec/infill/pattern/0/top_engagement | Board seating in top rail |
+| default_spec/infill/pattern/0/joint/channel_depth | Board groove receiving depth, if that is the authored Member joint; the whole Joint is currently absent |
+| post/joint/channel_depth | Post receiving depth for a rail, if publishing the complete post definition |
+
+Insertion margins can explicitly remain null with published Gaps. They must not
+be zero by default. These six fields are a bounded geometry list, not a claim
+that six measurements alone complete the model: effective pitch, fitting rules,
+source-backed quantities and lossless provenance/consumer mapping remain.
+
+Independent rereading of manual p4 and catalog p14 found no numerical depths or
+seating amounts. The 3-inch rail cut allowance belongs to the post axis; the
+replacement U-channel dimension belongs to an end accessory. Neither fills a
+board pocket or groove field. Panel height and outer rail heights cannot derive
+these values. A board stock length would at most constrain the sum of top and
+bottom engagements, not both independently or their clearances.
+
+Unreviewed evidence is allowed at honest curation levels under the frozen
+contract. A human approval is not a substitute for these missing measurements,
+and absence of approval alone is not a universal publication blocker.

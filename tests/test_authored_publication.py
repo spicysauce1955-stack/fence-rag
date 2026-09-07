@@ -70,3 +70,38 @@ class TestAuthoredPublication(unittest.TestCase):
             self.assertEqual(ref.belongs_to, source['content_hash'])
         finally:
             conn.close()
+
+    def test_nullable_fields_survive_builder_gap_deduplication(self):
+        builder = Mock(tenant='default')
+        builder.source_docs.return_value = []
+        gaps = [{'model_id': 'm', 'path': path, 'kind': 'missing_value',
+                 'code': 'authored_model_incomplete_value', 'closes_by': 'knowledge',
+                 'would_close': 'Supply ' + path, 'cites': []}
+                for path in ('/post', '/default_spec/frame/0/joint/insertion_margin',
+                             '/default_spec/frame/1/joint/insertion_margin')]
+        with patch('fence_evidence.authored_publication.build_index', return_value={}), \
+                patch('fence_evidence.authored_publication.admit_authored_models',
+                      return_value={'models': [], 'exclusions': [], 'gaps': gaps}):
+            build_authored_models(builder, [{'model': {'id': 'm'}}], [])
+        builder.gap.assert_called_once()
+        emitted = builder.gap.call_args.kwargs
+        self.assertEqual(emitted['params']['paths'], sorted(g['path'] for g in gaps))
+        self.assertEqual(emitted['closes_by'], 'knowledge')
+        for gap in gaps:
+            self.assertIn(gap['would_close'], emitted['would_close'])
+
+    @requires_store
+    def test_real_snapshot_preserves_both_unknown_margins_with_source_context(self):
+        package = json.loads((ROOT / 'workspace/catalog/emblem-73014714-model-draft.json').read_text())
+        for frame in package['model_fragment']['default_spec']['frame']:
+            frame['joint']['insertion_margin'] = None
+        snapshot = build_snapshot(tenant='default', authored_records=[package])
+        verify(snapshot)
+        gaps = [g for g in snapshot['gaps']
+                if g['because']['code'] == 'authored_model_incomplete_value']
+        self.assertEqual(len(gaps), 1)
+        self.assertEqual(gaps[0]['because']['params']['paths'], [
+            '/default_spec/frame/0/joint/insertion_margin',
+            '/default_spec/frame/1/joint/insertion_margin'])
+        self.assertTrue(gaps[0]['cites'])
+        self.assertEqual(snapshot['models'], [])

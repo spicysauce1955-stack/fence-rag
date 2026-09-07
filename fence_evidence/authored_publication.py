@@ -95,7 +95,28 @@ def build_authored_models(builder, records, parts, *, reviews=(), model_validato
                 params={'paths': sorted({i['path'] for i in issues}),
                         'reasons': sorted({i['code'] for i in issues})},
                 cites=[SourceRef(**c) for c in group['cites']],
-                would_close=('Implement a lossless consumer adapter and validate this model with its exact Part library.'
+                would_close=('Implement and validate a lossless public representation preserving each model value and its provenance.'
                              if planning else group['would_close']),
                 closes_by='planning' if planning else 'knowledge', severity='warns_line')
+    # Builder identity excludes params: aggregate nullable fields before emitting
+    # so two unknown margins do not collapse into one invisible omission.
+    nullable_groups = {}
+    for gap in result.get('gaps', []):
+        mid = gap['model_id']
+        if not isinstance(mid, str) or not mid:
+            continue
+        key = (mid, gap['kind'], gap['code'], gap['closes_by'])
+        group = nullable_groups.setdefault(key, {'paths': set(), 'requests': set(), 'refs': {}})
+        group['paths'].add(gap['path'])
+        group['requests'].add(gap['would_close'])
+        for cite in gap.get('cites', []):
+            pair = cite.get('id'), cite.get('belongs_to')
+            if pair in found:
+                group['refs'][pair] = found[pair]
+    for (mid, kind, code, owner), group in sorted(nullable_groups.items()):
+        builder.gap(kind=kind, subject={'kind': 'model', 'id': mid, 'tenant': builder.tenant},
+                    code=code, params={'paths': sorted(group['paths'])},
+                    cites=[SourceRef(**group['refs'][key]) for key in sorted(group['refs'])],
+                    would_close=' '.join(sorted(group['requests'])),
+                    closes_by=owner, severity='warns_line')
     return result['models']

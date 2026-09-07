@@ -77,20 +77,28 @@ class AuthoredModelTests(unittest.TestCase):
     def codes(self, result):
         return {i['code'] for e in result['exclusions'] for i in e['issues']}
 
-    def test_preflight_only_requires_external_semantic_validation(self):
+    def readiness_codes(self, result):
+        return {i['code'] for r in result['readiness'] for i in r['issues']}
+
+    def test_preflight_separates_consumer_readiness_from_publication(self):
         result = self.run_gate()
         self.assertEqual(result['models'], [])
         self.assertEqual(self.codes(result), {'consumer_numeric_provenance_mapping_unresolved'})
         self.assertEqual(self.record['model']['id'], 'test/model')
-        self.assertIn('consumer_validation_missing', self.codes(self.run_gate(model_validator=None)))
-        self.assertIn('consumer_validation_failed', self.codes(self.run_gate(model_validator=lambda m, p: ['fit failed'])))
+        self.assertIn('consumer_validation_missing', self.readiness_codes(self.run_gate(model_validator=None)))
+        self.assertIn('consumer_validation_failed', self.readiness_codes(self.run_gate(model_validator=lambda m, p: ['fit failed'])))
 
-    def test_missing_review_and_embedded_claim_cannot_admit(self):
+    def test_unreviewed_publication_does_not_fabricate_review(self):
         self.record['review'] = self.review
         self.record['review_status'] = 'human_approved'
-        self.assertIn('unreviewed_authored_model', self.codes(self.run_gate(reviews=[])))
+        result = self.run_gate(reviews=[])
+        self.assertEqual(self.codes(result), {'consumer_numeric_provenance_mapping_unresolved'})
+        self.assertEqual(result['readiness'][0]['review_status'], 'unreviewed')
         self.review['reviewer_kind'] = 'agent'
-        self.assertIn('unreviewed_authored_model', self.codes(self.run_gate()))
+        result = self.run_gate()
+        self.assertEqual(self.codes(result), {'consumer_numeric_provenance_mapping_unresolved'})
+        self.assertEqual(result['readiness'][0]['review_status'], 'agent_accepted')
+        self.assertEqual(self.parts[0]['spec'][0]['provenance']['curation_level'], 1)
 
     def test_review_binds_parts_and_field_evidence(self):
         for mutate in ('part', 'evidence', 'model'):
@@ -102,11 +110,22 @@ class AuthoredModelTests(unittest.TestCase):
                     self.record['field_evidence']['/grade'] = []
                 else:
                     self.record['model']['grade'] = 'commercial'
-                self.assertIn('unreviewed_authored_model', self.codes(self.run_gate()))
+                self.record['review_id'] = self.review['review_id']
+                self.assertIn('review_hash_mismatch', self.codes(self.run_gate()))
 
     def test_latest_review_revokes_acceptance(self):
-        rejection = dict(self.review, decision='rejected', reviewed_at='2026-09-06T01:00:00Z')
-        self.assertIn('unreviewed_authored_model', self.codes(self.run_gate(reviews=[rejection, self.review])))
+        rejection = dict(self.review, review_id='later-test-review', decision='rejected', reviewed_at='2026-09-06T01:00:00Z')
+        self.assertIn('review_rejected', self.codes(self.run_gate(reviews=[rejection, self.review])))
+
+    def test_duplicate_review_identity_cannot_choose_by_input_order(self):
+        rejection = dict(self.review, decision='rejected')
+        for reviews in ([self.review, rejection], [rejection, self.review]):
+            result = self.run_gate(reviews=reviews)
+            self.assertIn('invalid_review', self.codes(result))
+            self.assertEqual(result['readiness'][0]['review_status'], 'conflicting_reviews')
+        result = self.run_gate(reviews=[self.review, dict(self.review)])
+        self.assertEqual(self.codes(result), {'consumer_numeric_provenance_mapping_unresolved'})
+        self.assertEqual(result['readiness'][0]['review_status'], 'human_accepted')
 
     def test_source_and_reference_closure(self):
         self.assertIn('citation_closure', self.codes(self.run_gate(source_docs=[])))
@@ -114,8 +133,7 @@ class AuthoredModelTests(unittest.TestCase):
 
     def test_geometry_refusals(self):
         for key, value, expected in [('channel_depth', self.q(0), 'invalid_quantity'),
-                                     ('channel_depth', self.q(3), 'engagement_exceeds_channel'),
-                                     ('insertion_margin', None, 'invalid_quantity')]:
+                                     ('channel_depth', self.q(3), 'engagement_exceeds_channel')]:
             with self.subTest(key=key, value=value):
                 self.setUp()
                 self.record['model']['default_spec']['frame'][0]['joint'][key] = value
@@ -219,9 +237,9 @@ class AuthoredModelTests(unittest.TestCase):
     def test_adversarial_review_cannot_bypass_preflight(self):
         mutations = [
             ('grade_evidence', 'uncited'), ('height_evidence', 'uncited'),
-            ('spec_shape', 'missing_part_dimensions'), ('hidden_requirement_part', 'unsupported_requirement_contents'),
+            ('spec_shape', 'invalid_spec_shape'), ('hidden_requirement_part', 'unsupported_requirement_contents'),
             ('assembly', 'unsupported_assembly'), ('fake_height', 'unsupported_height_support'),
-            ('inactive_part', 'inactive_part')]
+            ('inactive_part', 'invalid_part_status')]
         for mutation, expected in mutations:
             with self.subTest(mutation=mutation):
                 self.setUp()
@@ -243,9 +261,55 @@ class AuthoredModelTests(unittest.TestCase):
                 self.assertIn(expected, self.codes(self.run_gate()))
                 self.assertEqual(self.run_gate()['models'], [])
 
-    def test_identity_only_parts_refused(self):
+    def test_identity_only_parts_are_publishable_but_not_geometry(self):
         self.parts[0]['spec'] = []
-        self.assertIn('missing_part_dimensions', self.codes(self.run_gate()))
+        result = self.run_gate(reviews=[])
+        self.assertEqual(self.codes(result), {'consumer_numeric_provenance_mapping_unresolved'})
+        self.assertIn('missing_part_dimensions', self.readiness_codes(result))
+
+    def test_missing_part_specs_remains_a_shape_error(self):
+        self.parts[0].pop('spec')
+        self.assertIn('invalid_spec_shape', self.codes(self.run_gate(reviews=[])))
+
+    def test_null_margin_does_not_waive_known_engagement_limit(self):
+        joint = self.record['model']['default_spec']['frame'][0]['joint']
+        joint['insertion_margin'] = None
+        joint['channel_depth'] = self.q(3)
+        result = self.run_gate(reviews=[])
+        self.assertIn('engagement_exceeds_channel', self.codes(result))
+        self.assertTrue(result['readiness'][0]['publication_blocked'])
+        self.assertFalse(result['readiness'][0]['consumer_validation_executed'])
+        gap = next(g for g in result['gaps'] if g['path'].endswith('insertion_margin'))
+        self.assertEqual(gap['cites'], [self.cite])
+
+    def test_valid_published_statuses_are_not_active_only(self):
+        for status in ('draft', 'active', 'retired'):
+            self.record['model']['status'] = status
+            self.parts[0]['status'] = status
+            result = self.run_gate(reviews=[])
+            self.assertEqual(self.codes(result), {'consumer_numeric_provenance_mapping_unresolved'})
+            if status != 'active':
+                self.assertIn('inactive_part', self.readiness_codes(result))
+                self.assertIn('inactive_model', self.readiness_codes(result))
+
+    def test_explicit_nullable_values_create_gaps_without_defaults(self):
+        model = self.record['model']
+        model['post'] = None
+        model['default_spec']['infill'] = None
+        model['default_spec']['frame'][0]['joint']['insertion_margin'] = None
+        self.record['field_evidence'].pop('/default_spec/frame/0/joint/insertion_margin')
+        result = self.run_gate(reviews=[])
+        self.assertEqual(self.codes(result), {'consumer_numeric_provenance_mapping_unresolved'})
+        self.assertEqual({g['path'] for g in result['gaps']}, {'/post', '/default_spec/infill', '/default_spec/frame/0/joint/insertion_margin'})
+        self.assertTrue(all(g['would_close'] and g['closes_by'] == 'knowledge' for g in result['gaps']))
+        self.assertIsNone(model['default_spec']['frame'][0]['joint']['insertion_margin'])
+        model.pop('post')
+        model['default_spec'].pop('infill')
+        model['default_spec']['frame'][0]['joint'].pop('insertion_margin')
+        result = self.run_gate(reviews=[])
+        self.assertIn('missing_value', self.codes(result))
+        self.assertIn('missing_infill', self.codes(result))
+        self.assertIn('missing_post', self.codes(result))
 
     def test_draft_emblem_is_excluded_without_inventing_review(self):
         import json
@@ -256,7 +320,7 @@ class AuthoredModelTests(unittest.TestCase):
         record = json.loads(draft.read_text())
         result = admit_authored_models([record], parts=[], source_docs=[], source_refs=[], reviews=[])
         self.assertEqual(result['models'], [])
-        self.assertIn('unreviewed_authored_model', self.codes(result))
+        self.assertEqual(result['readiness'][0]['review_status'], 'unreviewed')
         self.assertIn('missing_value', self.codes(result))
 
 

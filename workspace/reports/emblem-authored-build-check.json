@@ -1,8 +1,8 @@
 {
-  "snapshot_id": "a36fa7fc342e67ff4667c7c02ffdade1a9679518780e268e4410d651d7633812",
+  "snapshot_id": "1da3c31cfbab24f6c4a8bfd2dd16c56c8b8c19c9c3acb053d14a82f106f81390",
   "tenant": "default",
   "regime": "us_astm",
-  "retain_until": "2028-09-05",
+  "retain_until": "2028-09-06",
   "source_docs": 85,
   "warnings": 287,
   "gaps": 405,
@@ -69,12 +69,9 @@
             "/post/cap/qty",
             "/post/joint",
             "/post/requirement",
-            "/review",
-            "/status",
             "/variants"
           ],
           "reasons": [
-            "inactive_model",
             "invalid_grade",
             "invalid_length_rule",
             "invalid_quantity",
@@ -84,7 +81,6 @@
             "missing_value",
             "uncited",
             "unresolved_part",
-            "unreviewed_authored_model",
             "unsupported_fitting",
             "unsupported_height_support",
             "unsupported_placement"
@@ -117,7 +113,7 @@
           "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
         }
       ],
-      "would_close": "Resolve the listed source, geometry and schema gaps, then review the exact authored model and Part digest.",
+      "would_close": "Resolve the listed required shape, source, provenance and any explicit review-integrity failures without inventing missing values.",
       "closes_by": "knowledge",
       "severity": "warns_line",
       "on": null
@@ -137,8 +133,7 @@
             "/"
           ],
           "reasons": [
-            "consumer_numeric_provenance_mapping_unresolved",
-            "consumer_validation_missing"
+            "consumer_numeric_provenance_mapping_unresolved"
           ]
         }
       },
@@ -168,11 +163,10 @@
           "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
         }
       ],
-      "would_close": "Implement a lossless consumer adapter and validate this model with its exact Part library.",
+      "would_close": "Implement and validate a lossless public representation preserving each model value and its provenance.",
       "closes_by": "planning",
       "severity": "warns_line",
       "on": null
     }
-  ],
-  "stored": false
+  ]
 }

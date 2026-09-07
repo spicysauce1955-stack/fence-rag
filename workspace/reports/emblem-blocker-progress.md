@@ -1,7 +1,7 @@
-# Emblem blocker progress — G100, 2026-09-06
+# Emblem blocker progress — G101, 2026-09-07
 
 The source-backed private definition now closes all literal Part references.
-The actual Emblem model remains unreviewed and incomplete; no public FenceModel
+The actual Emblem model remains incomplete; unreviewed status alone is not a publication blocker; no public FenceModel
 or installation-ready BOM was published.
 
 | Blocker | Work completed | What remains |
@@ -9,7 +9,36 @@ or installation-ready BOM was published.
 | Missing board/cap definitions | Added typed draft Parts, board colour and exact cap SKU 73013956, with original source/provenance retained | Board effective width/stock length and cap physical fit are not inferred from nominal sizes |
 | Kit-to-component relationships | Bound exact kit identity to bottom rail, top rail, board and U-channel Part IDs; kept cap separate | Board count and stock lengths remain null. No partial executable kit or purchase credits were emitted |
 | Post receiving mechanics | Implemented a bounded private engine path using explicit receiving geometry and per-end engagement, shared-post clearance and consistent cuts/drawing extents | Actual Emblem values, corner/tilted/raked/through configurations and a public-wire mapping remain unsupported |
-| Numeric model provenance | Filed Amendment 008 with exact proposed text and a concrete synthetic example | Both teams must disposition it; it governs nothing until ratified and publication stays blocked |
+| Numeric model provenance | Filed Amendment 008 with exact proposed text and a concrete synthetic example | The proposed map remains pending. Numeric provenance is already required, but a lossless geometry association is not yet implemented; Amendment 008 is one proposed route, not proof that every model needs that amendment |
+
+## G101: publication validity and generation readiness are different
+
+The frozen contract explicitly permits unreviewed knowledge (section 1.4 and
+obligation 6). Identity-only Part definitions and draft/retired entities are not
+universally invalid. Exact purchasable SKUs, a complete supplier catalog and
+successful physical fitting are generation requirements, not generic publication
+requirements. Earlier G98–G100 claims that every model requires a human review,
+complete active Parts, and ratification of specifically Amendment 008 overstated
+the contract. Their test counts remain historical measurements.
+
+The preflight now separates those readiness diagnostics from structural exclusions.
+Optional claimed reviews remain content-bound; explicit rejection is not silently
+ignored. Explicit null post, infill and insertion margins use visible gaps;
+missing required fields are still errors. This correction does not invent any
+Emblem geometry or turn the private parser into a publication adapter.
+
+Three independent reviews confirmed that the missing geometry remains real.
+In addition to both rail pockets and both board engagements, **Member.joint is
+absent**: tongue/groove handedness is not a receiving-depth measurement. A complete
+post definition also needs its own rail-receiving depth. These are different
+axes and hosts. Post:null is legal no-opinion knowledge, but dropping required
+posts would not complete the user's Emblem BOM.
+
+The datamodel already requires provenance on Member dimensions. It does not
+explicitly declare a multi-value owner.provenance association. The actual private
+parser discards citations and authorship. We therefore retain the lossless-mapping
+refusal, without claiming that our proposed pointer-map amendment is the sole
+possible solution. No controlled boundary file or source claim changed.
 
 ## Identity and source verification
 
@@ -76,7 +105,14 @@ fabricated by this implementation.
 
 ## Validation
 
-Evidence suite: **1,547 tests pass**, one existing expected failure (58.828 seconds).
+G101: full evidence suite **1,553 tests pass**, one existing expected failure
+(56.279 seconds). After the final conflicting-review regression was added,
+**30 focused authored-model/publication tests pass**, including an independent
+adversarial rerun. The actual instance audit resolves **26 canonical SourceRefs**
+and still reports complete_model_admitted=false. Frozen contract hashes pass.
+No consumer code changed in G101; the consumer measurements below are G100.
+
+Historical G100 evidence suite: **1,547 tests pass**, one existing expected failure (58.828 seconds).
 After adding the Part-aware diagnostic, all **21 candidate tests pass** again.
 Independent source/kit checks and instance graph tests pass. Consumer full suite:
 **2,584 tests pass**, seven existing warnings (73.39 seconds). Consumer changes are

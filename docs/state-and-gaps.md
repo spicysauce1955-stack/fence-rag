@@ -5016,6 +5016,54 @@ request for more documents.
 
 ---
 
+### G101 — Separate publication validity from physical generation readiness
+
+Measured 2026-09-07. Three independent agents rechecked the frozen contract,
+actual datamodel declarations, source geometry and the revised gate. The prior
+profile incorrectly treated human review, active-only entities, nonempty Part
+specs and consumer fit success as universal publication requirements. Contract
+obligation 6 permits honestly classified unreviewed knowledge; the datamodel
+explicitly permits null post, infill and insertion margin values. The gate now
+separates readiness diagnostics from structural exclusions and emits cited gaps
+for explicit nullable values. Missing required fields remain errors.
+
+Adversarial review caught and fixed three concrete errors: absent Part.spec
+silently becoming [], unknown insertion margin bypassing a known engagement
+exceeding pocket depth, and contradictory same-ID review rows depending on input
+order. Exact optional review references remain content-bound; rejected or
+conflicting ledger records cannot silently become an acceptance. No absence of
+review is promoted to a human review or higher curation level.
+
+Real snapshot tests confirm that two missing rail margins survive builder gap
+deduplication with canonical source context. The actual Emblem object still does
+not publish. Source rereading also corrected the minimum-geometry list: Member.joint
+is entirely absent, and board groove receiving depth is distinct from rail
+pockets and post receiving depth. Insertion margins may be null with gaps; that
+permission supplies none of the required nonnullable depths or engagements.
+
+Numeric provenance is already required by the existing contract. The precise
+multi-value geometry association is not declared or implemented losslessly in
+this profile. Amendment 008 is one pending proposal, not the only theoretically
+possible representation and not a universal prerequisite for every model. The
+private parser still loses provenance, so its acceptance cannot close this gate.
+No source dimension, agreement or controlled boundary change was fabricated.
+
+Measured validation: **1,553 full-suite tests pass, one existing expected
+failure**, 56.279 seconds. After the final tied-review regression, **30 focused
+tests pass**, independently repeated. The actual instance audit resolves **26
+canonical SourceRefs** and reports **complete_model_admitted=false**; the real
+snapshot verifies with **models=[]**. Frozen hashes pass. No consumer code changed;
+G100's 2,584 consumer tests remain historical evidence, not a new run.
+
+Remaining work is applicable exact-model geometry and fitting evidence, public
+value/provenance mapping and the adapter, plus exact packaged inventory for a
+complete purchasable BOM. A source-backed partial publication must preserve its
+gaps; removing real rails/boards/posts merely to fit a schema is not completion.
+See the corrected field-level request in emblem-remaining-inputs.md and current
+emblem-blocker-progress.md. Concurrent snapshot verifier edits remain separate.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

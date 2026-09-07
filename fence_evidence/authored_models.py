@@ -38,12 +38,14 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
     """Return ``models`` and private ``exclusions``; no mutation or ledger writes.
 
     Record: {model, field_evidence: {JSON-pointer: [SourceRef]}}. A trusted review
-    needs content_hash, decision=accepted, reviewer_kind=human, reviewer,
-    reviewed_at (ISO datetime), and review_id. Latest review wins per digest.
-    A human's acceptance attests source interpretation; this function cannot.
+    is optional. When supplied for this digest it needs decision, reviewer_kind,
+    reviewer, reviewed_at (timezone-aware ISO datetime), and review_id. A record's
+    optional review_id requires an exact hash match. Latest matching review wins.
+    No review absence forbids publication or changes a value's curation level.
+    Readiness diagnostics and explicit-null gaps are returned separately.
     """
     from .snapshot import SOURCE_CLASSES, VERSION_STATUSES
-    models, exclusions = [], []
+    models, exclusions, readiness, gaps = [], [], [], []
     part_map = {p.get('id'): p for p in parts if isinstance(p, dict) and isinstance(p.get('id'), str)}
     duplicate_parts = set()
     part_ids = set()
@@ -64,7 +66,9 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
             if isinstance(mid, str):
                 identity_counts[mid] = identity_counts.get(mid, 0) + 1
     for record in records:
-        issues = []
+        issues, readiness_issues = [], []
+        def not_ready(path, code, message):
+            readiness_issues.append({'path': path, 'code': code, 'message': message})
         def fail(path, code, message):
             issues.append({'path': path, 'code': code, 'message': message})
         if duplicate_parts:
@@ -109,12 +113,13 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
             elif isinstance(node, float):
                 fail(path, 'float_forbidden', 'Public model quantities use integer thousandths, never floats.')
         check_tree(model, '')
-        def field(node, key, path):
+        def field(node, key, path, nullable=False):
             full = path + '/' + key
             if key not in node:
                 fail(full, 'missing_value', 'Explicit authored value required; no consumer default is evidence.')
                 return None
-            cited(evidence.get(full), full)
+            if not (nullable and node[key] is None):
+                cited(evidence.get(full), full)
             return node[key]
         def quantity(value, path, unit='mm', positive=False, signed=False):
             if (not isinstance(value, dict) or type(value.get('amount_milli')) is not int
@@ -152,8 +157,11 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
             if isinstance(pid, str) and pid in part_map:
                 if part_map[pid].get('contains') or part_map[pid].get('contained'):
                     fail(path + '/part_id', 'unsupported_part_contains', 'Contained Part references require transitive review binding; this profile refuses them.')
-                if part_map[pid].get('status') != 'active':
-                    fail(path + '/part_id', 'inactive_part', 'Referenced Part must be explicitly active.')
+                status = part_map[pid].get('status')
+                if status not in ('draft', 'active', 'retired'):
+                    fail(path + '/part_id', 'invalid_part_status', 'Part status must be draft, active or retired.')
+                elif status != 'active':
+                    not_ready(path + '/part_id', 'inactive_part', 'This valid published Part is not an active generation candidate.')
                 part = part_map[pid]
                 check_tree(part, path + '/part')
                 if not valid_version(part.get('version')) or not localized(part.get('name_i18n')) or part.get('authorship') != 'third_party_authored':
@@ -166,9 +174,11 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
                 rollup = part.get('contributing_sources')
                 if not isinstance(rollup, list) or not rollup or any(not isinstance(h, str) or h not in docs for h in rollup):
                     fail(path + '/part/contributing_sources', 'citation_closure', 'Part requires a resolvable source roll-up.')
-                specs = part.get('spec', [])
-                if not isinstance(specs, list) or not specs or any(not isinstance(sf, dict) for sf in specs):
-                    fail(path + '/part_id', 'missing_part_dimensions', 'Identity-only Part cannot establish physical geometry.')
+                specs = part.get('spec')
+                if not isinstance(specs, list) or any(not isinstance(sf, dict) for sf in specs):
+                    fail(path + '/part/spec', 'invalid_spec_shape', 'Part.spec must be an explicit list of SpecField objects.')
+                elif not specs:
+                    not_ready(path + '/part_id', 'missing_part_dimensions', 'Identity-only Parts may publish, but do not establish generation geometry.')
                 for spec in specs if isinstance(specs, list) else []:
                     if isinstance(spec, dict):
                         provenance = spec.get('provenance')
@@ -191,6 +201,17 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
                               or not isinstance(value.get('value_raw'), list) or not value['value_raw']
                               or any(not isinstance(v, str) or not v for v in value['value_raw'])):
                             fail(path + '/part/spec/value', 'unsupported_spec_value', 'This profile supports millimetre dimensions and lexeme-preserving Tokens.')
+        def missing_gap(path, explanation):
+            # Null is a declared absence, never an invented numeric default.
+            citations = evidence.get(path) or model.get('cites', [])
+            if not isinstance(citations, list):
+                citations = []
+            if citations:
+                cited(citations, path)
+            gaps.append({'model_id': model.get('id'), 'path': path, 'kind': 'missing_value',
+                         'code': 'authored_model_incomplete_value', 'would_close': explanation,
+                         'closes_by': 'knowledge', 'cites': copy.deepcopy(citations)})
+            not_ready(path, 'missing_value', explanation)
         def joint(node, path):
             if not isinstance(node, dict):
                 fail(path, 'missing_joint', 'Explicit Joint object required.')
@@ -203,7 +224,12 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
             if kind not in ('butt', 'channel', 'groove', 'bracket', 'overlap'):
                 fail(path, 'invalid_joint', 'Unsupported joint kind.')
             depth = quantity(field(node, 'channel_depth', path), path + '/channel_depth', positive=kind in ('channel', 'groove'))
-            margin = quantity(field(node, 'insertion_margin', path), path + '/insertion_margin')
+            margin_value = field(node, 'insertion_margin', path, nullable=True)
+            if margin_value is None and 'insertion_margin' in node:
+                margin = None
+                missing_gap(path + '/insertion_margin', 'Establish the insertion margin for this joint from applicable evidence or an explicitly classified authored value.')
+            else:
+                margin = quantity(margin_value, path + '/insertion_margin')
             if node.get('contains'):
                 fail(path, 'unsupported_contains', 'Contained assembly requires a dedicated validator.')
             return depth, margin
@@ -226,8 +252,10 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
             fail('/height_support', 'missing_value', 'Explicit height support required.')
         if model.get('authorship') != 'third_party_authored':
             fail('/authorship', 'unsupported_authorship', 'This producer authors third-party definitions; manufacturer approval requires a separate authenticated path.')
-        if model.get('status') != 'active':
-            fail('/status', 'inactive_model', 'Only explicitly active models may be admitted.')
+        if model.get('status') not in ('draft', 'active', 'retired'):
+            fail('/status', 'invalid_model_status', 'Model status must be draft, active or retired.')
+        elif model['status'] != 'active':
+            not_ready('/status', 'inactive_model', 'This valid published status does not select an active generation definition.')
         if field(model, 'grade', '') not in ('residential', 'commercial', 'industrial'):
             fail('/grade', 'invalid_grade', 'Explicit supported grade required.')
         height = field(model, 'height_support', '')
@@ -277,52 +305,56 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
             if slot.get('contains'):
                 fail(path, 'unsupported_contains', 'Contained assembly requires a dedicated validator.')
         infill = spec.get('infill')
-        if not isinstance(infill, dict):
-            infill = {}
-            fail('/default_spec/infill', 'missing_infill', 'This profile requires an explicit infill.')
-        path = '/default_spec/infill'
-        for key, allowed in [('orientation', ('vertical', 'horizontal')), ('justification', ('start', 'end', 'center')), ('excess', ('trim_last', 'truncate')), ('supply', ('components', 'assembly'))]:
-            if field(infill, key, path) not in allowed:
-                fail(path + '/' + key, 'unsupported_fitting', 'Explicit supported fitting policy required.')
-        quantity(field(infill, 'edge_margin', path), path + '/edge_margin')
-        pattern = infill.get('pattern')
-        if not isinstance(pattern, list) or not pattern:
-            fail(path + '/pattern', 'empty_pattern', 'A nonempty infill pattern is required.')
-            pattern = []
-        member_keys = set()
-        for i, member in enumerate(pattern):
-            p = path + '/pattern/' + str(i)
-            if not isinstance(member, dict):
-                fail(p, 'invalid_shape', 'Member must be an object.')
-                continue
-            key = member.get('key')
-            if not isinstance(key, str) or not key or key in member_keys:
-                fail(p + '/key', 'invalid_key', 'Unique nonempty member key required.')
-            else:
-                member_keys.add(key)
-            joint(member.get('joint'), p + '/joint')
-            if member.get('base_ref') == member.get('top_ref'):
-                fail(p, 'invalid_support_relationship', 'Member endpoints must reference distinct supporting frames.')
-            for side in ('base', 'top'):
-                ref = member.get(side + '_ref')
-                engagement = quantity(field(member, side + '_engagement', p), p + '/' + side + '_engagement', positive=True)
-                if not isinstance(ref, str) or ref not in frames:
-                    fail(p + '/' + side + '_ref', 'unresolved_slot', 'Member must reference its supporting frame.')
+        if infill is None and 'infill' in spec:
+            missing_gap('/default_spec/infill', 'Author an applicable infill definition if this panel should express an infill opinion.')
+        else:
+            if not isinstance(infill, dict):
+                infill = {}
+                fail('/default_spec/infill', 'missing_infill', 'This profile requires an explicit infill.')
+            path = '/default_spec/infill'
+            for key, allowed in [('orientation', ('vertical', 'horizontal')), ('justification', ('start', 'end', 'center')), ('excess', ('trim_last', 'truncate')), ('supply', ('components', 'assembly'))]:
+                if field(infill, key, path) not in allowed:
+                    fail(path + '/' + key, 'unsupported_fitting', 'Explicit supported fitting policy required.')
+            quantity(field(infill, 'edge_margin', path), path + '/edge_margin')
+            pattern = infill.get('pattern')
+            if not isinstance(pattern, list) or not pattern:
+                fail(path + '/pattern', 'empty_pattern', 'A nonempty infill pattern is required.')
+                pattern = []
+            member_keys = set()
+            for i, member in enumerate(pattern):
+                p = path + '/pattern/' + str(i)
+                if not isinstance(member, dict):
+                    fail(p, 'invalid_shape', 'Member must be an object.')
+                    continue
+                key = member.get('key')
+                if not isinstance(key, str) or not key or key in member_keys:
+                    fail(p + '/key', 'invalid_key', 'Unique nonempty member key required.')
                 else:
-                    if frame_orientations[ref] == infill.get('orientation'):
-                        fail(p, 'invalid_support_relationship', 'Supporting frame must run perpendicular to this infill.')
-                    depth, margin = frames[ref]
-                    if None not in (depth, margin, engagement) and engagement + margin > depth:
-                        fail(p, 'engagement_exceeds_channel', 'Engagement plus insertion margin exceeds receiving depth.')
-            quantity(field(member, 'gap_after', p), p + '/gap_after', signed=True)
-            quantity(field(member, 'face_offset', p), p + '/face_offset', signed=True)
-            edges = field(member, 'profile_edges', p)
-            if (not isinstance(edges, dict) or set(edges) != {'start', 'end'}
-                    or any(value not in ('tongue', 'groove', 'square', 'ship_lap', 'none') for value in edges.values())):
-                fail(p + '/profile_edges', 'invalid_edges', 'Explicit start and end profile edges are required.')
-            requirement(member.get('requirement'), p + '/requirement', True)
-            if member.get('contains'):
-                fail(p, 'unsupported_contains', 'Contained assembly requires a dedicated validator.')
+                    member_keys.add(key)
+                joint(member.get('joint'), p + '/joint')
+                if member.get('base_ref') == member.get('top_ref'):
+                    fail(p, 'invalid_support_relationship', 'Member endpoints must reference distinct supporting frames.')
+                for side in ('base', 'top'):
+                    ref = member.get(side + '_ref')
+                    engagement = quantity(field(member, side + '_engagement', p), p + '/' + side + '_engagement', positive=True)
+                    if not isinstance(ref, str) or ref not in frames:
+                        fail(p + '/' + side + '_ref', 'unresolved_slot', 'Member must reference its supporting frame.')
+                    else:
+                        if frame_orientations[ref] == infill.get('orientation'):
+                            fail(p, 'invalid_support_relationship', 'Supporting frame must run perpendicular to this infill.')
+                        depth, margin = frames[ref]
+                        if depth is not None and engagement is not None:
+                            if engagement > depth or (margin is not None and engagement + margin > depth):
+                                fail(p, 'engagement_exceeds_channel', 'Known engagement alone, or engagement plus a known margin, exceeds receiving depth.')
+                quantity(field(member, 'gap_after', p), p + '/gap_after', signed=True)
+                quantity(field(member, 'face_offset', p), p + '/face_offset', signed=True)
+                edges = field(member, 'profile_edges', p)
+                if (not isinstance(edges, dict) or set(edges) != {'start', 'end'}
+                        or any(value not in ('tongue', 'groove', 'square', 'ship_lap', 'none') for value in edges.values())):
+                    fail(p + '/profile_edges', 'invalid_edges', 'Explicit start and end profile edges are required.')
+                requirement(member.get('requirement'), p + '/requirement', True)
+                if member.get('contains'):
+                    fail(p, 'unsupported_contains', 'Contained assembly requires a dedicated validator.')
         fixings = spec.get('fixings')
         if not isinstance(fixings, list):
             fail('/default_spec/fixings', 'missing_value', 'Explicit fixing list required.')
@@ -341,8 +373,10 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
             quantity(field(fixing, 'qty_per_basis', p), p + '/qty_per_basis', 'each', True)
             requirement(fixing.get('requirement'), p + '/requirement')
         post = model.get('post')
-        if not isinstance(post, dict):
-            fail('/post', 'missing_post', 'This profile requires a complete post definition.')
+        if post is None and 'post' in model:
+            missing_gap('/post', 'Supply an applicable post requirement if this model should express a post-selection opinion.')
+        elif not isinstance(post, dict):
+            fail('/post', 'missing_post', 'Post must be an explicit PostSlot or null (no opinion).')
         else:
             requirement(post.get('requirement'), '/post/requirement')
             joint(post.get('joint'), '/post/joint')
@@ -351,38 +385,71 @@ def admit_authored_models(records, *, parts, source_docs, source_refs, reviews,
             if post.get('contains'):
                 fail('/post', 'unsupported_contains', 'Contained post components need a dedicated validator.')
         eligible = []
+        review_identities, conflicting_review_ids = {}, set()
+        review_status = 'unreviewed'
+        requested_review = record.get('review_id')
+        if requested_review is not None and (not isinstance(requested_review, str) or not requested_review.strip()):
+            fail('/review_id', 'invalid_review', 'An explicit review reference must be a nonempty review ID.')
+        selected_review_found = False
         for review in reviews:
-            if not isinstance(review, dict) or review.get('content_hash') != digest:
+            if not isinstance(review, dict):
+                continue
+            named = requested_review is not None and review.get('review_id') == requested_review
+            if named:
+                selected_review_found = True
+                if review.get('content_hash') != digest:
+                    fail('/review_id', 'review_hash_mismatch', 'The explicitly referenced review does not bind this model, evidence and Parts.')
+            if review.get('content_hash') != digest:
                 continue
             try:
                 stamp = datetime.fromisoformat(review['reviewed_at'].replace('Z', '+00:00'))
-                if stamp.tzinfo is None:
-                    raise ValueError('timezone required')
-                eligible.append((stamp, str(review.get('review_id', '')), review))
+                if (stamp.tzinfo is None or review.get('decision') not in ('accepted', 'rejected')
+                        or review.get('reviewer_kind') not in ('human', 'agent')
+                        or not isinstance(review.get('reviewer'), str) or not review['reviewer'].strip()
+                        or not isinstance(review.get('review_id'), str) or not review['review_id'].strip()):
+                    raise ValueError('Malformed trusted review')
+                identity_hash = canonical_content_hash(review)
+                review_id = review['review_id']
+                if review_id in review_identities and review_identities[review_id] != identity_hash:
+                    conflicting_review_ids.add(review_id)
+                    fail('/review', 'invalid_review', 'The same immutable review ID has contradictory records.')
+                else:
+                    review_identities[review_id] = identity_hash
+                    eligible.append((stamp, review_id, review))
             except (KeyError, TypeError, ValueError, AttributeError):
-                fail('/review', 'invalid_review', 'Review timestamp must be a timezone-aware ISO datetime.')
-        review = max(eligible, key=lambda row: row[:2])[2] if eligible else {}
-        if (review.get('decision') != 'accepted' or review.get('reviewer_kind') != 'human'
-                or not isinstance(review.get('reviewer'), str) or not review['reviewer'].strip()
-                or not isinstance(review.get('review_id'), str) or not review['review_id'].strip()):
-            fail('/review', 'unreviewed_authored_model', 'Trusted human review must accept this exact model, evidence and Part content hash.')
+                fail('/review', 'invalid_review', 'A supplied matching review needs decision, reviewer identity/kind and a timezone-aware ISO timestamp.')
+        if requested_review is not None and not selected_review_found:
+            fail('/review_id', 'missing_review', 'The explicitly referenced review is absent from the trusted ledger.')
+        if conflicting_review_ids:
+            review_status = 'conflicting_reviews'
+        elif eligible:
+            review = max(eligible, key=lambda row: row[:2])[2]
+            review_status = review['reviewer_kind'] + '_' + review['decision']
+            if review['decision'] == 'rejected':
+                fail('/review', 'review_rejected', 'Latest matching review explicitly rejects this definition; this is a workflow refusal, not a blanket human-review requirement.')
+        consumer_validation_executed = False
         if model_validator is None:
-            fail('/', 'consumer_validation_missing', 'A lossless wire adapter and semantic validator are required before admission.')
+            not_ready('/', 'consumer_validation_missing', 'No consumer validation was executed; this does not by itself forbid publication.')
         elif not issues:
+            consumer_validation_executed = True
             try:
                 validation_errors = model_validator(copy.deepcopy(model), copy.deepcopy(parts))
                 if not isinstance(validation_errors, list) or any(not isinstance(e, str) for e in validation_errors):
-                    fail('/', 'invalid_validation_result', 'Semantic validator must return a list of error strings.')
+                    not_ready('/', 'invalid_validation_result', 'Semantic validator must return a list of error strings.')
                 else:
                     for error in validation_errors:
-                        fail('/', 'consumer_validation_failed', error)
+                        not_ready('/', 'consumer_validation_failed', error)
             except Exception as exc:
-                fail('/', 'consumer_validation_failed', type(exc).__name__ + ': ' + str(exc))
+                not_ready('/', 'consumer_validation_failed', type(exc).__name__ + ': ' + str(exc))
+        readiness.append({'model_id': mid, 'content_hash': digest, 'review_status': review_status,
+                          'generation_ready': False, 'consumer_validation_executed': consumer_validation_executed,
+                          'publication_blocked': True, 'issues': readiness_issues})
         fail('/', 'consumer_numeric_provenance_mapping_unresolved',
              'Numeric model values need published provenance under contract obligation 6; this profile only stores private field citations and has no agreed lossless publication mapping.')
+        readiness[-1]['publication_blockers'] = copy.deepcopy(issues)
         if issues:
             exclusions.append({'model_id': mid, 'content_hash': digest, 'issues': issues,
-                               'would_close': 'Resolve the listed source, geometry and schema gaps, then review the exact authored model and Part digest.'})
+                               'would_close': 'Resolve the listed required shape, source, provenance and any explicit review-integrity failures without inventing missing values.'})
         else:
             models.append(copy.deepcopy(model))
-    return {'models': models, 'exclusions': exclusions}
+    return {'models': models, 'exclusions': exclusions, 'readiness': readiness, 'gaps': gaps}
