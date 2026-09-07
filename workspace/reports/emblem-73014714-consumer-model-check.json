@@ -1,6 +1,6 @@
 {
   "consumer_revision": "9de94eb06d8e997d9be098dedd5b6a6b2eb4024d",
-  "consumer_source_diff_sha256": "f904ca0bab8fcf2bdc3d213f9e36067da6252423d32dd3b8631a8bf48c94d35f",
+  "consumer_source_diff_sha256": "f9e91750d56c824f355f276023a5507837490ff39409c3a22cf8d54d42019d28",
   "post_requirement_parses": true,
   "post_role_matrix": {
     "end": [
@@ -18,7 +18,7 @@
   },
   "private_model_parser_errors": [],
   "whole_model_parses": true,
-  "candidate_hash": "abe89223e04c5cad3a6e2bf3808680edfda4832f7ef9ddbf275cd2a3f7098768",
+  "candidate_hash": "da79a6ef0ecf7852fea7fc41cea10cd1b619c542606a27da16f996039514ffb8",
   "partial_semantic_validation": {
     "executed": true,
     "errors": [
@@ -70,6 +70,27 @@
     },
     "handed_placement_consumed": false,
     "kit_purchase_credit_consumed": false
+  },
+  "part_aware_semantic_validation": {
+    "executed": true,
+    "scope": "diagnostic copies of draft definitions; empty catalog, not physical-fit proof",
+    "errors": [
+      "mfr/freedom-outdoor-living/73013956@v1: no product in the catalog covers this spec, so every slot naming it would report no_eligible_item on every bay of every job",
+      "mfr/freedom-outdoor-living/emblem-73014714-board@v1: no product in the catalog covers this spec, so every slot naming it would report no_eligible_item on every bay of every job",
+      "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel@v1: the spec is empty, which is a conjunction of nothing and therefore true of every product \u2014 a part that matches everything is not a specification",
+      "mfr/freedom-outdoor-living/emblem-73014714-rail-a@v1: no product in the catalog covers this spec, so every slot naming it would report no_eligible_item on every bay of every job",
+      "mfr/freedom-outdoor-living/emblem-73014714-rail-b@v1: no product in the catalog covers this spec, so every slot naming it would report no_eligible_item on every bay of every job",
+      "frame slot 'bottom_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have \u2014 the drawing would show a housed joint and the cut list would read as a butt one. Give the channel its depth, or call the joint 'butt'",
+      "frame slot 'top_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have \u2014 the drawing would show a housed joint and the cut list would read as a butt one. Give the channel its depth, or call the joint 'butt'",
+      "infill member 'board': width_mm must be positive, got 0",
+      "slot bottom_rail: no item in the catalog covers this spec, so nothing could ever supply it. Same reason an empty member list is refused \u2014 it would publish cleanly and then report `no_eligible_item` on every bay of every job built to this model",
+      "slot top_rail: no item in the catalog covers this spec, so nothing could ever supply it. Same reason an empty member list is refused \u2014 it would publish cleanly and then report `no_eligible_item` on every bay of every job built to this model",
+      "slot board: no item in the catalog covers this spec, so nothing could ever supply it. Same reason an empty member list is refused \u2014 it would publish cleanly and then report `no_eligible_item` on every bay of every job built to this model",
+      "slot u_channel_first_board_tongue: no item in the catalog covers this spec, so nothing could ever supply it. Same reason an empty member list is refused \u2014 it would publish cleanly and then report `no_eligible_item` on every bay of every job built to this model",
+      "slot u_channel_last_board_groove: no item in the catalog covers this spec, so nothing could ever supply it. Same reason an empty member list is refused \u2014 it would publish cleanly and then report `no_eligible_item` on every bay of every job built to this model"
+    ],
+    "active_parts_are_in_memory_test_copies": true,
+    "actual_authored_parts_remain_draft": true
   },
   "consumer_boundary": {
     "adapter_implemented": false,

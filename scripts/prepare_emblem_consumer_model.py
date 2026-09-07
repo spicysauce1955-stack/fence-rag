@@ -106,8 +106,86 @@ def author_assembly_rules(package, model):
             'review_status': 'unreviewed_authored', 'physical_fit_verified': False}
 
 
+def author_identity_parts(package, model):
+    """Close board/cap identity references without promoting nominal fit geometry."""
+    sources = unique_records(package['part_fragments'], 'id')
+    anchors = unique_records(package['part_identity_anchors'], 'part_id')
+    known_hashes = {source['content_hash'] for source in package['sources']}
+
+    def checked_cite(value):
+        if (not isinstance(value, dict) or set(value) != {'id', 'belongs_to'}
+                or not isinstance(value['id'], str)
+                or re.fullmatch(r'[0-9a-f]{16}', value['id']) is None
+                or not isinstance(value['belongs_to'], str)
+                or re.fullmatch(r'[0-9a-f]{64}', value['belongs_to']) is None
+                or value['belongs_to'] not in known_hashes):
+            raise ValueError('Identity citation must name a known package source with a valid SourceRef.')
+        return value['belongs_to']
+
+    def checked_anchor(value):
+        if (not isinstance(value, dict) or not isinstance(value.get('text_raw'), str)
+                or not value['text_raw'].strip() or not isinstance(value.get('element_id'), str)
+                or not value['element_id']):
+            raise ValueError('Identity anchor requires source text and an element ID.')
+        return checked_cite(value.get('cite'))
+
+    board_id = model['default_spec']['infill']['pattern'][0]['requirement']['part_id']
+    cap_id = model['post']['cap']['part_id']
+    parts, mappings = [], []
+    for pid, expected in ((board_id, 'infill'), (cap_id, 'post_cap')):
+        if not isinstance(pid, str) or pid not in sources:
+            raise ValueError('Board/cap identity must resolve to a source Part.')
+        source = sources[pid]
+        if source.get('type') != {'namespace': 'shared', 'key': expected}:
+            raise ValueError('Identity mapping requires the source board/cap PartType.')
+        specs = source.get('spec')
+        if not isinstance(specs, list) or any(not isinstance(sf, dict) for sf in specs):
+            raise ValueError('Board/cap identity requires a list of source SpecFields.')
+        colours = [sf for sf in specs if sf.get('key') == 'colour']
+        colour = colours[0] if len(colours) == 1 else {}
+        value, provenance = colour.get('value'), colour.get('provenance')
+        if (colour.get('agree') != '==' or not isinstance(value, dict)
+                or value.get('key') != 'white'
+                or not isinstance(value.get('value_raw'), list) or not value['value_raw']
+                or any(not isinstance(raw, str) or raw.strip().casefold() != 'white'
+                       for raw in value['value_raw'])
+                or not isinstance(provenance, dict)
+                or not isinstance(provenance.get('cites'), list) or not provenance['cites']):
+            raise ValueError('Board/cap identity requires the cited white colour token.')
+        colour_hashes = {checked_cite(cite) for cite in provenance['cites']}
+        private = {'id': pid, 'version': source['version'], 'status': 'draft',
+                   'type': expected, 'name_i18n': deepcopy(source['name_i18n']),
+                   'spec': [{'key': 'colour', 'agree': '==', 'value': 'white'}]}
+        mapping = {'part_id': pid, 'source_part': deepcopy(source),
+                   'fit_geometry_verified': False,
+                   'unconsumed_dimensions': [deepcopy(sf) for sf in source['spec']
+                                             if sf['key'] != 'colour'],
+                   'reason': 'Nominal dimensions are not manufactured dimensions, installed pitch or internal clearance.'}
+        if expected == 'post_cap':
+            if pid not in anchors:
+                raise ValueError('Cap identity needs its cited SKU anchor.')
+            identity = anchors[pid]
+            number, description = identity.get('model_number'), identity.get('description')
+            number_hash = checked_anchor(number)
+            description_hash = checked_anchor(description)
+            sku = number['text_raw']
+            if (sku != pid.rsplit('/', 1)[-1] or number_hash != description_hash
+                    or description_hash not in colour_hashes
+                    or re.search(r'\bpost\s+top\b', description['text_raw'], re.I) is None
+                    or re.search(r'\bwhite\b', description['text_raw'], re.I) is None):
+                raise ValueError('Cap SKU must match its cited source identity.')
+            private['spec'].append({'key': 'sku', 'agree': '==', 'value': sku})
+            mapping['sku_identity_anchor'] = deepcopy(identity)
+        else:
+            mapping['component_sku'] = None
+            mapping['reason'] += ' The panel-kit SKU is not a board SKU.'
+        parts.append(private)
+        mappings.append(mapping)
+    return parts, mappings
+
+
 def author_components(package, model):
-    """Map only evidenced horizontal rail heights and full-panel end channels."""
+    """Map cited identity and rail constraints, leaving unknown fitting explicit."""
     source_parts = unique_records(package['part_fragments'], 'id')
     parts, dimensions, matching = [], [], []
     for slot in model['default_spec']['frame']:
@@ -168,6 +246,8 @@ def author_components(package, model):
                            'exact_mm': str(exact), 'projected_mm': projected,
                            'rounding_error_mm': str(Decimal(projected) - exact),
                            'rounding_policy': 'nearest whole millimetre, half up'})
+    identity_parts, identity_mappings = author_identity_parts(package, model)
+    parts.extend(identity_parts)
     inventories = [i for i in package['packaged_assembly_inventory']
                    if i['component_key'] == 'end_u_channel']
     if len(inventories) != 1:
@@ -195,7 +275,8 @@ def author_components(package, model):
                           'position': 'first' if p['edge'].startswith('first') else 'last',
                           'profile_edge': 'tongue' if p['edge'].endswith('tongue') else 'groove'},
          'requirement': {'part_id': channel_id, 'qty': 1}} for p in placements]
-    return {'private_parts': parts, 'rail_dimension_mappings': dimensions,
+    return {'private_parts': parts, 'identity_mappings': identity_mappings,
+            'rail_dimension_mappings': dimensions,
             'rail_matching_mappings': matching,
             'u_channel_placements': placements, 'u_channel_inventory_evidence': deepcopy(inventory),
             'scope': 'full panel only; incomplete private component representation',
@@ -203,7 +284,53 @@ def author_components(package, model):
             'limitations': ['Handed bindings are authored; actual placement remains unverified until panel fitting inputs are sourced.',
                             'Channels ship in the panel kit; separate component demand must not become extra purchases.',
                             'Private rail dimensions and colour constrain matching, but component SKU identities and channel matching specs remain incomplete.',
-                            'Channel dimensions and remaining exact Parts are unresolved.']}
+                            'Board effective width/stock length and cap/channel fit geometry remain unresolved despite closed identity references.']}
+
+
+def author_kit_membership(package, model, private_parts):
+    """Bind the cited kit inventory to Parts without emitting a partial kit."""
+    inventory = unique_records(package['packaged_assembly_inventory'], 'component_key')
+    frames = {slot['key']: slot['requirement']['part_id']
+              for slot in model['default_spec']['frame']}
+    board = model['default_spec']['infill']['pattern'][0]
+    channels = model['default_spec']['fixings']
+    channel_ids = {f['requirement']['part_id'] for f in channels}
+    if len(channel_ids) != 1:
+        raise ValueError('Kit U-channel inventory must name one component identity.')
+    targets = [
+        ('bottom_rail', frames['bottom_rail'], ['bottom_rail'], 1),
+        ('top_rail', frames['top_rail'], ['top_rail'], 1),
+        ('tongue_and_groove_boards', board['requirement']['part_id'], [board['key']], None),
+        ('end_u_channel', next(iter(channel_ids)), [f['key'] for f in channels], 2),
+    ]
+    defined = {p['id'] for p in private_parts}
+    relationships = []
+    for key, pid, slots, expected in targets:
+        entry = inventory[key]
+        if (pid not in defined or type(entry['quantity_each']) is not type(expected)
+                or entry['quantity_each'] != expected):
+            raise ValueError('Kit membership needs defined Parts and the currently evidenced inventory.')
+        if not entry['evidence'].get('cite'):
+            raise ValueError('Kit membership requires its source evidence.')
+        relationships.append({'component_key': key, 'part_id': pid, 'slot_keys': slots,
+                              'quantity_each': expected, 'stock_length_mm': None,
+                              'source_inventory': deepcopy(entry)})
+    identities = [a for a in package['identity_anchors'] if a['text_raw'] == '73014714']
+    if len(identities) != 1 or not identities[0].get('cite'):
+        raise ValueError('Kit membership requires the exact supplier-model identity anchor.')
+    return {'artifact_kind': 'private_authored_kit_membership',
+            'supplier_model_number': '73014714', 'identity_anchor': deepcopy(identities[0]),
+            'model_id': model['id'], 'authorship': 'third_party_authored',
+            'review_status': 'unreviewed_authored', 'relationships': relationships,
+            'runtime_requirements_added': False,
+            'emission_status': 'blocked_incomplete_inventory_and_stock',
+            'remaining_inputs': ['Exact kit board count with applicable source evidence',
+                                 'Manufactured rail and board lengths for package credits',
+                                 'Applicable channel fit and length semantics'],
+            'separately_purchased_part_ids': [model['post']['cap']['part_id']],
+            'limitations': ['Membership is authored structure; it is not a complete supplier Product or executable kit requirement.',
+                            'Missing board count remains null; fitted demand is never substituted for packaged inventory.',
+                            'Post selection remains a separate station-scoped purchase rule.']}
 
 
 def prepare(package, placement_confirmation=None):
@@ -301,6 +428,8 @@ def prepare(package, placement_confirmation=None):
             'Integer-mm approximation is adapter authoring, not a manufacturer tolerance.')
     result['component_authoring'] = author_components(package, model)
     result['assembly_authoring'] = author_assembly_rules(package, model)
+    result['kit_membership_authoring'] = author_kit_membership(
+        package, model, result['component_authoring']['private_parts'])
     return result
 
 
@@ -358,6 +487,8 @@ def main():
     else:
         errors = []
     positions, semantic_errors, unconsumed, component_probe = {}, [], [], {}
+    part_aware = {'executed': False,
+                  'scope': 'diagnostic copies of draft definitions; empty catalog, not physical-fit proof'}
     if not errors:
         semantic_errors = validate_model(parsed, Catalog(), library=None)
         unconsumed = unconsumed_paths(result['model'], parsed.model_dump())
@@ -379,6 +510,9 @@ def main():
         authored = result['component_authoring']
         library = PartLibrary(parts=[Part.model_validate(dict(p, status='active'))
                                      for p in authored['private_parts']])
+        part_aware.update(executed=True, errors=validate_model(parsed, Catalog(), library=library),
+                          active_parts_are_in_memory_test_copies=True,
+                          actual_authored_parts_remain_draft=True)
         matching_checks = {}
         for part in library.parts:
             if part.type != 'rail':
@@ -436,6 +570,7 @@ def main():
             parsed.model_dump()['default_spec']['infill']['pattern'][0].get('profile_edges') ==
             result['model']['default_spec']['infill']['pattern'][0]['profile_edges']),
         'component_resolution_probe': component_probe,
+        'part_aware_semantic_validation': part_aware,
         'consumer_boundary': inspect_candidate(result, FenceModel),
         'placement_confirmed': confirmation is not None,
         'placement_confirmation_kind': 'user_confirmed_interpretation' if confirmation else None,

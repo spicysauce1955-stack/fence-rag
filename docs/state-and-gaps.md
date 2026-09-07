@@ -4965,6 +4965,57 @@ object. Fewer parser errors and passing synthetic tests do not close these gaps.
 
 ---
 
+### G100 — Close private Part identities and implement bounded post receiving mechanics
+
+Measured 2026-09-06. Continued the remaining blockers with three agents and
+independent source/geometry adversaries. The private candidate now defines its
+board and cap, closing every literal requirement against five draft Parts.
+Board colour and cap SKU 73013956 are source-backed; nominal dimensions are
+retained separately, never promoted to installed pitch or internal fit geometry.
+Thirteen identity mutations and canonical source-text cross-checks guard this
+mapping. Stored Parts remain draft, the original package and confirmation unchanged.
+
+The exact panel kit now has an authored relationship plan to the named rail,
+board and channel Parts: 1 bottom rail, 1 top rail, unknown board count, 2 channels.
+All stock lengths remain unknown and the cap remains separate. No executable
+partial kit or invented package credits were added. The Part-aware consumer
+validator now runs on in-memory copies of the five definitions and exposes missing
+board width and empty channel specs, alongside the expected failures from an empty
+diagnostic catalog. Literal identity closure is not physical fit or publication.
+
+The consumer implements explicit post receiving geometry for a bounded private
+subset: level horizontal individual rails, plumb end/line posts, known outside
+face widths and authored per-end engagements. Cuts and drawing extents agree;
+shared-post clearance is checked once with world-height/physical-station context.
+Independent review found a real cross-row collision bypass with asymmetric rail
+thicknesses, plus tilted-post and ineffective-test issues; all were reproduced and
+fixed. Unsupported corners, slopes, through members and crossing rail bands refuse.
+The private engagement fields still need an agreed public mapping; they do not
+retroactively add fields to the contract or fill any Emblem measurement.
+
+Filed **Amendment 008**, trigger D, with exact proposed geometry-provenance
+serialization, costs, tests and a complete synthetic example. Both dispositions
+are pending; it governs nothing. The frozen contract remains unchanged and the
+numeric-provenance publication refusal remains in force. No ratification, human
+source review or manufacturer measurement was fabricated.
+
+Measured checks: **1,547 evidence tests pass, one existing expected failure**;
+**21 candidate tests pass** again after adding the Part-aware diagnostic;
+**2,584 consumer tests pass, seven existing warnings**. Independent bounded
+geometry and source checks pass. Consumer changes remain a cumulative patch, not
+a deployment. Current artifact hashes, exact scope, remaining source request and
+proposal are summarized in `workspace/reports/emblem-blocker-progress.md`.
+
+The actual model still refuses admission and physical BOM verification. Remaining
+external inputs are an applicable exact-model component drawing/BOM or recorded
+sample measurements, plus bilateral disposition of the provenance proposal.
+Remaining software includes the public receiver/engagement adapter and complete
+kit consumption after its source constraints are known. Existing supported private
+mechanics were implemented and tested rather than treating all blockers as a
+request for more documents.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

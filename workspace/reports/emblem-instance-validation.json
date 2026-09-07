@@ -20,7 +20,7 @@
   ],
   "artifact_hashes": {
     "public_draft": "2a40d62828ae7da4c5018efb48efea6fbb52683c72a69211467534eb2537c768",
-    "private_candidate": "abe89223e04c5cad3a6e2bf3808680edfda4832f7ef9ddbf275cd2a3f7098768"
+    "private_candidate": "da79a6ef0ecf7852fea7fc41cea10cd1b619c542606a27da16f996039514ffb8"
   },
   "candidate_declares_current_source_package_hash": true,
   "candidate_reproduces_from_checked_inputs": true,
@@ -129,6 +129,14 @@
         {
           "artifact": "private_candidate",
           "path": "/placement_confirmation/source_cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/0/source_part/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/1/source_part/cites/0"
         }
       ]
     },
@@ -258,6 +266,22 @@
         {
           "artifact": "public_draft",
           "path": "/packaged_assembly_inventory/2/evidence/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/0/source_part/cites/1"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/0/source_part/spec/0/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/0/unconsumed_dimensions/0/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/kit_membership_authoring/relationships/2/source_inventory/evidence/cite"
         }
       ]
     },
@@ -361,6 +385,14 @@
         {
           "artifact": "private_candidate",
           "path": "/assembly_authoring/field_evidence/3/anchors/0/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/kit_membership_authoring/relationships/0/source_inventory/evidence/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/kit_membership_authoring/relationships/1/source_inventory/evidence/cite"
         }
       ]
     },
@@ -392,6 +424,10 @@
         {
           "artifact": "private_candidate",
           "path": "/component_authoring/u_channel_inventory_evidence/count_evidence/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/kit_membership_authoring/relationships/3/source_inventory/count_evidence/cite"
         }
       ]
     },
@@ -431,6 +467,10 @@
         {
           "artifact": "private_candidate",
           "path": "/component_authoring/u_channel_inventory_evidence/edge_evidence/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/kit_membership_authoring/relationships/3/source_inventory/edge_evidence/cite"
         }
       ]
     },
@@ -540,6 +580,14 @@
         {
           "artifact": "public_draft",
           "path": "/purchase_quantity_rules/0/evidence/0/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/0/source_part/cites/2"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/0/source_part/spec/1/provenance/cites/0"
         },
         {
           "artifact": "private_candidate",
@@ -748,6 +796,34 @@
         {
           "artifact": "public_draft",
           "path": "/spec_evidence/22/anchor/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/1/source_part/cites/1"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/1/source_part/spec/0/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/1/source_part/spec/1/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/1/source_part/spec/2/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/1/unconsumed_dimensions/0/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/1/unconsumed_dimensions/1/provenance/cites/0"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/1/sku_identity_anchor/description/cite"
         }
       ]
     },
@@ -759,6 +835,10 @@
         {
           "artifact": "public_draft",
           "path": "/identity_anchors/2/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/kit_membership_authoring/identity_anchor/cite"
         }
       ]
     },
@@ -815,6 +895,10 @@
         {
           "artifact": "public_draft",
           "path": "/part_identity_anchors/3/model_number/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/component_authoring/identity_mappings/1/sku_identity_anchor/model_number/cite"
         }
       ]
     },
@@ -830,6 +914,10 @@
         {
           "artifact": "private_candidate",
           "path": "/component_authoring/u_channel_inventory_evidence/evidence/cite"
+        },
+        {
+          "artifact": "private_candidate",
+          "path": "/kit_membership_authoring/relationships/3/source_inventory/evidence/cite"
         }
       ]
     },
@@ -991,7 +1079,7 @@
       {
         "path": "/default_spec/infill/pattern/0/requirement/part_id",
         "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board",
-        "definition_count": 0,
+        "definition_count": 1,
         "published": false,
         "selection": "literal"
       },
@@ -1012,7 +1100,7 @@
       {
         "path": "/post/cap/part_id",
         "part_id": "mfr/freedom-outdoor-living/73013956",
-        "definition_count": 0,
+        "definition_count": 1,
         "published": false,
         "selection": "literal"
       },
@@ -1039,7 +1127,7 @@
       }
     ],
     "duplicate_part_ids": [],
-    "literal_part_closure": false,
+    "literal_part_closure": true,
     "published_part_closure": false,
     "support_reference_closure": true
   },

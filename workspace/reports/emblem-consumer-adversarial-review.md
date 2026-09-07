@@ -154,22 +154,81 @@ A synthetic 2285 mm opening fits 14 pitches of 152.4 mm, but rounding the pitch 
 An adapter must refuse unsupported fractional repeat geometry or implement exact
 repeat arithmetic; rounding first cannot establish BOM correctness.
 
+## Bounded post receiving mechanics
+
+The private consumer now executes an explicitly authored receiving joint instead
+of merely preserving joint metadata. `PostSlot.receiving_joint` carries strict
+integer `channel_depth_mm`, `insertion_margin_mm`, and `shared_host_gap_mm`;
+`FrameSlot.post_engagement_start_mm` and `post_engagement_end_mm` specify each rail
+endpoint independently. Depth is never derived from a post's outside dimension.
+
+For a supported level rail, cut length is clear opening plus the two authored
+engagements. The elevation uses the same extent, starting at the negative start
+engagement. Actual chosen post face widths must be known, match the declared clear
+opening, and accommodate each engagement plus insertion margin within the authored
+receiving depth. A rail whose face would be clamped by rendering is refused.
+
+Global generation checks physical post identity across runs, opposite collinear
+entry directions, and world rail height (including panel bottom elevation).
+Shared line-post clearance is checked once per physical post and world rail row:
+post outside face width minus both actual endpoint engagements must meet the
+explicit minimum. `Strategy.post_joint_checks` records those measurements and
+member references. End posts require one incoming bay; line posts require two.
+
+This bounded implementation refuses corners, gates, junctions, transitions,
+non-plumb posts, sloping bays, through/distributed rails, overlap allowances,
+missing or mixed joint definitions, unmatched rows, duplicate members, and
+vertically overlapping unsupported bands. Existing models without receiving
+joints retain their prior behavior.
+
+Independent review found two real defects during implementation: tilted posts
+were initially accepted using an unprojected face width, and checking only equal
+rail centres missed collision between opposite, unequal-height rail bands. A
+100 mm host with two 60 mm engagements in overlapping cross-row bands could
+therefore pass same-row gap checks despite a 20 mm collision. Both now refuse;
+the independent reviewer reran the exact collision reproducer successfully.
+A missing-width test also initially removed an irrelevant attrs key; it now
+mutates the authoritative `Product.capabilities.face_width_mm` value.
+
+The synthetic integration fixture generates two 1500 mm centre spans with 80 mm
+post faces: each has a 1420 mm opening and four total 1465 mm rail cuts from
+20/25 mm engagements. Rendering starts at -20 mm and spans 1465 mm. The shared
+post has two checks, one per rail height, each measuring 35 mm clearance.
+Negative controls require 36 mm; positive controls cover reversed run directions,
+zero required gap with exact contact, and different panel datums yielding the
+same world rail height. These values are synthetic, not Emblem source facts.
+
+**Public adapter remains separate:** the current public FrameSlot has no explicit
+start/end post engagement fields; Member base/top engagement describes a different
+relationship. These new fields are private consumer authoring, not an agreed
+public-wire extension. Public `PostSlot.joint` input is explicitly refused instead
+of silently discarded. A public source projection still needs registered rule or
+authoring semantics and boundary agreement if its wire shape changes. No split of
+the manufacturer's total rail allowance into symmetric endpoints is inferred.
+The actual Emblem candidate supplies none of these receiving dimensions and
+remains blocked. The bounded mechanics close an engine capability, not that
+product's evidence or publication gap.
+
 ## Validation
 
 22 capability tests passed after the independent mutations. The separate
 `remaining_sources` agent independently reran all 22 and reproduced the corrected
 empty-pattern and negative-margin refusals. The real API refusal test passed.
-Final complete consumer suite: **2,558 passed**, seven existing warnings,
-71.74 seconds. Command: `timeout 120 .venv/bin/python -m pytest -q`, run outside
+Final complete consumer suite: **2,584 passed**, seven existing warnings,
+73.39 seconds. Command: `timeout 120 .venv/bin/python -m pytest -q`, run outside
 the filesystem/network sandbox so the browser-stack tests could start. The focused capability/API group passed 33 tests, and the
-locale/capability group passed 69 tests after the final locale correction. No consumer commits or pushes were made.
+locale/capability group passed 69 tests after the final locale correction. The final receiving/post-slot/capability group passed 71 tests, including 26
+receiving tests. The independent reviewer passed 64 tests before the seven final
+strict-input cases were added and separately reproduced the corrected cross-row
+collision refusal; see `emblem-post-receiving-independent-review.md`. No consumer
+commits or pushes were made.
 
 ## Exported consumer patch
 
 - Base HEAD: `9de94eb06d8e997d9be098dedd5b6a6b2eb4024d`.
 - Artifact: `workspace/reports/emblem-consumer-capabilities.patch`.
-- SHA-256: `652aba57120ba192735be6c60de8a1ece297d68520752f9ab07955237b6c00f1`.
-- Size: 51,074 bytes. Includes the untracked capability tests. Blank patch-context
+- SHA-256: `458d55806fa8fb8d04350666f06c9570c878ac406c1eb3d53be4f68ef416cc6d`.
+- Size: 80,132 bytes. Includes both untracked capability and receiving test files. Blank patch-context
   whitespace was normalized; `git apply --reverse --check` succeeds.
 - Consumer files changed:
   - `src/fenceai/demand/derive.py`
@@ -178,16 +237,18 @@ locale/capability group passed 69 tests after the final locale correction. No co
   - `src/fenceai/parts/model.py`
   - `src/fenceai/report/elevation.py`
   - `src/fenceai/strategy/generator.py`
+  - `src/fenceai/strategy/model.py`
   - `src/fenceai/web/static/i18n/en.json`
   - `src/fenceai/web/static/i18n/he.json`
   - `src/fenceai/web/static/js/panel-model.js`
   - `tests/api/test_authoring_gaps.py`
   - `tests/web/test_locale_bundles.py`
   - `tests/fencemodel/test_emblem_capabilities.py`
+  - `tests/fencemodel/test_post_receiving_joint.py`
 
 The final suite initially encountered browser-stack startup errors because an
 interrupted earlier run left its server/browser on ports 8800/9400. The exact
 orphaned test process groups were identified and stopped before the final retry;
 these were environment setup errors, not additional product-code failures.
 
-Final complete consumer validation succeeded: **2,558 tests passed**, with seven existing warnings, in 71.74 seconds. The exported patch above matches that tested code and fixture state.
+Final complete consumer validation succeeded: **2,584 tests passed**, with seven existing warnings, in 73.39 seconds. The exported patch above matches that tested code and fixture state.

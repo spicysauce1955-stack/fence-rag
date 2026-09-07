@@ -33,6 +33,58 @@ class TestConsumerCandidate(unittest.TestCase):
             {'member_key': key, 'position': 'first', 'profile_edge': 'tongue'},
             {'member_key': key, 'position': 'last', 'profile_edge': 'groove'}])
 
+    def test_board_and_cap_identity_mapping_retains_nominal_readings_only_in_sidecar(self):
+        result = prepare(self.package)['component_authoring']
+        by_type = {p['type']: p for p in result['private_parts']}
+        board, cap = by_type['infill'], by_type['post_cap']
+        self.assertEqual({sf['key'] for sf in board['spec']}, {'colour'})
+        self.assertEqual({sf['key']: sf['value'] for sf in cap['spec']},
+                         {'colour': 'white', 'sku': '73013956'})
+        mappings = {m['part_id']: m for m in result['identity_mappings']}
+        self.assertIsNone(mappings[board['id']]['component_sku'])
+        nominal = mappings[board['id']]['unconsumed_dimensions'][0]
+        self.assertEqual(nominal['value']['amount_milli'], 152400)
+        self.assertFalse(mappings[board['id']]['fit_geometry_verified'])
+        self.assertTrue(mappings[cap['id']]['sku_identity_anchor']['model_number']['cite'])
+
+    def test_identity_mapping_refuses_wrong_type_and_uncited_cap_identity(self):
+        for mutation in ('type', 'sku', 'cite'):
+            package = deepcopy(self.package)
+            if mutation == 'type':
+                board = next(p for p in package['part_fragments'] if p['type']['key'] == 'infill')
+                board['type']['key'] = 'post'
+            else:
+                cap = next(a for a in package['part_identity_anchors'] if a['part_id'].endswith('/73013956'))
+                cap['model_number']['text_raw' if mutation == 'sku' else 'cite'] = 'wrong' if mutation == 'sku' else {}
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError):
+                prepare(package)
+
+    def test_kit_membership_preserves_unknown_inventory_and_excludes_separate_cap(self):
+        result = prepare(self.package)
+        kit = result['kit_membership_authoring']
+        parts = {p['id'] for p in result['component_authoring']['private_parts']}
+        self.assertEqual(kit['supplier_model_number'], '73014714')
+        self.assertFalse(kit['runtime_requirements_added'])
+        self.assertEqual(kit['emission_status'], 'blocked_incomplete_inventory_and_stock')
+        relations = {r['component_key']: r for r in kit['relationships']}
+        self.assertEqual([relations[k]['quantity_each'] for k in
+                          ('bottom_rail', 'top_rail', 'tongue_and_groove_boards', 'end_u_channel')],
+                         [1, 1, None, 2])
+        self.assertTrue(all(r['part_id'] in parts and r['stock_length_mm'] is None
+                            for r in kit['relationships']))
+        cap = result['model']['post']['cap']['part_id']
+        self.assertEqual(kit['separately_purchased_part_ids'], [cap])
+        self.assertNotIn(cap, {r['part_id'] for r in kit['relationships']})
+        self.assertEqual(len(result['model']['default_spec']['fixings']), 2)
+        self.assertEqual(result['model']['default_spec']['infill']['pattern'][0]['requirement']['qty'], 1)
+
+    def test_unverified_board_pack_count_cannot_be_filled_from_repeat_count(self):
+        entry = next(i for i in self.package['packaged_assembly_inventory']
+                     if i['component_key'] == 'tongue_and_groove_boards')
+        entry['quantity_each'] = 15
+        with self.assertRaisesRegex(ValueError, 'currently evidenced inventory'):
+            prepare(self.package)
+
     def test_numeric_joint_fields_cannot_be_silently_dropped(self):
         self.package['model_fragment']['default_spec']['frame'][0]['joint']['channel_depth'] = {
             'amount_milli': 1000, 'unit': 'mm', 'value_raw': ['fixture']}
@@ -167,6 +219,45 @@ class TestConsumerCandidate(unittest.TestCase):
                     prepare(package)
 
 
+    def test_identity_colour_rejects_contradictory_readings_and_malformed_values(self):
+        for suffix in ('-board', '/73013956'):
+            for bad_value in (None, {'key': 'white', 'value_raw': ['Black']},
+                              {'key': 'white', 'value_raw': [True]}):
+                with self.subTest(part=suffix, value=bad_value):
+                    package = deepcopy(self.package)
+                    part = next(p for p in package['part_fragments'] if p['id'].endswith(suffix))
+                    next(s for s in part['spec'] if s['key'] == 'colour')['value'] = bad_value
+                    with self.assertRaisesRegex(ValueError, 'white colour token'):
+                        prepare(package)
+
+    def test_cap_identity_requires_compatible_description_and_same_known_source_version(self):
+        for mutation in ('unknown_source', 'other_known_source', 'malformed_cite',
+                         'bad_ref_id', 'gate_description', 'wrong_colour', 'missing_anchor'):
+            with self.subTest(mutation=mutation):
+                package = deepcopy(self.package)
+                anchor = next(a for a in package['part_identity_anchors']
+                              if a['part_id'].endswith('/73013956'))
+                if mutation == 'unknown_source':
+                    anchor['model_number']['cite']['belongs_to'] = '0' * 64
+                elif mutation == 'other_known_source':
+                    current = anchor['model_number']['cite']['belongs_to']
+                    other = next(s['content_hash'] for s in package['sources']
+                                 if s['content_hash'] != current)
+                    anchor['model_number']['cite']['belongs_to'] = other
+                elif mutation == 'malformed_cite':
+                    anchor['model_number']['cite'] = {'x': 1}
+                elif mutation == 'bad_ref_id':
+                    anchor['model_number']['cite']['id'] = 'not-a-source-ref'
+                elif mutation == 'gate_description':
+                    anchor['description']['text_raw'] = 'Gate Post Insert White'
+                elif mutation == 'wrong_colour':
+                    anchor['description']['text_raw'] = 'Contemporary Post Top - Black'
+                else:
+                    anchor['description'] = None
+                with self.assertRaises(ValueError):
+                    prepare(package)
+
+
 class TestConsumerCandidateIntegration(unittest.TestCase):
     def test_real_consumer_refuses_incomplete_candidate_and_exposes_lost_fields(self):
         consumer = Path(os.environ.get('FENCE_PLANNING_ROOT', '/tmp/fence-planning-bom'))
@@ -191,6 +282,11 @@ class TestConsumerCandidateIntegration(unittest.TestCase):
                     self.assertEqual(result['whole_model_parses'], confirmed)
                     self.assertEqual(result['partial_semantic_validation']['executed'], confirmed)
                     if confirmed:
+                        part_aware = result['part_aware_semantic_validation']
+                        self.assertTrue(part_aware['executed'])
+                        self.assertTrue(part_aware['actual_authored_parts_remain_draft'])
+                        self.assertTrue(any("width_mm must be positive" in e
+                                            for e in part_aware['errors']))
                         probe = result['component_resolution_probe']
                         self.assertEqual(probe['rail_face_heights_mm'],
                                          {'bottom_rail': 178, 'top_rail': 178})

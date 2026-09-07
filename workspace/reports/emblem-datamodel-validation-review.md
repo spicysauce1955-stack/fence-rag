@@ -1,6 +1,9 @@
 # Emblem instance validation against the design — 2026-09-06
 
-**Result: no complete Emblem FenceModel instance is valid for publication and consumption yet.**
+**Historical G99 review.** G100 closes private board/cap identities and adds bounded
+post receiving mechanics; see `emblem-blocker-progress.md` for current status.
+
+**Result at this checkpoint: no complete Emblem FenceModel instance was valid for publication and consumption.**
 This review supersedes G98's test-fixture coverage claims where stated below; it
 preserves the original source-bound draft and user confirmation.
 

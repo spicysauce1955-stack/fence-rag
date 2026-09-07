@@ -22,19 +22,26 @@ class TestEmblemInstanceValidation(unittest.TestCase):
         self.assertTrue(graph['requirements'])
         self.assertEqual({r['frame_key'] for r in graph['support_edges']}, {'bottom_rail', 'top_rail'})
 
-    def test_actual_private_graph_exposes_missing_board_and_cap_definitions(self):
+    def test_actual_private_graph_closes_identity_without_inventing_fit(self):
         parts = self.candidate['component_authoring']['private_parts']
         graph = reference_graph(self.candidate['model'], parts, [])
-        missing = {r['part_id'] for r in graph['requirements']
-                   if r['selection'] == 'literal' and r['definition_count'] == 0}
-        self.assertEqual(missing, {
-            'mfr/freedom-outdoor-living/emblem-73014714-board',
-            'mfr/freedom-outdoor-living/73013956',
-        })
-        self.assertFalse(graph['literal_part_closure'])
+        self.assertTrue(graph['literal_part_closure'])
+        self.assertFalse(graph['published_part_closure'])
+        for part in parts:
+            if part['type'] in ('infill', 'post_cap'):
+                self.assertFalse({'width_mm', 'stock_length_mm', 'thickness_mm'}
+                                 & {sf['key'] for sf in part['spec']})
         post = next(r for r in graph['requirements'] if r['path'] == '/post/requirement/part_id')
         self.assertEqual(post['selection'], 'predicate_or_unresolved')
         self.assertEqual(post['part_id'], '')
+
+    def test_removing_a_draft_definition_breaks_private_reference_closure(self):
+        parts = [p for p in self.candidate['component_authoring']['private_parts']
+                 if p['type'] not in ('infill', 'post_cap')]
+        graph = reference_graph(self.candidate['model'], parts, [])
+        self.assertFalse(graph['literal_part_closure'])
+        self.assertEqual(sum(r['selection'] == 'literal' and r['definition_count'] == 0
+                             for r in graph['requirements']), 2)
 
     def test_duplicate_referenced_part_is_ambiguous_even_when_other_parts_exist(self):
         parts = deepcopy(self.package['part_fragments'])

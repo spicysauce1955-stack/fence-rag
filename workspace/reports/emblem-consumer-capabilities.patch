@@ -21,7 +21,7 @@ index 3a6fcde..1e3919f 100644
                  role=slot.role, slot_key=slot.slot_key, eligibility=slot.eligibility,
              )
 diff --git a/src/fenceai/fencemodel/model.py b/src/fenceai/fencemodel/model.py
-index d9ee41d..1e35953 100644
+index d9ee41d..47d20ff 100644
 --- a/src/fenceai/fencemodel/model.py
 +++ b/src/fenceai/fencemodel/model.py
 @@ -225,6 +225,8 @@ class PartRequirement(BaseModel):
@@ -33,7 +33,31 @@ index d9ee41d..1e35953 100644
 
      @property
      def eligibility_source(self) -> Literal[
-@@ -407,7 +409,19 @@ class FrameSlot(BaseModel):
+@@ -364,7 +366,23 @@ def _refuse_authored_dimensions(holder, keys: tuple[str, ...]):
+     return holder
+
+
++class ReceivingPostJoint(BaseModel):
++    """Private authored dimensions measured inward from each outside post face."""
++    model_config = {"extra": "forbid"}
++    channel_depth_mm: int = Field(gt=0, strict=True)
++    insertion_margin_mm: int = Field(ge=0, strict=True)
++    shared_host_gap_mm: int = Field(ge=0, strict=True)
++
++    @model_validator(mode="after")
++    def _usable_depth(self):
++        if self.insertion_margin_mm >= self.channel_depth_mm:
++            raise ValueError("Post receiving margin must leave a positive usable depth")
++        return self
++
++
+ class FrameSlot(BaseModel):
++    post_engagement_start_mm: int | None = Field(default=None, gt=0, strict=True)
++    post_engagement_end_mm: int | None = Field(default=None, gt=0, strict=True)
+     key: str
+     orientation: Literal["horizontal", "vertical"]
+     placement: Placement
+@@ -407,7 +425,19 @@ class FrameSlot(BaseModel):
          return _refuse_authored_dimensions(self, ("thickness_mm",))
 
 
@@ -53,7 +77,7 @@ index d9ee41d..1e35953 100644
      key: str
      # Undeclared (0) until `parts.resolve.resolve_model_parts` fills it from the
      # part's dimensions — the same lifetime `thickness_mm` and `eligibility` have.
-@@ -438,6 +452,8 @@ class Member(BaseModel):
+@@ -438,6 +468,8 @@ class Member(BaseModel):
 
 
  class InfillSpec(BaseModel):
@@ -62,7 +86,7 @@ index d9ee41d..1e35953 100644
      orientation: Literal["vertical", "horizontal"]
      pattern: list[Member] = []
      justification: Literal["start", "end", "center", "spread_to_fit"] = "spread_to_fit"
-@@ -447,6 +463,7 @@ class InfillSpec(BaseModel):
+@@ -447,6 +479,7 @@ class InfillSpec(BaseModel):
 
 
  class FixingRule(BaseModel):
@@ -70,7 +94,23 @@ index d9ee41d..1e35953 100644
      key: str
      # registry-validated, for `LengthRule`'s reasons
      basis: str
-@@ -929,6 +946,10 @@ def _unsupported_features(model: FenceModel) -> list[str]:
+@@ -476,6 +509,15 @@ class PostSlot(BaseModel):
+     in this design one-directional.
+     """
+
++    receiving_joint: ReceivingPostJoint | None = None
++
++    @model_validator(mode="before")
++    @classmethod
++    def _public_joint_needs_adapter(cls, value):
++        if isinstance(value, dict) and "joint" in value:
++            raise ValueError("Public PostSlot.joint requires an explicit wire adapter; use private receiving_joint")
++        return value
++
+     key: str = "post"
+     requirement: PartRequirement
+     cap: PartRequirement | None = None
+@@ -929,6 +971,10 @@ def _unsupported_features(model: FenceModel) -> list[str]:
                      "claimed otherwise"
                  )
 
@@ -81,10 +121,36 @@ index d9ee41d..1e35953 100644
          for slot in spec.frame:
              wants_continuity = (slot.post_joint == "through"
                                  or slot.continuity == "continuous")
-@@ -1641,6 +1662,33 @@ def _step_order_errors(steps: list[AssemblyStep]) -> list[str]:
+@@ -1641,6 +1687,59 @@ def _step_order_errors(steps: list[AssemblyStep]) -> list[str]:
      return errors
 
 
++def _post_receiving_errors(model: FenceModel, dimensions_known: bool = False) -> list[str]:
++    joint = model.post.receiving_joint if model.post else None
++    errors = []
++    for spec in [model.default_spec, *(variant.spec for variant in model.variants)]:
++        if joint is not None and not spec.frame:
++            errors.append("Post receiving joint requires explicit rail slots")
++        for rail in spec.frame:
++            engagements = (rail.post_engagement_start_mm, rail.post_engagement_end_mm)
++            if joint is None:
++                if any(value is not None for value in engagements):
++                    errors.append(f"rail {rail.key}: post engagements require PostSlot.receiving_joint")
++                continue
++            if (rail.orientation != "horizontal" or isinstance(rail.placement, Distributed)
++                    or rail.requirement.qty != 1 or rail.continuity != "derived"
++                    or rail.post_joint != "lands" or rail.requirement.length_rule != "clear_between_posts"
++                    or rail.requirement.overlap_mm != 0):
++                errors.append(f"rail {rail.key}: receiving-post subset requires one horizontal per-bay lands rail and clear_between_posts")
++            if dimensions_known and rail.thickness_mm <= 0:
++                errors.append(f"rail {rail.key}: receiving-post check requires known rail face height")
++            if any(value is None for value in engagements):
++                errors.append(f"rail {rail.key}: both post end engagements must be explicit")
++            elif any(value + joint.insertion_margin_mm > joint.channel_depth_mm for value in engagements):
++                errors.append(f"rail {rail.key}: post engagement plus margin exceeds receiving depth")
++    return errors
++
++
 +def _edge_binding_errors(model: FenceModel) -> list[str]:
 +    errors = []
 +    for spec in [model.default_spec, *(v.spec for v in model.variants)]:
@@ -115,7 +181,7 @@ index d9ee41d..1e35953 100644
  def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
      """Containment and its credits, checked where an author can still fix them.
 
-@@ -1679,11 +1727,11 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
+@@ -1679,11 +1778,11 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
      # may not aim at one of these: see the refusal below.
      inside = {path for spec in specs for key, req in spec_requirements(spec)
                for path, _ in walk_contained(req.contained, key)}
@@ -130,7 +196,7 @@ index d9ee41d..1e35953 100644
      # Slots that CONTAIN a credit source. A credit may not aim at one of these:
      # crediting a container would change how many boxes the panel buys, which
      # changes how many pieces are in them, which changes the credit — a loop with
-@@ -1718,6 +1766,8 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
+@@ -1718,6 +1817,8 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
                  )
      for spec in specs:
          for key, req in spec_requirements(spec):
@@ -139,7 +205,7 @@ index d9ee41d..1e35953 100644
              contained = dict(walk_contained(req.contained, key))
              for path, piece in contained.items():
                  if not piece.part_id and not piece.role:
-@@ -1776,28 +1826,31 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
+@@ -1776,28 +1877,31 @@ def _containment_errors(model: FenceModel, resolved: bool) -> list[str]:
                      )
                      continue
                  if target in drawn:
@@ -193,31 +259,55 @@ index d9ee41d..1e35953 100644
                  if target in containers:
                      errors.append(
                          f"slot {key}: {relative!r} credits slot {target}, which "
-@@ -2014,6 +2067,7 @@ def validate_model(
+@@ -2014,6 +2118,8 @@ def validate_model(
      errors += _warning_errors(model, catalog)
      errors += _site_dimension_errors(model)
      errors += _containment_errors(model, resolved=library is not None)
 +    errors += _edge_binding_errors(model)
++    errors += _post_receiving_errors(model, dimensions_known=library is not None)
 
      for axis in model.option_axes:
          for value in axis.values:
 diff --git a/src/fenceai/fencemodel/resolve.py b/src/fenceai/fencemodel/resolve.py
-index 2296e0a..337ce2b 100644
+index 2296e0a..2a2b8d2 100644
 --- a/src/fenceai/fencemodel/resolve.py
 +++ b/src/fenceai/fencemodel/resolve.py
+@@ -9,7 +9,7 @@ from __future__ import annotations
+
+ from typing import Literal
+
+-from pydantic import BaseModel
++from pydantic import BaseModel, Field
+
+ from fenceai.core.errors import GenerationFailure, RequestRefused
+ from fenceai.core.units import Mm
 @@ -18,7 +18,7 @@ from fenceai.fencemodel.lengths import LENGTH_RULES
  from fenceai.fencemodel.fit import FitResult, fit_pattern
  from fenceai.fencemodel.model import (
      Distributed, Eligibility, FenceModel, Fraction, FromBottom, FromTop,
 -    HeightSupport, Member, PanelSpec, PartRequirement, spec_requirements,
-+    HeightSupport, Member, PanelSpec, PartRequirement, ProfileEdges, EdgeBinding, spec_requirements,
++    HeightSupport, Member, PanelSpec, PartRequirement, ProfileEdges, EdgeBinding, ReceivingPostJoint, spec_requirements,
  )
  from fenceai.knowledge.ast import MissingField, evaluate_expr, field_paths
  from fenceai.parts.model import PATH_SEP, contained_path, walk_contained_qty
-@@ -96,6 +96,15 @@ def clear_opening_mm(centre_width_mm: Mm, face_start_mm: Mm, face_end_mm: Mm) ->
+@@ -27,6 +27,10 @@ from fenceai.parts.model import PATH_SEP, contained_path, walk_contained_qty
+ class PanelContext(BaseModel):
+     """Everything a panel needs to know about the bay it is being laid into."""
+
++    post_face_width_start_mm: int | None = Field(default=None, gt=0, strict=True)
++    post_face_width_end_mm: int | None = Field(default=None, gt=0, strict=True)
++    post_kind_start: str | None = None
++    post_kind_end: str | None = None
+     centre_width_mm: Mm
+     clear_width_mm: Mm
+     height_mm: Mm
+@@ -96,6 +100,18 @@ def clear_opening_mm(centre_width_mm: Mm, face_start_mm: Mm, face_end_mm: Mm) ->
 
 
  class ResolvedSlot(BaseModel):
++    post_receiving_joint: ReceivingPostJoint | None = None
++    post_engagement_start_mm: int | None = None
++    post_engagement_end_mm: int | None = None
 +    profile_edges: ProfileEdges | None = None
 +    edge_binding: EdgeBinding | None = None
 +    bound_position_mm: Mm | None = None
@@ -230,7 +320,7 @@ index 2296e0a..337ce2b 100644
      slot_key: str
      role: str
      qty: int
-@@ -225,12 +234,16 @@ class ResolvedSlot(BaseModel):
+@@ -225,12 +241,16 @@ class ResolvedSlot(BaseModel):
      # arrived inside a container and `credited_by` names the path keys that
      # brought them — a LIST, because two different containers in one panel may
      # each contribute, and a single field would silently keep whichever was
@@ -249,7 +339,44 @@ index 2296e0a..337ce2b 100644
      # member count on this slot, because those members are the contained ones and
      # counting them at both ends would place every credited hinge twice.
      credits_slot_key: str = ""
-@@ -695,7 +708,15 @@ def resolve_panel(
+@@ -657,6 +677,7 @@ def resolve_panel(
+     ctx: PanelContext,
+     model_ref: str = "",
+     variant_index: int | None = None,
++    post_receiving_joint: ReceivingPostJoint | None = None,
+ ) -> ResolvedPanel:
+     """`variant_index` is recorded, never chosen here: which spec applies is
+     `choose_variant`'s answer, and a resolver that re-derived it from `spec`
+@@ -669,6 +690,7 @@ def resolve_panel(
+
+     for frame_slot in spec.frame:
+         req = frame_slot.requirement
++        post_extent = _post_rail_extent(frame_slot, post_receiving_joint, ctx)
+         count = (_qty(frame_slot.placement.count, frame_slot.placement.count_param, ctx.params)
+                  if isinstance(frame_slot.placement, Distributed) else 1)
+         eligibility, option_axis, option_value = _chosen_option(req, ctx)
+@@ -680,7 +702,11 @@ def resolve_panel(
+         resolved = ResolvedSlot(
+             slot_key=frame_slot.key, role=req.role, qty=count * req.qty,
+             slot_kind="frame",
+-            length_mm=_length_for(req, ctx), length_basis=ctx.length_basis,
++            length_mm=post_extent[1] if post_extent else _length_for(req, ctx),
++            span_start_mm=post_extent[0] if post_extent else None, length_basis=ctx.length_basis,
++            post_receiving_joint=post_receiving_joint,
++            post_engagement_start_mm=frame_slot.post_engagement_start_mm,
++            post_engagement_end_mm=frame_slot.post_engagement_end_mm,
+             length_rule=req.length_rule or "", continuity=frame_slot.continuity,
+             post_joint=frame_slot.post_joint,
+             eligibility=eligibility,
+@@ -692,10 +718,23 @@ def resolve_panel(
+             insertion_margin_mm=frame_slot.insertion_margin_mm,
+             positions_mm=placement_positions(frame_slot.placement, count, span),
+         )
++        if post_receiving_joint is not None and any(
++                2 * position < frame_slot.thickness_mm
++                or 2 * position + frame_slot.thickness_mm > 2 * ctx.height_mm
++                for position in resolved.positions_mm):
++            raise GenerationFailure(f"Rail {frame_slot.key}: receiving rail band lies outside the panel height")
          slots.append(resolved)
          frame[frame_slot.key] = resolved
 
@@ -265,7 +392,7 @@ index 2296e0a..337ce2b 100644
          axis = (ctx.clear_width_mm if spec.infill.orientation == "vertical"
                  else ctx.height_mm)
          fit = fit_pattern(
-@@ -706,6 +727,27 @@ def resolve_panel(
+@@ -706,6 +745,27 @@ def resolve_panel(
              excess=spec.infill.excess,
              edge_margin_mm=spec.infill.edge_margin_mm,
          )
@@ -293,7 +420,7 @@ index 2296e0a..337ce2b 100644
          for offset, member in enumerate(spec.infill.pattern):
              # how many of THIS member of the repeating sequence were placed
              n = sum(1 for i in range(fit.count) if i % len(spec.infill.pattern) == offset)
-@@ -744,7 +786,7 @@ def resolve_panel(
+@@ -744,7 +804,7 @@ def resolve_panel(
                  base_ref=member.base_ref, top_ref=member.top_ref,
                  base_engagement_mm=member.base_engagement_mm,
                  top_engagement_mm=member.top_engagement_mm,
@@ -302,7 +429,7 @@ index 2296e0a..337ce2b 100644
              ))
 
      frame_count = sum(s.qty for s in slots if s.fit is None)
-@@ -757,6 +799,8 @@ def resolve_panel(
+@@ -757,6 +817,8 @@ def resolve_panel(
      member_count = sum(s.qty for s in slots if s.fit is not None)
      placed_count = next((s.fit.count for s in slots if s.fit is not None), 0)
      for rule in spec.fixings:
@@ -311,7 +438,7 @@ index 2296e0a..337ce2b 100644
          per = _qty(rule.qty_per_basis, rule.qty_param, ctx.params)
          basis = FIXING_BASES.get(rule.basis)(PanelCounts(
              member_count=member_count, placed_count=placed_count,
-@@ -766,7 +810,9 @@ def resolve_panel(
+@@ -766,7 +828,9 @@ def resolve_panel(
              continue
          eligibility, option_axis, option_value = _chosen_option(rule.requirement, ctx)
          eligibility, pinned = _pinned_sku(rule.key, eligibility, ctx)
@@ -321,10 +448,40 @@ index 2296e0a..337ce2b 100644
              slot_key=rule.key, role=rule.requirement.role, slot_kind="fixing",
              qty=per * basis, basis=rule.basis, qty_per_basis=per,
              eligibility=eligibility,
-@@ -794,6 +840,32 @@ def resolve_panel(
+@@ -794,6 +858,62 @@ def resolve_panel(
                           slots=slots, credit_notes=notes)
 
 
++def _post_rail_extent(rail, joint, ctx):
++    engagements = (rail.post_engagement_start_mm, rail.post_engagement_end_mm)
++    if joint is None:
++        if any(value is not None for value in engagements):
++            raise GenerationFailure(f"Rail {rail.key}: post engagements have no receiving joint")
++        return None
++    if (rail.orientation != "horizontal" or isinstance(rail.placement, Distributed)
++            or rail.requirement.qty != 1 or rail.continuity != "derived"
++            or rail.post_joint != "lands" or rail.requirement.length_rule != "clear_between_posts"
++                    or rail.requirement.overlap_mm != 0):
++        raise GenerationFailure(f"Rail {rail.key}: unsupported receiving-post rail geometry")
++    if rail.thickness_mm <= 0:
++        raise GenerationFailure(f"Rail {rail.key}: receiving-post check requires known rail face height")
++    if ctx.vertical != "level" or ctx.length_basis != "width":
++        raise GenerationFailure("Post receiving joints currently require level rails")
++    faces = (ctx.post_face_width_start_mm, ctx.post_face_width_end_mm)
++    if any(face is None or face <= 0 for face in faces):
++        raise GenerationFailure("Post receiving joints require explicit chosen post face widths")
++    if any(kind not in ("end", "line") for kind in (ctx.post_kind_start, ctx.post_kind_end)):
++        raise GenerationFailure("Post receiving joints currently support ordinary end and line posts only")
++    if ctx.clear_width_mm <= 0 or clear_opening_mm(ctx.centre_width_mm, *faces) != ctx.clear_width_mm:
++        raise GenerationFailure("Post receiving joint clear opening disagrees with chosen post faces")
++    if any(joint.channel_depth_mm > face for face in faces):
++        raise GenerationFailure("Authored receiving depth exceeds the chosen post face width")
++    if any(value is None or value <= 0 or value + joint.insertion_margin_mm > joint.channel_depth_mm for value in engagements):
++        raise GenerationFailure(f"Rail {rail.key}: explicit engagement plus margin must fit receiving depth")
++    start, end = engagements
++    return -start, ctx.clear_width_mm + start + end
++
++
 +def _edge_binding_position(rule, spec, slots):
 +    binding = rule.edge_binding
 +    if binding is None:
@@ -354,7 +511,7 @@ index 2296e0a..337ce2b 100644
  def _contained_slots(
      slots: list[ResolvedSlot], spec: PanelSpec, credited: dict[str, tuple[str, int]]
  ) -> list[ResolvedSlot]:
-@@ -810,7 +882,7 @@ def _contained_slots(
+@@ -810,7 +930,7 @@ def _contained_slots(
      `qty` MULTIPLIES, through `walk_contained_qty` — the one place that
      arithmetic lives, shared with the credit that is sized from it.
 
@@ -363,7 +520,7 @@ index 2296e0a..337ce2b 100644
      BUYS for that slot. That is what a credited slot's own contents must be a
      multiple of: the hinges that arrive inside a kit bring their washers under
      the kit's path, and counting them again under the slot they credit is twelve
-@@ -827,18 +899,21 @@ def _contained_slots(
+@@ -827,18 +947,21 @@ def _contained_slots(
              # contents anyway would put members in the panel that arrived in a
              # box nobody bought.
              continue
@@ -388,7 +545,7 @@ index 2296e0a..337ce2b 100644
              # `contained_in` names the IMMEDIATE container, not the root: the
              # question a reader asks of a nested piece is which box it came out
              # of, and the root is one split away from the path either way.
-@@ -886,10 +961,13 @@ def _plan_credits(
+@@ -886,10 +1009,13 @@ def _plan_credits(
      credited: dict[str, tuple[str, int]] = {}
      for key, req in spec_requirements(spec):
          container = by_key.get(key)
@@ -405,7 +562,7 @@ index 2296e0a..337ce2b 100644
          for relative, target_key in sorted(req.credits.items()):
              path = contained_path(key, relative)
              have = available.get(path, 0)
-@@ -900,9 +978,25 @@ def _plan_credits(
+@@ -900,9 +1026,25 @@ def _plan_credits(
                  notes.append(CreditNote(kind="unmatched", contained_key=path,
                                          slot_key=target_key, qty=have))
                  continue
@@ -447,7 +604,7 @@ index c108341..8d7b506 100644
      # ships its own pin. The path key composes, so depth costs the readers
      # nothing — `gate_kit/hinge/pin` is one string like every other slot key.
 diff --git a/src/fenceai/report/elevation.py b/src/fenceai/report/elevation.py
-index 99ea50d..f297f91 100644
+index 99ea50d..c4730f2 100644
 --- a/src/fenceai/report/elevation.py
 +++ b/src/fenceai/report/elevation.py
 @@ -300,6 +300,19 @@ def _fixings(panel: ResolvedPanel, members: list[ElevationMember],
@@ -470,11 +627,144 @@ index 99ea50d..f297f91 100644
          drawn = 0
          for index, (x, y, weight) in enumerate(
                  _places(slot.basis, frame, infill, width_mm, height_mm, parts)):
+@@ -470,7 +483,9 @@ def _frame(slot: ResolvedSlot, width_mm: Mm, height_mm: Mm, nominal: Mm):
+             y = _clamp(position - thickness // 2, 0, max(height_mm - thickness, 0))
+             yield ElevationMember(
+                 slot_key=slot.slot_key, role=slot.role, index=index,
+-                x_mm=0, y_mm=y, w_mm=width_mm, h_mm=thickness,
++                x_mm=slot.span_start_mm if slot.post_receiving_joint is not None else 0,
++                y_mm=y, w_mm=slot.length_mm if slot.post_receiving_joint is not None else width_mm,
++                h_mm=thickness,
+                 declared=declared, kind="frame", sku=slot.sku, joint=slot.joint,
+             )
+
 diff --git a/src/fenceai/strategy/generator.py b/src/fenceai/strategy/generator.py
-index 5af9caf..ed53260 100644
+index 5af9caf..8f65f8e 100644
 --- a/src/fenceai/strategy/generator.py
 +++ b/src/fenceai/strategy/generator.py
-@@ -2822,9 +2822,9 @@ def _generate_run(
+@@ -23,6 +23,7 @@ from fenceai.core.errors import GenerationFailure
+ from fenceai.core.gaps import Because, Gap, GapSubject
+ from fenceai.core.units import SNAP_TOLERANCE_MM, Mm, slope_len_mm
+ from fenceai.strategy.choices import ChoiceSet, DesignPoint, offered
++from fenceai.strategy.model import PostJointCheck
+ from fenceai.decisions.graph import GraphBuilder
+ from fenceai.fencemodel.demo import legacy_model
+ from fenceai.fencemodel.library import FenceModelLibrary, content_hash
+@@ -262,6 +263,7 @@ def generate(
+             selections, gap_log,
+         )
+
++    _check_post_receiving_joints(topology, strategy, catalog)
+     _check_post_lengths(topology, knowledge, scope, site_facts, sink, catalog, builder, strategy)
+     _report_unfilled_posts(strategy, builder)
+     _report_missing_site_conditions(
+@@ -1725,6 +1727,83 @@ def _post_at(strategy: Strategy, run: Run, station: Mm, run_len: Mm):
+     return next((p for p in strategy.posts if p.run_ref == f"node:{node_id}"), None)
+
+
++def _check_post_receiving_joints(topology, strategy, catalog):
++    """Check a shared receiver once, after every adjoining bay has resolved."""
++    runs = {run.id: run for run in topology.runs}
++    nodes = {node.id: node for node in topology.nodes}
++    endpoints = {}
++    receiving_posts = set()
++    for span in strategy.spans:
++        run = runs[span.run_ref]
++        length = run_length(topology, run)
++        start, end = nodes[run.start_node_id], nodes[run.end_node_id]
++        direction = (end.x_mm - start.x_mm, end.y_mm - start.y_mm)
++        for side, station in (("start", span.start_station_mm), ("end", span.end_station_mm)):
++            post = _post_at(strategy, run, station, length)
++            if post is None:
++                continue
++            slots = [slot for slot in span.panel.slots if slot.slot_kind == "frame"] if span.panel else []
++            record = (span, side, slots, direction if side == "start" else (-direction[0], -direction[1]))
++            endpoints.setdefault(post.id, []).append(record)
++            if any(slot.post_receiving_joint is not None for slot in slots):
++                receiving_posts.add(post.id)
++    posts = {post.id: post for post in strategy.posts}
++    for post_id in sorted(receiving_posts):
++        post = posts[post_id]
++        incoming = endpoints[post_id]
++        if post.tilt_deg != 0:
++            raise GenerationFailure(f"Post {post_id}: receiving joints require a plumb post")
++        expected = 1 if post.kind == "end" else 2 if post.kind == "line" else 0
++        if not expected or len(incoming) != expected:
++            raise GenerationFailure(f"Post {post_id}: unsupported receiving-post topology")
++        if expected == 2:
++            a, b = incoming[0][3], incoming[1][3]
++            if a[0]*b[1] != a[1]*b[0] or a[0]*b[0] + a[1]*b[1] >= 0:
++                raise GenerationFailure(f"Post {post_id}: receiving bays must be collinear and opposite")
++        heights = {}
++        incoming_bands = []
++        for span, side, slots, direction in incoming:
++            if not slots or span.vertical != "level" or span.bottom_z_start_mm != span.bottom_z_end_mm:
++                raise GenerationFailure(f"Post {post_id}: receiving rails require level supported geometry")
++            bands = sorted((span.bottom_z_start_mm + slot.positions_mm[0], slot.thickness_mm or 0) for slot in slots if len(slot.positions_mm) == 1)
++            incoming_bands.append(bands)
++            if any(2 * (b[0] - a[0]) < a[1] + b[1] for a, b in zip(bands, bands[1:])):
++                raise GenerationFailure(f"Post {post_id}: receiving rail bands overlap vertically")
++            for slot in slots:
++                if slot.post_receiving_joint is None or len(slot.positions_mm) != 1 or slot.qty != 1:
++                    raise GenerationFailure(f"Post {post_id}: mixed, duplicate or unsupported receiving rails")
++                height = span.bottom_z_start_mm + slot.positions_mm[0]
++                engagement = slot.post_engagement_start_mm if side == "start" else slot.post_engagement_end_mm
++                heights.setdefault(height, []).append((span.id, slot, engagement))
++        if len(incoming_bands) == 2:
++            for left in incoming_bands[0]:
++                for right in incoming_bands[1]:
++                    if left[0] != right[0] and 2 * abs(left[0] - right[0]) < left[1] + right[1]:
++                        raise GenerationFailure(f"Post {post_id}: staggered receiving rail bands overlap across the post")
++        product = catalog.products.get(post.sku)
++        face = product.capabilities.face_width_mm if product else None
++        if face is None or face <= 0:
++            raise GenerationFailure(f"Post {post_id}: chosen product has no explicit face width")
++        for height in sorted(heights):
++            members = heights[height]
++            if len(members) != expected or len({span_id for span_id, _, _ in members}) != expected:
++                raise GenerationFailure(f"Post {post_id} at {height}: missing partner or duplicate rail at this height")
++            if expected == 1:
++                continue
++            first, second = members
++            joint = first[1].post_receiving_joint
++            if joint != second[1].post_receiving_joint:
++                raise GenerationFailure(f"Post {post_id} at {height}: receiving joint definitions disagree")
++            actual_gap = face - first[2] - second[2]
++            if actual_gap < joint.shared_host_gap_mm:
++                raise GenerationFailure(f"Post {post_id} at {height}: shared gap {actual_gap} mm is below required {joint.shared_host_gap_mm} mm")
++            strategy.post_joint_checks.append(PostJointCheck(
++                post_id=post_id, rail_height_mm=height,
++                member_refs=[span_id + "/" + slot.slot_key for span_id, slot, _ in members],
++                engagements_mm=[engagement for _, _, engagement in members],
++                face_width_mm=face, actual_gap_mm=actual_gap, required_gap_mm=joint.shared_host_gap_mm))
++
++
+ def _post_face_width(strategy: Strategy, run: Run, station: Mm, run_len: Mm,
+                      catalog: Catalog) -> Mm:
+     """How wide the post at this station is as SEEN — its extent along the run.
+@@ -2689,7 +2768,13 @@ def _generate_run(
+                 screws_count=screws_per_span,
+                 rail_cut_basis="slope" if v_mode == "raked" else "width",
+             )
++            start_post = _post_at(strategy, run, s0, length)
++            end_post = _post_at(strategy, run, s1, length)
+             panel_ctx = PanelContext(
++                post_face_width_start_mm=_post_face_width(strategy, run, s0, length, catalog) or None,
++                post_face_width_end_mm=_post_face_width(strategy, run, s1, length, catalog) or None,
++                post_kind_start=start_post.kind if start_post else None,
++                post_kind_end=end_post.kind if end_post else None,
+                 centre_width_mm=width,
+                 clear_width_mm=clear,
+                 height_mm=height,
+@@ -2718,6 +2803,7 @@ def _generate_run(
+             span.panel = resolve_panel(
+                 match_spec(variant.spec, catalog, panel_facts(panel_ctx)), panel_ctx,
+                 model_ref=model.ref, variant_index=variant.index,
++                post_receiving_joint=model.post.receiving_joint if model.post else None,
+             )
+             if not height_supported(model.height_support, height):
+                 unsupported_heights.setdefault(model.ref, []).append((height, span.id))
+@@ -2822,9 +2908,9 @@ def _generate_run(
                               # what the slot asked for, what arrived in a box, and
                               # what is left to buy. All three, because a reader
                               # given only the difference cannot check it.
@@ -486,6 +776,29 @@ index 5af9caf..ed53260 100644
                               "contained": ", ".join(slot.credited_by)},
                      scope_refs=[span.id], inputs=[sm.select_node_id, span_node.id],
                  ).id)
+diff --git a/src/fenceai/strategy/model.py b/src/fenceai/strategy/model.py
+index ee14c04..5dd33a4 100644
+--- a/src/fenceai/strategy/model.py
++++ b/src/fenceai/strategy/model.py
+@@ -130,7 +130,18 @@ class StrategyWarning(BaseModel):
+     decision_ref: str | None = None
+
+
++class PostJointCheck(BaseModel):
++    post_id: str
++    rail_height_mm: Mm
++    member_refs: list[str]
++    engagements_mm: list[Mm]
++    face_width_mm: Mm
++    actual_gap_mm: Mm
++    required_gap_mm: Mm
++
++
+ class Strategy(BaseModel):
++    post_joint_checks: list[PostJointCheck] = []
+     id: str
+     status: Literal["proposed", "accepted", "superseded"] = "proposed"
+     posts: list[Post] = []
 diff --git a/src/fenceai/web/static/i18n/en.json b/src/fenceai/web/static/i18n/en.json
 index 112597d..1b8b730 100644
 --- a/src/fenceai/web/static/i18n/en.json
@@ -879,3 +1192,233 @@ index 0000000..84813a1
 +        requirement=PartRequirement(role="infill")))
 +    with pytest.raises(GenerationFailure, match="outside the opening"):
 +        _resolve(spec, 90)
+diff --git a/tests/fencemodel/test_post_receiving_joint.py b/tests/fencemodel/test_post_receiving_joint.py
+new file mode 100644
+index 0000000..3800e54
+--- /dev/null
++++ b/tests/fencemodel/test_post_receiving_joint.py
+@@ -0,0 +1,224 @@
++"""Source-independent post receiving mechanics; all dimensions are synthetic."""
++import pytest
++
++from fenceai.catalog.demo import demo_catalog
++from fenceai.core.errors import GenerationFailure
++from fenceai.fencemodel.library import FenceModelLibrary
++from fenceai.fencemodel.model import (FenceModel, PostSlot, ReceivingPostJoint,
++    FrameSlot, FromBottom, PartRequirement, PanelSpec, Eligibility, EligibleItem,
++    validate_model)
++from fenceai.fencemodel.resolve import PanelContext, resolve_panel
++from fenceai.fencemodel.selection import FenceModelChoice
++from fenceai.parts.model import Part, PartLibrary, SpecField
++from fenceai.parts.resolve import resolve_model_parts
++from fenceai.knowledge.demo import demo_knowledge
++from fenceai.strategy.generator import generate, _check_post_receiving_joints
++from fenceai.demand.derive import derive_requirements
++from fenceai.report.elevation import panel_elevation
++from tests.conftest import straight_topology
++
++
++def fixture():
++    parts = PartLibrary(parts=[Part(id='synthetic/receiving-rail', version=1, type='rail',
++        spec=[SpecField(key='sku', value=['RAIL-3000'], agree='among'),
++              SpecField(key='thickness_mm', value=40, unit='mm')])])
++    model = FenceModel(id='SYNTHETIC-POST-RECEIVER', version=1,
++        post=PostSlot(receiving_joint=ReceivingPostJoint(channel_depth_mm=30,
++            insertion_margin_mm=5, shared_host_gap_mm=35),
++            requirement=PartRequirement(role='post', eligibility=Eligibility(
++                members=[EligibleItem(sku='POST-S')]))),
++        default_spec=PanelSpec(frame=[FrameSlot(key=key, orientation='horizontal',
++            placement=FromBottom(offset_mm=height), post_joint='lands',
++            post_engagement_start_mm=20, post_engagement_end_mm=25,
++            requirement=PartRequirement(part_id='synthetic/receiving-rail', qty=1,
++                                        length_rule='clear_between_posts'))
++            for key, height in [('bottom',100), ('top',1700)]]))
++    return model, parts
++
++
++def generated(model=None, parts=None, topology=None, catalog=None):
++    if model is None:
++        model, parts = fixture()
++    return generate(topology or straight_topology(3000), demo_knowledge(), catalog or demo_catalog(),
++        models=FenceModelLibrary(models=[model]), parts=parts,
++        default_model=FenceModelChoice(model_id=model.id))
++
++
++def test_actual_generation_cut_extent_demand_and_drawing_agree():
++    model, parts = fixture()
++    assert validate_model(model, demo_catalog(), parts) == []
++    result = generated(model, parts)
++    assert len(result.strategy.spans) == 2
++    checks = result.strategy.post_joint_checks
++    assert len(checks) == 2  # one physical shared post × two distinct rail heights
++    assert {check.rail_height_mm for check in checks} == {100, 1700}
++    assert all(check.engagements_mm == [25,20] for check in checks)
++    assert all(check.actual_gap_mm == check.required_gap_mm == 35 for check in checks)
++    assert len({check.post_id for check in checks}) == 1
++    for span in result.strategy.spans:
++        elevation = panel_elevation(span.panel, width_mm=span.clear_width_mm, height_mm=span.height_mm)
++        for rail in span.panel.slots:
++            assert rail.length_mm == 1465  # 1420 clear +20 start +25 end
++            assert rail.span_start_mm == -20
++            drawn = next(member for member in elevation.members if member.slot_key == rail.slot_key)
++            assert drawn.x_mm == -20 and drawn.w_mm == rail.length_mm
++    lines = [line for line in derive_requirements(result.strategy, demo_catalog()) if line.role=='rail']
++    assert len(lines) == 4
++    assert all(line.cut_length_mm == 1465 and line.engineering_qty == 1 for line in lines)
++
++
++def test_shared_gap_is_checked_once_and_refuses_one_millimetre_shortfall():
++    model, parts = fixture()
++    model.post.receiving_joint.shared_host_gap_mm = 36
++    assert validate_model(model, demo_catalog(), parts) == []
++    with pytest.raises(GenerationFailure, match='shared gap 35 mm is below required 36'):
++        generated(model, parts)
++
++
++@pytest.mark.parametrize('mutate', ['missing_engagement','too_deep','through','duplicate_height','overlapping_bands'])
++def test_receiving_shape_refusals(mutate):
++    model, parts = fixture()
++    rail = model.default_spec.frame[0]
++    if mutate == 'missing_engagement': rail.post_engagement_start_mm = None
++    elif mutate == 'too_deep': rail.post_engagement_end_mm = 26
++    elif mutate == 'through': rail.post_joint = 'through'
++    elif mutate == 'duplicate_height': model.default_spec.frame[1].placement.offset_mm = 100
++    else: model.default_spec.frame[1].placement.offset_mm = 110
++    with pytest.raises(GenerationFailure):
++        generated(model, parts)
++
++
++def test_unknown_post_width_is_not_replaced_with_a_nominal():
++    model, parts = fixture()
++    catalog = demo_catalog()
++    catalog.products['POST-S'].capabilities.face_width_mm = None
++    with pytest.raises(GenerationFailure, match='face widths'):
++        generated(model, parts, catalog=catalog)
++
++
++def test_public_joint_object_cannot_be_silently_ignored_by_private_post_parser():
++    with pytest.raises(ValueError, match='wire adapter'):
++        PostSlot.model_validate({'requirement': {'role':'post'}, 'joint': {'kind':'channel'}})
++    with pytest.raises(ValueError):
++        ReceivingPostJoint(channel_depth_mm=30, insertion_margin_mm=5,
++                           shared_host_gap_mm=35, channel_depth={'amount_milli':30000})
++
++
++def test_world_height_and_missing_shared_partner_are_checked():
++    result = generated()
++    result.strategy.post_joint_checks = []
++    result.strategy.spans[1].bottom_z_start_mm = 10
++    result.strategy.spans[1].bottom_z_end_mm = 10
++    with pytest.raises(GenerationFailure, match='staggered receiving rail bands'):
++        _check_post_receiving_joints(straight_topology(3000), result.strategy, demo_catalog())
++
++
++def test_corner_is_refused_from_actual_topology():
++    from fenceai.topology.model import Node, Run, Topology
++    topology = Topology(nodes=[Node(id='a',x_mm=0,y_mm=0),Node(id='b',x_mm=1500,y_mm=0),
++        Node(id='c',x_mm=1500,y_mm=1500)], runs=[Run(id='ab',start_node_id='a',end_node_id='b'),
++        Run(id='bc',start_node_id='b',end_node_id='c')])
++    with pytest.raises(GenerationFailure, match='end and line'):
++        generated(topology=topology)
++
++
++def test_without_receiving_joint_old_clear_length_behavior_is_unchanged():
++    model, parts = fixture()
++    model.post.receiving_joint = None
++    for rail in model.default_spec.frame:
++        rail.post_engagement_start_mm = rail.post_engagement_end_mm = None
++    result = generated(model, parts)
++    assert result.strategy.post_joint_checks == []
++    assert all(slot.length_mm == 1420 for span in result.strategy.spans for slot in span.panel.slots)
++
++
++def test_reversed_neighbor_uses_its_actual_end_engagement():
++    from fenceai.topology.model import Node, Run, Topology
++    topology = Topology(nodes=[Node(id='a',x_mm=0,y_mm=0),Node(id='b',x_mm=1500,y_mm=0),
++        Node(id='c',x_mm=3000,y_mm=0)], runs=[Run(id='ab',start_node_id='a',end_node_id='b'),
++        Run(id='cb',start_node_id='c',end_node_id='b')])
++    model, parts = fixture()
++    with pytest.raises(GenerationFailure, match='shared gap 30 mm'):
++        generated(model, parts, topology=topology)
++    model.post.receiving_joint.shared_host_gap_mm = 30
++    result = generated(model, parts, topology=topology)
++    assert len(result.strategy.post_joint_checks) == 2
++    assert all(check.engagements_mm == [25,25] and check.actual_gap_mm == 30
++               for check in result.strategy.post_joint_checks)
++
++
++def test_zero_required_gap_allows_exact_touch_without_inventing_clearance():
++    model, parts = fixture()
++    for rail in model.default_spec.frame:
++        rail.post_engagement_start_mm = 25
++    model.post.receiving_joint.shared_host_gap_mm = 0
++    catalog = demo_catalog()
++    catalog.products['POST-S'].capabilities.face_width_mm = 50
++    result = generated(model, parts, catalog=catalog)
++    assert all(check.actual_gap_mm == check.required_gap_mm == 0
++               for check in result.strategy.post_joint_checks)
++
++
++def test_world_height_can_match_despite_different_panel_local_datums():
++    result = generated()
++    span = result.strategy.spans[1]
++    span.bottom_z_start_mm = span.bottom_z_end_mm = 10
++    for rail in span.panel.slots:
++        rail.positions_mm[0] -= 10
++    result.strategy.post_joint_checks = []
++    _check_post_receiving_joints(straight_topology(3000), result.strategy, demo_catalog())
++    assert {check.rail_height_mm for check in result.strategy.post_joint_checks} == {100,1700}
++
++
++def test_tilted_receiving_post_is_refused_even_with_level_bays():
++    result = generated()
++    next(post for post in result.strategy.posts if post.kind == 'line').tilt_deg = 5
++    with pytest.raises(GenerationFailure, match='plumb post'):
++        _check_post_receiving_joints(straight_topology(3000), result.strategy, demo_catalog())
++
++
++def test_receiving_rail_band_cannot_be_clamped_to_a_different_drawing_position():
++    model, parts = fixture()
++    model.default_spec.frame[0].placement.offset_mm = 0
++    with pytest.raises(GenerationFailure, match="outside the panel height"):
++        generated(model, parts)
++
++
++def test_competing_overlap_allowance_cannot_be_silently_ignored():
++    model, parts = fixture()
++    model.default_spec.frame[0].requirement.overlap_mm = 12
++    assert validate_model(model, demo_catalog(), parts)
++    with pytest.raises(GenerationFailure):
++        generated(model, parts)
++
++
++def test_opposite_side_bands_are_checked_even_when_different_rows_share_no_centre():
++    result = generated()
++    catalog = demo_catalog()
++    catalog.products['POST-S'].capabilities.face_width_mm = 100
++    # Individually each side's bands only touch. Cross-side thick bands overlap.
++    for index, span in enumerate(result.strategy.spans):
++        rails = span.panel.slots
++        for rail, centre in zip(rails, (100,200)):
++            rail.positions_mm = [centre]
++            rail.post_receiving_joint.channel_depth_mm = 65
++            rail.post_receiving_joint.shared_host_gap_mm = 30
++        rails[0].thickness_mm, rails[1].thickness_mm = (10,190) if index == 0 else (190,10)
++        if index == 0:
++            rails[0].post_engagement_end_mm, rails[1].post_engagement_end_mm = 10,60
++        else:
++            rails[0].post_engagement_start_mm, rails[1].post_engagement_start_mm = 60,10
++    with pytest.raises(GenerationFailure, match='staggered receiving rail bands'):
++        _check_post_receiving_joints(straight_topology(3000), result.strategy, catalog)
++
++
++@pytest.mark.parametrize('override', [
++    {'channel_depth_mm':0}, {'channel_depth_mm':30.0}, {'channel_depth_mm':True},
++    {'insertion_margin_mm':30}, {'insertion_margin_mm':-1},
++    {'shared_host_gap_mm':-1}, {'shared_host_gap_mm':None},
++])
++def test_receiving_dimensions_are_explicit_strict_integers_with_usable_depth(override):
++    values = {'channel_depth_mm':30,'insertion_margin_mm':5,'shared_host_gap_mm':35}
++    values.update(override)
++    with pytest.raises(ValueError):
++        ReceivingPostJoint(**values)
