@@ -1,0 +1,267 @@
+{
+  "batch_id": "augusta-assembly-001",
+  "batch_hash": "48a825d380da37245a664c6ae6dd17d451052c3690c54d9f1338696133f5be50",
+  "run_id": "92ed0204f7e749b3be90ae06767fda53",
+  "at": "2026-09-07T16:25:30.872046+00:00",
+  "round": 3,
+  "stages": [
+    {
+      "stage": "S",
+      "status": "checked",
+      "sources": [
+        {
+          "path": "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png",
+          "sha256": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+        },
+        {
+          "path": "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf",
+          "sha256": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+        },
+        {
+          "path": "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
+          "sha256": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+        },
+        {
+          "path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
+          "sha256": "cb90e6a275ac5ff050a4c10d33d82b6478922683cd6d2c857e5c50a3dcb6c629"
+        }
+      ]
+    },
+    {
+      "stage": "C/K",
+      "status": "checked",
+      "claim_traces": [
+        {
+          "part_id": "mfr/weatherables/augusta-8x6-picket",
+          "spec_key": "nominal_thickness_mm",
+          "fact_id": 22776,
+          "element_id": "element-478d468055-0024",
+          "source_ref": {
+            "id": "fba738057e8aef78",
+            "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+          },
+          "review_status": "extracted",
+          "value_original": "7/8 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 22225,
+            "unit": "mm",
+            "value_raw": [
+              "7/8 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "fba738057e8aef78",
+                "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/augusta-8x6-picket",
+          "spec_key": "nominal_width_mm",
+          "fact_id": 22777,
+          "element_id": "element-478d468055-0024",
+          "source_ref": {
+            "id": "fba738057e8aef78",
+            "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+          },
+          "review_status": "extracted",
+          "value_original": "6 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 152400,
+            "unit": "mm",
+            "value_raw": [
+              "6 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "fba738057e8aef78",
+                "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/augusta-8x6-rail",
+          "spec_key": "width_mm",
+          "fact_id": 22772,
+          "element_id": "element-1b110be294-0001",
+          "source_ref": {
+            "id": "798c70ec3e3cfe5b",
+            "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+          },
+          "review_status": "flagged",
+          "value_original": "1.5 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 38100,
+            "unit": "mm",
+            "value_raw": [
+              "1.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "798c70ec3e3cfe5b",
+                "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/augusta-8x6-rail",
+          "spec_key": "height_mm",
+          "fact_id": 22773,
+          "element_id": "element-1b110be294-0001",
+          "source_ref": {
+            "id": "798c70ec3e3cfe5b",
+            "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+          },
+          "review_status": "flagged",
+          "value_original": "5.5 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 139700,
+            "unit": "mm",
+            "value_raw": [
+              "5.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "798c70ec3e3cfe5b",
+                "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/augusta-8x6-rail",
+          "spec_key": "length_mm",
+          "fact_id": 22774,
+          "element_id": "element-1b110be294-0001",
+          "source_ref": {
+            "id": "798c70ec3e3cfe5b",
+            "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+          },
+          "review_status": "flagged",
+          "value_original": "71.5 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 1816100,
+            "unit": "mm",
+            "value_raw": [
+              "71.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "798c70ec3e3cfe5b",
+                "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/augusta-8x6-u-channel",
+          "spec_key": "nominal_designation",
+          "fact_id": 22779,
+          "element_id": "element-bc63a76c40-0021",
+          "source_ref": {
+            "id": "5c9dacb5a791a172",
+            "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+          },
+          "review_status": "extracted",
+          "value_original": "1.5 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "key": "designation",
+            "value_raw": [
+              "1.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "5c9dacb5a791a172",
+                "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+              },
+              {
+                "id": "7cd327b1cb2b9848",
+                "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+              }
+            ],
+            "source_class": "manufacturer_installation_instruction",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ]
+    },
+    {
+      "stage": "P",
+      "status": "checked",
+      "snapshot_id": "7508f4e73acf0744e07014035bc6fb023fe3e95e0750f638489a7bee95f750fa",
+      "selected_parts_reproduced": 7,
+      "missing_requested_parts": []
+    }
+  ],
+  "rerun": [
+    "source hashes",
+    "canonical/fact/spec joins",
+    "current publisher selected Part comparison",
+    "snapshot verification",
+    "frozen boundary checks"
+  ],
+  "reused_not_rerun": [
+    "workspace/reports/augusta-assembly-consumer-probe.json (consumer validation via the consumer's own environment in this run; probe payload rerun each advance)",
+    "workspace/catalog/augusta-8x6-consumer-model.json (private diagnostic candidate; transformation rerun each advance)"
+  ],
+  "limitations": [
+    "Composition Parts carry identity only: per-panel counts (3 rails, 4 installed U-channel segments across two runs) live in the authored dataset with recorded bases, not in Part specs.",
+    "Receiving geometry (rail slot depth, picket seating, post rail-socket depth) is absent from all retained sources; the consumer refuses fitted dimensions, cuts and engagement checks.",
+    "AssemblyStep publication awaits human review of the proposed master-install candidates; none publishes without it.",
+    "The authored model candidate is excluded from models[] by the pending numeric provenance mapping (Amendment 008); its nulls publish as explicit gaps.",
+    "Rail placements are drawing-derived authored choices from the CAD section chain; the datum interpretation is unconfirmed.",
+    "The consumer infill fits one repeating cycle per panel: the upper picket run is a recorded consumer-capability limitation, not a published row.",
+    "The model authors no post opinion: no Augusta post identity or geometry is source-stated.",
+    "Purchasing: installed per-panel counts are known; picket counts, channel stock length and kit inventory are not."
+  ],
+  "lessons": [
+    "Post-correction sync: manifest limitations updated (4 installed U-channel segments; consumer-capability limitation recorded)."
+  ],
+  "proposed_improvements": [],
+  "runner_sha256": "40018c9aa35ed2e3422a8bd492f904d9f0522a20d8aa02e19de9330d5ac98b72",
+  "implementation_hashes": {
+    "fence_evidence/augusta_drawing_claims.py": "54e73f214406d34fd53d4771facd191c5d0b9fa41609bb660e240ca2a2b7dbc8",
+    "fence_evidence/part_types.py": "4b354287fa76cb33f62a9396b85fa066d08e2e8885be6b94c7ae644274bdd7e5",
+    "fence_evidence/parts.py": "3764a0913abc2e956cb0358ddbc6aec590c6eb5258f29258eb75f970fcdd9218",
+    "fence_evidence/snapshot.py": "fdffb435582c83a7b724855e6c71ebd67bf58e6d3120e674df228ce468a821df",
+    "data/weatherables.json": "118df33a18fe8582085c10ba99d10eb7654a678e1e940251e1ef7a7c18ee351b"
+  },
+  "status": "partial_knowledge_verified"
+}

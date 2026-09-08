@@ -1,0 +1,294 @@
+{
+  "scope": "Weatherables Augusta 8x6 privacy CAD drawing plus install-guide and specsheet readings; exact SKU unverified",
+  "sources": [
+    {
+      "path": "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png",
+      "sha256": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf",
+      "sha256": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
+      "sha256": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+    }
+  ],
+  "imported": {
+    "cad": [
+      {
+        "fact_id": 22768,
+        "inserted": false
+      },
+      {
+        "fact_id": 22769,
+        "inserted": false
+      },
+      {
+        "fact_id": 22770,
+        "inserted": false
+      },
+      {
+        "fact_id": 22771,
+        "inserted": false
+      },
+      {
+        "fact_id": 22772,
+        "inserted": false
+      },
+      {
+        "fact_id": 22773,
+        "inserted": false
+      },
+      {
+        "fact_id": 22774,
+        "inserted": false
+      }
+    ],
+    "install": [
+      {
+        "fact_id": 22779,
+        "inserted": false
+      }
+    ],
+    "specsheet": [
+      {
+        "fact_id": 22776,
+        "inserted": false
+      },
+      {
+        "fact_id": 22777,
+        "inserted": false
+      }
+    ]
+  },
+  "snapshot_id": "2c1d747559855312b1c255e71a2f0bf5fb576978b009e7da19755059d1285d03",
+  "snapshot_path": "workspace/snapshots/2c1d747559855312b1c255e71a2f0bf5fb576978b009e7da19755059d1285d03.json",
+  "parts": [
+    {
+      "id": "mfr/weatherables/augusta-8x6-picket",
+      "type": {
+        "namespace": "shared",
+        "key": "infill"
+      },
+      "status": "draft",
+      "name_i18n": {
+        "en": "Weatherables Augusta tongue-and-groove picket \u2014 specsheet style block; exact SKU unverified"
+      },
+      "authorship": "third_party_authored",
+      "spec": [
+        {
+          "key": "nominal_thickness_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 22225,
+            "unit": "mm",
+            "value_raw": [
+              "7/8 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "fba738057e8aef78",
+                "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "nominal_width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 152400,
+            "unit": "mm",
+            "value_raw": [
+              "6 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "fba738057e8aef78",
+                "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "cites": [
+        {
+          "id": "fba738057e8aef78",
+          "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+        }
+      ],
+      "contributing_sources": [
+        "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+      ],
+      "version": "sha256:186da7698020c4763ef9ddcb9ac88f526195dc3bf76a912c554fde2139196e9a"
+    },
+    {
+      "id": "mfr/weatherables/augusta-8x6-rail",
+      "type": {
+        "namespace": "shared",
+        "key": "rail"
+      },
+      "status": "draft",
+      "name_i18n": {
+        "en": "Weatherables Augusta rail \u2014 8x6 privacy CAD drawing rail; exact SKU unverified"
+      },
+      "authorship": "third_party_authored",
+      "spec": [
+        {
+          "key": "width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 38100,
+            "unit": "mm",
+            "value_raw": [
+              "1.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "798c70ec3e3cfe5b",
+                "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "height_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 139700,
+            "unit": "mm",
+            "value_raw": [
+              "5.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "798c70ec3e3cfe5b",
+                "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "length_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 1816100,
+            "unit": "mm",
+            "value_raw": [
+              "71.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "798c70ec3e3cfe5b",
+                "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "cites": [
+        {
+          "id": "798c70ec3e3cfe5b",
+          "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+        }
+      ],
+      "contributing_sources": [
+        "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      ],
+      "version": "sha256:1f7e469703259cdfa40ce9c8ebfe14f82b1a4a4b7d304016ce9a3880b2676e95"
+    },
+    {
+      "id": "mfr/weatherables/augusta-8x6-u-channel",
+      "type": {
+        "namespace": "shared",
+        "key": "bar"
+      },
+      "status": "draft",
+      "name_i18n": {
+        "en": "Weatherables Augusta U-channel \u2014 nominal designation and CAD panel membership; exact SKU unverified"
+      },
+      "authorship": "third_party_authored",
+      "spec": [
+        {
+          "key": "nominal_designation",
+          "agree": "==",
+          "value": {
+            "key": "designation",
+            "value_raw": [
+              "1.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "5c9dacb5a791a172",
+                "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+              },
+              {
+                "id": "7cd327b1cb2b9848",
+                "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+              }
+            ],
+            "source_class": "manufacturer_installation_instruction",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "cites": [
+        {
+          "id": "7cd327b1cb2b9848",
+          "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+        },
+        {
+          "id": "5c9dacb5a791a172",
+          "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+        }
+      ],
+      "contributing_sources": [
+        "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d",
+        "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      ],
+      "version": "sha256:0389b98433c0a6b49eecf54e09440151bf34d898c764d419a401f0bc321db9a0"
+    }
+  ],
+  "human_reviews_created": false,
+  "persisted_unpublished": [
+    "panel_drawing_overall_width_mm",
+    "panel_drawing_overall_height_mm",
+    "panel_drawing_picket_run_upper_mm",
+    "panel_drawing_picket_run_lower_mm"
+  ],
+  "remaining_gaps": [
+    "Overall panel dimensions and picket-run segments persist as flagged facts; no component Part owns them while FenceModel provenance mapping (Amendment 008) is pending.",
+    "Receiving depths, seating, installed pitch and cut allowances are not inferred from the drawing.",
+    "Rail count (three) and picket runs are cross-checked against sibling CADs and brochure text, but component interchangeability and exact-SKU identity remain unverified.",
+    "No purchasing quantities or kit inventory are claimed."
+  ]
+}

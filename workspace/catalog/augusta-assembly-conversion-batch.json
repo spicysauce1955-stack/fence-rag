@@ -1,0 +1,170 @@
+{
+  "batch_id": "augusta-assembly-001",
+  "profile": "persisted-facts-to-parts-v1",
+  "tenant": "default",
+  "scope": "Augusta 8x6 assembly slice: composition Parts with source-stated kit counts (8ft CAD page material list), value Parts incl. the metal rail insert, proposed step candidates awaiting human review, and the authored model candidate excluded pending Amendment 008 and receiving geometry",
+  "sources": [
+    {
+      "path": "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png",
+      "sha256": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf",
+      "sha256": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
+      "sha256": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
+      "sha256": "cb90e6a275ac5ff050a4c10d33d82b6478922683cd6d2c857e5c50a3dcb6c629"
+    },
+    {
+      "path": "manuals/weatherables/structural/weatherables-augusta-8ft-cad-page.html",
+      "sha256": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+    }
+  ],
+  "snapshot": "workspace/snapshots/95c770b849cb6817daaa03fc397bcc55e78bc9f48c51eff2e00dd548bdb44e58.json",
+  "part_ids": [
+    "mfr/weatherables/augusta-8x6-rail",
+    "mfr/weatherables/augusta-8x6-u-channel",
+    "mfr/weatherables/augusta-8x6-picket",
+    "mfr/weatherables/augusta-8x6-metal-insert",
+    "mfr/weatherables/wea-augusta-post-5x5",
+    "mfr/weatherables/wea-augusta-rail-slotted",
+    "mfr/weatherables/wea-augusta-picket-tg",
+    "mfr/weatherables/wea-augusta-u-channel",
+    "mfr/weatherables/wea-augusta-metal-insert"
+  ],
+  "bindings": [
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-metal-insert",
+      "spec_key": "width_mm",
+      "extractor": "source-reading:weatherables-augusta-8ft-cadpage:v1",
+      "fact_type": "metal_insert_width_in",
+      "element_id": "element-398603ee1a-0240"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-metal-insert",
+      "spec_key": "height_mm",
+      "extractor": "source-reading:weatherables-augusta-8ft-cadpage:v1",
+      "fact_type": "metal_insert_height_in",
+      "element_id": "element-398603ee1a-0240"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-metal-insert",
+      "spec_key": "length_mm",
+      "extractor": "source-reading:weatherables-augusta-8ft-cadpage:v1",
+      "fact_type": "metal_insert_length_in",
+      "element_id": "element-398603ee1a-0240"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-metal-insert",
+      "spec_key": "kit_count_per_panel",
+      "extractor": "source-reading:weatherables-augusta-8ft-cadpage:v1",
+      "fact_type": "kit_qty_metal_inserts_in",
+      "element_id": "element-398603ee1a-0240"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-picket",
+      "spec_key": "nominal_thickness_mm",
+      "extractor": "source-reading:weatherables-augusta-specsheet:v1",
+      "fact_type": "picket_thickness_in",
+      "element_id": "element-478d468055-0024"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-picket",
+      "spec_key": "nominal_width_mm",
+      "extractor": "source-reading:weatherables-augusta-specsheet:v1",
+      "fact_type": "picket_width_in",
+      "element_id": "element-478d468055-0024"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-picket",
+      "spec_key": "stock_length_mm",
+      "extractor": "source-reading:weatherables-augusta-8ft-cadpage:v1",
+      "fact_type": "picket_stock_length_in",
+      "element_id": "element-398603ee1a-0240"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-picket",
+      "spec_key": "kit_count_per_panel",
+      "extractor": "source-reading:weatherables-augusta-8ft-cadpage:v1",
+      "fact_type": "kit_qty_pickets_in",
+      "element_id": "element-398603ee1a-0240"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-rail",
+      "spec_key": "width_mm",
+      "extractor": "source-reading:weatherables-augusta-8x6-cad:v1",
+      "fact_type": "rail_drawing_width_mm",
+      "element_id": "element-1b110be294-0001"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-rail",
+      "spec_key": "height_mm",
+      "extractor": "source-reading:weatherables-augusta-8x6-cad:v1",
+      "fact_type": "rail_drawing_height_mm",
+      "element_id": "element-1b110be294-0001"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-rail",
+      "spec_key": "length_mm",
+      "extractor": "source-reading:weatherables-augusta-8x6-cad:v1",
+      "fact_type": "rail_drawing_length_mm",
+      "element_id": "element-1b110be294-0001"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-u-channel",
+      "spec_key": "width_mm",
+      "extractor": "source-reading:weatherables-augusta-8ft-cadpage:v1",
+      "fact_type": "u_channel_width_in",
+      "element_id": "element-398603ee1a-0240"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-u-channel",
+      "spec_key": "depth_mm",
+      "extractor": "source-reading:weatherables-augusta-8ft-cadpage:v1",
+      "fact_type": "u_channel_depth_in",
+      "element_id": "element-398603ee1a-0240"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-u-channel",
+      "spec_key": "length_mm",
+      "extractor": "source-reading:weatherables-augusta-8ft-cadpage:v1",
+      "fact_type": "u_channel_length_in",
+      "element_id": "element-398603ee1a-0240"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-u-channel",
+      "spec_key": "kit_count_per_panel",
+      "extractor": "source-reading:weatherables-augusta-8ft-cadpage:v1",
+      "fact_type": "kit_qty_u_channels_in",
+      "element_id": "element-398603ee1a-0240"
+    }
+  ],
+  "implementation_files": [
+    "fence_evidence/augusta_drawing_claims.py",
+    "fence_evidence/part_types.py",
+    "fence_evidence/parts.py",
+    "fence_evidence/snapshot.py",
+    "fence_evidence/extract.py",
+    "data/weatherables.json"
+  ],
+  "historical_evidence": [
+    "workspace/reports/augusta-assembly-consumer-probe.json (consumer validation via the consumer's own environment in this run; probe payload rerun each advance)",
+    "workspace/catalog/augusta-8x6-consumer-model.json (private diagnostic candidate; transformation rerun each advance)"
+  ],
+  "limitations": [
+    "Composition Parts carry identity only: per-panel counts (3 rails, 3 metal inserts, 22 pickets, 4 U-channels) live in the authored dataset with recorded bases from the manufacturer material list, not in Part specs.",
+    "Kit counts are manufacturer inventory statements (Tokens), not installed geometry: the U-channel length 39.5in equals the drawing-derived run height exactly; the picket stock length 43in implies 3.5in total seating, not a measured engagement.",
+    "Receiving geometry (rail slot depth, picket seating depth, post rail-socket depth) remains absent: no source states them, so fitted cut lengths and engagement checks stay unvalidated.",
+    "AssemblyStep publication awaits human review of the proposed master-install candidates; none publishes without it.",
+    "The authored model candidate is excluded from models[] by the pending numeric provenance mapping (Amendment 008); its nulls publish as explicit gaps.",
+    "Rail placements are drawing-derived authored choices from the CAD section chain; the datum interpretation is unconfirmed.",
+    "The consumer infill fits one repeating cycle per panel: the upper picket run and its two U-channel segments are a recorded consumer-capability limitation.",
+    "The model authors no post opinion: no post Part with citable values exists (the panel kit lists no posts; post specs exist at family level).",
+    "Posts, caps and concrete are separate purchases: post-hole specs (12in diameter, 30-36in deep) come from the master install guide, not the panel kit."
+  ]
+}

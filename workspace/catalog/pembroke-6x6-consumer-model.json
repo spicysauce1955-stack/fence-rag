@@ -1,0 +1,245 @@
+{
+  "artifact_kind": "private_consumer_model_candidate",
+  "source_package_hash": "31eb8eca0bb141894c0fd0ca68a0e182a306e4dd8d60b68666f5befd7328368a",
+  "model": {
+    "id": "mfr/weatherables-pembroke-6x6-privacy",
+    "version": 1,
+    "status": "draft",
+    "name_i18n": {
+      "en": "Weatherables Pembroke Privacy Fence — 6ft tall x 6ft wide CAD configuration; exact SKU unverified"
+    },
+    "authorship": "third_party_authored",
+    "grade": "residential",
+    "height_support": {
+      "kind": "discrete",
+      "heights_mm": [
+        1828
+      ]
+    },
+    "option_axes": [],
+    "variants": [],
+    "layout_policy": [],
+    "assembly": [],
+    "default_spec": {
+      "frame": [
+        {
+          "key": "bottom_rail",
+          "orientation": "horizontal",
+          "placement": {
+            "kind": "from_bottom",
+            "offset_mm": 69
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/pembroke-6x6-rail",
+            "qty": 1,
+            "length_rule": "clear_between_posts"
+          },
+          "channel_depth_mm": 0,
+          "insertion_margin_mm": 0,
+          "joint": "channel"
+        },
+        {
+          "key": "top_rail",
+          "orientation": "horizontal",
+          "placement": {
+            "kind": "from_bottom",
+            "offset_mm": 1758
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/pembroke-6x6-rail",
+            "qty": 1,
+            "length_rule": "clear_between_posts"
+          },
+          "channel_depth_mm": 0,
+          "insertion_margin_mm": 0,
+          "joint": "channel"
+        }
+      ],
+      "infill": {
+        "orientation": "vertical",
+        "justification": "start",
+        "excess": "space",
+        "edge_margin_mm": 0,
+        "supply": "components",
+        "pattern": [
+          {
+            "key": "picket",
+            "base_ref": "bottom_rail",
+            "top_ref": "top_rail",
+            "requirement": {
+              "part_id": "mfr/weatherables/pembroke-6x6-picket",
+              "length_rule": "between_frame",
+              "qty": 1
+            },
+            "profile_edges": {
+              "start": "tongue",
+              "end": "groove"
+            },
+            "joint": "groove"
+          }
+        ]
+      },
+      "fixings": [
+        {
+          "key": "u_channel_end_cover_first",
+          "basis": "per_panel",
+          "qty_per_basis": 1,
+          "edge_binding": {
+            "member_key": "picket",
+            "position": "first",
+            "profile_edge": "tongue"
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/pembroke-6x6-u-channel",
+            "qty": 1
+          }
+        },
+        {
+          "key": "u_channel_end_cover_last",
+          "basis": "per_panel",
+          "qty_per_basis": 1,
+          "edge_binding": {
+            "member_key": "picket",
+            "position": "last",
+            "profile_edge": "groove"
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/pembroke-6x6-u-channel",
+            "qty": 1
+          }
+        }
+      ]
+    },
+    "post": null,
+    "cites": [
+      {
+        "id": "d40f1cdb998fac7f",
+        "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+      },
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      },
+      {
+        "id": "4f94caa7fb11f5c5",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "contributing_sources": [
+      "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606",
+      "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b",
+      "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+    ]
+  },
+  "publishable": false,
+  "installation_ready": false,
+  "bom_generation_verified": false,
+  "transformation_evidence": {
+    "placements": [
+      {
+        "slot": "bottom_rail",
+        "offset_mm": 69,
+        "basis": "centerline of the [0, 139700] milli-mm envelope: 5.5in rail whose outside face sits at the panel bottom (drawing-derived; datum unconfirmed)",
+        "classification": "drawing-derived authored placement (centerline); unconfirmed datum"
+      },
+      {
+        "slot": "top_rail",
+        "offset_mm": 1758,
+        "basis": "centerline of the [1689100, 1828800] milli-mm envelope (top of the 5.5 + 61 + 5.5 = 72 in chain)",
+        "classification": "drawing-derived authored placement (centerline); unconfirmed datum"
+      }
+    ],
+    "placement_datum": "the draft authors rail CENTERLINES (consumer placement semantics; the section chain gives 5.5in envelope boundaries, halved to centerlines); the Emblem candidate established the same convention (from_bottom 88.9mm = half its 7in envelope)",
+    "unit_conversions": [
+      "draft Quantity objects carry integer thousandths of a millimetre; the consumer Mm is integer millimetres.",
+      "Counts (qty, qty_per_basis) convert by exact division: a fractional count REFUSES, never silently truncates.",
+      "Lengths and placements floor to whole millimetres with every loss recorded in precision_losses below."
+    ],
+    "precision_losses": [
+      {
+        "field": "placement/offset",
+        "value_raw": "centerline of the [0, 139700] milli-mm envelope: 5.5in rail whose outside face sits at the panel bottom (drawing-derived; datum unconfirmed)",
+        "exact_mm": 69.85,
+        "published_mm": 69,
+        "loss_mm": 0.85
+      },
+      {
+        "field": "placement/offset",
+        "value_raw": "centerline of the [1689100, 1828800] milli-mm envelope (top of the 5.5 + 61 + 5.5 = 72 in chain)",
+        "exact_mm": 1758.95,
+        "published_mm": 1758,
+        "loss_mm": 0.95
+      },
+      {
+        "field": "height",
+        "value_raw": "72 in. authored closure from the 6x6 material list: U-channel length 61 + 2 x rail height 5.5 = 72 (nominal 6 ft; CAD page title and specsheet height options)",
+        "exact_mm": 1828.8,
+        "published_mm": 1828,
+        "loss_mm": 0.8
+      }
+    ],
+    "authored_field_substitutions": [
+      {
+        "field": "default_spec/infill/excess",
+        "draft_value": "trim_last",
+        "candidate_value": "space",
+        "reason": "the producer profile supports trim_last (cut the final member to fit), but 2D trimming is not a supported consumer cut and no source states an end-fitting policy; the honest policy leaves the run as-is and lets u-channels cover end gaps (master install). The authored draft value is preserved in the draft and recorded here; it is not silently dropped."
+      }
+    ],
+    "private_defaults_are_not_source_facts": [
+      "channel_depth_mm and insertion_margin_mm: 0 = undeclared, absent from all retained sources",
+      "picket engagements: undeclared; a between_frame cut length without engagements is face-to-face only",
+      "picket pattern qty=1 is consumer cycle semantics (the pattern repeats to fill the run; handed edge bindings require qty 1); the manufacturer kit count 6 lives in the draft and dataset as cited inventory",
+      "rail placements are drawing-derived authored choices from the section chain (5.5 + 61 + 5.5 = 72); datum unconfirmed"
+    ],
+    "withheld_from_consumer_shape": [
+      "all null receiving depths from the producer draft (stayed absent, never defaulted)",
+      "per-panel quantity Tokens (counts live in the dataset and the publication report, not the consumer model)"
+    ]
+  },
+  "limitations": [
+    "channel_depth, insertion_margin and engagement nulls are declared absences: no retained source states rail slot depth, picket seating depth or post rail-socket depth for this configuration.",
+    "Rail placement offsets are drawing-derived authored choices from the section chain (5.5 + 61 + 5.5 = 72), not manufacturer-stated datums; the chain-to-opening datum interpretation is unconfirmed. The local CAD raster's canonical OCR is unusable (2 garbled labels, mean confidence 0) — the chain was recovered by diagnostic re-OCR at 16-24x upscale plus glyph-pixel analysis and closes exactly against the material list's U-channel length (72 - 2*5.5 = 61); no fact is anchored to that OCR.",
+    "Panel height 72 in is an authored arithmetic closure over the material list (61 + 2*5.5), not a direct dimension statement; the drawing's overall-height label corroborates at pixel level but cannot anchor a fact.",
+    "The model fragment authors no post opinion: a composition-only post Part carries no citable evidence values, and no retained source states Pembroke post socket depth or SKU identity (the gate lists name 4x4x76 socket posts, but no panel-list or specsheet value states the panel kit's post).",
+    "Rail placement offsets are CENTERLINES (consumer placement semantics); the 5.5in envelope halves to 69.85mm, exact in milli-mm but not whole millimetres — the consumer conversion floors with a recorded loss.",
+    "Kit counts are manufacturer inventory statements, not installed-pitch derivations: the picket stock length 64.25in exceeds the 61in run by an implied 3.25in seating, which is config-dependent and still not a measured engagement.",
+    "6 pickets x 11.3in nominal width covers 67.8in of a 72in run only with tongue-and-groove engagement; the per-board installed coverage is not source-stated and must not be inferred.",
+    "Rail length rule: the sources state rails slide INTO routed post sockets, and the draft knows the 71.5in rail stock, but the consumer's routed-rail length path requires a PostSlot.receiving_joint (post socket depth), which no retained source states and this candidate does not author. clear_between_posts is therefore published as the registry rule the routed path extends — with NO invented socket engagement — and any future resolved cut length will undercount the known stock until a receiving joint is authored from real evidence.",
+    "This candidate is a diagnostic input for consumer validation, not the production route.",
+    "Consumer validation of this candidate does not admit any FenceModel to the published snapshot."
+  ],
+  "withheld_mappings": [],
+  "mapping_completeness": {
+    "draft_member_keys": [
+      "picket"
+    ],
+    "mapped_member_keys": [
+      "picket"
+    ],
+    "withheld_member_keys": [],
+    "complete": true,
+    "draft_u_channel_segments": 2,
+    "mapped_u_channel_segments": 2,
+    "withheld_u_channel_segments": 0,
+    "fixing_count_complete": true
+  },
+  "capability_validation": {
+    "assembly": {
+      "validated": false,
+      "why": "no FenceModel admitted (Amendment 008 pending) and no procedures published (step reviews outstanding)"
+    },
+    "fitting": {
+      "validated": false,
+      "why": "receiving geometry absent from all retained sources; engagements and channel depths undeclared"
+    },
+    "cutting": {
+      "validated": false,
+      "why": "cut lengths need engagements and socket depths, all undeclared; a resolved between_frame length today is face-to-face only, not a seated-piece cut"
+    },
+    "purchasing": {
+      "validated": false,
+      "why": "installed per-panel counts are manufacturer-stated kit inventory for this configuration, but post counts, channel stock lengths beyond the kit entry and multi-panel purchase quantities are not source-stated"
+    }
+  }
+}

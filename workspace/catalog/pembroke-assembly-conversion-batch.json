@@ -1,0 +1,188 @@
+{
+  "batch_id": "pembroke-assembly-001",
+  "profile": "persisted-facts-to-parts-v1",
+  "tenant": "default",
+  "scope": "Pembroke 6x6 assembly slice: composition Parts with source-stated kit counts (Pembroke 6ft CAD page 6x6 material list), value Parts (rail, U-channel, metal insert, wide-board picket), and the authored model candidate excluded pending Amendment 008 and receiving geometry",
+  "sources": [
+    {
+      "path": "manuals/weatherables/structural/weatherables-pembroke-6ft-cad-page.html",
+      "sha256": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf",
+      "sha256": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
+      "sha256": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
+      "sha256": "cb90e6a275ac5ff050a4c10d33d82b6478922683cd6d2c857e5c50a3dcb6c629"
+    },
+    {
+      "path": "manuals/weatherables/structural/weatherables-cad-pembroke-6ft-privacy.png",
+      "sha256": "3fd74eaceddba4ac85905552e2419fdcfe4e4b29d258cb49b5c3f2aba5fcd8b8"
+    }
+  ],
+  "snapshot": "workspace/snapshots/0e04d171388eca3ffab0da325206dd83981bfe1c57c2d2b9c97adc87f8cf6844.json",
+  "part_ids": [
+    "mfr/weatherables/pembroke-6x6-rail",
+    "mfr/weatherables/pembroke-6x6-u-channel",
+    "mfr/weatherables/pembroke-6x6-picket",
+    "mfr/weatherables/pembroke-6x6-metal-insert",
+    "mfr/weatherables/wea-pembroke-post-4x4",
+    "mfr/weatherables/wea-pembroke-rail-slotted",
+    "mfr/weatherables/wea-pembroke-picket-tg",
+    "mfr/weatherables/wea-pembroke-u-channel",
+    "mfr/weatherables/wea-pembroke-metal-insert"
+  ],
+  "bindings": [
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-rail",
+      "spec_key": "width_mm",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "rail_width_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-rail",
+      "spec_key": "height_mm",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "rail_height_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-rail",
+      "spec_key": "length_mm",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "rail_length_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-rail",
+      "spec_key": "kit_count_per_panel",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "kit_qty_rails_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-u-channel",
+      "spec_key": "width_mm",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "u_channel_width_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-u-channel",
+      "spec_key": "depth_mm",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "u_channel_depth_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-u-channel",
+      "spec_key": "length_mm",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "u_channel_length_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-u-channel",
+      "spec_key": "kit_count_per_panel",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "kit_qty_u_channels_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-metal-insert",
+      "spec_key": "width_mm",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "metal_insert_width_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-metal-insert",
+      "spec_key": "height_mm",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "metal_insert_height_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-metal-insert",
+      "spec_key": "length_mm",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "metal_insert_length_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-metal-insert",
+      "spec_key": "kit_count_per_panel",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "kit_qty_metal_inserts_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-picket",
+      "spec_key": "nominal_thickness_mm",
+      "extractor": "source-reading:weatherables-pembroke-specsheet:v1",
+      "fact_type": "picket_thickness_in",
+      "element_id": "element-d3efcd2267-0015"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-picket",
+      "spec_key": "nominal_width_mm",
+      "extractor": "source-reading:weatherables-pembroke-specsheet:v1",
+      "fact_type": "picket_width_in",
+      "element_id": "element-d3efcd2267-0015"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-picket",
+      "spec_key": "stock_length_mm",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "picket_stock_length_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-picket",
+      "spec_key": "kit_count_per_panel",
+      "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
+      "fact_type": "kit_qty_pickets_in",
+      "element_id": "element-77275b2b5b-0239"
+    },
+    {
+      "part_id": "mfr/weatherables/pembroke-6x6-picket",
+      "spec_key": "tongue_groove_wall_gauge_mm",
+      "extractor": "source-reading:weatherables-pembroke-specsheet:v1",
+      "fact_type": "picket_tongue_groove_wall_gauge_in",
+      "element_id": "element-d3efcd2267-0015"
+    }
+  ],
+  "implementation_files": [
+    "fence_evidence/pembroke_cadpage_claims.py",
+    "fence_evidence/part_types.py",
+    "fence_evidence/parts.py",
+    "fence_evidence/snapshot.py",
+    "fence_evidence/extract.py",
+    "data/weatherables.json",
+    "scripts/advance_pembroke_assembly.py",
+    "scripts/prepare_pembroke_consumer_model.py"
+  ],
+  "historical_evidence": [
+    "workspace/reports/pembroke-assembly-consumer-probe.json (consumer validation via the consumer's own environment in this run; probe payload rerun each advance)",
+    "workspace/catalog/pembroke-6x6-consumer-model.json (private diagnostic candidate; transformation rerun each advance)"
+  ],
+  "limitations": [
+    "Composition Parts carry identity only: per-panel counts (2 rails, 1 metal insert, 6 pickets, 2 U-channels) are manufacturer kit-inventory statements with their bases in the dataset, not installed-geometry derivations.",
+    "Kit counts are manufacturer inventory statements (Tokens), not installed geometry: the U-channel length 61in equals the two-rail chain closure 72 - 2*5.5 exactly, and the picket stock 64.25in exceeds the 61in run by an implied 3.25in seating (config-dependent, not a measured engagement).",
+    "The local CAD raster's canonical OCR is unusable (2 garbled labels, mean confidence 0); its corroborating labels (72 width, 5.5/61/5.5 chain) are recorded in workspace/reports/pembroke-source-review/findings.md as diagnostic re-OCR evidence only — no fact anchors to that OCR and no Part cites the PNG.",
+    "Receiving geometry (rail slot depth, picket seating depth, post rail-socket depth) remains absent: no fitted dimension, seated cut length or engagement check is validated.",
+    "The authored model candidate is excluded from models[] by the pending numeric provenance mapping (Amendment 008) and by the invalid_quantity refusals that ARE the missing receiving geometry.",
+    "Rail placements are drawing-derived authored choices from the section chain (5.5 + 61 + 5.5 = 72); the datum interpretation is unconfirmed.",
+    "The model authors no post opinion: no post Part with citable values exists (the panel kit lists no posts; the gate lists' 4x4x76 socket posts are gate-scope evidence only).",
+    "Posts, caps and concrete are separate purchases: the master install post-hole specs (10in diameter for 4x4 posts, 30-36in deep) are family-level instructions, not Pembroke-specific fitted dimensions.",
+    "Exact SKU identity for the 6x6 kit is unverified; the Home Depot PWPR-T-G11-3-6X8 product page documents the 6x8 sibling, not this 6x6 configuration.",
+    "The model fragment authors no requirement for the bottom-rail metal insert (1 per panel, manufacturer kit inventory): the consumer fixings channel draws per_panel quantities at the panel centre unless edge-bound, and no source states the insert's seating inside the rail. A resolved BOM from the model alone would buy 0 inserts; purchasing must read the dataset composition and the value Part. Recorded as deliberate refusal in the draft's unresolved_fields.",
+    "Gap-closing round 2026-09-07: width options 72/96 in recorded in the dataset (specsheet p2 + master install p3 + both CAD-page panel lists); the .055in T&G wall gauge now publishes on the picket Part (specsheet p2, twice-observed); 2in recommended ground clearance and the conflicting wind-rating claims (110/130 FAQ vs 120/137 high-wind method, master install p15) are recorded as family-level dataset claims. Explicit inspected-not-claimed gaps: panel post-height pairing, panel-scope post cap, rail slot dimension, receiving geometry."
+  ]
+}

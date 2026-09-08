@@ -1,0 +1,581 @@
+{
+  "batch_id": "pembroke-assembly-001",
+  "batch_hash": "039927657170495eeb6b2c21bdddc2e256269f72f02486efe5d687f2f1848299",
+  "run_id": "7cfd87a3c8a84ea6b856db0c54f6a2cb",
+  "at": "2026-09-07T19:17:15.154415+00:00",
+  "round": 1,
+  "stages": [
+    {
+      "stage": "S",
+      "status": "checked",
+      "sources": [
+        {
+          "path": "manuals/weatherables/structural/weatherables-pembroke-6ft-cad-page.html",
+          "sha256": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+        },
+        {
+          "path": "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf",
+          "sha256": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+        },
+        {
+          "path": "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
+          "sha256": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+        },
+        {
+          "path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
+          "sha256": "cb90e6a275ac5ff050a4c10d33d82b6478922683cd6d2c857e5c50a3dcb6c629"
+        },
+        {
+          "path": "manuals/weatherables/structural/weatherables-cad-pembroke-6ft-privacy.png",
+          "sha256": "3fd74eaceddba4ac85905552e2419fdcfe4e4b29d258cb49b5c3f2aba5fcd8b8"
+        }
+      ]
+    },
+    {
+      "stage": "C/K",
+      "status": "checked",
+      "claim_traces": [
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-metal-insert",
+          "spec_key": "width_mm",
+          "fact_id": 22793,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "1.25 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 31750,
+            "unit": "mm",
+            "value_raw": [
+              "1.25 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-metal-insert",
+          "spec_key": "height_mm",
+          "fact_id": 22794,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "1.75 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 44450,
+            "unit": "mm",
+            "value_raw": [
+              "1.75 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-metal-insert",
+          "spec_key": "length_mm",
+          "fact_id": 22795,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "71.5 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 1816100,
+            "unit": "mm",
+            "value_raw": [
+              "71.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-metal-insert",
+          "spec_key": "kit_count_per_panel",
+          "fact_id": 22792,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "1 each",
+          "reviewed_value": null,
+          "published_value": {
+            "key": "count",
+            "value_raw": [
+              "1 each"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-picket",
+          "spec_key": "nominal_thickness_mm",
+          "fact_id": 22806,
+          "element_id": "element-d3efcd2267-0015",
+          "source_ref": {
+            "id": "d429e017069b3963",
+            "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+          },
+          "review_status": "extracted",
+          "value_original": "7/8 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 22225,
+            "unit": "mm",
+            "value_raw": [
+              "7/8 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d429e017069b3963",
+                "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-picket",
+          "spec_key": "nominal_width_mm",
+          "fact_id": 22807,
+          "element_id": "element-d3efcd2267-0015",
+          "source_ref": {
+            "id": "d429e017069b3963",
+            "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+          },
+          "review_status": "extracted",
+          "value_original": "11.3 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 287020,
+            "unit": "mm",
+            "value_raw": [
+              "11.3 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d429e017069b3963",
+                "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-picket",
+          "spec_key": "stock_length_mm",
+          "fact_id": 22801,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "64.25 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 1631950,
+            "unit": "mm",
+            "value_raw": [
+              "64.25 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-picket",
+          "spec_key": "kit_count_per_panel",
+          "fact_id": 22800,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "6 each",
+          "reviewed_value": null,
+          "published_value": {
+            "key": "count",
+            "value_raw": [
+              "6 each"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-rail",
+          "spec_key": "width_mm",
+          "fact_id": 22802,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "1.5 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 38100,
+            "unit": "mm",
+            "value_raw": [
+              "1.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-rail",
+          "spec_key": "height_mm",
+          "fact_id": 22803,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "5.5 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 139700,
+            "unit": "mm",
+            "value_raw": [
+              "5.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-rail",
+          "spec_key": "length_mm",
+          "fact_id": 22804,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "71.5 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 1816100,
+            "unit": "mm",
+            "value_raw": [
+              "71.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-rail",
+          "spec_key": "kit_count_per_panel",
+          "fact_id": 22791,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "2 each",
+          "reviewed_value": null,
+          "published_value": {
+            "key": "count",
+            "value_raw": [
+              "2 each"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-u-channel",
+          "spec_key": "width_mm",
+          "fact_id": 22797,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "1.25 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 31750,
+            "unit": "mm",
+            "value_raw": [
+              "1.25 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-u-channel",
+          "spec_key": "depth_mm",
+          "fact_id": 22798,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "1.5 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 38100,
+            "unit": "mm",
+            "value_raw": [
+              "1.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-u-channel",
+          "spec_key": "length_mm",
+          "fact_id": 22799,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "61 in.",
+          "reviewed_value": null,
+          "published_value": {
+            "amount_milli": 1549400,
+            "unit": "mm",
+            "value_raw": [
+              "61 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "part_id": "mfr/weatherables/pembroke-6x6-u-channel",
+          "spec_key": "kit_count_per_panel",
+          "fact_id": 22796,
+          "element_id": "element-77275b2b5b-0239",
+          "source_ref": {
+            "id": "d40f1cdb998fac7f",
+            "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+          },
+          "review_status": "extracted",
+          "value_original": "2 each",
+          "reviewed_value": null,
+          "published_value": {
+            "key": "count",
+            "value_raw": [
+              "2 each"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ]
+    },
+    {
+      "stage": "P",
+      "status": "checked",
+      "snapshot_id": "d84c7a70b94d16915856684edf98d274efc8cd3ab11c64b38a51c19d697484fa",
+      "selected_parts_reproduced": 9,
+      "missing_requested_parts": []
+    }
+  ],
+  "rerun": [
+    "source hashes",
+    "canonical/fact/spec joins",
+    "current publisher selected Part comparison",
+    "snapshot verification",
+    "frozen boundary checks"
+  ],
+  "reused_not_rerun": [
+    "workspace/reports/pembroke-assembly-consumer-probe.json (consumer validation via the consumer's own environment in this run; probe payload rerun each advance)",
+    "workspace/catalog/pembroke-6x6-consumer-model.json (private diagnostic candidate; transformation rerun each advance)"
+  ],
+  "limitations": [
+    "Composition Parts carry identity only: per-panel counts (2 rails, 1 metal insert, 6 pickets, 2 U-channels) are manufacturer kit-inventory statements with their bases in the dataset, not installed-geometry derivations.",
+    "Kit counts are manufacturer inventory statements (Tokens), not installed geometry: the U-channel length 61in equals the two-rail chain closure 72 - 2*5.5 exactly, and the picket stock 64.25in exceeds the 61in run by an implied 3.25in seating (config-dependent, not a measured engagement).",
+    "The local CAD raster's canonical OCR is unusable (2 garbled labels, mean confidence 0); its corroborating labels (72 width, 5.5/61/5.5 chain) are recorded in the source-review findings as diagnostic re-OCR evidence only — no fact anchors to that OCR and no Part cites the PNG.",
+    "Receiving geometry (rail slot depth, picket seating depth, post rail-socket depth) remains absent: no fitted dimension, seated cut length or engagement check is validated.",
+    "The authored model candidate is excluded from models[] by the pending numeric provenance mapping (Amendment 008) and by the invalid_quantity refusals that ARE the missing receiving geometry.",
+    "Rail placements are drawing-derived authored choices from the section chain (5.5 + 61 + 5.5 = 72); the datum interpretation is unconfirmed.",
+    "The model authors no post opinion: no post Part with citable values exists (the panel kit lists no posts; the gate lists' 4x4x76 socket posts are gate-scope evidence only).",
+    "Posts, caps and concrete are separate purchases: the master install post-hole specs (10in diameter for 4x4 posts, 30-36in deep) are family-level instructions, not Pembroke-specific fitted dimensions.",
+    "Exact SKU identity for the 6x6 kit is unverified; the Home Depot PWPR-T-G11-3-6X8 product page documents the 6x8 sibling, not this 6x6 configuration."
+  ],
+  "lessons": [
+    "The shared mfr namespace runs every same-manufacturer recipe per slice; scope value recipes by the composition's component ids, not by identity namespace.",
+    "A two-rail panel needs no consumer single-cycle withholding: the mapping-completeness invariant generalizes to mapped == authored when nothing is withheld."
+  ],
+  "proposed_improvements": [
+    "Deduplicate same-manufacturer PartType extension rows in the builder rather than at each call site."
+  ],
+  "runner_sha256": "40018c9aa35ed2e3422a8bd492f904d9f0522a20d8aa02e19de9330d5ac98b72",
+  "implementation_hashes": {
+    "fence_evidence/pembroke_cadpage_claims.py": "6a78ae162b03fc4c7676fa27f52d1a28d1aea07c7889f222caa1599eacbe45e5",
+    "fence_evidence/part_types.py": "e75d57912d3f562903c3a3f6c0f0b4296c1f78cb30d7285c28e64fd337d19766",
+    "fence_evidence/parts.py": "5865a9e64186e3630c6058df4e8f05202fcb3e3569829cfe2b09307448ee7cc9",
+    "fence_evidence/snapshot.py": "5958db5615d27a61fbf5edc347b7df44de606b9839132deb89f752bafff05488",
+    "fence_evidence/extract.py": "4c001ee3b40cf3f5afb322b41ec97db7d8e19df8c06373d85d927476452f561b",
+    "data/weatherables.json": "a9ad3b94df07c4450a04bda552e8f8a537fab11b9ce7b13af907ff42da75dd13",
+    "scripts/advance_pembroke_assembly.py": "eb47091045dad137ee8c86408e7ac177ff83660ca110b6760d019a255c633443",
+    "scripts/prepare_pembroke_consumer_model.py": "0a301b14fd7303b388fcf9bcdb853e1263050a0e36a9a208adac09d0542bd318"
+  },
+  "status": "partial_knowledge_verified"
+}

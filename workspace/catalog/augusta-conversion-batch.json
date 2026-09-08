@@ -1,0 +1,84 @@
+{
+  "batch_id": "augusta-drawing-001",
+  "profile": "persisted-facts-to-parts-v1",
+  "tenant": "default",
+  "scope": "Weatherables Augusta 8x6 privacy CAD drawing plus install-guide and specsheet readings; exact SKU unverified",
+  "sources": [
+    {
+      "path": "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png",
+      "sha256": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf",
+      "sha256": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
+      "sha256": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+    }
+  ],
+  "snapshot": "workspace/snapshots/2c1d747559855312b1c255e71a2f0bf5fb576978b009e7da19755059d1285d03.json",
+  "part_ids": [
+    "mfr/weatherables/augusta-8x6-rail",
+    "mfr/weatherables/augusta-8x6-u-channel",
+    "mfr/weatherables/augusta-8x6-picket"
+  ],
+  "bindings": [
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-rail",
+      "spec_key": "width_mm",
+      "extractor": "source-reading:weatherables-augusta-8x6-cad:v1",
+      "fact_type": "rail_drawing_width_mm",
+      "element_id": "element-1b110be294-0001"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-rail",
+      "spec_key": "height_mm",
+      "extractor": "source-reading:weatherables-augusta-8x6-cad:v1",
+      "fact_type": "rail_drawing_height_mm",
+      "element_id": "element-1b110be294-0001"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-rail",
+      "spec_key": "length_mm",
+      "extractor": "source-reading:weatherables-augusta-8x6-cad:v1",
+      "fact_type": "rail_drawing_length_mm",
+      "element_id": "element-1b110be294-0001"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-u-channel",
+      "spec_key": "nominal_designation",
+      "extractor": "source-reading:weatherables-augusta-8x6-install:v2",
+      "fact_type": "u_channel_designation_in",
+      "element_id": "element-bc63a76c40-0021"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-picket",
+      "spec_key": "nominal_thickness_mm",
+      "extractor": "source-reading:weatherables-augusta-specsheet:v1",
+      "fact_type": "picket_thickness_in",
+      "element_id": "element-478d468055-0024"
+    },
+    {
+      "part_id": "mfr/weatherables/augusta-8x6-picket",
+      "spec_key": "nominal_width_mm",
+      "extractor": "source-reading:weatherables-augusta-specsheet:v1",
+      "fact_type": "picket_width_in",
+      "element_id": "element-478d468055-0024"
+    }
+  ],
+  "implementation_files": [
+    "fence_evidence/augusta_drawing_claims.py",
+    "fence_evidence/parts.py",
+    "fence_evidence/reviews.py",
+    "fence_evidence/snapshot.py"
+  ],
+  "historical_evidence": [],
+  "limitations": [
+    "Overall panel dimensions and picket-run segments persist as flagged facts; no component Part owns them while FenceModel provenance mapping (Amendment 008) is pending.",
+    "Receiving depths, seating, installed pitch and cut allowances are not inferred from the drawing.",
+    "Rail count (three) and picket runs are cross-checked against sibling CADs and brochure text, but component interchangeability and exact-SKU identity remain unverified.",
+    "No purchasing quantities or kit inventory are claimed.",
+    "AI visual CAD readings remain flagged at curation level 0; OCR text is preserved verbatim and was not corrected in canonical storage."
+  ]
+}
