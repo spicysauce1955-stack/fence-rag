@@ -1,5 +1,16 @@
 # What this platform needs from Planning, and what it answers back
 
+> **HISTORICAL — a completed round-trip, answered in `planning-asks.md` §9 and amendments 006/007.**
+> Reading its questions as open sends someone to redo settled work: §2.1 (`curation_level` 0 vs 1)
+> is closed, §2.4 (paired value) was answered *against* its recommendation — amendment 006 shipped
+> the native `paired` `value_type` — and §2.5 is closed. §1.1(c)'s *"your lapsed-authority test
+> cannot be demonstrated against our corpus"* was falsified twice (T47 §1, T48 §1): the corpus
+> always held lapsed approvals, the date parser could not see them.
+> **One item is still genuinely open and must not be buried here:** §2.3's ask for a
+> representation of *not approved* distinct from *not covered*. The proposed ninth `GapKind`
+> never landed — `contract.md` still enumerates exactly eight, and T54 §2 reads them as closed.
+
+
 ```text
 Status:   v0.2, 2026-08-27. Working list, maintained by the Knowledge platform team.
 Mirror of: planning-asks.md, which is the same document pointing the other way.

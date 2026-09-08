@@ -1,8 +1,9 @@
 # Fence Evidence System
 
 A source-preserving evidence store and lexical retrieval layer over the vinyl
-fence document corpus in this repository — 137 PDFs, 6 CAD images and one DOCX
-specification, 2147 pages (2140 of them PDF), including the Miami-Dade NOA
+fence document corpus in this repository — 137 PDFs, 6 CAD images, 2 retained CAD
+web pages (HTML) and one DOCX specification, 2147 pages (2140 of them PDF),
+including the Miami-Dade NOA
 packages that carry the PE-sealed wind-load and footing tables.
 
 The goal is not a RAG demo. It is to answer a question like *"what footing depth
@@ -33,7 +34,8 @@ manuals/  china/manuals/  data/    catalog/    corpus-manifest.jsonl
                         a published Snapshot
                         hashed, verified, write-once
                         workspace/snapshots/
-                        (source_docs + warnings + gaps so far)
+                        (source_docs, warnings, gaps, parts,
+                         part_types, parameters)
 ```
 
 Canonical rows record what the source actually contained. Retrieval units are a
@@ -197,7 +199,7 @@ python3 -m fence_evidence.cli report            # regenerate workspace reports
 python3 -m fence_evidence.cli snapshot --build  # publish source_docs + warnings + gaps
 ```
 
-On a store built before `SCHEMA_VERSION 3`, run `cli migrate` first — it adds any
+On a store built before the current `SCHEMA_VERSION` (8), run `cli migrate` first — it adds any
 missing columns and backfills them, and is safe to re-run. `cli dataset --verify`
 checks that `data/` still matches the SHA-256 baseline in
 `workspace/catalog/data-digests.json`.
@@ -247,7 +249,8 @@ for hit in search_evidence("racking degrees Chesterfield", limit=5):
 
 | File | Status |
 |---|---|
-| `docs/integration/contract.md` | **FROZEN v1.1, ratified by both teams** — what crosses the boundary to Planning & BOM. Verify with `sha256sum -c contract.sha256` |
+| **`docs/knowledge-loop.md`** | **START HERE — what the whole project is for, and how the pieces fit** |
+| `docs/integration/contract.md` | **FROZEN and RATIFIED at v1.3** (2026-08-31; amendments 002-007 cut in) — what crosses the boundary to Planning & BOM. Verify with `sha256sum -c contract.sha256` |
 | `docs/integration/` | the boundary: the contract, the amendment procedure, the data model, and `audit/` — every round with its evidence |
 | `docs/build-plan.md` | **what to build next**, in order, against the ratified contract |
 | `guide.md` | the contract this implements |
@@ -257,10 +260,10 @@ for hit in search_evidence("racking degrees Chesterfield", limit=5):
 | `docs/phase-checkpoints.md` | per-phase record: implemented, tested, incomplete |
 | `docs/state-and-gaps.md` | current snapshot: measured state, and every known gap |
 | `docs/second-stage-evaluation.md` | within-page retrieval: measurement and the decision not to default it on |
-| `docs/experiment-noa-table-reading.md` | ran: 1,225 candidate readings over 44 pages by 7 agent readers, none yet reviewed by a person |
-| `workspace/reports/projection-relevance-audit.md` | relevance audit of the index; recommendations not applied |
+| `docs/experiment-noa-table-reading.md` | **historical** — the S1-S4 method it designs was never built; LLM visual reading filled the queue instead. `[measured]` 1,927 readings over 44 crops, 1,202 reviewed |
+| `workspace/reports/projection-relevance-audit.md` | relevance audit of the index. Three recommendations measured and settled: R1 rejected, R3 accepted and on by default, R5 rejected (G51, G64) |
 | `workspace/reports/` | environment, corpus audit, dependency options, pilot selection, coverage, evaluation |
-| `eval/gold-questions-*.json` | 59 hand-verified benchmark questions |
+| `eval/gold-questions-*.json` | **78** hand-verified benchmark questions (22 general, 22 structural, 34 no-answer) |
 
 ## Non-negotiables
 

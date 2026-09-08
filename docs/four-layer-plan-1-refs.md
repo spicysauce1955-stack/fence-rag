@@ -1,5 +1,13 @@
 # Plan 1 — `refs.py`: one owner, one index, one guard
 
+> **HISTORICAL — this plan was executed. Do not run it again.**
+> `fence_evidence/refs.py`, `cli refs --verify/--index`, `scripts/measure_ref_stability.py` and
+> `tests/test_refs.py` all exist. Its 33 checkboxes are all still unticked, which is misleading:
+> every one shipped. Its numbers are dead — `SCHEMA_VERSION` is 8 not 3, published cites are 519
+> not 431, and `crops.py`/`api.py`/`GET /source-refs/{id}`, which it lists as deliberately out of
+> scope, all shipped later. Kept as the reasoning behind `refs.py`.
+
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Give the evidence identifier a single owning module, a rebuildable inverse index, and a command that fails loudly when any published citation stops resolving.

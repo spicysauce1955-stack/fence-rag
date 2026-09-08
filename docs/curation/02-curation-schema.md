@@ -1,5 +1,15 @@
 # 2 — Proposed curation schema
 
+> **HISTORICAL — the 52-table `cur_*` schema was never built and will not be.**
+> `[measured]` zero `cur_*` tables exist; `SCHEMA_VERSION` is 8 and `store.migrate` is a real
+> versioned additive runner, contradicting this document's premise. Its `store.py:NN` line
+> citations have all drifted. **What shipped instead, and where its reasoning survives:** §2.11
+> became `crops.py` (which cites this section by name), §2.5.3 became `source-refs-design.md`,
+> and §2.5.5's review gate became `table_reviews` / `fact_reviews` / `step_reviews` plus
+> `review-ledger.jsonl`. Read §2.7 (conflicts) and §2.9 (gaps) — they are the reasoning behind
+> the hard/soft rule in `docs/knowledge-loop.md` §8.
+
+
 All new tables carry a `cur_` prefix. The prefix is the boundary the write guard
 enforces, and the guard is a real chokepoint rather than a convention:
 `sqlite3.Connection.set_authorizer` (stdlib, present on the 3.45.1 here) denies

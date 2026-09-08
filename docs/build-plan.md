@@ -97,6 +97,14 @@ hashed snapshot beforehand and computes locally, so this platform can be unreach
 plan from last March still renders the same numbers. That is why knowledge is published as
 an immutable content-addressed object rather than queried.
 
+> **Still true, and no longer the whole picture (2026-09-08).** That property holds for the
+> **engine**, and the snapshot stays exactly as described. The agreed design adds a *second*
+> consumer with the opposite need: an **agent** asking "what applies here, and how much should
+> I trust it?" cannot be served by a pre-fetched immutable object, so a query endpoint is added
+> beside the snapshot rather than in place of it. A query answer names the snapshot it was
+> computed from, so an agent's advice stays as reproducible as an engine's plan. See
+> `docs/knowledge-loop.md` section 3.
+
 **Changing any BINDING item requires an amendment** — `docs/integration/AMENDING.md`, four
 triggers, five steps. Amendment 001 is the worked example. Registry additions (a new part
 type, warning code, condition dimension, source class) are explicitly **not** amendments
@@ -179,8 +187,11 @@ as a vertical slice rather than a schema, per the plan below — and the two ear
 Planning asked for landed: `ParameterTable` (9 published, up from the 0 this section
 originally described) and `Part`/`PartType` (11 `Part`s, one manufacturer's rail
 components, real stock-length `Quantity` values). `Gap`, `Warning` and the snapshot itself
-are built and in production use. **Still fully unbuilt:** `FenceModel`, `Procedure` +
-`AssemblyStep`, `Combination`, `Rule` — the real remaining Phase D work. Whoever picks this
+are built and in production use. **Still fully unbuilt:** `FenceModel`, `Combination`, `Rule` — the real remaining Phase D
+work. **`Procedure`/`AssemblyStep` is NOT unbuilt** — corrected 2026-09-08: `steps.py`,
+`procedures.py`, `step_candidates`, `step_reviews` and `cli steps` all shipped. `[measured]`
+91 candidates across 2 documents, **0 reviews**, so it publishes `[]` for want of curation
+rather than code. Whoever picks this
 up next should read `docs/state-and-gaps.md` G62/G63 first: building `Part` surfaced a
 corpus-wide data defect, and fixing it wrong the first time (caught only by a later
 adversarial review) is worth understanding before extending the same fact-extraction code.
@@ -263,9 +274,20 @@ before the corpus is fully curated.
 Not a decision about what's most important, just the honest list of what's real and open,
 independent of Planning (nothing here is blocked on them):
 
-- **`FenceModel`/`Procedure`/`Rule`/`Combination`** — the largest remaining Phase D gap.
-  Needs a design pass before implementation; there is no assembly-step model in this
-  codebase yet to build on. The natural next `Part`/`PartType`-style vertical slice.
+- **`Procedure`/`AssemblyStep` — the top priority, and it needs no design pass.** Corrected
+  2026-09-08: the design pass happened (`docs/assembly-step-design.md`) and the model was
+  built (`steps.py`, `procedures.py`, `step_candidates`, `step_reviews`, `cli steps`).
+  `[measured]` **91 candidates across 2 documents with 0 reviews.** Two defects must be fixed
+  first: `build_procedures()` synthesizes an `after` edge where the contract requires empty
+  dependencies, and it always sets `Procedure.scope` to null, which the contract defines as
+  *owned by no product* rather than *product unknown*. Then review the queue and widen — 466
+  glyph-paired steps across 111 pages in 22 documents wait behind this one page
+  (`docs/workflows/source-to-contract.md`).
+- **`FenceModel`/`Rule`/`Combination`** — still genuinely unbuilt. `Rule` has no shape
+  anywhere (`CANDIDATES.md` C16, unfiled).
+- **The query endpoint and override intake** — new since this list was written; see
+  `docs/knowledge-loop.md` section 10 for the current ordering, which supersedes this
+  section on priority.
 - ~~**Retrieval quality, R3/R5**~~ — **done 2026-09-03, G64.** R3 accepted and on by
   default (unit support 0.623 → 0.645, two gold questions better and none worse); R5
   measured and rejected (0.623 → 0.583, eight worse). Both are retrieval-time filters, not

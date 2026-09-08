@@ -1,7 +1,17 @@
 # Integration — the boundary with Planning & BOM
 
+> **Front-door corrections, 2026-09-08.** The contract is **v1.3**, not v1.1. **Eight**
+> amendments are filed (001-008): 002-007 ratified, 008 ACCEPT-MODIFIED by both sides and
+> waiting on a batch. `CANDIDATES.md` runs to **C17**. The boundary is **not** closed —
+> `conversation.md` T55's ledger lists five open asks, and **live boundary state lives in
+> that file's per-turn ledgers**, not in `where-we-stand.md`, which is now historical.
+> Three documents here argue for fetch-a-snapshot *rather than* a query API
+> (`README` §, `system-overview.md` §3, `knowledge-design.md` §"Why this shape"). That
+> remains right for the engine and is not the whole picture — see `docs/knowledge-loop.md` §3.
+
+
 ```text
-Status:    contract.md FROZEN and RATIFIED at v1.1 (2026-08-25), signed by both
+Status:    contract.md FROZEN and RATIFIED at **v1.3** (2026-08-31), signed by both
            teams — audit/11-ratification-v1.1.md. Nothing on the boundary is open.
            v1.0 was never ratified: the cold read before signature found
            obligation 6 contradicting §1.4, filed as amendments/001 and cut.
@@ -34,7 +44,7 @@ the boundary: what crosses it, in what shape, and what each side promises the ot
 |---|---|
 | [`where-we-stand.md`](where-we-stand.md) | **Start here.** The state of the boundary in one page — settled, parked, and next on each side |
 | [`boundary-delta-v0.4.md`](boundary-delta-v0.4.md) | The four v0.4 items that needed agreement. All four accepted — see `audit/07` |
-| [`contract.md`](contract.md) | **FROZEN v1.1, ratified.** What crosses the boundary, and the promises each side makes. Verify with `sha256sum -c contract.sha256` |
+| [`contract.md`](contract.md) | **FROZEN v1.3, ratified.** What crosses the boundary, and the promises each side makes. Verify with `sha256sum -c contract.sha256` |
 | [`AMENDING.md`](AMENDING.md) | How and when the frozen contract may change — four triggers, five steps, and what is *not* an amendment |
 | [`amendments/`](amendments/) | Filed amendments. **001** — obligation 6's superseded clause, accepted, cut as v1.1 |
 | [`amendments/CANDIDATES.md`](amendments/CANDIDATES.md) | Noticed, not filed. Three open: `curation_level` 0-vs-1, `Warning.attaches_to.ref`, and whether a `PanelSpec` member edge is a "value" |

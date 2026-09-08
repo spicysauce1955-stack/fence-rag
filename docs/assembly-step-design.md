@@ -1,8 +1,16 @@
 # Steps out of installation guides — `Procedure` and `AssemblyStep`
 
 ```text
-Status:    Design, APPROVED 2026-09-03. Nothing here is implemented at the time
-           of writing. The visual companion to this document is an Artifact
+Status:    BUILT, and this document is what the code does. `steps.py` (splitter),
+           `procedures.py` (snapshot member), `step_candidates`/`step_reviews`,
+           `cli steps --propose/--queue/--accept`, review-ledger schema 2.
+           `[measured]` 2026-09-08: 91 candidates across 2 documents, 0 reviews --
+           `procedures` publishes [] for want of CURATION, not code.
+           Superseded numbers below: 11 damaged words is 12 (G67); the 44-vs-49
+           bullet discrepancy resolved to 44 (G68); the slice emits 91, not 55.
+           Two builder defects to fix before publishing: a synthesized `after`
+           edge where the contract wants empty dependencies, and `Procedure.scope`
+           null meaning `owned by no product` rather than `product unknown`. The visual companion to this document is an Artifact
            published the same day; this file is the authority if they differ.
 Written:   2026-09-03, after "what is left from the overall plan?" produced a
            decomposition rather than a backlog: of the four empty snapshot

@@ -1,5 +1,26 @@
 # Source-to-model workflow handoff
 
+> ## 2026-09-08 — read this before resuming anything below
+>
+> **The design changed.** `docs/knowledge-loop.md` settles what this platform is for: a
+> foundation knowledge layer an AI agent reasons from. **It is not a parts catalogue, and the
+> Planning/BOM backend will carry different products entirely.**
+>
+> Everything below is the record of the **exact-SKU Part programme** — Emblem 73014714, then
+> Augusta, then Pembroke. It is retained as **method**, not as a work queue. The blockers it
+> defines (exact SKU equivalence, package inventory, per-style colour availability) are work on
+> an axis the new design does not need. **Do not resume them without re-deciding them against
+> `docs/knowledge-loop.md` first.**
+>
+> **What the eight checkpoints below never draw a conclusion about:** after all of it,
+> `procedures = 0`, `rules = 0`, `models = 0`. `[measured]` 2026-09-08 the store holds **91 step
+> candidates across 2 documents with 0 reviews**. That queue — not another product slice — is
+> the top priority.
+>
+> Three snapshot ids below are each called "current" (`55bc6c76…`, `b5048772…`, `0e04d171…`).
+> Use `cli snapshot --list`. The last pushed checkpoint is no longer `1691563`.
+
+
 ## Current workflow entry point
 
 Use [docs/workflows/source-to-contract.md](docs/workflows/source-to-contract.md).

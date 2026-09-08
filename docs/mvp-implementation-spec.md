@@ -1,9 +1,28 @@
 # MVP Implementation Specification — Fence Evidence System
 
 ```text
-Status: Authoritative
-Scope: Preservation pilot and lexical evidence MVP
+Status: Authoritative for extraction, the canonical store, retrieval, and the
+        twelve prohibitions in section 0.
+        SUPERSEDED FOR SCOPE AND DEFERRALS -- see section 1a. This document was
+        written for the MVP; the platform's purpose was settled on 2026-09-08
+        and is stated in `docs/knowledge-loop.md`, which governs direction.
+Scope:  Preservation pilot and lexical evidence MVP
 ```
+
+## 1a. What this platform is for (2026-09-08)
+
+The scope statement below was written before the purpose was settled, and one of
+its deferrals has since been contradicted by both the code and the design: **"a
+served API or MCP server" shipped on 2026-08-28** (`fence_evidence/api.py`,
+`cli serve`), and under the agreed design a served **query endpoint is the only
+real interface** this platform has.
+
+Read `docs/knowledge-loop.md` first. In short: this is the foundation knowledge
+layer an AI agent reasons from, it talks only to the Planning/BOM backend and
+never to an end user, and it has exactly two edges -- a query outward ("what
+applies here?", returning values and procedures, cited, with conflicts
+surfaced), and overrides inward. Everything in this document about *how*
+extraction, the store and retrieval work remains authoritative.
 
 This document is authoritative when scope or sequencing conflicts arise.
 `rag-pipeline-plan.md` describes the corpus and the original requirements.
@@ -52,8 +71,14 @@ originating page or region image, an annotated gold evaluation set, and a
 measured evaluation gate.
 
 **Out of scope for the MVP (deferred, see `docs/target-architecture.md`):**
-dense/semantic retrieval, visual retrieval, cross-encoder reranking, a served
-API or MCP server, any LLM-generated answer text, any external service.
+dense/semantic retrieval, visual retrieval, cross-encoder reranking, any
+LLM-generated answer text, any external service.
+
+*(Corrected 2026-09-08: "a served API or MCP server" was removed from this list.
+It shipped as `fence_evidence/api.py` on 2026-08-28 -- `GET /source-refs/{id}`,
+`POST /source-refs:batch`, `POST /reviews`, behind a bearer allowlist -- and
+section 1a makes the query endpoint the platform's primary interface. A
+deferral list that forbids a shipped component is worse than no list.)*
 
 ## 2. Boundaries and permissions
 
@@ -260,8 +285,9 @@ ordering, nor the first-stage unit — it may only add. It is off by default; se
 - **Evaluation**: the gold set runs end-to-end and produces a per-category
   report.
 
-Run with `python3 -m pytest tests/` (pytest installed into `workspace/pylibs`)
-or `python3 tests/run_tests.py` on a clean checkout with stdlib only.
+Run with `python3 tests/run_tests.py` -- stdlib only, and the only entry point
+that reports skips correctly. *(Corrected 2026-09-08: this line previously said
+pytest was installed into `workspace/pylibs`. It is not, and never was.)*
 
 ## 10. Acceptance criteria
 
@@ -300,6 +326,6 @@ committed report:
 ## 11. Deferred features (explicitly not built)
 
 Dense/vector retrieval · visual page retrieval · reranking · graph database ·
-served HTTP API / MCP server · LLM answer generation · automatic conflict
+LLM answer generation · automatic conflict
 resolution · destructive dedup of near-identical chunks (near-duplicates are
 **linked** via `relations`, never removed) · China-track/US-track merging.

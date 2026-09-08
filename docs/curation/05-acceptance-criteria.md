@@ -1,5 +1,15 @@
 # 5 — Acceptance criteria
 
+> **HISTORICAL — these criteria are measured by `cli curate audit`, which does not exist.**
+> `workspace/reports/curation-readiness.md` was never written, and the gate these criteria
+> define was bypassed: the projection was rebuilt, 9 `ParameterTable`s published and 37 crops
+> reviewed without any of this running. Exactly one criterion (C-C3, `PROMOTABLE` no longer
+> containing `cross_family_verified`) is satisfied. **Worth keeping:** §"why there is a floor
+> group" — *a gap has to cost something, or gapping everything is the dominant strategy* — and
+> the reporting rule that *metrics which can be gamed by omission are reported together or not
+> at all*. The repo has since relearned both (G52, G78).
+
+
 Every criterion is measured by `cli curate audit --slice bufftech`, which writes
 `workspace/reports/curation-readiness.md`. Nothing here is judged by inspection.
 A criterion with no deterministic checker is not a criterion.

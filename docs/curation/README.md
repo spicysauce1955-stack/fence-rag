@@ -1,7 +1,18 @@
 # Phase 7C — Domain curation
 
 ```text
-Status:   Proposed. Nothing in this directory is implemented.
+Status:   MIXED, and this line was false in both directions until 2026-09-08.
+          This directory now holds TWO unrelated bodies of work:
+          - 01..05 are the August 2026 `cur_*` proposal. The 52-table schema was
+            never built and will not be, but THREE of its ideas shipped under
+            other names: §2.11 became crops.py (which cites it by name), §2.5.3
+            became source-refs-design.md, and §2.5.5's review gate became
+            table_reviews / fact_reviews / step_reviews + review-ledger.jsonl.
+            02, 04 and 05 carry historical banners; 01 and 03 are still useful.
+          - emblem-*.md are dated BUILD LOGS for shipped code, misfiled here.
+          The §5 readiness gate was never run, and the work it gated happened
+          anyway: 37 crops reviewed, 9 ParameterTables published, projection
+          rebuilt. Read docs/knowledge-loop.md for what the platform is for.
 Position: between the canonical evidence store and the retrieval projection.
 Gate:     no corpus-wide curation, and no projection rebuild, until these five
           documents are reviewed and the vertical slice passes §5 readiness.

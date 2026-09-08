@@ -1,9 +1,11 @@
 # Layering — five layers, and one rule about direction
 
 ```text
-Status:   PROPOSED as vocabulary. One thing in it is DECIDED: §5 settles what
-          the hand-researched dataset is, on measured evidence, and §5a records
-          where the layering still disagrees with docs/curation/.
+Status:   THE DIRECTION RULE IS DECIDED AND ENFORCED -- tests/test_pointer_direction.py
+          fails the build on a reference that points up a layer, and CLAUDE.md
+          states it as non-negotiable. The five-layer VOCABULARY remains proposed.
+          §5 settles what the hand-researched dataset is, on measured evidence.
+          Numbers below refreshed 2026-09-08; §2a added for the hard/soft overlay.
 Scope:    A way of describing what already exists, plus one rule that is new.
           The rule has already been applied once — see §3 — because it caught a
           defect while being written.
@@ -25,11 +27,14 @@ Naming the layers is cheap. The rule in §2 is the part that earns its keep.
 
 | | Layer | Holds | Built by |
 |---|---|---|---|
-| **L1** | Raw | the corpus — 144 files, read-only, content-addressed | `cli fetch` |
-| **L2** | Canonical | what each page contained — 81,794 elements, boxes, images | `cli ingest` |
-| **L3** | Assertions | a value, its conditions, and where it was read — 1,718 facts | `cli facts --extract` |
-| **L4** | Entities | the things a bill of materials names — parts, panels, slots | *nothing* |
+| **L1** | Raw | the corpus — 146 files, read-only, content-addressed | `cli fetch` (+2 HTML in git) |
+| **L2** | Canonical | what each page contained — 82,282 elements, boxes, images | `cli ingest` |
+| **L3** | Assertions | a value, its conditions, and where it was read — 1,882 facts | `cli facts --extract` |
+| **L4** | Entities | the things a bill of materials names — parts, panels, slots | `parts.py`, `part_types.py`, `authored_models.py` |
 | **L5** | Published | the contract shapes, hashed and immutable | `cli snapshot --build` |
+
+*(Refreshed 2026-09-08. L4's "Built by" read `*nothing*` until this date and the whole
+document's argument turned on it; 42 `Part`s and 8 `PartType`s now publish.)*
 
 > ### THE RULE
 >
@@ -107,7 +112,19 @@ contradicted by their own sources, and why the only way to find them was for a
 person to go back to the page by hand. There is no automated check that could
 have caught it, because there is nothing to check against.
 
-**L5 exists thinly.** `canonical.py` + `snapshot.py` + `snapshot_store.py` build, verify and store a snapshot — 62 `source_docs`, 282 `warnings`, 63 `gaps`. Still absent: `ParameterTable`, `Part`, and everything that needs an anchored L4.
+**L5 no longer exists thinly.** `canonical.py` + `snapshot.py` + `snapshot_store.py` build, verify and store a snapshot — `[measured]` 2026-09-08: 90 `source_docs`, 287 `warnings`, 414 `gaps`, 9 `ParameterTable`s, 42 `Part`s, 8 `PartType`s. Still absent: `FenceModel`, `Procedure`, `Rule`, `Combination` — all 0. `Procedure` is built but unreviewed (91 candidates, 0 reviews); `Rule` has no shape anywhere.
+
+### 2a · The hard/soft overlay, and why it is the same rule
+
+`docs/knowledge-loop.md` adds two things that are **not** layers: **overrides** (a person's
+scoped, reasoned, attributed correction) and **learned relevance** (from the query log). They
+sit as a **read-time overlay above L5** — consulted whenever a query is answered, winning on
+contradiction — and they **never write into L1-L5**.
+
+That is not an exception to the direction rule; it is the rule. An override points **down** at
+the citation it contradicts. It never mutates the row it names, and the evidence underneath
+stays exactly as extracted. A learned weight may reorder what a query returns and may never
+overwrite a value, because it has no citation to point down at.
 
 ### What anchoring L4 would look like
 

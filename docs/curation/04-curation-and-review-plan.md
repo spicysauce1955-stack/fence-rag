@@ -1,5 +1,16 @@
 # 4 — Curation and review plan
 
+> **HISTORICAL — the stage plan was not followed and the CLI it specifies does not exist.**
+> `[measured]` none of the 13 `cli curate` subcommands exists; there is no `fence_evidence/curation/`
+> package; five of six frozen fixtures were never created. One deliverable shipped
+> (`data-digests.json`), and C5's *method* shipped under other names (`table_review.py`,
+> `promote_tables.py`). Its claim that `PROMOTABLE` contains `cross_family_verified` "today" has
+> been false since 2026-08-25. **Worth keeping:** the review-queue mechanics (the priority
+> ordering, and the argument that "10% with zero rejections is consistent with a true error rate
+> near 25%"), and the rule that a bracket is one reviewed object rather than a condition retyped
+> onto N cells — which is G53 stated before G53 happened.
+
+
 Eleven stages: C0 through C8, with a cheap feasibility probe at C0.5 and a
 backfill at C4b. Each ends at a gate; a failed gate stops the stage that follows
 it rather than being noted and passed. No stage touches the corpus, the

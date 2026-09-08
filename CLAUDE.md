@@ -2,12 +2,27 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Read this first
+
+**[`docs/knowledge-loop.md`](docs/knowledge-loop.md) says what this project is for.** It was
+agreed with the project owner on 2026-09-08 and it governs *purpose and direction*: this is the
+foundation knowledge layer an AI agent reasons from — not a parts catalogue — it talks only to
+the Planning/BOM backend and never to an end user, and it has exactly two edges (a query
+outward, overrides inward). [`docs/README.md`](docs/README.md) indexes every document in the
+tree and says which are live and which are history.
+
+**The headline gap:** `[measured]` 2026-09-08 a snapshot publishes 9 `ParameterTable`s, 42
+`Part`s and 8 `PartType`s — and **0 `Procedure`s, 0 `Rule`s, 0 `FenceModel`s, 0 `Combination`s**.
+This base knows numbers, not method. `Procedure` is *built* (`steps.py`, `procedures.py`,
+`cli steps`) and publishes nothing because **91 step candidates across 2 documents have 0
+reviews**. `Rule` has no shape anywhere. Closing this outranks everything at the boundary.
+
 ## What this repo is
 
 Two things that must not be confused:
 
 1. A **research corpus + dataset** — vinyl-fence installation and structural-engineering source
-   documents (137 PDFs, 6 CAD PNGs, 1 DOCX; 2147 pages) plus hand-researched JSON describing their
+   documents (137 PDFs, 6 CAD PNGs, **2 retained CAD web pages (HTML)**, 1 DOCX; 2147 pages — 146 files) plus hand-researched JSON describing their
    contents. This is the read-only input.
 2. The **fence evidence system** (`fence_evidence/`) — a source-preserving evidence store and
    SQLite FTS5 retrieval layer over that corpus, which answers questions like *"what footing depth
@@ -66,7 +81,7 @@ order, and `audit/10-ratification-v1.0.md` §3.2 is the non-compliance this plat
 signature — **partly closed as of 2026-08-25**. Its live violation (obligation 6) and its
 three representational gaps (obligations 4, 15, 10) closed with build-plan A1-A5, all
 five of which landed 2026-08-25. Obligation 5 (the `PartType` spine) closed
-2026-08-31: 11 `Part`s and 5 `mfr/certainteed` `PartType` extensions publish for one
+2026-08-31: `Part`s and `PartType` extensions publish (**42 and 8** as of 2026-09-08; 11 and 5 when this was written) for one
 vertical slice (Chesterfield + the one assembly with real obligation-14 evidence),
 built with adversarial validation that caught and reversed a wrong data attribution
 before it shipped. Obligation 14 (`stock_length`) closed 2026-09-03: `SpecField.value:
@@ -105,7 +120,7 @@ no corpus-wide curation has run, and the projection has not been regenerated. Re
 `cross_family_verified` from `table_review.PROMOTABLE`, which let two agent readings promote a fact
 with no human review — was a **commitment** made in writing at ratification, and **landed
 2026-08-25** as item A1 of `docs/build-plan.md`. `PROMOTABLE` is now `("accepted", "corrected")`,
-the 324 machine-promoted facts are un-promoted, and all 1,225 readings are retained with their
+the 324 machine-promoted facts are un-promoted, and all readings are retained (**1,927** as of 2026-09-08; the 1,225 and 1,755 figures elsewhere in this file are both superseded) with their
 crops as a review queue. See `docs/state-and-gaps.md` G17.
 
 ## Commands
@@ -131,7 +146,7 @@ python3 -m fence_evidence.cli review --queue     # what is waiting for a person
 python3 -m fence_evidence.cli review --accept CROP --reviewer NAME   # record a review
 python3 -m fence_evidence.cli review --export    # the durable review ledger (G49)
 python3 -m fence_evidence.cli review --import PATH --apply   # replay it into this store
-python3 -m fence_evidence.cli fact-review --queue    # 266 OCR-flagged facts waiting
+python3 -m fence_evidence.cli fact-review --queue    # 180 OCR-flagged facts waiting
 python3 -m fence_evidence.cli steps --propose --document PATH [--page N]  # split bullets into step candidates
 python3 -m fence_evidence.cli steps --queue          # step candidates waiting for a person
 
@@ -253,7 +268,8 @@ data/                       derived/   page images + region crops (5.0 GB, git-i
                     |
                     +----->  canonical.py -> snapshot.py -> snapshot_store.py
                              a published Snapshot: hashed, verified, write-once
-                             (source_docs + warnings + gaps only, so far)
+                             (source_docs, warnings, gaps, parts, part_types, parameters —
+                             models/procedures/rules/combinations still 0)
 ```
 
 The split that matters: **canonical** tables (`documents`, `document_versions`, `pages`,
@@ -354,10 +370,12 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   store and replaying the ledger reproduces them exactly. See G49.
 - **The review loop has grown well past its first use, and the numbers have moved a
   lot since 2026-08-30.** `[measured]` 2026-08-31: **37 of 44 crops reviewed** (up
-  from 3), 1,218 of 1,755 readings carry a reviewer (1,194 `accepted`, 8 `corrected`),
-  110 promoted facts, **9 published `ParameterTable`s** (up from 4 — `max_span_mm` and
-  `footing_schedule` publish for the first time as of 2026-08-31). The other **13
-  readings are still `unreviewed` and 524 sit at `cross_family_verified`**, which is
+  from 3), 110 promoted facts, **9 published
+  `ParameterTable`s** (up from 4 — `max_span_mm` and `footing_schedule` publish for
+  the first time as of 2026-08-31). `[measured]` **2026-09-08: 1,927 readings, 1,202
+  reviewed, 185 still `unreviewed`, 524 at `cross_family_verified`.** This paragraph
+  previously said "the other 13 readings are still unreviewed", which read as
+  nearly-finished while the queue had in fact grown fourteenfold, which is
   level 1 and publishes nothing. Do not read "level 2 is populated" as "the corpus is
   curated" — 7 of 144 documents have any promoted table fact. Full account, updated
   faster than this file: `docs/state-and-gaps.md` G58/G59.
@@ -369,7 +387,7 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   the row as matching every `hvhz` value while the dimension stays in the domain. The token
   is anchored to the whole span — a hedged span asserts nothing. See G53.
 - **Tenant isolation is enforced at the ref minter, not by a filter.** `documents.owner_tenant`
-  is the whole axis — NULL is shared, which is all 144 corpus documents — and
+  is the whole axis — NULL is shared, which is all 146 corpus documents — and
   `SnapshotBuilder.source_ref` refuses to mint a citation into another tenant's document, so a
   cross-tenant value is unpublishable rather than filtered. Two fields leak WITHOUT a ref:
   `also_filed_as` and `superseded_by` publish facts about *other* documents. Both are scoped;

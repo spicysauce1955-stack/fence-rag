@@ -37,7 +37,7 @@ gate ordinal and the §1.4 tie-break resolves by higher level before `issue_date
   revision said it "cannot change until the review loop exists". The loop exists —
   `cli review --accept` and `POST /reviews` write both promotable statuses, and
   `promote-tables --apply` is no longer a no-op.)* What remains true, and is the half that
-  matters to you: **`reviewer` is NULL on all 1,225 readings** `[measured]`. The mechanism
+  matters to you: **`reviewer` was NULL on all 1,225 readings **when this was written**; `[measured]` 2026-09-08 the store holds 1,927 readings, **1,202 reviewed** (1,194 accepted, 8 corrected), 37 of 44 crops, and **9 `ParameterTable`s publish at curation level 2**. Level 2 is populated; this section's "never, today" is superseded** `[measured]`. The mechanism
   is built and nobody has used it, so nothing has been reviewed and nothing publishes at
   level 2.
 

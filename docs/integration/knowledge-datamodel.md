@@ -327,7 +327,16 @@ Provenance.cites[j].belongs_to          every cite-bearing value joins here
   ↑
 Part.contributing_sources               a convenience ROLL-UP, not the mechanism
 FenceModel.contributing_sources         — the set of docs behind one definition
+                                        MEMBERS ARE BARE 64-HEX CONTENT HASHES
 ```
+
+> **Correction, 2026-09-08 — `contributing_sources` carries content hashes, not `SourceDoc`s.**
+> The payload has always sent bare 64-hex content hashes. This document said `[SourceDoc]` in
+> three places and was wrong; Planning's reading was right (`conversation.md` T44 §4, agreed
+> T46 §7) — a roll-up carrying each document's class and dates inline would be a second
+> authority over facts the snapshot's `source_docs` already owns. The `length_rule` correction
+> from the same turn landed on 2026-09-06; this one was missed in that pass and is applied here.
+> A publisher following the old text would have emitted objects Planning does not accept.
 
 `contributing_sources` stays, because *"which documents is this definition built
 from"* is a question a reviewer asks directly and should not have to compute. But it
@@ -513,7 +522,7 @@ Part {
   spec                  [SpecField + Provenance]                        ← CHANGED
   authorship            Authorship
   cites                 [SourceRef]
-  contributing_sources  [SourceDoc]                                     ← NEW
+  contributing_sources  [str]  64-hex content hashes, NOT [SourceDoc]   ← NEW
 }
 ```
 
@@ -534,7 +543,7 @@ FenceModel {
   post                  PostSlot | null                null = NO OPINION
   assembly              [AssemblyStep]
   authorship · cites
-  contributing_sources  [SourceDoc]                                     ← NEW
+  contributing_sources  [str]  64-hex content hashes, NOT [SourceDoc]   ← NEW
 }
 
 PolicyContribution { param, value, knowledge_type, authority }
@@ -1366,7 +1375,7 @@ source policy's internals.
 |---|---|---|
 | `Part.type` | `PartType` | Filed as. Namespace decides who may extend. |
 | `Part.spec` | `[SpecField + Provenance]` | What it is. Dimensions derive from here. |
-| `Part.contributing_sources` | `[SourceDoc]` | **NEW.** Pinned, so a run can see a lapsed authority. |
+| `Part.contributing_sources` | `[str]` — bare 64-hex **content hashes**, not `[SourceDoc]` | **NEW.** Pinned, so a run can see a lapsed authority. Corrected 2026-09-08; see the note at §2.5. |
 | `SourceRef.belongs_to` | `SourceDoc.content_hash` | **NEW.** Joins a per-field citation to the provenance block. |
 | `FrameSlot.requirement` | `Part.id` **unpinned** | Generation resolves latest active; the run stamps what it resolved. |
 | `Member.base_ref` / `top_ref` | `FrameSlot.key` | Sibling reference: which frame members it runs between. |

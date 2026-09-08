@@ -1,3 +1,12 @@
+> **HISTORICAL — the setup instructions in this document were executed in 2026-08.**
+> It ordered the creation of the corpus bundle, the target architecture, the spec and the gold
+> set; all exist. Read it as the project's origin, not as a work queue. Two notes: the corpus
+> tree it describes (`images/`, `specifications/`) was never built that way — CAD images live
+> under `manuals/<mfr>/structural/` — and its "one lead agent, avoid multiple agents" guidance
+> is superseded by the multi-agent adversarial method recorded in `WORKFLOW-HANDOFF.md`.
+> **Live content: the twelve prohibitions**, restated authoritatively in
+> `docs/mvp-implementation-spec.md` §0. Purpose and direction: `docs/knowledge-loop.md`.
+
 
 ## 1. The complete source corpus
 
