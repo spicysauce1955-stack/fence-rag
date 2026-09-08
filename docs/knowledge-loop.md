@@ -289,7 +289,7 @@ That survives contact with the learning layer unchanged.
 | per-value provenance | agreed, unratified | Amendment 008 — accepted by both sides 2026-09-08, waiting on a batch with 009 and 010. |
 | **procedures** | **built, publishing nothing** | The pipeline shipped — `steps.py`, `procedures.py`, `step_candidates`, `step_reviews`, `cli steps`, ledger schema 2. It publishes `[]` for want of **reviews**, not for want of code. See below. |
 | **`Rule`** | **missing** | No shape anywhere — not in the contract, not in the datamodel. `CANDIDATES.md` C16 raises it and it is unfiled. |
-| query endpoint | missing | The retrieval machinery exists; the endpoint does not. |
+| query endpoint | **answer side built** | `query.py` + `cli query`. A function, not a route — Planning owes the request shape (T58 §3). Names its snapshot, returns its refs as an explicit list (T59 §2), surfaces conflicts without resolving them, and labels applicability without scoring it. |
 | query log | missing | Entirely ours. The only honest source of relevance. |
 | override intake | missing | No path for one to arrive, and no document-level target. |
 | quarantine | missing | No held-until-adjudicated concept, no bulk answer. |
@@ -370,6 +370,23 @@ extracted nothing, measured, and only then wrote the extraction rules. Same orde
 2. **The query endpoint.** The only real interface. Acceptance: it answers the 78 gold questions
    at or above the current retrieval baseline, with citations, and the relevance audit still
    measures what it measured before.
+   **The ANSWER side is built as of 2026-09-08** — `fence_evidence/query.py`,
+   `cli query`, `tests/test_query*.py` (60 tests). It is a **function, not a route**,
+   because T58 §3 says Planning will send a request shape and a route now would be
+   built to a guess. `Situation` is therefore ours and replaceable; the answer is not.
+   Three properties are load-bearing and each is mutation-tested:
+   `QueryAnswer.snapshot_id` names what it read (T58 §3); `QueryAnswer.refs` is
+   **exactly** the set of refs the rest of the answer cites — nothing more, so a
+   fabricated citation cannot hide in it, nothing less, so an honest one is not
+   refused (T59 §2); and conflicts are named, never resolved.
+   Applicability is two closed vocabularies and **no number**, because §11 still
+   says graded applicability is undesigned — pretending otherwise here is the
+   silent weighting §1 forbids. Acceptance was met **structurally rather than
+   statistically**: `query._evidence` calls `search_evidence` with its shipped
+   defaults, adds no filter and preserves its order, and
+   `tests/test_query_gold.py` compares the two result lists question by question
+   across all 78. The metrics cannot move because the ranking is not touched.
+   Still to do here: the HTTP route, once the request shape lands.
 3. **The query log.** Ours alone. Acceptance: every served query is recorded with what was
    returned, and a report can name the least-consulted published objects.
 4. **Override intake.** Four required fields, value or document target, blast radius reported

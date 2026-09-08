@@ -5302,6 +5302,46 @@ and exits 0 — a guard that always fails is a guard everybody learns to ignore.
 
 ---
 
+### G107 — the committed measurements are stale, and both got *better* without anyone noticing
+
+*2026-09-08.* Found by running `cli evaluate` and `cli audit` on a clean tree
+before touching anything, as the baseline for build item 2. Both rewrote their
+committed artifacts.
+
+`[measured]` `workspace/reports/evaluation-report.md` (committed) against a
+fresh run on the same store:
+
+| | committed | measured today |
+|---|---|---|
+| evidence support | 0.6450 | **0.6499** |
+| `conditional_table_lookup` passing | 3 of 7 | **4 of 7** |
+| failing ids | gq-113, gq-004, gq-006, **gq-007** | gq-113, gq-004, gq-006 |
+
+`[measured]` `workspace/tests/projection-audit.json` (committed) against a fresh
+`cli audit`: elements 81,794 → **82,282**; projected 54,209 → **54,677**; pages
+2,147 → **2,149**; headings 20,925 → **20,945**. The two extra pages are
+consistent with the two retained CAD web pages that `docs/README.md` already
+flags as arriving after the distribution manifest was cut, but that is a
+reading, not a measurement.
+
+**Why this is a gap and not a chore.** Nothing regressed — the store got
+slightly better and the report kept saying the old number. That is the failure
+mode: an acceptance artifact that only gets regenerated when somebody
+deliberately re-measures is not a guard, and a reader taking `0.6450` from the
+committed report is quoting a number this platform no longer produces. The same
+class as G106 — *the defect is that neither side reported it* — one layer in.
+`tests/test_slot_filter_wiring.py` already asserts that
+`evaluation-report.md` "must always be what this platform returns"; it passes,
+so whatever it checks is not this.
+
+**Deliberately not fixed in this change.** Refreshing 700 lines of measurement
+artifact inside a commit that builds the query surface would hide it. The fresh
+outputs were discarded and the committed ones restored, so the numbers above are
+reproducible by anyone running the two commands. **Open:** regenerate both
+deliberately, and decide whether a test should fail when they drift.
+
+---
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and

@@ -138,6 +138,8 @@ python3 -m fence_evidence.cli report          # regenerate workspace/reports/
 python3 -m fence_evidence.cli audit           # relevance audit of the retrieval projection
 python3 -m fence_evidence.cli migrate         # additive schema migration + backfills; safe to re-run
 python3 -m fence_evidence.cli dataset --verify   # data/ still matches its SHA-256 baseline
+python3 -m fence_evidence.cli query --snapshot ID --question "footing depth exposure C" \
+    --condition exposure_category=C --scope fence_model:mfr/certainteed-columbia-imperial-chesterfield
 python3 -m fence_evidence.cli snapshot --build   # publish source_docs + warnings + gaps
 python3 -m fence_evidence.cli snapshot --list
 python3 -m fence_evidence.cli refs --verify     # every published citation still resolves

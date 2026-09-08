@@ -29,6 +29,57 @@ def _warn_unfetched() -> int:
     return len(missing)
 
 
+def _parse_conditions(pairs: list[str]) -> dict:
+    """`DIM=VALUE` into what the published rows are actually conditioned on.
+
+    Booleans are coerced because `hvhz` publishes as `true`/`false` and the
+    string `"true"` matches no row -- an answer that then looks like an absence
+    of knowledge rather than a mistyped argument.
+
+    Lengths are accepted in **millimetres only**, and that is deliberate: a
+    Quantity is an integer count of thousandths (`canonical.py` refuses floats),
+    and accepting inches here would put a unit conversion in the CLI, which is
+    exactly where G63 put a number twelve times too small.
+    """
+    out: dict = {}
+    for pair in pairs or []:
+        if "=" not in pair:
+            raise ValueError(f"--condition wants DIM=VALUE; got {pair!r}")
+        dimension, _, raw = pair.partition("=")
+        dimension, raw = dimension.strip(), raw.strip()
+        if not dimension or not raw:
+            raise ValueError(f"--condition wants DIM=VALUE; got {pair!r}")
+        out[dimension] = _condition_value(raw)
+    return out
+
+
+def _condition_value(raw: str):
+    lowered = raw.lower()
+    if lowered in ("true", "false"):
+        return lowered == "true"
+    if lowered.endswith("mm") and lowered[:-2].strip().isdigit():
+        return {"amount_milli": int(lowered[:-2].strip()) * 1000, "unit": "mm",
+                "value_raw": [raw]}
+    if lowered.endswith(("in", '"')):
+        raise ValueError(
+            f"--condition {raw!r}: lengths are accepted in millimetres only "
+            f"(e.g. 1829mm). Converting here would put a unit conversion in "
+            f"the CLI, which is where G63's twelvefold error came from.")
+    try:
+        return int(raw)
+    except ValueError:
+        return raw
+
+
+def _parse_scope(raw: str | None) -> dict | None:
+    if raw is None:
+        return None
+    kind, sep, identifier = raw.partition(":")
+    if not sep or not kind.strip() or not identifier.strip():
+        raise ValueError(f"--scope wants KIND:ID; got {raw!r}")
+    return {"kind": kind.strip(), "id": identifier.strip()}
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="fence-evidence",
                                  description="Source-preserving evidence system "
@@ -183,6 +234,31 @@ def main(argv: list[str] | None = None) -> int:
                         "citation that no longer resolves")
     p.add_argument("--index", action="store_true",
                    help="rebuild the ref index and report its shape")
+
+    p = sub.add_parser("query",
+                       help="here is the situation: what applies, how strongly, "
+                            "and on what evidence?")
+    p.add_argument("--snapshot", metavar="ID",
+                   help="the snapshot to answer from. Required: an answer names "
+                        "the snapshot it was computed from (conversation.md "
+                        "T58 §3), and there is deliberately no 'latest' -- a "
+                        "snapshot carries no build time. `snapshot --list`.")
+    p.add_argument("--question", metavar="TEXT",
+                   help="free text; searched against the corpus for evidence")
+    p.add_argument("--condition", metavar="DIM=VALUE", action="append",
+                   default=[],
+                   help="a condition dimension the situation states, e.g. "
+                        "exposure_category=C, hvhz=true, fence_height=1829mm. "
+                        "An unrecognised dimension is refused, never dropped.")
+    p.add_argument("--scope", metavar="KIND:ID",
+                   help="the product the caller is asking about, e.g. "
+                        "fence_model:mfr/certainteed-columbia-imperial-"
+                        "chesterfield")
+    p.add_argument("--task", metavar="TASK",
+                   help="what the caller is doing; ranks sources")
+    p.add_argument("--role", metavar="ROLE", help="who is asking")
+    p.add_argument("-k", "--limit", type=int, default=10,
+                   help="evidence passages to return (default 10)")
 
     p = sub.add_parser("reach",
                        help="what our published objects are scoped TO, and how "
@@ -842,6 +918,38 @@ def main(argv: list[str] | None = None) -> int:
             print(f"dry run: {report['orphan_files']} orphaned file(s), "
                   f"{report['orphan_bytes'] / 1e9:.3f} GB. Re-run with --apply "
                   f"to delete them.", file=sys.stderr)
+    elif args.cmd == "query":
+        from .query import QueryRefused, Situation, answer_query
+        from .snapshot_store import SnapshotMissing
+        if not args.snapshot:
+            _print({"error": "an answer names the snapshot it was computed "
+                             "from: pass --snapshot ID. There is no 'latest' "
+                             "-- a snapshot carries no build time. "
+                             "`snapshot --list` shows what is held."})
+            return 2
+        try:
+            conditions = _parse_conditions(args.condition)
+            scope = _parse_scope(args.scope)
+        except ValueError as bad:
+            _print({"error": str(bad)})
+            return 2
+        situation = Situation(question=args.question, conditions=conditions,
+                              scope=scope, task=args.task, role=args.role,
+                              limit=args.limit)
+        from .store import connect
+        conn = connect(read_only=True) if args.question else None
+        try:
+            answer = answer_query(situation, snapshot_id=args.snapshot,
+                                  conn=conn)
+        except (QueryRefused, SnapshotMissing) as refused:
+            # A refusal is not an empty answer, and printing `{}` with exit 0
+            # is the vacuous-green class `snapshot` and `refs` already refuse.
+            _print({"error": str(refused)})
+            return 2
+        finally:
+            if conn is not None:
+                conn.close()
+        _print(answer.to_dict())
     elif args.cmd == "reach":
         from pathlib import Path as _Path
         from .reach import reachability_report

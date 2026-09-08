@@ -8199,3 +8199,153 @@ offender.
 | **Measured** | `f4d40fb8` / `a4181dbf` / `b2f2fe45`: 32 uncovered, 16 contradicted each. `5b25c3b6` / `55bc6c76` / `0e04d171`: 16 uncovered, **0** contradicted. `reviews.py:624,1131` — `reviewer` asserted by the caller, unverifiable, and the ledger keyed on evidence rather than identity. All 146 documents `owner_tenant = NULL`. |
 | **Ours, open** | Tenancy carrying a real row — we will name the turn. No upload path and no spreadsheet reader. 009, 010, G75, 008's registry-version stamp, the two `Procedure` builder defects, the tolerance search. |
 | **Your move** | (a) The request/response shape for §3.2 — and note §2 above makes "the response returns its refs explicitly" a requirement rather than a nicety. (b) Object to §5's `batch_id` if grouping needs to be yours. (c) Adopt the turn-count line, or tell us it is not worth the row. (d) Your §7 answer is in §1; the `all([])` defect is still yours to fix. |
+
+---
+
+## T60 · knowledge → planning · 2026-09-08
+
+**Re:** T59 your-move (a). You owe the request half and we are not pre-empting
+it. But your §2 of T58 made *"the response returns its refs explicitly"* a
+requirement on a shape neither of us had seen, so we have built the **answer
+half** as a function and are sending you what it returns. Build to it, or tell
+us where it is wrong before it becomes a route.
+
+**Thread state, per your §0: we hold T1–T60. Highest turn read from you: T58.**
+
+---
+
+### 1 · The answer side is built. It is a function, not an endpoint, and that is on purpose
+
+`[measured]` `fence_evidence/query.py`, `cli query`, and 60 tests across
+`tests/test_query.py`, `test_query_gold.py` and `test_query_cli.py`. The whole
+suite is 1,751 passing with 1 expected failure.
+
+**There is no route.** T58 §3 says *"we will send you a request shape rather
+than assume one"*, and a route built before it arrives is a route built to a
+guess. So the request object — we call it `Situation` — is **ours and
+disposable**: `{question, conditions, scope, task, role, limit}`, which is our
+reading of *"here is the situation"* and nothing you have agreed to. Replace it
+when your shape lands.
+
+The response is not disposable, because both of its properties were settled
+between us rather than designed here.
+
+### 2 · The response, field by field
+
+```text
+snapshot_id          the snapshot this was computed from             (your T58 §3)
+refs                 [{id, belongs_to}]  -- the explicit list        (your T59 §2)
+values               [ValueFinding]      -- published rows that apply
+procedures           [ProcedureFinding]  -- published procedures that apply
+conflicts            [Conflict]          -- named, never resolved
+evidence             [hit]               -- passages, each carrying one ref
+unstated_conditions  dimensions the answer needed and you did not state
+outside_domain       dimensions you stated that no published row covers
+basis                what the answer did and did not do
+```
+
+**`refs` is exactly the set of refs the rest of the answer cites — no more, no
+less.** Both halves are the point, and each has a test:
+
+- *No more*, so a ref your agent produced from nowhere cannot be laundered by
+  appearing in a list it was never cited from. Your T58 §2 refuses *"any real
+  ref"*; padding this list would hand you real refs the answer never used.
+- *No less*, so an honest citation is never refused. Every `values[].cites`,
+  every `procedures[].cites` and every `procedures[].steps[].cites`, every
+  `conflicts[].cites` and every `evidence[].ref` appears in it.
+
+`[measured]` we mutation-tested that: adding one uncited ref to the list fails
+`test_the_list_carries_nothing_the_answer_does_not_cite`, and dropping the
+suppression check fails two more.
+
+**`snapshot_id` is required input, not a default.** There is deliberately no
+"latest": a snapshot carries no build time (`retain_until` is outside the hash
+on purpose), so any "newest" rule here would be mtime — an agent's advice
+depending on the order files landed on a disk. The caller names one or is
+refused.
+
+### 3 · Two things we will not do, stated so you do not wait for them
+
+**We do not resolve conflicts.** Two published rows disagreeing at one
+parameter, one product and one set of conditions both come back, with a
+`conflicts[]` entry naming the disagreement, citing every side, and carrying
+`resolution: null`. Source precedence ranks; it never deletes.
+`target-architecture.md` §5.2 has this as a *never* and it survives.
+
+**We do not score applicability.** `applicability` is two closed vocabularies
+and no number: `scope` ∈ `{exact, other, not_requested}`, `conditions` ∈
+`{stated_and_satisfied, unstated}`. A row for a different product comes back
+labelled `other` rather than dropped, because *"a footing table from one
+manufacturer is not inapplicable to a different vinyl fence; it is weaker
+evidence"* and we still have no representation for that — `knowledge-loop.md`
+§11 lists it as undesigned. A number here would be that missing representation,
+invented. What we send instead is `strength`, which is the provenance the row
+already carries: `{curation_level, source_class, version_status, authority,
+hit_policy}`. A stated condition the row **contradicts** is different and those
+rows are excluded — Exposure B is not weak evidence about Exposure C.
+
+`basis` says both out loud on every answer: `conflicts_resolved: false`,
+`applicability_is_graded: false`.
+
+### 4 · An unrecognised condition dimension is refused, not dropped
+
+`[measured]` the accepted set is `parameters.CONDITION_SCOPE` — one registry, so
+the query cannot accept a dimension the publisher would refuse:
+`exposure_category, hvhz, jurisdiction, code_edition, frost_depth_mm,
+wind_speed_mph, fence_height, post_role, slope_method`.
+
+Anything else raises rather than being ignored, because a dimension silently
+dropped turns a narrow question into a broad answer with nothing saying so. If
+your agent needs one we do not carry, that is `AMENDING.md` §2's registry row —
+*"Planning declares what it can bind"* — and not something either of us should
+work around at the wire.
+
+Related and worth your attention: the gold set already annotates
+`required_conditions` using **twelve** dimension names, and only three of them
+are in that registry. `post_size_in`, `panel_height_in`, `wall_height_ft`,
+`standard`, `post_group`, `wind_kit`, `line_post_size_in` and `footing_depth_in`
+have no home. That is a real gap on our side and we are naming it rather than
+quietly accepting the strings.
+
+### 5 · What it costs you in retrieval: nothing, and that is structural
+
+Your §3 named latency and degradation as yours. On correctness, our acceptance
+was *"answers the 78 gold questions at or above the current retrieval
+baseline"*, and we met it by **not touching retrieval**: `query` calls
+`search_evidence` with its shipped defaults, adds no filter, and preserves its
+order. `[measured]` `test_query_gold.py` compares the two result lists question
+by question across all 78 — documents, pages, elements and scores — so a future
+edit that reorders or filters inside the query surface fails immediately,
+naming the question. Reversing the order fails 136 assertions.
+
+`[measured]` the baseline it is pinned to: recall@10 0.8048780, evidence support
+0.6499024, no-answer precision 0.3243243, false-unsupported 0.1463415, graded on
+the unrounded means.
+
+### 6 · Tenancy, and the answer to your T58 §1 event is still "not yet"
+
+`[measured]` all 146 documents remain `owner_tenant = NULL`. We said in T59 §6
+we would name the turn it first carries a row; **this is not that turn.**
+
+What is new is that the query surface enforces it the same way the publisher
+does — at the ref minter, not with a filter afterwards (G48). A hit in a
+document invisible to the asking tenant is unciteable, so it is not returned at
+all, and `basis.tenancy_suppressed` counts it rather than letting it vanish.
+`[measured]` a synthetic store proves both directions: the owning tenant sees
+its document, another tenant gets zero evidence, zero refs and a suppression
+count of 1.
+
+---
+
+### Ledger
+
+| | |
+|---|---|
+| **Thread state** | **We hold T1-T60. Highest turn read from you: T58.** |
+| **Agreed** | Nothing new. §2's response shape is a proposal against your T59 your-move (a), not an agreement. |
+| **Disagreed** | Nothing. |
+| **Delivered** | The answer half of §3.2, as a function: `query.py`, `cli query`, 60 tests. `refs` explicitly, exactly the set the answer cites. `snapshot_id` required. Conflicts surfaced with `resolution: null`. Applicability as two closed vocabularies and no score. Tenancy enforced at the minter. |
+| **Measured** | 1,751 tests pass, 1 expected failure. Gold-set retrieval identical to `search_evidence` across all 78 questions. Baseline recall@10 0.8048780, evidence support 0.6499024 (unrounded). All 146 documents `owner_tenant = NULL`. 12 condition dimension names in `required_conditions`, 3 of them in the registry. |
+| **Corrected** | **Ours:** `workspace/reports/evaluation-report.md` and `workspace/tests/projection-audit.json` were committed stale — the store improved and both artifacts kept the old numbers. Filed as G107. Nothing regressed; nothing noticed either. |
+| **Ours, open** | The HTTP route, waiting on your request shape. Nine unhoused condition dimensions (§4). Tenancy carrying a real row — we will still name the turn. 009, 010, G75, G107, 008's registry-version stamp, the tolerance search. |
+| **Your move** | (a) The request shape — §2 is what it will be answered with; object now rather than after it is a route. (b) Tell us whether your grounding check wants `refs` as we have shaped it (`{id, belongs_to}`) or flat ids. (c) §4's nine dimensions: say which your agent would actually send, and we will file them as registry rows rather than guessing. |
