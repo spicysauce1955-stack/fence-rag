@@ -113,6 +113,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--propose", action="store_true",
                    help="split list elements into step candidates (idempotent; "
                         "never overwrites a review)")
+    p.add_argument("--pair-numbered", action="store_true",
+                   help="pair 'N.' glyph elements with body paragraphs by "
+                        "bbox overlap into step candidates (the numbered-flow "
+                        "seam `--propose` does not read; idempotent)")
     p.add_argument("--queue", action="store_true", help="what is waiting for a person")
     p.add_argument("--document", help="document_id or source_path")
     p.add_argument("--page", type=int, help="one page only")
@@ -137,6 +141,9 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("table-review",
                        help="load reader transcriptions of scanned tables and compare them")
     p.add_argument("--load-dir", help="directory of agent-read-*.json files")
+    p.add_argument("--pattern", default="agent-read-*.json",
+                   help="file pattern for --load-dir (default agent-read-*.json; "
+                        "machine readers use their own pattern and reader_kind)")
     p.add_argument("--agreement", nargs=2, metavar=("READER_A", "READER_B"))
     p.add_argument("--mark-agreed", nargs=2, metavar=("READER_A", "READER_B"),
                    help="flag cells two readers read identically as agent_verified "
@@ -453,8 +460,8 @@ def main(argv: list[str] | None = None) -> int:
                                             dedupe_text=args.dedupe_text,
                                             page_cap=args.page_cap))["summary"])
     elif args.cmd == "steps":
-        if sum([args.propose, args.queue, bool(args.accept)]) != 1:
-            _print({"error": "choose exactly one of --propose, --queue or --accept"})
+        if sum([args.propose, args.pair_numbered, args.queue, bool(args.accept)]) != 1:
+            _print({"error": "choose exactly one of --propose, --pair-numbered, --queue or --accept"})
             return 2
         if args.accept and not (args.reviewer or "").strip():
             _print({"error": "--accept needs --reviewer: the name is the only thing "
@@ -493,6 +500,30 @@ def main(argv: list[str] | None = None) -> int:
                     return 1
                 _print({**out, "candidate_id": args.accept,
                         "text": row["text_raw"]})
+            elif args.pair_numbered:
+                if not args.document:
+                    _print({"error": "--pair-numbered needs --document"})
+                    return 2
+                row = conn.execute(
+                    "SELECT document_id FROM documents WHERE document_id=? OR source_path=?",
+                    (args.document, args.document)).fetchone()
+                if row is None:
+                    _print({"error": f"no such document: {args.document!r}"})
+                    return 1
+                from .steps import pair_numbered_flow
+                total = pair_numbered_flow(conn, document_id=row[0], page_no=args.page)
+                paired = conn.execute(
+                    """SELECT COUNT(*) FROM step_candidates
+                        WHERE document_id=? AND proposal_basis
+                          LIKE 'numbered_flow_pair:%'""",
+                    (row[0],)).fetchone()[0]
+                _print({"document_id": row[0], "page": args.page,
+                        "candidates": total,
+                        "numbered_flow_paired": paired,
+                        "reviewed": conn.execute(
+                            "SELECT COUNT(*) FROM step_candidates "
+                            "WHERE document_id=? AND reviewer IS NOT NULL",
+                            (row[0],)).fetchone()[0]})
             elif args.propose:
                 if not args.document:
                     _print({"error": "--propose needs --document"})
@@ -546,7 +577,8 @@ def main(argv: list[str] | None = None) -> int:
         conn = _c()
         out = {}
         if args.load_dir:
-            out["loaded"] = tr.load_directory(conn, _P(args.load_dir))
+            out["loaded"] = tr.load_directory(conn, _P(args.load_dir),
+                                              pattern=args.pattern)
         if args.mark_agreed:
             out["marked_agent_verified"] = tr.mark_agent_verified(conn, tuple(args.mark_agreed))
         if args.agreement:

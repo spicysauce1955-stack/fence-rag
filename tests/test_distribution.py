@@ -150,9 +150,9 @@ class TestAgainstTheRealCorpusManifest(unittest.TestCase):
         if not rows:
             self.skipTest("corpus manifest not built")
         m = build_manifest(rows, "https://pub.example.com/", "2026-01-01T00:00:00Z")
-        self.assertEqual(m["subsets"]["all"]["files"], 144)
-        self.assertEqual(m["subsets"]["all"]["unique"], 128)
-        self.assertEqual(m["subsets"]["structural"]["files"], 32)
+        self.assertEqual(m["subsets"]["all"]["files"], 146)
+        self.assertEqual(m["subsets"]["all"]["unique"], 130)
+        self.assertEqual(m["subsets"]["structural"]["files"], 34)
         self.assertEqual(m["subsets"]["china"]["files"], 4)
 
 

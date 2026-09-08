@@ -211,8 +211,24 @@ def build_parts(components: list[dict], registry, *, source_ref=None,
         part["contributing_sources"] = sorted({c["belongs_to"] for c in cites})
 
     parts = sorted(parts_by_id.values(), key=lambda p: p["id"])
+    # Scoped value recipes fire on the composition's own component ids, NOT
+    # on the identity namespace: Augusta and Pembroke share the mfr/weatherables
+    # namespace, and a namespace test would run each recipe once per slice,
+    # duplicating every recipe Part. The dataset's component ids are the slice's
+    # own authored selection and stay stable across slices.
+    component_ids = {c["component_id"] for c in components}
     from .emblem_claims import NAMESPACE, build_emblem_parts
-    if identity_namespace == NAMESPACE:
+    if component_ids and set(component_ids) <= {
+            "freedom-5x5-line-post", "freedom-5x5-corner-post", "freedom-5x5-end-post",
+            "freedom-5x5-post-top", "freedom-emblem-rail", "freedom-emblem-board"}:
         from .emblem_drawing_claims import build_parts as build_drawing_parts
         parts = sorted(parts + build_emblem_parts(conn, mint) + build_drawing_parts(conn, mint), key=lambda p: p['id'])
+    from .part_types import AUGUSTA_COMPONENT_IDS
+    if component_ids and component_ids <= AUGUSTA_COMPONENT_IDS:
+        from .augusta_drawing_claims import build_parts as build_augusta_parts
+        parts = sorted(parts + build_augusta_parts(conn, mint), key=lambda p: p['id'])
+    from .part_types import PEMBROKE_COMPONENT_IDS
+    if component_ids and component_ids <= PEMBROKE_COMPONENT_IDS:
+        from .pembroke_cadpage_claims import build_parts as build_pembroke_parts
+        parts = sorted(parts + build_pembroke_parts(conn, mint), key=lambda p: p['id'])
     return parts, gaps.list()

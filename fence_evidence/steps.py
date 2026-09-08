@@ -47,6 +47,7 @@ Corpus-wide after these rules: 6,105 `list` elements produce 7,931 segments —
 """
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
 
@@ -389,6 +390,156 @@ def _split_rider(text: str, pos: int, leader: str, depth: int, kind: str,
         Segment(text=tail, start=pos + head_len, end=pos + len(text), leader="",
                 depth=depth, kind="note", branch=branch, repair=None),
     ]
+
+
+# ---------------------------------------------------- numbered-flow pairing
+# The second extraction seam: manuals whose layout types each step NUMBER as
+# its own tiny element and each step BODY as a separate paragraph. The
+# Weatherables master installation guide is built this way — p7's Solid
+# Privacy flow is eleven `1.` `2.` `3.`… glyph elements beside eleven body
+# paragraphs — and `propose()` reads only `list` elements, so those pages
+# produced one candidate from twenty-two substantial paragraphs.
+#
+# The pairing is mechanical: a glyph pairs with the body whose vertical band
+# its own band overlaps, in the same page and column (x-overlap keeps a
+# two-column figure's callouts from stealing a body). `[measured]`
+# 2026-09-07 over the whole corpus: 466 glyph-paired steps across 111 pages
+# in 22 documents sit in this channel and nowhere else.
+# `[measured]` on the master install's p7: elements 0010 and 0011 each hold
+# THREE numbered steps' worth of text (the layout typed one paragraph element
+# for glyph 1's body and let steps 2-3's sentences continue inside it). A
+# glyph/body candidate therefore anchors a paragraph that may continue past
+# the glyph's own step; `proposal_basis` records which glyph fired, and the
+# reviewer's `proposed_kind` judgement stays theirs. The candidate is still
+# one span of one element, so nothing is double-proposed and the queue stays
+# review-granular.
+GLYPH_RE = re.compile(r"^\s*(\d{1,2})[.)]\s*$")
+# A glyph band is a small strip; a body can wrap for many lines. A glyph
+# points at the body whose top it overlaps — allowing the glyph to sit a few
+# points ABOVE the body's first line (common baseline slack) or inside it.
+GLYPH_BODY_TOP_SLACK = 45.0
+GLYPH_BODY_TOP_LIFT = 8.0
+# A glyph element is a number, not prose; a body is prose, not a number.
+BODY_MIN_CHARS = 25
+
+
+def _y_band(bbox_json):
+    """`(y0, y1)` from a stored bbox list, or None when unparseable."""
+    try:
+        v = json.loads(bbox_json)
+        return float(v[1]), float(v[3])
+    except (TypeError, ValueError, IndexError):
+        return None
+
+
+def _x_band(bbox_json):
+    try:
+        v = json.loads(bbox_json)
+        return float(v[0]), float(v[2])
+    except (TypeError, ValueError, IndexError):
+        return None
+
+
+def pair_numbered_flow(conn, *, document_id: str, page_no: int | None = None) -> int:
+    """Propose step candidates from `N.`-glyph/body element pairs.
+
+    The same queue, the same review gate and the same non-destructive keying
+    as `propose()` — a candidate is a span of an element, and reviewed rows
+    are never touched. What differs is the seam: instead of splitting one
+    `list` element, this joins two elements the layout pulled apart, so the
+    candidate anchors on the BODY element's span (the instruction text a
+    reviewer must read), and `proposal_basis` records the glyph pairing so
+    the proposal's provenance is measurable and the reviewer sees both
+    elements.
+
+    Returns the number of candidates now on record for that scope.
+    """
+    from .store import now
+    ensure_step_candidates(conn)
+    where = "e.document_id = ? AND e.text_source = 'pdf_text_layer' AND e.bbox IS NOT NULL"
+    params: list = [document_id]
+    if page_no is not None:
+        where += " AND e.page_no = ?"
+        params.append(page_no)
+    rows = conn.execute(
+        f"""SELECT e.element_id, e.version_id, e.page_no, e.ordinal, e.text,
+                   COALESCE(NULLIF(e.text,''), e.ocr_text) AS body,
+                   e.text_source, e.bbox
+              FROM elements e
+             WHERE {where}
+             ORDER BY e.page_no, e.ordinal""", params).fetchall()
+    by_page: dict[int, list] = {}
+    for row in rows:
+        by_page.setdefault(row["page_no"], []).append(row)
+    stamp = now()
+    proposed = 0
+    for elements in by_page.values():
+        glyphs = [r for r in elements
+                  if GLYPH_RE.fullmatch((r["text"] or "").strip() or "")]
+        if not glyphs:
+            continue
+        bodies = [r for r in elements
+                  if len((r["body"] or "").strip()) >= BODY_MIN_CHARS
+                  and not GLYPH_RE.fullmatch((r["text"] or "").strip() or "")]
+        for glyph in glyphs:
+            g_band, g_x = _y_band(glyph["bbox"]), _x_band(glyph["bbox"])
+            if g_band is None or g_x is None:
+                continue
+            best = None
+            best_key = None
+            for body in bodies:
+                b_band, b_x = _y_band(body["bbox"]), _x_band(body["bbox"])
+                if b_band is None or b_x is None:
+                    continue
+                # Column check: the glyph must overlap the body horizontally,
+                # or sit just left of it (number-in-margin layouts).
+                if g_x[1] < b_x[0] - 40 or g_x[0] > b_x[1] + 40:
+                    continue
+                # Vertical pairing: the glyph band overlaps the body's top
+                # region (its own height plus the slack a wrapped first line
+                # can sit above it).
+                if (b_band[0] <= g_band[1] + GLYPH_BODY_TOP_SLACK
+                        and b_band[1] >= g_band[0] - GLYPH_BODY_TOP_LIFT):
+                    # Closest-first-line wins: the true body starts on the
+                    # glyph's own line, so the smallest top-to-top distance
+                    # beats a section heading further down the page that
+                    # merely falls inside the slack window. `[measured]` on
+                    # the master install's p7: glyph `8.` at y[338,351] had
+                    # both its real body (`If there is a small gap…`,
+                    # top 338) and the NEXT section's heading (top 386)
+                    # inside the window; top-most wins chose the heading.
+                    key = (abs(b_band[0] - g_band[0]), b_band[0])
+                    if best is None or key < best_key:
+                        best, best_key = body, key
+            if best is None:
+                continue
+            text = best["body"]
+            cursor = conn.execute(
+                """SELECT 1 FROM step_candidates WHERE element_id=?
+                                              AND char_start=0 AND char_end=?""",
+                (best["element_id"], len(text))).fetchone()
+            if cursor is not None:
+                continue    # already proposed (split_block or an earlier run)
+            conn.execute(
+                """INSERT OR IGNORE INTO step_candidates
+                   (document_id, version_id, page_no, element_id, ordinal, seq,
+                    char_start, char_end, text_raw, text_repair,
+                    repair_confidence, text_source, segment_kind,
+                    leader, depth, branch, proposal_basis, created_at)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (document_id, best["version_id"], best["page_no"],
+                 best["element_id"], best["ordinal"], 0,
+                 0, len(text), text, None, None, best["text_source"],
+                 "step", "", 0, None,
+                 "numbered_flow_pair: glyph element " + glyph["element_id"]
+                 + " (text " + repr(glyph["text"].strip()) + ")", stamp))
+            proposed += 1
+    conn.commit()
+    scope = "AND page_no = ?" if page_no is not None else ""
+    args = [document_id] + ([page_no] if page_no is not None else [])
+    return conn.execute(
+        f"SELECT COUNT(*) FROM step_candidates WHERE document_id = ? {scope}",
+        args).fetchone()[0]
 
 
 # --------------------------------------------------------------- proposing

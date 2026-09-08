@@ -76,6 +76,9 @@ COMPONENT_TYPE_SPINE = {
     "hinge": ("mfr", "gate_hardware"),
     "latch": ("mfr", "gate_hardware"),
     "drop_rod": ("mfr", "gate_hardware"),
+    "bar": ("shared", "bar"),
+    "fastener": ("shared", "fastener"),
+    "bracket": ("shared", "bracket"),
 }
 
 
@@ -109,12 +112,18 @@ def load_slice_components(path=None, *, assembly_ids=ASSEMBLY_IDS,
             for sub in assembly.get("sub_assemblies", []):
                 if component_ids is not None and sub["component_id"] not in component_ids:
                     continue
-                out.append({
+                entry = {
                     "assembly_id": assembly["assembly_id"],
                     "component_id": sub["component_id"],
                     "component_type": sub["component_type"],
                     "component_name": sub.get("component_name"),
-                })
+                }
+                # Authored per-panel counts pass through with their recorded
+                # basis; a missing count stays absent, never zero.
+                if "qty_per_panel" in sub:
+                    entry["qty_per_panel"] = sub["qty_per_panel"]
+                    entry["qty_per_panel_basis"] = sub.get("qty_per_panel_basis")
+                out.append(entry)
     out.sort(key=lambda c: (c["assembly_id"], c["component_id"]))
     return out
 
@@ -125,6 +134,44 @@ def load_emblem_components() -> list[dict]:
         REPO_ROOT / "data" / "freedom-outdoor-living.json",
         assembly_ids=("freedom-emblem-privacy-panel",),
         component_ids=EMBLEM_COMPONENT_IDS)
+
+
+# Membership selection only: the Augusta privacy panel's authored components.
+# Counts and identities come from the dataset's own authored structure with its
+# recorded bases (the manufacturer's 8ft CAD page material list); no dimensional
+# value is copied from the research recipes.
+AUGUSTA_COMPONENT_IDS = frozenset({
+    "wea-augusta-post-5x5", "wea-augusta-rail-slotted",
+    "wea-augusta-picket-tg", "wea-augusta-u-channel",
+    "wea-augusta-metal-insert",
+})
+
+
+def load_augusta_components() -> list[dict]:
+    """Authored Augusta privacy panel identities and per-panel counts."""
+    return load_slice_components(
+        REPO_ROOT / "data" / "weatherables.json",
+        assembly_ids=("wea-augusta-privacy",),
+        component_ids=AUGUSTA_COMPONENT_IDS)
+
+
+# Membership selection only: the Pembroke privacy panel's authored components.
+# Counts and identities come from the dataset's own authored structure with its
+# recorded bases (the manufacturer's Pembroke 6ft CAD page 6x6 material list);
+# no dimensional value is copied from the research recipes.
+PEMBROKE_COMPONENT_IDS = frozenset({
+    "wea-pembroke-post-4x4", "wea-pembroke-rail-slotted",
+    "wea-pembroke-picket-tg", "wea-pembroke-u-channel",
+    "wea-pembroke-metal-insert",
+})
+
+
+def load_pembroke_components() -> list[dict]:
+    """Authored Pembroke privacy panel identities and per-panel counts."""
+    return load_slice_components(
+        REPO_ROOT / "data" / "weatherables.json",
+        assembly_ids=("wea-pembroke-privacy",),
+        component_ids=PEMBROKE_COMPONENT_IDS)
 
 
 class PartTypeRegistry:

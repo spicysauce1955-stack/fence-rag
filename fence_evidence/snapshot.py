@@ -1874,7 +1874,8 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
         # PartType/Part (obligation 5, and the identity half of obligation 14):
         # same ref minter, same closure-is-structural reasoning as above.
         from .part_types import (PartTypeRegistry, build_part_types,
-                                 load_emblem_components, load_slice_components)
+                                 load_augusta_components, load_emblem_components,
+                                 load_pembroke_components, load_slice_components)
         from .parts import build_parts
         components = load_slice_components()      # DatasetChanged -> build fails closed
         part_type_registry = PartTypeRegistry()
@@ -1890,11 +1891,40 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
             emblem_components, emblem_registry, conn=conn,
             identity_namespace=emblem_registry.namespace,
             source_ref=lambda eid: asdict(b.source_ref(eid)))
-        part_types = sorted(part_types + emblem_types,
+        # Weatherables Augusta: authored composition components carry identity
+        # and per-panel counts (C3 authored membership, bases recorded in the
+        # dataset); the shared mfr/weatherables namespace also fires the
+        # scoped drawing/specsheet recipe once for value-backed Parts.
+        augusta_components = load_augusta_components()
+        augusta_registry = PartTypeRegistry("Weatherables")
+        augusta_types, augusta_type_gaps = build_part_types(
+            augusta_components, augusta_registry)
+        augusta_parts, augusta_part_gaps = build_parts(
+            augusta_components, augusta_registry, conn=conn,
+            identity_namespace=augusta_registry.namespace,
+            source_ref=lambda eid: asdict(b.source_ref(eid)))
+        # Weatherables Pembroke: the same authored-composition treatment, on
+        # the same shared mfr/weatherables namespace; the scoped HTML/specsheet
+        # recipe fires for its value-backed Parts.
+        pembroke_components = load_pembroke_components()
+        pembroke_registry = PartTypeRegistry("Weatherables")
+        pembroke_types, pembroke_type_gaps = build_part_types(
+            pembroke_components, pembroke_registry)
+        pembroke_parts, pembroke_part_gaps = build_parts(
+            pembroke_components, pembroke_registry, conn=conn,
+            identity_namespace=pembroke_registry.namespace,
+            source_ref=lambda eid: asdict(b.source_ref(eid)))
+        # The Augusta and Pembroke slices share the manufacturer namespace and
+        # mint the same extension rows (picket, post_stiffener_aluminum) twice;
+        # dedup by (namespace, key), matching the verify() uniqueness rule.
+        _weatherables_types = {((pt["namespace"], pt["key"])): pt
+                               for pt in augusta_types + pembroke_types}
+        part_types = sorted(part_types + emblem_types
+                            + list(_weatherables_types.values()),
                             key=lambda pt: (pt["namespace"], pt["key"]))
-        parts = sorted(parts + emblem_parts, key=lambda part: part["id"])
-        part_type_gaps += emblem_type_gaps
-        part_gaps += emblem_part_gaps
+        parts = sorted(parts + emblem_parts + augusta_parts + pembroke_parts, key=lambda part: part["id"])
+        part_type_gaps += emblem_type_gaps + augusta_type_gaps + pembroke_type_gaps
+        part_gaps += emblem_part_gaps + augusta_part_gaps + pembroke_part_gaps
         for g in (*part_type_gaps, *part_gaps):
             b.gap(kind=g["kind"], subject=g["subject"],
                   code=g["because"]["code"], params=g["because"].get("params") or {},

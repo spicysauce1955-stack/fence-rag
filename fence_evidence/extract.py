@@ -576,6 +576,156 @@ def extract_docx(path: Path, *, doc_id: str | None = None) -> ExtractedDocument:
     return doc
 
 
+# ------------------------------------------------------------------------- html
+def extract_html(path: Path, *, doc_id: str | None = None) -> ExtractedDocument:
+    """HTML page via stdlib HTMLParser: visible text and tables only.
+
+    A manufacturer web page has no page geometry, so elements carry no bbox
+    (the DOCX precedent). Only rendered-content semantics are extracted:
+    heading/paragraph text and <table> cells as real Table elements, with
+    scripts/styles/hidden chrome discarded. Text origin is `html_text` so
+    evidence readers can distinguish web-page text from PDF text layers.
+    """
+    from html.parser import HTMLParser
+
+    class _PageText(HTMLParser):
+        # Block-level tags that end the current text run.
+        _BLOCK = {"p", "div", "li", "tr", "br", "h1", "h2", "h3", "h4",
+                  "h5", "h6", "table", "thead", "tbody", "section",
+                  "article", "header", "footer", "nav", "figcaption"}
+        _HEAD = {"h1": 1, "h2": 2, "h3": 3, "h4": 4, "h5": 4, "h6": 4}
+        _SKIP = {"script", "style", "noscript", "template", "svg"}
+
+        def __init__(self):
+            super().__init__(convert_charrefs=True)
+            self.blocks: list[tuple[str, str, int]] = []  # (kind, text, level)
+            self._buf: list[str] = []
+            self._kind = "paragraph"
+            self._level = 0
+            self._skip = 0
+            self._cells: list[Cell] = []
+            self.tables: list[Table] = []
+            self._row = self._col = 0
+            self._in_table = 0
+            self._cell_buf: list[str] | None = None
+
+        def _flush(self):
+            text = " ".join("".join(self._buf).split())
+            if text:
+                self.blocks.append((self._kind, text, self._level))
+            self._buf = []
+            self._kind = "paragraph"
+            self._level = 0
+
+        def _flush_cell(self):
+            if self._cell_buf is not None:
+                text = " ".join("".join(self._cell_buf).split())
+                if text:
+                    self._cells.append(Cell(row=self._row, col=self._col, text=text))
+                self._col += 1
+                self._cell_buf = None
+
+        def handle_starttag(self, tag, attrs):
+            if tag in self._SKIP:
+                self._skip += 1
+                return
+            if tag in ("td", "th"):
+                self._flush_cell()
+                self._cell_buf = []
+                return
+            if tag == "tr":
+                if self._in_table:
+                    self._flush_cell()
+                    self._row += 1
+                    self._col = 0
+                return
+            if tag == "table":
+                self._in_table += 1
+                self._row = self._col = 0
+                self._cells = []
+                return
+            if tag in self._BLOCK:
+                if self._in_table and self._cell_buf is not None:
+                    self._cell_buf.append(" ")
+                else:
+                    self._flush()
+            if tag in self._HEAD:
+                self._kind = "heading"
+                self._level = self._HEAD[tag]
+
+        def handle_endtag(self, tag):
+            if tag in self._SKIP:
+                self._skip -= 1
+                return
+            if tag in ("td", "th"):
+                self._flush_cell()
+                return
+            if tag == "tr":
+                return
+            if tag == "table" and self._in_table:
+                self._in_table -= 1
+                if self._cells:
+                    n_rows = max(c.row for c in self._cells) + 1
+                    n_cols = max(c.col for c in self._cells) + 1
+                    self.tables.append(Table(n_rows=n_rows, n_cols=n_cols,
+                                             cells=list(self._cells),
+                                             detector="html-<table>"))
+                self._cells = []
+                self._row = self._col = 0
+                return
+            if tag in self._BLOCK and not self._in_table:
+                self._flush()
+
+        def handle_data(self, data):
+            if self._skip:
+                return
+            if self._in_table and self._cell_buf is not None:
+                self._cell_buf.append(data)
+            else:
+                self._buf.append(data)
+
+    path = Path(path)
+    rp = rel(path)
+    doc_id = doc_id or doc_id_for(rp)
+    doc = ExtractedDocument(source_path=rp, sha256=sha256_file(path),
+                            file_type="html", tool_versions=dict(tool_versions()))
+    page = Page(page_no=1, width=0.0, height=0.0, extraction_method="html-parser")
+    parser = _PageText()
+    parser.feed(path.read_text(encoding="utf-8", errors="replace"))
+    parser.close()
+    parser._flush()
+    ordinal = 0
+    for kind, text, level in parser.blocks:
+        if kind == "heading":
+            page.elements.append(Element(element_type="heading", text=text,
+                                         text_source="html_text",
+                                         heading_level=level, ordinal=ordinal))
+        else:
+            page.elements.append(Element(element_type="paragraph", text=text,
+                                         text_source="html_text",
+                                         ordinal=ordinal))
+        ordinal += 1
+    for table in parser.tables:
+        text = "\n".join(
+            " | ".join(c.text for c in sorted([c for c in table.cells if c.row == r],
+                                             key=lambda c: c.col))
+            for r in range(table.n_rows))
+        if text.strip():
+            page.elements.append(Element(element_type="table", text=text,
+                                         text_source="html_text",
+                                         ordinal=ordinal, table=table))
+            ordinal += 1
+    page.text_char_count = sum(len(e.text) for e in page.elements)
+    page.has_text_layer = True
+    doc.pages.append(page)
+    doc.issue("info", "no_page_image_for_html",
+              "an HTML page has no page geometry; visible text and table cells "
+              "are preserved without bounding boxes", 1)
+    if not page.elements:
+        doc.issue("error", "no_elements", "HTML produced no elements")
+    return doc
+
+
 # ------------------------------------------------------------------------- image
 def extract_image(path: Path, *, doc_id: str | None = None) -> ExtractedDocument:
     """Raster drawing (CAD PNG): OCR labels with bounding boxes."""
@@ -640,6 +790,7 @@ def extract_image(path: Path, *, doc_id: str | None = None) -> ExtractedDocument
 EXTRACTORS = {
     "pdf": extract_pdf,
     "docx": extract_docx,
+    "html": extract_html, "htm": extract_html,
     "png": extract_image, "jpg": extract_image, "jpeg": extract_image,
     "tif": extract_image, "tiff": extract_image,
 }
