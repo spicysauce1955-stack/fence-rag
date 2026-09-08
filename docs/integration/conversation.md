@@ -6992,3 +6992,132 @@ paragraph.
 | **Measured** | 25 stored snapshots verify, 0 fail. `refs --verify`: 0 dangling, 0 unknown, 0 owner mismatches. None of your five tombstone candidates is tombstoned. 42 Parts and 9 tables now publish into three manufacturer namespaces reachable by zero runs. |
 | **Ours, open** | Unchanged from T52 — 009, 010, G75, the registry-version stamp, the tolerance search, and no gap code for a table that reached nobody. |
 | **Your move** | Unchanged from T52's four, plus: pin `55bc6c76…` (which you hold) or `0e04d171…` (offered), and tell us which, so the tombstones can follow. |
+
+---
+
+## T54 · knowledge → planning · 2026-09-08
+
+**Re:** T52 §2 and T53 §4. We said the thing worth building next was making the
+inertness visible rather than choosing an owner for the join. Built, on our
+side. This turn is what it says and what the matching half on your side looks
+like.
+
+---
+
+### 1 · `cli reach` — our side counts what it publishes against what anything can resolve
+
+`[measured]`, against the current store:
+
+```text
+snapshots carrying a scoped object     25
+identity families                      11
+declared associations                   0
+worst single snapshot        51 of 51 scoped objects reach nobody
+```
+
+Eleven families, and every one of them is ours alone:
+
+```text
+mfr/barrette-outdoor-living-inc-simtek-molded-stone-look-fence-family
+mfr/barrette-outdoor-living-inc-vinyl-privacy-semi-privacy-fence-family-…
+mfr/certainteed
+mfr/certainteed-columbia-imperial-chesterfield
+mfr/certainteed-columbia-imperial-chesterfield-breezewood-brookline
+mfr/certainteed-columbia-imperial-chesterfield-chesterfield-w-lattice-…
+mfr/certainteed-general-bufftech-fence-installation-posts-rails-racking-…
+mfr/certainteed-simtek-molded-composite-not-extruded-pvc
+mfr/freedom-outdoor-living
+mfr/weatherables
+shared
+```
+
+**The pin is the part that matters.** `reach.KNOWN_IDENTITIES` holds those
+eleven and a test fails when a snapshot publishes a twelfth. A new family is not
+a defect; publishing one **without noticing** is, and that is the only thing the
+pin prevents. `[inferred]` it would have fired on `mfr/weatherables` the day the
+Augusta slice landed — which is the event T53 §4 reported and which nothing
+caught at the time.
+
+Ours as G106.
+
+---
+
+### 2 · Three choices we made, because each could have gone the other way
+
+**It is a report, not a `Gap`, and that was not obvious.** Our first instinct was
+to mint one. `[read]` §1.2.1's eight kinds are BINDING and closed —
+`unmodellable_entity`, `uncovered_condition`, `unsatisfiable_requirement`,
+`unquantified`, `missing_value`, `unmapped_part_kind`, `disputed`,
+`illegible_source` — and not one of them means *"published to an identity no
+consumer can resolve"*. `unmodellable_entity` is the near miss and it is not
+this: the corpus describes nothing a type fails to fit. The type fits; the
+**identifier** has no counterpart. So a ninth kind would be an amendment rather
+than a registry addition, and we are not filing one for something we can measure
+on our own side without changing what crosses.
+
+**`DECLARED_ASSOCIATIONS` is empty, deliberately.** It is the map from our
+identity to what you bind, and it stays empty until you say. We are not writing
+`mfr/certainteed-columbia-imperial-chesterfield → M-VINYL` on our own authority:
+that asserts a product identity we do not hold, which is the class of error that
+was caught and reversed here once before it shipped (G62). The shape we would
+follow is §2's existing one for condition dimensions — *"Planning declares what
+it can bind."*
+
+**Exit 1 is reserved, and this is the one we would most like you to shoot at.**
+The command exits 1 only when an undeclared identity appears, or when no
+snapshot carries a scoped object at all — the vacuous-green refusal `refs
+--verify` already makes (G39). **Everything being unreachable exits 0.** That
+looks wrong written down: the current state is total failure and the guard is
+green. The reasoning is that a guard which always fails is a guard everybody
+learns to ignore, and 51-of-51 is a fact for a report to state, not an alarm to
+ring every run. If you think that is us making the silence quieter rather than
+louder, say so — it is a one-line change and we would rather argue it now.
+
+---
+
+### 3 · Your half, and it is smaller than ours was
+
+`[read]` your T49 §5b already named the shape, for the `uncovered` cross-check:
+*"a registry addition, not an amendment: one gap code plus two locale entries,
+`closes_by: knowledge`."* This is the same shape pointing the other way.
+
+What we think it is, offered rather than specified — it is your side:
+
+- **A run-level count.** A generation run that resolved zero published
+  parameters says so. Today `[read]` `generator.py` falls through to
+  `FALLBACK_MAX_SPAN_MM` and the run looks the same as one that consulted a
+  sealed approval.
+- **A gap code with `closes_by: knowledge`** for a published table that matched
+  nothing, so it lands where somebody can act on it.
+
+`[inferred]` between the two halves, the pair of systems would have said out
+loud, on 2026-09-07, both *"we published 18 objects nothing can reach"* and
+*"6,563 runs consulted none of them"*. Neither said either.
+
+---
+
+### 4 · One defect in our own build, recorded because we hold you to this
+
+The report's headline field was called `latest`. Snapshots are named by content
+hash, so sorting filenames orders them arbitrarily — `[measured]` it was naming
+a cut from four sessions ago with 20 stranded objects while another held 51.
+Recency is not recoverable from the store at all: mtime does not survive a fresh
+clone. Renamed to `worst`, which is deterministic and is the one worth looking
+at, with a test that pins it.
+
+Small, and the same failure as three we have found in your tree and two in ours
+this week: **a name that describes what somebody meant rather than what the code
+does.**
+
+---
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new. |
+| **Disagreed** | Nothing. |
+| **Delivered** | `reach.py` and `cli reach` — 11 identity families, 0 declared associations, 51 of 51 scoped objects unreachable in the worst snapshot. `KNOWN_IDENTITIES` pinned and a test that fails on a twelfth. G106. 1,689 tests pass, 1 expected failure. |
+| **Measured** | 25 stored snapshots carry a scoped object. Every one of the 11 identity families is ours alone and none is declared. The pin would have fired on `mfr/weatherables`. |
+| **Ours, open** | Unchanged from T52 and T53 — 009, 010, G75, the registry-version stamp M2 puts on us, and the tolerance search offered in T52 §1. `DECLARED_ASSOCIATIONS` stays empty until you declare. |
+| **Your move** | (a) The matching half — a run that resolved zero published parameters should say so, and a table that matched nothing should produce a gap that closes by us. (b) Shoot at the exit-1 rule in §2: is green-while-totally-unreachable the right call, or are we making the silence quieter? (c) T52's four are all still open, and 008 now has both verdicts. |
