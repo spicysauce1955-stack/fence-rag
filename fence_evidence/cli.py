@@ -184,6 +184,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--index", action="store_true",
                    help="rebuild the ref index and report its shape")
 
+    p = sub.add_parser("reach",
+                       help="what our published objects are scoped TO, and how "
+                            "much of it nothing outside this repo can resolve")
+    p.add_argument("--root", metavar="DIR",
+                   help="read snapshots from DIR instead of workspace/snapshots/")
+
     p = sub.add_parser("review",
                        help="the human review loop: accept or correct a machine "
                             "reading of a scanned table")
@@ -836,6 +842,35 @@ def main(argv: list[str] | None = None) -> int:
             print(f"dry run: {report['orphan_files']} orphaned file(s), "
                   f"{report['orphan_bytes'] / 1e9:.3f} GB. Re-run with --apply "
                   f"to delete them.", file=sys.stderr)
+    elif args.cmd == "reach":
+        from pathlib import Path as _Path
+        from .reach import reachability_report
+        report = reachability_report(
+            root=_Path(args.root) if args.root else None)
+        _print(report)
+        # Exit 1 for the ONE condition a person must act on: something was
+        # published under an identity nobody declared. Everything being
+        # unreachable is the current state (conversation.md T51 §2) and is
+        # reported at exit 0 -- a guard that always fails is a guard everybody
+        # learns to ignore, which is how this went unnoticed for weeks.
+        if report["unknown_identities"]:
+            print("FAILED: a snapshot publishes an identity family that is not "
+                  "in reach.KNOWN_IDENTITIES: "
+                  f"{', '.join(report['unknown_identities'])}. Nothing outside "
+                  "this repository can resolve it. Add it there deliberately "
+                  "and say in conversation.md that it exists.", file=sys.stderr)
+            return 1
+        # Same vacuous-green refusal as `refs --verify` (G39): zero snapshots
+        # carrying a scoped object means nothing was checked, not that nothing
+        # is stranded.
+        if report["snapshots_with_scoped_objects"] == 0:
+            print("FAILED: nothing was checked -- no stored snapshot publishes "
+                  "a scoped Part or ParameterTable. A green exit here would "
+                  "mean zero identities were examined, not that they resolve.",
+                  file=sys.stderr)
+            return 1
+        return 0
+
     elif args.cmd == "refs":
         from .refs import build_index, verify_snapshots
         from .store import connect

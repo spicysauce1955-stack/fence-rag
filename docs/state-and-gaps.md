@@ -5230,6 +5230,56 @@ were corrected with regressions. Full suite before these final presentation
 changes:1594 tests in60.045s, OK with one expected failure. Six focused knowledge
 cases pass after the changes. No fabricated measurements or human reviews.
 
+### G106 — everything we publish is scoped to an identity nothing can resolve, and nothing said so
+
+*2026-09-08.* `conversation.md` T51 §2, measured by Planning: across **6,563
+stored generation runs, an `mfr/*` id appears at no path under `.graph` or
+`.strategy`**. Not one published `ParameterTable` has ever governed anything. A
+table is scoped `{kind: "fence_model", id: "mfr/certainteed-columbia-imperial-
+chesterfield"}`; the consumer's evaluator matches a scope by plain equality
+against its own `FenceModel` id (`M-SLAT`, `M-LEGACY`, `M-VINYL`). The two
+namespaces have never met.
+
+**Neither system reported it, and that is the actual defect.** The rounding
+breach in T50 §3 lived in published data for weeks because nothing exercised the
+path end to end. Worse, this platform published **18 more Parts into a third
+unreachable namespace** (`mfr/weatherables`, the Augusta and Pembroke slices) in
+a single session and reported nothing — noticed only while writing a commit
+message, and recorded in T53 §4.
+
+**Built: `reach.py` and `cli reach`.** `[measured]` on the current store — 25
+snapshots carry a scoped object, **11 identity families, 0 declared
+associations**, and the worst single snapshot has **51 of 51 scoped objects
+reaching nobody**. `KNOWN_IDENTITIES` pins the eleven and
+`tests/test_scope_reach.py` fails when a snapshot publishes a twelfth: a new
+family is not a defect, publishing one without noticing is, and that is the one
+thing the pin prevents. It would have fired on `mfr/weatherables`.
+
+**Why a report and not a `Gap`.** §1.2.1's eight gap kinds are BINDING and
+closed, and none means *"published to an identity no consumer can resolve"*.
+Inventing one is an amendment, not a registry addition. The knowledge is not
+missing; its reachability is.
+
+**`DECLARED_ASSOCIATIONS` is deliberately empty.** We hold `mfr/*`; the consumer
+holds `M-VINYL`. Asserting the two are the same would be inventing a product
+identity, the same class of error as the wrong manufacturer attribution caught
+in G62. Filling it in requires the consumer to declare what it can bind, on the
+shape §2 already uses for condition dimensions.
+
+**Open.** The join itself. T52 §2 puts three candidates to Planning — we publish
+`FenceModel`s and they bind our id (the designed path, blocked on 008 and real
+evidence); we publish an alias table (impossible, we do not hold their
+namespace); or the join is per-job configuration and belongs to neither side.
+The alarm does not choose. It ends the silence, which is what let the question
+go unasked for weeks.
+
+Exit-code contract: exit 1 only when an undeclared identity appears, or when no
+snapshot carries a scoped object at all (the vacuous-green refusal `cli refs
+--verify` already makes, G39). Everything being unreachable is the current state
+and exits 0 — a guard that always fails is a guard everybody learns to ignore.
+
+1,689 tests pass, 1 expected failure.
+
 ---
 
 ## 4. If work resumes, in order
