@@ -68,6 +68,23 @@ def _step_key(element_id: str, char_start: int, char_end: int) -> str:
         f"{element_id}:{char_start}:{char_end}".encode()).hexdigest()[:12]
 
 
+
+def _scope_of(conn, document_id: str) -> dict:
+    """The `EntityRef` a procedure is about, resolved exactly as a table's is.
+
+    Delegates to `parameters._default_scope` rather than reimplementing it: two
+    resolvers for "which product is this document about" is how a procedure and
+    a parameter table read off one guide come to disagree, and the import is
+    cheap. It is imported inside the function because `parameters` imports from
+    this package's snapshot side and a module-level import would close a cycle.
+    """
+    from .parameters import _default_scope
+    row = conn.execute(
+        "SELECT document_id, manufacturer, product_family FROM documents "
+        "WHERE document_id = ?", (document_id,)).fetchone()
+    return _default_scope(row)
+
+
 def build_procedures(conn: sqlite3.Connection, *, source_ref_page=None,
                      tenant: str | None = None) -> tuple[list[dict], list[dict]]:
     """`(procedures, gaps)`, both plain dicts ready for the wire."""
@@ -124,7 +141,6 @@ def build_procedures(conn: sqlite3.Connection, *, source_ref_page=None,
         except KeyError:
             continue
         steps = []
-        previous = None
         for r in by_page[page]:
             key = _step_key(r["element_id"], r["char_start"], r["char_end"])
             steps.append({
@@ -132,20 +148,46 @@ def build_procedures(conn: sqlite3.Connection, *, source_ref_page=None,
                 "kind": r["step_kind"],
                 "scope": r["step_scope"],
                 "slots": [json.loads(r["slot_target"])] if r["slot_target"] else [],
-                # Order on the page is a STATED order, so `after` is a reading
-                # rather than an inference. Anything else -- `not_before`,
-                # `exclusive_with` -- is a reviewer's call and is not derived here.
-                "requires": ([{"kind": "after", "step": previous}] if previous else []),
+                # EMPTY, and that is obligation 11 read literally:
+                #
+                #   "Publish `requires` where a document ASSERTS a dependency
+                #    ... and leave it empty where the document merely prints one
+                #    step after another. Two guides here explicitly DENY their
+                #    own print order."
+                #
+                # This used to synthesise `{"kind": "after"}` between every
+                # consecutive pair, on a comment asserting that page order is "a
+                # STATED order, so `after` is a reading rather than an
+                # inference". It is not, and the contract cites the counter-
+                # evidence by name: a guide that prints A before B and then says
+                # the order does not matter would have been published claiming
+                # that it does. Order survives in the list; it is not an edge.
+                #
+                # A real edge -- `after`, `not_before`, `before`,
+                # `exclusive_with` -- is a reviewer's call and enters through
+                # `step_reviews`, never through the position of a bullet.
+                "requires": [],
                 "cites": [cite],
                 "text_i18n": r["text_final"] or _body(r["text_raw"]),
             })
-            previous = key
         out.append({
             "id": _procedure_id(document_id, page_no),
-            # `null` = owned by no product at all, which the shape permits and
-            # which is honest: this guide's `FenceModel` does not exist yet, so
-            # naming a referent would be inventing one.
-            "scope": None,
+            # `knowledge-datamodel.md:1392` defines `null` as *owned by no
+            # product* -- a positive claim. This published `null` because the
+            # guide's `FenceModel` does not exist yet, which is *product
+            # unknown*: a different fact, asserted as the first one.
+            #
+            # `parameters._default_scope` already answers this for a
+            # `ParameterTable` read off the same documents, and reusing it means
+            # a procedure and a table from one guide agree about what they are
+            # about -- and land in one identity namespace, which `reach.py`
+            # counts. It resolves a `fence_model` ref in the `mfr/` namespace
+            # where the curated metadata names a family, and the document itself
+            # where it does not. It never invents an entity.
+            #
+            # `null` is left for a curator to state deliberately, which is the
+            # only way "owned by no product" is ever true rather than unknown.
+            "scope": _scope_of(conn, document_id),
             "steps": steps,
             "cites": [cite],
         })

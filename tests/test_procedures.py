@@ -28,7 +28,8 @@ def scratch() -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.executescript("""
         CREATE TABLE documents (document_id TEXT PRIMARY KEY, source_path TEXT,
-                                doc_type TEXT, title TEXT, owner_tenant TEXT);
+                                doc_type TEXT, title TEXT, owner_tenant TEXT,
+                                manufacturer TEXT, product_family TEXT);
         CREATE TABLE document_versions (version_id TEXT PRIMARY KEY,
                                         document_id TEXT, sha256 TEXT);
         CREATE TABLE elements (element_id TEXT PRIMARY KEY, document_id TEXT,
@@ -42,7 +43,7 @@ def scratch() -> sqlite3.Connection:
     conn.executescript(STEP_CANDIDATES_DDL)
     conn.executescript(STEP_REVIEWS_DDL)
     conn.execute("INSERT INTO documents VALUES ('doc-1','a.pdf','installation_manual',"
-                 "'Bufftech Guide',NULL)")
+                 "'Bufftech Guide',NULL,NULL,NULL)")
     conn.execute("INSERT INTO document_versions VALUES ('v1','doc-1','abc123')")
     conn.execute("INSERT INTO pages VALUES ('v1',8,'p.png',612.0,792.0,200)")
     conn.execute("INSERT INTO elements VALUES ('el-1','doc-1','v1',8,7,'list',?,NULL,"
@@ -126,24 +127,75 @@ class TestAReviewedStepPublishes(unittest.TestCase):
         self.assertEqual(len(step["cites"]), 1)
         self.assertEqual(step["cites"][0]["belongs_to"], "abc123")
 
-    def test_the_procedure_owns_no_model(self):
-        """`scope: null` — "owned by no product at all" — is honest here: the
-        guide's `FenceModel` does not exist yet, so inventing a referent would
-        be worse than saying nothing."""
+    def test_the_procedure_is_scoped_like_every_other_published_object(self):
+        """`scope: null` is a CLAIM -- "owned by no product at all" -- and it was
+        the wrong one.
+
+        `knowledge-datamodel.md:1392` defines `Procedure.scope: EntityRef | null`
+        with `null` = *owned by no product*. This builder published `null` because
+        the guide's `FenceModel` does not exist yet, which is *product unknown* --
+        a different fact, and one the shape has a better answer for.
+
+        `parameters._default_scope` already resolves exactly this for a
+        `ParameterTable` off the same documents: a `fence_model` ref in the `mfr/`
+        namespace where the curated metadata names a family, and the document
+        itself where it does not. Procedures now use it, so a procedure and a
+        parameter table read off one guide agree about what they are about.
+        """
         conn = scratch()
         review(conn, 0)
         proc = build_procedures(conn, source_ref_page=mint(conn))[0][0]
-        self.assertIsNone(proc["scope"])
+        self.assertEqual(proc["scope"],
+                         {"kind": "source_document", "id": "doc-1", "tenant": None})
 
-    def test_steps_keep_source_order_and_requires_follows_it(self):
+    def test_steps_keep_source_order_but_print_order_is_not_a_dependency(self):
+        """Contract obligation 11, quoted: *"Publish `requires` where a document
+        ASSERTS a dependency ... and leave it empty where the document merely
+        prints one step after another. Two guides here explicitly DENY their own
+        print order."*
+
+        This builder synthesised an `after` edge between every consecutive pair,
+        on a comment claiming page order is "a STATED order". The contract's own
+        evidence is that it is not: a guide that prints A then B and then says
+        the order does not matter would have been published asserting that it
+        does. Order is preserved in the list; it is no longer published as an
+        edge.
+        """
         conn = scratch()
         review(conn, 0)
         review(conn, 1)
         proc = build_procedures(conn, source_ref_page=mint(conn))[0][0]
         keys = [s["key"] for s in proc["steps"]]
         self.assertEqual(len(keys), 2)
-        self.assertEqual(proc["steps"][1]["requires"],
-                         [{"kind": "after", "step": keys[0]}])
+        self.assertEqual(proc["steps"][0]["requires"], [])
+        self.assertEqual(proc["steps"][1]["requires"], [],
+                         "print order is not an asserted dependency")
+
+    def test_no_step_anywhere_publishes_a_synthesised_edge(self):
+        conn = scratch()
+        review(conn, 0)
+        review(conn, 1)
+        review(conn, 2)
+        proc = build_procedures(conn, source_ref_page=mint(conn))[0][0]
+        self.assertEqual([s["requires"] for s in proc["steps"]], [[], [], []])
+
+    def test_a_guide_naming_a_family_scopes_into_the_mfr_namespace(self):
+        """The branch that matters on real data, and the point of the change.
+
+        A `ParameterTable` read off a CertainTeed guide is scoped
+        `mfr/certainteed-bufftech`. Before this fix a `Procedure` off the SAME
+        guide published `scope: null`, so the two disagreed about what they were
+        about, and the procedure was invisible to `reach.py`'s identity count.
+        Now they agree.
+        """
+        conn = scratch()
+        conn.execute("UPDATE documents SET manufacturer='CertainTeed', "
+                     "product_family='Bufftech' WHERE document_id='doc-1'")
+        review(conn, 0)
+        proc = build_procedures(conn, source_ref_page=mint(conn))[0][0]
+        self.assertEqual(proc["scope"], {"kind": "fence_model",
+                                         "id": "mfr/certainteed-bufftech",
+                                         "tenant": None})
 
     def test_requires_names_a_key_inside_its_own_procedure(self):
         conn = scratch()
