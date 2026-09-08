@@ -355,13 +355,18 @@ sessions, which is what this document is for.
 The repository has run this play before and it worked: with 137 PDFs it ingested everything,
 extracted nothing, measured, and only then wrote the extraction rules. Same order here.
 
-1. **Publish procedures.** The largest gap, and nothing else depends on it. The code is done;
-   **91 candidates across 2 documents have 0 reviews**, and the builder carries two defects
-   (the synthesized `after` edge, and `scope` null meaning the wrong thing). Fix those two,
-   review the queue, then widen — `docs/workflows/source-to-contract.md` measured 466
-   glyph-paired steps across 111 pages in 22 documents waiting behind this one page.
+1. **Publish procedures.** The largest gap, and nothing else depends on it.
+   **The two builder defects are FIXED as of 2026-09-08** — print order is no longer published
+   as an `after` edge (obligation 11), and `scope` now resolves through
+   `parameters._default_scope` instead of asserting `null`. What remains is **not code**:
+   `[measured]` 91 candidates across 2 documents with **0 reviews**, and `segment_kind` is a
+   person's call that must not be fabricated. Review the queue, then widen —
+   `docs/workflows/source-to-contract.md` measured 466 glyph-paired steps across 111 pages in
+   22 documents waiting behind this one page.
    Acceptance: a snapshot publishes at least one `Procedure` with cited steps and honest
    dependencies, and `snapshot --verify-stored` passes.
+   **This item now needs a curator, not an engineer.** If no person is available, start at
+   item 2, which is unblocked.
 2. **The query endpoint.** The only real interface. Acceptance: it answers the 78 gold questions
    at or above the current retrieval baseline, with citations, and the relevance audit still
    measures what it measured before.
