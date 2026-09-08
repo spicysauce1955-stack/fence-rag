@@ -1,0 +1,81 @@
+# `docs/` — what is here, what governs, what is history
+
+```text
+Index rebuilt 2026-09-08, after a five-way audit of every document in this tree.
+Every "state" line below was measured on that date against the store and the code.
+```
+
+**Start with [`knowledge-loop.md`](knowledge-loop.md).** It says what the project is for.
+Everything else describes a part.
+
+---
+
+## The four that govern
+
+| Document | Governs | Status |
+|---|---|---|
+| **[`knowledge-loop.md`](knowledge-loop.md)** | **Purpose and direction** — what we are building and why | **Agreed 2026-09-08.** Not frozen; correct it when wrong |
+| [`integration/contract.md`](integration/contract.md) | What crosses the boundary to Planning/BOM | **FROZEN v1.3**, hashed. Never edit — see `integration/AMENDING.md` |
+| [`integration/AMENDING.md`](integration/AMENDING.md) | How the contract changes | **FROZEN**, hashed |
+| [`mvp-implementation-spec.md`](mvp-implementation-spec.md) | How this platform works internally | Authoritative for extraction, store, retrieval, prohibitions. **Superseded for scope** — see its §1a |
+
+Verify the frozen pair: `cd docs/integration && sha256sum -c contract.sha256` — both lines must
+print `OK`.
+
+## The three you read to know where things stand
+
+| Document | What it is |
+|---|---|
+| [`state-and-gaps.md`](state-and-gaps.md) | The measured record, G1–G106. **Trust its numbers over any prose, including this file's.** Large; no index; gaps are not in numeric order |
+| [`integration/conversation.md`](integration/conversation.md) | The negotiation transcript with Planning, T1–T55. **Live boundary state lives in its per-turn ledgers** |
+| [`build-plan.md`](build-plan.md) | Build sequencing. Phases A–E done; §6's ordering is superseded on priority by `knowledge-loop.md` §10 |
+
+## Live working documents
+
+| Document | What it is |
+|---|---|
+| [`layering.md`](layering.md) | Five layers and one rule — *every reference points down, never up*. The rule is **decided and enforced** by a test; the vocabulary is proposed. §2a carries the hard/soft overlay |
+| [`workflows/source-to-contract.md`](workflows/source-to-contract.md) | How new knowledge actually gets published today. The most current document in this tree |
+| [`assembly-step-design.md`](assembly-step-design.md) | `Procedure`/`AssemblyStep`. **Built** — the blocker is 91 unreviewed candidates, not code |
+| [`integration/knowledge-datamodel.md`](integration/knowledge-datamodel.md) | The entity shapes. The one boundary document a newcomer needs |
+| [`integration/registry-additions.md`](integration/registry-additions.md) | The live vocabularies — source classes, warning codes, `curation_level` |
+| [`integration/source-refs-design.md`](integration/source-refs-design.md) | §4.2/§4.3 are normative and implemented. §1's `sref_` scheme was never built |
+| [`integration/amendments/`](integration/amendments/) | 001–008 and `CANDIDATES.md` (C1–C17). The reasoning behind every contract change |
+| [`target-architecture.md`](target-architecture.md) | Informative future direction. §5.2 — *conflicts surfaced, never resolved* — is load-bearing |
+| [`distribution-design.md`](distribution-design.md) | How a checkout obtains the corpus. Implemented and accurate |
+| [`second-stage-evaluation.md`](second-stage-evaluation.md) | A measurement and a decision not to ship. Does not expire |
+| [`project-contract-alignment-review.md`](project-contract-alignment-review.md) | 2026-09-06 review. Self-labelled historical, but carries **two unclosed defects** in the procedure builder |
+
+## History — read for reasoning, never as a work queue
+
+Each of these carries a banner explaining what happened to it.
+
+| Document | Why it is history |
+|---|---|
+| [`phase-checkpoints.md`](phase-checkpoints.md) | Accurate to 2026-08-28 and stops dead there |
+| [`four-layer-model-design.md`](four-layer-model-design.md) | Plans 1–2 shipped; plan 3 (`claims`) was never built. §5.1 is now **blocking** |
+| [`four-layer-plan-1-refs.md`](four-layer-plan-1-refs.md) | Executed. Its 33 unticked boxes all shipped |
+| [`experiment-noa-table-reading.md`](experiment-noa-table-reading.md) | The method it designs was never built; LLM reading filled the queue instead |
+| [`curation/`](curation/) | The `cur_*` schema was never built. Three of its ideas shipped under other names; `emblem-*.md` are build logs misfiled here |
+| [`superpowers/specs/`](superpowers/specs/) | Session designs. The review loop shipped in full; the LLM-extraction file became a diary |
+| [`integration/where-we-stand.md`](integration/where-we-stand.md) | The state file the conversation thread replaced |
+| [`integration/knowledge-asks.md`](integration/knowledge-asks.md) · [`planning-asks.md`](integration/planning-asks.md) | A completed round-trip. **One open item** survives in knowledge-asks §2.3 |
+| [`integration/boundary-delta-v0.4.md`](integration/boundary-delta-v0.4.md) | A closed approval request |
+| [`integration/audit/`](integration/audit/) | The ordered reasoning behind every boundary decision. Immutable record |
+| [`../guide.md`](../guide.md) | The setup instructions that built this repo. **Live content: the twelve prohibitions** |
+| [`../rag-pipeline-plan.md`](../rag-pipeline-plan.md) | The original plan. Correctly self-labelled since 2026-08 |
+
+---
+
+## Traps this tree has set before
+
+- **Two unrelated `R1`–`R5` schemes.** `target-architecture.md` §3 numbers retrieval *upgrades*;
+  `workspace/reports/projection-relevance-audit.md` numbers *recommendations*. Same labels,
+  different proposals. Always say which.
+- **"Contract" means two things.** Since 2026-08-25 it means `integration/contract.md`. Older
+  documents use it for the search *response* shape.
+- **Counts drift fast.** Corpus is **146** files (137 PDF, 6 PNG, 2 HTML, 1 DOCX) — but the
+  distribution manifest still lists 144 and carries no HTML, so `cli fetch` alone no longer
+  reconstructs the corpus; the two HTML sources ship in git.
+- **A status line saying "nothing here is implemented" is not evidence.** Four documents said it
+  about code that had shipped. Check the module before believing the banner.
