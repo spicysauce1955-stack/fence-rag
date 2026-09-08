@@ -49,10 +49,25 @@
           "assembly_type": "panel",
           "assembly_name": "Savannah Privacy Fence",
           "style": "privacy",
-          "height_options_in": [48, 60, 72],
+          "height_options_in": [
+            48,
+            60,
+            72
+          ],
           "width_on_center_in": 96,
-          "color_options": ["White", "Tan", "Khaki", "Gray", "Black", "Coastal Grey (woodgrain)", "Cedar (woodgrain)"],
-          "texture_finish": ["Smooth", "WeatherGrain woodgrain texture (Coastal Grey / Cedar options)"],
+          "color_options": [
+            "White",
+            "Tan",
+            "Khaki",
+            "Gray",
+            "Black",
+            "Coastal Grey (woodgrain)",
+            "Cedar (woodgrain)"
+          ],
+          "texture_finish": [
+            "Smooth",
+            "WeatherGrain woodgrain texture (Coastal Grey / Cedar options)"
+          ],
           "material_grade": {
             "resin": "Co-extruded PVC: virgin/premium-grade vinyl cap layer over a high-quality recycled PVC core (post-industrial recycled vinyl siding/window scrap); overall product ~85% recycled content by manufacturer claim; BPA-free",
             "uv_inhibitors": "Titanium dioxide concentrated in outer cap layer for UV protection",
@@ -70,7 +85,12 @@
               "wall_thickness_in": ".150 in (general manufacturer claim per FAQ; not broken out per fence height in official docs; comparable 5x5 horse-fence post wall is confirmed .150 in)",
               "profile_depth_in": "1.5 in x 5.5 in routed rail-socket channel (bottom/top rail); posts internally marked: no marking = line post, red dots = end post, green dots = corner post, 'custom'/'blank' text = custom/blank post",
               "material": "Co-extruded virgin-cap / recycled-core PVC",
-              "compatible_component_ids": ["wea-rail-top-privacy", "wea-rail-bottom-privacy", "wea-picket-6in-tg", "wea-postcap-privacy"],
+              "compatible_component_ids": [
+                "wea-rail-top-privacy",
+                "wea-rail-bottom-privacy",
+                "wea-picket-6in-tg",
+                "wea-postcap-privacy"
+              ],
               "fasteners": []
             },
             {
@@ -82,9 +102,16 @@
               "wall_thickness_in": null,
               "profile_depth_in": "Slotted channel accepts 7/8 in T&G picket tongue",
               "material": "Vinyl extrusion with internal aluminum insert for rigidity",
-              "compatible_component_ids": ["wea-post-5x5-privacy"],
+              "compatible_component_ids": [
+                "wea-post-5x5-privacy"
+              ],
               "fasteners": [
-                {"type": "self-tapping stainless steel screw", "size": "#10 x 1 in", "material": "stainless steel", "qty_per_assembly": "1 per side of top rail inside post (high-wind installation, no-fastener baseline is 0)"}
+                {
+                  "type": "self-tapping stainless steel screw",
+                  "size": "#10 x 1 in",
+                  "material": "stainless steel",
+                  "qty_per_assembly": "1 per side of top rail inside post (high-wind installation, no-fastener baseline is 0)"
+                }
               ]
             },
             {
@@ -96,7 +123,9 @@
               "wall_thickness_in": null,
               "profile_depth_in": "Slotted channel accepts 7/8 in T&G picket tongue",
               "material": "Vinyl extrusion",
-              "compatible_component_ids": ["wea-post-5x5-privacy"],
+              "compatible_component_ids": [
+                "wea-post-5x5-privacy"
+              ],
               "fasteners": []
             },
             {
@@ -108,9 +137,17 @@
               "wall_thickness_in": ".060 in (tongue & groove wall gauge)",
               "profile_depth_in": null,
               "material": "Vinyl extrusion, tongue-and-groove interlocking edges",
-              "compatible_component_ids": ["wea-rail-top-privacy", "wea-rail-bottom-privacy"],
+              "compatible_component_ids": [
+                "wea-rail-top-privacy",
+                "wea-rail-bottom-privacy"
+              ],
               "fasteners": [
-                {"type": "self-tapping stainless steel screw (high-wind option)", "size": "#10 x 1 in", "material": "stainless steel", "qty_per_assembly": "4 per 13.875 in wide panel-privacy picket (2 at top rail, 2 at mid/bottom rail) for 120 mph-rated install; 0 for baseline install"}
+                {
+                  "type": "self-tapping stainless steel screw (high-wind option)",
+                  "size": "#10 x 1 in",
+                  "material": "stainless steel",
+                  "qty_per_assembly": "4 per 13.875 in wide panel-privacy picket (2 at top rail, 2 at mid/bottom rail) for 120 mph-rated install; 0 for baseline install"
+                }
               ]
             },
             {
@@ -122,9 +159,16 @@
               "wall_thickness_in": null,
               "profile_depth_in": null,
               "material": "Vinyl (also available solar LED / low-voltage LED variants)",
-              "compatible_component_ids": ["wea-post-5x5-privacy"],
+              "compatible_component_ids": [
+                "wea-post-5x5-privacy"
+              ],
               "fasteners": [
-                {"type": "adhesive (not screwed - allows future removal)", "size": "small bead", "material": "clear silicone (manufacturer recommends silicone over glue for caps to allow future upgrade/battery access)", "qty_per_assembly": "1 dab per cap"}
+                {
+                  "type": "adhesive (not screwed - allows future removal)",
+                  "size": "small bead",
+                  "material": "clear silicone (manufacturer recommends silicone over glue for caps to allow future upgrade/battery access)",
+                  "qty_per_assembly": "1 dab per cap"
+                }
               ]
             },
             {
@@ -136,7 +180,9 @@
               "wall_thickness_in": null,
               "profile_depth_in": "Minimum 22 in above grade (54 in total insert length typical: 22 in above grade + below-grade portion)",
               "material": "Aluminum",
-              "compatible_component_ids": ["wea-post-5x5-privacy"],
+              "compatible_component_ids": [
+                "wea-post-5x5-privacy"
+              ],
               "fasteners": []
             }
           ],
@@ -150,7 +196,11 @@
           "slope_accommodation": {
             "method": "both",
             "max_rake_angle_deg": null,
-            "hardware_required": ["U-mount rail brackets (stepping method)", "blank posts (routed on-site) or end posts turned to the blank side (stepping method)", "aluminum post insert or concrete fill to 22 in above grade (for >6 ft height or high-wind areas, also used with stepping)"],
+            "hardware_required": [
+              "U-mount rail brackets (stepping method)",
+              "blank posts (routed on-site) or end posts turned to the blank side (stepping method)",
+              "aluminum post insert or concrete fill to 22 in above grade (for >6 ft height or high-wind areas, also used with stepping)"
+            ],
             "notes": "Each fence style accommodates a defined degree of slope (stated as inches of drop over feet of run in the per-style spec diagram, not published as a single company-wide figure). Where slope exceeds a style's rated capacity, installer steps the fence using one of three documented options: (1) end posts with holes cut in the blank side, (2) end posts with U-mount rail brackets on the blank side, (3) blank posts with U-mount brackets on both sides. Racking (routed post system following the grade) is the default/baseline method within each style's rated slope tolerance. U-mount bracket installations require shortening rails since they are not inserted into routed post sockets."
           }
         },
@@ -159,10 +209,20 @@
           "assembly_type": "single_gate",
           "assembly_name": "Savannah Privacy Fence Gate Kit",
           "style": "privacy",
-          "height_options_in": [48, 60, 72],
+          "height_options_in": [
+            48,
+            60,
+            72
+          ],
           "width_on_center_in": null,
-          "color_options": ["White", "Tan", "Khaki"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan",
+            "Khaki"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": null,
           "sub_assemblies": [
             {
@@ -174,10 +234,22 @@
               "wall_thickness_in": null,
               "profile_depth_in": null,
               "material": "Vinyl frame (post + rails), cross-braced",
-              "compatible_component_ids": ["wea-post-5x5-privacy"],
+              "compatible_component_ids": [
+                "wea-post-5x5-privacy"
+              ],
               "fasteners": [
-                {"type": "self-tapping screw", "size": "not specified (provided in kit)", "material": "not specified", "qty_per_assembly": "4-6 per cross brace (2-3 per rail); 8 ft high panels require 2 cross braces"},
-                {"type": "PVC solvent/vinyl glue (rail-to-post socket bonding)", "size": "1/8 in bead", "material": "vinyl cement", "qty_per_assembly": "1 bead per rail-socket pocket, ~1/4 in down from top of pocket; sets in 45-60 seconds"}
+                {
+                  "type": "self-tapping screw",
+                  "size": "not specified (provided in kit)",
+                  "material": "not specified",
+                  "qty_per_assembly": "4-6 per cross brace (2-3 per rail); 8 ft high panels require 2 cross braces"
+                },
+                {
+                  "type": "PVC solvent/vinyl glue (rail-to-post socket bonding)",
+                  "size": "1/8 in bead",
+                  "material": "vinyl cement",
+                  "qty_per_assembly": "1 bead per rail-socket pocket, ~1/4 in down from top of pocket; sets in 45-60 seconds"
+                }
               ]
             },
             {
@@ -189,7 +261,9 @@
               "wall_thickness_in": null,
               "profile_depth_in": null,
               "material": "Stainless steel / die-cast zinc",
-              "compatible_component_ids": ["wea-gate-kit-savannah"],
+              "compatible_component_ids": [
+                "wea-gate-kit-savannah"
+              ],
               "fasteners": []
             },
             {
@@ -201,7 +275,9 @@
               "wall_thickness_in": null,
               "profile_depth_in": null,
               "material": "Stainless steel / polymer, some lockable variants",
-              "compatible_component_ids": ["wea-gate-kit-savannah"],
+              "compatible_component_ids": [
+                "wea-gate-kit-savannah"
+              ],
               "fasteners": []
             },
             {
@@ -213,7 +289,9 @@
               "wall_thickness_in": null,
               "profile_depth_in": null,
               "material": "Stainless steel",
-              "compatible_component_ids": ["wea-gate-kit-savannah"],
+              "compatible_component_ids": [
+                "wea-gate-kit-savannah"
+              ],
               "fasteners": []
             },
             {
@@ -225,7 +303,9 @@
               "wall_thickness_in": null,
               "profile_depth_in": null,
               "material": "Aluminum",
-              "compatible_component_ids": ["wea-gate-kit-savannah"],
+              "compatible_component_ids": [
+                "wea-gate-kit-savannah"
+              ],
               "fasteners": []
             },
             {
@@ -237,7 +317,9 @@
               "wall_thickness_in": null,
               "profile_depth_in": null,
               "material": "Galvanized steel",
-              "compatible_component_ids": ["wea-gate-kit-savannah"],
+              "compatible_component_ids": [
+                "wea-gate-kit-savannah"
+              ],
               "fasteners": []
             }
           ],
@@ -255,10 +337,23 @@
           "assembly_type": "panel",
           "assembly_name": "Ashton Privacy Fence",
           "style": "privacy",
-          "height_options_in": [60, 72, 84, 96],
+          "height_options_in": [
+            60,
+            72,
+            84,
+            96
+          ],
           "width_on_center_in": 96,
-          "color_options": ["White", "Tan", "Khaki", "Cedar"],
-          "texture_finish": ["Smooth", "WeatherGrain (Cedar option)"],
+          "color_options": [
+            "White",
+            "Tan",
+            "Khaki",
+            "Cedar"
+          ],
+          "texture_finish": [
+            "Smooth",
+            "WeatherGrain (Cedar option)"
+          ],
           "material_grade": {
             "resin": "Co-extruded PVC (same formulation as Savannah line)",
             "uv_inhibitors": "Titanium dioxide in outer cap layer",
@@ -290,9 +385,140 @@
           "slope_accommodation": {
             "method": "both",
             "max_rake_angle_deg": null,
-            "hardware_required": ["U-mount rail brackets", "aluminum post insert"],
+            "hardware_required": [
+              "U-mount rail brackets",
+              "aluminum post insert"
+            ],
             "notes": "Rated 130 mph wind gust up to 6 ft height per manufacturer wind testing; slope tolerance per style spec diagram (not extracted)."
           }
+        },
+        {
+          "assembly_id": "wea-augusta-privacy",
+          "assembly_type": "panel",
+          "assembly_name": "Augusta Privacy Fence",
+          "style": "privacy",
+          "height_options_in": [
+            72,
+            84,
+            96
+          ],
+          "width_on_center_in": 72,
+          "color_options": [
+            "White",
+            "Tan",
+            "Khaki",
+            "Gray",
+            "White/Tan",
+            "Coastal Gray (woodgrain)",
+            "Cedar (woodgrain)",
+            "Black"
+          ],
+          "texture_finish": [
+            "Smooth",
+            "WeatherGrain woodgrain texture (Coastal Grey / Cedar options)"
+          ],
+          "material_grade": {
+            "resin": "Co-extruded PVC consistent with the Premium privacy line (specsheet lists Augusta under Premium style privacy fences)",
+            "uv_inhibitors": "Titanium dioxide concentrated in outer cap layer",
+            "impact_modifiers": null,
+            "titanium_dioxide_pct": "10-12 phr (per manufacturer FAQ, line-wide claim)",
+            "warranty": "Limited Lifetime Material Warranty on vinyl extrusions for individual residential homeowners (20-Year for commercial/other); hardware & connectors 5 years residential / 2 years commercial"
+          },
+          "sub_assemblies": [
+            {
+              "component_id": "wea-augusta-post-5x5",
+              "component_type": "post",
+              "component_name": "5\"x5\" Line/End/Corner Post (3 routed holes)",
+              "nominal_dimensions_in": "5x5",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": "1.5 in x 5.5 in routed rail-socket holes; brochure: posts for the Augusta fence will have 3 route holes",
+              "material": "Vinyl extrusion",
+              "compatible_component_ids": [
+                "wea-augusta-rail-slotted"
+              ],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-augusta-rail-slotted",
+              "component_type": "rail",
+              "component_name": "Augusta Slotted Rail (1.5\" x 5.5\")",
+              "nominal_dimensions_in": "1.5 x 5.5",
+              "actual_dimensions_in": "1.5 x 5.5 x 71.5 (8x6 panel per material list)",
+              "wall_thickness_in": null,
+              "profile_depth_in": "Slotted channel accepts 7/8 in T&G picket; three rails (top, mid, bottom) per the 8ft CAD page material list; bottom rail houses the metal insert per master install",
+              "material": "Vinyl extrusion; bottom rail with internal aluminum insert (master installation instructions, Solid Privacy flow)",
+              "compatible_component_ids": [
+                "wea-augusta-post-5x5",
+                "wea-augusta-picket-tg"
+              ],
+              "fasteners": [],
+              "qty_per_panel": 3,
+              "qty_per_panel_basis": "Manufacturer 8ft master CAD page material list (8x6 Panel): Top & Bottom Rail 2 + Mid Rail 1 = 3 rails 1.5in x 5.5in x 71.5in each; corroborates the CAD section chain and brochure 3-route-hole note"
+            },
+            {
+              "component_id": "wea-augusta-picket-tg",
+              "component_type": "picket",
+              "component_name": "Augusta 7/8\" x 6\" Tongue & Groove Picket",
+              "nominal_dimensions_in": "7/8 x 6",
+              "actual_dimensions_in": "7/8 x 6 x 43 (8x6 panel per material list)",
+              "wall_thickness_in": ".060 in (tongue & groove wall gauge, specsheet style block)",
+              "profile_depth_in": null,
+              "material": "Vinyl extrusion, tongue-and-groove interlocking edges",
+              "compatible_component_ids": [
+                "wea-augusta-rail-slotted"
+              ],
+              "fasteners": [],
+              "qty_per_panel": 22,
+              "qty_per_panel_basis": "Manufacturer 8ft master CAD page material list (8x6 Panel): T&G Pickets 22, 0.875in x 6in x 43in; 22 = 11 per run x 2 runs; the 43in stock exceeds the 39.5in run by 3.5in implied seating (config-dependent, not a measured engagement)"
+            },
+            {
+              "component_id": "wea-augusta-u-channel",
+              "component_type": "bar",
+              "component_name": "1.5\" U-Channel",
+              "nominal_dimensions_in": "1.25 x 1.5 x 39.5",
+              "actual_dimensions_in": "1.25 x 1.5 x 39.5 (8x6 panel per material list)",
+              "wall_thickness_in": null,
+              "profile_depth_in": "Slides on the T&G picket at panel ends; master installation instructions: slide a u-channel on the first and last picket",
+              "material": "Vinyl extrusion",
+              "compatible_component_ids": [
+                "wea-augusta-picket-tg"
+              ],
+              "fasteners": [],
+              "qty_per_panel": 4,
+              "qty_per_panel_basis": "Manufacturer 8ft master CAD page material list (8x6 Panel): U-Channel 4, 1.25in x 1.5in x 39.5in; the length exactly equals the drawing-derived picket-run height (95.5 - 3*5.5)/2 = 39.5. Purchase stock is one 4-count kit entry, not four separate cuts"
+            },
+            {
+              "component_id": "wea-augusta-metal-insert",
+              "component_type": "post_stiffener_aluminum",
+              "component_name": "Augusta Metal Rail Insert (1.25\" x 1.75\")",
+              "nominal_dimensions_in": "1.25 x 1.75",
+              "actual_dimensions_in": "1.25 x 1.75 x 71.5 (8x6 panel per material list)",
+              "wall_thickness_in": null,
+              "profile_depth_in": "Slides inside each of the three rails; master install: bottom rail with the aluminum insert, and ADDITIONAL STEPS for fences over 6ft tall require reinforcing",
+              "material": "Metal (aluminum per master install; the material list names it Metal)",
+              "compatible_component_ids": [
+                "wea-augusta-rail-slotted"
+              ],
+              "fasteners": [],
+              "qty_per_panel": 3,
+              "qty_per_panel_basis": "Manufacturer 8ft master CAD page material list (8x6 Panel): Metal 3, 1.25in x 1.75in x 71.5in - one insert per rail"
+            }
+          ],
+          "post_spacing_rules": {
+            "on_center_in": 72,
+            "post_depth_below_grade_in": null,
+            "frost_line_note": null,
+            "footing_diameter_in": null,
+            "concrete_footing_spec": "Master installation instructions (Panel Installation): pour concrete around post B to about 3 inches below ground level and level and plumb; follow the layout and post installation instructions on page 3 for post A"
+          },
+          "slope_accommodation": {
+            "method": "unknown",
+            "max_rake_angle_deg": null,
+            "hardware_required": [],
+            "notes": "Augusta-specific racking/stepped transition hardware is not stated in the retained sources; no value is inferred from the Savannah line."
+          },
+          "color_options_note": "Premium privacy row colors per specsheet p1 legend (White/Tan/Khaki/Gray/White-Tan) and full-line catalog p7 'Color Options Include' (White/Cedar/Tan/Coastal/Khaki/Black/Gray); brochure p15 lists Augusta among Coastal Gray available styles; exact per-style availability (esp. WeatherGrain and Black) needs per-SKU verification"
         }
       ]
     },
@@ -304,10 +530,23 @@
           "assembly_type": "panel",
           "assembly_name": "Pembroke Privacy Fence",
           "style": "privacy",
-          "height_options_in": [48, 60, 72, 84, 96],
+          "height_options_in": [
+            48,
+            60,
+            72,
+            84,
+            96
+          ],
           "width_on_center_in": 96,
-          "color_options": ["White", "Tan", "Khaki", "Gray"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan",
+            "Khaki",
+            "Gray"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": {
             "resin": "Co-extruded PVC (virgin cap layer / recycled PVC core), ~85% recycled content per manufacturer claim",
             "uv_inhibitors": "Titanium dioxide in outer layer",
@@ -339,6 +578,85 @@
               "material": "Vinyl extrusion with aluminum insert in bottom rail",
               "compatible_component_ids": [],
               "fasteners": []
+            },
+            {
+              "component_id": "wea-pembroke-post-4x4",
+              "component_type": "post",
+              "component_name": "4\"x4\" Socket Post",
+              "nominal_dimensions_in": "4x4",
+              "actual_dimensions_in": "4 x 4 x 76 (gate list per Pembroke 6ft CAD page; panel lists no posts)",
+              "wall_thickness_in": null,
+              "profile_depth_in": "1.5 in x 5.5 in routed rail-socket holes (master install: 1.5\"x5.5\" Hole for rail in the post); two route holes for the two-rail solid privacy panel. Family catalog data (brochure p15 + full-line catalog p15, twice-observed): posts sold Blank/Line/End/Corner/Gate variants in 4x4 and 5x5, heights 72/84/96/105/120/140 in, all colors; gate posts include a metal insert; posts are custom routed per style. No source states which post height pairs with the 6x6 panel (panel kit lists no posts; the gate list's 4x4x76 is gate scope)",
+              "material": "Vinyl extrusion",
+              "compatible_component_ids": [
+                "wea-pembroke-rail-slotted"
+              ],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-pembroke-rail-slotted",
+              "component_type": "rail",
+              "component_name": "Pembroke Slotted Rail (1.5\" x 5.5\")",
+              "nominal_dimensions_in": "1.5 x 5.5",
+              "actual_dimensions_in": "1.5 x 5.5 x 71.5 (6x6 panel per material list)",
+              "wall_thickness_in": null,
+              "profile_depth_in": "Slotted channel accepts the T&G picket; two rails (top and bottom) per the Pembroke 6ft CAD page 6x6 material list; bottom rail houses the metal insert per master install Solid Privacy flow",
+              "material": "Vinyl extrusion; bottom rail with internal aluminum insert (master installation instructions, Solid Privacy flow)",
+              "compatible_component_ids": [
+                "wea-pembroke-post-4x4",
+                "wea-pembroke-picket-tg"
+              ],
+              "fasteners": [],
+              "qty_per_panel": 2,
+              "qty_per_panel_basis": "Manufacturer Pembroke 6ft CAD page material list (6x6 Panel): Top Rail 1 + Bottom Rail 1 = 2 rails 1.5in x 5.5in x 71.5in each; corroborates the CAD drawing's two-rail section chain (5.5 + 61 + 5.5 = 72) and the master install Solid Privacy flow (bottom rail with insert plus top rail)"
+            },
+            {
+              "component_id": "wea-pembroke-picket-tg",
+              "component_type": "picket",
+              "component_name": "Pembroke 7/8\" x 11.3\" Tongue & Groove Picket",
+              "nominal_dimensions_in": "7/8 x 11.3",
+              "actual_dimensions_in": "0.875 x 11.3 x 64.25 (6x6 panel per material list)",
+              "wall_thickness_in": ".055 in (tongue & groove wall gauge, specsheet Classic style block)",
+              "profile_depth_in": null,
+              "material": "Vinyl extrusion, tongue-and-groove interlocking edges",
+              "compatible_component_ids": [
+                "wea-pembroke-rail-slotted"
+              ],
+              "fasteners": [],
+              "qty_per_panel": 6,
+              "qty_per_panel_basis": "Manufacturer Pembroke 6ft CAD page material list (6x6 Panel): T&G Pickets 6, 0.875in x 11.3in x 64.25in; the 64.25in stock exceeds the 61in run by 3.25in implied seating (config-dependent, not a measured engagement; the 6x8 list carries the same 64.25in stock)"
+            },
+            {
+              "component_id": "wea-pembroke-u-channel",
+              "component_type": "bar",
+              "component_name": "1.5\" U-Channel",
+              "nominal_dimensions_in": "1.25 x 1.5 x 61",
+              "actual_dimensions_in": "1.25 x 1.5 x 61 (6x6 panel per material list)",
+              "wall_thickness_in": null,
+              "profile_depth_in": "Slides on the T&G picket at panel ends; master installation instructions: slide a u-channel on the first and last picket",
+              "material": "Vinyl extrusion",
+              "compatible_component_ids": [
+                "wea-pembroke-picket-tg"
+              ],
+              "fasteners": [],
+              "qty_per_panel": 2,
+              "qty_per_panel_basis": "Manufacturer Pembroke 6ft CAD page material list (6x6 Panel): U-Channel 2, 1.25in x 1.5in x 61in; the length exactly equals the drawing-derived single picket-run height 72 - 2*5.5 = 61 (two-rail panel, one run), and the 6x8 list repeats the same 61in for its own 6ft height. Purchase stock is one 2-count kit entry"
+            },
+            {
+              "component_id": "wea-pembroke-metal-insert",
+              "component_type": "post_stiffener_aluminum",
+              "component_name": "Pembroke Metal Rail Insert (1.25\" x 1.75\")",
+              "nominal_dimensions_in": "1.25 x 1.75",
+              "actual_dimensions_in": "1.25 x 1.75 x 71.5 (6x6 panel per material list)",
+              "wall_thickness_in": null,
+              "profile_depth_in": "Slides inside the bottom rail only; master install Solid Privacy flow: Slide the bottom rail (with the aluminum insert) and top rail into post A",
+              "material": "Metal (aluminum per master install; the material list names it Metal)",
+              "compatible_component_ids": [
+                "wea-pembroke-rail-slotted"
+              ],
+              "fasteners": [],
+              "qty_per_panel": 1,
+              "qty_per_panel_basis": "Manufacturer Pembroke 6ft CAD page material list (6x6 Panel): Metal 1, 1.25in x 1.75in x 71.5in; the bottom-rail-only placement is master-install evidence (Solid Privacy flow: slide the bottom rail with the aluminum insert), cited separately at profile_depth_in, not a material-list statement"
             }
           ],
           "post_spacing_rules": {
@@ -351,8 +669,30 @@
           "slope_accommodation": {
             "method": "both",
             "max_rake_angle_deg": null,
-            "hardware_required": ["U-mount rail brackets", "aluminum/steel post reinforcement for tall or high-wind installs"],
+            "hardware_required": [
+              "U-mount rail brackets",
+              "aluminum/steel post reinforcement for tall or high-wind installs"
+            ],
             "notes": "Same stepping/racking methodology as Premium privacy line; per-style slope tolerance found in the CAD spec diagram shipped with the panel (not captured in this dataset)."
+          },
+          "racking_supplement_note": "Home Depot product page PWPR-T-G11-3-6X8 states the Pembroke 6ft panel accommodates a grade change of 4 in over an 8 ft run using the racking method (data/structural/weatherables-structural.json racking_stepping_supplement); degrees conversion 2.39 is the structural pass's own trigonometry, not a manufacturer figure.",
+          "width_options_in": [
+            72,
+            96
+          ],
+          "width_options_basis": "Specsheet p2 Pembroke block: 'Width: 6' & 8''; master install p3: most posts are installed 72in or 96in center to center and 'The width of all of our fence panels can be reduced'; the manufacturer Pembroke 6ft CAD page carries both 6x6 and 6x8 panel material lists",
+          "panel_ground_clearance_in": "2 (recommended minimum between the bottom of the panel and the ground; master installation instructions p2, family-level recommendation)",
+          "wind_rating_claims": {
+            "standard_install_faq": "110 mph sustained / gusts up to 130 mph for panels 6 ft tall and less (manufacturer FAQ, quoted in data/structural/weatherables-structural.json engineering_letters; the blog's T&G privacy bucket naming Pembroke repeats 110/130)",
+            "high_wind_install_with_fasteners_master_install_p15": "Panel Privacy 120 mph sustained / gusts up to 137 mph with post reinforcement (concrete or aluminum insert to at least 22in above grade, 12in x 36in post hole) and rail-edge screws (master installation instructions p15, retained PDF)",
+            "conflict_note": "Two different Weatherables sources give inconsistent figures (110/130 vs 120/137); both are reproduced verbatim rather than reconciled. Neither is a downloadable stamped document (structural pass finding). High-wind ratings apply to the installed method, not the panel alone."
+          },
+          "inspected_not_claimed": {
+            "panel_post_height_pairing": "not found after inspection: no retained source pairs a post length with the 6x6 panel (master install p3 gives hole depth 30-36in; brochure p15 lists post heights 72-140in; the combination is an install choice, not a stated product pairing)",
+            "panel_post_cap": "not claimed: the panel material list names no post cap; the gate lists' 'Post Cap 2 | 4x4' entries are gate scope; brochure p15 shows post hardware family-wide but no panel-scope cap statement",
+            "rail_slot_dimension": "not found after inspection: the master install labels the rail '1.5\"x5.5\" Slotted rail' but states no slot width/depth; the '7/8\" slot' label belongs to the lattice-variant rail, not the solid privacy rail",
+            "u_channel_screw_note": "not applicable: the u-channel screw instruction applies to Coastal/Cedar WeatherGrain fencing only; Pembroke color options are White/Tan/Khaki/Gray (smooth)",
+            "receiving_geometry": "unchanged open gap: rail slot depth, picket seating depth (beyond the implied 3.25in), and post rail-socket depth are absent from all retained sources"
           }
         },
         {
@@ -360,10 +700,22 @@
           "assembly_type": "panel",
           "assembly_name": "Glenshire Privacy Fence",
           "style": "privacy",
-          "height_options_in": [60, 72, 84, 96],
+          "height_options_in": [
+            60,
+            72,
+            84,
+            96
+          ],
           "width_on_center_in": 96,
-          "color_options": ["White", "Tan", "Khaki", "Gray"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan",
+            "Khaki",
+            "Gray"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": null,
           "sub_assemblies": [
             {
@@ -400,8 +752,14 @@
           "style": "semi-privacy",
           "height_options_in": null,
           "width_on_center_in": null,
-          "color_options": ["White", "Tan", "Khaki"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan",
+            "Khaki"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": {
             "resin": "Co-extruded PVC (line-wide manufacturer formulation)",
             "uv_inhibitors": "Titanium dioxide outer layer",
@@ -439,8 +797,14 @@
           "style": "semi-privacy",
           "height_options_in": null,
           "width_on_center_in": null,
-          "color_options": ["White", "Tan", "Khaki"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan",
+            "Khaki"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": null,
           "sub_assemblies": [
             {
@@ -471,8 +835,14 @@
           "style": "picket",
           "height_options_in": null,
           "width_on_center_in": null,
-          "color_options": ["White", "Tan", "Khaki"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan",
+            "Khaki"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": {
             "resin": "Co-extruded PVC (line-wide manufacturer formulation)",
             "uv_inhibitors": "Titanium dioxide outer layer",
@@ -492,7 +862,12 @@
               "material": "Vinyl extrusion, notch-lock insertion through routed top rail into bottom rail",
               "compatible_component_ids": [],
               "fasteners": [
-                {"type": "adhesive", "size": "small drop", "material": "vinyl glue", "qty_per_assembly": "1 dab per picket cap"}
+                {
+                  "type": "adhesive",
+                  "size": "small drop",
+                  "material": "vinyl glue",
+                  "qty_per_assembly": "1 dab per picket cap"
+                }
               ]
             }
           ],
@@ -512,8 +887,14 @@
           "style": "picket",
           "height_options_in": null,
           "width_on_center_in": null,
-          "color_options": ["White", "Tan", "Khaki"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan",
+            "Khaki"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": null,
           "sub_assemblies": [
             {
@@ -542,10 +923,19 @@
           "assembly_type": "panel",
           "assembly_name": "Captiva Pool Fence",
           "style": "pool / closed-top picket",
-          "height_options_in": [48, 60],
+          "height_options_in": [
+            48,
+            60
+          ],
           "width_on_center_in": null,
-          "color_options": ["White", "Tan", "Khaki"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan",
+            "Khaki"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": {
             "resin": "Co-extruded PVC (line-wide manufacturer formulation)",
             "uv_inhibitors": "Titanium dioxide outer layer",
@@ -581,10 +971,19 @@
           "assembly_type": "panel",
           "assembly_name": "Crestview Pool Fence",
           "style": "pool / closed-top picket",
-          "height_options_in": [48, 60],
+          "height_options_in": [
+            48,
+            60
+          ],
           "width_on_center_in": null,
-          "color_options": ["White", "Tan", "Khaki"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan",
+            "Khaki"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": null,
           "sub_assemblies": [
             {
@@ -615,8 +1014,13 @@
           "style": "ranch rail",
           "height_options_in": null,
           "width_on_center_in": 96,
-          "color_options": ["White", "Tan"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": {
             "resin": "Co-extruded PVC (line-wide manufacturer formulation)",
             "uv_inhibitors": "Titanium dioxide outer layer",
@@ -634,7 +1038,9 @@
               "wall_thickness_in": ".150 in",
               "profile_depth_in": null,
               "material": "Vinyl extrusion",
-              "compatible_component_ids": ["wea-rail-2rail"],
+              "compatible_component_ids": [
+                "wea-rail-2rail"
+              ],
               "fasteners": []
             },
             {
@@ -646,7 +1052,9 @@
               "wall_thickness_in": ".090 in",
               "profile_depth_in": null,
               "material": "Vinyl extrusion",
-              "compatible_component_ids": ["wea-post-2rail"],
+              "compatible_component_ids": [
+                "wea-post-2rail"
+              ],
               "fasteners": []
             },
             {
@@ -658,7 +1066,9 @@
               "wall_thickness_in": null,
               "profile_depth_in": null,
               "material": "Vinyl",
-              "compatible_component_ids": ["wea-post-2rail"],
+              "compatible_component_ids": [
+                "wea-post-2rail"
+              ],
               "fasteners": []
             }
           ],
@@ -678,8 +1088,13 @@
           "style": "ranch rail",
           "height_options_in": null,
           "width_on_center_in": 96,
-          "color_options": ["White", "Tan"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": null,
           "sub_assemblies": [
             {
@@ -691,7 +1106,9 @@
               "wall_thickness_in": ".150 in",
               "profile_depth_in": null,
               "material": "Vinyl extrusion",
-              "compatible_component_ids": ["wea-rail-3rail"],
+              "compatible_component_ids": [
+                "wea-rail-3rail"
+              ],
               "fasteners": []
             },
             {
@@ -703,7 +1120,9 @@
               "wall_thickness_in": ".090 in",
               "profile_depth_in": null,
               "material": "Vinyl extrusion",
-              "compatible_component_ids": ["wea-post-3rail"],
+              "compatible_component_ids": [
+                "wea-post-3rail"
+              ],
               "fasteners": []
             }
           ],
@@ -723,8 +1142,13 @@
           "style": "ranch rail",
           "height_options_in": null,
           "width_on_center_in": 96,
-          "color_options": ["White", "Tan"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": null,
           "sub_assemblies": [
             {
@@ -736,7 +1160,9 @@
               "wall_thickness_in": ".150 in",
               "profile_depth_in": null,
               "material": "Vinyl extrusion",
-              "compatible_component_ids": ["wea-rail-4rail"],
+              "compatible_component_ids": [
+                "wea-rail-4rail"
+              ],
               "fasteners": []
             },
             {
@@ -748,7 +1174,9 @@
               "wall_thickness_in": ".090 in",
               "profile_depth_in": null,
               "material": "Vinyl extrusion",
-              "compatible_component_ids": ["wea-post-4rail"],
+              "compatible_component_ids": [
+                "wea-post-4rail"
+              ],
               "fasteners": []
             }
           ],
@@ -768,8 +1196,13 @@
           "style": "ranch rail / crossbuck",
           "height_options_in": null,
           "width_on_center_in": null,
-          "color_options": ["White", "Tan"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": null,
           "sub_assemblies": [],
           "post_spacing_rules": null,
@@ -782,8 +1215,13 @@
           "style": "ranch rail",
           "height_options_in": null,
           "width_on_center_in": null,
-          "color_options": ["White", "Tan"],
-          "texture_finish": ["Smooth"],
+          "color_options": [
+            "White",
+            "Tan"
+          ],
+          "texture_finish": [
+            "Smooth"
+          ],
           "material_grade": null,
           "sub_assemblies": [
             {
@@ -795,10 +1233,22 @@
               "wall_thickness_in": null,
               "profile_depth_in": null,
               "material": "Vinyl extrusion, cross-braced",
-              "compatible_component_ids": ["wea-post-2rail"],
+              "compatible_component_ids": [
+                "wea-post-2rail"
+              ],
               "fasteners": [
-                {"type": "self-tapping screw", "size": "not specified", "material": "not specified", "qty_per_assembly": "2 per rail per cross brace (4-6 per brace depending on configuration)"},
-                {"type": "PVC vinyl glue", "size": "1/8 in bead", "material": "vinyl cement", "qty_per_assembly": "1 bead per post-rail socket pocket, sets in ~45 seconds"}
+                {
+                  "type": "self-tapping screw",
+                  "size": "not specified",
+                  "material": "not specified",
+                  "qty_per_assembly": "2 per rail per cross brace (4-6 per brace depending on configuration)"
+                },
+                {
+                  "type": "PVC vinyl glue",
+                  "size": "1/8 in bead",
+                  "material": "vinyl cement",
+                  "qty_per_assembly": "1 bead per post-rail socket pocket, sets in ~45 seconds"
+                }
               ]
             },
             {
@@ -810,7 +1260,9 @@
               "wall_thickness_in": null,
               "profile_depth_in": null,
               "material": "Aluminum",
-              "compatible_component_ids": ["wea-gate-kit-2rail"],
+              "compatible_component_ids": [
+                "wea-gate-kit-2rail"
+              ],
               "fasteners": []
             }
           ],
@@ -833,31 +1285,289 @@
           "texture_finish": null,
           "material_grade": null,
           "sub_assemblies": [
-            {"component_id": "wea-hw-hinge-cornerstone-med", "component_type": "hinge", "component_name": "Cornerstone Medium Duty Hinges", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Steel/polymer", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-hinge-cornerstone-hd", "component_type": "hinge", "component_name": "Cornerstone Heavy Duty Hinges", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Steel/polymer", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-hinge-truclose", "component_type": "hinge", "component_name": "Tru-Close Multi-Adjust Hinge Series 3 (self-closing)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Steel", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-hinge-ss-adjustable", "component_type": "hinge", "component_name": "Stainless Steel Adjustable Gate Hinge", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Stainless steel", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-latch-traverse", "component_type": "latch", "component_name": "Traverse Gate Latch", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Polymer/steel", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-latch-keystone-adv2", "component_type": "latch", "component_name": "Keystone Advantage Two-Sided Lockable Latch", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Polymer", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-latch-keystone-adv1", "component_type": "latch", "component_name": "Keystone Advantage One-Sided Lockable Latch", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Polymer", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-latch-x2-1side", "component_type": "latch", "component_name": "Keystone X2 One-Sided Lockable Latch", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Polymer", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-latch-x2-2side", "component_type": "latch", "component_name": "Keystone X2 Two-Sided Lockable Latch", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Polymer", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-latch-armor", "component_type": "latch", "component_name": "Armor Latch", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Steel", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-latch-trident", "component_type": "latch", "component_name": "Trident Gate Latch (pool-code, key-lockable)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Steel/polymer", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-latch-ss", "component_type": "latch", "component_name": "Stainless Steel Gate Latch", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Stainless steel", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-latch-lokklatch-mag", "component_type": "latch", "component_name": "LokkLatch Magnetic", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Aluminum/polymer, magnetic", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-latch-lokklatch-deluxe", "component_type": "latch", "component_name": "LokkLatch Deluxe S3", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Aluminum/polymer", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-droprod-ss-std", "component_type": "drop_rod", "component_name": "Stainless Steel Drop Rod", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Stainless steel", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-droprod-ss-lockable", "component_type": "drop_rod", "component_name": "Key Lockable Stainless Steel Drop Rod", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Stainless steel", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-postinsert-al", "component_type": "post_stiffener_aluminum", "component_name": "Aluminum Post Insert (4x4 and 5x5 sizes)", "nominal_dimensions_in": "sized for 4x4 or 5x5 post", "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": "minimum 22 in above grade for high-wind/gate applications", "material": "Aluminum", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-postinsert-steel", "component_type": "post_stiffener_steel", "component_name": "Galvanized Post Insert (4x4 and 5x5 sizes)", "nominal_dimensions_in": "sized for 4x4 or 5x5 post", "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Galvanized steel", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-gatewheel", "component_type": "bracket", "component_name": "Gate Wheel (support for heavy/large gates)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Steel/polymer", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-gatebrace", "component_type": "bracket", "component_name": "Adjustable Gate Brace (aluminum cross-brace)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Aluminum", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-umount-bracket", "component_type": "bracket", "component_name": "U-Mount Rail Bracket (surface/stepping-method mounting)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Vinyl/aluminum", "compatible_component_ids": [], "fasteners": []},
-            {"component_id": "wea-hw-concrete-mount", "component_type": "bracket", "component_name": "Concrete Post Mount (surface-mount base for concrete/hard surfaces)", "nominal_dimensions_in": null, "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Aluminum mount member with steel leveling bolts", "compatible_component_ids": [], "fasteners": [
-              {"type": "concrete anchor bolt", "size": "1/4 in diameter masonry hole, min 3.5 in deep", "material": "steel with washer", "qty_per_assembly": "4 per mount"}
-            ]},
-            {"component_id": "wea-hw-fastener-hw-screw", "component_type": "fastener", "component_name": "High-Wind Reinforcement Screw", "nominal_dimensions_in": "#10 x 1 in", "actual_dimensions_in": null, "wall_thickness_in": null, "profile_depth_in": null, "material": "Stainless steel, self-tapping", "compatible_component_ids": [], "fasteners": []}
+            {
+              "component_id": "wea-hw-hinge-cornerstone-med",
+              "component_type": "hinge",
+              "component_name": "Cornerstone Medium Duty Hinges",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Steel/polymer",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-hinge-cornerstone-hd",
+              "component_type": "hinge",
+              "component_name": "Cornerstone Heavy Duty Hinges",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Steel/polymer",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-hinge-truclose",
+              "component_type": "hinge",
+              "component_name": "Tru-Close Multi-Adjust Hinge Series 3 (self-closing)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Steel",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-hinge-ss-adjustable",
+              "component_type": "hinge",
+              "component_name": "Stainless Steel Adjustable Gate Hinge",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Stainless steel",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-latch-traverse",
+              "component_type": "latch",
+              "component_name": "Traverse Gate Latch",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Polymer/steel",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-latch-keystone-adv2",
+              "component_type": "latch",
+              "component_name": "Keystone Advantage Two-Sided Lockable Latch",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Polymer",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-latch-keystone-adv1",
+              "component_type": "latch",
+              "component_name": "Keystone Advantage One-Sided Lockable Latch",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Polymer",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-latch-x2-1side",
+              "component_type": "latch",
+              "component_name": "Keystone X2 One-Sided Lockable Latch",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Polymer",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-latch-x2-2side",
+              "component_type": "latch",
+              "component_name": "Keystone X2 Two-Sided Lockable Latch",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Polymer",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-latch-armor",
+              "component_type": "latch",
+              "component_name": "Armor Latch",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Steel",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-latch-trident",
+              "component_type": "latch",
+              "component_name": "Trident Gate Latch (pool-code, key-lockable)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Steel/polymer",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-latch-ss",
+              "component_type": "latch",
+              "component_name": "Stainless Steel Gate Latch",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Stainless steel",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-latch-lokklatch-mag",
+              "component_type": "latch",
+              "component_name": "LokkLatch Magnetic",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum/polymer, magnetic",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-latch-lokklatch-deluxe",
+              "component_type": "latch",
+              "component_name": "LokkLatch Deluxe S3",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum/polymer",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-droprod-ss-std",
+              "component_type": "drop_rod",
+              "component_name": "Stainless Steel Drop Rod",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Stainless steel",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-droprod-ss-lockable",
+              "component_type": "drop_rod",
+              "component_name": "Key Lockable Stainless Steel Drop Rod",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Stainless steel",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-postinsert-al",
+              "component_type": "post_stiffener_aluminum",
+              "component_name": "Aluminum Post Insert (4x4 and 5x5 sizes)",
+              "nominal_dimensions_in": "sized for 4x4 or 5x5 post",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": "minimum 22 in above grade for high-wind/gate applications",
+              "material": "Aluminum",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-postinsert-steel",
+              "component_type": "post_stiffener_steel",
+              "component_name": "Galvanized Post Insert (4x4 and 5x5 sizes)",
+              "nominal_dimensions_in": "sized for 4x4 or 5x5 post",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Galvanized steel",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-gatewheel",
+              "component_type": "bracket",
+              "component_name": "Gate Wheel (support for heavy/large gates)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Steel/polymer",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-gatebrace",
+              "component_type": "bracket",
+              "component_name": "Adjustable Gate Brace (aluminum cross-brace)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-umount-bracket",
+              "component_type": "bracket",
+              "component_name": "U-Mount Rail Bracket (surface/stepping-method mounting)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Vinyl/aluminum",
+              "compatible_component_ids": [],
+              "fasteners": []
+            },
+            {
+              "component_id": "wea-hw-concrete-mount",
+              "component_type": "bracket",
+              "component_name": "Concrete Post Mount (surface-mount base for concrete/hard surfaces)",
+              "nominal_dimensions_in": null,
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Aluminum mount member with steel leveling bolts",
+              "compatible_component_ids": [],
+              "fasteners": [
+                {
+                  "type": "concrete anchor bolt",
+                  "size": "1/4 in diameter masonry hole, min 3.5 in deep",
+                  "material": "steel with washer",
+                  "qty_per_assembly": "4 per mount"
+                }
+              ]
+            },
+            {
+              "component_id": "wea-hw-fastener-hw-screw",
+              "component_type": "fastener",
+              "component_name": "High-Wind Reinforcement Screw",
+              "nominal_dimensions_in": "#10 x 1 in",
+              "actual_dimensions_in": null,
+              "wall_thickness_in": null,
+              "profile_depth_in": null,
+              "material": "Stainless steel, self-tapping",
+              "compatible_component_ids": [],
+              "fasteners": []
+            }
           ],
           "post_spacing_rules": null,
           "slope_accommodation": null

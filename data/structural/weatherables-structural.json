@@ -333,6 +333,24 @@
       "model_or_line": null,
       "date_or_version": null,
       "note": null
+    },
+    {
+      "doc_type": "cad_detail",
+      "title": "augusta 8ft master CAD page (material lists: 8x6 and 8x8 panels, gates)",
+      "url": "https://weatherables.com/pages/augusta-8ft-cad",
+      "local_path": "manuals/weatherables/structural/weatherables-augusta-8ft-cad-page.html",
+      "model_or_line": "Augusta",
+      "date_or_version": null,
+      "note": "Manufacturer web page retained as HTML (content-stable across fetches; page chrome is not); carries per-configuration panel and gate material lists with quantities and dimensions"
+    },
+    {
+      "doc_type": "cad_detail",
+      "title": "pembroke 6ft master CAD page (material lists: 6x6 and 6x8 panels, gates)",
+      "url": "https://weatherables.com/pages/pembroke-6ft-cad",
+      "local_path": "manuals/weatherables/structural/weatherables-pembroke-6ft-cad-page.html",
+      "model_or_line": "Pembroke",
+      "date_or_version": null,
+      "note": "Manufacturer web page retained as HTML (material-list content byte-identical across three fetches on 2026-09-07; page chrome is not stable); carries per-configuration panel and gate material lists with quantities and dimensions. The 6x6 panel list's U-channel length 61 in closes exactly against the local pembroke CAD drawing chain 72 - 2*5.5 = 61 (two-rail panel, single picket run; no halving — the /2 applies only to Augusta's two-run 95.5 - 3*5.5)/2"
     }
   ],
   "remaining_gaps_after_this_pass": [

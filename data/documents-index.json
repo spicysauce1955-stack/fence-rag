@@ -1,6 +1,6 @@
 {
-  "total_indexed_documents": 145,
-  "documents_with_verified_local_file": 141,
+  "total_indexed_documents": 147,
+  "documents_with_verified_local_file": 143,
   "documents_missing_local_file": 0,
   "documents_url_only_no_download": 4,
   "files_on_disk_not_in_index": [],
@@ -983,6 +983,26 @@
       "date_or_version": null,
       "url": "https://cdn.shopify.com/s/files/1/0942/4470/0531/files/Captiva4x48.png",
       "local_path": "manuals/weatherables/structural/weatherables-cad-captiva-gate-48in.png",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "cad_detail",
+      "title": "augusta 8ft master CAD page (material lists: 8x6 and 8x8 panels, gates)",
+      "model_or_line": "Augusta",
+      "date_or_version": null,
+      "url": "https://weatherables.com/pages/augusta-8ft-cad",
+      "local_path": "manuals/weatherables/structural/weatherables-augusta-8ft-cad-page.html",
+      "file_exists": true
+    },
+    {
+      "manufacturer": "Weatherables",
+      "doc_type": "cad_detail",
+      "title": "pembroke 6ft master CAD page (material lists: 6x6 and 6x8 panels, gates)",
+      "model_or_line": "Pembroke",
+      "date_or_version": null,
+      "url": "https://weatherables.com/pages/pembroke-6ft-cad",
+      "local_path": "manuals/weatherables/structural/weatherables-pembroke-6ft-cad-page.html",
       "file_exists": true
     },
     {

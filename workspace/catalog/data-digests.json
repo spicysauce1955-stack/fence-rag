@@ -53,16 +53,16 @@
       "sha256": "b6c739096c952a2b12e6d77b5e1fb79fdb571bbb179d2fd996ee027a4350eb94"
     },
     "data/structural/weatherables-structural.json": {
-      "bytes": 26934,
-      "sha256": "bf70bab18759d460e61062a90aebcd367ca7a202889cb18823c54739f1acb668"
+      "bytes": 28321,
+      "sha256": "291eb5abcfe5d13ac06166cfa0971bea4999437a9cba0911b698fe246fc824d4"
     },
     "data/wam-bam.json": {
       "bytes": 53620,
       "sha256": "e51a3ae0e4cafa42432878dec122baecfa23b197c44c0b358bff28cb5597bd48"
     },
     "data/weatherables.json": {
-      "bytes": 58038,
-      "sha256": "200ae413357bc3dc1f8998fdd6e8720e1473a85834fcdea0d39118fd622531f0"
+      "bytes": 80965,
+      "sha256": "212eb5bd8936f67c959398fddbf856ba662e9dd83425fc1cd954e032c13e648b"
     }
   },
   "why": "A baseline of the hand-researched dataset before any curation phase touches it. `data/` has one commit in its history and carries four claims contradicted by their own sources (state-and-gaps G16), which are still present verbatim because correcting someone's research is their call. If a value is ever silently amended, this is what makes the change visible rather than invisible. Acceptance criterion P1b."
