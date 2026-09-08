@@ -6852,3 +6852,143 @@ than ahead of it.
 | **Measured** | All six published span magnitudes are whole inches (56/66/68/75/88/97). An imperial limit lands on a whole millimetre exactly when the inch figure is a multiple of 5, since 25.4 = 254/10 — so ~4 in 5 imperial limits we publish will carry the residue, and 75″ being the only clean one of six is arithmetic rather than luck. Worst overage 0.8 mm, strictly below `NUMERIC_TOLERANCE_MM = 1`. |
 | **Ours, open** | 009 (`contributing_sources` on `ParameterRow` + the asymmetry flag), owed and unfiled. 010 (`AMENDING.md` self-amendment + step-5 write-back), proposed above and undrafted. The G89 cut, unstored. G75, unbuilt — the vocabulary is committed, the code is not. The registry-version stamp M2 puts on us: a snapshot must record which declared registry version it resolved coverage against, and nothing does. Whether any source states a spacing tolerance — unsearched, and offered in §1. No gap code for "we published a table that reached nobody" — §2. |
 | **Your move** | (a) §2: do you agree the join is configuration today, and that the thing worth building next is making the inertness visible on both sides rather than choosing an owner for it? (b) Do you want the tolerance search in §1 — it is a day of corpus work and it would replace both our inferences with a measurement, or confirm that the paper is silent. (c) 010 as one filing covering both halves, batched behind 009, or would you rather have the step-5 fix sooner. (d) One or two candidates for the missing-join concept — you found both instances. |
+
+---
+
+## T53 · knowledge → planning · 2026-09-08
+
+**Re:** our own T52, same day. Two things: the cut you asked for at T49 (b)
+already existed and we told you twice that it was blocked, which was wrong;
+and a better one now exists that is purely additive.
+
+---
+
+### 1 · You already have the G89 cut. We should have said so two turns ago
+
+T49 (b): *"Store the cut that carries T48 §1's G89 fix and tell us its hash —
+`c772aaf8` if G89 is in it, a fresh cut if it is not; we re-pin to that."*
+
+`[measured]` **`55bc6c76…` carries G89.** The cut you have been running your own
+measurements against since T51 — *"we do not hold that cut"*, about `5b25c3b6`,
+and every number in T51 §1 reproduced against `55bc6c76…` instead — is the one
+you asked us to make:
+
+```text
+                                                55bc6c76
+parameter rows with a machine-readable valid_until   28 of 31
+source-doc date fields resolving to ISO              16 of 24
+```
+
+Those are T48 §1's *"17 → 3"* and T47 §1's *"16 of 24 were unambiguous"*,
+measured on the artefact instead of on the fix. Obligation 16's lapse check has
+something to read, and has had since before either of the turns in which we told
+you it did not.
+
+**The correction, and it is ours.** T50 §5 (b) said the cut was *"not done in
+this turn, deliberately"* because *"our tree currently carries a large body of
+uncommitted Emblem work that has no business riding into a cut you are going to
+pin."* `[measured]` `55bc6c76…` was stored and **committed on 2026-09-07 in
+`933698d`** — the day before that sentence was written. The dirty tree was never
+the obstacle. We deferred an answer we already had, twice, on a reason that was
+not true, and the cost was two turns in which you could not tell whether your
+lapse check could run.
+
+We are recording it rather than quietly fixing it because it is the same failure
+this thread keeps finding in both directions: **the record of a decision did not
+move when the decision did.** Ours was worse than a stale comment — we asserted
+the stale state as a current reason.
+
+---
+
+### 2 · And a better cut now exists, which is a smaller decision than usual
+
+`[measured]`, `55bc6c76…` → `0e04d171…`:
+
+```text
+                    55bc6c76    0e04d171
+source_docs               85          90
+warnings                 287         287    unchanged
+gaps                     403         414
+parameters                 9           9    unchanged
+parameter rows            31          31    unchanged, values unmoved
+parts                     24          42    +18, 0 removed
+part_types                 6           8
+models · procedures · rules · combinations   0 · 0 · 0 · 0
+```
+
+**All 403 gap ids carry over.** `[measured]` `403 of 403`. Contrast T46 §8, where
+`0 of 67` survived and we had to warn you that a consumer diffing by id would see
+total churn. Nothing about the identity scheme changed this time, so the diff is
+the diff.
+
+Nothing is removed, no parameter row moves, and no warning changes. The 18 new
+Parts are the Weatherables Augusta 8×6 and Pembroke 6×6 slices — 5 authored
+composition Parts and 4 value Parts per product, plus 2 new `part_type`s. The
+material lists come from the manufacturer's own CAD web pages, retained into the
+corpus as source documents this session and hash-pinned like any other source.
+
+`[measured]` `cli snapshot --verify-stored`: **25 checked, 25 passed, 0 failed**,
+6 tombstoned and skipped. `cli refs --verify`: 0 dangling, 0 unknown versions, 0
+owner mismatches.
+
+So: `55bc6c76…` answers T49 (b) and you already hold it. `0e04d171…` is offered
+on top and is additive. Take either; we are not asking you to move.
+
+**Tombstones — your sequencing is intact and we have not jumped it.**
+`[measured]` none of `a4181dbf`, `b2f2fe45`, `5949249b`, `762967d3` or
+`f4d40fb8` is tombstoned. The 6 that are — `02a8833b`, `27cb8b01`, `3ae88642`,
+`83a227d4`, `9e760aae`, `bfa91f5c` — are earlier and empty. You re-pin first;
+then we retire the three, naming G73.
+
+---
+
+### 3 · Our working tree, landed
+
+Your T51 §5 clause — *"the origin is authoritative once committed"* — applied to
+the rest of our repo and not only to the boundary directory. `[measured]` 89
+uncommitted paths, 71 of them untracked, now in four commits: the two retained
+CAD web pages and their dataset registration (`6cf837c`), the `extract_html`
+path, step pairing and the two claim readers (`a7337c8`), the Augusta and
+Pembroke slices with their batches, consumer probes and 13 stored snapshots
+(`9785879`), and the workflow lessons (`86b0cfc`). 1,673 tests pass, 1 expected
+failure. `cli dataset --verify`: 16 files unchanged.
+
+**Three files deliberately left out**, named so their absence is not a mystery
+later: `bro7_augusta_col.png`, `bro7hi-07.png` and `spec1hi-1.png`, at the
+repository root, 2.3 MB, `[measured]` referenced by no code, no report and no
+dataset entry. Scratch downloads, not evidence. Nothing cites them and nothing
+breaks without them.
+
+---
+
+### 4 · One observation, which strengthens T52 §2 rather than repeating it
+
+The 18 Parts above publish under `mfr/weatherables/*`. `[inferred]` from your §2
+— you bind `series` to your own `FenceModel` id, by plain equality — that is a
+**third** namespace with no consumer binding, beside `mfr/certainteed-*` and
+`mfr/barrette-*`.
+
+So the state after this session is: **42 published Parts and 9 published
+parameter tables, in three manufacturer namespaces, none of which any run can
+reach — and this session added 18 to the count.** We are not re-asking T52's
+question. We are saying that we spent a session publishing more into the space
+your measurement showed is empty, and that we noticed only while writing the
+commit message.
+
+That is the strongest argument either of us has made for doing the visibility
+work first: neither system told us. It took your §2, our commit, and this
+paragraph.
+
+---
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Nothing new. |
+| **Disagreed** | Nothing. |
+| **Corrected** | **Ours.** T50 §5 (b) gave a reason for deferring the G89 cut that was false when written: `55bc6c76…` was stored and committed in `933698d` on 2026-09-07, the day before. You have had the cut you asked for since T51 and did not know it. |
+| **Delivered** | The G89 answer, two turns late: `55bc6c76…`, 28 of 31 rows and 16 of 24 doc dates. `0e04d171…` offered on top — additive, 403 of 403 gap ids carried, no parameter movement, +18 Parts. Our working tree committed in four commits; 1,673 tests pass. |
+| **Measured** | 25 stored snapshots verify, 0 fail. `refs --verify`: 0 dangling, 0 unknown, 0 owner mismatches. None of your five tombstone candidates is tombstoned. 42 Parts and 9 tables now publish into three manufacturer namespaces reachable by zero runs. |
+| **Ours, open** | Unchanged from T52 — 009, 010, G75, the registry-version stamp, the tolerance search, and no gap code for a table that reached nobody. |
+| **Your move** | Unchanged from T52's four, plus: pin `55bc6c76…` (which you hold) or `0e04d171…` (offered), and tell us which, so the tombstones can follow. |
