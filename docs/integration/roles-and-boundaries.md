@@ -2,6 +2,10 @@
 
 ```text
 Status:     PROPOSED, 2026-09-08, by the Knowledge team. Both dispositions PENDING.
+            REVISED the same day, before any reply, against Planning's two agent
+            specs of 2026-09-08 (`advisory-agent-design.md`, `agent-framework-design.md`),
+            which were written independently and which this document had not seen.
+            Four things it got wrong are corrected in place and marked REVISED.
             NOT AN AMENDMENT. It changes no BINDING item and needs no ratification.
 Binds:      Nothing, until both sides record acceptance below.
 Authority:  NONE at the boundary. `contract.md` is FROZEN at v1.3 and governs what
@@ -68,10 +72,36 @@ equally unchanged:
 | **What is happening** | — | The map, the job, actions, choices, run state |
 | **Method** | The actions the *sources* describe (`Procedure`, `AssemblyStep`) | The commands the *engine* accepts |
 | **Geometry** | Published dimensions in thousandths | Placement, fitting, cutting, assembly |
-| **The agent** | — | Hosts it; it reads Knowledge and commands the engine |
+| **The agent** | — | Hosts it. **REVISED:** it *proposes into input slots* and never reaches inside `generate()` — not "commands the engine" as first drafted |
+| **A customer's documents** | Ingested, stored verbatim, versioned, never edited, only cited | — |
+| **A customer's products** | Nothing | Operational data, keyed by their team key |
 | **The person** | Never sees one. A curator reviews Knowledge's own readings | Owns every screen, and decides what any person is shown |
 | **Identity of a job** | — | Owns it entirely |
 | **Learning** | Relevance, from its own query log | — |
+
+### REVISED — the source/operational split, and where a customer's own material goes
+
+Planning's `advisory-agent-design.md` §8 (decision O3) settles a question this document had
+left open and got half-wrong. A company's material divides in two:
+
+- **Source materials** — manuals, price lists, spec sheets, drawings. *"Stored verbatim,
+  versioned, never edited, only cited."*
+- **Operational data** — the company's products, jobs, layouts, corrections. Live and editable.
+
+That is the answer, and it falls out cleanly: **a customer's documents come to Knowledge**,
+because the first bullet is a description of what this platform already is. **A customer's
+products stay with Planning**, because they are operational data.
+
+Planning's §4 warning is correct and does not conflict: `TenantId` on the wire is the
+*publisher's* axis and **must not be repurposed** as Planning's multi-team key. Those are two
+different concepts — `null` there means *Knowledge-global*, not *belongs to no team of yours* —
+and both can exist without touching each other.
+
+> **This has a clock on it.** Planning's §8 records *"**Documents** — a provenance record type,
+> and **no ingestion of any kind.** This is the largest unbuilt piece of the product goal. **It
+> is its own track**."* Knowledge already ingests 146 documents verbatim, versioned, never
+> edited, with every published value resolving to a document, page and region. **Before that
+> track is scheduled, both sides should decide whether it is a second copy of this one.**
 
 **The most consequential line is the second.** Knowledge holds `mfr/*` identities derived from
 manufacturer documents. Planning will carry different products. Neither side can author the
@@ -126,6 +156,39 @@ The only thing that comes back. Four required fields; refused if any is empty.
 Knowledge never observes a person and cannot verify either — which is exactly why they must be
 required rather than inferred.
 
+#### REVISED — adopt Planning's five rejection types; this document's `HOW FAR` was not enough
+
+`advisory-agent-design.md` §3 (decision D4) types a rejection five ways, and **only two of them
+touch knowledge at all**:
+
+| Type | Means | What happens | Crosses to Knowledge? |
+|---|---|---|---|
+| `wrong` | the rule is bad | counts against the rule | **yes** |
+| `unknown_fact` | a fact was missing, not a bad rule | opens a `Gap` naming the fact; **the rule is untouched** | **yes** |
+| `not_here` | right in general, wrong for this job | narrows scope | no — Planning's `scope_restrict` |
+| `not_now` | fine, don't bother me | silences on this project; learns nothing | no |
+| `my_call` | no right answer, customer's taste | records a preference, never a correction | no |
+
+**This is better than what this document originally proposed, and the difference matters.** The
+first draft argued that a single honest `HOW FAR` field encoded the whole taxonomy — *global
+scope means "this is wrong", narrow scope means "not here"* — and that categories should be
+derived later from the scopes people actually pick.
+
+Scope cannot express `unknown_fact`, and that is the one that counts. A correction made because
+**the agent lacked a fact** is not evidence against the rule; routing it to a `Gap` leaves the
+rule intact and names what would close it. Under the scope-only design it would have been
+recorded as a narrow-scope disagreement and quietly counted against a rule that was never
+wrong — the self-poisoning failure this loop was designed to avoid, reintroduced by the design
+meant to avoid it.
+
+`not_now` and `my_call` are likewise real and inexpressible as scope, and both correctly stay on
+Planning's side.
+
+**So §3.3 narrows: only `wrong` and `unknown_fact` cross.** Three of five rejections never reach
+Knowledge at all, which is a cleaner boundary than this document first drew. `HOW FAR` remains
+required on the two that do cross, because *"this rule is wrong, everywhere"* and *"this rule is
+wrong, for this soil"* are still different claims.
+
 ---
 
 ## 4 · What each side takes on
@@ -148,9 +211,13 @@ required rather than inferred.
 
 ### Planning undertakes to
 
-1. **Carry Knowledge's citation ids on commands**, opaque and unparsed. This is the hook the
-   whole correction loop hangs from: without it an override has nothing to name. Planning's own
-   code already treats these ids as opaque and says so, so the discipline exists.
+1. **Carry Knowledge's citation ids through to a proposal's rationale.** **REVISED — this was
+   filed as "the only real new obligation on Planning" and it appears to be free.**
+   `agent-framework-design.md` §5.1 already requires every proposal's rationale to be a list of
+   tagged `Claim`s, where a `read` or `measured` claim **must** carry `evidence` — a file and
+   page or line. A Knowledge `ref_id` is exactly that evidence. So the hook the correction loop
+   hangs from already exists in Planning's design, arrived at independently and for a different
+   reason. What is left is confirming the two mean the same thing, not building anything.
 2. Send overrides with all four fields of §3.3, or not at all.
 3. **Assert `WHO` and the role.** Knowledge cannot obtain them by any other route.
 4. Decide what any person is shown, and whether a person is asked anything at all.
@@ -201,14 +268,27 @@ by choice rather than by requirement.
 - **Knowledge team:** PROPOSED, 2026-09-08. Filing is not acceptance.
 - **Planning team:** **PENDING** — accept / accept-modified / reject, with reasoning.
 
-Two things the Knowledge side would specifically like shot at:
+**REVISED — what the Knowledge side would like shot at, after reading Planning's two specs.**
+The first draft's headline ask has withdrawn itself; these replace it.
 
-1. **§4 Planning item 1** — carrying opaque citation ids on commands is the only real new
-   obligation this document places on Planning, and it is placed there because Knowledge cannot
-   do it. If it is expensive, say so now: the whole correction loop is designed around it, and
-   it is cheaper to redesign than to discover.
+1. **The document-ingestion track (§2's clock).** The most urgent item here, because it is the
+   only one where waiting costs work rather than clarity. Planning's §8 schedules a
+   source-material store that is verbatim, versioned, never edited and cite-only. Knowledge is
+   that store, with 146 documents in it. Decide whether the track is a second copy **before it
+   is scheduled**, not after.
 2. **§3.2** — whether a served query is acceptable at all, given that `build-plan.md` §1 argues
    for a pre-fetched immutable object *"rather than queried"*. The Knowledge reading is that
-   both are right for different consumers. If Planning reads the pure-function property as
-   excluding a live query even for an agent, that disagreement should surface here rather than
-   in an implementation.
+   both are right for different consumers: the engine gets the snapshot, an agent gets a query
+   whose answer names the snapshot it was computed from. If Planning reads the pure-function
+   property as excluding a live query even for an agent, that disagreement should surface here
+   rather than in an implementation.
+3. **Whether a Knowledge `ref_id` is admissible as a `Claim.evidence` value** (§4 Planning
+   item 1). If yes, the correction loop's hook is already built on both sides and nobody owes
+   anybody anything. If Planning's grounding check in `agent-framework-design.md` §6 must
+   *re-execute* a `read` claim against its own view, then a `ref_id` pointing into Knowledge is
+   not re-executable on Planning's side, and that needs a mechanism rather than an assumption.
+
+**Withdrawn from the first draft, recorded so the change is visible:** the claim that carrying
+citation ids was a new cost on Planning, and the argument that a single `HOW FAR` field made a
+rejection taxonomy unnecessary. Both were wrong, and Planning's independently-written specs are
+what showed it.

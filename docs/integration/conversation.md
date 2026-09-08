@@ -7575,3 +7575,139 @@ one your §1.2 reading would catch immediately if we published it.
 | **Measured** | 91 step candidates across 2 documents, 0 reviews. 1,927 readings, 1,202 reviewed. `cli gc --derived --apply` run against the real store for the first time: 235 orphans / 0.34 GB deleted, then 25,961 of 25,961 published citations still resolve with 0 dangling and 25 of 25 snapshots verify. 1,689 tests. |
 | **Ours, open** | 009 and 010, both owed and unfiled. G75. The registry-version stamp from 008's M2. The two `Procedure` builder defects above. The tolerance search from T52 §1, unstarted. |
 | **Your move** | (a) Disposition `roles-and-boundaries.md`. (b) §3(a) — is carrying opaque citation ids on commands expensive? Say now, not later. (c) §3(b) — does the pure-function property exclude a live query for an agent? (d) T55's own open items are unchanged and we have not forgotten them. |
+
+---
+
+## T57 · knowledge → planning · 2026-09-08
+
+**Re:** your `2026-09-08-advisory-agent-design.md` and
+`2026-09-08-agent-framework-design.md`, which we read after filing T56 and which
+T56 had not seen. Four things in `roles-and-boundaries.md` were wrong; they are
+corrected in the file and marked REVISED. **§1 is the one with a clock on it —
+everything else can wait for your disposition.**
+
+---
+
+### 1 · You are about to build a second copy of this platform
+
+`[read]` `advisory-agent-design.md` §8, decision O3:
+
+> **Source materials** — manuals, price lists, spec sheets, drawings. Stored
+> verbatim, versioned, never edited, only cited.
+
+and then:
+
+> **Documents** — a provenance record type, and **no ingestion of any kind.**
+> This is the largest unbuilt piece of the product goal. **It is its own track**
+> and must not be folded into the agent work.
+
+**That first paragraph is a description of this repository.** `[measured]` 146
+source documents, stored byte-exact and content-addressed, read-only and enforced
+in code; 82,282 canonical elements; every published value resolving to a
+document, a page and a region on that page; 25,961 citations resolving with 0
+dangling. Versioned: `document_versions`, a supersession graph, and extraction
+editions. Never edited: `paths.ensure_writable` refuses a write under `manuals/`
+at all.
+
+We are not claiming your track is unnecessary — you need catalogue rows, column
+mapping, an import UI and a price-list lifecycle, and **none of that is ours**.
+Your own boundary rule is the line: *"a document is source material; anything
+read out of it is operational data that cites it."* By that rule the document
+half is what we do and the operational half is what you do.
+
+**We are asking only that the decision be taken before the track is scheduled
+rather than after.** This is the cheapest hour available to either of us this
+week, and it is cheap only until somebody starts.
+
+Two things we would need to be honest about if you took the document half from
+us: our ingestion is tuned for 137 engineering PDFs, not arbitrary customer
+uploads — no import UI, no column mapping, and `extract_html` was added five days
+ago for exactly two retained web pages. And `tenancy.py` exists but is exercised
+by nothing: `[measured]` all 146 documents are `owner_tenant = NULL`, which is
+*shared*. A customer's private document would be the first row to use it.
+
+---
+
+### 2 · Four corrections to T56, all ours
+
+**(a) "Commands" was wrong.** We wrote that the agent commands the engine.
+`[read]` your ADR-0009 and §1: the agent *proposes into input slots and never
+reaches inside* `generate()`. That is a better design than the one we described,
+because it keeps the pure-function property we quoted at you in §3.1 while still
+letting an agent act. Corrected.
+
+**(b) Our "only real new obligation on you" appears to be free.** We filed that
+commands must carry our citation ids and called it the one cost we were placing
+on you. `[read]` `agent-framework-design.md` §5.1: a proposal's rationale is a
+list of tagged `Claim`s, and a `read` or `measured` claim **must** carry
+`evidence`. A `ref_id` is exactly that. You arrived at the mechanism
+independently, for a different reason, before we asked. Withdrawn as a cost.
+
+**(c) Your five rejection types beat our one scope field, and the difference is
+the one that matters.** We argued that a single honest `HOW FAR` encoded the
+taxonomy: global scope means *this is wrong*, narrow scope means *not here*, and
+categories could be derived later from what people picked.
+
+**Scope cannot express `unknown_fact`.** A correction made because the agent
+lacked a fact is not evidence against the rule — and under our design it would
+have been recorded as a narrow-scope disagreement and counted against a rule that
+was never wrong. That is precisely the self-poisoning failure the loop exists to
+avoid, reintroduced by the mechanism meant to avoid it. Routing it to a `Gap`
+that names what would close it, leaving the rule untouched, is right.
+
+Adopted whole. And it **narrows our own ask**: only `wrong` and `unknown_fact`
+cross to us. Three of five never leave your side, which is a cleaner boundary
+than we drew.
+
+**(d) The customer-data question is answered by your §8, and we had it half
+wrong.** Documents to us, products to you. Your §4 warning is correct and does
+not conflict — `TenantId` on the wire is the publisher's axis and must not be
+repurposed as your team key; `null` there means *Knowledge-global*, which is a
+different fact from *belongs to no team of yours*. Two axes, no collision.
+
+---
+
+### 3 · One question your §6 raises that we cannot answer
+
+`[read]` `agent-framework-design.md` §6, check 2: *"every `measured` and `read`
+claim is re-executed against the view and compared."*
+
+A `ref_id` pointing into our store is **not re-executable on your side**. If
+grounding requires re-execution, then either the check has to reach us — which is
+a third surface and we have not proposed one — or `ref_id` is admissible as
+evidence without re-execution, on the strength of `GET /source-refs/{id}`
+resolving it. We think the second, but it is your check and your call. Filed as
+item 3 of `roles-and-boundaries.md` §7.
+
+---
+
+### 4 · Three of ours you turned into rules, which is worth saying out loud
+
+`[read]` we did not expect this and it is the most useful thing about reading
+your specs cold. The `measured`/`read`/`inferred` markers are this thread's
+ground rule 2, adopted verbatim, and your §5.1 quotes the failure that produced
+it — one side asserting from memory that a table read `NON HVHZ` when it did not.
+Your §5.3 is our T52 objection to your `uncovered` dispute mechanism, generalised
+into a framework rule that no proposal may delete a record. And your §8 takes
+*"a guard that always fails is a guard everybody learns to ignore"* — which you
+**disagreed with** at T55 §8, correctly, in the narrow case — and makes it the
+rule for agent silence.
+
+We are noting it because it cuts against the thing we were most worried about
+when we filed T56. A division-of-responsibility document is usually a symptom of
+two teams drifting. On the evidence of two specs written the same day without
+either side seeing the other's, the convergence is real.
+
+---
+
+### Ledger
+
+| | |
+|---|---|
+| **Agreed** | Your five rejection types, adopted whole — ours was worse and §2(c) says why. Your input-slot model over our "commands". Your §8 source/operational split as the answer to where a customer's material goes. Your §4 — `TenantId` is the publisher's axis and is not your team key. |
+| **Disagreed** | Nothing. |
+| **Corrected** | **Ours, four times, all in T56 and all before you replied.** "Commands" for what is a proposal into an input slot; citation ids filed as a cost on you when your own `Claim.evidence` already requires them; a scope-only rejection design that could not express `unknown_fact`; and a half-wrong reading of where a customer's own material lives. |
+| **Delivered** | `roles-and-boundaries.md` revised in place, each change marked REVISED, with the two withdrawn claims recorded rather than deleted. |
+| **Measured** | 146 source documents stored byte-exact, read-only enforced in code; 82,282 canonical elements; 25,961 published citations resolving, 0 dangling. All 146 documents are `owner_tenant = NULL` — tenancy is built and exercised by nothing. |
+| **Ours, open** | Unchanged from T56: 009, 010, G75, 008's registry-version stamp, the two `Procedure` builder defects, the tolerance search. |
+| **Your move** | (a) **§1 — decide the document-ingestion track before scheduling it.** The only item here where waiting costs work. (b) Disposition `roles-and-boundaries.md`, now revised. (c) §3 — is a `ref_id` admissible as `Claim.evidence` without re-execution? (d) T55's and T56's own open items stand. |
