@@ -15,6 +15,26 @@ instructions are in [the Emblem workflow](docs/curation/emblem-publication-workf
 Historical checkpoints below retain their original context; do not treat them
 as a current exhaustive search result.
 
+## BOM inspection integration — 2026-09-07
+
+Snapshot `55bc6c769a933079f37e7b5795bd0042ee52a66d5beefe95c9a9d079dcc05bda`
+is imported into the persistent database of `/home/user/.superset/projects/BOM`.
+Local preview: `http://localhost:8000`, Everything → Knowledge → Published parts.
+Search `noa22021705` for the three new drawing drafts, or Emblem for eight matching
+records. All 24 typed Part definitions survived the API/storage round trip. The
+snapshot still contains no Models; draft visibility does not establish assembly
+readiness. This integration is local and its code changes are not yet committed.
+
+The actual BOM checkout needed opaque public Part version support and a read-only
+viewer; the old `/tmp/fence-planning-bom` cumulative patch was not applied wholesale.
+85 focused API/Part/locale tests plus one precision test passed. Browser checks
+confirmed filtering, fractional mm/cm values, and Hebrew. A saved s17 project's
+canvas produced a null-point overlay error; the Knowledge view worked. Details
+are in that checkout's `docs/architecture/published-part-inspection.md`; backup,
+import receipt, screenshots and server log are in
+`/home/user/.local/state/fenceai-emblem/`. Port 8791 belongs to an independent
+throwaway smoke server and must not be treated as the persistent application.
+
 ## Objective and scope
 
 Formalize a repeatable conversion from source evidence into contract-valid data-model instances through fence-rag’s **Sources → Canonical → Claims → Published** layers. This session developed an Emblem prototype; it did **not** complete that layered conversion. The next session should formalize the workflow before extending the prototype.
@@ -158,3 +178,40 @@ draft Parts, preserving original exact-SKU Parts. New snapshot:
 `python3 scripts/advance_emblem_drawing.py`, then
 `python3 scripts/check_conversion_batch.py workspace/catalog/emblem-drawing-conversion-batch.json`.
 No synthetic dimensions, human reviews, or consumer assembly approval were added.
+
+
+Augusta slice complete — 2026-09-07 (batch `augusta-assembly-001`): the
+Weatherables Augusta 8×6 privacy panel now has a full S→C→K→P→consumer path
+and is the best template for the next product. What exists:
+
+- **Snapshot `95c770b8…`** (33 Parts, 0 models, 0 procedures by design):
+  5 authored composition Parts (`wea-augusta-*`, counts in the dataset with
+  recorded bases), 4 value Parts (`augusta-8x6-*`: rail, picket incl.
+  43 in stock length + 22 kit count, U-channel 1.25×1.5×39.5 in + count 4,
+  and a metal rail insert Part the earlier slices did not know existed).
+- **Five retained sources** incl. the manufacturer's 8ft CAD web page
+  (HTML, `extract_html` ingests its material-list tables as canonical
+  elements) — found by following the dataset's own URL patterns after the
+  coverage-inventory lesson. U-channel length 39.5 in closes exactly
+  against the drawing chain ((95.5−3×5.5)/2); the 6 ft list closes the
+  same way. Picket 43−39.5=3.5 in is recorded implied seating, NOT a
+  measured engagement.
+- **Consumer validation with exit-code discipline**: the advance script
+  refuses to store the snapshot unless all 12 checks pass (closed-outcome
+  resolver check, unit/datum fidelity incl. centerline offsets 69.85→69
+  mm with recorded losses, membership-pinned checks, mapping completeness,
+  capability flags). `capability_validation` keeps assembly/fitting/
+  cutting/purchasing `validated=false` with truthful reasons.
+- **Still open**: receiving depths (rail slot, picket seating beyond the
+  implied 3.5 in, post socket), exact SKU identity, Augusta per-style color
+  availability, Amendment 008 (models blocked), 20 step candidates awaiting
+  human review. Panel weight 65 lb, post-hole specs and post family data
+  are inspected but not yet persisted as facts.
+- Workflow lessons (product-shaped coverage, datum semantics, exception
+  discipline, corpus-path web retention, consumer-dialect traps) are now
+  written into `docs/workflows/source-to-contract.md` — read the
+  "Coverage must be product-shaped", "Retaining a web source", "Bounded
+  review" and "Autonomous execution order" sections before starting.
+- Reproduce: `python3 scripts/advance_augusta_assembly.py` (exit 0 = all
+  checks green) then
+  `python3 scripts/check_conversion_batch.py workspace/catalog/augusta-assembly-conversion-batch.json --round 1`.

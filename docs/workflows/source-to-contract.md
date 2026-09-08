@@ -62,6 +62,54 @@ questions can proceed alongside this work when they help identify the intended
 product or configuration; supplying a new document is not automatically the
 user's burden.
 
+### Coverage must be product-shaped, not batch-shaped (Augusta lesson)
+
+A limitation is only honest after the inventory has been genuinely
+product-scoped. The Augusta slice initially recorded "purchasing quantities
+not claimed" and "picket count unknown" as honest boundaries — while the
+manufacturer's own CAD web page (reachable by following the URL pattern
+already recorded in the dataset's document entries) carried a complete
+per-configuration material list that closed both gaps plus an entire unknown
+component (metal rail inserts). The failures to avoid:
+
+* **Batch-shaped inspection.** Inspecting only the documents the current
+  evidence chain already touches is not a bounded inventory. Walk the
+  family's whole document list; inspect or explicitly defer each with a
+  reason. A "not found" recorded over an uninspected corpus subset is
+  unverified.
+* **Unfollowed URL patterns.** The dataset's `documents` entries name real
+  URL shapes (e.g. `weatherables.com/pages/<style>-<size>-cad`, CDN asset
+  paths). One sibling URL pattern often generalizes to the exact product
+  page, spec sheet or material list you are missing. Follow the pattern
+  before declaring a gap; a web locator found this way still needs its bytes
+  retained through the corpus path before it is evidence.
+* **Limitations written where gap states belong.** "X not claimed" is a
+  boundary only after inspection; before that it is `not found after
+  (incomplete) inspection`, which the gap-state table already forbids.
+* **Numbers that echo each other are corroboration, not truth.** The
+  strongest gap-closers cross-validate: the Augusta material list's
+  U-channel length (39.5 in) exactly equaled the drawing-derived run height
+  (95.5 − 3×5.5)/2, and the 6 ft list closed the same way (27.75). Prefer
+  evidence that closes arithmetically against what you already hold; record
+  the closure check in the coverage note.
+* **Implied values are not measurements.** A stated stock length minus a
+  derived run height (43 − 39.5 = 3.5 in) is *implied seating*, and it can
+  be configuration-dependent (6 ft gives 3.25 in). Record the implication
+  and its dependence explicitly; never publish it as an engagement.
+
+### Retaining a web source through the corpus path
+
+A web locator alone is not a canonical SourceRef. When a bounded search
+finds a manufacturer source worth trusting, retain it the established way:
+add the document entry to the owning dataset file (with title, url,
+local_path and a note recording content stability), download the bytes under
+`manuals/`, record the sha256, rebuild the manifest (`cli manifest`),
+and ingest (`cli ingest --path ...`). Web-page HTML needs an extractor:
+`extract_html` (stdlib, `html_text` origin, real `<table>` elements) exists
+for this. Then the page's tables and paragraphs are canonical elements and
+can anchor facts like any other source. Verify the material content is
+stable across fetches when the page chrome is not, and say so in the note.
+
 Classify each open question explicitly:
 
 | State | Meaning and next action |
@@ -97,6 +145,78 @@ The current unified `claims` table is a design proposal. Use `facts`,
 Do not create a parallel claim table for a batch. Source-supported relationships
 that have no durable lifecycle or public mapping yet may be explained as
 research findings, but must not be counted as a completed K→P conversion.
+
+## Extracting assembly information (the two unblocked seams)
+
+"Assembly information" in this repository means three different things, and
+the obstacle "we cannot extract it" decomposes accordingly — structure is
+authored and never extracted (Invariant 10), values flow through readings and
+review, and steps flow through candidates and review. Two mechanical seams
+were unblocked in 2026-09-07 after the Pembroke slice measured them:
+
+1. **Numbered-flow steps** (`cli steps --pair-numbered --document …`). Some
+   manuals — the Weatherables master guide among them — type each step NUMBER
+   as its own element and each step BODY as a separate paragraph.
+   `--propose` reads only `list` elements, so those flows produced nothing:
+   `[measured]` 466 glyph-paired steps across 111 pages in 22 documents sat
+   in this channel. `pair_numbered_flow` joins glyph and body by bbox
+   overlap (closest-first-line wins — the top-most-body variant paired
+   glyph `8.` with the NEXT section's heading), proposes into the SAME
+   `step_candidates` queue with `proposal_basis` carrying the glyph's
+   provenance, and is idempotent and non-destructive like `--propose`.
+   Nothing publishes without the human review; this only fills the queue
+   the review already gates.
+2. **Kit/material-list tables** (`scripts/read_kit_tables.py` →
+   `cli table-review --load-dir workspace/tests --pattern
+   machine-read-kit-tables.json`). The corpus holds complete per-
+   configuration kit lists ingested as canonical `table` elements with real
+   `table_cells` (Weatherables CAD pages, Catalyst SKU sheets): `[measured]`
+   18 kit-shaped tables (the 45-table figure included SKU/color matrices,
+   which the shape test correctly rejects — a two-row color/SKU header is a
+   catalog, not a BOM). The machine reader emits the exact `agent-read-*.json`
+   shape `table_review.load_reading()` already ingests, with
+   `reader_kind='machine'`, row-granular (row_label = the ITEM cell, one
+   candidate row per kit line). 165 candidates now wait in the existing
+   review lifecycle. The reader proposes; promotion and classification stay
+   human, and composition stays authored.
+
+What remains blocked, deliberately: a table reader will never emit a
+`PanelSpec` (Invariant 10); `models[]` waits on Amendment 008; procedures
+publish only after review. A future slice can bind reviewed kit-table rows
+to recipes by (document, table element, row) — the machine reading made that
+addressable — instead of hand-transcribing values into per-product recipe
+modules.
+
+## Autonomous execution order
+
+A full slice runs well without user interaction when executed in this order.
+Each step names its gate; a failed gate stops the line and is fixed at its
+owner before the next step runs.
+
+1. **Bind scope from the dataset first.** Before asking anyone anything,
+   read the product family's dataset file: its `documents` list is the
+   coverage universe, its URL patterns are the web leads, and its
+   assemblies name the components. Ask the user only for what the dataset
+   cannot answer (usually: which product/size, and which intended use).
+2. **Inventory before reading.** List every document in the family; mark
+   each inspected-or-deferred with a reason. Follow sibling URL patterns
+   for the exact product page before declaring any gap.
+3. **Trust ladder per value.** Text layer > HTML table > clean OCR label >
+   garbled OCR (pixel-verify against sibling drawings, record the method) >
+   cross-drawing arithmetic closure. Prefer evidence that closes
+   arithmetically against evidence already held.
+4. **Persist, then author, then publish.** Facts via the recipe import;
+   composition via the dataset (counts with recorded bases; digest
+   re-baselined deliberately); Parts via the normal publisher. Kit counts
+   publish as Tokens; implied values record their dependence.
+5. **Consumer semantics before transformer arithmetic.** Grep the consumer's
+   docstrings for what each field MEANS (centerline vs edge, cycle vs count,
+   handed-binding qty), check precedents in existing candidates, then write
+   the conversion. Counts refuse fractional values; lengths floor with
+   recorded losses; memberships pin by id, not count.
+6. **Gate the snapshot on the checks.** The advance script stores its
+   snapshot only when every consumer check passes, and exits nonzero
+   otherwise. Then the checkpoint, the full suite, and the run log.
 
 ## Evidence tracking and the batch manifest
 
@@ -138,6 +258,52 @@ or purchasing credits hiding physical parts. Also challenge an evidence-gap
 claim: could an image-only sheet, existing OCR, a differently named filing or
 a recoverable download already contain the answer?
 
+Where parallel agents are authorized, a five-way adversarial review paid for
+itself on the Augusta slice (source applicability, schema/layer closure,
+assembly/BOM logic, malformed inputs, overclaim audit). Findings it produced
+that self-review missed, in rough priority order of severity:
+
+* **Datum semantics conversions.** A value that survives a unit conversion can
+  still be semantically wrong: a draft authoring bottom-edge offsets into a
+  consumer centerline field put every rail 69.85 mm low, contradicting the
+  same project's own earlier precedent (the Emblem's half-envelope 88.9 mm).
+  When converting between dialects, check what the receiving field MEANS
+  (grep the consumer's docstrings), and check it against precedents in your
+  own artifacts before trusting the arithmetic.
+* **Exception handling that reads as success.** `except Exception: refused`
+  passes for any failure, and `all([])` passes for no result. Enumerate
+  outcomes in a closed set; pass only on the exact expected failure (matched
+  by type AND message start) or a genuinely populated result; treat a missing
+  record as failure. Have a test simulate a foreign exception and assert it
+  fails.
+* **Exit-code discipline.** An advance script that stores its snapshot and
+  exits 0 regardless of its own validation results turns every downstream
+  honesty claim into prose. Gate `put_snapshot` on all checks passing and
+  exit nonzero otherwise (the Emblem `completion_code` pattern).
+* **Silent truncation in conversions.** `int(x / 1000)` on a quantity can
+  turn a sub-unit count into 0 with no error. Counts are exact knowledge:
+  refuse fractional values. Lengths may floor, but only with the loss
+  recorded in a table a test reads.
+* **Prose drift between script and report.** If a report's honesty statement
+  is hand-edited beyond what its generating script produces, the next run
+  silently downgrades it. The script must carry the full statement.
+* **Overclaims in capability reasons.** "Consumer refuses cuts" was false —
+  the resolver produced `length_unresolved=False` whenever the fit happened
+  to succeed; the refusals were zero-width arithmetic, not design. Check the
+  consumer's code before writing what it does; "no source states X" is false
+  when the dataset's own sourced component contradicts you.
+* **Small error-contract bugs that hide real failures.** Dereferencing a row
+  before its `None` check turns the designed `ValueError` into a `TypeError`
+  and misroutes callers. Vacuous assertions (`... or True`) pin nothing.
+  Count-only probe checks stay green through renames — pin memberships by
+  id.
+* **Consumer-dialect traps.** Pattern-member qty is cycle-repeat semantics
+  (handed edge bindings require qty 1); two stacked rows cannot be two
+  pattern members (they alternate); fixings are the only channel for
+  U-channel counts; a post is required for the routed-rail length path.
+  Record dialect findings in the candidate's evidence, and withhold with
+  structure (path, code, reason, closes_by) rather than dropping.
+
 For each finding, record the failing check, evidence and disposition. Correct
 only its owner: source acquisition/ingestion, claim review, authored composition,
 or publisher/consumer code. Never repair public JSON by hand. Rerun the affected
@@ -150,7 +316,9 @@ Ask a user only the question needed for the requested capability. A supplier
 contents list helps purchasing; measured installed pitch helps fitted counts;
 neither is a prerequisite for answering supported identity questions. A user
 answer is attributed evidence or an authored choice, not manufacturer truth or
-blanket review approval.
+blanket review approval. Ask early, once, with concrete options — most
+everything else in this workflow is answerable without interaction if the
+coverage and consumer-semantics rules above are followed.
 
 ## Run and record
 
