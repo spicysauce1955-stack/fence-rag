@@ -1055,7 +1055,27 @@ evaluation report states what each would have to prove.
   40,200 files / 5.17 GB, of which 9,889 are in scope, and **176 orphans /
   145.0 MB** — 120 stale region crops whose element ordinals moved in a
   re-extraction, 56 uncited crop-cache renders, zero page images and zero
-  table-candidate crops. `--apply` has not been run against the real store.
+  table-candidate crops.
+
+**`--apply` was first run against the real store on 2026-09-08, and it behaved.**
+`[measured]` 235 orphans / 0.34 GB deleted, 69 empty directories pruned, 0 errors,
+`runs_in_flight: []` and `too_young_to_judge: 0`. All were `regions` crops — stale
+region renders whose element ordinals moved in a re-extraction. Verified after:
+**25,961 of 25,961 published citations still resolve, 0 dangling**; 25 of 25 stored
+snapshots verify; 1,689 tests pass. The protection that made it safe is the root set,
+which includes `published_snapshot_cites` (962) and `review_crop_sha256` (44) — the two
+classes of file that cannot be regenerated.
+
+**Separately, and it was 40% larger than the orphans: the `visualization-tools/`
+`node_modules` was deleted by hand on 2026-09-08.** `[measured]` 474 MB. `gc` correctly
+never touched it — it is unmanaged by design, per the scope whitelist above — so the
+tool built for reclaiming space in `derived/` could never have reclaimed the biggest
+thing in it. `package.json`, `package-lock.json` and `four-layer-smoke.svg` were kept,
+so `npm ci` in that directory restores it. Nothing depends on it: the only code
+reference is `tests/test_gc.py`, which writes a synthetic path into a temp fixture.
+`derived/` went 5.3 GB -> 4.5 GB. Note for whoever reads `gc.py:18`: its docstring
+still cites this checkout as the worked example of an unmanaged subtree, which remains
+true of the directory even though `node_modules` is now gone.
 
   **Four ways it could have deleted something it should not**, found by an
   adversarial pass on the day it landed and closed the same day. (i) It **raced a
