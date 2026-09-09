@@ -40,6 +40,19 @@ contract it implements, including 12 numbered prohibitions), `docs/target-archit
 (informative future direction), `rag-pipeline-plan.md` (historical, superseded, kept only because
 the spec and the guide cite it).
 
+**[`docs/naming.md`](docs/naming.md) is DECIDED and partly enforced** (2026-09-09).
+Every name this project mints — data fields, ids, code vocabularies, Python symbols,
+tests, documents and document ids. Almost none of it is new; the repository already had
+these conventions and had never written them down, which is how `fence_height_ft` came to
+exist beside `fence_height` (G108) and how five document-id namespaces came to collide.
+`tests/test_naming.py` enforces the four rules cheap enough to check. **Add a convention
+there with its check, or with a stated reason there is none.** The load-bearing ones:
+a second name for one value must mark a role or a layer; a unit suffix appears iff the
+value is a quantity and its unit is not declared elsewhere; `_mm` means `Quantity` and an
+unsuffixed key means `Token`; `UPPER_SNAKE` is a registry code that crosses to Planning
+and `error.*` is transport; a test name is a behaviour sentence and its docstring is the
+why; an id namespace is global across `docs/`.
+
 `docs/layering.md` is a **proposal** naming five layers (raw → canonical → assertions →
 entities → published) and one rule: *every reference points down a layer, never up*. The rule
 already landed once — it inverted `table_read_candidates.promoted_fact_id` into

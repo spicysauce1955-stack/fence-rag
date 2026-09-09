@@ -34,6 +34,7 @@ print `OK`.
 
 | Document | What it is |
 |---|---|
+| [`naming.md`](naming.md) | Every name this project mints. **Decided 2026-09-09**, four rules enforced by `tests/test_naming.py`; the rest recorded with their open defects |
 | [`layering.md`](layering.md) | Five layers and one rule — *every reference points down, never up*. The rule is **decided and enforced** by a test; the vocabulary is proposed. §2a carries the hard/soft overlay |
 | [`workflows/source-to-contract.md`](workflows/source-to-contract.md) | How new knowledge actually gets published today. The most current document in this tree |
 | [`assembly-step-design.md`](assembly-step-design.md) | `Procedure`/`AssemblyStep`. **Built** — the blocker is 91 unreviewed candidates, not code |
@@ -69,9 +70,13 @@ Each of these carries a banner explaining what happened to it.
 
 ## Traps this tree has set before
 
-- **Two unrelated `R1`–`R5` schemes.** `target-architecture.md` §3 numbers retrieval *upgrades*;
-  `workspace/reports/projection-relevance-audit.md` numbers *recommendations*. Same labels,
-  different proposals. Always say which.
+- **Colliding id namespaces — five of them, not one.** `[measured]` 2026-09-09: `R` means a
+  retrieval upgrade (`target-architecture.md` §3), an audit *recommendation*
+  (`workspace/reports/projection-relevance-audit.md`), **or** a curation acceptance criterion
+  (`curation/05`). `F` means an audit defect or a curation floor criterion. `C` means an amendment
+  candidate or a curation stage — and `CLAUDE.md` uses both senses nine lines apart. `A` means a
+  build-plan item or a curation group. Always say which; `curation/05`'s compound `C-A1` form is
+  the fix. `naming.md` §9 decides the rule.
 - **"Contract" means two things.** Since 2026-08-25 it means `integration/contract.md`. Older
   documents use it for the search *response* shape.
 - **Counts drift fast.** Corpus is **146** files (137 PDF, 6 PNG, 2 HTML, 1 DOCX) — but the
