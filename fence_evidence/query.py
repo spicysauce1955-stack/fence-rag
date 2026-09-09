@@ -346,11 +346,15 @@ def _supersession(snapshot) -> dict:
     """`content_hash -> what replaced it`, read from the snapshot's own
     `source_docs`.
 
-    Read from the PINNED SNAPSHOT rather than the live store on purpose. It is
-    deterministic -- the same answer a year from now -- and it does not inherit
-    `relations.supersession_chain`'s defect, which takes `LIMIT 1` per hop and
-    so returns one arbitrary path through what is really a DAG, silently
-    dropping chain members.
+    Read from the PINNED SNAPSHOT rather than the live store on purpose: it is
+    deterministic, the same answer a year from now, and a pinned answer must not
+    depend on anything outside its own pin.
+
+    This was also written to avoid `relations.supersession_chain`'s `LIMIT 1`
+    per hop, which returned one arbitrary path through what is really a DAG and
+    silently dropped chain members. **That defect is fixed as of 2026-09-09
+    (G110)**, so only the first reason still stands -- but it is the load-bearing
+    one, and this comment said otherwise in the present tense for a day.
     """
     return {doc["content_hash"]: list(doc.get("superseded_by") or [])
             for doc in (snapshot.get("source_docs") or [])

@@ -20,63 +20,63 @@
       "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-rail",
       "spec_key": "drawing_width_mm",
       "extractor": "source-reading:emblem-noa22021705:v1",
-      "fact_type": "rail_drawing_width_mm",
+      "fact_type": "rail_drawing_width_in",
       "element_id": "element-44a8582188-0011"
     },
     {
       "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-rail",
       "spec_key": "drawing_height_mm",
       "extractor": "source-reading:emblem-noa22021705:v1",
-      "fact_type": "rail_drawing_height_mm",
+      "fact_type": "rail_drawing_height_in",
       "element_id": "element-44a8582188-0013"
     },
     {
       "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-rail",
       "spec_key": "drawing_length_mm",
       "extractor": "source-reading:emblem-noa22021705:v1",
-      "fact_type": "rail_drawing_length_mm",
+      "fact_type": "rail_drawing_length_in",
       "element_id": "element-44a8582188-0013"
     },
     {
       "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-board",
       "spec_key": "drawing_thickness_mm",
       "extractor": "source-reading:emblem-noa22021705:v1",
-      "fact_type": "board_drawing_thickness_mm",
+      "fact_type": "board_drawing_thickness_in",
       "element_id": "element-44a8582188-0017"
     },
     {
       "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-board",
       "spec_key": "drawing_profile_width_mm",
       "extractor": "source-reading:emblem-noa22021705:v1",
-      "fact_type": "board_drawing_profile_width_mm",
+      "fact_type": "board_drawing_profile_width_in",
       "element_id": "element-44a8582188-0017"
     },
     {
       "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-board",
       "spec_key": "drawing_length_mm",
       "extractor": "source-reading:emblem-noa22021705:v1",
-      "fact_type": "board_drawing_length_mm",
+      "fact_type": "board_drawing_length_in",
       "element_id": "element-44a8582188-0017"
     },
     {
       "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-end-channel",
       "spec_key": "drawing_width_mm",
       "extractor": "source-reading:emblem-noa22021705:v1",
-      "fact_type": "end_channel_drawing_width_mm",
+      "fact_type": "end_channel_drawing_width_in",
       "element_id": "element-44a8582188-0044"
     },
     {
       "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-end-channel",
       "spec_key": "drawing_depth_mm",
       "extractor": "source-reading:emblem-noa22021705:v1",
-      "fact_type": "end_channel_drawing_depth_mm",
+      "fact_type": "end_channel_drawing_depth_in",
       "element_id": "element-44a8582188-0044"
     },
     {
       "part_id": "mfr/freedom-outdoor-living/emblem-noa22021705-end-channel",
       "spec_key": "drawing_length_mm",
       "extractor": "source-reading:emblem-noa22021705:v1",
-      "fact_type": "end_channel_drawing_length_mm",
+      "fact_type": "end_channel_drawing_length_in",
       "element_id": "element-44a8582188-0044"
     }
   ],

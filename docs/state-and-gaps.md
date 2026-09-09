@@ -4096,7 +4096,7 @@ What exists now, end to end:
 a person; until somebody confirms what each line is, none of them publishes."* That is the
 rule working, not the pipeline failing — `AssemblyStep.kind` and `scope` are required by the
 shape, so a candidate without a review cannot publish even partially. A half-classified step
-would be this platform asserting something nobody decided, which is A1/C0 in a new seam.
+would be this platform asserting something nobody decided, which is A1/CUR-S0 in a new seam.
 
 **One defect found in this work, by running it rather than by a test.** `build_procedures`
 wrapped its query in `except sqlite3.Error: return [], []`, reasoning that a store predating
@@ -5342,6 +5342,48 @@ deliberately, and decide whether a test should fail when they drift.
 
 ---
 
+**Proposed 2026-09-09, not built: date the artifact, do not police it.**
+
+The obvious guard — fail the suite when the committed report disagrees with a
+fresh run — is unkeepable, and saying why is most of the design. It goes red on
+any legitimate ingest, on any extractor improvement, and on a machine where the
+corpus is only partly fetched. `[measured]` this session moved
+`evidence_support` not at all (0.6499024 before and after) but moved the fact
+table under it by 17 renamed types and 18 re-derived condition dicts; a drift
+guard would have had nothing to say about either, which is the point — it
+measures the wrong thing. A guard everybody learns to skip is worse than no
+guard, and `cli reach`'s exit-code contract already records that lesson in this
+repository's own words.
+
+Three cheaper things, in order of what they buy:
+
+1. **Stamp every committed measurement artifact with what produced it.** The
+   report already carries its numbers; it does not carry the store's identity.
+   Add a header line naming the `SCHEMA_VERSION`, the document and fact counts,
+   and the ISO date — the same shape `manifest` rows already use. Then
+   staleness is *visible to a reader* without anything having to fail, and
+   `[measured]` the two artifacts G107 found were stale by 488 elements and two
+   pages, which such a header would have shown at a glance.
+2. **Make `cli evaluate` and `cli audit` refuse to overwrite silently.**
+   `--name` already exists and this session used it to take a baseline without
+   touching the committed report. Make the DEFAULT name write beside the
+   committed one and print the diff, so regenerating is a deliberate act with a
+   visible result rather than an invisible overwrite. `[measured]` the
+   `--second-stage` flag once overwrote `evaluation-report.md` with a different
+   configuration's numbers, and the fix then was to separate the paths; this is
+   the same fix one step further.
+3. **A test that the artifact is INTERNALLY consistent**, not that it is
+   current: every acceptance verdict in the committed report follows from the
+   unrounded numbers in the committed JSON beside it. That is checkable, never
+   goes red on an ingest, and it is the failure G65 actually names — a PASS
+   graded on a rounded 0.700 against a real 0.699512.
+
+None of the three is a drift guard, and that is deliberate: the thing worth
+guaranteeing is that a reader can tell *when* a number was taken, not that it
+was taken *recently*.
+
+---
+
 ### G108 — the store holds two names for one condition axis, and only one can publish
 
 *2026-09-09.* Found while investigating why nine of the gold set's twelve
@@ -5375,12 +5417,50 @@ rather than a misspelt key. It is the same shape as the `lang`/`corpus_track`
 shortcut `tests/test_basis_columns.py` guards: one axis, two vocabularies, and a
 guard in only one of the two places.
 
-**Recommended, not done here:** repoint `_COND_HEIGHT` at `fence_height` and
-emit an `Interval` (a point is `min == max`, both inclusive), then add the
-shortcut-guard test the repository already uses twice — *every key
-`facts._conditions()` can emit is in `CONDITION_SCOPE`*. That test fails today,
-which is the honest state. It is deferred because it changes what the extractor
-asserts and therefore wants a re-extraction, not a same-session edit.
+**CLOSED 2026-09-09**, and the recommendation needed one correction on the way.
+
+*Recommended here:* *"repoint `_COND_HEIGHT` at `fence_height` and emit an
+`Interval`."* **The extractor must not emit an `Interval`.**
+`_translate_conditions` hands the value to `parameters._parse_fence_height`,
+which parses a **label** — `str(value)` of a dict would fail it just as surely
+as the wrong key failed `CONDITION_SCOPE`, only with a different message. So
+`_conditions` writes the source's own lexeme (`[measured]` 2026-09-09 the
+eighteen rows say `8'` ×4, `4'` ×4, `16'` ×2, `12'` ×2, `8 foot` ×2,
+`6 feet`, `6'`, `3.5ft`, `10ft.` — the trailing `high`/`tall`/`height` sits
+OUTSIDE `_COND_HEIGHT`'s capture group, so it cannot reach the lexeme), which
+is what
+prohibition 7 asks for anyway, and `_parse_fence_height` gained the point
+branch: a stated height is an interval whose bounds coincide and are both
+inclusive. `_quantity_from_lexeme` widened to read the spelled-out unit forms,
+which is widening only — every lexeme that parsed before parses to the same
+value, and `[measured]` the corpus's only two `fence_height` labels
+(`Up to 48"`, `49" to 76"`) are byte-identical through the change.
+
+*Recommended here:* *"it wants a re-extraction."* **A targeted backfill, not
+`cli facts --extract`.** `[measured]` the 18 rows sit on 9 documents carrying
+274 regex facts between them, so a re-extraction would rewrite 274 rows to
+correct 18, inside a change about names — and it would move every `fact_id` on
+those documents, which is the one thing a fact review is anchored against
+surviving. So `facts.backfill_condition_keys` runs `_conditions` over each
+affected element's own text and rewrites only that column. It is a
+re-extraction of the FIELD: `[measured]` all 18 conditions dicts reproduce
+identically from today's extractor, so nothing was invented, and a pure key
+rename would have had to manufacture a source lexeme the float `8.0` does not
+carry.
+
+**And it refuses rather than guesses.** A row whose recomputation differs
+anywhere but the height axis is left alone and reported — the extractor has
+moved since those rows were written, and silently adopting a different exposure
+category under cover of a naming fix is the G62 error. `[measured]` `refused`
+is empty today; it fired correctly during mutation testing, on a row
+deliberately given an inconsistent pair.
+
+Guards in `tests/test_naming.py::TestRule1OneConditionAxisOneName`: the static
+one reads the assignments out of `facts._conditions` with `ast`, so it sees
+every key the function CAN emit rather than the ones a fixture happens to
+trigger; a functional one round-trips a written height back through
+`_parse_fence_height`; a third puts the whole dict through the real publisher;
+and a store guard holds the backfill. All four mutation-checked.
 
 **Also measured, and separate:** `required_conditions` in the gold set is
 **inert**. `evaluate.py:517` is its only reader, on the `facts` interface, and
@@ -5388,6 +5468,244 @@ none of the seven annotated questions declares an interface — so no code has
 ever executed or validated those twelve names. `eval/gold-question-schema.json`
 types the field as a bare object with no key constraint, which is how a
 thirteenth name gets invented next.
+
+---
+
+
+### G109 — one snapshot published `Part.version` as two different types, and one of them nobody could recompute
+
+*2026-09-09.* `docs/naming.md` §4, defect D-5, closed the same day it was
+written down. `[measured]` snapshot `0e04d171…`: the integer `1` on 27 parts and
+the string `"sha256:<64hex>"` on 15. `snapshot.PART_SHAPE` omitted the field
+entirely, and `_shape_failures` is an allowlist — a field absent from the shape
+publishes at whatever type it happens to hold — so nothing could have caught it.
+
+**A reason for the string form was recorded, contrary to what `naming.md` said.**
+G103 (2026-09-07) states it: *"Part versions no longer stay at 1 when reviewed
+content changes. Each is now a `sha256:` hash of all public Part content except
+version… Hash versions identify content, not chronological order."* `naming.md`
+D-5's *"No reason for the string form is recorded anywhere"* was wrong, and so
+was its *"`contract.md` pins `Combination.members` as `[Part@version]`"* — that
+sentence is in `knowledge-datamodel.md:1395`, and `contract.md` never names
+`Combination.members` at all. Both are corrected there now. The substantive
+observations survived: the two types did coexist, and nothing checked.
+
+**The integer was the defective form.** `[measured]` it is `1` on every
+int-versioned part in all 24 stored snapshots that carry parts, and there is no
+bump path anywhere in the package — no `next_version`, no increment. So a
+corrected value shipped under the version its predecessor shipped under, which
+is exactly what G103 fixed for the four `*_claims.py` slices and never fixed for
+`parts.py`. Pinning `Part@1` pins nothing.
+
+**Fixed:** `canonical.part_version` is now the single definition — `sha256:` plus
+the content hash of the part with `version` excluded — and all five mint sites
+call it. `parts.py` mints AFTER the stock-length pass rather than inside the dict
+literal, because `spec`, `cites` and `contributing_sources` are all still empty
+at that point.
+
+**A second, live defect fell out of the same read.** `augusta_drawing_claims`
+re-hashed a picket dict that ALREADY carried a version, chaining the two, so the
+published value could not be recomputed from the published payload. `[measured]`
+2026-09-09: 14 of the 15 string-versioned parts in `0e04d171…` reproduce from
+their own bytes; `mfr/weatherables/augusta-8x6-picket` did not. That is one
+published `Part.version` a consumer could not verify. It is fixed forward; the
+stored snapshot still carries it, because a stored snapshot is write-once.
+
+**What could NOT be closed, and it is a finding rather than an omission.**
+`PART_SHAPE` carries the WEAK rule — `is_object_version`, a positive integer or
+a non-empty string — not the strong one. `snapshot_store.verify_stored` re-runs
+`verify()` over stored payloads, so a gate refusing the integer `1` would mark 24
+write-once snapshots non-compliant for having obeyed the rule of their day. The
+strong rule lives at the builder, where `tests/test_naming.py` holds it: every
+built part's version is the content hash of the part it names. The weak rule is
+also exactly the predicate `authored_models`' audit and Planning's own
+`_version_identity` already enforce, so one definition now serves all three.
+
+`tests/test_naming.py::TestRule4PartVersionNamesOneThing`, five tests,
+mutation-checked four ways: the counter returning, the hash including its own
+field, the picket's chained re-hash, and `PART_SHAPE` losing the field.
+
+---
+
+### G110 — the supersession chain returned one arbitrary path per hop, and which path depended on where you asked
+
+*2026-09-09.* `relations.supersession_chain` walked ancestors and descendants
+with `LIMIT 1` and no `ORDER BY`, so a lineage that branches returned one route
+through it and silently dropped the rest.
+
+`[measured]` NOA `12-1106.11` (`doc-32e36a07ab44`) has **six** direct successors;
+the walk returned one, and `21-0125.07` — a real member — was absent. Worse, the
+route depended on the entry point: resolving `24-0117.05` returned a 3-member
+chain, `12-1106.11` a 4-member one, over one graph. Corpus-wide, `[measured]` 24
+`superseded_by` edges over 11 documents in two lineages; 7 documents supersede
+more than one document and 4 are superseded by more than one — a maximum
+out-degree of 4 and a maximum in-degree of 7. Branching is the shape of this data.
+
+**Nothing published was wrong.** `SourceDoc.superseded_by` comes from
+`snapshot._successors`, an unbounded query ordered by `sha256`, and
+`query._supersession` reads that on purpose — its comment already names this bug.
+What was wrong is every answer `cli resolve`, `versions.chain_for` and the
+`resolve` interface gave about a chain, and `select_active`'s claim that
+*"nothing in the chain supersedes it"*, which was computed over a subset.
+
+**Fixed:** the walk collects the whole connected component and orders it
+oldest-first by longest-ancestor-path rank, tie-broken on `document_id`. Order is
+the caller's, never SQLite's — `canonical.py`'s rule applied to a read, and
+load-bearing because `select_active` reads `chain[-1]` positionally.
+`[measured]` after: all three of `24-0117.05`, `12-1106.11` and `23-0314.05`
+return the same 8-member chain and the same active document.
+
+**The trap the fix had to clear, and it was the whole difficulty.** The four
+filings of `24-0117.05` share one sha256 (`2f446717ee75…`), each independently
+reads `in_force`, and none is marked active. Over the complete DAG `select_active`
+sees all four at once, and its own *">1 in force is a conflict"* rule would have
+called four copies of one approval a conflict — trading a silent omission for a
+spurious refusal on the exact lineage the walk was fixed for, and breaking
+`test_contract.py`'s pin and `test_versions.py`'s `inferred_in_force` assertion
+for the right domain reason. So `_one_per_approval` collapses candidates that
+share bytes, and only bytes: two documents that are not the same file never share
+a hash, so a genuine disagreement still reaches the conflict rule intact. That
+property is what makes the collapse safe rather than convenient, and it is
+mutation-tested from both sides.
+
+`tests/test_versions.py::TestTheChainIsTheWholeDagNotOnePath`, five tests.
+
+---
+
+### G111 — we asked Planning for eleven locale bundles the contract exempts, and meanwhile three codes we really do emit have no bundle at all
+
+*2026-09-09.* `docs/naming.md` §5, defect E-1, investigated and answered: the
+document is stale, and the missing emitter is not a defect.
+
+`[measured]` `grep -rn "WARN_" --include=*.py .` returns **zero hits** — there is
+no `WARN_*` constant in this codebase and no commit ever shipped an emitter.
+`[measured]` across all 31 stored snapshots: 7,187 published warnings, **0**
+carrying a `code`, and one field set in every one of the 25 non-empty snapshots
+(`text_raw`, `lang`, `lang_basis`, `severity_lexeme`, `attaches_to`, `cites`).
+
+**That is compliant.** Obligation 10: *"`code` and `params` are an optional
+overlay — 142 of 226 distinct warnings here appear exactly once, and only 3 recur
+with different values."* And `contract.md` §2's registry table puts these objects
+in the exempt half: *"**Source** warnings … **Exempt from the bundle rule.** The
+`SOURCE_*` codes are NOT these."* Eleven classes of sentence lifted verbatim from
+manufacturers' documents are source warnings by the contract's own definition, so
+`registry-additions.md` §6's ask for *"21 platform codes… ten `SOURCE_*`, eleven
+`WARN_*`"* contradicted §2 — which the same document states correctly forty
+sections earlier and then breaks.
+
+**Nobody was blocked, and that is not the same as nobody being misled.**
+`[measured]` Planning declined the ask at `conversation.md` T7 on their own
+reasoning (*"Register and implement per your own judgment"*), and their `en`/`he`
+bundles carry **zero** `WARN_*` keys. The ask nonetheless stood uncorrected in a
+boundary document for thirteen days, and `docs/build-plan.md` C1 asserted
+*"Planning still needs the two locale bundles"* for the whole of that time. Both
+are corrected. The §3 census itself was honest and mostly reproducible —
+`[measured]` nine of eleven `Published`/`Cites` pairs reproduce to the digit
+against the 289-warning snapshot and all eleven exemplar `ref_id`s resolve; the
+two that miss do so because the original classifier matched a disjunction wider
+than the exemplar phrase, and that classifier was a one-off script never
+committed. Its `Elements`/`Docs` columns do not reproduce and contradict this
+document's own G42 table (`WARN_FROST_LINE` 18/16 there against 254/28 here);
+both are now marked unreproducible until one is re-measured with a stated
+pattern.
+
+**OPEN, and it is the real defect this investigation found.** The two
+`SOURCE_*` lists have drifted three codes in each direction. `[measured]`
+2026-09-09:
+
+| | |
+|---|---|
+| We emit, they have no bundle | `SOURCE_CONTENT_DUPLICATED`, `SOURCE_NOT_FETCHED`, `SOURCE_STATUS_BASIS_FILENAME` |
+| They bundle, we cannot emit | `SOURCE_CELL_BOX_MISSING`, `SOURCE_DERIVED_NOT_ACCEPTABLE`, `SOURCE_READING_NOT_HUMAN_REVIEWED` |
+
+The first row is the live one: those three render as raw English on a Hebrew
+screen. Neither CI can see it — their
+`test_source_warning_code_list_is_current` checks a **vendored fixture** rather
+than this platform, and this platform has no test asserting the other direction
+at all. Raised at the boundary as `conversation.md` T61. The fix is a shared
+enumeration, not a bigger fixture, and it is not this session's to choose
+unilaterally.
+
+---
+
+### G112 — every edition of one approval is a different product, so the only exact answer about Chesterfield is an approval that expired in 2018
+
+*2026-09-09.* Written up, deliberately not fixed. Root cause of the trap the
+query surface now reports, and a companion to G106.
+
+`parameters._default_scope` builds a `fence_model` id by slugging
+`"{manufacturer} {product_family}"`. `product_family` is read off the document,
+so **each edition of one approval lineage prints a slightly different family
+string and gets a different product id.** `[measured]` snapshot `0e04d171…`
+publishes nine `ParameterTable`s under **seven** distinct `mfr/*` ids, five of
+which are the same CertainTeed/Barrette lineage:
+
+```
+mfr/certainteed-columbia-imperial-chesterfield
+mfr/certainteed-columbia-imperial-chesterfield-breezewood-brookline
+mfr/certainteed-columbia-imperial-chesterfield-chesterfield-w-lattice-breezewood-brookline
+mfr/barrette-outdoor-living-inc-vinyl-privacy-semi-privacy-fence-family-certainteed-era-model-names
+mfr/certainteed-general-bufftech-fence-installation-posts-rails-racking-stepping
+```
+
+`[measured]` asking the query surface for `footing depth exposure C` at
+`exposure_category=C`, scoped to `fence_model:mfr/certainteed-columbia-imperial-chesterfield`:
+**exactly one row grades `scope: "exact"`**, it is the `footing_schedule` whose
+`valid_until` is **2018-03-13**. The current approval -- `doc-3c8ab51045c7`, NOA
+23-0314.05 -- grades `scope: "other"` because its id carries **five** more
+tokens (`-chesterfield-w-lattice-breezewood-brookline`). (An earlier draft of
+this gap said "three more words" and pointed at `doc-7a08132799a1`, which is
+NOA 21-0125.07 and is itself titled *superseded*; both were wrong and are
+corrected here rather than quietly.)
+
+**The answer is not silently wrong, and that matters.** The expired row publishes
+`version_status: "superseded"` and `superseded_by_in_answer` naming all three
+successors with their scope ids, on `basis: "supersession_graph"`. A consumer
+reading currency gets the truth. A consumer filtering on `scope == "exact"` — the
+obvious thing to do with a graded field — gets the 2018 approval alone.
+
+**Not fixed, and not by oversight.** Every route out of this asserts a product
+identity, and `[measured]` `models: 0`, `combinations: 0` — nothing this platform
+publishes says those five ids are one lineage, because nothing this platform
+holds knows it. Deciding they are is the same class of error as the wrong rail
+attribution caught in G62: a plausible, checkable-looking claim about a product
+that no document states. G106's `DECLARED_ASSOCIATIONS` is empty for exactly this
+reason and stays empty.
+
+The options, with what each costs:
+
+1. **Slug the approval lineage instead of the printed family string.** The
+   supersession graph knows **four** of the five are one lineage (G110 made that
+   walk complete and entry-independent), so an id could be derived from the
+   lineage's oldest member -- **but not for the fifth.**
+   `mfr/certainteed-general-bufftech-fence-installation-posts-rails-racking-stepping`
+   resolves to `doc-3a8071e73dba`, the *Bufftech Installation Guide*, an
+   `installation_manual` with **zero** supersession edges (`[measured]`
+   `supersession_chain` returns a 1-member chain). It has no lineage to slug, so
+   this option cannot cover the case as written -- which is itself an instance of
+   the conflation this gap is about: same manufacturer is not same lineage. Cost: it changes every published `scope.id`, which is
+   in 9 distinct write-once tables (225 rows across 25 snapshots), and it
+   asserts that one approval lineage is one
+   *product* — which is false in general, since one NOA covers several model
+   names and a model can appear in two lineages.
+2. **Publish a `FenceModel` per lineage and let scopes point at it.** The
+   designed path (obligation 5's shape, T52 §2's first candidate). Cost: it is
+   blocked on amendment 008 and on real evidence, and `FenceModel` is one of the
+   four members with a measured count of zero. It is the right answer and it is
+   not available yet.
+3. **Report the collision rather than resolve it** — a gap, or a field on the
+   answer, saying "four other scopes in this snapshot share this authority's
+   lineage". Cost: §1.2.1's eight gap kinds are BINDING and closed, and none
+   means this; a new one is an amendment, not a registry addition. Same wall
+   G106 hit, and the same reason `cli reach` became a report rather than a gap.
+4. **Do nothing and let currency carry it.** What happens today. Cost: it works
+   only for a consumer that reads `currency`, and `scope` is the field whose
+   whole purpose is to be filtered on.
+
+`[inferred]` option 3 in `reach.py`'s shape — a report and an alarm, not a
+published member — is the cheapest thing that ends the silence, and option 2
+remains the answer. Nothing here should be built before Planning says what it can
+bind, which is the same sentence G106 ends on.
 
 ---
 

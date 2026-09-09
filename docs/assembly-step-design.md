@@ -241,7 +241,7 @@ corrects it — the accept/correct path `cli review` already implements.
 
 Three consequences, each with a standing reason in this repo:
 
-1. **Proposals never publish on their own.** A1/C0 is the precedent: machine agreement
+1. **Proposals never publish on their own.** A1/CUR-S0 is the precedent: machine agreement
    between two readers was being laundered into curation level 2, and 324 facts had to be
    un-promoted. A `step_candidate` with no reviewer publishes nothing, ever.
 2. **Proposer precision is measured and reported before anything publishes.** The last

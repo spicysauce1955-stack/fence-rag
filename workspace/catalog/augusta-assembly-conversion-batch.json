@@ -63,7 +63,7 @@
       "part_id": "mfr/weatherables/augusta-8x6-metal-insert",
       "spec_key": "kit_count_per_panel",
       "extractor": "source-reading:weatherables-augusta-8ft-cadpage:v1",
-      "fact_type": "kit_qty_metal_inserts_in",
+      "fact_type": "kit_qty_metal_inserts",
       "element_id": "element-398603ee1a-0240"
     },
     {
@@ -91,28 +91,28 @@
       "part_id": "mfr/weatherables/augusta-8x6-picket",
       "spec_key": "kit_count_per_panel",
       "extractor": "source-reading:weatherables-augusta-8ft-cadpage:v1",
-      "fact_type": "kit_qty_pickets_in",
+      "fact_type": "kit_qty_pickets",
       "element_id": "element-398603ee1a-0240"
     },
     {
       "part_id": "mfr/weatherables/augusta-8x6-rail",
       "spec_key": "width_mm",
       "extractor": "source-reading:weatherables-augusta-8x6-cad:v1",
-      "fact_type": "rail_drawing_width_mm",
+      "fact_type": "rail_drawing_width_in",
       "element_id": "element-1b110be294-0001"
     },
     {
       "part_id": "mfr/weatherables/augusta-8x6-rail",
       "spec_key": "height_mm",
       "extractor": "source-reading:weatherables-augusta-8x6-cad:v1",
-      "fact_type": "rail_drawing_height_mm",
+      "fact_type": "rail_drawing_height_in",
       "element_id": "element-1b110be294-0001"
     },
     {
       "part_id": "mfr/weatherables/augusta-8x6-rail",
       "spec_key": "length_mm",
       "extractor": "source-reading:weatherables-augusta-8x6-cad:v1",
-      "fact_type": "rail_drawing_length_mm",
+      "fact_type": "rail_drawing_length_in",
       "element_id": "element-1b110be294-0001"
     },
     {
@@ -140,7 +140,7 @@
       "part_id": "mfr/weatherables/augusta-8x6-u-channel",
       "spec_key": "kit_count_per_panel",
       "extractor": "source-reading:weatherables-augusta-8ft-cadpage:v1",
-      "fact_type": "kit_qty_u_channels_in",
+      "fact_type": "kit_qty_u_channels",
       "element_id": "element-398603ee1a-0240"
     }
   ],

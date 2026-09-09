@@ -30,7 +30,7 @@ import sqlite3
 from dataclasses import asdict, dataclass
 from datetime import date, timedelta
 
-from .canonical import canonical_bytes, content_hash
+from .canonical import canonical_bytes, content_hash, is_object_version
 from .dates import normalize_date
 from .lang import detect_lang
 from .refs import ref_id
@@ -428,6 +428,27 @@ class SnapshotBuilder:
     #
     # `because.code` values are registry additions, which `AMENDING.md` §4
     # states are explicitly NOT amendments and need no negotiation.
+    # `quality_issues.kind` -> (published gap kind, published `because.code`,
+    # `would_close`). The middle column is a SECOND NAME for the store's own
+    # `kind`, and `naming.md` §1 admits one only where it marks a role or a
+    # layer: here it marks the layer, store -> published, and three of the
+    # seven actually differ across it --
+    #
+    #     mojibake_text_layer  -> text_layer_mojibake
+    #     low_ocr_confidence   -> ocr_below_confidence_floor
+    #     empty_page_after_ocr -> empty_after_ocr
+    #
+    # The other four cross unchanged. `naming.md` §5 recorded these as three
+    # undocumented renames (defect E-2); they are documented here rather than
+    # unwound, because the published spellings are in 25 write-once snapshots
+    # and the store's are in `quality_issues` rows nothing re-derives on a
+    # rename. Read the published side as the noun-first form the `SOURCE_*`
+    # registry uses (`SOURCE_TEXT_LAYER_MOJIBAKE`), which is what the crossing
+    # names are aligned to and what the store's are not.
+    #
+    # The `warning_*` prefix on the codes in `warnings()` below is a different
+    # sub-scheme of `because.code` again, and it does NOT name a severity --
+    # it names the pass that raised the gap. `severity` is its own field.
     QUALITY_GAP_KINDS = {
         "table_not_reconstructed": (
             "illegible_source", "table_not_reconstructed",
@@ -1376,6 +1397,16 @@ SPEC_FIELD_SHAPE = (
 )
 PART_SHAPE = (
     ("id", _is_str, "a string"),
+    # D-5, `naming.md` §4. One snapshot published this as the integer `1` on 27
+    # parts and as `"sha256:<64hex>"` on 15, and the field was absent here --
+    # `_shape_failures` is an allowlist, so an undeclared field publishes at
+    # whatever type it happens to hold. The rule is deliberately the weak one:
+    # `verify()` also runs over write-once snapshots published before
+    # `canonical.part_version` existed, and refusing `1` here would mark 24
+    # stored snapshots non-compliant for having obeyed the rule of their day.
+    # New builds mint a content hash and nothing else; `tests/test_naming.py`
+    # holds the builder to it.
+    ("version", is_object_version, "a positive integer or a non-empty string"),
     ("status", _is_str, "a string"),
     ("type", _is_dict, "a PartTypeRef object {namespace, key}"),
     ("name_i18n", _is_dict, _I18N),

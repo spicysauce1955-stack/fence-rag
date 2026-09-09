@@ -3,7 +3,7 @@
 > **HISTORICAL — the stage plan was not followed and the CLI it specifies does not exist.**
 > `[measured]` none of the 13 `cli curate` subcommands exists; there is no `fence_evidence/curation/`
 > package; five of six frozen fixtures were never created. One deliverable shipped
-> (`data-digests.json`), and C5's *method* shipped under other names (`table_review.py`,
+> (`data-digests.json`), and CUR-S5's *method* shipped under other names (`table_review.py`,
 > `promote_tables.py`). Its claim that `PROMOTABLE` contains `cross_family_verified` "today" has
 > been false since 2026-08-25. **Worth keeping:** the review-queue mechanics (the priority
 > ordering, and the argument that "10% with zero rejections is consistent with a true error rate
@@ -11,8 +11,8 @@
 > onto N cells — which is G53 stated before G53 happened.
 
 
-Eleven stages: C0 through C8, with a cheap feasibility probe at C0.5 and a
-backfill at C4b. Each ends at a gate; a failed gate stops the stage that follows
+Eleven stages: CUR-S0 through CUR-S8, with a cheap feasibility probe at CUR-S0.5 and a
+backfill at CUR-S4b. Each ends at a gate; a failed gate stops the stage that follows
 it rather than being noted and passed. No stage touches the corpus, the
 canonical tables, `facts`, or the retrieval projection.
 
@@ -63,7 +63,7 @@ Two independent agent readings that agree raise `confidence_basis` to
 > **This is a change, not a description of current behaviour.**
 > `table_review.PROMOTABLE` is `("accepted", "corrected", "cross_family_verified")`
 > today: agreement between two *different model families* already promotes, and
-> 324 facts in the store were written that way with no human in the loop. C0
+> 324 facts in the store were written that way with no human in the loop. CUR-S0
 > removes `cross_family_verified` from `PROMOTABLE`. The 324 rows are recorded as
 > a grandfathered exception and migrate as `candidate` like everything else.
 >
@@ -80,20 +80,20 @@ build a command.
 
 ---
 
-## C0 — Schema, guards, and the curation CLI
+## CUR-S0 — Schema, guards, and the curation CLI
 
 **Build.** `fence_evidence/curation/` with `schema.py`, `guard.py`,
 `entities.py`, `dossier.py`, `pagemap.py`, `migrate.py`, `claims.py`,
 `crops.py`, `grids.py`, `review.py`, `procedures.py`, `conflicts.py`,
 `bundle.py`, `audit.py`. Additive migration; `store.SCHEMA_VERSION` → 2.
 
-Also in C0, one change to existing behaviour and five frozen fixtures, each with
+Also in CUR-S0, one change to existing behaviour and five frozen fixtures, each with
 its own test:
 
 1. `table_review.PROMOTABLE` loses `cross_family_verified`.
 2. `workspace/catalog/data-digests.json` is written, recording SHA-256 for every
 file under `data/**` — the corpus manifest's 144 rows cover only `manuals/` and
-`china/`, so `data/` has no baseline hash anywhere today, and P1b cannot check
+`china/`, so `data/` has no baseline hash anywhere today, and CUR-P1b cannot check
 it without one.
 3. `workspace/catalog/spelling-fixture.jsonl` freezes a blind-labelled set of
 every observed spelling of the five styles and the manufacturers, each with its
@@ -102,8 +102,8 @@ every observed spelling of the five styles and the manufacturers, each with its
 false-positive `table_not_reconstructed` pages with a typed `flag_disposition`,
 reconciling the `is_table` contradiction in the ground-truth JSON.
 5. `eval/curation-questions.json` holds one fixture question per capability
-(CAP-1..CAP-9) with the exact call and the expected answer shape, so R3, R5, R6,
-R7 and R10 have predicates rather than the word "pass".
+(CAP-1..CAP-9) with the exact call and the expected answer shape, so CUR-R3, CUR-R5, CUR-R6,
+CUR-R7 and CUR-R10 have predicates rather than the word "pass".
 6. `workspace/catalog/ground-truth-round-1.jsonl` freezes the blind
 manual-verification readings currently living unhashed in
 `workspace/tests/agent-read-*.json`, with a recorded SHA-256 and a
@@ -116,22 +116,22 @@ CLI surface, all new under `cli curate`:
 
 ```bash
 cli curate init                        # additive migration
-cli curate probe    --slice bufftech   # C0.5
-cli curate entities --slice bufftech   # C1
-cli curate dossier  --slice bufftech   # C2
-cli curate pagemap  --slice bufftech   # C3
-cli curate migrate  --slice bufftech   # C4
-cli curate backfill --slice bufftech   # C4b
-cli curate grids    --slice bufftech   # C5
-cli curate procedures --slice bufftech # C6
+cli curate probe    --slice bufftech   # CUR-S0.5
+cli curate entities --slice bufftech   # CUR-S1
+cli curate dossier  --slice bufftech   # CUR-S2
+cli curate pagemap  --slice bufftech   # CUR-S3
+cli curate migrate  --slice bufftech   # CUR-S4
+cli curate backfill --slice bufftech   # CUR-S4b
+cli curate grids    --slice bufftech   # CUR-S5
+cli curate procedures --slice bufftech # CUR-S6
 cli curate queue    --class footing --limit 25
 cli curate review   --claim <id> --decision accept --rationale "..."
-cli curate conflicts --slice bufftech  # C7
-cli curate bundle   --slice bufftech   # C7
-cli curate audit    --slice bufftech   # C8
+cli curate conflicts --slice bufftech  # CUR-S7
+cli curate bundle   --slice bufftech   # CUR-S7
+cli curate audit    --slice bufftech   # CUR-S8
 ```
 
-**Gate C0.** A test asserts a full curation run leaves the eleven canonical
+**Gate CUR-S0.** A test asserts a full curation run leaves the eleven canonical
 tables and `facts` byte-identical (row count and an ordered-row hash). A test
 asserts the `set_authorizer` guard rejects a write to every canonical table
 name. A test asserts `retrieval_units` and `retrieval_fts` are untouched. The
@@ -139,41 +139,41 @@ existing 164 tests still pass.
 
 ---
 
-## C0.5 — Feasibility probe (cheap, before anything expensive)
+## CUR-S0.5 — Feasibility probe (cheap, before anything expensive)
 
-**Why it exists.** C5 is the stage that can fail, and everything before it is
+**Why it exists.** CUR-S5 is the stage that can fail, and everything before it is
 expensive: 522 page maps of which roughly 365 need agent reading — the round-1
 pass read 44 pages across seven agents and that was already a substantial run —
 plus 19 dossiers with four human judgement calls, entity resolution with review
-rows, and 1,293 claim migrations with crop generation. Discovering at C5 that
+rows, and 1,293 claim migrations with crop generation. Discovering at CUR-S5 that
 the method does not work would waste all of it.
 
 **What it does.** One `wind_exposure_footing` crop. Two blind readers. Compare
 against the frozen ground truth. It needs only `cur_claims`,
 `cur_claim_evidence`, `cur_table_readings`, and a crop — minutes, not hours.
 
-**It also fixes R2's baseline and F1's floor.** The 0.588 digit-bearing recall
+**It also fixes CUR-R2's baseline and CUR-F1's floor.** The 0.588 digit-bearing recall
 figure was measured over 534 values across all 44 flagged pages and all table
-kinds. C5's actual population is different: of the 39 Tier-A crops, **8 are
+kinds. CUR-S5's actual population is different: of the 39 Tier-A crops, **8 are
 `wind_exposure_footing`, 24 are `bill_of_materials`, 6 are `drawing_only` and 1
 is prose**, and only **7 of the 39 have more than one reader** — the other 32
 have a single agent reading, so "cell-for-cell against ground truth" is against
-one reader on 82% of the surface. C0.5 recomputes the store-recall baseline on
-the exact frozen denominator R2 will use, and publishes it. R2's target is set
+one reader on 82% of the surface. CUR-S0.5 recomputes the store-recall baseline on
+the exact frozen denominator CUR-R2 will use, and publishes it. CUR-R2's target is set
 from that number, not from 0.588.
 
-**Gate C0.5.** The probe reads one grid, produces cell claims with
+**Gate CUR-S0.5.** The probe reads one grid, produces cell claims with
 `evidence_kind='visual_reading'` and pixel bboxes, renders its crop, and writes
 to the readiness report: the recomputed store-recall baseline on the frozen
-denominator, the per-crop reader counts, **R2's target**, and **F1's N** — the
+denominator, the per-crop reader counts, **CUR-R2's target**, and **CUR-F1's N** — the
 minimum count of accepted, fully-conditioned structural claims slice 1 must
-produce. Both numbers are published before C5 runs and are not revised
+produce. Both numbers are published before CUR-S5 runs and are not revised
 afterwards. If two readers cannot agree on a grid the ground truth already
-contains, C1 does not start and nothing downstream of it does either.
+contains, CUR-S1 does not start and nothing downstream of it does either.
 
 ---
 
-## C1 — Entities, aliases, relations
+## CUR-S1 — Entities, aliases, relations
 
 **Sequenced first**, because `cur_document_dossiers.issuing_org_entity_id` /
 `brand_entity_id` and `cur_page_map_entities` all reference `cur_entities`. Run
@@ -192,7 +192,7 @@ spellings denote the single Barrette group. Five `product_style` entities
 spelling in the slice. The component role vocabulary populated. One approval
 entity per NOA number with `issued_by → Miami-Dade` and `approved_under` edges.
 
-**Gate C1.** Every Tier-A document resolves to exactly one manufacturer entity.
+**Gate CUR-S1.** Every Tier-A document resolves to exactly one manufacturer entity.
 Each of the five style names resolves from every spelling in the frozen spelling
 fixture (see doc 5, C-B2). Every `accepted` alias cites an `element_id`; every
 alias without one is `curator_label` and stays `candidate`. No entity is
@@ -200,7 +200,7 @@ alias without one is `curator_label` and stays `candidate`. No entity is
 
 ---
 
-## C2 — Document dossiers
+## CUR-S2 — Document dossiers
 
 **Scope.** All 19 slice documents.
 
@@ -221,7 +221,7 @@ read at 28.0% mean confidence.
 4. Whether `bufftech-installation-guide-afence.pdf` (100% scanned, 222 facts) is
 `manufacturer_legacy_technical` or `unknown` revision status.
 
-**Gate C2.** 19/19 dossiers. Every `revision_status` other than `unknown`
+**Gate CUR-S2.** 19/19 dossiers. Every `revision_status` other than `unknown`
 carries an `element_id` **and** a `revision_quote` that is a verbatim substring
 of that element and is *not* a substring of the filename or `documents.title`.
 Every duplicate group has exactly one `canonical_for_duplicate_group=1`. No two
@@ -231,7 +231,7 @@ demonstrably exists in their bodies, so "all unknown" is not an acceptable pass.
 
 ---
 
-## C3 — Page content maps
+## CUR-S3 — Page content maps
 
 **Scope.** 522 pages.
 
@@ -257,9 +257,9 @@ two more — NOA-23-0314.05 p9 and NOA-06-1019.01 p3 — both recorded with
 and both different in kind from the other five: they are index sheets carrying
 **per-model maximum post-spacing labels**. Those are real CAP-6 values.
 `flag_disposition` distinguishes `false_positive_cross_reference` from
-`false_positive_index_sheet`, and the index sheets stay in C5's scope.
+`false_positive_index_sheet`, and the index sheets stay in CUR-S5's scope.
 
-**Gate C3.** 522/522 mapped, each with ≥1 content class. Every page classed
+**Gate CUR-S3.** 522/522 mapped, each with ≥1 content class. Every page classed
 `wind_exposure_footing_table` carries `has_reviewable_table=1`. The seven
 flagged pages are enumerated in the fixture with a typed `flag_disposition` and
 the `is_table` contradiction reconciled. A blind-labelled 40-page sample agrees
@@ -267,7 +267,7 @@ with the map on the primary content class at ≥0.90.
 
 ---
 
-## C4 — Fact → candidate claim migration (requirement 4)
+## CUR-S4 — Fact → candidate claim migration (requirement 4)
 
 **This stage creates zero facts. It creates 1,293 candidates and rejects most of
 them at the door.**
@@ -319,7 +319,7 @@ root segment** — e.g. `'Privacy Fence – Chesterfield, Chesterfield with
 CertaGrain Texture > 3. Install First Post'` — while the other 6 have the root
 `'P.S.I. MINIMUM'` and the style one level down. That gives the binding pass a
 deterministic first cut: match any heading segment against the style aliases
-from C1, root first. The 6 non-root matches are the reminder that matching only
+from CUR-S1, root first. The 6 non-root matches are the reminder that matching only
 the root would quietly miss some. The remaining 981 will mostly not be bindable
 even after review: *"dig holes 30″ deep or to frost line"* in a general
 instructions section is a claim about no particular product, and the honest
@@ -335,7 +335,7 @@ Tier-B facts migrate too — all 380 of them, all `regex-v1` — but as
 `duplicate_of_claim_id` pointers to their Tier-A twin's claim. No Tier-B claim
 is reviewed or accepted independently.
 
-**Gate C4.** 1,293/1,293 migrated, 0 accepted. Every claim has ≥1
+**Gate CUR-S4.** 1,293/1,293 migrated, 0 accepted. Every claim has ≥1
 `cur_claim_evidence` row whose `crop_path` exists on disk and whose
 `crop_sha256` matches. `facts` unchanged, asserted by hash. Every `exact_quote`
 is a verbatim substring of the cited element's `text`/`ocr_text` at the cited
@@ -344,19 +344,19 @@ writes and which would pass trivially.
 
 ---
 
-## C4b — Backfill
+## CUR-S4b — Backfill
 
-Dossier and page-map fields that reference claims created in C4 and C5:
+Dossier and page-map fields that reference claims created in CUR-S4 and CUR-S5:
 `effective_claim_id`, `expires_claim_id`, and any `cur_page_map_entities` left
 empty.
 
-**Gate C4b.** 0 of the 5 approval dossiers have a NULL `effective_claim_id` or
+**Gate CUR-S4b.** 0 of the 5 approval dossiers have a NULL `effective_claim_id` or
 `expires_claim_id`; 0 page maps are entity-empty on a page whose dossier names a
 product line. Measured by C-A12.
 
 ---
 
-## C5 — Structural table reading (CAP-6)
+## CUR-S5 — Structural table reading (CAP-6)
 
 670 distinct cells across 39 distinct page crops in Tier A, of which 8 crops and
 132 cells are `wind_exposure_footing` — the grids CAP-6 actually needs.
@@ -397,7 +397,7 @@ schema that row cannot be written without an `hvhz_applicability` condition
 generated from a reviewed annotation, and a reviewer who cannot see which rows a
 bracket spans records `needs_source` and a `knowledge_gap` — not a guess.
 
-**Gate C5.** All 8 `wind_exposure_footing` crops are read, not one. Every one of
+**Gate CUR-S5.** All 8 `wind_exposure_footing` crops are read, not one. Every one of
 their 132 distinct cells is either an accepted claim with a full condition tuple
 or a `knowledge_gap` with a reason **and** a recorded abstention. Zero accepted
 values disagree with the frozen ground truth. Zero silent errors — a wrong value
@@ -408,7 +408,7 @@ recall alone rewards both guessing and shrinking the set.
 
 ---
 
-## C6 — Procedures and compatibility
+## CUR-S6 — Procedures and compatibility
 
 **Scope.** The two current install guides (`1085f7c65c47` fence, `6431d597a32d`
 gate) plus the family sheet `c0fa3df89251`.
@@ -423,13 +423,13 @@ same guides. `incompatible_with` carries `review_class='compatibility'` and is
 mandatory-review: a missing "do not use with" is a safety failure, a spurious
 one is an inconvenience.
 
-**Gate C6.** ≥1 complete post-and-panel procedure with contiguous ordinals,
+**Gate CUR-S6.** ≥1 complete post-and-panel procedure with contiguous ordinals,
 every warning attached to a step, every figure evidence row resolving to a crop
 on disk. Every `incompatible_with` edge has a human review row.
 
 ---
 
-## C7 — Conflicts, gaps, and the bundle
+## CUR-S7 — Conflicts, gaps, and the bundle
 
 **Conflicts.** Detected where attribute, subject entity, and
 `condition_signature` all match and values differ — with `valid_from` and
@@ -470,12 +470,12 @@ Every claim carries `document_id`, `version_sha256`, `page_no`, `evidence_kind`,
 `exact_quote` where the kind has one. A bundle entry that cannot render its crop
 is a build failure, not a warning.
 
-**Gate C7.** Bundle validates; every claim member is `accepted`; every crop
+**Gate CUR-S7.** Bundle validates; every claim member is `accepted`; every crop
 resolves and hashes; `conflicts` and `knowledge_gaps` are non-empty.
 
 ---
 
-## C8 — Data-readiness review (requirement 9)
+## CUR-S8 — Data-readiness review (requirement 9)
 
 One explicit gate, run by `cli curate audit --slice bufftech`, producing
 `workspace/reports/curation-readiness.md`. The projection stays frozen until it
@@ -512,7 +512,7 @@ distinct cell decisions across 39 crops, of which the 8 `wind_exposure_footing`
 grids carry **132 distinct cells** (behind 384 candidate reader rows) — the
 smallest and most valuable part of the surface. The experiment document's own
 cost model is roughly 15 minutes per page; 39 crops is on the order of ten hours
-before condition tuples and review records. The C0.5 probe measures the real
+before condition tuples and review records. The CUR-S0.5 probe measures the real
 per-cell rate and that number replaces this estimate.
 
 ---
@@ -522,4 +522,4 @@ per-cell rate and that number replaces this estimate.
 Corpus-wide curation. Slice 2 (SimTek, the second approval chain, including the
 NOA 22-0616.10 material-class error from G16). The Catalyst successor catalog.
 The China track. Any retrieval, projection, ranking, embedding, serving, or
-answer-generation change. All of these wait on C8.
+answer-generation change. All of these wait on CUR-S8.

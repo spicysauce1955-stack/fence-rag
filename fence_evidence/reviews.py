@@ -1607,7 +1607,7 @@ def submit_step_review(conn: sqlite3.Connection, *, element_id: str,
         raise ReviewRefused(
             "error.bad_verdict",
             f"verdict must be one of {', '.join(STEP_VERDICTS)}; got {verdict!r}. "
-            f"No machine verdict belongs here -- that is what A1/C0 revoked.")
+            f"No machine verdict belongs here -- that is what A1/CUR-S0 revoked.")
     if step_kind is not None and step_kind not in STEP_KINDS:
         raise ReviewRefused("error.bad_step_kind",
                             f"kind must be one of {', '.join(STEP_KINDS)}")

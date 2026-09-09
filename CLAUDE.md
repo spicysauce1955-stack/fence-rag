@@ -45,13 +45,23 @@ Every name this project mints — data fields, ids, code vocabularies, Python sy
 tests, documents and document ids. Almost none of it is new; the repository already had
 these conventions and had never written them down, which is how `fence_height_ft` came to
 exist beside `fence_height` (G108) and how five document-id namespaces came to collide.
-`tests/test_naming.py` enforces the four rules cheap enough to check. **Add a convention
-there with its check, or with a stated reason there is none.** The load-bearing ones:
+`tests/test_naming.py` and `tests/test_gold_set.py` enforce the nine rules cheap
+enough to check. **Add a convention there with its check, or with a stated reason
+there is none** — §11 lists what stays unenforced and why. The load-bearing ones:
 a second name for one value must mark a role or a layer; a unit suffix appears iff the
-value is a quantity and its unit is not declared elsewhere; `_mm` means `Quantity` and an
-unsuffixed key means `Token`; `UPPER_SNAKE` is a registry code that crosses to Planning
+value is a quantity and its unit is not declared elsewhere, **and it must be a unit the
+row actually carries**; `_mm` means `Quantity` and an unsuffixed key means `Token`;
+`UPPER_SNAKE` is a registry code that crosses to Planning
 and `error.*` is transport; a test name is a behaviour sentence and its docstring is the
 why; an id namespace is global across `docs/`.
+
+**Worked 2026-09-09**, the day after it was written: six defects closed, `max_rack`
+filed as amendment 011, `review_status` put to the owner as
+`docs/review-status-migration-plan.md` rather than migrated, and **four figures in
+`naming.md` itself corrected** — its B-1 count (13, not 11), its "no reason for the
+string form is recorded anywhere" (G103 records it), its attribution of
+`Combination.members` to `contract.md` (it is `knowledge-datamodel.md`), and its "nine
+lines apart" (31). See G109-G112.
 
 `docs/layering.md` is a **proposal** naming five layers (raw → canonical → assertions →
 entities → published) and one rule: *every reference points down a layer, never up*. The rule
@@ -129,7 +139,7 @@ projection: a capability matrix, a `cur_*` schema of claims-not-facts, a single-
 slice, a staged plan, and acceptance criteria. It sits in **tier 3 — this team's internals**, and
 the contract is silent on it. It remains **a proposal under review**: nothing in it is implemented,
 no corpus-wide curation has run, and the projection has not been regenerated. Read
-`docs/curation/README.md` first. One exception to "proposal": its C0 — removing
+`docs/curation/README.md` first. One exception to "proposal": its CUR-S0 — removing
 `cross_family_verified` from `table_review.PROMOTABLE`, which let two agent readings promote a fact
 with no human review — was a **commitment** made in writing at ratification, and **landed
 2026-08-25** as item A1 of `docs/build-plan.md`. `PROMOTABLE` is now `("accepted", "corrected")`,
@@ -407,6 +417,27 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   cross-tenant value is unpublishable rather than filtered. Two fields leak WITHOUT a ref:
   `also_filed_as` and `superseded_by` publish facts about *other* documents. Both are scoped;
   if you add a third such field, scope it. `docs/state-and-gaps.md` G48.
+- **`Part.version` is a content hash, and `canonical.part_version` is the one place
+  that mints it.** Never `'sha256:' + content_hash(part)` by hand: the field is
+  excluded from its own hash, and doing that by hand went wrong once —
+  `augusta_drawing_claims` re-hashed a dict that already carried a version, so one
+  published version could not be recomputed from the published payload. The integer
+  `1` it replaced never incremented anywhere, so `Part@1` pinned nothing (G109).
+  `PART_SHAPE` types the field only as *positive int | non-empty string*, because
+  `snapshot --verify-stored` re-runs `verify()` over 24 write-once snapshots that
+  publish the integer; the strong rule is at the builder and in `tests/test_naming.py`.
+- **`facts._conditions()` writes `fence_height`, carrying the source's own lexeme** —
+  `8' tall`, not the float `8.0`, and not an `Interval`. The publisher parses a LABEL
+  (`parameters._parse_fence_height`), so a dict fails it exactly as the old
+  `fence_height_ft` key did. Every key that function can emit must be in
+  `parameters.CONDITION_SCOPE`; a test reads the assignments out of the source with
+  `ast` and fails if one is not (G108).
+- **`relations.supersession_chain` returns the whole DAG, oldest first**, not one path.
+  It took `LIMIT 1` per hop until 2026-09-09, so a branching lineage returned an
+  arbitrary route and the route depended on where you entered. If you widen what it
+  feeds, remember why `versions._one_per_approval` exists: the four byte-identical
+  filings of NOA `24-0117.05` are one approval, and counting them as four turns a
+  correct answer into a spurious `conflict` (G110).
 - **`ref_id` embeds a bbox, and a re-extraction can move it.** A 0.02pt shift
   changes the id completely and `delete_version_rows()` removes the rows the old
   id named, so a toolchain upgrade breaks published citations retroactively and

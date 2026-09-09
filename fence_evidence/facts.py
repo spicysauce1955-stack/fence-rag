@@ -205,7 +205,13 @@ def _normalise(fact_type: str, raw: str, match_text: str) -> tuple[float | None,
 
 _COND_WIND = re.compile(rf"{_NUM}\s*mph", re.I)
 _COND_EXPOSURE = re.compile(r"exposure\s*(?:category)?\s*[:\-]?\s*([BCD])\b", re.I)
-_COND_HEIGHT = re.compile(rf"{_NUM}\s*(?:{_FT})\s*(?:high|tall|height|fence)", re.I)
+# G108. The whole measurement is captured, not just its number, because the
+# value this writes is a LABEL the publisher parses -- `parameters.
+# _parse_fence_height` -- and a bare float in feet is unparseable there.
+# Prohibition 7 says the same thing from the other side: store the source's own
+# wording, and let the one named conversion point turn it into millimetres.
+_COND_HEIGHT = re.compile(
+    rf"(?P<measure>{_NUM}\s*(?:{_FT}))\s*(?:high|tall|height|fence)", re.I)
 _COND_HVHZ = re.compile(r"\bHVHZ\b", re.I)
 
 
@@ -220,7 +226,14 @@ def _conditions(text: str, heading_path: list[str]) -> dict:
         cond["exposure_category"] = m.group(1).upper()
     m = _COND_HEIGHT.search(hay)
     if m:
-        cond["fence_height_ft"] = _to_float(m.group(1))
+        # `fence_height`, NOT `fence_height_ft` (G108). The registry declares
+        # this axis as `range(mm)` and `parameters.CONDITION_SCOPE` knows it
+        # under that one name; the `_ft` spelling was a second vocabulary for
+        # one axis, refused at publish time by a message about a "condition
+        # scope" rather than about a misspelt key. `tests/test_naming.py`
+        # reads these assignments out of the source and fails if a key here is
+        # not in `CONDITION_SCOPE`.
+        cond["fence_height"] = " ".join(m.group("measure").split())
     if _COND_HVHZ.search(hay):
         cond["hvhz"] = True
     return cond
@@ -701,6 +714,150 @@ def extract_facts(*, document_id: str | None = None,
     finally:
         if own:
             conn.close()
+
+
+# `naming.md` §2, defects B-1 and B-2, both closed 2026-09-09. A fact type
+# carries a unit suffix iff it is quantity-valued AND its unit is not declared
+# elsewhere -- and the suffix names the unit the row actually holds.
+#
+#   B-1, 13 types (`naming.md` said 11; `[measured]` 2026-09-09 it is 13):
+#   the `*_claims.py` drawing readings were named `_mm` while `unit_original`
+#   is `in` on every row and `unit_normalized` is NULL on every row. The stored
+#   number is inches; the millimetre only ever exists in the published
+#   `Quantity`, which each recipe's `quantity()` builds by re-parsing
+#   `value_original` as an inch string. So the fix is a RENAME and not a
+#   normalisation: writing 25.4x into `value_normalized` would make the store
+#   assert a conversion no reader performs, which is the half of G63 that
+#   shipped a number twelve times too small. The published `SpecField.key`
+#   stays `_mm`, because that is the unit it crosses in.
+#
+#   B-2, 4 types: `kit_qty_*_in` count `each`. `_in` is a LIVE DISPATCH KEY --
+#   `_normalise` above branches on `fact_type.endswith("_in")` and would have
+#   multiplied a count of pickets by twelve. They survived only by being
+#   written directly by the recipes, never through `_normalise`. A count is not
+#   a quantity with a unit the name must declare, so the suffix goes.
+FACT_TYPE_RENAMES = {
+    "board_drawing_length_mm": "board_drawing_length_in",
+    "board_drawing_profile_width_mm": "board_drawing_profile_width_in",
+    "board_drawing_thickness_mm": "board_drawing_thickness_in",
+    "end_channel_drawing_depth_mm": "end_channel_drawing_depth_in",
+    "end_channel_drawing_length_mm": "end_channel_drawing_length_in",
+    "end_channel_drawing_width_mm": "end_channel_drawing_width_in",
+    "panel_drawing_overall_height_mm": "panel_drawing_overall_height_in",
+    "panel_drawing_overall_width_mm": "panel_drawing_overall_width_in",
+    "panel_drawing_picket_run_lower_mm": "panel_drawing_picket_run_lower_in",
+    "panel_drawing_picket_run_upper_mm": "panel_drawing_picket_run_upper_in",
+    "rail_drawing_height_mm": "rail_drawing_height_in",
+    "rail_drawing_length_mm": "rail_drawing_length_in",
+    "rail_drawing_width_mm": "rail_drawing_width_in",
+    "kit_qty_metal_inserts_in": "kit_qty_metal_inserts",
+    "kit_qty_pickets_in": "kit_qty_pickets",
+    "kit_qty_rails_in": "kit_qty_rails",
+    "kit_qty_u_channels_in": "kit_qty_u_channels",
+}
+
+
+def rename_fact_types(conn: sqlite3.Connection) -> dict:
+    """Move the rows of `FACT_TYPE_RENAMES` onto their corrected names.
+
+    A backfill and not a re-extraction: the rows' evidence, value and unit
+    columns are all correct and untouched, and only the label was wrong for
+    the STORED rows. It is not inert for the review-correction path:
+    `reviews._normalise_corrected` calls `_normalise`, which branches on
+    `fact_type.endswith("_in")`. `[measured]` 2026-09-09 a corrected
+    `kit_qty_pickets_in` of `6 each` normalised to `72.0 in` -- the
+    twelvefold class of G63, reachable the moment a curator touched one of
+    those counts -- and after the rename it normalises to nothing, which is
+    correct for a count. That is one of the better reasons to make this
+    change, so it is stated rather than filed under "only a label". A
+    re-extraction would additionally move every `fact_id` on those documents,
+    which is the one thing a fact review is anchored against surviving
+    (`reviews._fact_anchor` is `(element_id, fact_type, value_before)`).
+
+    `fact_reviews.fact_type` moves in the same transaction, for that reason: a
+    review left under the old label would stop matching its fact and be
+    reported as unbound. `[measured]` 2026-09-09 there are 0 such reviews and 0
+    lines in `review-ledger.jsonl` naming any of the 17 -- the rename is free
+    TODAY and would not have been after a curator opened one of those crops.
+
+    Idempotent, so `cli migrate` can run it every time: a name already moved
+    matches nothing. Returns the per-name counts actually moved, never a total,
+    because "0 rows moved" and "the migration did not run" must not look alike.
+    """
+    moved: dict[str, dict] = {}
+    for old, new in sorted(FACT_TYPE_RENAMES.items()):
+        facts = conn.execute("UPDATE facts SET fact_type=? WHERE fact_type=?",
+                             (new, old)).rowcount
+        reviews = conn.execute(
+            "UPDATE fact_reviews SET fact_type=? WHERE fact_type=?",
+            (new, old)).rowcount
+        if facts or reviews:
+            moved[old] = {"to": new, "facts": facts, "fact_reviews": reviews}
+    return moved
+
+
+RETIRED_CONDITION_KEYS = ("fence_height_ft",)
+
+
+def backfill_condition_keys(conn: sqlite3.Connection) -> dict:
+    """Re-derive `conditions` for facts still carrying a retired axis name.
+
+    G108. `_conditions` used to write `fence_height_ft`, a bare float in feet,
+    which `parameters.CONDITION_SCOPE` does not declare and the publisher
+    therefore refuses. `[measured]` 2026-09-09: 18 rows, none accepted, so
+    nothing wrong has been published -- but the refusal fires when a curator
+    accepts one, which is precisely what the review queue exists to do.
+
+    **This is a re-extraction of the field, not a relabelling.** Each row's
+    conditions are recomputed by running the current `_conditions` over the
+    element's own text, exactly as `extract_facts` does, so the value stored is
+    the one today's extractor derives and not one this function invented. A
+    pure key rename would have had to manufacture the source lexeme -- the
+    float `8.0` does not say whether the page printed `8'`, `8 foot` or
+    `8 feet` -- and manufacturing a verbatim reading is what prohibition 7
+    forbids.
+
+    It is deliberately narrower than `cli facts --extract`, which deletes and
+    rebuilds every regex fact on a document and moves every `fact_id` with
+    them. `[measured]` 2026-09-09: 9 documents hold the 18 rows and carry 274
+    regex facts between them, so a re-extraction would rewrite 274 rows to
+    correct 18, inside a change about names.
+
+    **A row whose recomputation differs anywhere but the height axis is left
+    alone and reported.** The extractor has moved since those rows were
+    written; silently adopting a different exposure category or wind speed
+    under cover of a naming fix is the G62 error -- a value changed by a
+    change that was about something else. `[measured]` 2026-09-09 all 18
+    reproduced identically, so `refused` is empty today.
+
+    Idempotent: a row with no retired key is not selected.
+    """
+    like = " OR ".join("f.conditions LIKE ?" for _ in RETIRED_CONDITION_KEYS)
+    rows = conn.execute(
+        f"""SELECT f.fact_id, f.fact_type, f.conditions,
+                   e.text, e.ocr_text, e.heading_path
+              FROM facts f JOIN elements e ON e.element_id = f.element_id
+             WHERE {like}""",
+        tuple(f'%"{key}"%' for key in RETIRED_CONDITION_KEYS)).fetchall()
+    rewritten, refused = 0, []
+    for row in rows:
+        stored = json.loads(row["conditions"] or "{}")
+        text = row["text"] or row["ocr_text"] or ""
+        heading_path = json.loads(row["heading_path"] or "[]")
+        fresh = _conditions(text, heading_path)
+        self_key = SELF_CONDITION.get(row["fact_type"])
+        if self_key:
+            fresh.pop(self_key, None)
+        elsewhere = {k: v for k, v in stored.items()
+                     if k not in RETIRED_CONDITION_KEYS}
+        if {k: v for k, v in fresh.items() if k != "fence_height"} != elsewhere:
+            refused.append({"fact_id": row["fact_id"], "stored": stored,
+                            "recomputed": fresh})
+            continue
+        conn.execute("UPDATE facts SET conditions=? WHERE fact_id=?",
+                     (json.dumps(fresh), row["fact_id"]))
+        rewritten += 1
+    return {"examined": len(rows), "rewritten": rewritten, "refused": refused}
 
 
 def query_facts(fact_type: str | None = None, *, conditions: dict | None = None,

@@ -369,8 +369,16 @@ def _quantity_from_lexeme(lexeme: str) -> dict | None:
     """
     unit = "in" if '"' in lexeme else ("ft" if "'" in lexeme else None)
     if unit is None:
-        for token, u in (("mm", "mm"), ("cm", "cm")):
-            if re.search(rf"\d\s*{token}\b", lexeme, re.IGNORECASE):
+        # The spelled-out forms arrived with G108: `facts._conditions` writes
+        # the source's own words, and a document that says `6 feet tall` never
+        # prints a prime. Longest first, so `inches` is not read as `in`
+        # followed by rubbish. Widening only: every lexeme that parsed before
+        # parses to the same value now, and the ones that gain a reading were
+        # refused outright.
+        for token, u in (("mm", "mm"), ("cm", "cm"),
+                         ("inches", "in"), ("inch", "in"), ("in", "in"),
+                         ("feet", "ft"), ("foot", "ft"), ("ft", "ft")):
+            if re.search(rf"\d\s*{token}\.?\b", lexeme, re.IGNORECASE):
                 unit = u
                 break
     magnitude = _magnitude(lexeme)
@@ -407,6 +415,17 @@ def _parse_fence_height(label: str | None) -> dict | None:
         if lo is None or hi is None:
             return None
         return {"min": lo, "max": hi,
+                "min_inclusive": True, "max_inclusive": True,
+                "value_raw": [text]}
+    # A single stated height -- `8'`, `6 feet` -- is a POINT, which is an
+    # interval whose bounds coincide and are both inclusive, not a missing
+    # value. G108: `facts._conditions` writes exactly this shape, and without
+    # this branch the axis would still be refused, only with a different
+    # message. Two dicts rather than one shared object: `min` and `max` are
+    # separate published members and must not alias.
+    point = _quantity_from_lexeme(text)
+    if point is not None:
+        return {"min": point, "max": _quantity_from_lexeme(text),
                 "min_inclusive": True, "max_inclusive": True,
                 "value_raw": [text]}
     return None

@@ -176,7 +176,7 @@ Ordered as Planning re-ranked them after the cell-coverage measurement.
 
 | | What | Note |
 |---|---|---|
-| C1 | ~~**The eleven-warning starter list**~~ **DONE 2026-08-27.** | Delivered in `docs/integration/registry-additions.md` §3, with counts, citation counts, verbatim exemplars and a resolvable `ref_id` each. Producing it exposed G42: five of the eleven had **zero** published instances against 16–254 matching elements, because the detector wants a severity lexeme and those five are ordinary bullets in installation lists. All eleven now publish non-zero. Planning still needs the two locale bundles — sent as `conversation.md` T8. |
+| C1 | ~~**The eleven-warning starter list**~~ **DONE 2026-08-27.** | Delivered in `docs/integration/registry-additions.md` §3, with counts, citation counts, verbatim exemplars and a resolvable `ref_id` each. Producing it exposed G42: five of the eleven had **zero** published instances against 16–254 matching elements, because the detector wants a severity lexeme and those five are ordinary bullets in installation lists. All eleven now publish non-zero. ~~Planning still needs the two locale bundles — sent as `conversation.md` T8.~~ **Corrected 2026-09-09: they do not, and did not.** The eleven are source-warning CLASSES, not codes — `contract.md` §2 exempts source warnings from the bundle rule, obligation 10 makes `code` an optional overlay, and `[measured]` 0 of 7,187 published warnings carry one. Planning declined the ask at T7 on their own reasoning and `[measured]` their bundles hold zero `WARN_*` keys. See `registry-additions.md` §3's correction banner. |
 | C2 | **`also_filed_as`** — one source class per content hash | 18 of 40 `same_content_as` pairs carry a different `doc_type` on each side. Load-bearing now that Planning applies the policy. Committed and relied upon. |
 | C3 | **Cell bounding boxes** (K4) | 973 of 18,472 cells have one — 100% of `ocr-word-grid`, **0 of 17,499** from either pdfplumber detector, which discards geometry pdfplumber already returns. ~594 tables to re-extract. Bounds the text-layer queue; does **not** bound the structural queue, where 73 pages have no reconstructed grid to box at all. |
 
@@ -252,7 +252,7 @@ Storage engine and schema. Whether claims live in one table or twenty. Extractio
 models, OCR strategy. How the review queue is ordered and what a reviewer sees. Whether
 curation runs as a CLI, a batch job or a service. Language and runtime beyond the API shape.
 Retrieval implementation. Release cadence. `docs/curation/` is tier 3 and stays this team's
-internals — note that its C0 proposal to revoke `cross_family_verified` is now A1 above and
+internals — note that its CUR-S0 proposal to revoke `cross_family_verified` is now A1 above and
 a commitment rather than a proposal.
 
 ## 5. What the other side is doing

@@ -69,7 +69,7 @@ class TestAugustaDrawingClaims(unittest.TestCase):
     def test_correction_and_rejection_use_existing_review_path(self):
         recipe.import_cad_readings(self.conn)
         row=self.conn.execute('SELECT * FROM facts WHERE extractor=? AND fact_type=?',
-            (recipe.CAD_EXTRACTOR,'rail_drawing_length_mm')).fetchone()
+            (recipe.CAD_EXTRACTOR,'rail_drawing_length_in')).fetchone()
         old=next(p for p in self.parts() if p['id'].endswith('-rail'))
         submit_fact_review(self.conn,fact_id=row['fact_id'],reviewer='test',
             ref_id=fact_ref_id(self.conn,row['fact_id']),verdict='corrected',value='71.501 in.')

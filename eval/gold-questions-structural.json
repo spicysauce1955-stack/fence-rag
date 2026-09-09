@@ -134,9 +134,11 @@
       ],
       "required_conditions": {
         "exposure_category": "C",
-        "footing_depth_in": 36,
         "hvhz": true,
         "wind_speed_mph": 115
+      },
+      "required_selectors": {
+        "footing_depth_in": 36
       },
       "expects_image_evidence": true,
       "verification": {
@@ -176,7 +178,9 @@
       "required_conditions": {
         "wind_speed_mph": 130,
         "exposure_category": "B",
-        "fence_height_ft": 6,
+        "fence_height": "6 ft"
+      },
+      "required_selectors": {
         "line_post_size_in": "2 3/8",
         "post_group": "Group IA Schedule 40, ASTM F1083 Regular Grade (30,000 psi yield)"
       },
@@ -218,7 +222,7 @@
       "required_conditions": {
         "wind_speed_mph": 130,
         "exposure_category": "D",
-        "panel_height_in": 72
+        "fence_height": "72 in"
       },
       "expects_image_evidence": false,
       "verification": {
@@ -256,8 +260,10 @@
         "post hole diameter 5x5 vs 8x8"
       ],
       "required_conditions": {
-        "post_size_in": "8x8",
         "wind_speed_mph": 75
+      },
+      "required_selectors": {
+        "post_size_in": "8x8"
       },
       "expects_image_evidence": false,
       "verification": {
@@ -297,8 +303,8 @@
       "required_conditions": {
         "wind_speed_mph": 120,
         "exposure_category": "C",
-        "wall_height_ft": 6,
-        "standard": "ASCE 7-16"
+        "fence_height": "6 ft",
+        "code_edition": "ASCE 7-16"
       },
       "expects_image_evidence": false,
       "verification": {

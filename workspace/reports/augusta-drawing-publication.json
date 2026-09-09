@@ -280,10 +280,10 @@
   ],
   "human_reviews_created": false,
   "persisted_unpublished": [
-    "panel_drawing_overall_width_mm",
-    "panel_drawing_overall_height_mm",
-    "panel_drawing_picket_run_upper_mm",
-    "panel_drawing_picket_run_lower_mm"
+    "panel_drawing_overall_width_in",
+    "panel_drawing_overall_height_in",
+    "panel_drawing_picket_run_upper_in",
+    "panel_drawing_picket_run_lower_in"
   ],
   "remaining_gaps": [
     "Overall panel dimensions and picket-run segments persist as flagged facts; no component Part owns them while FenceModel provenance mapping (Amendment 008) is pending.",

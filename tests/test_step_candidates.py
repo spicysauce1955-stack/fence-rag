@@ -1,6 +1,6 @@
 """`step_candidates` — the assertion layer between an element and a Procedure.
 
-Proposals live here and publish nothing. The precedent is A1/C0: machine
+Proposals live here and publish nothing. The precedent is A1/CUR-S0: machine
 agreement between two readers was being laundered into curation level 2, and
 324 facts had to be un-promoted. A candidate with no reviewer is worth exactly
 nothing, and these tests pin that rather than trusting it.

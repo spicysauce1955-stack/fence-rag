@@ -332,11 +332,11 @@ whose SHA-256 matches the recorded value.
 | CAP-9 visual | pages+bbox complete | crops for 74/1,041 regex facts; no element for CAP-6 values | `low_confidence_ocr` |
 
 CAP-6 is the capability that justifies the whole phase and the one most likely
-to fail. Document 4 therefore puts a cheap feasibility probe (C0.5) in front of
+to fail. Document 4 therefore puts a cheap feasibility probe (CUR-S0.5) in front of
 every expensive stage, so a failure there costs minutes rather than the whole
 dossier and page-map effort.
 
 CAP-2, CAP-3 and CAP-4 have "Ready when" clauses but no Group-R readiness
 criterion in document 5. That is deliberate: they are out of scope for slice 1's
-readiness gate and are registered under R10 as capability gaps, so their absence
+readiness gate and are registered under CUR-R10 as capability gaps, so their absence
 is published rather than implied.

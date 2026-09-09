@@ -27,7 +27,7 @@ FenceModel provenance mapping (Amendment 008) remains pending.
 from fractions import Fraction
 import json
 import re
-from .canonical import content_hash
+from .canonical import part_version
 from .emblem_claims import _check_review_projection
 from .parameters import CURATION_LEVEL, _source_class
 from .reviews import effective_fact_value
@@ -55,13 +55,13 @@ CAD_ANCHORS = {
 # are persisted for a future model batch; rail dimensions publish onto the
 # rail Part. The U-channel width lives with the install-guide reading below.
 CAD_READINGS = (
-    ('panel', 'panel_drawing_overall_width_mm', 'overall_width', '72 in.'),
-    ('panel', 'panel_drawing_overall_height_mm', 'overall_height', '95.5 in.'),
-    ('panel', 'panel_drawing_picket_run_upper_mm', 'section_upper', '39.5 in.'),
-    ('panel', 'panel_drawing_picket_run_lower_mm', 'section_lower', '39.5 in.'),
-    ('rail', 'rail_drawing_width_mm', 'rail_callout_top', '1.5 in.'),
-    ('rail', 'rail_drawing_height_mm', 'rail_callout_top', '5.5 in.'),
-    ('rail', 'rail_drawing_length_mm', 'rail_callout_top', '71.5 in.'),
+    ('panel', 'panel_drawing_overall_width_in', 'overall_width', '72 in.'),
+    ('panel', 'panel_drawing_overall_height_in', 'overall_height', '95.5 in.'),
+    ('panel', 'panel_drawing_picket_run_upper_in', 'section_upper', '39.5 in.'),
+    ('panel', 'panel_drawing_picket_run_lower_in', 'section_lower', '39.5 in.'),
+    ('rail', 'rail_drawing_width_in', 'rail_callout_top', '1.5 in.'),
+    ('rail', 'rail_drawing_height_in', 'rail_callout_top', '5.5 in.'),
+    ('rail', 'rail_drawing_length_in', 'rail_callout_top', '71.5 in.'),
 )
 
 INSTALL_SHA = 'db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b'
@@ -119,16 +119,16 @@ CADPAGE_ANCHORS = {
 # component, fact_type, anchor, raw, normalized. Quantities are whole counts;
 # dimensions are manufacturer-stated stock sizes for this configuration.
 CADPAGE_READINGS = (
-    ('rail-kit', 'kit_qty_rails_in', 'panel_8x6_list', '3 each', 3),
-    ('metal-insert', 'kit_qty_metal_inserts_in', 'panel_8x6_list', '3 each', 3),
+    ('rail-kit', 'kit_qty_rails', 'panel_8x6_list', '3 each', 3),
+    ('metal-insert', 'kit_qty_metal_inserts', 'panel_8x6_list', '3 each', 3),
     ('metal-insert', 'metal_insert_width_in', 'panel_8x6_list', '1.25 in.', 1.25),
     ('metal-insert', 'metal_insert_height_in', 'panel_8x6_list', '1.75 in.', 1.75),
     ('metal-insert', 'metal_insert_length_in', 'panel_8x6_list', '71.5 in.', 71.5),
-    ('u-channel', 'kit_qty_u_channels_in', 'panel_8x6_list', '4 each', 4),
+    ('u-channel', 'kit_qty_u_channels', 'panel_8x6_list', '4 each', 4),
     ('u-channel', 'u_channel_width_in', 'panel_8x6_list', '1.25 in.', 1.25),
     ('u-channel', 'u_channel_depth_in', 'panel_8x6_list', '1.5 in.', 1.5),
     ('u-channel', 'u_channel_length_in', 'panel_8x6_list', '39.5 in.', 39.5),
-    ('picket', 'kit_qty_pickets_in', 'panel_8x6_list', '22 each', 22),
+    ('picket', 'kit_qty_pickets', 'panel_8x6_list', '22 each', 22),
     ('picket', 'picket_stock_length_in', 'panel_8x6_list', '43 in.', 43.0),
 )
 
@@ -287,6 +287,12 @@ def import_specsheet_readings(conn):
 def _cadpage_expected(anchors):
     for component, fact_type, anchor, raw, normalized in CADPAGE_READINGS:
         a = anchors[anchor]
+        # `kit_qty_*` carries NO unit suffix (`naming.md` §2, B-2): a count
+        # is not a quantity whose unit the name must declare, and the `_in`
+        # it used to carry is a live dispatch key -- `facts._normalise`
+        # branches on `endswith("_in")` and would multiply a picket count
+        # by twelve. The unit is declared here, on the prefix, and nowhere
+        # else.
         unit = 'each' if fact_type.startswith('kit_qty') else 'in'
         yield dict(document_id=a['document_id'], version_id=a['version_id'], page_no=a['page_no'],
             element_id=a['element_id'], fact_type=fact_type,
@@ -348,7 +354,7 @@ def _part(part_id, kind, name, specs, cites, sources):
     part = {'id': part_id, 'type': {'namespace': 'shared', 'key': kind}, 'status': 'draft',
         'name_i18n': {'en': name}, 'authorship': 'third_party_authored', 'spec': specs,
         'cites': cites, 'contributing_sources': sources}
-    part['version'] = 'sha256:' + content_hash(part)
+    part['version'] = part_version(part)
     return part
 
 
@@ -400,8 +406,8 @@ def build_parts(conn, source_ref):
         facts = _checked_facts(conn, CAD_EXTRACTOR,
             _reading_rows(conn, CAD_EXTRACTOR, _cad_expected(anchors), 'page'))
         specs = []
-        rail_keys = {'rail_drawing_width_mm': 'width_mm', 'rail_drawing_height_mm': 'height_mm',
-                     'rail_drawing_length_mm': 'length_mm'}
+        rail_keys = {'rail_drawing_width_in': 'width_mm', 'rail_drawing_height_in': 'height_mm',
+                     'rail_drawing_length_in': 'length_mm'}
         for component, fact_type, anchor, _ in CAD_READINGS:
             row = facts[fact_type]
             if row is None or row['review_status'] == 'rejected' or component != 'rail':
@@ -491,8 +497,8 @@ def build_parts(conn, source_ref):
         if 'u_channel_length_in' in by_type:
             component, row, anchor_row = by_type['u_channel_length_in']
             u_specs.append(_spec(row, 'length_mm', anchor_row, source_ref))
-        if 'kit_qty_u_channels_in' in by_type:
-            component, row, anchor_row = by_type['kit_qty_u_channels_in']
+        if 'kit_qty_u_channels' in by_type:
+            component, row, anchor_row = by_type['kit_qty_u_channels']
             u_specs.append(kit_count_spec(row, 'kit_count_per_panel', anchor_row))
         if u_specs:
             parts = [p for p in parts if p['id'] != PREFIX + 'u-channel']
@@ -504,7 +510,7 @@ def build_parts(conn, source_ref):
         for fact_type, key in (('metal_insert_width_in', 'width_mm'),
                                ('metal_insert_height_in', 'height_mm'),
                                ('metal_insert_length_in', 'length_mm'),
-                               ('kit_qty_metal_inserts_in', 'kit_count_per_panel')):
+                               ('kit_qty_metal_inserts', 'kit_count_per_panel')):
             if fact_type in by_type:
                 component, row, anchor_row = by_type[fact_type]
                 m_specs.append(kit_count_spec(row, key, anchor_row) if key == 'kit_count_per_panel'
@@ -516,7 +522,7 @@ def build_parts(conn, source_ref):
         # Picket: add stock length and kit count to the specsheet-based Part.
         p_add = []
         for fact_type, key in (('picket_stock_length_in', 'stock_length_mm'),
-                               ('kit_qty_pickets_in', 'kit_count_per_panel')):
+                               ('kit_qty_pickets', 'kit_count_per_panel')):
             if fact_type in by_type:
                 component, row, anchor_row = by_type[fact_type]
                 p_add.append(kit_count_spec(row, key, anchor_row) if key == 'kit_count_per_panel'
@@ -528,7 +534,7 @@ def build_parts(conn, source_ref):
                 picket['cites'] = _merge_cites(picket, p_add)
                 picket['contributing_sources'] = sorted(set(picket['contributing_sources']) | {CADPAGE_SHA})
                 picket['name_i18n'] = {'en': 'Weatherables Augusta tongue-and-groove picket — specsheet style and 8ft CAD page material list; exact SKU unverified'}
-                picket['version'] = 'sha256:' + content_hash(picket)
+                picket['version'] = part_version(picket)
     return parts
 
 

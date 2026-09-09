@@ -63,7 +63,7 @@
       "part_id": "mfr/weatherables/pembroke-6x6-rail",
       "spec_key": "kit_count_per_panel",
       "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
-      "fact_type": "kit_qty_rails_in",
+      "fact_type": "kit_qty_rails",
       "element_id": "element-77275b2b5b-0239"
     },
     {
@@ -91,7 +91,7 @@
       "part_id": "mfr/weatherables/pembroke-6x6-u-channel",
       "spec_key": "kit_count_per_panel",
       "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
-      "fact_type": "kit_qty_u_channels_in",
+      "fact_type": "kit_qty_u_channels",
       "element_id": "element-77275b2b5b-0239"
     },
     {
@@ -119,7 +119,7 @@
       "part_id": "mfr/weatherables/pembroke-6x6-metal-insert",
       "spec_key": "kit_count_per_panel",
       "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
-      "fact_type": "kit_qty_metal_inserts_in",
+      "fact_type": "kit_qty_metal_inserts",
       "element_id": "element-77275b2b5b-0239"
     },
     {
@@ -147,7 +147,7 @@
       "part_id": "mfr/weatherables/pembroke-6x6-picket",
       "spec_key": "kit_count_per_panel",
       "extractor": "source-reading:weatherables-pembroke-6ft-cadpage:v1",
-      "fact_type": "kit_qty_pickets_in",
+      "fact_type": "kit_qty_pickets",
       "element_id": "element-77275b2b5b-0239"
     },
     {

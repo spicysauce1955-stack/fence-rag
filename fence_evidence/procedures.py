@@ -2,7 +2,7 @@
 
 Declared in the payload since the contract was signed and empty ever since.
 This fills it, under one rule: **a step candidate with no reviewer publishes
-nothing, ever.** That is A1/C0 applied to a new seam — machine agreement was
+nothing, ever.** That is A1/CUR-S0 applied to a new seam — machine agreement was
 once laundered into curation level 2 and 324 facts had to be un-promoted, and
 the whole architecture here exists so that cannot happen again.
 

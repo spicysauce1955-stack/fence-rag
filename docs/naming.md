@@ -2,7 +2,24 @@
 
 ```text
 Status:   DECIDED, 2026-09-09, and partly ENFORCED -- tests/test_naming.py fails
-          the build on the four rules cheap enough to check mechanically.
+          the build on the rules cheap enough to check mechanically.
+          WORKED the same day. Fifteen open items were listed below on
+          2026-09-09; five are CLOSED (B-1, B-2, D-5, G108, and
+          section 6's `gc.py`, which closed as a collision rather than a
+          defect), one is PARTLY closed (section 9's colliding namespaces --
+          `F` and `C` closed, `R` went from three senses to two and the
+          remaining pair is untouched), one is FILED as amendment 011 (B-4),
+          one is ANSWERED and turned up a different live defect (E-1 -> G111),
+          one is HALF CLOSED by documenting it (E-2), one is PUT TO THE OWNER
+          as a migration plan rather than migrated (E-3), and five stay open
+          with a stated reason each (B-3, D-1 to D-4).
+          Four figures IN THIS DOCUMENT were wrong and are corrected in place
+          with the measurement that settled each -- B-1's count, D-5's "no
+          reason is recorded anywhere", D-5's attribution of
+          `Combination.members` to `contract.md`, and section 9's "nine lines
+          apart". A conventions document that cannot be trusted is worth less
+          than no conventions document, so the corrections are marked rather
+          than quietly applied.
           Everything here was MEASURED off the code and the published snapshots
           first; almost none of it is new. The repository already had these
           conventions. It did not have them written down, which is why they
@@ -26,13 +43,21 @@ problem wearing another problem's clothes:
   which exist. The same table column is called `post_size_in` in one question
   and `line_post_size_in` in another. Nothing reads the field, so nothing ever
   said.
-- **Five colliding document-id namespaces.** `docs/README.md` warns about one of
-  them. `R1` means a retrieval upgrade, an audit recommendation, *or* a curation
-  acceptance criterion, depending on the file.
+- **Five colliding document-id namespaces.** `docs/README.md` warned about one
+  of them. `R1` meant a retrieval upgrade, an audit recommendation, *or* a
+  curation acceptance criterion, depending on the file. **Partly closed
+  2026-09-09** by requalifying the curation schemes: `F` and `C` are now
+  unambiguous, `R` still means two things -- see §9.
 
 None was a hard failure. All were the same shape: **a name nothing checks
 slowly stops meaning what a reader assumes.** The rules below are mostly
 descriptive; the value is that they are now checkable.
+
+**And the document did it to itself.** Working these defects on 2026-09-09
+found four wrong figures *in this file*, written the day before by the session
+that wrote the rules. Each is corrected in place and marked. That is not an
+embarrassment to bury: it is the same failure mode one layer up, and the reason
+§11 ends the way it does.
 
 ---
 
@@ -60,11 +85,15 @@ one holds the identical 64-hex value:
 
 **Beware the homonym.** `canonical.content_hash()` is a *different function*:
 sha256 of an object's canonical JSON bytes, not of a file. Same word, same
-64-hex shape, different subject. It mints `snapshot_id` and `Part.version`
-strings.
+64-hex shape, different subject. It mints `snapshot_id` and, through
+`canonical.part_version`, `Part.version` strings. **`part_version` is the one
+definition of the second of those** as of 2026-09-09 -- five call sites minted
+it by hand before, and one of them hashed a dict that already carried its own
+version, so a published `Part.version` could not be recomputed from the
+published payload. See §4, D-5.
 
-**Open defect (A-1).** `authority` is the only hash-bearing published field with
-no type gate and no closure check — `snapshot.HASH_BEARING` omits it, so a value
+**A-1, CLOSED 2026-09-09 by its own check.** `authority` was the only
+hash-bearing published field with no type gate and no closure check — `snapshot.HASH_BEARING` omits it, so a value
 naming a document absent from `source_docs` would publish, while the same value
 in `belongs_to` is refused. `[measured]` 0 of 7 authorities are unresolvable
 today. `tests/test_naming.py` now closes it.
@@ -97,15 +126,28 @@ one dict, which reads as an inconsistency and is not: `fence_height` publishes
 `domain: "range(mm)"` and declares its unit there; `wind_speed_mph` publishes an
 enumeration, which declares nothing, so the name must.
 
-**Open defects, all measured, none fixed here:**
+**The defects, and what happened to each on 2026-09-09:**
 
-| id | defect | why it matters |
+| id | defect | status |
 |---|---|---|
-| B-1 | 11 `*_drawing_*_mm` fact types whose `unit_original` is `in` | the exact inversion of Rule 2 — the class of error that produced G63's twelvefold-too-small number |
-| B-2 | 4 `kit_qty_*_in` fact types whose unit is `each` | `_in` is a **live dispatch key**; these survive only because they bypass `facts._normalise` |
-| B-3 | `u_channel_designation_in` is a designation, not a length | minor |
-| B-4 | `max_rack` is `quantity(deg_milli)` with no suffix, in ratified `contract.md` | cheap now (publishes nothing); expensive once it does |
-| G108 | `fence_height_ft` vs `fence_height` | see `state-and-gaps.md` |
+| B-1 | ~~11~~ **13** `*_drawing_*_mm` fact types whose `unit_original` is `in` | **CLOSED.** Renamed to `_in`. `[measured]` the count in this table was wrong — it is 13, not 11: board (3), end_channel (3), panel (4), rail (3). The fix is a RENAME and not a normalisation, decided on evidence rather than symmetry: `[measured]` `value_normalized` is NULL on all 13 and each recipe's `quantity()` converts by re-parsing `value_original` as an inch string, so writing 25.4× into the store would make it assert a conversion no reader performs — the half of G63 that shipped a number twelve times too small. The published `SpecField.key` stays `_mm`, because that is the unit it CROSSES in. G109 |
+| B-2 | 4 `kit_qty_*_in` fact types whose unit is `each` | **CLOSED.** Suffix removed — a count is not a quantity whose unit the name must declare. The unit is declared once, on the `kit_qty` prefix in the two recipes, with a comment saying why |
+| B-3 | `u_channel_designation_in` is a designation, not a length | **OPEN, and it passes Rule 2a below**, correctly: `unit_original` is `in` on all 3 rows, so the name claims no unit the row lacks. Still minor, still a designation |
+| B-4 | `max_rack` is `quantity(deg_milli)` with no suffix, in ratified `contract.md` | **FILED as amendment 011**, not fixed — a name in a frozen contract moves only through `AMENDING.md`. The proposal reframes it: the unit IS declared elsewhere (`value_type`), so the rule is not "every quantity takes a suffix" but "every published parameter name takes one and this is the only exception". `[measured]` **9 distinct tables** across three parameter names, all suffixed or `paired` (they appear as 225 rows across the 25 non-tombstoned snapshots — 9 x 25; the count Planning has held since 2026-08-31 is 9); `max_rack` tables published: **0** |
+| G108 | `fence_height_ft` vs `fence_height` | **CLOSED.** `facts._conditions` writes `fence_height` carrying the source's own lexeme, `parameters._parse_fence_height` gained a point branch (a stated height is an interval whose bounds coincide, both inclusive), and `cli migrate` re-derived the 18 stored rows rather than relabelling them |
+
+> ### RULE 2a, added with its check
+>
+> **A unit token at the end of a `fact_type` must be a unit the row actually
+> carries** — in `unit_original` or in `unit_normalized`, after alias
+> normalisation.
+>
+> Not equality with either, and the two near-misses are the reason. An equality
+> rule on `unit_original` fails `stock_length_in`, which this section explicitly
+> protects: 33 of its 62 sources state feet. An equality rule on
+> `unit_normalized` fails the drawing readings, whose value is never normalised
+> at all. `[measured]` 2026-09-09 the rule as stated caught exactly B-1 and B-2
+> — 17 fact types — and passed everything this document calls correct.
 
 **Not a defect:** `stock_length_in` is named for inches although 33 of 62 sources
 state feet. The suffix names the fact type, and `parts._stock_length_quantity`
@@ -173,12 +215,60 @@ a published page subject is `doc-x#p6` while the internal `page_id` is
 without reconstructing the version (D-3); `Part.id` lowercases what a
 `component`-kind gap subject publishes verbatim (D-4).
 
-**D-5, the most serious, and it is live:** `[measured]` `Part.version` is the
-integer `1` on 27 published parts and the string `"sha256:<64hex>"` on 15, **in
-one snapshot**, and `PART_SHAPE` omits the field so nothing catches it. This
-becomes load-bearing the moment `Combination` is built — `contract.md` pins
-`Combination.members` as `[Part@version]`. No reason for the string form is
-recorded anywhere.
+**Open, and each judged rather than merely listed on 2026-09-09.** D-1 through
+D-4 all stay open and none is worth doing now, for one reason each: changing
+`element_id`'s truncation moves every element id and therefore every row keyed
+on one (a re-extraction, for a cosmetic two hex digits); `asset_id`'s shape is
+in the filenames under `workspace/derived/`; the published page subject and
+`Part.id`'s lowercasing are both **published bytes in write-once snapshots**,
+where obligation 1 makes a wrong name frozen rather than fixable. D-3 is the one
+with real cost — a consumer cannot join a published page subject to a `pages`
+row without reconstructing the version — and it belongs with the extraction-
+editions work in G38 rather than with a rename.
+
+**D-5, CLOSED 2026-09-09, and two of the four sentences that described it were
+wrong.** `[measured]` `Part.version` was the integer `1` on 27 published parts
+and the string `"sha256:<64hex>"` on 15, **in one snapshot**, with `PART_SHAPE`
+omitting the field so nothing could catch it. Both of those observations were
+right. The other two were not:
+
+- *"No reason for the string form is recorded anywhere"* — **false.** G103,
+  written 2026-09-07, two days before this document: *"Part versions no longer
+  stay at 1 when reviewed content changes. Each is now a `sha256:` hash of all
+  public Part content except version… Hash versions identify content, not
+  chronological order."* It is also in `docs/curation/emblem-publication-
+  workflow.md` and in the adversarial review that caused it. The search that
+  produced this sentence looked in the code and not in the record.
+- *"`contract.md` pins `Combination.members` as `[Part@version]`"* — **false.**
+  `contract.md` never names `Combination.members`; that pin is
+  `knowledge-datamodel.md:1395`, and `contract.md`'s only word on `Combination`
+  is obligation 17, which says nothing consumes one yet. The claim was stronger
+  than the citation, in exactly the direction that makes a defect sound urgent.
+
+**Resolved toward the hash**, because the two forms are two jobs and only one of
+them is done: `[measured]` the integer is `1` on every int-versioned part in all
+24 stored snapshots that carry parts, and no bump path exists anywhere in the
+package, so a corrected value shipped under its predecessor's version. That is
+what G103 fixed for the four recipe slices and never fixed for `parts.py`.
+`canonical.part_version` is now the single definition and all five sites call
+it.
+
+**`PART_SHAPE` carries the WEAK rule, and that is a finding rather than a
+compromise.** `snapshot_store.verify_stored` re-runs `verify()` over stored
+payloads, so a gate refusing the integer `1` would mark 24 write-once snapshots
+non-compliant for having obeyed the rule of their day. So the shape types
+`version` as *a positive integer or a non-empty string* — which is also exactly
+the predicate `authored_models`' audit and Planning's own `_version_identity`
+already enforce, one definition now serving all three — and the strong rule
+lives at the builder, where `tests/test_naming.py` holds it.
+
+**A second, live defect fell out of the same read**, and it is the reason
+`part_version` exists as a function: `augusta_drawing_claims` re-hashed a picket
+dict that already carried a version, chaining the two. `[measured]` 14 of the 15
+string-versioned parts in snapshot `0e04d171…` reproduce from their own bytes;
+`mfr/weatherables/augusta-8x6-picket` does not. One published `Part.version` a
+consumer cannot verify. Fixed forward; the stored snapshot keeps it, because a
+stored snapshot is write-once. See G109.
 
 ---
 
@@ -209,16 +299,51 @@ without sharing a definition — `table_review.PROMOTABLE` and
 independent decisions that must be free to diverge. What is forbidden is two
 names for **one** vocabulary.
 
-**Open defects:** `WARN_*` is a declared vocabulary that nothing emits —
-`[measured]` **0 of 287** published warnings carry a `code`, while
-`registry-additions.md` asks Planning to build 11 locale bundles for codes that
-never arrive (E-1). `because.code` carries a `warning_`-prefixed sub-scheme that
-reads as a severity and is not, plus three undocumented renames off
-`quality_issues.kind` (E-2). And **`review_status` is one column name over four
-disjoint vocabularies** across `facts`, `table_read_candidates`, `step_candidates`
-and the `*_reviews` tables, with `CURATION_LEVEL` mapping across two of them at
-once — so a value from the wrong table scores a curation level silently (E-3).
-E-3 is the one worth a migration.
+**E-1, ANSWERED 2026-09-09, and the answer is that the document was wrong, not
+the code.** `WARN_*` is not a vocabulary nothing emits; it is a **census** of
+eleven kinds of sentence this corpus prints, mis-filed as a registry of codes.
+`[measured]` `grep -rn "WARN_" --include=*.py .` returns **zero hits** — there
+is no such constant anywhere — and across all 31 stored snapshots there are
+**7,187 published warnings, 0 carrying a `code`** (this document's "0 of 287"
+was right for the largest cohort and understated the population). That is
+compliant: obligation 10 makes `code` *"an optional overlay"*, and `contract.md`
+§2 puts source warnings in the **exempt** half of the registry — *"Exempt from
+the bundle rule. The `SOURCE_*` codes are NOT these."* So
+`registry-additions.md` §6's ask for eleven locale bundles contradicted §2 of
+the same contract, and `[measured]` Planning had already declined it at
+`conversation.md` T7 and never built it. Both documents are corrected;
+`docs/build-plan.md` C1's *"Planning still needs the two locale bundles"* was
+false for thirteen days and is struck. **The real defect the investigation found
+is the opposite one**, and it is open: `[measured]` the two `SOURCE_*` lists
+have drifted three codes in each direction, so three codes this platform CAN
+emit have no bundle on Planning's side and render as raw English. G111, and
+`conversation.md` T61.
+
+**E-2, HALF CLOSED 2026-09-09.** The `warning_`-prefixed sub-scheme and the
+three renames off `quality_issues.kind` are now documented at
+`snapshot.QUALITY_GAP_KINDS` rather than unwound: `[measured]` exactly three of
+the seven kinds change on crossing (`mojibake_text_layer` →
+`text_layer_mojibake`, `low_ocr_confidence` → `ocr_below_confidence_floor`,
+`empty_page_after_ocr` → `empty_after_ocr`) and four cross unchanged. Under
+RULE 1 the second name marks a **layer**, store → published, and the published
+spellings are aligned to the noun-first `SOURCE_*` form while the store's are
+not. Unwinding either side would rewrite write-once snapshots or rows nothing
+re-derives; documenting was the whole available fix.
+
+**E-3, PUT TO THE OWNER 2026-09-09, deliberately not migrated.**
+`docs/review-status-migration-plan.md` has the measured matrix, the blast radius
+and four costed options. The headline correction: **this document's *"a value
+from the wrong table silently scores a curation level"* is stronger than the
+evidence.** `[measured]` all 200 level-2 facts have a real human record behind
+them and zero are mis-scored; what is true is narrower — `facts.review_status`
+really does hold two vocabularies (108 rows carry `accepted`, a candidates
+value), and two guards written in the other vocabulary do not cover those rows.
+The recommendation is per-table `frozenset`s and a `CURATION_LEVEL` that
+**raises** on an out-of-vocabulary value, not a rename: the rename would run DDL
+against the 1,927 readings that are not in the review ledger, and a value-space
+split would rewrite 204 lines of the ledger itself — the one artifact here that
+does not regenerate. A schema migration over the review tables is not a
+unilateral change, so it stops at the plan.
 
 ---
 
@@ -259,8 +384,20 @@ E-3 is the one worth a migration.
 
 **Known deviations, recorded rather than fixed:** five modules in the
 `*_claims.py` cluster import `_private` names across module boundaries;
-`gc.py` shadows the stdlib `gc`; `promote_tables.py` is the only verb+object
-module name.
+`promote_tables.py` is the only verb+object module name.
+
+**`gc.py` — examined 2026-09-09 and CLOSED as a collision, not a defect.**
+`[measured]` it breaks nothing and cannot: Python 3 imports are absolute, the
+stdlib `gc` is a builtin, and both resolve correctly in the same process
+(`import gc` and `from fence_evidence import gc` give different modules, and
+`sys.modules['gc']` is still the builtin inside ours). `[measured]` nothing in
+this package imports the stdlib `gc` at all, and the only two importers of ours
+name it explicitly (`cli.py`'s `from .gc import collect`,
+`tests/test_gc.py`'s `from fence_evidence import gc as gcmod`). Renaming would
+cost the CLI wiring, two imports and — the real price — the first rule in this
+section, since the subcommand is `gc` and the module would no longer be named
+for it. The rule is worth more than the clarity, so the module keeps the name
+and this paragraph is the fix.
 
 ---
 
@@ -323,12 +460,48 @@ a past defect, 16.5% quote a document directly, 10.9% cite a gap id.
 > - **`T<n>` turns are contiguous and append-only.** Heading:
 >   `## T<n> · <sender> → <recipient> · <ISO date>`.
 
-**Open defect: five colliding namespaces.** `docs/README.md` warns about one of
-them (two `R1`–`R5` schemes). `[measured]` there are at least five: `R` means a
-retrieval upgrade, an audit recommendation, *or* a curation criterion; `F` means
-an audit defect *or* a curation floor criterion; `C` means an amendment
-candidate *or* a curation stage — **and `CLAUDE.md` uses both senses of `C` nine
-lines apart**; `A` means a build-plan item *or* a curation group.
+**PARTLY CLOSED 2026-09-09 by requalifying the curation schemes.** `F` and `C`
+are now unambiguous. **`R` is not**: `docs/target-architecture.md:179` still
+numbers retrieval upgrades `R1`-`R5` and
+`workspace/reports/projection-relevance-audit.md:158` still numbers
+recommendations `R1`-`R9`, and `CLAUDE.md` uses the audit sense. Three senses
+became two; the trap `docs/README.md` originally warned about is the one that
+survives. `[measured]` there were four collisions, not five -- `docs/curation/05`'s
+groups are P, C, F and R, so the `A` collision this document asserted never
+existed: `R` meant a retrieval upgrade, an audit
+recommendation, *or* a curation criterion; `F` an audit defect *or* a curation
+floor criterion; `C` an amendment candidate *or* a curation stage — and
+`CLAUDE.md` used both senses of `C` ~~nine~~ **31** lines apart (`[measured]`
+2026-09-09: lines 101 and 132; the "nine" was written into this document and
+into `docs/README.md` without being counted, then copied between them rather
+than re-measured — a small instance of the exact failure §0 describes); `A` a
+build-plan item *or* a curation group.
+
+**The curation schemes moved, and only they**, being the newest and least cited:
+stages `C0`–`C8`/`C0.5`/`C4b` → `CUR-S0`…`CUR-S8` (an `S` for stage, because
+bare `C` was taken twice already — once by amendment candidates and once by
+Group C's own subgroups), Group P → `CUR-P*`, Group F → `CUR-F*`, Group R →
+`CUR-R*`. `[measured]` 134 id occurrences across 22 files, including 15 inbound
+citations from outside `docs/curation/`: four production modules and four tests
+cite the `A1/CUR-S0` precedent in their docstrings, and `dataset.py` cites
+`CUR-P1b`. The audit, target-architecture, build-plan and amendment-candidate
+schemes were left alone.
+
+**`C-A1`…`C-G7` did NOT move.** They are the precedent this rule cites, and
+`[measured]` they collide with nothing. §9's trigger is *"where a letter is
+already taken"*, and the compound form is not taken by anybody.
+
+**No permanent guard, and that is a decision rather than an omission.** A check
+would have to scan every document under `docs/` for a heading-or-table-row
+shaped id, and the shapes are not closed: R/F/C/A ids appear as headings, as
+table rows, and as bare prose mentions. A pattern loose enough to catch all
+three also catches Cloudflare's `R2_BUCKET`, the ASCII `C0` control range, a PDF
+`/F1` font key and the NOA drawing item code `P1` — all four are in this
+repository, and a mechanical pass during this very change ate `C-C1`–`C-C9`
+before diff review caught it. The invariant is unbounded too: "which letters are
+taken" changes every time anybody adds a heading, so the guard would go red on
+the next legitimate id, which is what §11 says not to ship. The citation map
+built for the rename is the verification, and it was a one-time one.
 
 ---
 
@@ -347,15 +520,36 @@ Changing any of these breaks published data or another team's build:
 
 ## 11. Enforcement
 
-`tests/test_naming.py` checks the four rules cheap enough to check
-mechanically, over the stored snapshots and the code:
+`tests/test_naming.py` checks the rules cheap enough to check mechanically,
+over the stored snapshots and the code, and `tests/test_gold_set.py` carries the
+one that belongs to the gold set:
 
 | Rule | Check |
 |---|---|
 | 1 | every `authority` in a published snapshot resolves to a `source_docs` entry — closes A-1 |
+| 1 | every key `facts._conditions()` **can** emit is in `parameters.CONDITION_SCOPE`, read out of the source with `ast` rather than sampled — closes G108. The static form is the point: a functional check sees only the keys the fixtures happen to trigger |
+| 1 | a height the extractor writes parses back through `parameters._parse_fence_height` into an `Interval`, and the publisher does not refuse the conditions it emits — the two ends agreeing about the VALUE, not only the key |
+| 2a | no `fact_type` names a unit none of its rows carries — closes B-1 and B-2 |
 | 3 | every `_mm`-suffixed `SpecField` key carries a `Quantity`; every unsuffixed one carries a `Token` |
+| 4 | every built `Part.version` is the content hash of the part it names, and `PART_SHAPE` types the field — closes D-5 |
 | 5 | every code in `api.ERROR_CODES` is `error.*`; no registry code is |
 | 9 | CLI subcommands and flags are kebab-case; `G<n>` headings are unique |
+| — | every gold-set `required_conditions` key is a declared dimension; the schema's `propertyNames.enum` equals `sorted(CONDITION_SCOPE)`; a quantity-valued condition carries its unit; one source column is not two names |
+
+`[measured]` 2026-09-09: 1,797 tests pass, 1 expected failure. Every guard added
+that day was written red, watched fail for the right reason, and then
+**mutation-checked** — the implementation broken deliberately and the guard
+confirmed to fail. Several guards in this repository were added green and only
+mutation proved they discriminate; these are not among them.
+
+**What stayed unenforced, and why**, so the list is honest: §9's namespace rule
+(no non-brittle check exists — see §9); §6's Python conventions (a style check
+over 61 modules would go red on the next legitimate exception); §7's and §8's
+test-and-docstring conventions (`[measured]` 2026-09-09 **1,798 of 1,799**
+test names already state a behaviour rather than a function -- §7's figure
+counts the ONE violation, not the compliance -- and 61 of 61 modules carry a
+docstring; a lint for prose is a lint somebody argues with); and E-3's per-table vocabulary check, which fails today and lands
+with the migration rather than before it.
 
 The rest are recorded, not enforced. A rule that cannot be checked is a rule
 that drifts — which is the whole argument of §0 — so **when you add a

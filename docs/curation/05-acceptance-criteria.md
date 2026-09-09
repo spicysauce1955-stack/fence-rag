@@ -32,21 +32,21 @@ costs.
 
 | # | Criterion | Measure | Target |
 |---|---|---|---|
-| P1 | Corpus files unmodified | SHA-256 of every file in `workspace/catalog/corpus-manifest.jsonl` | 144/144 identical |
-| P1b | `data/` unmodified | SHA-256 of every file under `data/**` vs `workspace/catalog/data-digests.json`, written at C0 | all identical |
-| P2 | Canonical tables unmodified | row count + ordered-row hash of all eleven canonical tables, before and after a full run | identical |
-| P3 | `facts` unmodified | row count + ordered-row hash | identical, 1,988 rows |
-| P4 | Projection not regenerated | `retrieval_units` and `retrieval_fts` row counts, and `retrieval_units.built_at` | unchanged, 10,886 |
-| P5 | Write guard enforced | attempted write to each canonical table name and to `facts`, through the authorizer | every attempt rejected |
-| P6 | Extraction code untouched | git diff over `extract.py`, `layout.py`, `hocr.py`, `tables.py`, `quality.py`, `ingest.py`, `manifest.py` | empty |
-| P7 | Existing tests still pass | `python3 tests/run_tests.py` | 164/164, plus the new curation tests |
+| CUR-P1 | Corpus files unmodified | SHA-256 of every file in `workspace/catalog/corpus-manifest.jsonl` | 144/144 identical |
+| CUR-P1b | `data/` unmodified | SHA-256 of every file under `data/**` vs `workspace/catalog/data-digests.json`, written at CUR-S0 | all identical |
+| CUR-P2 | Canonical tables unmodified | row count + ordered-row hash of all eleven canonical tables, before and after a full run | identical |
+| CUR-P3 | `facts` unmodified | row count + ordered-row hash | identical, 1,988 rows |
+| CUR-P4 | Projection not regenerated | `retrieval_units` and `retrieval_fts` row counts, and `retrieval_units.built_at` | unchanged, 10,886 |
+| CUR-P5 | Write guard enforced | attempted write to each canonical table name and to `facts`, through the authorizer | every attempt rejected |
+| CUR-P6 | Extraction code untouched | git diff over `extract.py`, `layout.py`, `hocr.py`, `tables.py`, `quality.py`, `ingest.py`, `manifest.py` | empty |
+| CUR-P7 | Existing tests still pass | `python3 tests/run_tests.py` | 164/164, plus the new curation tests |
 
-P1 is scoped to the manifest's 144 rows because the manifest covers only
+CUR-P1 is scoped to the manifest's 144 rows because the manifest covers only
 `manuals/` and `china/`; `data/` — including the authority-20
-`certainteed-bufftech-structural.json` that R9 turns on — has no recorded
-baseline hash today, which is why P1b and its C0 deliverable exist.
+`certainteed-bufftech-structural.json` that CUR-R9 turns on — has no recorded
+baseline hash today, which is why CUR-P1b and its CUR-S0 deliverable exist.
 
-P1–P4 are the technical statement of *"the current implementation is now the
+CUR-P1–CUR-P4 are the technical statement of *"the current implementation is now the
 immutable extraction and preservation layer"*. If any fails, nothing else here
 matters.
 
@@ -67,11 +67,11 @@ matters.
 | C-A5b | Duplicate ≠ lineage | 0 pairs of documents with different `sha256` sharing a `duplicate_group_id` (prohibition 5) |
 | C-A6 | The 24-0117.05 divergence is recorded | the dossier set records all 4 `manufacturer` values and all 4 `doc_type` values for one identical SHA-256 |
 | C-A7 | Disagreement with the stored status is typed | `disagrees_with_stored = (revision_status ≠ map(stored_version_status))` holds for 19/19; ≥1 dossier has it set (23-0314.05) |
-| C-A8 | Flag dispositions are typed and complete | all 7 known false-positive `table_not_reconstructed` pages appear in `workspace/catalog/table-flag-fixture.jsonl` with a `flag_disposition`; the 2 index sheets are `false_positive_index_sheet` and remain in C5 scope with `has_reviewable_table=1` |
+| C-A8 | Flag dispositions are typed and complete | all 7 known false-positive `table_not_reconstructed` pages appear in `workspace/catalog/table-flag-fixture.jsonl` with a `flag_disposition`; the 2 index sheets are `false_positive_index_sheet` and remain in CUR-S5 scope with `has_reviewable_table=1` |
 | C-A9 | Authority assigned | 19/19 dossiers carry an `authority_level` from `cur_vocab` and a non-empty `authority_basis` |
 | C-A10 | The slice spans what it claims | the 19 dossiers cover `install_manual`, `gate_manual`, `catalog`, `approval` and `warranty`, and ≥2 supersession generations (requirement 7). `spec_sheet` and `drawing_set` are not represented in this slice and are registered as `out_of_scope` gaps rather than left implied |
 | C-A11 | Page maps are not guesses | a blind-labelled 40-page sample agrees with `cur_page_maps` on the primary content class at ≥0.90, with a confusion table in the report |
-| C-A12 | Backfill completed (gate C4b) | 0 of the 5 approval dossiers have a NULL `effective_claim_id` or `expires_claim_id`; 0 page maps are entity-empty on a page whose dossier names a product line |
+| C-A12 | Backfill completed (gate CUR-S4b) | 0 of the 5 approval dossiers have a NULL `effective_claim_id` or `expires_claim_id`; 0 page maps are entity-empty on a page whose dossier names a product line |
 
 ### C-B Entities
 
@@ -101,7 +101,7 @@ matters.
 
 | # | Criterion | Target |
 |---|---|---|
-| C-D1 | Structural claims are conditional | 100% of `accepted` claims in `footing`, `spacing`, `wind_condition` carry conditions on `fence_height`, `exposure_category`, `hvhz_applicability` **and `post_size`** — the same four C5 requires, named once here and referenced from there |
+| C-D1 | Structural claims are conditional | 100% of `accepted` claims in `footing`, `spacing`, `wind_condition` carry conditions on `fence_height`, `exposure_category`, `hvhz_applicability` **and `post_size`** — the same four CUR-S5 requires, named once here and referenced from there |
 | C-D2 | Unknown is explicit and blocking | 0 `accepted` mandatory-class claims with any `operator='unknown'` condition; the trigger refuses it |
 | C-D3 | Authority present | 100% of claims carry an `authority_level` resolving in `cur_vocab` |
 | C-D4 | Validity present or gapped | 100% of approval-sourced claims carry `valid_from`/`valid_until`, or `validity_basis='none'` **and** a `cur_knowledge_gaps` row with `scope_kind='claim'` and `scope_ref=claim_id` — checked by join, not by prose |
@@ -155,12 +155,12 @@ are what makes every "100% of accepted claims" criterion above mean anything.
 
 | # | Criterion | Measure | Target |
 |---|---|---|---|
-| F1 | Structural claims exist | accepted claims with a full four-dimension condition tuple, sourced from the 8 `wind_exposure_footing` crops (132 distinct cells) | ≥ N, where **N is fixed and published by Gate C0.5** as a stated fraction of the digit-bearing values in the frozen ground truth for those crops, before C5 runs, and is not revised afterwards |
-| F2 | Coverage is not shrunk | cells attempted / cells in the frozen ground truth for those 8 crops | reported, with the abstention rate |
-| F3 | All eight grids are read | `cur_table_readings` rows with `table_kind='wind_exposure_footing'` and `status='reviewed'` (a defined `grid_status` value), covering all 132 distinct cells | 8/8 grids, 132/132 cells dispositioned — not "at least one Table 1", which is satisfiable by reading the one grid whose values are already published in three places |
-| F4 | Bindings exist | claims with `subject_binding='bound'` and `subject_entity_id` naming a `product_style` | ≥ 1 per style that the corpus documents |
-| F5 | A procedure exists | `cur_procedures` with ≥1 reviewed, contiguous step sequence | ≥ 1 |
-| F6 | Gaps are specific, not blanket | share of `cur_knowledge_gaps` whose `scope_kind` is `page` or `table` rather than `capability` | reported; a slice where every gap is capability-wide has not been curated |
+| CUR-F1 | Structural claims exist | accepted claims with a full four-dimension condition tuple, sourced from the 8 `wind_exposure_footing` crops (132 distinct cells) | ≥ N, where **N is fixed and published by Gate CUR-S0.5** as a stated fraction of the digit-bearing values in the frozen ground truth for those crops, before CUR-S5 runs, and is not revised afterwards |
+| CUR-F2 | Coverage is not shrunk | cells attempted / cells in the frozen ground truth for those 8 crops | reported, with the abstention rate |
+| CUR-F3 | All eight grids are read | `cur_table_readings` rows with `table_kind='wind_exposure_footing'` and `status='reviewed'` (a defined `grid_status` value), covering all 132 distinct cells | 8/8 grids, 132/132 cells dispositioned — not "at least one Table 1", which is satisfiable by reading the one grid whose values are already published in three places |
+| CUR-F4 | Bindings exist | claims with `subject_binding='bound'` and `subject_entity_id` naming a `product_style` | ≥ 1 per style that the corpus documents |
+| CUR-F5 | A procedure exists | `cur_procedures` with ≥1 reviewed, contiguous step sequence | ≥ 1 |
+| CUR-F6 | Gaps are specific, not blanket | share of `cur_knowledge_gaps` whose `scope_kind` is `page` or `table` rather than `capability` | reported; a slice where every gap is capability-wide has not been curated |
 
 ---
 
@@ -170,35 +170,35 @@ Groups P, C and F must already pass.
 
 | # | Criterion | Measure | Target |
 |---|---|---|---|
-| R1 | **No silent errors** | accepted `visual_reading` values that disagree with the frozen ground truth **and were not abstained on**, over the full ground-truth denominator for the 8 grids (132 cells) | **0** |
-| R2 | Agreement with prior readings | accepted values vs `workspace/catalog/ground-truth-round-1.jsonl` (SHA-256 recorded), reported as **coverage, recall, precision and abstention together**, split by crops with 1 reader (32) and >1 reader (7) | ≥ the target set at C0.5 |
-| R2b | Correctness is the human's number | inter-rater disagreement between the human reviewer and the agent consensus, per grid | reported as a first-class number |
-| R3 | CAP-6 answerable | *"footing depth for Chesterfield, 6 ft, Exposure C, HVHZ"* returns one winning claim (`cur_conflicts.winning_claim_id` where a group exists) with a complete condition tuple and a rendering crop, superseded members addressable but not returned — or a knowledge gap with a reason | pass, against a fixture in `eval/curation-questions.json` |
-| R4 | CAP-7 answerable | each of the 5 NOAs has a reviewed scope claim naming its models and a reviewed date pair | 5/5 |
-| R5 | CAP-8 answerable | *"which approval is in force"* returns one document, one date pair, one citation; the other 3 filings resolve as duplicates | pass, against a fixture in `eval/curation-questions.json` |
-| R6 | CAP-1 answerable | *"who sells Chesterfield today"* resolves through the succession edges with evidence | pass, against a fixture in `eval/curation-questions.json` |
-| R7 | CAP-5 answerable | ≥1 complete post-and-panel procedure, contiguous ordinals, every warning attached, every figure crop resolving | pass, against a fixture in `eval/curation-questions.json` |
-| R8 | CAP-9 answerable | every accepted claim renders its crop | 100% |
-| R9 | **G16 regression, inverted** | for the three in-slice errors — the HVHZ bracket on the Exposure-B rows, the PE licence state, the hat-insert dimensions — the bundle contains an **accepted claim on the same attribute/subject/condition signature whose value matches the source page**, each with its crop | 3/3 |
-| R10 | Capability partition | for each of CAP-1..CAP-9, the bundle contains either ≥1 accepted claim satisfying that capability's fixture predicate **or** ≥1 gap with `capability='CAP-n'` | 9/9, no capability silently absent |
-| R11 | Review is finished, not abandoned | 0 claims in `in_review`; every *reviewed* claim is `accepted`, `rejected`, `needs_source`, `blocked` or `superseded`; unreviewed claims remain `candidate` and their count is reported per class | pass |
-| R12 | Idempotency | a second full run with unchanged inputs and `config_hash` produces rows identical on every column except `started_at`, `finished_at`, `created_at`, `reviewed_at`, `resolved_at`, `generated_at` — the explicit list, as `tests/test_idempotency.py` already does for the projection | pass |
+| CUR-R1 | **No silent errors** | accepted `visual_reading` values that disagree with the frozen ground truth **and were not abstained on**, over the full ground-truth denominator for the 8 grids (132 cells) | **0** |
+| CUR-R2 | Agreement with prior readings | accepted values vs `workspace/catalog/ground-truth-round-1.jsonl` (SHA-256 recorded), reported as **coverage, recall, precision and abstention together**, split by crops with 1 reader (32) and >1 reader (7) | ≥ the target set at CUR-S0.5 |
+| CUR-R2b | Correctness is the human's number | inter-rater disagreement between the human reviewer and the agent consensus, per grid | reported as a first-class number |
+| CUR-R3 | CAP-6 answerable | *"footing depth for Chesterfield, 6 ft, Exposure C, HVHZ"* returns one winning claim (`cur_conflicts.winning_claim_id` where a group exists) with a complete condition tuple and a rendering crop, superseded members addressable but not returned — or a knowledge gap with a reason | pass, against a fixture in `eval/curation-questions.json` |
+| CUR-R4 | CAP-7 answerable | each of the 5 NOAs has a reviewed scope claim naming its models and a reviewed date pair | 5/5 |
+| CUR-R5 | CAP-8 answerable | *"which approval is in force"* returns one document, one date pair, one citation; the other 3 filings resolve as duplicates | pass, against a fixture in `eval/curation-questions.json` |
+| CUR-R6 | CAP-1 answerable | *"who sells Chesterfield today"* resolves through the succession edges with evidence | pass, against a fixture in `eval/curation-questions.json` |
+| CUR-R7 | CAP-5 answerable | ≥1 complete post-and-panel procedure, contiguous ordinals, every warning attached, every figure crop resolving | pass, against a fixture in `eval/curation-questions.json` |
+| CUR-R8 | CAP-9 answerable | every accepted claim renders its crop | 100% |
+| CUR-R9 | **G16 regression, inverted** | for the three in-slice errors — the HVHZ bracket on the Exposure-B rows, the PE licence state, the hat-insert dimensions — the bundle contains an **accepted claim on the same attribute/subject/condition signature whose value matches the source page**, each with its crop | 3/3 |
+| CUR-R10 | Capability partition | for each of CAP-1..CAP-9, the bundle contains either ≥1 accepted claim satisfying that capability's fixture predicate **or** ≥1 gap with `capability='CAP-n'` | 9/9, no capability silently absent |
+| CUR-R11 | Review is finished, not abandoned | 0 claims in `in_review`; every *reviewed* claim is `accepted`, `rejected`, `needs_source`, `blocked` or `superseded`; unreviewed claims remain `candidate` and their count is reported per class | pass |
+| CUR-R12 | Idempotency | a second full run with unchanged inputs and `config_hash` produces rows identical on every column except `started_at`, `finished_at`, `created_at`, `reviewed_at`, `resolved_at`, `generated_at` — the explicit list, as `tests/test_idempotency.py` already does for the projection | pass |
 
-**R1 is a hard zero, and it is about wrong values, not missing ones.** The G16
+**CUR-R1 is a hard zero, and it is about wrong values, not missing ones.** The G16
 failure was a confidently wrong number, and
 `docs/experiment-noa-table-reading.md` already makes silent-error rate the
 deciding criterion. One accepted value that contradicts what a reader
 transcribed from the page image, without having abstained, fails readiness
 outright regardless of every other number.
 
-**R2 measures reproducibility, not correctness, and says so.** Both the C5
+**CUR-R2 measures reproducibility, not correctness, and says so.** Both the CUR-S5
 readers and the frozen ground truth are blind agent readings from the same model
-family; the round-1 report warns that *"correlated failure is possible"*. R2 is
-therefore agreement-with-prior-readings. R2b — the human reviewer against the
+family; the round-1 report warns that *"correlated failure is possible"*. CUR-R2 is
+therefore agreement-with-prior-readings. CUR-R2b — the human reviewer against the
 agent consensus — is the correctness measure, and it is reported alongside,
 never instead.
 
-**R9 is inverted from its first draft.** As originally written it passed by
+**CUR-R9 is inverted from its first draft.** As originally written it passed by
 doing nothing: the four G16 errors are absent from the bundle by construction,
 since `data/structural/*.json` is never a claim source on its own. Requiring the
 bundle to contain the *correct* claim, accepted, with its crop, is a test the
@@ -227,5 +227,5 @@ measured value, including the ones that pass, and states the verdict per group.
 Partial reporting is how A4's no-answer precision looked acceptable at 0.667 on
 a three-question negative set before an 18-question set measured it at 0.333.
 Metrics that can be gamed by omission are reported together or not at all —
-which is why R2 reports coverage, recall, precision and abstention as one row,
+which is why CUR-R2 reports coverage, recall, precision and abstention as one row,
 and why Group F exists at all.

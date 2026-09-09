@@ -7,7 +7,7 @@ from fractions import Fraction
 import json
 import re
 
-from .canonical import content_hash
+from .canonical import part_version
 from .parameters import CURATION_LEVEL, _source_class
 from .reviews import (FACT_STATUS_FOR_VERDICT, effective_fact_value, fact_ref_id,
                       _normalise_corrected)
@@ -197,7 +197,7 @@ def build_emblem_parts(conn, source_ref):
             'type': {'namespace': 'shared', 'key': kind}, 'name_i18n': {'en': name},
             'spec': specs, 'authorship': 'third_party_authored',
             'cites': [cites[k] for k in sorted(cites)], 'contributing_sources': [SOURCE_SHA]}
-        part['version'] = 'sha256:' + content_hash(part)
+        part['version'] = part_version(part)
         parts.append(part)
     return parts
 

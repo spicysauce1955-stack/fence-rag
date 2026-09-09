@@ -214,7 +214,7 @@ curation hours. The carve-out is what keeps that cost bounded.
 
 `workspace/catalog/data-digests.json` now exists — a SHA-256 of all 16
 hand-maintained dataset files, written by `fence_evidence/dataset.py` and checked
-by `cli dataset --verify`. Acceptance criterion P1b asked for it and it did not
+by `cli dataset --verify`. Acceptance criterion CUR-P1b asked for it and it did not
 exist. `data/` has **exactly one commit** in its history; the moment that changes,
 the ability to say what the researcher originally wrote is gone. This is cheap
 insurance and it is now in place regardless of what happens next.

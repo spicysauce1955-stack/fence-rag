@@ -96,6 +96,37 @@ components, sized fourteen 2s and one 4. This was already corrected in
 
 ## 3. The eleven-warning starter list
 
+> **CORRECTED 2026-09-09 — these eleven are CLASSES, not codes, and §6's locale-bundle
+> ask below was wrong.** They name eleven kinds of sentence this corpus prints; they are
+> not a `code` field on anything. `[measured]` 2026-09-09, across all 31 stored
+> snapshots: **7,187 published warnings, 0 carrying a `code`**, and one field set in
+> every one of the 25 non-empty snapshots — `text_raw`, `lang`, `lang_basis`,
+> `severity_lexeme`, `attaches_to`, `cites`. `grep -rn "WARN_" --include=*.py .`
+> returns **zero hits**: there is no `WARN_*` constant in this codebase and no commit
+> has ever shipped an emitter.
+>
+> That is compliant, not a hole. Obligation 10: *"`code` and `params` are an optional
+> overlay — 142 of 226 distinct warnings here appear exactly once, and only 3 recur with
+> different values."* And `contract.md` §2's registry table puts these objects in the
+> **exempt** half: *"**Source** warnings … Knowledge. **Exempt from the bundle rule.**
+> The `SOURCE_*` codes are NOT these."* A sentence lifted verbatim from a manufacturer's
+> document is a source warning by the contract's own definition, so asking for locale
+> bundles for it contradicts §2 — which this document states correctly at line 48 and
+> then breaks in §6.
+>
+> The counts below are a **census of the corpus**, honestly measured and correctly
+> labelled by the paragraph that follows. What was wrong was the leap from census to
+> registry ask. `[measured]` 2026-09-09, re-checked against the 289-warning snapshot:
+> nine of the eleven `Published`/`Cites` pairs reproduce to the digit, and all eleven
+> exemplar `ref_id`s resolve. The two that do not — `WARN_UTILITY_LOCATE` and
+> `WARN_EYE_PROTECTION` — miss because the original classifier matched a disjunction
+> wider than the exemplar phrase (0 elements say *"before you dig"*; 101 say *"811"*),
+> and that classifier was a one-off script that was never committed. The **Elements**
+> and **Docs** columns do not reproduce and are contradicted by
+> `docs/state-and-gaps.md:1527`, which gives `WARN_FROST_LINE` as 254/28 against this
+> table's 18/16. Treat both as unreproducible until one is re-measured with a stated
+> pattern.
+
 The eleven classes named in `planning-asks.md` §3.2, each with its instance counts and a
 verbatim exemplar carrying a resolvable `ref_id`.
 
@@ -232,7 +263,8 @@ one: identical *extracted text* with different bytes, so `same_content_as` does 
 
 | | |
 |---|---|
-| Locale bundles | 21 platform codes need `en` + `he` entries: ten `SOURCE_*`, eleven `WARN_*`. Plus `CURATION_MACHINE_CONSENSUS` if not already added, and `parameter_condition_excluded` from T2 |
+| Locale bundles | **Corrected 2026-09-09.** Ten platform codes need `en` + `he` entries: the ten `SOURCE_*`. Plus `CURATION_MACHINE_CONSENSUS` if not already added, and `parameter_condition_excluded` from T2. **The eleven `WARN_*` need no bundles and never did** — they are source warnings, exempt by `contract.md` §2, and no published warning carries a `code`. The original line asked for 21; it should have asked for 10. Planning had already declined the ask on its own reasoning at `conversation.md` T7 (*"Register and implement per your own judgment"*) and `[measured]` 2026-09-09 their bundles carry **zero** `WARN_*` keys, so nothing was ever blocked on it — but the ask stood uncorrected in this document for thirteen days |
 | Nothing to negotiate | every item here is a §2 registry addition |
-| One thing to note | all eleven report non-zero as of 2026-08-27; the five that were empty when this list was drafted are fixed (§3.1) |
+| One thing to note | **The two `SOURCE_*` lists have drifted three codes in each direction.** `[measured]` 2026-09-09: `sourcerefs.SOURCE_CODES` can emit `SOURCE_CONTENT_DUPLICATED`, `SOURCE_NOT_FETCHED` and `SOURCE_STATUS_BASIS_FILENAME`, none of which is in Planning's `en`/`he` bundles — those render as raw English. Planning's bundles carry `SOURCE_CELL_BOX_MISSING`, `SOURCE_DERIVED_NOT_ACCEPTABLE` and `SOURCE_READING_NOT_HUMAN_REVIEWED`, none of which this platform can emit. Their `test_source_warning_code_list_is_current` checks a vendored fixture rather than this platform, so neither CI can see it. Raised as `conversation.md` T61 |
+| The eleven classes | all eleven report non-zero as of 2026-08-27; the five that were empty when this list was drafted are fixed (§3.1). This is about DETECTION — whether the sentence reaches `warnings[]` at all — and not about a `code`, which none of them carries |
 | One thing we owe back | a `family` column on the reader table, or a decision to ship reader ids instead (§4) |

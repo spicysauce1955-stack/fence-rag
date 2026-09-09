@@ -21,7 +21,12 @@ from .lang import detect_lang
 from .tenancy import TenantLeak, validate_owner
 from .paths import EVIDENCE_DB, ensure_writable
 
-SCHEMA_VERSION = 8
+# 9: the B-1/B-2 fact-type renames and the G108 condition-key backfill. Those
+# are DATA migrations with no DDL, and the stamp is bumped anyway on purpose --
+# without it a store that has never run `cli migrate` is indistinguishable from
+# one that has, and the only symptom is a guard in `tests/test_naming.py`
+# failing with a message about unit suffixes rather than "run migrate".
+SCHEMA_VERSION = 9
 
 SCHEMA = """
 PRAGMA journal_mode=WAL;
@@ -429,7 +434,7 @@ CREATE INDEX IF NOT EXISTS ix_fact_reviews_ref ON fact_reviews(ref_id);
 #
 # The last four columns are a PROJECTION of `step_reviews`, exactly as
 # `table_read_candidates`' are of `table_reviews`. A candidate that no person
-# has reviewed publishes nothing, ever (A1/C0).
+# has reviewed publishes nothing, ever (A1/CUR-S0).
 #
 # Pointers run DOWN: a candidate names its element; nothing on `elements` names
 # a candidate.
@@ -1051,11 +1056,21 @@ def migrate(conn: sqlite3.Connection) -> dict:
          no-op once done, and it refuses if step 3 has not run;
       5. `backfill_tool_fingerprint` fills the new column from the run each row
          already names -- no re-extraction, no source file read;
-      6. the view goes back, now that every column it names exists.
+      6. the view goes back, now that every column it names exists;
+      7. `facts.rename_fact_types` moves 17 fact types onto names whose unit
+         suffix matches the unit their rows carry (`naming.md` §2, B-1/B-2).
+         A backfill, not a re-extraction: no `fact_id` moves, so no fact review
+         is unbound. Lazy import, matching `parameters.py`'s discipline --
+         `facts` imports this module;
+      8. `facts.backfill_condition_keys` re-derives `conditions` for the 18
+         facts still naming the retired `fence_height_ft` axis (G108), and
+         refuses any row whose recomputation disagrees about a different
+         dimension.
 
     Every step is a no-op on an up-to-date store, so running this twice does
     exactly as much as running it once.
     """
+    from .facts import backfill_condition_keys, rename_fact_types
     conn.execute("DROP VIEW IF EXISTS current_editions")
     conn.executescript(SCHEMA)
     added = ensure_columns(conn)
@@ -1064,13 +1079,17 @@ def migrate(conn: sqlite3.Connection) -> dict:
     fingerprinted = backfill_tool_fingerprint(conn)
     ensure_views(conn)
     retired = retire_columns(conn)
+    renamed = rename_fact_types(conn)
+    conditions = backfill_condition_keys(conn)
     conn.execute("INSERT OR REPLACE INTO schema_meta(key, value) VALUES ('schema_version', ?)",
                  (str(SCHEMA_VERSION),))
     conn.commit()
     # Both directions, so a caller can report them. `retired['refused']` is the
     # half that needs a person: a column still holding data is never dropped.
     return {"added": added, "retired": retired, "version_unique": unique,
-            "tool_fingerprints_backfilled": fingerprinted}
+            "tool_fingerprints_backfilled": fingerprinted,
+            "fact_types_renamed": renamed,
+            "condition_keys_backfilled": conditions}
 
 
 def tool_fingerprint(tool_versions: dict) -> str:

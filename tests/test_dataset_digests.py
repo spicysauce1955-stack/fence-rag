@@ -6,7 +6,7 @@ carries four claims that were checked against their own sources and contradicted
 `data/` is read-only input and correcting someone's research is their call.
 
 The moment that changes, the ability to say what the researcher originally wrote
-is gone. Acceptance criterion P1b asks for a SHA-256 of every file under `data/**`
+is gone. Acceptance criterion CUR-P1b asks for a SHA-256 of every file under `data/**`
 before any curation phase begins; this writes it. It is cheap insurance against
 the failure where a value is silently corrected, a snapshot is rebuilt, and
 nobody can tell which of the two readings the old hash was made from.

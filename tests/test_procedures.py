@@ -1,7 +1,7 @@
 """`procedures` — what a reviewed step publishes, and what an unreviewed one does not.
 
 The member has been declared and empty since the contract was signed. This is
-the path that fills it, and the rule it enforces is the one A1/C0 established:
+the path that fills it, and the rule it enforces is the one A1/CUR-S0 established:
 a candidate with no reviewer publishes nothing, ever.
 
 Because nothing on the slice page is reviewed yet, the live snapshot publishes

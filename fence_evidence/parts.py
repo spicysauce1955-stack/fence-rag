@@ -65,7 +65,7 @@ from __future__ import annotations
 import json
 import sqlite3
 
-from .canonical import canonical_bytes
+from .canonical import canonical_bytes, part_version
 from .parameters import (MILLI_PER_UNIT, _UNIT_ALIASES, _Gaps, _default_source_ref,
                          _magnitude, _round_half_up)
 
@@ -156,7 +156,6 @@ def build_parts(components: list[dict], registry, *, source_ref=None,
         part_id = _part_id(c["component_id"], identity_namespace or ref["namespace"])
         parts_by_id[c["component_id"]] = {
             "id": part_id,
-            "version": 1,
             "status": "active",
             "type": ref,
             "name_i18n": {"en": c["component_name"] or c["component_id"]},
@@ -209,6 +208,16 @@ def build_parts(components: list[dict], registry, *, source_ref=None,
         })
         part["cites"] = cites
         part["contributing_sources"] = sorted({c["belongs_to"] for c in cites})
+
+    # AFTER the stock-length pass above, never inside the dict literal that
+    # builds the part: `version` is a hash of everything else the part carries,
+    # and `spec`, `cites` and `contributing_sources` are all still empty at
+    # that point. Minting early is the ordering mistake that produced the one
+    # unreproducible published version this platform has shipped -- see
+    # `canonical.part_version`. The counter this replaced was the literal `1`
+    # with no bump path anywhere in the package (G103, D-5 in `naming.md` §4).
+    for part in parts_by_id.values():
+        part["version"] = part_version(part)
 
     parts = sorted(parts_by_id.values(), key=lambda p: p["id"])
     # Scoped value recipes fire on the composition's own component ids, NOT

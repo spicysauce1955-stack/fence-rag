@@ -20,8 +20,13 @@ import re
 import unittest
 
 import context  # noqa: F401  -- puts the repo root on sys.path
+from context import requires_store
 from fence_evidence import api
+from fence_evidence import snapshot as snapshot_module
+from fence_evidence.canonical import part_version
 from fence_evidence.cli import main  # noqa: F401  -- import guard
+from fence_evidence.parts import build_parts
+from fence_evidence.part_types import PartTypeRegistry, build_part_types
 from fence_evidence.paths import REPO_ROOT
 from fence_evidence.snapshot_store import list_snapshots, get_snapshot
 
@@ -76,6 +81,169 @@ class TestRule1EveryAuthorityResolves(unittest.TestCase):
                         self.assertRegex(row["authority"], HEX64)
 
 
+class TestRule1OneConditionAxisOneName(unittest.TestCase):
+    """§1 and G108 — the store held `fence_height_ft` and the publisher accepts
+    only `fence_height`, and the only thing between them was a refusal at
+    publish time.
+
+    `[measured]` 2026-09-09: 18 facts carried the unpublishable name (none
+    accepted) and 24 carried the publishable one (all accepted).
+    `_translate_conditions({"fence_height_ft": 8.0})` returned
+    `('condition_scope_undeclared', 'fence_height_ft')` -- a message naming a
+    scope rather than a misspelt key, fired at the moment a curator accepted
+    one of the 18 rather than at extraction. Same shape as the
+    `lang`/`corpus_track` shortcut `tests/test_basis_columns.py` guards: one
+    axis, two vocabularies, and a guard in only one of the two places.
+
+    The static check is the load-bearing one. A functional check can only see
+    the keys the evidence strings happen to trigger; reading the assignments
+    out of the source sees every key the function CAN emit, which is what the
+    rule says.
+    """
+
+    def emitted_keys(self):
+        """Every literal key `facts._conditions` assigns into its dict."""
+        import ast
+        source = (REPO_ROOT / "fence_evidence" / "facts.py").read_text()
+        tree = ast.parse(source)
+        function = next(
+            node for node in ast.walk(tree)
+            if isinstance(node, ast.FunctionDef) and node.name == "_conditions")
+        keys = set()
+        for node in ast.walk(function):
+            if not isinstance(node, ast.Assign):
+                continue
+            for target in node.targets:
+                if (isinstance(target, ast.Subscript)
+                        and isinstance(target.value, ast.Name)
+                        and isinstance(target.slice, ast.Constant)
+                        and isinstance(target.slice.value, str)):
+                    keys.add(target.slice.value)
+        self.assertTrue(keys, "did not parse any condition key out of _conditions")
+        return keys
+
+    def test_every_key_the_extractor_can_emit_is_a_declared_dimension(self):
+        from fence_evidence.parameters import CONDITION_SCOPE
+        for key in sorted(self.emitted_keys()):
+            with self.subTest(key=key):
+                self.assertIn(key, CONDITION_SCOPE,
+                              "obligation 13: a key with no declared scope is "
+                              "refused at publish, so extracting it writes a "
+                              "fact no review can make publishable")
+
+    def test_a_height_the_extractor_writes_parses_back_into_an_interval(self):
+        """The two ends must agree about the VALUE too, not only the key.
+        `_parse_fence_height` reads a label; a bare float in feet would fail it
+        just as surely as the wrong key failed `CONDITION_SCOPE`."""
+        from fence_evidence.facts import _conditions
+        from fence_evidence.parameters import _parse_fence_height
+        for text in ("Rated for 130 mph on an 8' tall fence",
+                     "6 feet tall, Exposure C",
+                     "10ft. height at 90 mph",
+                     "3.5ft high panels"):
+            with self.subTest(text=text):
+                conditions = _conditions(text, [])
+                self.assertIn("fence_height", conditions)
+                interval = _parse_fence_height(conditions["fence_height"])
+                self.assertIsNotNone(interval, conditions["fence_height"])
+                self.assertEqual(interval["min"], interval["max"],
+                                 "a stated height is a point, not a band")
+                self.assertTrue(interval["min_inclusive"])
+                self.assertTrue(interval["max_inclusive"])
+
+    def test_no_condition_the_extractor_emits_is_refused_by_the_publisher(self):
+        """The end-to-end statement of the same thing, through the real gate."""
+        from fence_evidence.facts import _conditions
+        from fence_evidence.parameters import _translate_conditions
+        conditions = _conditions(
+            "Exposure C, 130 mph, HVHZ, 8' tall", [])
+        _published, _dimensions, problem, height = _translate_conditions(conditions)
+        self.assertIsNone(problem, f"the publisher refused {conditions}")
+        self.assertIsNotNone(height)
+
+    @requires_store
+    def test_no_stored_fact_still_carries_the_retired_height_name(self):
+        """The 18 rows were re-derived by `cli migrate`, not left to be fixed
+        by a re-extraction that has not happened."""
+        from fence_evidence.store import connect
+        conn = connect(read_only=True)
+        try:
+            stale = conn.execute(
+                "SELECT COUNT(*) FROM facts "
+                "WHERE conditions LIKE '%\"fence_height_ft\"%'").fetchone()[0]
+        finally:
+            conn.close()
+        self.assertEqual(stale, 0, "a fact still names the unpublishable axis")
+
+
+
+# The unit tokens a `fact_type` name may end in, mapped to the spelling the
+# `unit_original`/`unit_normalized` columns use. A closed set on purpose: a
+# fact type ending in `_pickets` or `_inserts` is naming a component, not a
+# unit, and must not be dragged into a unit check by a loose rule.
+_SUFFIX_UNIT = {"in": "in", "mm": "mm", "cm": "cm", "ft": "ft",
+                "mph": "mph", "deg": "deg", "degrees": "deg"}
+
+
+def _canonical_unit(raw):
+    """One spelling for a unit column's value. `in.` and `in` are one unit."""
+    from fence_evidence.parameters import _UNIT_ALIASES
+    text = (raw or "").strip().rstrip(".").lower()
+    return _UNIT_ALIASES.get(text, text)
+
+
+@requires_store
+class TestRule2AUnitSuffixNamesAUnitTheRowCarries(unittest.TestCase):
+    """§2, defects B-1 and B-2 — a `_in`/`_mm` suffix on a `fact_type` that no
+    column of the row agrees with.
+
+    `[measured]` 2026-09-09, before the fix: 17 fact types failed this — 13
+    `*_drawing_*_mm` types whose only unit is `in` (B-1; `naming.md` said 11,
+    which was itself a miscount) and 4 `kit_qty_*_in` types that count `each`
+    (B-2). `_in` is a live dispatch key: `facts._normalise` branches on
+    `fact_type.endswith("_in")` and would have multiplied a count of pickets by
+    twelve had those rows ever reached it; they survived only by being written
+    directly by the `*_claims.py` recipes.
+
+    The check is deliberately "the named unit appears in `unit_original` OR
+    `unit_normalized`", not equality with either. `stock_length_in` states feet
+    in 33 of its 62 sources and `naming.md` records that as CORRECT — the name
+    is the type's canonical unit and `unit_normalized` is `in` on all 62 — so
+    an equality rule on `unit_original` would fail the one case the document
+    explicitly protects, and an equality rule on `unit_normalized` would fail
+    the drawing readings, whose value is never normalised at all.
+    """
+
+    def fact_types(self):
+        from fence_evidence.store import connect
+        conn = connect(read_only=True)
+        try:
+            return conn.execute(
+                """SELECT fact_type, COUNT(*) AS n,
+                          GROUP_CONCAT(DISTINCT unit_original) AS originals,
+                          GROUP_CONCAT(DISTINCT unit_normalized) AS normalized
+                     FROM facts GROUP BY fact_type ORDER BY fact_type""").fetchall()
+        finally:
+            conn.close()
+
+    def test_no_fact_type_names_a_unit_none_of_its_rows_carries(self):
+        checked = 0
+        for row in self.fact_types():
+            named = _SUFFIX_UNIT.get(row["fact_type"].rsplit("_", 1)[-1])
+            if named is None:
+                continue
+            checked += 1
+            carried = {_canonical_unit(v)
+                       for column in ("originals", "normalized")
+                       for v in (row[column] or "").split(",") if v.strip()}
+            with self.subTest(fact_type=row["fact_type"]):
+                self.assertIn(named, carried,
+                              f"{row['fact_type']} names {named!r} and its "
+                              f"{row['n']} rows carry {sorted(carried)}; "
+                              f"`facts._normalise` dispatches on this suffix")
+        self.assertGreater(checked, 10, "no unit-suffixed fact types were checked")
+
+
 class TestRule3ANameSignalsAShape(unittest.TestCase):
     """§3 — on a `SpecField`, `_mm` carries a `Quantity` and an unsuffixed key
     carries a `Token`.
@@ -125,6 +293,107 @@ class TestRule3ANameSignalsAShape(unittest.TestCase):
         for snapshot_id, part_id, field in self.spec_fields():
             with self.subTest(snap=snapshot_id[:12], part=part_id, key=field.get("key")):
                 self.assertNotIsInstance(field.get("value"), (int, float))
+
+
+class TestRule4PartVersionNamesOneThing(unittest.TestCase):
+    """§4, defect D-5 — one snapshot published `Part.version` as the integer
+    `1` on 27 parts and as `"sha256:<64hex>"` on 15, and `PART_SHAPE` omitted
+    the field so nothing caught it.
+
+    The two forms are not two spellings of one idea; they are two different
+    jobs. G103 (2026-09-07) records why the string form exists: *"Part versions
+    no longer stay at 1 when reviewed content changes. Each is now a `sha256:`
+    hash of all public Part content except version."* The integer never moved —
+    `[measured]` 2026-09-09, `1` on every int-versioned part in all 24 stored
+    snapshots that carry parts, and no bump path exists anywhere in the
+    package — so `knowledge-datamodel.md` §1395's `Combination.members ==
+    [Part@version]` would pin a version that a correction leaves unchanged.
+
+    So the content hash is the form that does the job, and these guards keep it
+    the only one a NEW build can mint. They do not reach the stored snapshots:
+    those were well-formed under the rule of their day, they are write-once, and
+    `verify()` runs over them unchanged — which is why `PART_SHAPE` carries the
+    weaker `positive int | non-empty str` rule that history satisfies and the
+    builder carries the strong one. See `docs/naming.md` §4.
+    """
+
+    def synthetic_parts(self):
+        """Two parts off a synthetic composition — no store, no corpus."""
+        components = [
+            {"component_id": "guard-line-post", "component_type": "post",
+             "component_name": "Guard line post"},
+            {"component_id": "guard-rail", "component_type": "rail",
+             "component_name": "Guard rail"},
+        ]
+        registry = PartTypeRegistry("Guard")
+        build_part_types(components, registry)
+        parts, _ = build_parts(components, registry, conn=None,
+                               identity_namespace=registry.namespace,
+                               source_ref=lambda element_id: {})
+        self.assertTrue(parts, "the fixture built no parts to check")
+        return parts
+
+    def test_a_built_part_version_is_the_hash_of_the_part_it_names(self):
+        """A counter that never increments pins nothing. Recomputing the hash
+        off the published payload is also the only way a consumer can check the
+        pin, so it must be reproducible from the part alone."""
+        for part in self.synthetic_parts():
+            with self.subTest(part=part["id"]):
+                self.assertEqual(part["version"], part_version(part))
+
+    def test_two_parts_that_differ_carry_different_versions(self):
+        """The property G103 bought: a corrected value must not ship under the
+        version its predecessor shipped under."""
+        versions = {part["version"] for part in self.synthetic_parts()}
+        self.assertEqual(len(versions), 2)
+
+    def test_part_version_excludes_the_version_field_itself(self):
+        """Hashing a dict that already carries a version chains the hashes, and
+        a chained version cannot be recomputed from the published payload.
+        `[measured]` 2026-09-09: 14 of the 15 string-versioned parts in
+        snapshot `0e04d171` reproduced from their own bytes; the Augusta picket
+        did not, because `augusta_drawing_claims` re-hashed an already-versioned
+        dict."""
+        part = {"id": "x", "spec": []}
+        first = part_version(part)
+        part["version"] = first
+        self.assertEqual(part_version(part), first)
+
+    def test_the_part_shape_types_the_version_field(self):
+        """`PART_SHAPE` is an allowlist: a field absent from it publishes
+        whatever type it happens to hold. `version` was absent."""
+        shape = {name: ok for name, ok, _ in snapshot_module.PART_SHAPE}
+        self.assertIn("version", shape)
+        ok = shape["version"]
+        self.assertTrue(ok("sha256:" + "a" * 64))
+        self.assertTrue(ok(1), "the stored snapshots publish this and stay valid")
+        for bad in (0, -1, "", "   ", [], {}, 1.0, True):
+            with self.subTest(bad=bad):
+                self.assertFalse(ok(bad))
+
+    @requires_store
+    def test_every_scoped_recipe_part_reproduces_its_own_version(self):
+        """The four `*_claims.py` slices mint their own parts and were the
+        original home of the string form; this is the guard that would have
+        caught the Augusta picket's chained hash."""
+        from fence_evidence.augusta_drawing_claims import build_parts as augusta
+        from fence_evidence.emblem_claims import build_emblem_parts as emblem
+        from fence_evidence.emblem_drawing_claims import build_parts as emblem_drawing
+        from fence_evidence.parameters import _default_source_ref
+        from fence_evidence.pembroke_cadpage_claims import build_parts as pembroke
+        from fence_evidence.store import connect
+
+        conn = connect(read_only=True)
+        try:
+            mint = _default_source_ref(conn)
+            built = (augusta(conn, mint) + emblem(conn, mint)
+                     + emblem_drawing(conn, mint) + pembroke(conn, mint))
+            self.assertTrue(built, "no recipe part was built to check")
+            for part in built:
+                with self.subTest(part=part["id"]):
+                    self.assertEqual(part["version"], part_version(part))
+        finally:
+            conn.close()
 
 
 class TestRule5CaseCarriesMeaning(unittest.TestCase):

@@ -50,7 +50,7 @@ tables** — `cur_claims`, `cur_claim_evidence`, `cur_table_readings`,
 and more. It re-models `facts`, `table_read_candidates`, `relations`,
 `quality_issues`, `documents`, and the gap/warning/procedure shapes
 `snapshot.py` already builds. It is **entirely unimplemented**, and its one
-load-bearing idea (C0) shipped as build-plan A1 on 2026-08-25.
+load-bearing idea (CUR-S0) shipped as build-plan A1 on 2026-08-25.
 
 The useful fraction landed; the rest remains a *competing* design every reader
 must reconcile against the code.

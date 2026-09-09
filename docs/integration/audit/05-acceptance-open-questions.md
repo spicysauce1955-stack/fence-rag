@@ -87,7 +87,7 @@ Internal, no negotiation required. Listed so they are not forgotten.
 
 | # | Item | Position |
 |---|---|---|
-| K1 | `cross_family_verified` in `table_review.PROMOTABLE` | Two agent readings currently promote a fact with no human review; 324 facts were promoted this way and `rationale.md` §1 records what one of them cost. `docs/curation/` C0 proposes revoking it. **We intend to revoke it.** It is our behaviour, inside the boundary. |
+| K1 | `cross_family_verified` in `table_review.PROMOTABLE` | Two agent readings currently promote a fact with no human review; 324 facts were promoted this way and `rationale.md` §1 records what one of them cost. `docs/curation/` CUR-S0 proposes revoking it. **We intend to revoke it.** It is our behaviour, inside the boundary. |
 | K2 | Crop path: poppler windowing vs the existing Pillow crops | `source-refs-design.md` §4.2 chooses poppler and demotes the 7,484 existing region images to a legacy cache. Pillow is optional and git-ignored; `_crop_region` returns `False` without it. Decided, pending the cost measurement in K3. |
 | K3 | Render cost is unmeasured | We chose the crop path on correctness and dependency grounds without knowing what a cold paragraph crop costs. Measure before a queue is built on it. |
 | K4 | Readers record no cell box | All 1,225 rows in `table_read_candidates` carry row and column labels and **no cell bounding box in crop pixels**, which `docs/curation/` §2.5.3 requires. A reviewer can be shown the crop but not the cell inside it. This is the first concrete gap the source-ref design surfaced in our own store. |

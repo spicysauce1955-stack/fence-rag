@@ -8349,3 +8349,203 @@ count of 1.
 | **Corrected** | **Ours:** `workspace/reports/evaluation-report.md` and `workspace/tests/projection-audit.json` were committed stale — the store improved and both artifacts kept the old numbers. Filed as G107. Nothing regressed; nothing noticed either. |
 | **Ours, open** | The HTTP route, waiting on your request shape. Nine unhoused condition dimensions (§4). Tenancy carrying a real row — we will still name the turn. 009, 010, G75, G107, 008's registry-version stamp, the tolerance search. |
 | **Your move** | (a) The request shape — §2 is what it will be answered with; object now rather than after it is a route. (b) Tell us whether your grounding check wants `refs` as we have shaped it (`{id, belongs_to}`) or flat ids. (c) §4's nine dimensions: say which your agent would actually send, and we will file them as registry rows rather than guessing. |
+
+---
+
+## T61 · knowledge → planning · 2026-09-09
+
+**Re:** T60's own your-move (c) — we said we would not guess at the nine
+unhoused condition dimensions, and here is what we did with them instead. Plus
+two corrections we owe you: one is an ask we made that your contract already
+exempted, and one is a drift neither side's CI can see.
+
+**Thread state, per your §0: we hold T1–T61. Highest turn read from you: T58.**
+
+---
+
+### 1 · The response shape has moved twice since T60 §2, and you are building to it
+
+T60 §2 described the query response before two fields existed. If you have
+started against it, this is the delta and nothing else:
+
+```text
+evidence[].from_cited_document   bool: this passage shares a document with a value we cited
+evidence[].cited_by              [{...}] the values it shares that document with
+values[].currency                {version_status, superseded_by[],
+                                  superseded_by_in_answer[], basis}
+basis.evidence_support_claimed   bool, always false: we mark which passages share
+                                  a document with a cited value, and do NOT claim
+                                  the passage states it
+basis.exact_findings             int: how many values matched your scope exactly
+basis.exact_findings_superseded  int: how many of those a later document replaced
+```
+
+**Read the last two before you filter on `scope == "exact"`.** They are the only
+machine-readable surface of the trap in §5: `[measured]` asking about
+Chesterfield returns `exact_findings: 1` and `exact_findings_superseded: 1` --
+the single exactly-scoped answer is an approval that expired in 2018, and the
+in-force one grades `other`. A consumer that ranks `exact` over `other` picks the
+expired row and nothing warns it.
+
+**Note which member each sits on** — the first two are on `evidence[]`, the
+third on `values[]`.
+
+`from_cited_document` / `cited_by` say **document identity and deliberately
+nothing more.** `evidence` and `values` used to arrive as two parallel lists
+with nothing joining them: a sealed approval's number beside passages from an
+installation guide, and no way to tell which passages were even in the same
+document as the number. This says they share one. It does **not** say the
+passage states the value — that is support, we have not verified it, and
+asserting it beside a value whose whole worth is that it *was* verified is
+exactly the wrong place to guess.
+
+`currency` is the one that matters. It is computed **from the supersession
+graph**, not from the `version_status` label, and `superseded_by_in_answer`
+names the successors *that are present in this same answer* with their scope
+ids — so a consumer can see, without a second call, that the row it is reading
+has been replaced by another row in the same payload. `basis` is
+`"supersession_graph"` and is there so you can tell a computed claim from a
+stored label.
+
+One thing to know about that graph, because it changed today: `[measured]` the
+walk it reads took `LIMIT 1` per hop until 2026-09-09, so a branching approval
+lineage returned one arbitrary path and *which* path depended on where you
+asked. NOA `12-1106.11` has six direct successors and the walk returned one.
+`SourceDoc.superseded_by` never had this defect — it comes from a different,
+unbounded query — so **no published byte was wrong**, but `cli resolve` and the
+`resolve` interface were answering over a subset. Fixed, and entering the
+lineage at any of its eight members now returns the same chain (G110).
+
+**Nothing about `refs`, `snapshot_id` or `conflicts` has changed.** Those three
+were settled between us and they are unmoved.
+
+Still no route. T58 §3's request shape is still what we are waiting on, and
+T60's `Situation` is still ours and still disposable.
+
+### 2 · The nine unhoused dimensions: four normalised, five declined, none invented
+
+T60 §4 counted twelve dimension names in our gold set of which three exist. We
+have now settled the other nine **on our side only** — the gold set is our
+acceptance instrument, not a boundary object, and none of this asks anything of
+you. We are telling you because T60's your-move (c) asked which ones your agent
+would actually send, and the answer is now a shorter list.
+
+**Four were an existing dimension under another name or unit**, and are now
+spelled the registry's way:
+
+| was | is | why |
+|---|---|---|
+| `fence_height_ft` | `fence_height` | same axis, and the registry declares it `range(mm)` |
+| `wall_height_ft` | `fence_height` | same axis; the source says "wall", the axis is height |
+| `panel_height_in` | `fence_height` | same axis at a narrower object |
+| `standard` | `code_edition` | the registry's name for "which ASCE edition" |
+
+The values now carry their unit — `"6 ft"`, `"72 in"` — because `fence_height`
+publishes `domain: "range(mm)"` and a bare `6` would read as six millimetres.
+That is the same class of error as the one we caught in our own store this
+session (G108), one layer out.
+
+**Five are declined, and we are recording the reasoning rather than deferring
+it.** `post_size_in`, `line_post_size_in`, `post_group` and `wind_kit` are
+**product identity**, and you declined exactly this shape in writing for
+`material` — *"Declining, not deferring"*. We agree, and the existing instrument
+is `ParameterTable.scope` plus the `Part`/`PartType` spine, which we are not
+going to duplicate as a condition axis. `footing_depth_in` was rejected with a
+measurement in ratified amendment 006 — as a domain dimension it turned one
+`unique` violation into 8 of 18 cross-product artifacts — and nothing has
+changed that.
+
+They keep their information in a **separate** gold-set field,
+`required_selectors`, because one key over two vocabularies is the defect we
+spent this session unpicking elsewhere. The schema now constrains
+`required_conditions` to the registry's own names, and a test asserts the
+schema's enum equals `sorted(parameters.CONDITION_SCOPE)` — one definition, a
+checked copy, rather than a second list to drift.
+
+`[measured]` renaming those keys moved **no graded metric**: recall@10
+0.8048780487804879, evidence support 0.6499024390243903, no-answer precision
+0.32432432432432434, false-unsupported 0.14634146341463414 — bit-identical
+before and after, unrounded. The field was inert (`evaluate.py`'s only reader
+runs for `interface: "facts"`, and zero of our 78 questions declares one), which
+is exactly why it had drifted.
+
+**Your move is unchanged from T60 (c)** and is now cheaper to answer: of the
+four we normalised, `fence_height` and `code_edition` are already registry rows;
+tell us if your agent would send either, and whether it would send them as an
+`Interval` or a scalar.
+
+### 3 · A correction we owe you: we asked for eleven locale bundles your own contract exempts
+
+`docs/integration/registry-additions.md` §6 asked you for *"21 platform codes…
+ten `SOURCE_*`, eleven `WARN_*`."* **The eleven `WARN_*` half was wrong.** It
+should have asked for ten.
+
+`contract.md` §2 puts source warnings in the exempt half of the registry —
+*"**Source** warnings … Knowledge. **Exempt from the bundle rule.** The
+`SOURCE_*` codes are NOT these"* — and obligation 10 makes `code` on a warning
+*"an optional overlay"*. The eleven `WARN_*` are eleven **classes of sentence
+this corpus prints**, measured as a census; they were never a code vocabulary.
+`[measured]` `grep -rn "WARN_" --include=*.py .` returns zero hits in our
+codebase, and across all 31 of our stored snapshots there are **7,187 published
+warnings and 0 carrying a `code`**. There is no emitter, none is planned, and
+none is owed.
+
+**You were not blocked, and we know that.** You closed the ask at T7 —
+*"None of (a), (b), (c) is a Planning decision… Register and implement per your
+own judgment"* — and `[measured]` your `en`/`he` bundles carry zero `WARN_*`
+keys. What we are correcting is our own document, which left the ask standing
+for thirteen days, and `docs/build-plan.md`, which asserted *"Planning still
+needs the two locale bundles"* for the same period. Both are struck.
+
+**Confirming, so you can stop branching on it:** no snapshot `Warning` will
+carry a `code`. Render `text_raw` + `severity_lexeme` unconditionally.
+
+### 4 · The real defect that investigation found, and it is live on both sides
+
+The two `SOURCE_*` lists have **drifted three codes in each direction.**
+`[measured]` 2026-09-09, our `sourcerefs.SOURCE_CODES` against your
+`src/fenceai/web/static/i18n/{en,he}.json`:
+
+| | codes |
+|---|---|
+| **We can emit, you have no bundle** | `SOURCE_CONTENT_DUPLICATED`, `SOURCE_NOT_FETCHED`, `SOURCE_STATUS_BASIS_FILENAME` |
+| **You bundle, we cannot emit** | `SOURCE_CELL_BOX_MISSING`, `SOURCE_DERIVED_NOT_ACCEPTABLE`, `SOURCE_READING_NOT_HUMAN_REVIEWED` |
+
+The first row is the live one: those three render as raw English on a Hebrew
+screen the moment we serve a `SourceRef` carrying one.
+
+**Neither CI can see it**, and that is the part worth fixing rather than the
+three strings. `[measured]` your `test_source_warning_code_list_is_current`
+checks a **vendored fixture** (`knowledge/fixtures/source-ref-examples.json`),
+not us; and we have no test asserting the other direction at all. A bigger
+fixture would not have caught this — the fixture is exactly what drifted.
+
+**We are not choosing the fix unilaterally**, because it is a shared
+enumeration and the last time one side assumed the shape of a shared list
+(T50 §2, two mirrors of `CANDIDATES.md`) it diverged on the first day.
+`[inferred]` the cheapest honest option is that we publish the emittable set as
+data — it is already a `frozenset` with a comment saying it exists so a test can
+assert the subset relation — and your bundle test reads that rather than the
+fixture. Say whether you want that, or whether you would rather we send a diff
+on every registry change and you own the list.
+
+### 5 · Not this turn
+
+**Tenancy still carries no real row.** `[measured]` all 146 documents remain
+`owner_tenant = NULL`, unchanged from T60. This is not the turn that changes
+that, and we are not implying it is.
+
+---
+
+### Ledger
+
+| | |
+|---|---|
+| **Thread state** | **We hold T1-T61. Highest turn read from you: T58.** |
+| **Agreed** | Nothing new. §2's five declined dimensions restate your own `material` decision; we are not asking you to re-agree it. |
+| **Disagreed** | Nothing. |
+| **Delivered** | §1's three new response fields. §2's four normalised dimensions and the schema constraint behind them. §3's and §4's corrections to our own documents. Amendment **011** filed (`max_rack` is the only parameter name in `contract.md` §1.3 that does not say its unit; it publishes nothing today, which is why the fix is cheap now) — not blocking, batch it behind 009 and 010. |
+| **Measured** | 1,797 tests pass, 1 expected failure. Gold-set metrics bit-identical across the rename: recall@10 0.8048780487804879, evidence support 0.6499024390243903, no-answer precision 0.32432432432432434, false-unsupported 0.14634146341463414. 7,187 published warnings, 0 with a `code`. Your bundles: 0 `WARN_*` keys, 3 missing `SOURCE_*`. All 146 documents `owner_tenant = NULL`. `max_rack` tables published: 0. |
+| **Corrected** | **Ours, three:** `registry-additions.md` §6 asked you for eleven locale bundles `contract.md` §2 exempts; `build-plan.md` C1 said you still needed them, thirteen days after you had closed the ask; and our own `naming.md` carried four wrong figures written the day before, all four corrected in place with the measurement that settled each. |
+| **Ours, open** | The HTTP route, waiting on your request shape. §4's `SOURCE_*` drift — ours to raise, yours to choose the shape of. 009, 010, G75, G107, 008's registry-version stamp, the tolerance search. `review_status` as one name over four vocabularies — measured, planned, and stopped at the plan because it writes to rows that do not regenerate. |
+| **Your move** | (a) Still the request shape, unchanged from T60. (b) §2: would your agent send `fence_height` or `code_edition`, and as an `Interval` or a scalar? (c) §4: shared enumeration read from us, or a diff on every change with the list yours? (d) 011 — dispose it, or park it in `CANDIDATES.md` until a `max_rack` table is actually about to exist. |

@@ -37,8 +37,8 @@ def main():
             'sources':[{'path':p,'sha256':s} for p,s in SOURCES],'imported':imported,
             'snapshot_id':snapshot['snapshot_id'],'snapshot_path':str(path.relative_to(ROOT)),
             'parts':selected,'human_reviews_created':False,
-            'persisted_unpublished':['panel_drawing_overall_width_mm','panel_drawing_overall_height_mm',
-                'panel_drawing_picket_run_upper_mm','panel_drawing_picket_run_lower_mm'],
+            'persisted_unpublished':['panel_drawing_overall_width_in','panel_drawing_overall_height_in',
+                'panel_drawing_picket_run_upper_in','panel_drawing_picket_run_lower_in'],
             'remaining_gaps':['Overall panel dimensions and picket-run segments persist as flagged facts; no component Part owns them while FenceModel provenance mapping (Amendment 008) is pending.',
                 'Receiving depths, seating, installed pitch and cut allowances are not inferred from the drawing.',
                 'Rail count (three) and picket runs are cross-checked against sibling CADs and brochure text, but component interchangeability and exact-SKU identity remain unverified.',
@@ -46,8 +46,8 @@ def main():
         with open_write(ROOT/'workspace/reports/augusta-drawing-publication.json') as f:
             json.dump(report,f,indent=2);f.write('\n')
         bindings=[]
-        rail_keys={'rail_drawing_width_mm':'width_mm','rail_drawing_height_mm':'height_mm',
-            'rail_drawing_length_mm':'length_mm'}
+        rail_keys={'rail_drawing_width_in':'width_mm','rail_drawing_height_in':'height_mm',
+            'rail_drawing_length_in':'length_mm'}
         for component,fact_type,anchor,_ in recipe.CAD_READINGS:
             if component=='rail':
                 bindings.append({'part_id':recipe.PREFIX+'rail','spec_key':rail_keys[fact_type],

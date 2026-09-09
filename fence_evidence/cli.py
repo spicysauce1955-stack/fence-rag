@@ -1079,6 +1079,10 @@ def main(argv: list[str] | None = None) -> int:
             _print({"schema_version": SCHEMA_VERSION,
                     "columns_added": result["added"],
                     "columns_retired": result["retired"],
+                    # A backfill that moves no column has to be visible too, or
+                    # "it ran and moved nothing" reads as "it never ran".
+                    "fact_types_renamed": result["fact_types_renamed"],
+                    "condition_keys_backfilled": result["condition_keys_backfilled"],
                     "lang": backfill_lang(conn)})
         finally:
             conn.close()

@@ -1,6 +1,6 @@
 """The human gate on a step candidate, and what publishes once it closes.
 
-A candidate with no reviewer publishes nothing, ever. That is A1/C0: machine
+A candidate with no reviewer publishes nothing, ever. That is A1/CUR-S0: machine
 agreement between two readers was once laundered into curation level 2 and 324
 facts had to be un-promoted. The same rule, applied to a different seam.
 

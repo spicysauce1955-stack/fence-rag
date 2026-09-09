@@ -65,5 +65,5 @@
       "sha256": "212eb5bd8936f67c959398fddbf856ba662e9dd83425fc1cd954e032c13e648b"
     }
   },
-  "why": "A baseline of the hand-researched dataset before any curation phase touches it. `data/` has one commit in its history and carries four claims contradicted by their own sources (state-and-gaps G16), which are still present verbatim because correcting someone's research is their call. If a value is ever silently amended, this is what makes the change visible rather than invisible. Acceptance criterion P1b."
+  "why": "A baseline of the hand-researched dataset before any curation phase touches it. `data/` has one commit in its history and carries four claims contradicted by their own sources (state-and-gaps G16), which are still present verbatim because correcting someone's research is their call. If a value is ever silently amended, this is what makes the change visible rather than invisible. Acceptance criterion CUR-P1b."
 }

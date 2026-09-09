@@ -398,8 +398,10 @@
       "required_conditions": {
         "wind_speed_mph": 130,
         "exposure_category": "B",
-        "fence_height_ft": 6,
-        "post_size_in": "2 3/8",
+        "fence_height": "6 ft"
+      },
+      "required_selectors": {
+        "line_post_size_in": "2 3/8",
         "post_group": "Group IA Schedule 40 regular grade (30,000 psi)"
       },
       "query_terms": [
@@ -436,7 +438,9 @@
         "3000 PSI"
       ],
       "required_conditions": {
-        "fence_height_ft": 8,
+        "fence_height": "8 ft"
+      },
+      "required_selectors": {
         "post_size_in": "8x8",
         "wind_kit": "75 MPH"
       },

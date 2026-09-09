@@ -1,5 +1,16 @@
 # Phase 7C — Domain curation
 
+> **Naming, 2026-09-09.** The four id schemes documents 4 and 5 define — the eleven curation
+> stages, and acceptance-criteria Groups P, F and R — now carry a `CUR-` prefix (`CUR-S0`
+> through `CUR-S8`, `CUR-P1`–`CUR-P7`, `CUR-F1`–`CUR-F6`, `CUR-R1`–`CUR-R12`), because
+> `docs/naming.md` §9 rules that an id namespace is global across `docs/` and these four were
+> the newest and least-cited of the schemes colliding: bare `C` was already taken by
+> `docs/integration/amendments/CANDIDATES.md`'s `C1`–`C17`, bare `P` by the NOA drawing item
+> codes in `data/**`, bare `F` by the relevance audit's own `F1`–`F10`, and bare `R` by the
+> relevance audit's `R1`–`R9`, `docs/target-architecture.md`'s `R1`–`R5`, and Cloudflare `R2`.
+> Group C's own compound ids, `C-A1` through `C-G7`, are unchanged — they are the precedent §9
+> cites, and they collide with nothing.
+
 ```text
 Status:   MIXED, and this line was false in both directions until 2026-09-08.
           This directory now holds TWO unrelated bodies of work:
@@ -27,7 +38,7 @@ missing layer.
 > **Baseline note, 2026-08-25.** This proposal was written against a store holding
 > **1,988 facts**. Build-plan A1 has since un-promoted the 324 that no person reviewed,
 > so the store holds **1,652** and the level-2 population is zero. Fact counts throughout
-> these five documents — including `05-acceptance-criteria.md` P3 ("identical, 1,988
+> these five documents — including `05-acceptance-criteria.md` CUR-P3 ("identical, 1,988
 > rows") and C-C3's `cross_family_verified` slice — are stated as of authoring and have
 > **not** been rewritten: they are the premises the proposal was reasoned from, and
 > silently restating them would hide that the ground moved. Re-measure before accepting
@@ -38,7 +49,7 @@ Two measurements make the case, both from `docs/state-and-gaps.md`:
 - **G6/G15.** `facts` holds **1,652 rows**, all from `extractor='regex-v1'`.
 (It held 1,976 when this was written: 1,652 regex rows plus 324 from an
 unreviewed table-reading pass marked `table-read:cross_family_verified`, none of
-which a person ever accepted. Those 324 were un-promoted on 2026-08-25 — C0 below
+which a person ever accepted. Those 324 were un-promoted on 2026-08-25 — CUR-S0 below
 landed as build-plan A1 — but the case this section makes is unchanged, and the
 regex rows it turns on were always the larger half.) A
 typical regex row reads `footing_depth_in = 30"`, `subject = "FENCING
@@ -72,7 +83,7 @@ not modified.
 
 One deliberate exception, **now closed ahead of this phase**: `PROMOTABLE`
 contained `cross_family_verified`, so two agent readings from different model
-families promoted without a person — 324 facts entered `facts` that way. **C0 was
+families promoted without a person — 324 facts entered `facts` that way. **CUR-S0 was
 taken out of this proposal and landed on its own as build-plan A1, 2026-08-25**,
 because it was a ratification commitment rather than a proposal and should not
 have waited on a phase still under review. `PROMOTABLE` is now `("accepted",

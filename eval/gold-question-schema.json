@@ -66,8 +66,12 @@
     },
     "required_conditions": {
       "type": "object",
-      "description": "e.g. {\"wind_speed_mph\": 130, \"exposure_category\": \"C\"}"
+      "description": "the CONDITIONS the expected answer is scoped by, spelled the way parameters.CONDITION_SCOPE spells them -- this is the registry's vocabulary, not a free annotation. A quantity-valued dimension carries its unit in the value, because the domain declares mm and a bare number would read as millimetres: {\"wind_speed_mph\": 130, \"exposure_category\": \"C\", \"fence_height\": \"6 ft\"}",
+      "propertyNames": {"enum": ["code_edition", "exposure_category", "fence_height", "frost_depth_mm", "hvhz", "jurisdiction", "post_role", "slope_method", "wind_speed_mph"]}
     },
+    "required_selectors": {
+      "type": "object",
+      "description": "further constraints the expected answer depends on that are NOT condition dimensions and are not going to become them: product identity (post size, post group, wind kit -- Planning declined this shape in writing for `material`, and the instrument is ParameterTable.scope plus the Part/PartType spine) and another column of the same source table (footing_depth_in -- rejected with a measurement in ratified amendment 006). Kept as a separate key rather than mixed into required_conditions, because one name over two vocabularies is naming.md defect E-3"},
     "expects_image_evidence": {"type": "boolean"},
     "verification": {
       "type": "object",

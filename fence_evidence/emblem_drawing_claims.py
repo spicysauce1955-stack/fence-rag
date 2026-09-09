@@ -6,7 +6,7 @@ components, not verified replacements or geometry for SKU73014714.
 from fractions import Fraction
 import json
 import re
-from .canonical import content_hash
+from .canonical import part_version
 from .emblem_claims import NAMESPACE, _check_review_projection
 from .parameters import CURATION_LEVEL, _source_class
 from .reviews import effective_fact_value
@@ -24,16 +24,27 @@ ANCHORS={
     'channel':('element-44a8582188-0044','99°X1,.34°S3.875"'),
 }
 # Interpretation verified against the source image, not corrected canonical OCR.
+#
+# `(component, fact_suffix, spec_key, anchor, raw)`. The middle two columns are
+# the SAME dimension under two names and that is the rule, not an oversight:
+# `naming.md` §2 -- *"`facts.fact_type` is this platform's internal name and
+# carries the SOURCE's unit (`_in`); the published parameter carries the unit it
+# CROSSES in, which is always mm."* The drawing states inches, `quantity()`
+# below converts to milli-mm at publish time, and nothing in between holds a
+# millimetre. One `key` served both until 2026-09-09, which is how 13 fact types
+# came to be named `_mm` over rows whose only unit is `in` -- `naming.md` B-1,
+# and the same inversion that produced G63's twelvefold-too-small number.
+# `augusta_drawing_claims`'s `rail_keys` map is the existing precedent.
 READINGS=(
-    ('rail','drawing_width_mm','rail_width','2.25 in.'),
-    ('rail','drawing_height_mm','rail_dimensions','7 in.'),
-    ('rail','drawing_length_mm','rail_dimensions','94 in.'),
-    ('board','drawing_thickness_mm','board','0.875 in.'),
-    ('board','drawing_profile_width_mm','board','6 in.'),
-    ('board','drawing_length_mm','board','61.5 in.'),
-    ('end-channel','drawing_width_mm','channel','0.99 in.'),
-    ('end-channel','drawing_depth_mm','channel','1.34 in.'),
-    ('end-channel','drawing_length_mm','channel','53.875 in.'),
+    ('rail','drawing_width_in','drawing_width_mm','rail_width','2.25 in.'),
+    ('rail','drawing_height_in','drawing_height_mm','rail_dimensions','7 in.'),
+    ('rail','drawing_length_in','drawing_length_mm','rail_dimensions','94 in.'),
+    ('board','drawing_thickness_in','drawing_thickness_mm','board','0.875 in.'),
+    ('board','drawing_profile_width_in','drawing_profile_width_mm','board','6 in.'),
+    ('board','drawing_length_in','drawing_length_mm','board','61.5 in.'),
+    ('end-channel','drawing_width_in','drawing_width_mm','channel','0.99 in.'),
+    ('end-channel','drawing_depth_in','drawing_depth_mm','channel','1.34 in.'),
+    ('end-channel','drawing_length_in','drawing_length_mm','channel','53.875 in.'),
 )
 
 
@@ -52,10 +63,10 @@ def checked_anchors(conn):
 
 
 def expected_readings(anchors):
-    for component,key,anchor,raw in READINGS:
+    for component,fact_suffix,_spec_key,anchor,raw in READINGS:
         a=anchors[anchor]
         yield dict(document_id=a['document_id'],version_id=a['version_id'],page_no=a['page_no'],
-            element_id=a['element_id'],fact_type=component.replace('-','_')+'_'+key,
+            element_id=a['element_id'],fact_type=component.replace('-','_')+'_'+fact_suffix,
             subject='Emblem pre-built drawing001 sheet4: '+component,
             value_original=raw,unit_original='in',conditions=json.dumps({
                 'drawing':'001','sheet':'4 of 9','panel_style':'pre-built','family':'Emblem',
@@ -65,12 +76,27 @@ def expected_readings(anchors):
 
 
 def reading_rows(conn,anchors):
-    for expected in expected_readings(anchors):
+    # `known` is materialised up front so the stale-name check below can run
+    # after the loop without re-deriving it.
+    expected_items=list(expected_readings(anchors))
+    for expected in expected_items:
         rows=conn.execute('SELECT * FROM facts WHERE extractor=? AND fact_type=?',
             (EXTRACTOR,expected['fact_type'])).fetchall()
         if len(rows)>1 or (rows and any(rows[0][k]!=v for k,v in expected.items())):
             raise ValueError('Conflicting immutable drawing reading')
         yield expected,rows[0] if rows else None
+    # The guard `augusta_drawing_claims` and `pembroke_cadpage_claims` already
+    # carry, and this module did not. Without it a reading persisted under a
+    # name the recipe no longer knows is not seen at all, so the import writes
+    # its replacement and leaves the stale row beside it -- in a module whose
+    # own error message calls these readings immutable. `[measured]`
+    # 2026-09-09 on a copy of the live store with the 9 rows restored to their
+    # pre-rename `*_mm` names: 9 inserted, 9 rows became 18.
+    live={r['fact_type'] for r in conn.execute(
+        'SELECT fact_type FROM facts WHERE extractor=?',(EXTRACTOR,))}
+    known={e['fact_type'] for e in expected_items}
+    if live-known:
+        raise ValueError('Unknown persisted reading types: '+','.join(sorted(live-known)))
 
 
 def import_readings(conn):
@@ -111,12 +137,12 @@ def build_parts(conn,source_ref):
     parts=[]
     for component,kind in [('rail','rail'),('board','infill'),('end-channel','bar')]:
         specs=[]
-        for member,key,anchor,_ in READINGS:
+        for member,fact_suffix,spec_key,anchor,_ in READINGS:
             if member!=component:continue
-            row=facts[component.replace('-','_')+'_'+key]
+            row=facts[component.replace('-','_')+'_'+fact_suffix]
             if row is None or row['review_status']=='rejected':continue
             cites=[source_ref(anchors[a]['element_id']) for a in (anchor,'style','model')]
-            specs.append({'key':key,'agree':'==','value':quantity(row),'provenance':{
+            specs.append({'key':spec_key,'agree':'==','value':quantity(row),'provenance':{
                 'cites':cites,'source_class':_source_class(anchors[anchor]['doc_type']),
                 'curation_level':CURATION_LEVEL.get(row['review_status'],0),
                 'version_status':anchors[anchor]['version_status'] or 'unknown'}})
@@ -126,5 +152,5 @@ def build_parts(conn,source_ref):
             'name_i18n':{'en':'Emblem '+component+' — NOA22-0217.05 pre-built drawing; exact SKU unverified'},
             'authorship':'third_party_authored','spec':specs,'cites':[citations[k] for k in sorted(citations)],
             'contributing_sources':[SOURCE_SHA]}
-        part['version']='sha256:'+content_hash(part);parts.append(part)
+        part['version']=part_version(part);parts.append(part)
     return parts

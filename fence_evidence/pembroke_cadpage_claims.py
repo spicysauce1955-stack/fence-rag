@@ -42,7 +42,7 @@ fitting are validated.
 from fractions import Fraction
 import json
 import re
-from .canonical import content_hash
+from .canonical import part_version
 from .emblem_claims import _check_review_projection
 from .parameters import CURATION_LEVEL, _source_class
 from .reviews import effective_fact_value
@@ -68,16 +68,16 @@ CADPAGE_ANCHORS = {
 # component, fact_type, anchor, raw, normalized. Quantities are whole counts;
 # dimensions are manufacturer-stated stock sizes for this configuration.
 CADPAGE_READINGS = (
-    ('rail-kit', 'kit_qty_rails_in', 'panel_6x6_list', '2 each', 2),
-    ('metal-insert', 'kit_qty_metal_inserts_in', 'panel_6x6_list', '1 each', 1),
+    ('rail-kit', 'kit_qty_rails', 'panel_6x6_list', '2 each', 2),
+    ('metal-insert', 'kit_qty_metal_inserts', 'panel_6x6_list', '1 each', 1),
     ('metal-insert', 'metal_insert_width_in', 'panel_6x6_list', '1.25 in.', 1.25),
     ('metal-insert', 'metal_insert_height_in', 'panel_6x6_list', '1.75 in.', 1.75),
     ('metal-insert', 'metal_insert_length_in', 'panel_6x6_list', '71.5 in.', 71.5),
-    ('u-channel', 'kit_qty_u_channels_in', 'panel_6x6_list', '2 each', 2),
+    ('u-channel', 'kit_qty_u_channels', 'panel_6x6_list', '2 each', 2),
     ('u-channel', 'u_channel_width_in', 'panel_6x6_list', '1.25 in.', 1.25),
     ('u-channel', 'u_channel_depth_in', 'panel_6x6_list', '1.5 in.', 1.5),
     ('u-channel', 'u_channel_length_in', 'panel_6x6_list', '61 in.', 61.0),
-    ('picket', 'kit_qty_pickets_in', 'panel_6x6_list', '6 each', 6),
+    ('picket', 'kit_qty_pickets', 'panel_6x6_list', '6 each', 6),
     ('picket', 'picket_stock_length_in', 'panel_6x6_list', '64.25 in.', 64.25),
     ('rail', 'rail_width_in', 'panel_6x6_list', '1.5 in.', 1.5),
     ('rail', 'rail_height_in', 'panel_6x6_list', '5.5 in.', 5.5),
@@ -191,6 +191,12 @@ def _import(conn, reading_rows, status):
 def _cadpage_expected(anchors):
     for component, fact_type, anchor, raw, normalized in CADPAGE_READINGS:
         a = anchors[anchor]
+        # `kit_qty_*` carries NO unit suffix (`naming.md` §2, B-2): a count
+        # is not a quantity whose unit the name must declare, and the `_in`
+        # it used to carry is a live dispatch key -- `facts._normalise`
+        # branches on `endswith("_in")` and would multiply a picket count
+        # by twelve. The unit is declared here, on the prefix, and nowhere
+        # else.
         unit = 'each' if fact_type.startswith('kit_qty') else 'in'
         yield dict(document_id=a['document_id'], version_id=a['version_id'], page_no=a['page_no'],
             element_id=a['element_id'], fact_type=fact_type,
@@ -300,7 +306,7 @@ def _part(part_id, kind, name, specs, cites, sources):
     part = {'id': part_id, 'type': {'namespace': 'shared', 'key': kind}, 'status': 'draft',
         'name_i18n': {'en': name}, 'authorship': 'third_party_authored', 'spec': specs,
         'cites': cites, 'contributing_sources': sources}
-    part['version'] = 'sha256:' + content_hash(part)
+    part['version'] = part_version(part)
     return part
 
 
@@ -357,7 +363,7 @@ def build_parts(conn, source_ref):
         for fact_type, key in (('rail_width_in', 'width_mm'),
                                ('rail_height_in', 'height_mm'),
                                ('rail_length_in', 'length_mm'),
-                               ('kit_qty_rails_in', 'kit_count_per_panel')):
+                               ('kit_qty_rails', 'kit_count_per_panel')):
             if fact_type in by_type:
                 component, row, anchor_row = by_type[fact_type]
                 r_specs.append(kit_count_spec(row, key, anchor_row) if key == 'kit_count_per_panel'
@@ -372,7 +378,7 @@ def build_parts(conn, source_ref):
         for fact_type, key in (('u_channel_width_in', 'width_mm'),
                                ('u_channel_depth_in', 'depth_mm'),
                                ('u_channel_length_in', 'length_mm'),
-                               ('kit_qty_u_channels_in', 'kit_count_per_panel')):
+                               ('kit_qty_u_channels', 'kit_count_per_panel')):
             if fact_type in by_type:
                 component, row, anchor_row = by_type[fact_type]
                 u_specs.append(kit_count_spec(row, key, anchor_row) if key == 'kit_count_per_panel'
@@ -386,7 +392,7 @@ def build_parts(conn, source_ref):
         for fact_type, key in (('metal_insert_width_in', 'width_mm'),
                                ('metal_insert_height_in', 'height_mm'),
                                ('metal_insert_length_in', 'length_mm'),
-                               ('kit_qty_metal_inserts_in', 'kit_count_per_panel')):
+                               ('kit_qty_metal_inserts', 'kit_count_per_panel')):
             if fact_type in by_type:
                 component, row, anchor_row = by_type[fact_type]
                 m_specs.append(kit_count_spec(row, key, anchor_row) if key == 'kit_count_per_panel'
@@ -411,7 +417,7 @@ def build_parts(conn, source_ref):
                        'picket_tongue_groove_wall_gauge_in': 'tongue_groove_wall_gauge_mm'}[fact_type]
                 p_specs.append(_spec(row, key, s_anchors[anchor], source_ref))
         for fact_type, key in (('picket_stock_length_in', 'stock_length_mm'),
-                               ('kit_qty_pickets_in', 'kit_count_per_panel')):
+                               ('kit_qty_pickets', 'kit_count_per_panel')):
             if fact_type in by_type:
                 component, row, anchor_row = by_type[fact_type]
                 p_specs.append(kit_count_spec(row, key, anchor_row) if key == 'kit_count_per_panel'
