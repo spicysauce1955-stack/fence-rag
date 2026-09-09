@@ -304,7 +304,8 @@ def answer_query(situation: Situation, *, snapshot: dict | None = None,
                                                    requested_scope)
     procedures = _applicable_procedures(snapshot, requested_scope)
     conflicts = _conflicts(values)
-    evidence, tenancy_suppressed = _evidence(situation, snapshot, conn)
+    evidence, tenancy_suppressed = _evidence(situation, snapshot, conn,
+                                            _cited_documents(values, procedures))
 
     refs = _collect_refs(values, procedures, conflicts, evidence)
     return QueryAnswer(
@@ -322,6 +323,7 @@ def answer_query(situation: Situation, *, snapshot: dict | None = None,
             "searched": bool(situation.question) and conn is not None,
             "tenancy_suppressed": tenancy_suppressed,
             "conflicts_resolved": False,
+            "evidence_support_claimed": False,
             "applicability_is_graded": False,
         },
     )
@@ -433,7 +435,39 @@ def _conflicts(values):
 
 # ------------------------------------------------------------------ retrieval
 
-def _evidence(situation: Situation, snapshot: dict, conn):
+def _cited_documents(values, procedures) -> dict:
+    """Which documents the published half of this answer already cites.
+
+    Keyed on `belongs_to` -- the document version hash -- which both a
+    published citation and a live-minted evidence ref already carry, so the
+    join is identity and not a guess.
+    """
+    out: dict[str, list] = {}
+
+    def add(sha, kind, ident):
+        if not sha:
+            return
+        entry = {"kind": kind, "id": ident}
+        bucket = out.setdefault(sha, [])
+        if entry not in bucket:
+            bucket.append(entry)
+
+    for finding in values:
+        for cite in finding.cites:
+            add(cite.get("belongs_to"), "value", finding.parameter)
+    for procedure in procedures:
+        for cite in procedure.cites:
+            add(cite.get("belongs_to"), "procedure", procedure.id)
+        for step in procedure.steps:
+            for cite in step.get("cites") or []:
+                add(cite.get("belongs_to"), "procedure", procedure.id)
+    for bucket in out.values():
+        bucket.sort(key=lambda e: (e["kind"], e["id"] or ""))
+    return out
+
+
+def _evidence(situation: Situation, snapshot: dict, conn,
+              cited_by: dict | None = None):
     """The passages behind the question, each carrying a mintable ref.
 
     Delegates to `search_evidence` with its shipped defaults and changes
@@ -467,6 +501,17 @@ def _evidence(situation: Situation, snapshot: dict, conn):
         record["ref"] = {"id": ref_id(locus["sha256"], result.page,
                                       locus["bbox"]),
                          "belongs_to": locus["sha256"]}
+        # Document identity, and deliberately nothing more. `evidence` and
+        # `values` arrived as two parallel lists with nothing joining them --
+        # a sealed approval's number beside passages from an installation
+        # guide, and no way to tell which passages were even in the same
+        # document as the number. This says they share one. It does NOT say
+        # the passage states the value: that is support, this platform has not
+        # verified it, and asserting it beside a value whose whole worth is
+        # that it WAS verified is exactly the wrong place to guess.
+        shared = (cited_by or {}).get(locus["sha256"], [])
+        record["from_cited_document"] = bool(shared)
+        record["cited_by"] = [dict(entry) for entry in shared]
         out.append(record)
     return tuple(out), suppressed
 

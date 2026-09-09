@@ -219,5 +219,146 @@ class TestTenancyAtTheRefMinter(unittest.TestCase):
         self.assertEqual(len(answer.evidence), 1)
 
 
+class TestPassagesFromCitedDocumentsAreMarked(unittest.TestCase):
+    """A returned passage and a returned value can come from the SAME document,
+    and until now the answer did not say so.
+
+    `evidence` and `values` arrived as two parallel lists with nothing joining
+    them: a sealed approval's footing schedule beside three passages from an
+    installation guide, and no way for a caller to tell which passages were
+    even in the same document as the number it is about to cite.
+
+    What is marked here is **document identity and nothing more** — the passage
+    and the value share a `belongs_to`, which is mechanical and already in the
+    answer. It is deliberately NOT a claim that the passage states the value:
+    that would be asserting support this platform has not verified, on the same
+    page as a value whose whole worth is that it was verified. The test below
+    that pins a passage with unrelated text is what keeps the two apart.
+    """
+
+    VALUE_SHA = "d" * 64
+    OTHER_SHA = "e" * 64
+
+    def store(self):
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.executescript(SCHEMA)
+        for n, (doc, sha, text) in enumerate((
+                ("doc-cited", self.VALUE_SHA,
+                 "Footing depth for post embedment in firm soil."),
+                ("doc-uncited", self.OTHER_SHA,
+                 "Footing depth is measured from finished grade."))):
+            conn.execute(
+                """INSERT INTO documents(document_id, source_path, file_type,
+                        corpus_track, doc_type, title, version_status)
+                   VALUES(?,?,'pdf','us','install_guide',?,'unknown')""",
+                (doc, f"manuals/x/{doc}.pdf", doc))
+            conn.execute(
+                """INSERT INTO document_versions(version_id, document_id, sha256,
+                        file_size_bytes, page_count, ingested_at)
+                   VALUES(?,?,?,1,1,'2026-09-08T00:00:00Z')""",
+                (f"v{n}", doc, sha))
+            conn.execute(
+                """INSERT INTO pages(page_id, version_id, page_no, width, height,
+                        extraction_method, has_text_layer)
+                   VALUES(?,?,1,612,792,'text',1)""", (f"pg{n}", f"v{n}"))
+            conn.execute(
+                """INSERT INTO elements(element_id, page_id, version_id,
+                        document_id, page_no, ordinal, element_type, text,
+                        text_source, heading_path, bbox)
+                   VALUES(?,?,?,?,1,0,'paragraph',?,'text','[]',
+                          '[10.0, 20.0, 30.0, 40.0]')""",
+                (f"el{n}", f"pg{n}", f"v{n}", doc, text))
+        conn.commit()
+        build_retrieval_units(conn)
+        conn.commit()
+        return conn
+
+    def snapshot(self):
+        return dict(SNAPSHOT, parameters=[{
+            "condition_scope": {"exposure_category": "site"},
+            "domain": {"exposure_category": ["B", "C", "D"]},
+            "domain_basis": "measured", "hit_policy": "unique",
+            "parameter": "footing_depth_mm", "task": "structural_parameter",
+            "scope": {"kind": "fence_model", "id": "mfr/acme", "tenant": None},
+            "uncovered": [], "value_type": "quantity(mm)",
+            "rows": [{
+                "authority": self.VALUE_SHA, "condition_basis": "stated",
+                "conditions": {"exposure_category": "C"},
+                "valid_from": None, "valid_until": None,
+                "value": {"amount_milli": 762000, "unit": "mm",
+                          "value_raw": ['30"']},
+                "provenance": {"curation_level": 2,
+                               "source_class": "sealed_approval",
+                               "version_status": "active",
+                               "cites": [{"id": "ffffffffffffffff",
+                                          "belongs_to": self.VALUE_SHA}]},
+            }]}])
+
+    def answer(self):
+        return answer_query(Situation(question="footing depth", limit=10),
+                            snapshot=self.snapshot(), conn=self.store())
+
+    def test_both_documents_are_still_returned(self):
+        """The marking annotates; it must not filter."""
+        answer = self.answer()
+        self.assertEqual(len(answer.evidence), 2)
+
+    def test_a_passage_sharing_a_document_with_a_value_is_marked(self):
+        answer = self.answer()
+        marked = [h for h in answer.evidence if h["from_cited_document"]]
+        self.assertEqual([h["ref"]["belongs_to"] for h in marked],
+                         [self.VALUE_SHA])
+
+    def test_it_names_what_else_cites_that_document(self):
+        answer = self.answer()
+        hit = [h for h in answer.evidence if h["from_cited_document"]][0]
+        self.assertEqual(hit["cited_by"],
+                         [{"kind": "value", "id": "footing_depth_mm"}])
+
+    def test_a_passage_from_an_uncited_document_is_marked_false(self):
+        answer = self.answer()
+        hit = [h for h in answer.evidence
+               if h["ref"]["belongs_to"] == self.OTHER_SHA][0]
+        self.assertIs(hit["from_cited_document"], False)
+        self.assertEqual(hit["cited_by"], [])
+
+    def test_the_mark_is_document_identity_and_not_a_claim_of_support(self):
+        """The marked passage says nothing about a footing DEPTH VALUE -- it
+        only shares a document with one. If this ever starts meaning "this
+        passage states that value", it has to be earned, not inferred."""
+        answer = self.answer()
+        hit = [h for h in answer.evidence if h["from_cited_document"]][0]
+        self.assertNotIn("30", hit["text"])
+        self.assertIs(hit["from_cited_document"], True)
+
+    def test_the_basis_says_support_was_not_claimed(self):
+        answer = self.answer()
+        self.assertIs(answer.basis["evidence_support_claimed"], False)
+
+    def test_marking_adds_no_refs(self):
+        """A document-identity annotation must not enlarge the citation list --
+        that list is what a grounding check matches against."""
+        answer = self.answer()
+        cited = {c["id"] for v in answer.values for c in v.cites}
+        cited |= {h["ref"]["id"] for h in answer.evidence}
+        self.assertEqual({r["id"] for r in answer.refs}, cited)
+
+    def test_a_procedure_sharing_a_document_is_named_too(self):
+        snapshot = dict(self.snapshot(), procedures=[{
+            "id": "proc-abc123",
+            "scope": {"kind": "fence_model", "id": "mfr/acme", "tenant": None},
+            "cites": [{"id": "eeeeeeeeeeeeeeee",
+                       "belongs_to": self.OTHER_SHA}],
+            "steps": [],
+        }])
+        answer = answer_query(Situation(question="footing depth", limit=10),
+                              snapshot=snapshot, conn=self.store())
+        hit = [h for h in answer.evidence
+               if h["ref"]["belongs_to"] == self.OTHER_SHA][0]
+        self.assertEqual(hit["cited_by"],
+                         [{"kind": "procedure", "id": "proc-abc123"}])
+
+
 if __name__ == "__main__":
     unittest.main()
