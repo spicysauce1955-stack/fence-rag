@@ -118,6 +118,7 @@ class ValueFinding:
     valid_until: dict | None
     applicability: dict
     strength: dict
+    currency: dict
     cites: list
 
     def to_dict(self) -> dict:
@@ -324,13 +325,66 @@ def answer_query(situation: Situation, *, snapshot: dict | None = None,
             "tenancy_suppressed": tenancy_suppressed,
             "conflicts_resolved": False,
             "evidence_support_claimed": False,
+            "exact_findings": _exact(values),
+            "exact_findings_superseded": _exact(values, superseded=True),
             "applicability_is_graded": False,
         },
     )
 
 
+def _exact(values, *, superseded: bool = False) -> int:
+    """How many findings matched the caller's product exactly -- and how many of
+    those a later document replaced. One number that names the trap: every
+    exactly-scoped answer you have is out of date."""
+    exact = [f for f in values if f.applicability["scope"] == "exact"]
+    if not superseded:
+        return len(exact)
+    return sum(1 for f in exact if f.currency["superseded_by"])
+
+
+def _supersession(snapshot) -> dict:
+    """`content_hash -> what replaced it`, read from the snapshot's own
+    `source_docs`.
+
+    Read from the PINNED SNAPSHOT rather than the live store on purpose. It is
+    deterministic -- the same answer a year from now -- and it does not inherit
+    `relations.supersession_chain`'s defect, which takes `LIMIT 1` per hop and
+    so returns one arbitrary path through what is really a DAG, silently
+    dropping chain members.
+    """
+    return {doc["content_hash"]: list(doc.get("superseded_by") or [])
+            for doc in (snapshot.get("source_docs") or [])
+            if doc.get("content_hash")}
+
+
+def _link_replacements(findings) -> None:
+    """Say which superseding document is ALSO in this answer, and how it graded.
+
+    This is the Chesterfield trap made visible: the in-force approval is right
+    there, under a different `fence_model` id, graded `other`, while the only
+    `exact` row expired in 2018.
+    """
+    by_authority: dict = {}
+    for finding in findings:
+        by_authority.setdefault(finding.strength.get("authority"),
+                                []).append(finding)
+    for finding in findings:
+        for replacement in finding.currency["superseded_by"]:
+            for other in by_authority.get(replacement, []):
+                entry = {"parameter": other.parameter,
+                         "authority": replacement,
+                         "scope_id": (other.scope or {}).get("id"),
+                         "applicability": dict(other.applicability)}
+                if entry not in finding.currency["superseded_by_in_answer"]:
+                    finding.currency["superseded_by_in_answer"].append(entry)
+
+
 def _applicable_values(snapshot, stated, requested_scope):
     findings, unstated, outside = [], set(), set()
+    graph = _supersession(snapshot)
+    # An absent `source_docs` is an ABSENCE, not an assertion that nothing is
+    # superseded, and the answer must not read as the latter.
+    basis = "supersession_graph" if graph else "version_status_label_only"
     for table in snapshot.get("parameters", []) or []:
         declared = set(table.get("condition_scope") or {})
         scope_match = _scope_verdict(table.get("scope"), requested_scope)
@@ -359,6 +413,16 @@ def _applicable_values(snapshot, stated, requested_scope):
                 valid_from=row.get("valid_from"),
                 valid_until=row.get("valid_until"),
                 applicability={"scope": scope_match, "conditions": verdict},
+                currency={
+                    # `knowledge-loop.md` §3: "currency comes from the
+                    # supersession graph and not from the `version_status`
+                    # label". The label is still reported next door in
+                    # `strength`; it is not what this reads.
+                    "version_status": provenance.get("version_status"),
+                    "superseded_by": list(graph.get(row.get("authority"), [])),
+                    "superseded_by_in_answer": [],
+                    "basis": basis,
+                },
                 strength={
                     "curation_level": provenance.get("curation_level"),
                     "source_class": provenance.get("source_class"),
@@ -378,6 +442,7 @@ def _applicable_values(snapshot, stated, requested_scope):
         unstated |= (declared - set(stated)) if admitted_any else set()
     findings.sort(key=lambda f: (f.parameter or "", _key(f.scope),
                                  _key(f.conditions), _key(f.value)))
+    _link_replacements(findings)
     return tuple(findings), unstated, outside
 
 

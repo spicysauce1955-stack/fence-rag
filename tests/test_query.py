@@ -427,5 +427,135 @@ class TestRefusals(unittest.TestCase):
                          snapshot=ONE_TABLE)
 
 
+class TestCurrencyComesFromTheGraphNotTheLabel(unittest.TestCase):
+    """`knowledge-loop.md` §3, on why the query lives on this side at all:
+
+        *"retrieval here is not fetch-by-id. It means knowing which condition
+        dimensions apply, that currency comes from the supersession graph and
+        not from the `version_status` label, that five tables agreeing is
+        corroboration rather than redundancy … The semantics stay where the
+        expertise is."*
+
+    The first cut did the opposite on every count. It exposed the label and
+    never touched the graph, and the effect on real data was not academic: the
+    only row graded `scope: "exact"` for Chesterfield is an approval that
+    EXPIRED IN 2018, while the in-force 2025 approval for the same lineage
+    grades `"other"` -- the same grade as a table for a different product
+    entirely. Both are published, both carry identical values, and a caller
+    ranking `exact` over `other` (the only ordering the answer offers) picks the
+    expired one.
+
+    The cause is upstream and is not fixed here: `parameters._default_scope`
+    mints a `fence_model` id by slugging each document's own manufacturer and
+    product family, and every edition of one approval lineage names a slightly
+    different model list, so each edition lands on a different id. Nothing
+    published says those ids are one product line -- `models` and
+    `combinations` are both 0.
+
+    What IS fixed here is that the answer stops making the caller do the join.
+    The snapshot already carries `source_docs[].superseded_by`, and
+    `contract.md` §1.1 says `SourceRef.belongs_to` exists precisely so this join
+    is possible -- *"without it an opaque id carries zero admissibility bits
+    into a pinned snapshot, and a run cannot tell that three of a definition's
+    five citations are superseded approvals."* So the join is made here, from
+    the pinned snapshot rather than the live store: deterministic, and it does
+    not inherit `relations.supersession_chain`'s DAG bug, which takes one
+    arbitrary path per hop and silently drops chain members.
+    """
+
+    OLD, NEW = "a" * 64, "b" * 64
+
+    def snapshot(self, *, include_replacement=True, source_docs=True,
+                 old_label="superseded"):
+        tables = [parameter_table(
+            scope_id="mfr/old-model-names",
+            rows=[row(value=quantity(762, '30"'),
+                      conditions={"exposure_category": "C"},
+                      cites=[{"id": "1111111111111111", "belongs_to": self.OLD}],
+                      authority=self.OLD, version_status=old_label)])]
+        if include_replacement:
+            tables.append(parameter_table(
+                scope_id="mfr/new-model-names",
+                rows=[row(value=quantity(762, '30"'),
+                          conditions={"exposure_category": "C"},
+                          cites=[{"id": "2222222222222222",
+                                  "belongs_to": self.NEW}],
+                          authority=self.NEW, version_status="unknown")]))
+        snap = snapshot(parameters=tables)
+        if source_docs:
+            snap["source_docs"] = [
+                {"content_hash": self.OLD, "source_class": "sealed_approval",
+                 "version_status": "superseded", "superseded_by": [self.NEW],
+                 "also_filed_as": []},
+                {"content_hash": self.NEW, "source_class": "sealed_approval",
+                 "version_status": "unknown", "superseded_by": [],
+                 "also_filed_as": []},
+            ]
+        return snap
+
+    def ask(self, **kwargs):
+        return answer_query(
+            Situation(conditions={"exposure_category": "C"},
+                      scope={"kind": "fence_model", "id": "mfr/old-model-names"}),
+            snapshot=self.snapshot(**kwargs))
+
+    def old(self, answer):
+        return [f for f in answer.values if f.strength["authority"] == self.OLD][0]
+
+    def test_a_superseded_value_names_what_replaced_it(self):
+        self.assertEqual(self.old(self.ask()).currency["superseded_by"],
+                         [self.NEW])
+
+    def test_a_value_nothing_supersedes_says_so_with_an_empty_list(self):
+        answer = self.ask()
+        new = [f for f in answer.values if f.strength["authority"] == self.NEW][0]
+        self.assertEqual(new.currency["superseded_by"], [])
+
+    def test_the_replacement_present_in_the_same_answer_is_named(self):
+        """The Chesterfield trap: the replacement is right there, under a
+        different scope id, graded `other`."""
+        self.assertEqual(
+            self.old(self.ask()).currency["superseded_by_in_answer"],
+            [{"parameter": "footing_depth_mm", "authority": self.NEW,
+              "scope_id": "mfr/new-model-names",
+              "applicability": {"scope": "other",
+                                "conditions": "stated_and_satisfied"}}])
+
+    def test_a_replacement_absent_from_the_answer_is_an_empty_list_not_a_lie(self):
+        answer = self.ask(include_replacement=False)
+        currency = self.old(answer).currency
+        self.assertEqual(currency["superseded_by"], [self.NEW])
+        self.assertEqual(currency["superseded_by_in_answer"], [])
+
+    def test_the_graph_wins_over_the_label(self):
+        """A row whose own provenance calls itself active is still superseded
+        if the snapshot's graph says so. That is the whole rule."""
+        answer = self.ask(old_label="active")
+        finding = self.old(answer)
+        self.assertEqual(finding.strength["version_status"], "active")
+        self.assertEqual(finding.currency["superseded_by"], [self.NEW])
+        self.assertEqual(finding.currency["basis"], "supersession_graph")
+
+    def test_without_source_docs_it_reports_the_label_and_says_that_is_all(self):
+        """A snapshot with no `source_docs` is not an assertion that nothing is
+        superseded -- it is an absence, and the answer must not read as the
+        former."""
+        finding = self.old(self.ask(source_docs=False))
+        self.assertEqual(finding.currency["superseded_by"], [])
+        self.assertEqual(finding.currency["basis"], "version_status_label_only")
+
+    def test_the_answer_counts_how_many_exact_findings_are_superseded(self):
+        """One number that names the trap: every exactly-scoped answer you have
+        is out of date."""
+        answer = self.ask()
+        self.assertEqual(answer.basis["exact_findings"], 1)
+        self.assertEqual(answer.basis["exact_findings_superseded"], 1)
+
+    def test_currency_adds_no_refs(self):
+        answer = self.ask()
+        cited = {c["id"] for f in answer.values for c in f.cites}
+        self.assertEqual({r["id"] for r in answer.refs}, cited)
+
+
 if __name__ == "__main__":
     unittest.main()

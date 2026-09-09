@@ -5342,6 +5342,56 @@ deliberately, and decide whether a test should fail when they drift.
 
 ---
 
+### G108 — the store holds two names for one condition axis, and only one can publish
+
+*2026-09-09.* Found while investigating why nine of the gold set's twelve
+`required_conditions` dimensions have no home in `parameters.CONDITION_SCOPE`.
+The answer for most of them is that they should not have one. The answer for
+`fence_height_ft` is that it is **the registry's `fence_height` under a
+different name and unit, and it is live in this store.**
+
+`[measured]` `fence_evidence/facts.py:223` — `_COND_HEIGHT` writes
+`cond["fence_height_ft"] = _to_float(...)`, a bare float in feet.
+`promote_tables.KEY_COLUMNS` maps `fence\s*height` to **`fence_height`**, which
+publishes as an `Interval` of `Quantity` in mm (`domain: "range(mm)"`). Both
+names are in the store right now:
+
+| key | rows | review_status |
+|---|---|---|
+| `fence_height_ft` | 18 | 8 `extracted`, 8 `extracted`/2 `flagged` across 6 fact types — **0 accepted** |
+| `fence_height` | 24 | **all 24 `accepted`** |
+
+`[measured]` `_translate_conditions({"fence_height_ft": 8.0})` returns
+`({}, set(), ('condition_scope_undeclared', 'fence_height_ft'), None)` — the
+publisher refuses it. So nothing has broken: none of the 18 is promotable, and
+the 24 that publish use the right name.
+
+**Why it is a gap and not a non-event.** The refusal is the only thing standing
+between the two names, and it fires at publish time rather than at extraction.
+The moment a curator accepts one of those 18 rows — which is exactly what the
+review queue exists for — the fact becomes unpublishable for a reason that has
+nothing to do with the evidence, and the message names a "condition scope"
+rather than a misspelt key. It is the same shape as the `lang`/`corpus_track`
+shortcut `tests/test_basis_columns.py` guards: one axis, two vocabularies, and a
+guard in only one of the two places.
+
+**Recommended, not done here:** repoint `_COND_HEIGHT` at `fence_height` and
+emit an `Interval` (a point is `min == max`, both inclusive), then add the
+shortcut-guard test the repository already uses twice — *every key
+`facts._conditions()` can emit is in `CONDITION_SCOPE`*. That test fails today,
+which is the honest state. It is deferred because it changes what the extractor
+asserts and therefore wants a re-extraction, not a same-session edit.
+
+**Also measured, and separate:** `required_conditions` in the gold set is
+**inert**. `evaluate.py:517` is its only reader, on the `facts` interface, and
+none of the seven annotated questions declares an interface — so no code has
+ever executed or validated those twelve names. `eval/gold-question-schema.json`
+types the field as a bare object with no key constraint, which is how a
+thirteenth name gets invented next.
+
+---
+
+
 ## 4. If work resumes, in order
 
 *Rewritten 2026-08-28. Three of the five items below were done or answered, and
