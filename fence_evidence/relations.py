@@ -166,27 +166,69 @@ def derive_relations(conn: sqlite3.Connection) -> dict[str, int]:
 
 
 def supersession_chain(conn: sqlite3.Connection, document_id: str) -> list[str]:
-    """Ordered chain oldest -> newest through supersedes edges."""
-    seen = {document_id}
-    back = [document_id]
-    cur = document_id
-    while True:
-        row = conn.execute("""SELECT to_document_id AS d FROM relations
-            WHERE from_document_id=? AND relation_type='supersedes' LIMIT 1""",
-                           (cur,)).fetchone()
-        if not row or row["d"] in seen:
+    """Every document in one supersession lineage, oldest first.
+
+    The WHOLE component, not one path through it. Both walks used to take
+    `LIMIT 1` per hop, so a lineage that branches returned one arbitrary route
+    and silently dropped the rest: `[measured]` 2026-09-09, NOA `12-1106.11`
+    has six direct successors and the walk returned one, leaving `21-0125.07`
+    -- a real member -- out of the answer. Corpus-wide, 7 documents supersede
+    more than one document and 4 are superseded by more than one, so branching
+    is the shape of this data rather than an edge case. Worse, the route
+    depended on where you entered: resolving `24-0117.05` and resolving
+    `12-1106.11` returned two disjoint chains over one graph.
+
+    That mattered because `versions.select_active` computes *"nothing in the
+    chain supersedes it"* over exactly this list, so the claim was made about a
+    subset. Nothing PUBLISHED was affected: `SourceDoc.superseded_by` comes
+    from `snapshot._successors`, which has no `LIMIT` and orders by content
+    hash, and `query._supersession` reads that for this reason.
+
+    An edge reads `A supersedes B` from A (the newer approval) to B (the one it
+    replaces) -- the mirror of `superseded_by`, whose *from* side is the
+    superseded document. Marking the wrong side once labelled every current NOA
+    superseded; `tests/test_versions.py` guards the direction.
+
+    **Order is oldest -> newest and is the caller's, never SQLite's.** Rank is
+    the longest ancestor path, tie-broken on `document_id` so two byte-identical
+    refilings sort stably -- `canonical.py`'s rule, that a list's order is
+    decided where its meaning is known, applied to a read. `select_active`
+    reads `chain[-1]` positionally for its `assumed_newest` fallback, so the
+    tail has to be a newest member and not whichever row came back first.
+
+    The relaxation is bounded by the component size rather than run to a fixed
+    point, so a cycle in a corrupt store returns a list instead of hanging.
+    """
+    component = {document_id}
+    frontier = [document_id]
+    while frontier:
+        current = frontier.pop()
+        for row in conn.execute(
+                """SELECT to_document_id AS d FROM relations
+                    WHERE from_document_id=? AND relation_type='supersedes'
+                   UNION
+                   SELECT from_document_id AS d FROM relations
+                    WHERE to_document_id=? AND relation_type='supersedes'""",
+                (current, current)):
+            if row["d"] not in component:
+                component.add(row["d"])
+                frontier.append(row["d"])
+
+    supersedes = {d: set() for d in component}
+    for d in component:
+        supersedes[d] = {row["d"] for row in conn.execute(
+            """SELECT to_document_id AS d FROM relations
+                WHERE from_document_id=? AND relation_type='supersedes'""",
+            (d,))} & component
+
+    rank = {d: 0 for d in component}
+    for _ in range(len(component)):
+        settled = True
+        for d in component:
+            deepest = max((rank[older] + 1 for older in supersedes[d]), default=0)
+            if deepest > rank[d]:
+                rank[d] = deepest
+                settled = False
+        if settled:
             break
-        back.insert(0, row["d"])
-        seen.add(row["d"])
-        cur = row["d"]
-    cur = document_id
-    while True:
-        row = conn.execute("""SELECT from_document_id AS d FROM relations
-            WHERE to_document_id=? AND relation_type='supersedes' LIMIT 1""",
-                           (cur,)).fetchone()
-        if not row or row["d"] in seen:
-            break
-        back.append(row["d"])
-        seen.add(row["d"])
-        cur = row["d"]
-    return back
+    return sorted(component, key=lambda d: (rank[d], d))

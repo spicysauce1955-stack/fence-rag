@@ -846,3 +846,99 @@ class TestNoBasisDeniesWhatTheChainCarries(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@requires_facts
+class TestTheChainIsTheWholeDagNotOnePath(unittest.TestCase):
+    """`supersession_chain` took `LIMIT 1` per hop, so a lineage that branches
+    returned one arbitrary path and silently dropped the rest.
+
+    `[measured]` 2026-09-09: NOA `12-1106.11` (`doc-32e36a07ab44`) has **six**
+    direct successors; the walk returned one. `21-0125.07` is a real member and
+    was absent. Corpus-wide, 4 documents have more than one successor and 7
+    have more than one predecessor, over 11 documents in two lineages — so this
+    is the shape of the data, not an edge case.
+
+    Nothing PUBLISHED was wrong: `SourceDoc.superseded_by` comes from
+    `snapshot._successors`, an unbounded query ordered by content hash, and
+    `query._supersession` reads that on purpose. What was wrong is every answer
+    `cli resolve`, `chain_for` and the `resolve` interface gave about a chain,
+    and `active_basis`'s claim that *"nothing in the chain supersedes it"* was
+    computed over a subset of the chain.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.conn = connect()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.conn.close()
+
+    LEGACY = "doc-32e36a07ab44"      # NOA 12-1106.11, six successors
+
+    def successors(self, document_id):
+        return {r[0] for r in self.conn.execute(
+            """SELECT to_document_id FROM relations
+                WHERE from_document_id=? AND relation_type='superseded_by'""",
+            (document_id,))}
+
+    def test_every_successor_of_a_branching_member_is_in_the_chain(self):
+        from fence_evidence.relations import supersession_chain
+        successors = self.successors(self.LEGACY)
+        self.assertGreater(len(successors), 1,
+                           "the branching lineage this guards moved")
+        chain = set(supersession_chain(self.conn, self.LEGACY))
+        self.assertTrue(successors <= chain,
+                        f"the walk dropped {sorted(successors - chain)}")
+
+    def test_the_chain_is_the_same_wherever_it_is_entered(self):
+        """One lineage is one answer. Entering at a different node used to
+        return a different, shorter path over the same graph."""
+        from fence_evidence.relations import supersession_chain
+        chain = supersession_chain(self.conn, self.LEGACY)
+        for member in chain:
+            with self.subTest(entered_at=member):
+                self.assertEqual(supersession_chain(self.conn, member), chain)
+
+    def test_the_order_is_oldest_first_and_deterministic(self):
+        """`select_active`'s `assumed_newest` fallback reads `chain[-1]`, and
+        `canonical.py`'s rule is that a caller orders its own collection —
+        never SQLite's row order, which is what the old walk followed."""
+        from fence_evidence.relations import supersession_chain
+        chain = supersession_chain(self.conn, self.LEGACY)
+        position = {d: i for i, d in enumerate(chain)}
+        for older in chain:
+            for newer in self.successors(older) & set(chain):
+                with self.subTest(older=older, newer=newer):
+                    self.assertLess(position[older], position[newer])
+        self.assertEqual(supersession_chain(self.conn, self.LEGACY), chain)
+
+    def test_a_byte_identical_refiling_is_not_a_second_approval(self):
+        """`[measured]` 2026-09-09: the four filings of `24-0117.05` share one
+        sha256 (`2f446717ee75…`), each independently reads `in_force`, and none
+        is marked active. Over the full DAG all four are candidates at once, and
+        `select_active`'s >1-in-force rule would call that a conflict — trading
+        a silent omission for a spurious refusal on the exact lineage this fix
+        is about. Four filings of one approval are one approval."""
+        current = self.conn.execute(
+            "SELECT document_id FROM documents WHERE source_path LIKE ? LIMIT 1",
+            ("%Miami-Dade-NOA_Barrette-Outdoor-Living_"
+             "Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf",)).fetchone()
+        self.assertIsNotNone(current)
+        chain = chain_for(self.conn, current["document_id"], as_of="2026-08-28")
+        in_force = [m for m in chain
+                    if (m.get("expiry") or {}).get("status") == "in_force"]
+        self.assertGreater(len(in_force), 1,
+                           "the refiled lineage this guards moved")
+        got = select_active(chain, as_of="2026-08-28")
+        self.assertEqual(got["active_basis_kind"], "inferred_in_force",
+                         got["active_basis"])
+
+    def test_two_genuinely_different_approvals_in_force_are_still_a_conflict(self):
+        """The collapse must not swallow a real disagreement: it groups on
+        identical bytes, and two different documents never share them."""
+        a = _m("doc-a", expiry="in_force", expiration="2029-01-01")
+        b = _m("doc-b", expiry="in_force", expiration="2030-01-01")
+        a["content_hashes"], b["content_hashes"] = ["aaa"], ["bbb"]
+        self.assertEqual(select_active([a, b])["active_basis_kind"], "conflict")
