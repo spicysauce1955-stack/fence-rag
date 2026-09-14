@@ -1,4 +1,4 @@
-# Coverage remediation plan — eight items, one per session
+# Coverage remediation plan — nine items on three tracks
 
 ```text
 Status:   A PLAN, not a change. Nothing here is implemented. Written 2026-09-14 from an
@@ -11,6 +11,9 @@ Authority: Advisory on sequencing only. `docs/knowledge-loop.md` governs purpose
 Read first: `docs/knowledge-loop.md` §9 (the largest gap), then §10 (build order, which
           this document refines rather than replaces).
 Shape:    One item per session, each with its own acceptance test, per knowledge-loop §10.
+          Items are grouped by WHO CAN DO THEM, not by size -- see §0b. knowledge-loop §10
+          already draws this line ("needs a curator, not an engineer; if no person is
+          available, start at item 2") and this plan is ordered to respect it.
 ```
 
 ---
@@ -72,7 +75,68 @@ Recorded so the next session does not re-litigate it.
 
 ---
 
-## 1 · Item 1 — grade the evaluation on the query production actually sends
+## 0b · Three tracks, because the blocker differs
+
+An ordering by size sends a session with no curator into a wall. Order by who can act.
+
+| Track | Items | Blocker | Curator needed? |
+|---|---|---|---|
+| **A — engineer alone** | 0, 1, 2, 3, 5, 6 | nothing; all are code | no |
+| **B — engineer, then curator** | 4, 7 | a person must sign off before anything publishes | **yes, after the build** |
+| **C — needs the other team** | 8 | Planning must agree the join first | no, but blocked |
+
+**Run track A to exhaustion before starting track B.** Track A items publish coverage without
+a person: item 5 alone moves 524 readings from nothing to published, and item 6 makes 6,660
+figures reachable for the first time. Track B builds a queue that only a human can clear, so
+starting it while track A is unfinished converts an engineering session into a waiting one.
+
+Track C waits regardless. Do not mint identities into a void.
+
+**Recommended running order, one per session:**
+
+```text
+0  re-measure            cheap, and everything about published output depends on it
+1  the honest ruler      no later measurement means anything until this lands
+2  second stage on       five minutes, already built and measured; do it while the
+                         ruler is fresh so it is graded honestly the first time
+3  publication gates     safety; closes 9 unreviewed published dimensions
+5  publish level 1       +524 rows, satisfies a BINDING obligation, no curator
+6  link the figures      free; makes 6,660 figures reachable for the first time
+------------------------ track A exhausted; a curator is now the constraint
+4  page-level review     the leverage change; hands over a queue of ~9,188
+7  read the drawings     deprioritised (HVHZ); ~350 items, needs sign-off
+------------------------ blocked on Planning
+8  one identity          file EntityRef.id stability (012/013) first
+```
+
+**Two of these are worth doing even if the plan is otherwise abandoned:** item 1, because
+every number this project quotes is currently measured on a query shape production never
+sends; and item 3's `source_class` default, because sealed engineering drawings are publishing
+as `marketing` today.
+
+## 0c · Item 0 — re-measure before planning against published numbers
+
+**Not optional, and it is cheap.** The store was built 2026-09-09 16:40; branch HEAD landed at
+16:47 having added 161 lines to `facts.py` and touched `parameters.py`, `parts.py` and
+`snapshot.py` — including the naming work that renamed 13 `*_drawing_*_mm` fact types to
+`_in` (B-1). Every element- and document-level number in §0 is unaffected, because
+`extract.py` and `layout.py` were not touched. **The fact-type and published-object counts are
+not guaranteed to match what current code produces**, and items 3, 5 and 7 all reason about
+published output.
+
+**Do:** rebuild the snapshot with current code and diff it against `0e04d171`; re-run the
+evaluation; compare the store's distinct `fact_type` values against what `facts.py` now emits.
+
+**Do NOT re-extract facts as a side effect.** `facts` rows carry `review_status`, and a
+re-extraction moves every `fact_id`. The review ledger exists to survive exactly that (G49),
+but replaying it is a deliberate operation with its own acceptance test — not something to do
+while measuring. If the fact types have drifted, that is a finding to file, not a cleanup to
+perform in passing.
+
+**Acceptance.** A recorded diff between the stored snapshot and one built from current code;
+either "no change" or a named list of what moved. Nothing written to `facts`.
+
+## 1 · Item 1 — grade the evaluation on the query production actually sends  `[track A]`
 
 **Defect.** `evaluate._query_for()` prefers a question's hand-written `query_terms` over the
 question itself, and `[measured]` **all 79 gold questions carry them**. The production path
@@ -101,7 +165,7 @@ report; `summary["raw"]` carries unrounded means for both (G65).
 
 **Not in scope.** Making anything pass. The honest numbers are allowed to be worse.
 
-## 2 · Item 2 — switch on the second stage
+## 2 · Item 2 — switch on the second stage  `[track A]`
 
 **Defect.** `retrieval.search_evidence(second_stage=False)` by default, and
 `SECOND_STAGE_MIN_TERM_DF_SHARE = 0.30`. The mechanism is built, tested and off.
@@ -128,7 +192,7 @@ and record it.
 unsupported ≤ 0.20; a human spot-check that newly attached elements are headings and spec
 lines rather than footers.
 
-## 3 · Item 3 — close the two publication-gate gaps
+## 3 · Item 3 — close the two publication-gate gaps  `[track A]`
 
 **Defect A.** `parameters.py` gates publication on review status; `parts.py` does not — it
 maps `review_status` to a curation level and publishes regardless. `[measured]` nine published
@@ -160,7 +224,7 @@ in this store has ever changed a numeric digit.** Human review here is demonstra
 legibility and structure check, not an arithmetic one. Do not cite the 2% not-accepted rate as
 evidence that published numbers are 98% right.
 
-## 4 · Item 4 — give step review the leverage crop review already has
+## 4 · Item 4 — give step review the leverage crop review already has  `[track B]`
 
 **The highest-leverage item in this plan, and the one that changes the project's shape.**
 
@@ -201,7 +265,7 @@ byte-identical to approving the same spans one at a time.
 **This item hands over a queue, not finished output.** Clearing it needs a curator. An agent
 may act as a machine *reader*; it may not be the human sign-off.
 
-## 5 · Item 5 — publish the 524 machine-agreed readings at level 1
+## 5 · Item 5 — publish the 524 machine-agreed readings at level 1  `[track A]`
 
 **Not a new policy. An unfulfilled obligation.**
 
@@ -230,7 +294,7 @@ can be wrong. The mitigation is entirely Planning's `min_curation: 2` policy row
 structural tasks. If that is ever relaxed, this ships 524 unchecked cells into structural
 decisions.
 
-## 6 · Item 6 — link dimensions to the diagrams they annotate
+## 6 · Item 6 — link dimensions to the diagrams they annotate  `[track A]`
 
 **Defect.** `[measured]` all 6,660 `figure` elements carry empty `text` **and** empty
 `ocr_text`, produce 0 retrieval units, and are reachable by no query path. But they are
@@ -281,7 +345,7 @@ geometry, and `basis` records which was used per row.
 **Acceptance.** Figures become reachable by query; a sampled set of links is checked by eye; a
 link whose basis is `leader_line` degrades honestly when `pdfplumber` is absent.
 
-## 7 · Item 7 — read the drawings a vision model can read and OCR cannot
+## 7 · Item 7 — read the drawings a vision model can read and OCR cannot  `[track B]`
 
 **Lower priority than items 4 and 6, by the owner's direction** — the HVHZ / Miami-Dade
 material is deprioritised. `[measured]` that is a small share anyway: **23 of 221 drawings
@@ -330,7 +394,7 @@ citation returns text reading `5'x 5.5" x 71.5"` and `image: null`.
 **Cost.** ≈ $19 and ~960 calls for the machine pile, the drawings and a first figure tranche,
 assuming two independent readers per crop. **Money is not the constraint; sign-off is.**
 
-## 8 · Item 8 — one identity per product
+## 8 · Item 8 — one identity per product  `[track C]`
 
 **Deferred deliberately. It needs Planning before it is worth doing.**
 
@@ -360,7 +424,7 @@ reason 011 was filed while it was cheap.
 
 | Item | Amendment? | Why |
 |---|---|---|
-| 1, 2 | no | Internal measurement |
+| 0, 1, 2 | no | Internal measurement |
 | 3 | no | `source_class` is a registry; `sealed_approval` exists |
 | 4 | no | `contract.md` §1.2 states review state is *not* in the payload |
 | 5 | no | Obligation 6 already requires it |
