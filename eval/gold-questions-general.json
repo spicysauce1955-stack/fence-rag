@@ -542,8 +542,10 @@
         "method": "pdftotext -layout over all 137 corpus PDFs into /tmp scratch, then `grep -ril \"torque\" <txtdir>` -> 0 files; `grep -riE \"ft[ -]?lbs?\\b|in[ -]?lbs?\\b|inch[ -]pounds\" <txtdir>` -> 0 files; `grep -ic torque` on the ARCAT .docx text -> 0. Additionally rendered and OCR'd all 143 pages of the 8 Wam Bam guides (pdftoppm -r 130 -png + tesseract --psm 6) because two of them have a corrupt text layer; the only 'torque' hits are 'Cordless Drill (preferably with a high-torque setting)' in the tool list, which is a tool recommendation, not a fastener torque value.",
         "confirmed": true,
         "quote": "Cordless Drill (preferably with a high-torque setting)",
-        "notes": "No numeric fastener torque appears anywhere. The closest guidance is qualitative: the Bufftech gate guide page 7 says only 'Avoid overtightening fasteners'. A retrieval system will likely surface that page - correct behaviour is to say the value is not specified. Caveat: scanned NOAs and the Showtech catalogs were checked via text layer only (they have none), but they are engineering approvals and product catalogs, not fastener-level assembly documents."
-      }
+        "notes": "No numeric fastener torque appears anywhere. The closest guidance is qualitative: the Bufftech gate guide page 7 says only 'Avoid overtightening fasteners'. A retrieval system will likely surface that page - correct behaviour is to say the value is not specified. Caveat: scanned NOAs and the Showtech catalogs were checked via text layer only (they have none), but they are engineering approvals and product catalogs, not fastener-level assembly documents.",
+        "annotation_note": "2026-09-14: classified. `torque` df 2 (drill mentions only) and no inch-pound figure anywhere, so the value is genuinely unstated; every component word occurs."
+      },
+      "no_answer_class": "adjacent-vocabulary"
     },
     {
       "id": "gq-117",
@@ -564,8 +566,10 @@
         "method": "grep -r -o '\\$ *[0-9][0-9.,]*' over pdftotext output of all 137 corpus PDFs -> only 4 distinct hits, all tool/lumber costs: '$25', '$30' (post pounders, Wam Bam nantucket spec sheet and Windsor guide), '$35.' (Windsor guide) and '$10.00' (a length of wood, Murphy's Vinyl Fence Laws). Also inspected manuals/illusions-vinyl-fence/product-price-catalog-186pg.pdf directly: its order forms have '$ EACH' / '$ TOTAL' column headers and 'ADD $- PER RAIL PER SECTION' lines with the price fields blank.",
         "confirmed": true,
         "quote": "CODE   DESCRIPTION   COLOR   QUANTITY   $ EACH   $ TOTAL",
-        "notes": "The 186-page Illusions document is titled a price catalog but ships with every price cell empty (dealer fills them in); it only carries colour multipliers such as '(BG) x 1.10'. There is no product pricing anywhere in the corpus."
-      }
+        "notes": "The 186-page Illusions document is titled a price catalog but ships with every price cell empty (dealer fills them in); it only carries colour multipliers such as '(BG) x 1.10'. There is no product pricing anywhere in the corpus.",
+        "annotation_note": "2026-09-14: classified. The price guide IS in the corpus and its own cover prints `NO PRICING`; `v300` df 56, `illusions` df 2667. The topic and product are covered and the value is never stated."
+      },
+      "no_answer_class": "near-miss"
     },
     {
       "id": "gq-118",
@@ -586,8 +590,10 @@
         "method": "grep -ril 'NOA\\|Miami\\|Dade' over the pdftotext output of all 17 manuals/wam-bam/**.pdf -> 0 files; grep -ri -o 'mph' -> 0 hits. Because nervous-nelly-VF15100 and steady-freddy-VF16100 have a corrupt (mojibake) text layer, all 143 pages of the 8 affected/related Wam Bam guides were additionally rendered (pdftoppm -r 130 -png) and OCR'd (tesseract --psm 6) into one file; grep -iE 'miami|dade|\\bNOA\\b' and grep -i 'mph' over that OCR text also return 0 hits.",
         "confirmed": true,
         "quote": "In high wind applications, it is recommended to drive the 4 extra screws into the top and bottom rails to further secure the panel",
-        "notes": "The quote (Cambridge guide page 25) is the ONLY wind-related guidance in the whole Wam Bam set and is qualitative - no mph figure, no NOA, no engineering approval. The corpus has 15 other Miami-Dade NOAs (Barrette, CertainTeed, Illusions, VEKA), so this is a strong distractor trap: a retriever will surface a foreign manufacturer's NOA."
-      }
+        "notes": "The quote (Cambridge guide page 25) is the ONLY wind-related guidance in the whole Wam Bam set and is qualitative - no mph figure, no NOA, no engineering approval. The corpus has 15 other Miami-Dade NOAs (Barrette, CertainTeed, Illusions, VEKA), so this is a strong distractor trap: a retriever will surface a foreign manufacturer's NOA.",
+        "annotation_note": "2026-09-14: classified. `wam` df 836, `noa` df 2642, `miami-dade` df 2633 — every subject term is present and no Wam Bam NOA co-occurrence exists. Detection currently fires on the verb `carry` (df 0 / `carrying` df 6), which is a tokenizer artifact, not evidence of absence."
+      },
+      "no_answer_class": "near-miss"
     },
     {
       "id": "gq-119",
