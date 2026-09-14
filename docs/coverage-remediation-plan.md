@@ -1,4 +1,4 @@
-# Coverage remediation plan — seven items, one per session
+# Coverage remediation plan — eight items, one per session
 
 ```text
 Status:   A PLAN, not a change. Nothing here is implemented. Written 2026-09-14 from an
@@ -17,7 +17,13 @@ Shape:    One item per session, each with its own acceptance test, per knowledge
 
 ## 0 · The finding this plan exists to act on
 
-`[measured]` 2026-09-14 against `workspace/indexes/evidence.db`:
+`[measured]` 2026-09-14 against `workspace/indexes/evidence.db` (built 2026-09-09 16:40) and
+the latest snapshot `0e04d171`. **Provenance caveat:** the store predates branch HEAD
+`250b27e` (16:47) by seven minutes, and that commit added 161 lines to `facts.py` and touched
+`parameters.py`, `parts.py` and `snapshot.py`. `extract.py` and `layout.py` were **not**
+touched, so every element- and document-level count below is unaffected; the fact-type and
+published-object counts could shift on a rebuild. Re-measure those before citing them in a
+decision. 31 snapshot files are stored, of which 25 carry a payload and 6 are tombstoned.
 
 | | |
 |---|---|
@@ -25,7 +31,7 @@ Shape:    One item per session, each with its own acceptance test, per knowledge
 | documents with any promoted table fact | **7** |
 | documents with any step candidate | **2** |
 | step reviews, ever | **0** |
-| published knowledge units | **84** — 31 `ParameterRow`s + 53 `SpecField`s |
+| published knowledge units | **85** — 31 `ParameterRow`s + 54 `SpecField`s, in snapshot `0e04d171` |
 | `figure` elements with any text or OCR | **0 of 6,660** |
 | published values traceable to a figure or drawing | **0** |
 | values published from `data/structural/*.json` | **0 of ~120 engineering claims** |
