@@ -2046,6 +2046,33 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
             b, list(authored_records), parts, reviews=authored_reviews,
             model_validator=authored_model_validator)
 
+        # A `ParameterTable` scope names a `FenceModel`; `[measured]`
+        # 2026-09-14 all 9 published tables did so while this snapshot
+        # published 0 models, so every scope reference resolved to nothing and
+        # nothing said so. Publishing the models is not honestly available --
+        # `FENCE_MODEL_SHAPE` requires `grade`, `height_support` and
+        # `default_spec`, and a footing schedule in a Miami-Dade approval
+        # states none of them -- so the reference stands and the gap is
+        # declared. Obligation 8: what cannot be expressed as a value is a Gap.
+        #
+        # Must run BEFORE `quality_gaps()`, whose severity rule asks whether a
+        # document already backs a published value.
+        _declared_models = {m.get("id") for m in models if isinstance(m, dict)}
+        for _scope_id in sorted({
+                (t.get("scope") or {}).get("id") for t in parameters
+                if (t.get("scope") or {}).get("kind") == "fence_model"
+                and (t.get("scope") or {}).get("id") not in _declared_models}):
+            if not _scope_id:
+                continue
+            b.gap(kind="missing_value",
+                  subject={"kind": "fence_model", "id": _scope_id, "tenant": tenant},
+                  code="scope_model_undefined",
+                  params={"scope_id": _scope_id},
+                  would_close=(f"define the fence model {_scope_id!r}: this snapshot "
+                               f"scopes parameter rows to it and publishes no model "
+                               f"with that id, so the scope resolves to nothing"),
+                  closes_by="knowledge", severity="informational")
+
         # G78. Every extraction failure this platform already DETECTED,
         # published as a gap. Runs LAST of the ref-minting passes, and that
         # ordering is load-bearing: its severity rule asks whether a document

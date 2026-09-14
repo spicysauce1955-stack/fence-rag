@@ -229,15 +229,20 @@ class TestBuiltSnapshot(unittest.TestCase):
                                   f"uncovered-point gap does not name the point "
                                   f"it is about: {key}={value!r} missing from {w!r}")
                 continue
-            if g["subject"].get("kind") == "component":
+            if g["subject"].get("kind") in ("component", "fence_model"):
                 # A component-scoped gap (obligation 14, PartType/Part) can
                 # cite several sources across several pages at once -- no
                 # single page to name -- so G40's requirement here is that the
                 # component itself is named, the same way a ParamRef gap must
                 # name its parameter.
+                #
+                # `fence_model` joined it 2026-09-14 for the same reason: a
+                # scope spans every page whose rows carry it, so there is no one
+                # page to point at. The requirement is unchanged -- name the
+                # subject -- and `scope_model_undefined` names the scope id.
                 self.assertIn(g["subject"]["id"], w,
-                              f"component-scoped gap does not name the "
-                              f"component it is about: {w!r}")
+                              f"{g['subject']['kind']}-scoped gap does not name "
+                              f"the subject it is about: {w!r}")
                 continue
             self.assertTrue(
                 re.search(r"\bp\d+\b", w)
