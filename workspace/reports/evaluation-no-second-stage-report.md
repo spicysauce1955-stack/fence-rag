@@ -2,7 +2,7 @@
 
 Questions: **78** (41 answerable, 37 no-answer) · k = 10
 
-Configuration: second stage on, R3 duplicate suppression on, R5 page cap off.
+Configuration: second stage off, R3 duplicate suppression on, R5 page cap off.
 
 Every gold question was runnable.
 
@@ -15,7 +15,7 @@ the question text verbatim — what query.py sends as situation.question, and th
 | Document recall@10 | 0.7561 | A3 ≥ 0.80 — FAIL |
 | Page recall@10 | 0.585 | reported |
 | MRR | 0.595 | reported |
-| Evidence support (terms in the retrieved unit) | 0.6528 | A3 ≥ 0.70 — FAIL |
+| Evidence support (terms in the retrieved unit) | 0.6219 | A3 ≥ 0.70 — FAIL |
 | Page evidence support (terms anywhere on a retrieved page) | 0.737 | reported |
 | No-answer precision | 0.4865 | A4 ≥ 0.66 — FAIL |
 | False-unsupported rate (answerable questions wrongly declared unsupported) | 0.3902 | A4b ≤ 0.20 — FAIL |
@@ -31,7 +31,7 @@ Figures published in `docs/` and `workspace/reports/` before 2026-09-14 are keyw
 | Document recall@10 | 0.8049 | A3 ≥ 0.80 — PASS |
 | Page recall@10 | 0.659 | reported |
 | MRR | 0.557 | reported |
-| Evidence support (terms in the retrieved unit) | 0.6946 | A3 ≥ 0.70 — FAIL |
+| Evidence support (terms in the retrieved unit) | 0.6499 | A3 ≥ 0.70 — FAIL |
 | Page evidence support (terms anywhere on a retrieved page) | 0.769 | reported |
 | No-answer precision | 0.3243 | A4 ≥ 0.66 — FAIL |
 | False-unsupported rate (answerable questions wrongly declared unsupported) | 0.1463 | A4b ≤ 0.20 — PASS |
@@ -40,12 +40,12 @@ Figures published in `docs/` and `workspace/reports/` before 2026-09-14 are keyw
 
 | Category | n | doc hits | passed | mean support | failing ids |
 |---|---|---|---|---|---|
-| comparison | 4 | 3 | 1 | 0.5 | gq-120, gq-017, gq-018 |
-| conditional_table_lookup | 7 | 6 | 6 | 0.762 | gq-004 |
+| comparison | 4 | 3 | 1 | 0.4 | gq-120, gq-017, gq-018 |
+| conditional_table_lookup | 7 | 6 | 5 | 0.686 | gq-113, gq-004 |
 | conflict | 2 | 2 | 0 | 0.298 | gq-015, gq-016 |
 | current_version | 2 | 1 | 1 | 0.3 | gq-012 |
 | exact_identifier | 3 | 3 | 3 | 0.833 | — |
-| exact_product | 4 | 4 | 4 | 0.75 | — |
+| exact_product | 4 | 4 | 3 | 0.667 | gq-103 |
 | historical_version | 2 | 2 | 2 | 0.9 | — |
 | no_answer | 37 | 0 | 18 | None | gq-117, gq-201, gq-202, gq-203, gq-204, gq-205, gq-207, gq-208, gq-210, gq-215, gq-222, gq-223, gq-224, gq-226, gq-227, gq-229, gq-230, gq-231, gq-232 |
 | paraphrase | 5 | 1 | 1 | 0.2 | gq-105, gq-106, gq-108, gq-109 |
@@ -96,9 +96,9 @@ The search rows for these questions are unchanged and still appear in the by-cat
 
 Only categories that actually failed appear here. Nothing below is built.
 
-### conditional_table_lookup — 1 of 7 failing
+### conditional_table_lookup — 2 of 7 failing
 
-- **Problem**: conditional_table_lookup questions fail lexical retrieval (failing ids: gq-004).
+- **Problem**: conditional_table_lookup questions fail lexical retrieval (failing ids: gq-113, gq-004).
 - **Experiment**: Table-aware structured lookup keyed on conditions (wind speed, exposure, height) resolved against table_cells and facts.
 - **Acceptance**: Answers the conditional questions with the correct cell, and returns 'outside documented range' rather than a nearest-neighbour value.
 
@@ -132,9 +132,17 @@ Only categories that actually failed appear here. Nothing below is built.
 - **Experiment**: Visual/page-level retrieval for drawing-heavy documents.
 - **Acceptance**: Improves recall@10 on visual_evidence questions without reducing lexical recall elsewhere.
 
-Failing categories with no pre-registered experiment: comparison, current_version, source_verification. These need extraction or annotation review first, not a new retrieval mode.
+Failing categories with no pre-registered experiment: comparison, current_version, exact_product, source_verification. These need extraction or annotation review first, not a new retrieval mode.
 
 ## Failures in detail
+
+### gq-103 — exact_product
+*Where are the Illusions pergola kit installation instructions, and what post size does the kit ship with?*
+
+- query: `Where are the Illusions pergola kit installation instructions, and what post size does the kit ship with?`
+- expected: manuals/illusions-vinyl-fence/pergola-kit-installation-instructions.pdf
+- doc rank: 1 · unit support: 0.333 · page support: 1.0 · missing terms: ['8” x 8” Vinyl Posts', 'Shade Tubing']
+- top hit: manuals/illusions-vinyl-fence/pergola-kit-installation-instructions.pdf p2 score 17.2797
 
 ### gq-105 — paraphrase
 *My back yard drops away pretty steeply. How do I make the fence follow the hillside?*
@@ -167,6 +175,14 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 - expected: manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf
 - doc rank: None · unit support: 0.0 · page support: 0.0 · missing terms: ['.250”', 'Heavy Duty Posts', 'VH88']
 - top hit: manuals/weatherables/weatherables-full-line-catalog-2026.pdf p4 score 13.4388
+
+### gq-113 — conditional_table_lookup
+*I'm running an 8 ft high Illusions privacy fence with the 75 mph wind kit, so I have to use the 8" x 8" posts. How deep and how wide does the post hole have to be?*
+
+- query: `I'm running an 8 ft high Illusions privacy fence with the 75 mph wind kit, so I have to use the 8" x 8" posts. How deep and how wide does the post hole have to be?`
+- expected: manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf
+- doc rank: 1 · unit support: 0.333 · page support: 1.0 · missing terms: ['42”', '3000 PSI']
+- top hit: manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf p2 score 29.7305
 
 ### gq-117 — no_answer
 *What is the list price per section of an Illusions V300 6 ft privacy fence?*
@@ -381,7 +397,7 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 
 - query: `When the Columbia/Imperial/Chesterfield fence approval moved from CertainTeed to Barrette, did the allowable post spacing change - and did the engineer of record change?`
 - expected: manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf, manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf
-- doc rank: 2 · unit support: 0.4 · page support: 0.4 · missing terms: ['Robert Nieminen', 'POST SPACING AND FOOTING DIMENSIONS', 'ASCE 7-10']
+- doc rank: 2 · unit support: 0.2 · page support: 0.4 · missing terms: ['Pedro De Figueiredo', 'Robert Nieminen', 'POST SPACING AND FOOTING DIMENSIONS', 'ASCE 7-10']
 - top hit: manuals/certainteed-bufftech/structural/NOA-21-0125.07-CertainTeed-extruded-pvc-fencing-2021-2024-superseded.pdf p8 score 14.4403
 
 ### gq-018 — comparison
@@ -389,7 +405,7 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 
 - query: `Compare the Weatherables Augusta privacy panel CAD details for the 6 ft wide and the 8 ft wide panel - what changes?`
 - expected: manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png, manuals/weatherables/structural/weatherables-cad-augusta-8x8-privacy.png
-- doc rank: None · unit support: 0.6 · page support: 0.6 · missing terms: ['72', '39.5']
+- doc rank: None · unit support: 0.4 · page support: 0.6 · missing terms: ['72', 'U-Channels', '39.5']
 - top hit: manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf p27 score 16.213
 
 ### gq-019 — visual_evidence

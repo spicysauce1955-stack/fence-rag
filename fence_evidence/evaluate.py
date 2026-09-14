@@ -16,7 +16,7 @@ from typing import Any
 
 from .paths import REPO_ROOT, REPORTS_DIR, TESTS_DIR, open_write, resolve_asset
 from .relations import APPROVAL_RE
-from .retrieval import (DEDUPE_TEXT_DEFAULT, STOPWORDS, UNIT_WORDS,
+from .retrieval import (DEDUPE_TEXT_DEFAULT, SECOND_STAGE_DEFAULT, STOPWORDS, UNIT_WORDS,
                         build_match_expression, resolve_document_version,
                         search_evidence)
 from .store import connect
@@ -162,7 +162,36 @@ def _looks_unsupported(query: str, results, conn) -> tuple[bool, str]:
     return False, ""
 
 
-def _query_for(q: dict) -> str:
+# The two shapes a gold question can be asked in. `keyword_hint` is what every
+# figure published before 2026-09-14 was measured on; `natural_question` is what
+# `query.py` actually sends as `situation.question`, and is the graded column.
+# Lower snake because this vocabulary is internal and crosses to nobody
+# (naming.md RULE 5).
+NATURAL_QUESTION = "natural_question"
+KEYWORD_HINT = "keyword_hint"
+QUERY_FORMS = (NATURAL_QUESTION, KEYWORD_HINT)
+GRADED_QUERY_FORM = NATURAL_QUESTION
+QUERY_FORM_BASIS = {
+    NATURAL_QUESTION: ("the question text verbatim — what query.py sends as "
+                       "situation.question, and the column acceptance is graded on"),
+    KEYWORD_HINT: ("the question's hand-written query_terms joined by spaces; every "
+                   "figure published before 2026-09-14 was measured here, and "
+                   "nothing is graded on it"),
+}
+
+
+def _query_for(q: dict, *, form: str = KEYWORD_HINT) -> str:
+    """The string this question is searched with, in the named form.
+
+    `keyword_hint` joins the question's hand-written `query_terms`; every
+    acceptance number published before 2026-09-14 came from here.
+    `natural_question` is the question verbatim — what production sends. A
+    question carrying no `query_terms` is the same string in both forms.
+    """
+    if form not in QUERY_FORMS:
+        raise ValueError(f"unknown query form {form!r}; expected one of {QUERY_FORMS}")
+    if form == NATURAL_QUESTION:
+        return q["question"]
     terms = q.get("query_terms") or []
     if terms:
         return " ".join(terms) if isinstance(terms, list) else str(terms)
@@ -191,10 +220,11 @@ def _equivalent_paths(conn, paths: set[str]) -> set[str]:
 
 
 def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
-                      second_stage: bool = False,
+                      second_stage: bool = SECOND_STAGE_DEFAULT,
                       dedupe_text: bool = DEDUPE_TEXT_DEFAULT,
-                      page_cap: int | None = None) -> dict:
-    query = _query_for(q)
+                      page_cap: int | None = None,
+                      query_form: str = KEYWORD_HINT) -> dict:
+    query = _query_for(q, form=query_form)
     results = search_evidence(query, limit=k, conn=conn, second_stage=second_stage,
                               dedupe_text=dedupe_text, page_cap=page_cap)
     declared_docs = set(q.get("expected_documents") or [])
@@ -261,7 +291,8 @@ def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
 
     return {
         "id": q.get("id"), "category": q.get("category"), "set": q.get("_set"),
-        "question": q.get("question"), "query": query, "answerable": answerable,
+        "question": q.get("question"), "query": query,
+        "query_form": query_form, "answerable": answerable,
         "n_results": len(results),
         "doc_rank": doc_rank, "page_rank": page_rank,
         "expected_documents": sorted(declared_docs),
@@ -640,9 +671,90 @@ def _routed_summary(routed_rows: list[dict], search_rows: list[dict]) -> dict:
     return out
 
 
+def _search_metrics(rows: list[dict], *, k: int, query_form: str) -> dict:
+    """Every metric that depends on which string the question was searched with.
+
+    Returns today's flat key names unchanged, so `acceptance_table` and the
+    report renderer read a block exactly as they used to read the whole summary.
+    One metric therefore keeps exactly one name, and the column it belongs to is
+    carried by its position under `summary["query_forms"]` — a layer, which is
+    what naming.md RULE 1 requires of a second use of one name.
+    """
+    answerable = [r for r in rows if r["answerable"]]
+    unanswerable = [r for r in rows if not r["answerable"]]
+    supports = [r["support"] for r in answerable if r["support"] is not None]
+    page_supports = [r["page_support"] for r in answerable if r["page_support"] is not None]
+    recall = (sum(1 for r in answerable if r["doc_rank"]) / len(answerable)) if answerable else 0.0
+    page_recall = (sum(1 for r in answerable if r["page_rank"]) / len(answerable)) if answerable else 0.0
+    mrr = (statistics.mean([1 / r["doc_rank"] if r["doc_rank"] else 0.0 for r in answerable])
+           if answerable else 0.0)
+
+    by_cat: dict[str, dict] = defaultdict(lambda: {"n": 0, "doc_hits": 0, "passed": 0,
+                                                   "support": [], "failures": []})
+    for r in rows:
+        c = by_cat[r["category"] or "uncategorised"]
+        c["n"] += 1
+        c["doc_hits"] += 1 if r["doc_rank"] else 0
+        c["passed"] += 1 if r["passed"] else 0
+        if r["support"] is not None:
+            c["support"].append(r["support"])
+        if not r["passed"]:
+            c["failures"].append(r["id"])
+    for c in by_cat.values():
+        c["mean_support"] = round(statistics.mean(c["support"]), 3) if c["support"] else None
+        c.pop("support")
+
+    false_unsupported = [r for r in answerable if r["reported_unsupported"]]
+    raw_support = statistics.mean(supports) if supports else None
+    raw_no_answer_precision = (sum(1 for r in unanswerable if r["passed"]) / len(unanswerable)
+                               if unanswerable else None)
+    raw_false_unsupported = (len(false_unsupported) / len(answerable)
+                             if answerable else None)
+    block = {
+        "k": k,
+        "query_form": query_form,
+        "query_form_basis": QUERY_FORM_BASIS[query_form],
+        "recall_at_k": round(recall, 3),
+        "page_recall_at_k": round(page_recall, 3),
+        "mrr": round(mrr, 3),
+        "evidence_support": round(raw_support, 3) if raw_support is not None else None,
+        "page_evidence_support": round(statistics.mean(page_supports), 3) if page_supports else None,
+        "no_answer_precision": round(raw_no_answer_precision, 3)
+        if raw_no_answer_precision is not None else None,
+        # The other half of the picture. A detector can reach high no-answer
+        # precision by declaring almost everything unsupported, so the two are
+        # always reported together.
+        "false_unsupported_rate": round(raw_false_unsupported, 3)
+        if raw_false_unsupported is not None else None,
+        "false_unsupported_ids": [r["id"] for r in false_unsupported],
+        "passed": sum(1 for r in rows if r["passed"]),
+        "by_category": {k2: v for k2, v in sorted(by_cat.items())},
+        
+        # The projection audit's R3 and R5. Recorded on every run, including the
+        # baseline, so a results file always says which configuration produced it.
+        "second_stage_attachments": sum(r.get("second_stage_attachments") or 0 for r in rows),
+        "acceptance": {},
+        # The values the gate was applied to, unrounded. `evidence_support`
+        # above is rounded for reading, and a value like 0.699512 reads as
+        # 0.700; a reader checking a verdict needs the number it was made on.
+        "raw": {"recall_at_k": recall, "mrr": mrr, "evidence_support": raw_support,
+                "no_answer_precision": raw_no_answer_precision,
+                "false_unsupported_rate": raw_false_unsupported},
+    }
+    # Graded on the measured means, never on the three-decimal display values
+    # in `summary`. Reading the rounded number once let 0.699512 report as a
+    # pass against a 0.70 threshold; see G65.
+    block["acceptance"] = acceptance_flags(
+        recall_at_k=recall, evidence_support=raw_support,
+        no_answer_precision=raw_no_answer_precision,
+        false_unsupported_rate=raw_false_unsupported)
+    return block
+
+
 def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
                    only_ingested: bool = False, report_name: str | None = None,
-                   second_stage: bool = False, db_path: Path | None = None,
+                   second_stage: bool = SECOND_STAGE_DEFAULT,
+                   db_path: Path | None = None,
                    write: bool = True, dedupe_text: bool = DEDUPE_TEXT_DEFAULT,
                    page_cap: int | None = None) -> dict:
     """Run the gold set.
@@ -675,9 +787,17 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
                     continue
                 kept.append(q)
             questions = kept
-        rows = [evaluate_question(q, k=k, conn=conn, second_stage=second_stage,
-                                  dedupe_text=dedupe_text, page_cap=page_cap)
-                for q in questions]
+        # Two passes over the same questions, one per query form. Both columns
+        # come from ONE run: measuring them in separate invocations would let a
+        # store rebuilt in between be compared against itself at two different
+        # times, and read as a retrieval change.
+        rows_by_form = {
+            form: [evaluate_question(q, k=k, conn=conn, second_stage=second_stage,
+                                     dedupe_text=dedupe_text, page_cap=page_cap,
+                                     query_form=form)
+                   for q in questions]
+            for form in QUERY_FORMS}
+        rows = rows_by_form[GRADED_QUERY_FORM]
         # The routed pass is a *second* pass over the same questions. Nothing
         # here feeds back into `rows`; the search harness above is untouched.
         interface_counts: dict[str, int] = defaultdict(int)
@@ -691,56 +811,20 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
     finally:
         conn.close()
 
-    answerable = [r for r in rows if r["answerable"]]
-    unanswerable = [r for r in rows if not r["answerable"]]
-    supports = [r["support"] for r in answerable if r["support"] is not None]
-    page_supports = [r["page_support"] for r in answerable if r["page_support"] is not None]
-    recall = (sum(1 for r in answerable if r["doc_rank"]) / len(answerable)) if answerable else 0.0
-    page_recall = (sum(1 for r in answerable if r["page_rank"]) / len(answerable)) if answerable else 0.0
-    mrr = (statistics.mean([1 / r["doc_rank"] if r["doc_rank"] else 0.0 for r in answerable])
-           if answerable else 0.0)
-
-    by_cat: dict[str, dict] = defaultdict(lambda: {"n": 0, "doc_hits": 0, "passed": 0,
-                                                   "support": [], "failures": []})
-    for r in rows:
-        c = by_cat[r["category"] or "uncategorised"]
-        c["n"] += 1
-        c["doc_hits"] += 1 if r["doc_rank"] else 0
-        c["passed"] += 1 if r["passed"] else 0
-        if r["support"] is not None:
-            c["support"].append(r["support"])
-        if not r["passed"]:
-            c["failures"].append(r["id"])
-    for c in by_cat.values():
-        c["mean_support"] = round(statistics.mean(c["support"]), 3) if c["support"] else None
-        c.pop("support")
-
-    false_unsupported = [r for r in answerable if r["reported_unsupported"]]
-    raw_support = statistics.mean(supports) if supports else None
-    raw_no_answer_precision = (sum(1 for r in unanswerable if r["passed"]) / len(unanswerable)
-                               if unanswerable else None)
-    raw_false_unsupported = (len(false_unsupported) / len(answerable)
-                             if answerable else None)
+    metrics = {form: _search_metrics(rows_by_form[form], k=k, query_form=form)
+               for form in QUERY_FORMS}
+    rows = rows_by_form[GRADED_QUERY_FORM]
     summary = {
         "k": k,
         "questions": len(rows),
-        "answerable": len(answerable),
-        "no_answer": len(unanswerable),
-        "recall_at_k": round(recall, 3),
-        "page_recall_at_k": round(page_recall, 3),
-        "mrr": round(mrr, 3),
-        "evidence_support": round(raw_support, 3) if raw_support is not None else None,
-        "page_evidence_support": round(statistics.mean(page_supports), 3) if page_supports else None,
-        "no_answer_precision": round(raw_no_answer_precision, 3)
-        if raw_no_answer_precision is not None else None,
-        # The other half of the picture. A detector can reach high no-answer
-        # precision by declaring almost everything unsupported, so the two are
-        # always reported together.
-        "false_unsupported_rate": round(raw_false_unsupported, 3)
-        if raw_false_unsupported is not None else None,
-        "false_unsupported_ids": [r["id"] for r in false_unsupported],
-        "passed": sum(1 for r in rows if r["passed"]),
-        "by_category": {k2: v for k2, v in sorted(by_cat.items())},
+        "answerable": sum(1 for r in rows if r["answerable"]),
+        "no_answer": sum(1 for r in rows if not r["answerable"]),
+        # Which column the acceptance verdict was made on. Every figure in
+        # `docs/` and `workspace/reports/` dated before 2026-09-14 is a
+        # `keyword_hint` number; comparing one against a `natural_question`
+        # number reads a change of instrument as a change in retrieval.
+        "graded_query_form": GRADED_QUERY_FORM,
+        "query_forms": metrics,
         "skipped_not_ingested": skipped,
         # G14. Every metric above is the search harness over every question,
         # routed ones included, which is what keeps them comparable with the
@@ -754,22 +838,8 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
         # baseline, so a results file always says which configuration produced it.
         "dedupe_text": dedupe_text,
         "page_cap": page_cap,
-        "second_stage_attachments": sum(r.get("second_stage_attachments") or 0 for r in rows),
-        "acceptance": {},
-        # The values the gate was applied to, unrounded. `evidence_support`
-        # above is rounded for reading, and a value like 0.699512 reads as
-        # 0.700; a reader checking a verdict needs the number it was made on.
-        "raw": {"recall_at_k": recall, "mrr": mrr, "evidence_support": raw_support,
-                "no_answer_precision": raw_no_answer_precision,
-                "false_unsupported_rate": raw_false_unsupported},
+        "acceptance": metrics[GRADED_QUERY_FORM]["acceptance"],
     }
-    # Graded on the measured means, never on the three-decimal display values
-    # in `summary`. Reading the rounded number once let 0.699512 report as a
-    # pass against a 0.70 threshold; see G65.
-    summary["acceptance"] = acceptance_flags(
-        recall_at_k=recall, evidence_support=raw_support,
-        no_answer_precision=raw_no_answer_precision,
-        false_unsupported_rate=raw_false_unsupported)
     out = {"summary": summary, "results": rows, "routed_results": routed_rows}
     if write:
         # Derived here, not only in the CLI. A programmatic
@@ -828,7 +898,7 @@ def _phase7_section(out: dict) -> list[str]:
     lines = ["## Phase 7 — experiments this evaluation would justify", "",
              "Only categories that actually failed appear here. Nothing below is built.",
              ""]
-    justified = [(cat, c) for cat, c in s["by_category"].items()
+    justified = [(cat, c) for cat, c in s["query_forms"][GRADED_QUERY_FORM]["by_category"].items()
                  if c["passed"] < c["n"] and cat in PHASE7_TRIGGERS]
     if not justified:
         lines += ["No failure category reaches the bar for an enhancement; lexical "
@@ -841,7 +911,7 @@ def _phase7_section(out: dict) -> list[str]:
                   f"(failing ids: {', '.join(c['failures'])}).",
                   f"- **Experiment**: {experiment}.",
                   f"- **Acceptance**: {acceptance}", ""]
-    unlisted = [cat for cat, c in s["by_category"].items()
+    unlisted = [cat for cat, c in s["query_forms"][GRADED_QUERY_FORM]["by_category"].items()
                 if c["passed"] < c["n"] and cat not in PHASE7_TRIGGERS]
     if unlisted:
         lines += ["Failing categories with no pre-registered experiment: "
@@ -1020,8 +1090,14 @@ def default_report_name(explicit: str | None, second_stage: bool, *,
     if explicit:
         return explicit
     parts = ["evaluation"]
-    if second_stage:
-        parts.append("second-stage")
+    # By DEVIATION from the shipped default, like `dedupe_text` below. Written
+    # as a bare truth test while the default was False, this silently renamed
+    # the shipped configuration to `evaluation-second-stage` the moment the
+    # default moved -- and the baseline artifacts the tests expect stopped being
+    # written. The docstring's rule was already right; this line was not
+    # following it.
+    if second_stage != SECOND_STAGE_DEFAULT:
+        parts.append("second-stage" if second_stage else "no-second-stage")
     # Named by deviation from the shipped configuration, so `evaluation` always
     # means "what this platform actually returns" however the defaults move.
     if dedupe_text != DEDUPE_TEXT_DEFAULT:
@@ -1055,14 +1131,27 @@ def _write_report(out: dict, report_name: str = "evaluation") -> None:
          f"{', '.join(s['skipped_not_ingested'])}." if s.get("skipped_not_ingested")
          else "Every gold question was runnable."),
         "",
-        *acceptance_table(s),
+        f"## Acceptance — {GRADED_QUERY_FORM.replace('_', ' ')} (GRADED)",
+        "",
+        QUERY_FORM_BASIS[GRADED_QUERY_FORM],
+        "",
+        *acceptance_table(s["query_forms"][GRADED_QUERY_FORM]),
+        "",
+        "## Acceptance — keyword hints (reported, not graded)",
+        "",
+        QUERY_FORM_BASIS[KEYWORD_HINT],
+        "",
+        "Figures published in `docs/` and `workspace/reports/` before 2026-09-14 are "
+        "keyword-hint numbers; compare them only with this table.",
+        "",
+        *acceptance_table(s["query_forms"][KEYWORD_HINT]),
         "",
         "## By category",
         "",
         "| Category | n | doc hits | passed | mean support | failing ids |",
         "|---|---|---|---|---|---|",
     ]
-    for cat, c in s["by_category"].items():
+    for cat, c in s["query_forms"][GRADED_QUERY_FORM]["by_category"].items():
         lines.append(f"| {cat} | {c['n']} | {c['doc_hits']} | {c['passed']} | "
                      f"{c['mean_support']} | {', '.join(c['failures']) or '—'} |")
     lines += [""] + _routed_section(out) + _phase7_section(out) + \

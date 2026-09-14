@@ -11,7 +11,8 @@ import unittest
 
 from context import requires_store  # noqa: F401
 from fence_evidence.evaluate import default_report_name
-from fence_evidence.retrieval import search_evidence
+from fence_evidence.retrieval import (DEDUPE_TEXT_DEFAULT, SECOND_STAGE_DEFAULT,
+                                       search_evidence)
 from fence_evidence.store import connect
 
 
@@ -62,11 +63,18 @@ class TestReportNaming(unittest.TestCase):
     def test_the_shipped_configuration_keeps_the_plain_name(self):
         """`evaluation-report.md` must always be what this platform returns, so
         the name follows the default rather than the flag."""
-        self.assertEqual(default_report_name(None, False), "evaluation")
-        self.assertEqual(default_report_name(None, False, dedupe_text=True), "evaluation")
-        self.assertEqual(default_report_name(None, True), "evaluation-second-stage")
-        self.assertEqual(default_report_name(None, False, dedupe_text=False),
-                         "evaluation-nodedupe")
+        # The SHIPPED configuration keeps the plain name, whatever that
+        # configuration is. Passing a literal False pinned the test to the
+        # 2026-09-14 default rather than to the property.
+        self.assertEqual(
+            default_report_name(None, SECOND_STAGE_DEFAULT, dedupe_text=DEDUPE_TEXT_DEFAULT),
+            "evaluation")
+        # Each deviation from the shipped configuration earns its own path.
+        self.assertNotEqual(default_report_name(None, not SECOND_STAGE_DEFAULT),
+                            "evaluation")
+        self.assertEqual(
+            default_report_name(None, SECOND_STAGE_DEFAULT, dedupe_text=False),
+            "evaluation-nodedupe")
 
     def test_an_explicit_name_still_wins(self):
         self.assertEqual(

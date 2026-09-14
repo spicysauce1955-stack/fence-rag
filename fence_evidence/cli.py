@@ -103,11 +103,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--version-status")
     p.add_argument("--element-type")
     p.add_argument("--full", action="store_true", help="print full element text")
-    p.add_argument("--second-stage", action="store_true",
-                   help="also search within each retrieved page for elements covering "
-                        "query terms the matched unit missed (opt-in: measured at 0.6946 "
-                        "unit support against a 0.70 acceptance target, see "
-                        "docs/second-stage-evaluation.md)")
+    # Opt-OUT since 2026-09-14, mirroring --no-dedupe-text. On the graded
+    # (natural-question) column this is worth +0.031 evidence support, 5 gold
+    # questions better and none worse. It does not reach the 0.70 target and is
+    # not claimed to; see docs/coverage-remediation-plan.md §2.
+    p.add_argument("--no-second-stage", dest="second_stage", action="store_false",
+                   help="measure without the within-page second stage, which "
+                        "otherwise searches each retrieved page for elements "
+                        "covering query terms the matched unit missed")
     # The projection audit's R3 and R5, measured 2026-09-03 (state-and-gaps
     # G64). R3 earned its default -- two gold questions better, none worse --
     # so the flag turns it OFF; R5 did not, so its flag turns it on.
@@ -145,7 +148,9 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("evaluate", help="Phase 4: run the gold evaluation set")
     p.add_argument("-k", type=int, default=10)
-    p.add_argument("--second-stage", action="store_true")
+    p.add_argument("--no-second-stage", dest="second_stage", action="store_false",
+                   help="measure without the within-page second stage (see "
+                        "`search --no-second-stage`)")
     p.add_argument("--no-dedupe-text", dest="dedupe_text", action="store_false",
                    help="measure without R3 (see `search --no-dedupe-text`)")
     p.add_argument("--page-cap", type=int, default=None,
