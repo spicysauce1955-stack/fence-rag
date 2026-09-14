@@ -14,7 +14,7 @@ from pathlib import Path
 from context import (ROOT, requires_facts, requires_store,  # noqa: F401
                      requires_full_store)
 from fence_evidence.evaluate import (DEFAULT_INTERFACE, GRADED_QUERY_FORM,
-                                     INTERFACES, KEYWORD_HINT,
+                                     INTERFACES,
                                      evaluate_question,
                                      evaluate_routed_question, load_gold,
                                      question_interface, run_evaluation)
@@ -326,8 +326,8 @@ class TestTheTwoConfigurationsDoNotShareAnArtifact(unittest.TestCase):
         self.assertEqual(deviation["summary"]["second_stage"],
                          not SECOND_STAGE_DEFAULT)
         self.assertNotEqual(
-            base["summary"]["query_forms"][KEYWORD_HINT]["evidence_support"],
-            deviation["summary"]["query_forms"][KEYWORD_HINT]["evidence_support"])
+            base["summary"]["query_forms"][GRADED_QUERY_FORM]["evidence_support"],
+            deviation["summary"]["query_forms"][GRADED_QUERY_FORM]["evidence_support"])
 
 
 if __name__ == "__main__":

@@ -168,13 +168,85 @@ Every acceptance figure, category breakdown, no-answer statistic and tuning-vari
   *below* the 0.70 target it was supposed to make reachable.
 - **Three documents still record the second stage as rejected.** It ships.
 
+## 6a · Settled 2026-09-14 — the gold set repaired, and three code defects filed
+
+**The keyword column is retired.** `query_terms` stays in the gold files as the annotator's
+record of salient terms; nothing computes a metric from it, nothing searches with it, and
+`_query_for` takes **no `form` argument** — a seam with a keyword default is exactly how
+`audit.py` shipped a caller measuring the wrong thing for weeks. The column could not be made
+trustworthy by construction: whoever writes search terms for a question already knows its
+answer.
+
+**Repairs made** (evidence in the commit; every one re-verified against the store):
+
+| what | why |
+|---|---|
+| `gq-004`, `gq-019` → `noa-24-0117.05` p17 | both ask what is **in force**; the store marks 23-0314.05 superseded with four `superseded_by` edges. **recall@10 0.7561 → 0.8049 — A3 passes**, because these questions were marking the *correct, current* document wrong |
+| `gq-002` drop p16, `gq-015` drop p1 | the page carries **none** of its question's answer terms |
+| `gq-233` near-miss → absent-subject | `st101` df 0 and no element hit; the corpus carries ST1001 |
+| `gq-215` absent-subject → adjacent-vocabulary | `pet` df 9, `dog` df 69 — only the compound is absent |
+| `gq-116/117/118` classified | three negatives outside the dedicated file carried no class, and `test_gold_set.py` only polices that file. **All 37 are now classified: 13 adjacent-vocabulary, 13 near-miss, 11 absent-subject** |
+
+**Deliberately NOT repaired — the annotation is right and the store is wrong.** Repairing
+these would hide an extraction defect behind a corrected answer key:
+
+- `gq-104` — `Cross Buck Fence Gate Installation Guide` is printed on page 1 and reaches the
+  store as two elements reading `weatherables`. The title is unreachable anywhere.
+- `gq-110` — the source prints `285 lbs`; table extraction truncates the column to `285`.
+- `gq-018` — the CAD drawing prints `72"`; OCR reads `12"`. The question's own
+  `verification.notes` claim the term "comes through"; **the store falsifies that note**.
+
+**Left for the owner**, flagged not decided: `gq-009` and `gq-122` (is "the current
+**CertainTeed** NOA" the superseded CertainTeed-branded one, or the Barrette successor?);
+`gq-015`'s "two live NOAs" premise (the store marks 22-0217.05 superseded with no supersession
+relations); `gq-228` and `gq-204`.
+
+### Three code defects found while repairing, none fixed here
+
+1. **`evidence_support` is credited from documents that are not the expected one.**
+   `evaluate.py:242` joins `_returned_evidence` over **all ten results**, while the
+   element-type and image checks at `:269`/`:274` are scoped to `expected_docs`. Consequence:
+   `gq-004`, `gq-009` and `gq-019` each scored a perfect **1.0 with `doc_rank: None`** — their
+   terms are NOA boilerplate any sibling sheet supplies. **The headline support number credits
+   evidence from the wrong document.** Fixing this will move 0.6528 downward and is the single
+   most important outstanding change to the instrument.
+2. **Term matching is an unanchored substring test.** `_norm(term) in joined`, so `88` matches
+   inside `1988` and `12` inside `73011754`. Roughly a dozen terms across eight questions are
+   bare two-digit numbers or corpus-wide boilerplate (`CONCRETE` df 717). Anchor on word
+   boundaries, or require the unit-bearing form (`36"`, `140 lbs`).
+3. **`expected_element_type` names types the store can never return** for 9-11 questions —
+   `gq-101` wants `heading`, which is excluded from `retrieval_units` by design; `gq-004/009/017`
+   want `table` on a scanned drawing sheet that has none. It is scored at `:264`.
+
+**And the annotation is not where the deficit lives.** Of 160 answer terms, 76 are ANSWER,
+61 LOCATOR, 3 UNVERIFIABLE, 20 borderline. Re-scoring on ANSWER terms only moves support
+0.6528 → **0.7105** — annotation accounts for about **17% of the gap**. The questions scoring
+0.0 do so because the expected document was never returned, and no re-annotation rescues those.
+
+### A4 and A4b are the same rule, and the target is unreachable as annotated
+
+`no_answer_precision` is exactly *"the fraction of negatives containing a df-0 token"* —
+18 of 37 fire, and 18/37 = 0.486, the reported figure to three decimals. **7 of those 18
+detections (39%) rest on a morphological artifact**, not on absence: `carry` (df 0, `carrying`
+6), `e84` (df 0, `"e 84"` 6), `e90` (df 0 while the corpus prints `STC 21`), `concrete-filled`,
+`tightened`. True *semantic* precision is **0.297**, not 0.486.
+
+0.66 requires 25 of 37 flagged. Only 11 questions carry a genuinely absent token; reaching 25
+means firing on 14 of the 26 questions whose defining property is that *every word occurs* —
+which `_looks_unsupported`'s own docstring says no lexical feature can separate. **Fixing the
+tokenizer moves A4b toward its target and A4 away from its own**, to roughly 0.35. The two
+gates are in direct conflict. Either A4 is renegotiated against the corrected class mix, or
+the detector needs a signal that is not term presence.
+
 ## 7 · What to do, in order
 
-1. **Audit and repair the gold set** (§2). Nothing else is worth measuring first. Either fix
-   the 15 leaking questions and the 12 misdirecting ones, or demote `query_terms` to
-   documentation and delete the column.
-2. **Fix the no-answer tokenizer defect** (§3). 16 of 41 questions are affected and it is a
-   contained change.
+1. ~~**Audit and repair the gold set**~~ — **DONE 2026-09-14**, see §6a. `query_terms` demoted,
+   the keyword column retired, six questions repaired, three code defects filed.
+2. **Scope `evidence_support` to the expected documents** (§6a defect 1). The headline number
+   currently credits evidence from the wrong document; three questions score 1.0 having
+   retrieved nothing expected. Nothing else about support means anything until this lands.
+3. **Fix the no-answer tokenizer defect** (§3), and settle A4 against the corrected class mix
+   at the same time — the two gates are one rule and cannot both be satisfied by tuning it.
 3. **Re-run `cli audit`** and correct `projection-relevance-audit.md`'s figures.
 4. **Re-measure paraphrase** and settle prohibition 9 on evidence (§4).
 5. Correct the overturned figures in the four documents named in §6 *when they are next
