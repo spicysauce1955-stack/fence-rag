@@ -79,7 +79,12 @@ class QueryRefused(ValueError):
 KNOWN_DIMENSIONS = frozenset(CONDITION_SCOPE)
 
 SCOPE_MATCH = ("exact", "other", "not_requested")
-CONDITION_MATCH = ("stated_and_satisfied", "unstated")
+# `not_evaluated` added 2026-09-14. Without it a condition the caller stated and
+# nothing published constrains fell through to `stated_and_satisfied`: a 42-inch
+# frost line was received, never examined, and a 24-inch footing came back
+# labelled satisfied. Claiming a check that did not happen is the one failure
+# `docs/knowledge-loop.md` forbids outright.
+CONDITION_MATCH = ("stated_and_satisfied", "unstated", "not_evaluated")
 
 
 # ------------------------------------------------------------------ request
@@ -148,6 +153,11 @@ class QueryAnswer:
     unstated_conditions: tuple
     outside_domain: tuple
     basis: dict
+    # Dimensions the CALLER stated that NO published row constrains. The mirror
+    # of `unstated_conditions`, and the one that was missing: without it a
+    # stated frost depth was received, never checked, and reported satisfied.
+    # Defaulted so a caller constructing this positionally still works.
+    unevaluated_conditions: tuple = ()
 
     def to_dict(self) -> dict:
         return {
@@ -158,6 +168,7 @@ class QueryAnswer:
             "conflicts": [dict(c) for c in self.conflicts],
             "evidence": [dict(e) for e in self.evidence],
             "unstated_conditions": list(self.unstated_conditions),
+            "unevaluated_conditions": list(self.unevaluated_conditions),
             "outside_domain": list(self.outside_domain),
             "basis": dict(self.basis),
         }
@@ -235,8 +246,21 @@ def _scalar(value) -> str:
     return str(value).strip().lower()
 
 
-def _row_verdict(row_conditions: dict, stated: dict) -> tuple[bool, str, set]:
-    """(admitted, conditions verdict, dimensions that excluded this row)."""
+def _row_verdict(row_conditions: dict, stated: dict) -> tuple[bool, str, set, set]:
+    """(admitted, conditions verdict, dimensions that excluded, dimensions not evaluated).
+
+    Two directions have to be reported, and only one of them used to be. A
+    dimension the ROW declares that the caller did not state makes the verdict
+    `unstated`. A dimension the CALLER stated that the row does not constrain is
+    `not_evaluated` -- nothing published speaks to it, so no check happened.
+
+    The second was invisible until 2026-09-14: the loop below walks
+    `row_conditions`, so a stated `frost_depth_mm` that no row declares was never
+    seen and the verdict fell through to `stated_and_satisfied`. The caller had
+    been told its condition was satisfied by a row that never considered it.
+    Exclusion still outranks both -- an unevaluated extra must not rescue a row
+    some other dimension rules out.
+    """
     excluded: set[str] = set()
     unstated = False
     for dimension, published in (row_conditions or {}).items():
@@ -248,9 +272,12 @@ def _row_verdict(row_conditions: dict, stated: dict) -> tuple[bool, str, set]:
             excluded.add(dimension)
         elif verdict is None:
             unstated = True
+    unevaluated = {d for d in stated if d not in (row_conditions or {})}
     if excluded:
-        return False, "excluded", excluded
-    return True, ("unstated" if unstated else "stated_and_satisfied"), excluded
+        return False, "excluded", excluded, unevaluated
+    if unevaluated:
+        return True, "not_evaluated", excluded, unevaluated
+    return True, ("unstated" if unstated else "stated_and_satisfied"), excluded, unevaluated
 
 
 def _scope_verdict(published_scope, requested) -> str:
@@ -301,7 +328,7 @@ def answer_query(situation: Situation, *, snapshot: dict | None = None,
             requested_scope.get("kind") and requested_scope.get("id")):
         raise QueryRefused("a scope must carry both a kind and an id")
 
-    values, unstated, outside = _applicable_values(snapshot, stated,
+    values, unstated, outside, not_evaluated = _applicable_values(snapshot, stated,
                                                    requested_scope)
     procedures = _applicable_procedures(snapshot, requested_scope)
     conflicts = _conflicts(values)
@@ -317,6 +344,7 @@ def answer_query(situation: Situation, *, snapshot: dict | None = None,
         conflicts=conflicts,
         evidence=evidence,
         unstated_conditions=tuple(sorted(unstated)),
+        unevaluated_conditions=tuple(sorted(not_evaluated)),
         outside_domain=tuple(sorted(outside)),
         basis={
             "conditions_stated": sorted(stated),
@@ -385,6 +413,7 @@ def _link_replacements(findings) -> None:
 
 def _applicable_values(snapshot, stated, requested_scope):
     findings, unstated, outside = [], set(), set()
+    not_evaluated: set[str] = set()
     graph = _supersession(snapshot)
     # An absent `source_docs` is an ABSENCE, not an assertion that nothing is
     # superseded, and the answer must not read as the latter.
@@ -396,8 +425,8 @@ def _applicable_values(snapshot, stated, requested_scope):
         excluded_by: dict[str, int] = {}
         rows = table.get("rows") or []
         for row in rows:
-            ok, verdict, excluded = _row_verdict(row.get("conditions") or {},
-                                                 stated)
+            ok, verdict, excluded, unevaluated = _row_verdict(
+                row.get("conditions") or {}, stated)
             if not ok:
                 for dimension in excluded:
                     excluded_by[dimension] = excluded_by.get(dimension, 0) + 1
@@ -405,6 +434,10 @@ def _applicable_values(snapshot, stated, requested_scope):
             admitted_any = True
             if verdict == "unstated":
                 unstated |= (set(row.get("conditions") or {}) - set(stated))
+            # Reported per answer as well as per value: a caller scanning the
+            # top of the answer must see that something it stated was never
+            # checked, without reading every finding.
+            not_evaluated |= unevaluated
             provenance = row.get("provenance") or {}
             findings.append(ValueFinding(
                 parameter=table.get("parameter"),
@@ -416,7 +449,10 @@ def _applicable_values(snapshot, stated, requested_scope):
                 condition_basis=row.get("condition_basis"),
                 valid_from=row.get("valid_from"),
                 valid_until=row.get("valid_until"),
-                applicability={"scope": scope_match, "conditions": verdict},
+                applicability={"scope": scope_match, "conditions": verdict,
+                               # Named per value, because which conditions went
+                               # unchecked differs row by row.
+                               "conditions_not_evaluated": sorted(unevaluated)},
                 currency={
                     # `knowledge-loop.md` §3: "currency comes from the
                     # supersession graph and not from the `version_status`
@@ -447,7 +483,7 @@ def _applicable_values(snapshot, stated, requested_scope):
     findings.sort(key=lambda f: (f.parameter or "", _key(f.scope),
                                  _key(f.conditions), _key(f.value)))
     _link_replacements(findings)
-    return tuple(findings), unstated, outside
+    return tuple(findings), unstated, outside, not_evaluated
 
 
 def _applicable_procedures(snapshot, requested_scope):
