@@ -117,7 +117,7 @@ def unit_shape(conn: sqlite3.Connection) -> dict:
 
 def result_list_composition(conn: sqlite3.Connection, k: int = 10) -> dict:
     """What the top-k is actually spent on, across the gold questions."""
-    from .evaluate import GRADED_QUERY_FORM, _query_for, load_gold
+    from .evaluate import _query_for, load_gold
     from .retrieval import search_evidence
     dup_texts = {r[0] for r in conn.execute(
         "SELECT text FROM retrieval_units GROUP BY text HAVING COUNT(*)>1")}
@@ -134,12 +134,11 @@ def result_list_composition(conn: sqlite3.Connection, k: int = 10) -> dict:
         # when it became a default: the audit measures the within-page gap it
         # exists to close.
         #
-        # The QUERY FORM, by contrast, is deliberately NOT pinned to the old
-        # value. The audit measures how the projection behaves for a real
-        # caller, so it must use the string a real caller sends. Every figure
-        # in the committed `projection-relevance-audit.md` predates this and was
-        # measured on `keyword_hint`; re-running now will move them.
-        results = search_evidence(_query_for(q, form=GRADED_QUERY_FORM), limit=k, conn=conn,
+        # `_query_for` now sends the question itself and takes no form argument,
+        # so this caller cannot drift again. Every figure in the committed
+        # `projection-relevance-audit.md` predates that and was measured on the
+        # retired keyword form; re-running now will move them.
+        results = search_evidence(_query_for(q), limit=k, conn=conn,
                                   dedupe_text=False, second_stage=False)
         seen = set()
         for r in results:
@@ -183,7 +182,7 @@ def within_page_ceiling(conn: sqlite3.Connection, k: int = 10) -> dict:
         # default R3 dedupe, which exists precisely to hide F2's duplication
         # from a result list. Reading the fix instead of the defect would
         # silently report F2 and F3 as solved.
-        results = search_evidence(_query_for(q, form=GRADED_QUERY_FORM), limit=k, conn=conn,
+        results = search_evidence(_query_for(q), limit=k, conn=conn,
                                   dedupe_text=False, second_stage=False)
         returned = "\n".join(_returned_evidence(r) for r in results)
         cur = sum(1 for t in terms if _norm(t) in returned) / len(terms)

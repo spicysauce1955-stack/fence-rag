@@ -162,39 +162,34 @@ def _looks_unsupported(query: str, results, conn) -> tuple[bool, str]:
     return False, ""
 
 
-# The two shapes a gold question can be asked in. `keyword_hint` is what every
-# figure published before 2026-09-14 was measured on; `natural_question` is what
-# `query.py` actually sends as `situation.question`, and is the graded column.
-# Lower snake because this vocabulary is internal and crosses to nobody
-# (naming.md RULE 5).
+# The one shape a gold question is asked in. A second form, `keyword_hint`,
+# briefly existed: it joined each question's hand-written `query_terms`, and
+# every figure published before 2026-09-14 was measured on it. It was RETIRED
+# the same week, because it cannot be made trustworthy by construction —
+# whoever writes search terms for a question already knows its answer, and 15
+# of 78 questions carried an `expected_answer_term` inside their own
+# `query_terms`. `docs/keyword-ruler-audit.md` has the measurement.
+#
+# `query_terms` survives in the gold files as the annotator's record of salient
+# terms. Nothing computes a metric from it, and nothing searches with it.
 NATURAL_QUESTION = "natural_question"
-KEYWORD_HINT = "keyword_hint"
-QUERY_FORMS = (NATURAL_QUESTION, KEYWORD_HINT)
+QUERY_FORMS = (NATURAL_QUESTION,)
 GRADED_QUERY_FORM = NATURAL_QUESTION
 QUERY_FORM_BASIS = {
     NATURAL_QUESTION: ("the question text verbatim — what query.py sends as "
-                       "situation.question, and the column acceptance is graded on"),
-    KEYWORD_HINT: ("the question's hand-written query_terms joined by spaces; every "
-                   "figure published before 2026-09-14 was measured here, and "
-                   "nothing is graded on it"),
+                       "situation.question"),
 }
 
 
-def _query_for(q: dict, *, form: str = KEYWORD_HINT) -> str:
-    """The string this question is searched with, in the named form.
+def _query_for(q: dict) -> str:
+    """The string this question is searched with: the question itself.
 
-    `keyword_hint` joins the question's hand-written `query_terms`; every
-    acceptance number published before 2026-09-14 came from here.
-    `natural_question` is the question verbatim — what production sends. A
-    question carrying no `query_terms` is the same string in both forms.
+    One documented place saying what production sends, so a caller cannot
+    drift. It deliberately takes **no** `form` argument — the retired keyword
+    form lived behind exactly such a parameter, defaulted to the wrong value,
+    and `audit.py` shipped a caller measuring the wrong thing for weeks because
+    of it. A seam is how that defect travelled; there is no seam now.
     """
-    if form not in QUERY_FORMS:
-        raise ValueError(f"unknown query form {form!r}; expected one of {QUERY_FORMS}")
-    if form == NATURAL_QUESTION:
-        return q["question"]
-    terms = q.get("query_terms") or []
-    if terms:
-        return " ".join(terms) if isinstance(terms, list) else str(terms)
     return q["question"]
 
 
@@ -222,11 +217,22 @@ def _equivalent_paths(conn, paths: set[str]) -> set[str]:
 def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
                       second_stage: bool = SECOND_STAGE_DEFAULT,
                       dedupe_text: bool = DEDUPE_TEXT_DEFAULT,
-                      page_cap: int | None = None,
-                      query_form: str = KEYWORD_HINT) -> dict:
-    query = _query_for(q, form=query_form)
+                      page_cap: int | None = None) -> dict:
+    """Search for one gold question and grade what came back."""
+    query = _query_for(q)
     results = search_evidence(query, limit=k, conn=conn, second_stage=second_stage,
                               dedupe_text=dedupe_text, page_cap=page_cap)
+    return score_question(q, results, conn=conn, query=query)
+
+
+def score_question(q: dict, results, *, conn=None, query: str | None = None) -> dict:
+    """Grade an already-retrieved result list against a gold question.
+
+    Separated from the search so the grading rules can be tested on a list the
+    test constructs. They could not be before, which is why the scoping defect
+    below survived: reaching it required a full store and a real query.
+    """
+    query = _query_for(q) if query is None else query
     declared_docs = set(q.get("expected_documents") or [])
     expected_docs = _equivalent_paths(conn, declared_docs)
     expected_pages: dict[str, list[int]] = dict(q.get("expected_pages") or {})
@@ -245,7 +251,18 @@ def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
             page_rank = i + 1
             break
 
-    joined = "\n".join(_returned_evidence(r) for r in results)
+    # Scoped to the expected documents, as `type_ok` and `image_ok` below already
+    # are. Joined over every result, this credited answer terms to a document
+    # that is not the answer: `[measured]` 2026-09-14 gq-009 scored 1.000 and
+    # gq-018 0.600 with `doc_rank: None`, on NOA boilerplate (`ASCE 7-10`,
+    # `HVHZ: MIAMI-DADE AND BROWARD COUNTIES`) printed on every sibling sheet.
+    # It moves verdicts as well as the mean: `passed` needs `support >= 0.5`, so
+    # gq-019, gq-112 and gq-005 go from pass to fail once their credit is taken
+    # from the document that actually supplied it. Answerable passing 28 -> 25.
+    # `expected_docs` is `_equivalent_paths`-expanded, so the 14 groups of
+    # byte-identical filings still count for one another.
+    joined = "\n".join(_returned_evidence(r) for r in results
+                       if r.source_path in expected_docs)
     found_terms = [t for t in terms if _norm(t) in joined]
     support = (len(found_terms) / len(terms)) if terms else None
 
@@ -256,7 +273,16 @@ def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
     page_support = support
     if terms and conn is not None:
         page_text_parts = []
+        # Scoped with `joined` above, and for the same reason. Left unscoped it
+        # would credit "the reader was put in front of the right page" to a page
+        # of a different document -- gq-018 drew its page credit from a
+        # chain-link GATES manual. Scoping also keeps the pair a ladder:
+        # page_support >= support still holds for every question, so the gap
+        # between them keeps its one meaning, "the right page came back but the
+        # returned unit did not carry the terms".
         for r in results:
+            if r.source_path not in expected_docs:
+                continue
             for row in conn.execute(
                     """SELECT e.text, e.ocr_text FROM elements e
                         WHERE e.document_id=? AND e.page_no=?""",
@@ -292,7 +318,7 @@ def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
     return {
         "id": q.get("id"), "category": q.get("category"), "set": q.get("_set"),
         "question": q.get("question"), "query": query,
-        "query_form": query_form, "answerable": answerable,
+        "query_form": GRADED_QUERY_FORM, "answerable": answerable,
         "n_results": len(results),
         "doc_rank": doc_rank, "page_rank": page_rank,
         "expected_documents": sorted(declared_docs),
@@ -792,11 +818,10 @@ def run_evaluation(*, k: int = DEFAULT_K, gold_paths: list[Path] | None = None,
         # store rebuilt in between be compared against itself at two different
         # times, and read as a retrieval change.
         rows_by_form = {
-            form: [evaluate_question(q, k=k, conn=conn, second_stage=second_stage,
-                                     dedupe_text=dedupe_text, page_cap=page_cap,
-                                     query_form=form)
-                   for q in questions]
-            for form in QUERY_FORMS}
+            GRADED_QUERY_FORM: [
+                evaluate_question(q, k=k, conn=conn, second_stage=second_stage,
+                                  dedupe_text=dedupe_text, page_cap=page_cap)
+                for q in questions]}
         rows = rows_by_form[GRADED_QUERY_FORM]
         # The routed pass is a *second* pass over the same questions. Nothing
         # here feeds back into `rows`; the search harness above is untouched.
@@ -1131,20 +1156,15 @@ def _write_report(out: dict, report_name: str = "evaluation") -> None:
          f"{', '.join(s['skipped_not_ingested'])}." if s.get("skipped_not_ingested")
          else "Every gold question was runnable."),
         "",
-        f"## Acceptance — {GRADED_QUERY_FORM.replace('_', ' ')} (GRADED)",
+        f"## Acceptance — {GRADED_QUERY_FORM.replace('_', ' ')}",
         "",
         QUERY_FORM_BASIS[GRADED_QUERY_FORM],
         "",
+        "Figures published in `docs/` and `workspace/reports/` before 2026-09-14 were "
+        "measured on the retired `keyword_hint` form and do not compare with these; "
+        "see `docs/keyword-ruler-audit.md`.",
+        "",
         *acceptance_table(s["query_forms"][GRADED_QUERY_FORM]),
-        "",
-        "## Acceptance — keyword hints (reported, not graded)",
-        "",
-        QUERY_FORM_BASIS[KEYWORD_HINT],
-        "",
-        "Figures published in `docs/` and `workspace/reports/` before 2026-09-14 are "
-        "keyword-hint numbers; compare them only with this table.",
-        "",
-        *acceptance_table(s["query_forms"][KEYWORD_HINT]),
         "",
         "## By category",
         "",
