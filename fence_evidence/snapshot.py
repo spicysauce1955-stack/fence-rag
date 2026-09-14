@@ -340,6 +340,38 @@ class Gap:
     on: str | None = None  # `disputed` only
 
 
+# The class that makes nothing admissible under §1.4. Published wherever this
+# platform cannot justify a stronger reading, so the conservative answer is
+# never an arbitrary one.
+WEAKEST_SOURCE_CLASS = "marketing"
+
+
+def resolve_source_class(doc_types) -> str | None:
+    """The §1.4 class for bytes filed under several `doc_type`s.
+
+    `[measured]` 2026-09-14 the bytes `c4eb900c...` are filed as
+    `unspecified` (-> marketing) and as `csi_spec` (-> industry_standard), and
+    the snapshot published `marketing` because `_register_doc` is idempotent per
+    hash and kept whichever filing a citation reached first. §1.4 makes
+    `marketing` inadmissible for every task, so an arrival-order accident made a
+    Miami-Dade NOA unusable. Same defect, same function, as G75 closed for the
+    dates.
+
+    A filing that cannot be classified never outranks one that can. Two filings
+    that both classify and disagree return None: ranking them would mint a
+    precedence order this project has never agreed, and refusing is what it does
+    everywhere else. The caller raises a gap naming both.
+    """
+    classified = {SOURCE_CLASS[t] for t in doc_types if t not in UNCLASSIFIED}
+    if len(classified) == 1:
+        return classified.pop()
+    if not classified:
+        # Nothing better exists. Weakest class plus `source_class_unclassified`,
+        # which is the deliberate conservative default and stays unchanged.
+        return SOURCE_CLASS[next(iter(doc_types))]
+    return None
+
+
 class SnapshotBuilder:
     def __init__(self, conn: sqlite3.Connection, *, tenant: str, regime: str):
         self.conn = conn
@@ -391,9 +423,21 @@ class SnapshotBuilder:
         # for every filing independently, so the answer stops depending on
         # arrival order (G75).
         issue_date, expiration_date, evidence = self._document_dates(row)
+        # The class is resolved across EVERY filing of these bytes, not taken
+        # from whichever one a citation reached first. See
+        # `resolve_source_class`; this is G75's fix applied to the class.
+        filings = [r[0] for r in self.conn.execute(
+            """SELECT d.doc_type FROM document_versions v
+                 JOIN documents d ON d.document_id = v.document_id
+                WHERE v.sha256 = ?""", (row["sha256"],))]
+        resolved_class = resolve_source_class(filings or [row["doc_type"]])
         self._docs[row["sha256"]] = SourceDoc(
             content_hash=row["sha256"],
-            source_class=SOURCE_CLASS[row["doc_type"]],
+            # On a genuine disagreement `resolve_source_class` returns None and
+            # we publish the weakest class -- the same conservative default the
+            # unclassified path already documents, so a contested document
+            # cannot make anything wrongly admissible while the gap stands.
+            source_class=resolved_class or WEAKEST_SOURCE_CLASS,
             version_status=row["version_status"],
             version_status_basis=(
                 # The stored basis says "no explicit version marker in curated
@@ -410,7 +454,26 @@ class SnapshotBuilder:
             also_filed_as=self._other_filings(row["sha256"],
                                               row["document_id"]))
 
-        if row["doc_type"] in UNCLASSIFIED:
+        if resolved_class is None:
+            # Two filings of one document classify differently. Refusing to rank
+            # them is the same posture as everywhere else; the gap names both so
+            # a person can settle it.
+            self.gap(kind="conflict",
+                     subject={"kind": "source_document", "id": row["document_id"],
+                              "tenant": None},
+                     code="source_class_disagreement",
+                     params={"doc_types": sorted(set(filings)),
+                             "content_hash": row["sha256"]},
+                     would_close=f"decide the source class of {_label(row)}, filed "
+                                 f"under {sorted(set(filings))!r} which map to "
+                                 f"different §1.4 classes",
+                     closes_by="knowledge", severity="warns_line")
+        # Raised when NO filing of these bytes could be classified -- the case
+        # where the weakest class is published for want of anything better. A
+        # group rescued by a sibling filing is classified and needs no gap;
+        # gating on `resolved_class is None` instead silently dropped all 8 of
+        # these, because a solo `unspecified` resolves to marketing, not None.
+        if not any(t not in UNCLASSIFIED for t in filings):
                 self.gap(kind="missing_value", subject={"kind": "source_document", "id": row["document_id"], "tenant": None},
                          code="source_class_unclassified",
                          params={"doc_type": row["doc_type"],
