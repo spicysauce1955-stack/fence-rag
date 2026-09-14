@@ -64,7 +64,16 @@ SECOND_STAGE_ATTACH_CHAR_BUDGET = 1400
 # must be rarer than this share of the index. A query-relative floor (half the
 # most informative missing term) was tried first and disabled the mechanism
 # outright on ordinary queries.
-SECOND_STAGE_MIN_TERM_DF_SHARE = 0.30
+# `[measured]` 2026-09-14 on the graded (natural-question) column, support
+# plateaus at 0.40: every value from 0.40 to 1.00 scores 0.6527804878. 0.75 was
+# the smallest round value that pushed the KEYWORD column over 0.70, and it buys
+# +128 attachments for +0.000000 support -- 138 of those 152 marginal rows add
+# nothing but a generic corpus word (`fence` 90, `vinyl` 37). Fitted to the
+# criterion on the instrument `evaluate.GRADED_QUERY_FORM` retired.
+SECOND_STAGE_MIN_TERM_DF_SHARE = 0.40
+# The shipped default, named so `evaluate` measures the configuration that
+# ships rather than a separate one that has to be kept in step by hand.
+SECOND_STAGE_DEFAULT = True
 SECOND_STAGE_HEADING_PATH_WEIGHT = 0.25   # inherited context breaks ties, nothing more
 
 
@@ -483,7 +492,7 @@ DEDUPE_TEXT_DEFAULT = True
 def search_evidence(query: str, *, limit: int = 10, filters: dict | None = None,
                     mode: str = "fts5", conn: sqlite3.Connection | None = None,
                     min_score: float = 0.0,
-                    second_stage: bool = False,
+                    second_stage: bool = SECOND_STAGE_DEFAULT,
                     dedupe_text: bool = DEDUPE_TEXT_DEFAULT,
                     page_cap: int | None = None) -> list[SearchResult]:
     """`dedupe_text` and `page_cap` are the projection audit's R3 and R5. R3 is

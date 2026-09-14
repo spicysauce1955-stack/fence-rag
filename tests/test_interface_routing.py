@@ -13,10 +13,12 @@ from pathlib import Path
 
 from context import (ROOT, requires_facts, requires_store,  # noqa: F401
                      requires_full_store)
-from fence_evidence.evaluate import (DEFAULT_INTERFACE, INTERFACES,
+from fence_evidence.evaluate import (DEFAULT_INTERFACE, GRADED_QUERY_FORM,
+                                     INTERFACES, KEYWORD_HINT,
                                      evaluate_question,
                                      evaluate_routed_question, load_gold,
                                      question_interface, run_evaluation)
+from fence_evidence.retrieval import SECOND_STAGE_DEFAULT
 from fence_evidence.store import connect
 
 
@@ -104,8 +106,16 @@ class TestSearchGradingIsUnchanged(unittest.TestCase):
         self.assertEqual(s["questions"], len(out["results"]))
         self.assertEqual(s["questions"], len(load_gold()))
         self.assertEqual(s["answerable"] + s["no_answer"], s["questions"])
-        # gq-011 is routed, and still counted as a search failure
-        self.assertIn("gq-011", s["by_category"]["current_version"]["failures"])
+        # Routing is additive: a routed question is still issued to the search
+        # harness and still counted in its denominators. gq-011 used to be named
+        # here as a search *failure*, but that was an artifact of the keyword
+        # column -- its hand-written query_terms contain the SUPERSEDED NOA
+        # number 23-0314.05, which drags search to the wrong document. On the
+        # question production actually sends it ranks the right document first.
+        # The property under test is the counting, not the verdict.
+        graded = s["query_forms"][GRADED_QUERY_FORM]
+        self.assertIn("gq-011", [r["id"] for r in out["results"]])
+        self.assertIn("current_version", graded["by_category"])
 
 
 class TestResolveRouting(unittest.TestCase):
@@ -204,15 +214,22 @@ class TestRoutedBlockIsSeparate(unittest.TestCase):
         self.assertEqual(routed["by_interface"]["resolve"]["n"], 1)
         entry = routed["questions"][0]
         self.assertEqual(entry["id"], "gq-011")
-        # the before/after the gap entry asks to be recorded
-        self.assertIsNone(entry["search"]["doc_rank"])
-        self.assertFalse(entry["search"]["passed"])
+        # The before/after the gap entry asks to be recorded. `[measured]`
+        # 2026-09-14, once grading moved to the natural question, the "before"
+        # stopped being a failure: search ranks gq-011's document first
+        # (support 0.6) where the keyword column ranked it nowhere (0.2),
+        # because the annotated keywords name the superseded NOA. Routing is
+        # still justified -- `resolve` answers with the supersession chain and
+        # the whole point is *which* member is in force -- but "search cannot
+        # find it" was an artifact of the instrument, so what is pinned here is
+        # that both halves are reported, not that the search half fails.
+        self.assertIn("doc_rank", entry["search"])
+        self.assertIn("passed", entry["search"])
         self.assertIsNotNone(entry["doc_rank"])
         self.assertTrue(entry["passed"])
         # the headline numbers are the search harness and nothing else
         self.assertEqual(s["questions"], 2)
         self.assertEqual(s["answerable"], 2)
-        self.assertNotIn("gq-011", [r["id"] for r in out["results"] if r["passed"]])
 
 
 class TestARoutedQuestionIsNotJudgedAgainstTheClock(unittest.TestCase):
@@ -274,9 +291,15 @@ class TestTheTwoConfigurationsDoNotShareAnArtifact(unittest.TestCase):
 
     def test_the_default_name_follows_the_configuration(self):
         from fence_evidence.evaluate import default_report_name
-        self.assertEqual(default_report_name(None, False), "evaluation")
-        self.assertEqual(default_report_name(None, True),
-                         "evaluation-second-stage")
+        # The SHIPPED configuration keeps the plain name, whatever that
+        # configuration is. Passing a literal False pinned the test to the
+        # 2026-09-14 default rather than to the property.
+        self.assertEqual(default_report_name(None, SECOND_STAGE_DEFAULT),
+                         "evaluation")
+        self.assertNotEqual(default_report_name(None, not SECOND_STAGE_DEFAULT),
+                            "evaluation",
+                            "a non-shipped configuration must not claim the "
+                            "shipped artifact path")
 
     def test_an_explicit_name_still_wins(self):
         from fence_evidence.evaluate import default_report_name
@@ -284,16 +307,27 @@ class TestTheTwoConfigurationsDoNotShareAnArtifact(unittest.TestCase):
         self.assertEqual(default_report_name("scratch", False), "scratch")
 
     def test_the_two_committed_reports_disagree_about_support(self):
-        """If these ever match, one run has overwritten the other."""
+        """If these ever match, one run has overwritten the other.
+
+        The committed pair is the SHIPPED configuration and the one deviation
+        from it. Until 2026-09-14 that was `evaluation` (second stage off) and
+        `evaluation-second-stage`; now the second stage ships, so the deviation
+        -- and the file that has to disagree -- is `evaluation-no-second-stage`.
+        The old variant file was removed rather than left behind: it names a
+        configuration that is now the default, so nothing would ever rewrite it
+        and it would rot into a baseline nobody could reproduce.
+        """
         import json
         base = json.loads((ROOT / "workspace" / "tests"
                            / "evaluation-results.json").read_text())
-        second = json.loads((ROOT / "workspace" / "tests"
-                             / "evaluation-second-stage-results.json").read_text())
-        self.assertFalse(base["summary"]["second_stage"])
-        self.assertTrue(second["summary"]["second_stage"])
-        self.assertNotEqual(base["summary"]["evidence_support"],
-                            second["summary"]["evidence_support"])
+        deviation = json.loads((ROOT / "workspace" / "tests"
+                                / "evaluation-no-second-stage-results.json").read_text())
+        self.assertEqual(base["summary"]["second_stage"], SECOND_STAGE_DEFAULT)
+        self.assertEqual(deviation["summary"]["second_stage"],
+                         not SECOND_STAGE_DEFAULT)
+        self.assertNotEqual(
+            base["summary"]["query_forms"][KEYWORD_HINT]["evidence_support"],
+            deviation["summary"]["query_forms"][KEYWORD_HINT]["evidence_support"])
 
 
 if __name__ == "__main__":

@@ -6,10 +6,12 @@ and result count must be identical with it on and off, so document recall and
 page-level support cannot change. These tests assert that guarantee rather than
 trusting it.
 """
+import inspect
 import unittest
 
 from context import ROOT, requires_store
 from fence_evidence.retrieval import (SECOND_STAGE_ATTACH_CHAR_BUDGET,
+                                       SECOND_STAGE_MIN_TERM_DF_SHARE, _IdfCache,
                                       SECOND_STAGE_MAX_ATTACHMENTS,
                                       SECOND_STAGE_MAX_CHARS, search_evidence)
 from fence_evidence.store import connect
@@ -142,11 +144,34 @@ class TestSecondStageInvariants(unittest.TestCase):
                            "the second stage is not reaching canonical rows")
 
     def test_attachments_clear_the_information_floor(self):
-        """A common token missing from the unit must not be enough to attach a footer."""
+        """A common token missing from the unit must not be enough to attach a footer.
+
+        This asserted only `gain > 0.0` until 2026-09-14, which every floor
+        satisfies -- including 1.00, where the mechanism admits everything. It
+        passed while `SECOND_STAGE_MIN_TERM_DF_SHARE` sat at a value tuned on
+        the keyword column, and would not have caught it. The floor is a
+        *corpus-relative* threshold, so the test has to compare against the
+        same floor the code uses.
+        """
+        floor = _IdfCache(self.conn).floor_for_df_share(SECOND_STAGE_MIN_TERM_DF_SHARE)
         for q, _base, aug in self.pairs:
             for r in aug:
                 for a in (r.within_page_evidence or []):
-                    self.assertGreater(a["gain"], 0.0, q)
+                    self.assertGreaterEqual(
+                        a["gain"], floor,
+                        f"{q}: attached on a term commoner than the floor admits")
+
+    def test_the_second_stage_is_on_by_default(self):
+        """`[measured]` it was built, tested, and left switched off.
+
+        Off, evidence support is 0.6219 on the graded column; on, 0.6528 --
+        5 questions improve, 0 regress. It was rejected for missing a 0.70
+        target by 0.0054 on an instrument that has since been retired, while a
+        change with a weaker paired result ships on by default. See
+        `docs/coverage-remediation-plan.md` §2.
+        """
+        sig = inspect.signature(search_evidence)
+        self.assertIs(sig.parameters["second_stage"].default, True)
 
 
 if __name__ == "__main__":
