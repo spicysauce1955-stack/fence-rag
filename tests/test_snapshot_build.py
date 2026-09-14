@@ -16,7 +16,8 @@ import unittest
 
 import context  # noqa: F401  -- puts the repo root on sys.path
 from context import requires_store
-from fence_evidence.snapshot import (SnapshotBuilder, SOURCE_CLASS,
+from fence_evidence.snapshot import (WEAKEST_SOURCE_CLASS, resolve_source_class,
+                                     SnapshotBuilder, SOURCE_CLASS,
                                      build_snapshot)
 
 
@@ -617,8 +618,16 @@ class TestAlsoFiledAsOverTheCorpus(unittest.TestCase):
         self.assertGreater(len(nonempty), 0)
 
     def test_each_list_is_the_group_minus_exactly_one_filing(self):
-        """One class per content hash: the group's OTHER filings are published,
-        and the one that is not is the one whose class was."""
+        """One class per content hash: the group's OTHER filings are published.
+
+        This used to also assert that the published class was the WITHHELD
+        filing's -- true only while the class came from whichever filing a
+        citation reached first. `[measured]` 2026-09-14 that let `unspecified`
+        (-> marketing) beat `csi_spec` on the bytes `c4eb900c...`, publishing a
+        Miami-Dade NOA in the one class §1.4 makes inadmissible everywhere. The
+        class is now resolved across the whole group, so it is no longer tied to
+        the registering filing -- see `test_the_published_class_is_resolved_over_the_whole_group`.
+        """
         for d in self.snap["source_docs"]:
             group = {(r["manufacturer"], r["doc_type"]) for r in self.conn.execute(
                 """SELECT d.manufacturer, d.doc_type
@@ -632,10 +641,23 @@ class TestAlsoFiledAsOverTheCorpus(unittest.TestCase):
                 missing = group - published
                 self.assertEqual(len(missing), 1,
                                  "exactly one filing is the published one")
-                self.assertEqual(SOURCE_CLASS[missing.pop()[1]],
-                                 d["source_class"],
-                                 "the withheld filing is not the one whose "
-                                 "class was published")
+                self.assertEqual(len(missing), 1)
+
+    def test_the_published_class_is_resolved_over_the_whole_group(self):
+        """The class must not depend on which filing a citation reached first.
+
+        Strictly stronger than the assertion it replaces: it pins the published
+        class to every filing of the bytes rather than to one arbitrary member.
+        """
+        for d in self.snap["source_docs"]:
+            types = [r[0] for r in self.conn.execute(
+                """SELECT d.doc_type FROM document_versions v
+                     JOIN documents d ON d.document_id = v.document_id
+                    WHERE v.sha256 = ?""", (d["content_hash"],))]
+            with self.subTest(content_hash=d["content_hash"][:12]):
+                self.assertEqual(
+                    d["source_class"],
+                    resolve_source_class(types) or WEAKEST_SOURCE_CLASS)
 
     def test_a_group_disagreeing_on_doc_type_still_publishes_one_class(self):
         """The failure the rule exists to prevent, in the corpus that has it: a
