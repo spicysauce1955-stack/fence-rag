@@ -518,8 +518,13 @@ class TestCurrencyComesFromTheGraphNotTheLabel(unittest.TestCase):
             self.old(self.ask()).currency["superseded_by_in_answer"],
             [{"parameter": "footing_depth_mm", "authority": self.NEW,
               "scope_id": "mfr/new-model-names",
+              # `conditions_not_evaluated` added 2026-09-14: a condition the
+              # caller stated that no row constrains is now named rather than
+              # folded into `stated_and_satisfied`. Empty here because this
+              # fixture states only dimensions the rows declare.
               "applicability": {"scope": "other",
-                                "conditions": "stated_and_satisfied"}}])
+                                "conditions": "stated_and_satisfied",
+                                "conditions_not_evaluated": []}}])
 
     def test_a_replacement_absent_from_the_answer_is_an_empty_list_not_a_lie(self):
         answer = self.ask(include_replacement=False)
