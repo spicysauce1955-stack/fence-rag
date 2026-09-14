@@ -6,52 +6,38 @@ Configuration: second stage off, R3 duplicate suppression on, R5 page cap off.
 
 Every gold question was runnable.
 
-## Acceptance — natural question (GRADED)
+## Acceptance — natural question
 
-the question text verbatim — what query.py sends as situation.question, and the column acceptance is graded on
+the question text verbatim — what query.py sends as situation.question
 
-| Metric | Value | Acceptance |
-|---|---|---|
-| Document recall@10 | 0.7561 | A3 ≥ 0.80 — FAIL |
-| Page recall@10 | 0.585 | reported |
-| MRR | 0.595 | reported |
-| Evidence support (terms in the retrieved unit) | 0.6219 | A3 ≥ 0.70 — FAIL |
-| Page evidence support (terms anywhere on a retrieved page) | 0.737 | reported |
-| No-answer precision | 0.4865 | A4 ≥ 0.66 — FAIL |
-| False-unsupported rate (answerable questions wrongly declared unsupported) | 0.3902 | A4b ≤ 0.20 — FAIL |
-
-## Acceptance — keyword hints (reported, not graded)
-
-the question's hand-written query_terms joined by spaces; every figure published before 2026-09-14 was measured here, and nothing is graded on it
-
-Figures published in `docs/` and `workspace/reports/` before 2026-09-14 are keyword-hint numbers; compare them only with this table.
+Figures published in `docs/` and `workspace/reports/` before 2026-09-14 were measured on the retired `keyword_hint` form and do not compare with these; see `docs/keyword-ruler-audit.md`.
 
 | Metric | Value | Acceptance |
 |---|---|---|
 | Document recall@10 | 0.8049 | A3 ≥ 0.80 — PASS |
-| Page recall@10 | 0.659 | reported |
-| MRR | 0.557 | reported |
-| Evidence support (terms in the retrieved unit) | 0.6499 | A3 ≥ 0.70 — FAIL |
-| Page evidence support (terms anywhere on a retrieved page) | 0.769 | reported |
-| No-answer precision | 0.3243 | A4 ≥ 0.66 — FAIL |
-| False-unsupported rate (answerable questions wrongly declared unsupported) | 0.1463 | A4b ≤ 0.20 — PASS |
+| Page recall@10 | 0.610 | reported |
+| MRR | 0.611 | reported |
+| Evidence support (terms in the retrieved unit) | 0.4909 | A3 ≥ 0.70 — FAIL |
+| Page evidence support (terms anywhere on a retrieved page) | 0.637 | reported |
+| No-answer precision | 0.4865 | A4 ≥ 0.66 — FAIL |
+| False-unsupported rate (answerable questions wrongly declared unsupported) | 0.3902 | A4b ≤ 0.20 — FAIL |
 
 ## By category
 
 | Category | n | doc hits | passed | mean support | failing ids |
 |---|---|---|---|---|---|
-| comparison | 4 | 3 | 1 | 0.4 | gq-120, gq-017, gq-018 |
-| conditional_table_lookup | 7 | 6 | 5 | 0.686 | gq-113, gq-004 |
-| conflict | 2 | 2 | 0 | 0.298 | gq-015, gq-016 |
+| comparison | 4 | 3 | 1 | 0.3 | gq-120, gq-017, gq-018 |
+| conditional_table_lookup | 7 | 7 | 3 | 0.502 | gq-112, gq-113, gq-004, gq-005 |
+| conflict | 2 | 2 | 0 | 0.155 | gq-015, gq-016 |
 | current_version | 2 | 1 | 1 | 0.3 | gq-012 |
-| exact_identifier | 3 | 3 | 3 | 0.833 | — |
+| exact_identifier | 3 | 3 | 3 | 0.667 | — |
 | exact_product | 4 | 4 | 3 | 0.667 | gq-103 |
-| historical_version | 2 | 2 | 2 | 0.9 | — |
+| historical_version | 2 | 2 | 1 | 0.7 | gq-013 |
 | no_answer | 37 | 0 | 18 | None | gq-117, gq-201, gq-202, gq-203, gq-204, gq-205, gq-207, gq-208, gq-210, gq-215, gq-222, gq-223, gq-224, gq-226, gq-227, gq-229, gq-230, gq-231, gq-232 |
 | paraphrase | 5 | 1 | 1 | 0.2 | gq-105, gq-106, gq-108, gq-109 |
-| source_verification | 4 | 4 | 3 | 0.733 | gq-021 |
-| table_retrieval | 4 | 2 | 2 | 0.75 | gq-009, gq-010 |
-| visual_evidence | 4 | 3 | 3 | 1.0 | gq-019 |
+| source_verification | 4 | 4 | 3 | 0.692 | gq-021 |
+| table_retrieval | 4 | 2 | 2 | 0.417 | gq-009, gq-010 |
+| visual_evidence | 4 | 4 | 3 | 0.75 | gq-019 |
 
 ## Routed interfaces
 
@@ -96,9 +82,9 @@ The search rows for these questions are unchanged and still appear in the by-cat
 
 Only categories that actually failed appear here. Nothing below is built.
 
-### conditional_table_lookup — 2 of 7 failing
+### conditional_table_lookup — 4 of 7 failing
 
-- **Problem**: conditional_table_lookup questions fail lexical retrieval (failing ids: gq-113, gq-004).
+- **Problem**: conditional_table_lookup questions fail lexical retrieval (failing ids: gq-112, gq-113, gq-004, gq-005).
 - **Experiment**: Table-aware structured lookup keyed on conditions (wind speed, exposure, height) resolved against table_cells and facts.
 - **Acceptance**: Answers the conditional questions with the correct cell, and returns 'outside documented range' rather than a nearest-neighbour value.
 
@@ -107,6 +93,12 @@ Only categories that actually failed appear here. Nothing below is built.
 - **Problem**: conflict questions fail lexical retrieval (failing ids: gq-015, gq-016).
 - **Experiment**: Conflict surfacing: return every source that states a value for the same condition, with its version status.
 - **Acceptance**: Both conflicting sources appear in the top 10 with their statuses.
+
+### historical_version — 1 of 2 failing
+
+- **Problem**: historical_version questions fail lexical retrieval (failing ids: gq-013).
+- **Experiment**: Version-aware ranking that prefers the member of a supersession chain the question asks for.
+- **Acceptance**: Historical questions resolve to the superseded document and current questions to the active one.
 
 ### no_answer — 19 of 37 failing
 
@@ -175,6 +167,14 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 - expected: manuals/illusions-vinyl-fence/75mph-wind-kit-installation-instructions.pdf
 - doc rank: None · unit support: 0.0 · page support: 0.0 · missing terms: ['.250”', 'Heavy Duty Posts', 'VH88']
 - top hit: manuals/weatherables/weatherables-full-line-catalog-2026.pdf p4 score 13.4388
+
+### gq-112 — conditional_table_lookup
+*Local code says design for 130 mph wind. For a 6 ft chain link fence with 2 3/8" Schedule 40 regular-grade posts, what maximum line post spacing does the CLFMI guide give before correction factors?*
+
+- query: `Local code says design for 130 mph wind. For a 6 ft chain link fence with 2 3/8" Schedule 40 regular-grade posts, what maximum line post spacing does the CLFMI guide give before correction factors?`
+- expected: manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf
+- doc rank: 1 · unit support: 0.333 · page support: 0.333 · missing terms: ['TABLE 4', '130 MPH']
+- top hit: manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf p12 score 34.6221
 
 ### gq-113 — conditional_table_lookup
 *I'm running an 8 ft high Illusions privacy fence with the 75 mph wind kit, so I have to use the 8" x 8" posts. How deep and how wide does the post hole have to be?*
@@ -348,16 +348,24 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 *I'm installing Bufftech Chesterfield fence in Miami-Dade in Exposure C. If I pour a 36 inch deep footing, what is the maximum post spacing the NOA allows?*
 
 - query: `I'm installing Bufftech Chesterfield fence in Miami-Dade in Exposure C. If I pour a 36 inch deep footing, what is the maximum post spacing the NOA allows?`
-- expected: manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf
-- doc rank: None · unit support: 1.0 · page support: 1.0 · missing terms: []
+- expected: manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf
+- doc rank: 3 · unit support: 0.25 · page support: 1.0 · missing terms: ['88', 'HVHZ: MIAMI-DADE AND BROWARD COUNTIES', 'ASCE 7-10']
 - top hit: manuals/industry-standards/ARCAT-CSI-32-31-23-Vinyl-Fencing-and-Gates-MasterSpec_Superior-Outdoor.docx p1 score 22.3325
+
+### gq-005 — conditional_table_lookup
+*For a 6 ft high chain link fence in a 130 mph wind zone, what maximum line post spacing does the CLFMI guide give for a 2 3/8 inch Schedule 40 regular grade steel line post?*
+
+- query: `For a 6 ft high chain link fence in a 130 mph wind zone, what maximum line post spacing does the CLFMI guide give for a 2 3/8 inch Schedule 40 regular grade steel line post?`
+- expected: manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf
+- doc rank: 1 · unit support: 0.4 · page support: 0.4 · missing terms: ['TABLE 4', '130 MPH', '2 3/8']
+- top hit: manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf p12 score 39.3293
 
 ### gq-009 — table_retrieval
 *Show me the maximum post spacing and footing dimensions table from the current CertainTeed / Bufftech extruded PVC vinyl fence NOA.*
 
 - query: `Show me the maximum post spacing and footing dimensions table from the current CertainTeed / Bufftech extruded PVC vinyl fence NOA.`
 - expected: manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf
-- doc rank: None · unit support: 1.0 · page support: 1.0 · missing terms: []
+- doc rank: None · unit support: 0.0 · page support: 0.0 · missing terms: ['POST SPACING AND FOOTING DIMENSIONS', 'HVHZ: MIAMI-DADE AND BROWARD COUNTIES', 'ASCE 7-10', 'FOOTING TABLE']
 - top hit: manuals/freedom-outdoor-living/structural/MiamiDade-NOA-24-0117.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf p17 score 30.4669
 
 ### gq-010 — table_retrieval
@@ -376,6 +384,14 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 - doc rank: None · unit support: 0.0 · page support: 0.0 · missing terms: ['24-0729.04', 'revises and renews NOA #21-0308.05', '08/14/2029', '10/03/2024']
 - top hit: manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf p5 score 9.2533
 
+### gq-013 — historical_version
+*Back in the 2013 CertainTeed acceptance NOA 12-1106.11, which drawing was the approval document and how many sheets did it have?*
+
+- query: `Back in the 2013 CertainTeed acceptance NOA 12-1106.11, which drawing was the approval document and how many sheets did it have?`
+- expected: manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf
+- doc rank: 1 · unit support: 0.4 · page support: 1.0 · missing terms: ['12-048', 'Fence Columbia, Imperial and Chesterfield Models', 'EngCo']
+- top hit: manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf p3 score 19.0026
+
 ### gq-015 — conflict
 *Barrette has two live Miami-Dade NOAs for extruded PVC vinyl fencing. Do they call for the same post footing, and if not what does each one specify?*
 
@@ -389,7 +405,7 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 
 - query: `The old Barrette Active Yards NOA and the current Barrette vinyl fence NOA give different post footing sizes - what does each say?`
 - expected: manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf, manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf
-- doc rank: 1 · unit support: 0.429 · page support: 0.857 · missing terms: ['96', 'CONCRETE', '42485', 'ASCE 7-10']
+- doc rank: 1 · unit support: 0.143 · page support: 0.714 · missing terms: ['16', '36', '96', 'CONCRETE', '42485', 'ASCE 7-10']
 - top hit: manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf p2 score 17.4697
 
 ### gq-017 — comparison
@@ -405,15 +421,15 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 
 - query: `Compare the Weatherables Augusta privacy panel CAD details for the 6 ft wide and the 8 ft wide panel - what changes?`
 - expected: manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png, manuals/weatherables/structural/weatherables-cad-augusta-8x8-privacy.png
-- doc rank: None · unit support: 0.4 · page support: 0.6 · missing terms: ['72', 'U-Channels', '39.5']
+- doc rank: None · unit support: 0.0 · page support: 0.0 · missing terms: ['72', '96', 'U-Channels', '39.5', '5.5']
 - top hit: manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf p27 score 16.213
 
 ### gq-019 — visual_evidence
 *Show me the post and footing cross-section from the current Bufftech vinyl fence NOA - what footing diameter, concrete strength and post reinforcement does it detail?*
 
 - query: `Show me the post and footing cross-section from the current Bufftech vinyl fence NOA - what footing diameter, concrete strength and post reinforcement does it detail?`
-- expected: manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf
-- doc rank: None · unit support: 1.0 · page support: 1.0 · missing terms: []
+- expected: manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf
+- doc rank: 3 · unit support: 0.0 · page support: 0.0 · missing terms: ['POST AND FOOTING DESIGN', '3000 PSI CONCRETE', 'EXISTING SOIL', 'FOOTING TABLE']
 - top hit: manuals/industry-standards/CLFMI-Product-Manual-CSI-Section-32-31-13-Chain-Link-Fence-Gates.pdf p14 score 20.4524
 
 ### gq-021 — source_verification
@@ -421,6 +437,6 @@ Failing categories with no pre-registered experiment: comparison, current_versio
 
 - query: `How deep does VEKA's approved drawing bury the post for the Tahoe II privacy fence, and what is under the concrete?`
 - expected: manuals/industry-standards/structural/Miami-Dade-NOA_VEKA-Inc_PVC-Privacy-Fence-Panels_24-0729.04.pdf
-- doc rank: 6 · unit support: 0.333 · page support: 0.5 · missing terms: ['17.71', 'DESIGN PRESSURE', 'FASTEST MILE', '3000 PSI MIN']
+- doc rank: 6 · unit support: 0.167 · page support: 0.5 · missing terms: ['17.71', 'DESIGN PRESSURE', 'FASTEST MILE', '3000 PSI MIN', 'CONCRETE']
 - top hit: manuals/wam-bam/cambridge-BL19110-install-guide.pdf p16 score 9.8512
 

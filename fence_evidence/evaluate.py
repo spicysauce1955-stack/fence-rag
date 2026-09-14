@@ -218,9 +218,21 @@ def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
                       second_stage: bool = SECOND_STAGE_DEFAULT,
                       dedupe_text: bool = DEDUPE_TEXT_DEFAULT,
                       page_cap: int | None = None) -> dict:
+    """Search for one gold question and grade what came back."""
     query = _query_for(q)
     results = search_evidence(query, limit=k, conn=conn, second_stage=second_stage,
                               dedupe_text=dedupe_text, page_cap=page_cap)
+    return score_question(q, results, conn=conn, query=query)
+
+
+def score_question(q: dict, results, *, conn=None, query: str | None = None) -> dict:
+    """Grade an already-retrieved result list against a gold question.
+
+    Separated from the search so the grading rules can be tested on a list the
+    test constructs. They could not be before, which is why the scoping defect
+    below survived: reaching it required a full store and a real query.
+    """
+    query = _query_for(q) if query is None else query
     declared_docs = set(q.get("expected_documents") or [])
     expected_docs = _equivalent_paths(conn, declared_docs)
     expected_pages: dict[str, list[int]] = dict(q.get("expected_pages") or {})
@@ -239,7 +251,18 @@ def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
             page_rank = i + 1
             break
 
-    joined = "\n".join(_returned_evidence(r) for r in results)
+    # Scoped to the expected documents, as `type_ok` and `image_ok` below already
+    # are. Joined over every result, this credited answer terms to a document
+    # that is not the answer: `[measured]` 2026-09-14 gq-009 scored 1.000 and
+    # gq-018 0.600 with `doc_rank: None`, on NOA boilerplate (`ASCE 7-10`,
+    # `HVHZ: MIAMI-DADE AND BROWARD COUNTIES`) printed on every sibling sheet.
+    # It moves verdicts as well as the mean: `passed` needs `support >= 0.5`, so
+    # gq-019, gq-112 and gq-005 go from pass to fail once their credit is taken
+    # from the document that actually supplied it. Answerable passing 28 -> 25.
+    # `expected_docs` is `_equivalent_paths`-expanded, so the 14 groups of
+    # byte-identical filings still count for one another.
+    joined = "\n".join(_returned_evidence(r) for r in results
+                       if r.source_path in expected_docs)
     found_terms = [t for t in terms if _norm(t) in joined]
     support = (len(found_terms) / len(terms)) if terms else None
 
@@ -250,7 +273,16 @@ def evaluate_question(q: dict, *, k: int = DEFAULT_K, conn=None,
     page_support = support
     if terms and conn is not None:
         page_text_parts = []
+        # Scoped with `joined` above, and for the same reason. Left unscoped it
+        # would credit "the reader was put in front of the right page" to a page
+        # of a different document -- gq-018 drew its page credit from a
+        # chain-link GATES manual. Scoping also keeps the pair a ladder:
+        # page_support >= support still holds for every question, so the gap
+        # between them keeps its one meaning, "the right page came back but the
+        # returned unit did not carry the terms".
         for r in results:
+            if r.source_path not in expected_docs:
+                continue
             for row in conn.execute(
                     """SELECT e.text, e.ocr_text FROM elements e
                         WHERE e.document_id=? AND e.page_no=?""",

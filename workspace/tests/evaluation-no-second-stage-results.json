@@ -9,12 +9,12 @@
       "natural_question": {
         "k": 10,
         "query_form": "natural_question",
-        "query_form_basis": "the question text verbatim \u2014 what query.py sends as situation.question, and the column acceptance is graded on",
-        "recall_at_k": 0.756,
-        "page_recall_at_k": 0.585,
-        "mrr": 0.595,
-        "evidence_support": 0.622,
-        "page_evidence_support": 0.737,
+        "query_form_basis": "the question text verbatim \u2014 what query.py sends as situation.question",
+        "recall_at_k": 0.805,
+        "page_recall_at_k": 0.61,
+        "mrr": 0.611,
+        "evidence_support": 0.491,
+        "page_evidence_support": 0.637,
         "no_answer_precision": 0.486,
         "false_unsupported_rate": 0.39,
         "false_unsupported_ids": [
@@ -35,7 +35,7 @@
           "gq-017",
           "gq-021"
         ],
-        "passed": 42,
+        "passed": 39,
         "by_category": {
           "comparison": {
             "n": 4,
@@ -46,17 +46,19 @@
               "gq-017",
               "gq-018"
             ],
-            "mean_support": 0.4
+            "mean_support": 0.3
           },
           "conditional_table_lookup": {
             "n": 7,
-            "doc_hits": 6,
-            "passed": 5,
+            "doc_hits": 7,
+            "passed": 3,
             "failures": [
+              "gq-112",
               "gq-113",
-              "gq-004"
+              "gq-004",
+              "gq-005"
             ],
-            "mean_support": 0.686
+            "mean_support": 0.502
           },
           "conflict": {
             "n": 2,
@@ -66,7 +68,7 @@
               "gq-015",
               "gq-016"
             ],
-            "mean_support": 0.298
+            "mean_support": 0.155
           },
           "current_version": {
             "n": 2,
@@ -82,7 +84,7 @@
             "doc_hits": 3,
             "passed": 3,
             "failures": [],
-            "mean_support": 0.833
+            "mean_support": 0.667
           },
           "exact_product": {
             "n": 4,
@@ -96,9 +98,11 @@
           "historical_version": {
             "n": 2,
             "doc_hits": 2,
-            "passed": 2,
-            "failures": [],
-            "mean_support": 0.9
+            "passed": 1,
+            "failures": [
+              "gq-013"
+            ],
+            "mean_support": 0.7
           },
           "no_answer": {
             "n": 37,
@@ -146,7 +150,7 @@
             "failures": [
               "gq-021"
             ],
-            "mean_support": 0.733
+            "mean_support": 0.692
           },
           "table_retrieval": {
             "n": 4,
@@ -156,189 +160,16 @@
               "gq-009",
               "gq-010"
             ],
-            "mean_support": 0.75
+            "mean_support": 0.417
           },
           "visual_evidence": {
             "n": 4,
-            "doc_hits": 3,
+            "doc_hits": 4,
             "passed": 3,
             "failures": [
               "gq-019"
             ],
-            "mean_support": 1.0
-          }
-        },
-        "second_stage_attachments": 0,
-        "acceptance": {
-          "A3_recall_at_10_ge_0.80": false,
-          "A3_evidence_support_ge_0.70": false,
-          "A4_no_answer_precision_ge_0.66": false,
-          "A4b_false_unsupported_le_0.20": false
-        },
-        "raw": {
-          "recall_at_k": 0.7560975609756098,
-          "mrr": 0.5947154471544716,
-          "evidence_support": 0.6218536585365854,
-          "no_answer_precision": 0.4864864864864865,
-          "false_unsupported_rate": 0.3902439024390244
-        }
-      },
-      "keyword_hint": {
-        "k": 10,
-        "query_form": "keyword_hint",
-        "query_form_basis": "the question's hand-written query_terms joined by spaces; every figure published before 2026-09-14 was measured here, and nothing is graded on it",
-        "recall_at_k": 0.805,
-        "page_recall_at_k": 0.659,
-        "mrr": 0.557,
-        "evidence_support": 0.65,
-        "page_evidence_support": 0.769,
-        "no_answer_precision": 0.324,
-        "false_unsupported_rate": 0.146,
-        "false_unsupported_ids": [
-          "gq-108",
-          "gq-109",
-          "gq-001",
-          "gq-012",
-          "gq-015",
-          "gq-019"
-        ],
-        "passed": 35,
-        "by_category": {
-          "comparison": {
-            "n": 4,
-            "doc_hits": 4,
-            "passed": 1,
-            "failures": [
-              "gq-119",
-              "gq-120",
-              "gq-017"
-            ],
-            "mean_support": 0.467
-          },
-          "conditional_table_lookup": {
-            "n": 7,
-            "doc_hits": 5,
-            "passed": 4,
-            "failures": [
-              "gq-113",
-              "gq-004",
-              "gq-006"
-            ],
-            "mean_support": 0.581
-          },
-          "conflict": {
-            "n": 2,
-            "doc_hits": 1,
-            "passed": 0,
-            "failures": [
-              "gq-015",
-              "gq-016"
-            ],
-            "mean_support": 0.298
-          },
-          "current_version": {
-            "n": 2,
-            "doc_hits": 1,
-            "passed": 1,
-            "failures": [
-              "gq-011"
-            ],
-            "mean_support": 0.6
-          },
-          "exact_identifier": {
-            "n": 3,
-            "doc_hits": 3,
-            "passed": 3,
-            "failures": [],
-            "mean_support": 1.0
-          },
-          "exact_product": {
-            "n": 4,
-            "doc_hits": 4,
-            "passed": 1,
-            "failures": [
-              "gq-102",
-              "gq-103",
-              "gq-104"
-            ],
-            "mean_support": 0.333
-          },
-          "historical_version": {
-            "n": 2,
-            "doc_hits": 2,
-            "passed": 2,
-            "failures": [],
-            "mean_support": 1.0
-          },
-          "no_answer": {
-            "n": 37,
-            "doc_hits": 0,
-            "passed": 12,
-            "failures": [
-              "gq-116",
-              "gq-117",
-              "gq-118",
-              "gq-201",
-              "gq-202",
-              "gq-203",
-              "gq-204",
-              "gq-206",
-              "gq-207",
-              "gq-208",
-              "gq-210",
-              "gq-215",
-              "gq-222",
-              "gq-223",
-              "gq-224",
-              "gq-225",
-              "gq-226",
-              "gq-227",
-              "gq-228",
-              "gq-229",
-              "gq-230",
-              "gq-231",
-              "gq-232",
-              "gq-233",
-              "gq-234"
-            ],
-            "mean_support": null
-          },
-          "paraphrase": {
-            "n": 5,
-            "doc_hits": 3,
-            "passed": 3,
-            "failures": [
-              "gq-106",
-              "gq-108"
-            ],
-            "mean_support": 0.6
-          },
-          "source_verification": {
-            "n": 4,
-            "doc_hits": 4,
-            "passed": 4,
-            "failures": [],
-            "mean_support": 0.734
-          },
-          "table_retrieval": {
-            "n": 4,
-            "doc_hits": 3,
-            "passed": 2,
-            "failures": [
-              "gq-009",
-              "gq-010"
-            ],
-            "mean_support": 0.85
-          },
-          "visual_evidence": {
-            "n": 4,
-            "doc_hits": 3,
-            "passed": 2,
-            "failures": [
-              "gq-019",
-              "gq-020"
-            ],
-            "mean_support": 0.812
+            "mean_support": 0.75
           }
         },
         "second_stage_attachments": 0,
@@ -346,14 +177,14 @@
           "A3_recall_at_10_ge_0.80": true,
           "A3_evidence_support_ge_0.70": false,
           "A4_no_answer_precision_ge_0.66": false,
-          "A4b_false_unsupported_le_0.20": true
+          "A4b_false_unsupported_le_0.20": false
         },
         "raw": {
           "recall_at_k": 0.8048780487804879,
-          "mrr": 0.5566008517228029,
-          "evidence_support": 0.6499024390243903,
-          "no_answer_precision": 0.32432432432432434,
-          "false_unsupported_rate": 0.14634146341463414
+          "mrr": 0.6109756097560975,
+          "evidence_support": 0.49090243902439024,
+          "no_answer_precision": 0.4864864864864865,
+          "false_unsupported_rate": 0.3902439024390244
         }
       }
     },
@@ -416,7 +247,7 @@
     "dedupe_text": true,
     "page_cap": null,
     "acceptance": {
-      "A3_recall_at_10_ge_0.80": false,
+      "A3_recall_at_10_ge_0.80": true,
       "A3_evidence_support_ge_0.70": false,
       "A4_no_answer_precision_ge_0.66": false,
       "A4b_false_unsupported_le_0.20": false
@@ -1175,14 +1006,15 @@
         "manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf"
       ],
       "equivalent_documents": [],
-      "support": 1.0,
-      "page_support": 1.0,
+      "support": 0.667,
+      "page_support": 0.667,
       "found_terms": [
         "Concrete Usage for Posts",
-        "285 lbs",
         "140 lbs"
       ],
-      "missing_terms": [],
+      "missing_terms": [
+        "285 lbs"
+      ],
       "element_type_ok": true,
       "image_evidence_ok": null,
       "top_score": 21.021,
@@ -1371,14 +1203,14 @@
         "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf"
       ],
       "equivalent_documents": [],
-      "support": 0.667,
-      "page_support": 0.667,
+      "support": 0.333,
+      "page_support": 0.333,
       "found_terms": [
-        "130 MPH",
         "3.3"
       ],
       "missing_terms": [
-        "TABLE 4"
+        "TABLE 4",
+        "130 MPH"
       ],
       "element_type_ok": false,
       "image_evidence_ok": null,
@@ -1398,7 +1230,7 @@
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
-      "passed": true,
+      "passed": false,
       "top_hits": [
         {
           "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
@@ -5063,13 +4895,14 @@
         "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
       ],
       "equivalent_documents": [],
-      "support": 1.0,
-      "page_support": 1.0,
+      "support": 0.5,
+      "page_support": 0.5,
       "found_terms": [
-        "52609",
         "Pedro De Figueiredo"
       ],
-      "missing_terms": [],
+      "missing_terms": [
+        "52609"
+      ],
       "element_type_ok": false,
       "image_evidence_ok": null,
       "top_score": 21.134,
@@ -5225,23 +5058,28 @@
       "query_form": "natural_question",
       "answerable": true,
       "n_results": 10,
-      "doc_rank": null,
-      "page_rank": null,
+      "doc_rank": 3,
+      "page_rank": 3,
       "expected_documents": [
-        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf"
       ],
-      "equivalent_documents": [],
-      "support": 1.0,
+      "equivalent_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-24-0117.05-Barrette-successor-extruded-pvc-fencing-post-CertainTeed-transfer-2029.pdf",
+        "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-24-0117.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+        "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf"
+      ],
+      "support": 0.25,
       "page_support": 1.0,
       "found_terms": [
+        "POST SPACING AND FOOTING DIMENSIONS"
+      ],
+      "missing_terms": [
         "88",
-        "POST SPACING AND FOOTING DIMENSIONS",
         "HVHZ: MIAMI-DADE AND BROWARD COUNTIES",
         "ASCE 7-10"
       ],
-      "missing_terms": [],
       "element_type_ok": false,
-      "image_evidence_ok": false,
+      "image_evidence_ok": true,
       "top_score": 22.332,
       "second_stage_attachments": 0,
       "element_types": [
@@ -5323,15 +5161,15 @@
         "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf"
       ],
       "equivalent_documents": [],
-      "support": 0.6,
-      "page_support": 0.6,
+      "support": 0.4,
+      "page_support": 0.4,
       "found_terms": [
-        "130 MPH",
         "3.3",
         "EXPOSURE CATEGORY"
       ],
       "missing_terms": [
         "TABLE 4",
+        "130 MPH",
         "2 3/8"
       ],
       "element_type_ok": false,
@@ -5352,7 +5190,7 @@
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
-      "passed": true,
+      "passed": false,
       "top_hits": [
         {
           "source_path": "manuals/industry-standards/CLFMI-Chain-Link-Wind-Load-Guide-Line-Post-Spacing_WLG2445_2023.pdf",
@@ -5685,15 +5523,15 @@
         "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
       ],
       "equivalent_documents": [],
-      "support": 1.0,
-      "page_support": 1.0,
-      "found_terms": [
+      "support": 0.0,
+      "page_support": 0.0,
+      "found_terms": [],
+      "missing_terms": [
         "POST SPACING AND FOOTING DIMENSIONS",
         "HVHZ: MIAMI-DADE AND BROWARD COUNTIES",
         "ASCE 7-10",
         "FOOTING TABLE"
       ],
-      "missing_terms": [],
       "element_type_ok": false,
       "image_evidence_ok": false,
       "top_score": 30.467,
@@ -6029,16 +5867,16 @@
         "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf"
       ],
       "equivalent_documents": [],
-      "support": 0.8,
+      "support": 0.4,
       "page_support": 1.0,
       "found_terms": [
         "12-1106.11",
-        "Fence Columbia, Imperial and Chesterfield Models",
-        "EngCo",
         "03/13/2018"
       ],
       "missing_terms": [
-        "12-048"
+        "12-048",
+        "Fence Columbia, Imperial and Chesterfield Models",
+        "EngCo"
       ],
       "element_type_ok": true,
       "image_evidence_ok": null,
@@ -6058,7 +5896,7 @@
       ],
       "reported_unsupported": false,
       "unsupported_reason": "",
-      "passed": true,
+      "passed": false,
       "top_hits": [
         {
           "source_path": "manuals/certainteed-bufftech/structural/NOA-12-1106.11-extruded-pvc-vinyl-fencing.pdf",
@@ -6305,14 +6143,14 @@
         "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-24-0117.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
         "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf"
       ],
-      "support": 0.429,
-      "page_support": 0.857,
+      "support": 0.143,
+      "page_support": 0.714,
       "found_terms": [
-        "16",
-        "36",
         "POST SPACING AND FOOTING DIMENSIONS"
       ],
       "missing_terms": [
+        "16",
+        "36",
         "96",
         "CONCRETE",
         "42485",
@@ -6487,16 +6325,15 @@
         "manuals/weatherables/structural/weatherables-cad-augusta-8x8-privacy.png"
       ],
       "equivalent_documents": [],
-      "support": 0.4,
-      "page_support": 0.6,
-      "found_terms": [
-        "96",
-        "5.5"
-      ],
+      "support": 0.0,
+      "page_support": 0.0,
+      "found_terms": [],
       "missing_terms": [
         "72",
+        "96",
         "U-Channels",
-        "39.5"
+        "39.5",
+        "5.5"
       ],
       "element_type_ok": false,
       "image_evidence_ok": false,
@@ -6567,23 +6404,27 @@
       "query_form": "natural_question",
       "answerable": true,
       "n_results": 10,
-      "doc_rank": null,
+      "doc_rank": 3,
       "page_rank": null,
       "expected_documents": [
-        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf"
       ],
-      "equivalent_documents": [],
-      "support": 1.0,
-      "page_support": 1.0,
-      "found_terms": [
+      "equivalent_documents": [
+        "manuals/certainteed-bufftech/structural/NOA-24-0117.05-Barrette-successor-extruded-pvc-fencing-post-CertainTeed-transfer-2029.pdf",
+        "manuals/freedom-outdoor-living/structural/MiamiDade-NOA-24-0117.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf",
+        "manuals/industry-standards/structural/Miami-Dade-NOA_Barrette-Outdoor-Living_Extruded-PVC-Vinyl-Fencing_24-0117.05.pdf"
+      ],
+      "support": 0.0,
+      "page_support": 0.0,
+      "found_terms": [],
+      "missing_terms": [
         "POST AND FOOTING DESIGN",
         "3000 PSI CONCRETE",
         "EXISTING SOIL",
         "FOOTING TABLE"
       ],
-      "missing_terms": [],
       "element_type_ok": false,
-      "image_evidence_ok": false,
+      "image_evidence_ok": true,
       "top_score": 20.452,
       "second_stage_attachments": 0,
       "element_types": [
@@ -6737,17 +6578,17 @@
         "manuals/industry-standards/structural/Miami-Dade-NOA_VEKA-Inc_PVC-Privacy-Fence-Panels_24-0729.04.pdf"
       ],
       "equivalent_documents": [],
-      "support": 0.333,
+      "support": 0.167,
       "page_support": 0.5,
       "found_terms": [
-        "TAHOE",
-        "CONCRETE"
+        "TAHOE"
       ],
       "missing_terms": [
         "17.71",
         "DESIGN PRESSURE",
         "FASTEST MILE",
-        "3000 PSI MIN"
+        "3000 PSI MIN",
+        "CONCRETE"
       ],
       "element_type_ok": false,
       "image_evidence_ok": true,

@@ -203,13 +203,28 @@ relations); `gq-228` and `gq-204`.
 
 ### Three code defects found while repairing, none fixed here
 
-1. **`evidence_support` is credited from documents that are not the expected one.**
-   `evaluate.py:242` joins `_returned_evidence` over **all ten results**, while the
-   element-type and image checks at `:269`/`:274` are scoped to `expected_docs`. Consequence:
-   `gq-004`, `gq-009` and `gq-019` each scored a perfect **1.0 with `doc_rank: None`** — their
-   terms are NOA boilerplate any sibling sheet supplies. **The headline support number credits
-   evidence from the wrong document.** Fixing this will move 0.6528 downward and is the single
-   most important outstanding change to the instrument.
+1. ~~**`evidence_support` is credited from documents that are not the expected one.**~~
+   **FIXED 2026-09-14.** `joined` **and** `page_joined` are now scoped to `expected_docs`, as
+   `type_ok`/`image_ok` at `:269`/`:274` always were. `score_question` was extracted from
+   `evaluate_question` to make the rule testable on a constructed result list — it could not be
+   reached before without a full store and a real query, which is how the defect survived.
+
+   `[measured]` **evidence_support 0.6528 → 0.5271**, page support 0.7372 → 0.6370, answerable
+   passing **28 → 25**. No acceptance flag flips; A3 support failed before and after.
+
+   **It moves verdicts, not only the mean** — `passed` requires `support >= 0.5`, so `gq-019`,
+   `gq-112` and `gq-005` become honest failures. An adversarial check could not falsify the
+   scoping: of the 11 questions that move, **9 had the expected document retrieved at the wrong
+   unit or page** — which is exactly what unit support is supposed to report — 1 is the
+   `285 lbs` extraction truncation, and **0 are "another document legitimately owns the
+   answer"**. The credit removed was boilerplate: `ASCE 7-10` and
+   `HVHZ: MIAMI-DADE AND BROWARD COUNTIES` are printed by 7-8 sibling sheets; `gq-018` was
+   drawing page credit from a **chain-link gates manual**.
+
+   Both were scoped together deliberately. With one scoped and the other not, the pair stops
+   being a ladder — 0.527 against an unscoped 0.737 mixes "on the page but not in the unit"
+   with "in a different document entirely". Scoped, `page_support >= support` still holds for
+   every question, so their gap keeps its single meaning.
 2. **Term matching is an unanchored substring test.** `_norm(term) in joined`, so `88` matches
    inside `1988` and `12` inside `73011754`. Roughly a dozen terms across eight questions are
    bare two-digit numbers or corpus-wide boilerplate (`CONCRETE` df 717). Anchor on word
@@ -242,9 +257,7 @@ the detector needs a signal that is not term presence.
 
 1. ~~**Audit and repair the gold set**~~ — **DONE 2026-09-14**, see §6a. `query_terms` demoted,
    the keyword column retired, six questions repaired, three code defects filed.
-2. **Scope `evidence_support` to the expected documents** (§6a defect 1). The headline number
-   currently credits evidence from the wrong document; three questions score 1.0 having
-   retrieved nothing expected. Nothing else about support means anything until this lands.
+2. ~~**Scope `evidence_support` to the expected documents**~~ — **DONE**, see §6a defect 1.
 3. **Fix the no-answer tokenizer defect** (§3), and settle A4 against the corrected class mix
    at the same time — the two gates are one rule and cannot both be satisfied by tuning it.
 3. **Re-run `cli audit`** and correct `projection-relevance-audit.md`'s figures.
