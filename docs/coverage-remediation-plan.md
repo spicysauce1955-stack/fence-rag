@@ -136,7 +136,7 @@ perform in passing.
 **Acceptance.** A recorded diff between the stored snapshot and one built from current code;
 either "no change" or a named list of what moved. Nothing written to `facts`.
 
-## 1 · Item 1 — grade the evaluation on the query production actually sends  `[track A]`
+## 1 · Item 1 — grade the evaluation on the query production actually sends  `[track A]` `[BUILT]`
 
 **Defect.** `evaluate._query_for()` prefers a question's hand-written `query_terms` over the
 question itself, and `[measured]` **all 79 gold questions carry them**. The production path
@@ -165,22 +165,34 @@ report; `summary["raw"]` carries unrounded means for both (G65).
 
 **Not in scope.** Making anything pass. The honest numbers are allowed to be worse.
 
-## 2 · Item 2 — switch on the second stage  `[track A]`
+## 2 · Item 2 — switch on the second stage  `[track A]` `[BUILT]`
 
 **Defect.** `retrieval.search_evidence(second_stage=False)` by default, and
 `SECOND_STAGE_MIN_TERM_DF_SHARE = 0.30`. The mechanism is built, tested and off.
 
-`[measured]` second stage on with the floor loosened to ~0.75: evidence support
-**0.650 → 0.7062**. The floor was suppressing exactly the headings that carry the missing
-terms (`3000 PSI`, `ASCE 7-10`, `EXPOSURE D`), which is also audit finding F1 — 33.9% of
-heading text is reachable nowhere else, and the second stage is the remedy that was built for
-it. By construction it cannot move document recall, page recall or no-answer precision
-(`tests/test_second_stage.py`).
+**BUILT 2026-09-14 — and this item is corrected by its own execution.** What follows is what
+the measurement said, not what this plan first claimed.
 
-**Honest expectation.** That 0.7062 was measured on the keyword column. The natural-question
-baseline is 0.622, so the same lift lands near **0.678** — this item probably does **not**
-clear 0.70 on the honest ruler. Ship it because it is a real, significant, invariant-
-preserving improvement, not because it turns a criterion green.
+`[measured]` on the graded column, evidence support **0.6219 → 0.6528**, 5 questions improve
+and 0 regress. By construction it cannot move document recall, page recall or no-answer
+precision, and that held empirically to ten digits (`tests/test_second_stage.py`).
+
+**The floor is 0.40, not the 0.75 this plan specified.** Support plateaus at 0.40: every value
+from 0.40 to 1.00 scores 0.6527804878. 0.75 buys **+128 attachments for +0.000000 support**,
+and 138 of those 152 marginal rows add nothing but a generic corpus word — `fence` 90,
+`vinyl` 37. 0.75 was simply the smallest round value that pushed the **keyword** column over
+0.70: a number fitted to the criterion, on the instrument item 1 exists to retire.
+
+**This plan's stated justification for the loosening was falsified.** It claimed the floor was
+suppressing the headings carrying `3000 PSI`, `ASCE 7-10` and `EXPOSURE D`. **Zero** of the 152
+marginal attachments contain any of them. The reasoning was wrong even though the direction
+was right — which is the argument for measuring an item before shipping it, not after.
+
+**The honest expectation was right, and still too optimistic.** This plan predicted ~0.678 by
+transplanting the keyword lift (+0.0563). The real lift on the honest ruler is **+0.0309** —
+55% of it — landing at **0.6528**, a full 0.047 short of 0.70. A lift measured on one
+instrument does not transfer to another; it shrinks. Shipped as an improvement, with no
+criterion claimed.
 
 **Note the inconsistency it closes.** `docs/second-stage-evaluation.md` rejected this for
 missing 0.70 by **0.0054** — one seventh of the metric's own standard error — while R3, whose
@@ -191,6 +203,43 @@ and record it.
 **Acceptance.** Both evaluation columns reported (item 1); recall@10 unchanged; false-
 unsupported ≤ 0.20; a human spot-check that newly attached elements are headings and spec
 lines rather than footers.
+
+## 2a · What executing items 1 and 2 taught
+
+`[measured]` 2026-09-14, PR #7. Recorded because the plan was wrong in a way worth
+generalising.
+
+**Item 1's real result.** All four criteria fail on the graded column:
+
+| criterion | graded (natural question) | reported (keyword hints) |
+|---|---|---|
+| document recall@10 | **0.7561 FAIL** | 0.8049 PASS |
+| evidence support | **0.6528 FAIL** | 0.6946 FAIL |
+| no-answer precision | **0.4865 FAIL** | 0.3243 FAIL |
+| false-unsupported rate | **0.3902 FAIL** | 0.1463 PASS |
+
+**Four defects surfaced that nothing in this plan predicted**, every one of them a
+consequence of moving a default or an instrument rather than of the feature itself:
+
+- **`gq-011`'s annotated keywords name the SUPERSEDED NOA `23-0314.05`**, which drags search
+  to the wrong document: `doc_rank None` / support 0.2 on keywords, against **rank 1** /
+  support 0.6 on the plain question. The routed block recorded *"search cannot find this"* as
+  routing's justification — an artifact of the instrument. Routing is still right for its own
+  reason (`resolve` answers with the supersession chain), but a conclusion this project had
+  drawn rested on the broken ruler. **Assume others do too.**
+- **`test_attachments_clear_the_information_floor` asserted only `gain > 0.0`**, which every
+  floor satisfies including 1.00. The floor was untested, which is why one fitted to the wrong
+  column survived.
+- **`default_report_name` named the second stage by truth rather than by deviation** from the
+  default, so moving the default silently renamed the shipped configuration and stopped
+  writing the baseline artifacts. Its own docstring already stated the rule it was breaking.
+- **Both `--second-stage` CLI flags were opt-in `store_true`**, so `cli evaluate` kept
+  measuring the old configuration after the default moved.
+
+**The generalisation, for items 3 through 8:** when a default moves, every place that names,
+tests or reports the old value is a defect site. Grep for the constant, not just for the
+behaviour. And a lift measured on one instrument does not transfer to another — re-measure on
+the graded column before quoting a number.
 
 ## 3 · Item 3 — close the two publication-gate gaps  `[track A]`
 
