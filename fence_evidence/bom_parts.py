@@ -1,14 +1,20 @@
-"""Publish a `Part` from a parts-list row a person reviewed against its crop.
+"""Identify the part a reviewed parts-list row names. Publishes nothing yet.
 
 `[measured]` 2026-09-14: 177 reviewed parts-list rows across 5 Miami-Dade NOAs,
 531 cells, one reviewer, every row `accepted` or `corrected`. They publish
 nothing today, while the 42 `Part`s that do publish come from hand-written
 Python modules carrying values transcribed into source.
 
-The difference this module makes is the provenance, not the count: every number
-it publishes traces to a row a named person compared against the image this
-store holds, and `curation_level` is READ from that review column rather than
-asserted.
+**Status, stated plainly because the first draft of this docstring did not.**
+This module parses and identifies; it returns an id string and a spine type. It
+constructs no `Part`, and nothing in `fence_evidence/` imports it yet. The
+`Part` construction -- spec fields, cites, and a `curation_level` READ from the
+review column rather than asserted -- is the next layer and is not here.
+
+The difference it is meant to make is the provenance, not the count: every
+number it would publish traces to a row a named person compared against the
+image this store holds. That claim belongs to the layer that publishes, and
+until that exists this module should not be read as making it.
 
 Two refusals do the real work, and both were shaped by defects this project has
 already paid for:
