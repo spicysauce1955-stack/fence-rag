@@ -96,6 +96,13 @@ SECTION_MAX_CHARS = 45
 # undifferentiated blob and presented two MUTUALLY EXCLUSIVE methods as a
 # sequence -- a reader would do both.
 BRANCH_RE = re.compile(r"^([A-Za-z])[.)]\s+\S")
+# The lettered label is to a branch what the glyph is to a bullet: chrome in
+# front of the instruction. It has to come off before anything asks what the
+# line SAYS, for exactly the reason `_classify` strips a leading `4. ` --
+# `PROHIBITION_RE` anchors at the start, so `c. Never cut the top of the post`
+# read as an ordinary alternative. `[measured]` that line is printed by 5
+# documents and was typed `branch` in every one.
+BRANCH_LABEL_RE = re.compile(r"^[A-Za-z][.)][" + re.escape(LEADER_GAP) + r"]*")
 # A rider the guide prints under an instruction; never the start of one.
 RIDER_RE = re.compile(r"^(Note|NOTE|Caution|CAUTION|Tip|TIP)\b\s*[:.-]?", re.ASCII)
 # A prohibition is not a step, and the design's own worked example says so:
@@ -343,8 +350,29 @@ def split_block(block: str, *, text_source: str = "pdf_text_layer") -> list[Segm
         text = block[start:end]
         if label is not None:
             current_branch = label
+            # A lettered label was given its kind directly and never asked
+            # `_classify` what it said, so the one kind that must override an
+            # alternative could not. `branch` carries content, so nothing was
+            # lost -- but `c. Never cut the top of the post` published as an
+            # `AssemblyStep` instructing the installer to do the thing the page
+            # forbids, which is the same defect, on the same line, that typing
+            # a prohibition `step` was. Only `prohibition` overrides: it is the
+            # one kind whose omission is dangerous rather than merely wrong,
+            # and `[measured]` 997 of the corpus's 1,002 branch segments are
+            # ordinary instructions that must stay scoped to their alternative.
+            #
+            # The repair is proposed here too, and not only for tidiness: the
+            # damage HIDES the word the kind turns on (`N\never` flattens to
+            # `N ever`), so a branch that proposed no repair could not have seen
+            # a damaged prohibition even in principle. 0 branch segments carry
+            # such damage today; the ordering is the point, not the count.
+            body = BRANCH_LABEL_RE.sub("", text.lstrip(), count=1)
+            repair, confidence = _propose_repair(body)
+            kind = _classify(body, "", 0, label, text_source)
             out.append(Segment(text=text, start=start, end=end, leader="", depth=0,
-                               kind="branch", branch=label, repair=None))
+                               kind=(kind if kind == "prohibition" else "branch"),
+                               branch=label, repair=repair,
+                               repair_confidence=confidence))
             continue
         if depth == 0 and leader:
             # A new top-level bullet closes any open lettered alternative.
