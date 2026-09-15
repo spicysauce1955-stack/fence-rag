@@ -140,10 +140,15 @@ class TestTheWorkbench(unittest.TestCase):
         must not come back looking untouched."""
         from fence_evidence.reviews import apply_step_decisions
         from test_step_decisions import decision
-        apply_step_decisions(self.conn, [decision(candidates(self.conn)[0])],
-                             reviewer="an-owner", dry_run=False)
+        d = decision(candidates(self.conn)[0])
+        apply_step_decisions(self.conn, [d], reviewer="an-owner", dry_run=False)
         row = rows_of(self.workbench())[0]
-        self.assertEqual(attr(row, "data-verdict"), "accepted")
+        # Whatever was recorded, not a fixed string: the first candidate here
+        # carries a proposed repair, so a reviewer answering it lands on
+        # `corrected`. What this test is about is that the row comes back
+        # showing the decision at all.
+        self.assertEqual(attr(row, "data-verdict"), d["verdict"])
+        self.assertIn(d["verdict"], ("accepted", "corrected"))
 
 
 class TestWhatIsWaiting(unittest.TestCase):

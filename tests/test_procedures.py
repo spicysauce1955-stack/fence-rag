@@ -53,7 +53,19 @@ def scratch() -> sqlite3.Connection:
 
 
 def review(conn, seq, **kw):
+    """One reviewer's decision about candidate `seq`.
+
+    Where the splitter proposed a repair and the caller did not say otherwise,
+    this answers it — `corrected`, carrying the repaired words. That is what a
+    reviewer does, and `build_procedures` now refuses a step whose repair the
+    review left unanswered rather than publishing `I nsert post in hole`. Tests
+    that are about something else (ordering, citations, scope) should not have
+    to restate that decision; the one that is about it says so explicitly.
+    """
     row = conn.execute("SELECT * FROM step_candidates WHERE seq=?", (seq,)).fetchone()
+    if (row["text_repair"] and "text_final" not in kw
+            and kw.get("verdict", "accepted") == "accepted"):
+        kw = dict(kw, verdict="corrected", text_final=row["text_repair"])
     args = dict(element_id=row["element_id"], char_start=row["char_start"],
                 char_end=row["char_end"], text_seen=row["text_raw"],
                 reviewer="a-person", verdict="accepted",

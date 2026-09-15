@@ -70,9 +70,22 @@ def candidates(conn):
 
 
 def decision(row, **kw):
+    """One row of a sitting file.
+
+    Where the splitter proposed a repair and the caller did not say otherwise,
+    this answers it — `corrected`, carrying the repaired words, which is what a
+    reviewer working the console does. `build_procedures` refuses a step whose
+    repair the review left unanswered rather than publishing `I nsert post in
+    hole`, so a fixture that stayed silent would be exercising a refusal it
+    never meant to.
+    """
     d = {"candidate_id": row["candidate_id"], "text_seen": row["text_raw"],
          "verdict": "accepted", "step_kind": "installation",
          "step_scope": "post", "slot_target": {"kind": "PostSlot", "key": "post"}}
+    if (row["text_repair"] and "text_final" not in kw
+            and kw.get("verdict", "accepted") == "accepted"):
+        d["verdict"] = "corrected"
+        d["text_final"] = row["text_repair"]
     d.update(kw)
     return d
 
