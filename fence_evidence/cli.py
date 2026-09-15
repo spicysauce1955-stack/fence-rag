@@ -174,6 +174,18 @@ def main(argv: list[str] | None = None) -> int:
                         "bbox overlap into step candidates (the numbered-flow "
                         "seam `--propose` does not read; idempotent)")
     p.add_argument("--queue", action="store_true", help="what is waiting for a person")
+    p.add_argument("--import-proposals", nargs="+", metavar="READING",
+                   help="fill proposed_kind/scope/slot from one or more "
+                        "independent readings (step_4_mapping JSON). Anchored on "
+                        "(document, page, text): a step no candidate holds is "
+                        "refused, a reviewed candidate is never touched, and two "
+                        "readers who disagree leave the column NULL with both "
+                        "readings in proposal_basis")
+    p.add_argument("--dry-run", action="store_true",
+                   help="with --import-proposals: measure, write nothing")
+    p.add_argument("--disagreements", action="store_true",
+                   help="with --import-proposals: also list the candidates the "
+                        "readers read differently")
     p.add_argument("--document", help="document_id or source_path")
     p.add_argument("--page", type=int, help="one page only")
     p.add_argument("--limit", type=int, default=200)
@@ -301,8 +313,14 @@ def main(argv: list[str] | None = None) -> int:
                    help="replay a ledger into this store. Dry run without --apply; "
                         "refuses the whole file if any line disagrees with a "
                         "review already recorded here")
+    p.add_argument("--apply-steps", dest="apply_steps", metavar="PATH",
+                   help="record a whole sitting of step decisions from a JSONL "
+                        "file (the review console writes one). Needs --reviewer. "
+                        "Dry run without --apply; one bad row refuses the batch, "
+                        "because half a sitting cannot be re-run without "
+                        "re-deciding the half that took")
     p.add_argument("--apply", action="store_true",
-                   help="with --import: actually write")
+                   help="with --import or --apply-steps: actually write")
 
     p = sub.add_parser("fact-review",
                        help="the human review loop for regex-extracted facts "
@@ -547,8 +565,10 @@ def main(argv: list[str] | None = None) -> int:
                                             dedupe_text=args.dedupe_text,
                                             page_cap=args.page_cap))["summary"])
     elif args.cmd == "steps":
-        if sum([args.propose, args.pair_numbered, args.queue, bool(args.accept)]) != 1:
-            _print({"error": "choose exactly one of --propose, --pair-numbered, --queue or --accept"})
+        if sum([args.propose, args.pair_numbered, args.queue, bool(args.accept),
+                bool(args.import_proposals)]) != 1:
+            _print({"error": "choose exactly one of --propose, --pair-numbered, "
+                             "--queue, --accept or --import-proposals"})
             return 2
         if args.accept and not (args.reviewer or "").strip():
             _print({"error": "--accept needs --reviewer: the name is the only thing "
@@ -611,6 +631,21 @@ def main(argv: list[str] | None = None) -> int:
                             "SELECT COUNT(*) FROM step_candidates "
                             "WHERE document_id=? AND reviewer IS NOT NULL",
                             (row[0],)).fetchone()[0]})
+            elif args.import_proposals:
+                from .step_proposals import (ProposalRefused, disagreements,
+                                             import_proposals)
+                try:
+                    out = import_proposals(conn, args.import_proposals,
+                                           document=args.document,
+                                           apply=not args.dry_run)
+                except ProposalRefused as exc:
+                    _print({"error": "error.unresolved_document",
+                            "message": str(exc)})
+                    return 1
+                if args.disagreements:
+                    out["disagreements"] = disagreements(
+                        conn, limit=args.limit) if not args.dry_run else []
+                _print(out)
             elif args.propose:
                 if not args.document:
                     _print({"error": "--propose needs --document"})
@@ -754,10 +789,16 @@ def main(argv: list[str] | None = None) -> int:
         # Checked before the imports, so a usage error does not depend on a
         # module being importable.
         modes = (bool(args.queue), args.accept is not None, bool(args.rebuild),
-                 bool(args.export), args.import_path is not None)
+                 bool(args.export), args.import_path is not None,
+                 args.apply_steps is not None)
         if sum(modes) != 1:
             _print({"error": "choose one of --queue, --accept, --rebuild, "
-                             "--export, --import"})
+                             "--export, --import, --apply-steps"})
+            return 2
+        if args.apply_steps is not None and not (args.reviewer or "").strip():
+            _print({"error": "--apply-steps requires --reviewer: the name is the "
+                             "only thing separating 'software read this' from "
+                             "'a person confirmed it'"})
             return 2
         import json as _json
         from pathlib import Path as _P
@@ -772,6 +813,22 @@ def main(argv: list[str] | None = None) -> int:
                 _print(reviews.rebuild_projection(conn))
             elif args.export:
                 _print(reviews.export_reviews(conn, args.out))
+            elif args.apply_steps is not None:
+                # The end of a sitting. Whole-batch: `apply_step_decisions`
+                # writes all of the decisions or none of them, and a refusal
+                # exits non-zero for `--import`'s reason -- a script must not be
+                # able to read a refused sitting as an applied one.
+                try:
+                    decisions = reviews.read_step_decisions(args.apply_steps)
+                    out = reviews.apply_step_decisions(
+                        conn, decisions, reviewer=args.reviewer,
+                        dry_run=not args.apply)
+                except reviews.ReviewRefused as e:
+                    _print({"error": e.code, "message": str(e)})
+                    return 1
+                _print(out)
+                if out["refusals"]:
+                    return 1
             elif args.import_path is not None:
                 try:
                     out = reviews.import_reviews(conn, args.import_path,

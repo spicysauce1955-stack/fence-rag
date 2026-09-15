@@ -455,6 +455,40 @@ class TestANumberedInstructionSurvivesWrapping(unittest.TestCase):
         self.assertEqual(kinds(split_block("2. Dig Holes", text_source="pdf_text_layer")),
                          ["section"])
 
+    def test_a_prohibition_under_a_lettered_branch_is_a_prohibition(self):
+        """`c. Never cut the top of the post` is verbatim from five documents
+        (doc-87db00d364b3 p45, doc-700e6e22c440 p50, doc-1085f7c65c47 p45,
+        doc-6431d597 p50, doc-3a8071e7 p50) and every one was typed `branch`,
+        because a lettered label was given its kind directly and never asked
+        `_classify` what it said. `branch` carries content, so it is not lost —
+        but it publishes as an `AssemblyStep` telling an installer to do the
+        one thing the page forbids, which is the exact defect `prohibition`
+        was added to stop when the same line was typed `step`."""
+        segs = split_block("c. Never cut the top of the post",
+                           text_source="pdf_text_layer")
+        self.assertEqual(kinds(segs), ["prohibition"])
+        self.assertEqual(segs[0].branch, "c")
+
+    def test_a_lettered_branch_that_instructs_is_still_a_branch(self):
+        """The fix must not retype every lettered alternative. 997 of the
+        corpus's 1,002 branch segments are ordinary instructions and they stay
+        `branch`, which is what scopes them to their alternative."""
+        segs = split_block("a. Measure height from top of post\n"
+                           "b. Cut off bottom of post with metal cutting blade",
+                           text_source="pdf_text_layer")
+        self.assertEqual(kinds(segs), ["branch", "branch"])
+
+    def test_damage_cannot_hide_a_prohibition_under_a_lettered_branch(self):
+        """The same ordering trap the bullet path already guards: `N\never`
+        flattens to `N ever`, so a kind decided on the raw reading cannot see
+        the word. A lettered branch proposed no repair at all, so it could not
+        have seen it even in principle."""
+        segs = split_block("c. N\never cut the top of the post",
+                           text_source="pdf_text_layer")
+        self.assertEqual(kinds(segs), ["prohibition"])
+        self.assertEqual(segs[0].repair, "Never cut the top of the post")
+        self.assertEqual(segs[0].repair_confidence, "high")
+
     def test_a_numbered_block_that_does_contain_bullets_is_still_cut(self):
         """Wrapping is not the same as containing a list. A numbered block with
         real bullet leaders must still be split into them."""

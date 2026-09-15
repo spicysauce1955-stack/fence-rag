@@ -2,6 +2,7 @@
 
 ```text
 Index rebuilt 2026-09-08, after a five-way audit of every document in this tree.
+Amended 2026-09-15: added parser-tool-evaluation.md; corrected the step-candidate count.
 Every "state" line below was measured on that date against the store and the code.
 ```
 
@@ -41,7 +42,8 @@ print `OK`.
 | [`review-status-migration-plan.md`](review-status-migration-plan.md) | **A PLAN, not a change.** `naming.md` E-3: one column name over four vocabularies. Measured matrix, blast radius, four costed options, and the correction that the defect is not currently producing a wrong curation level. Needs the owner's decision, because every option but the recommended one writes to rows that do not regenerate |
 | [`layering.md`](layering.md) | Five layers and one rule — *every reference points down, never up*. The rule is **decided and enforced** by a test; the vocabulary is proposed. §2a carries the hard/soft overlay |
 | [`workflows/source-to-contract.md`](workflows/source-to-contract.md) | How new knowledge actually gets published today. The most current document in this tree |
-| [`assembly-step-design.md`](assembly-step-design.md) | `Procedure`/`AssemblyStep`. **Built** — the blocker is 91 unreviewed candidates, not code |
+| [`parser-tool-evaluation.md`](parser-tool-evaluation.md) | **FINDINGS**, 2026-09-15. docling, marker, MinerU, ColPali, RAGFlow/DeepDoc, kotaemon, measured against this platform. **Nothing adopted.** PDF parsing is 7.3% of this codebase and the addressable surface is 73 pages; none of the six has a human-review layer. Carries the cost of a parser swap (716 of 962 citations, 71 crop-keyed reviews), the split proposed for the 73 pages, and the one-day test that would settle it |
+| [`assembly-step-design.md`](assembly-step-design.md) | `Procedure`/`AssemblyStep`. **Built** — the blocker is 2,312 unreviewed candidates, not code. 559 machine proposals now sit on them, and a throwaway-copy run proved 26 Procedures / 514 steps come out |
 | [`integration/knowledge-datamodel.md`](integration/knowledge-datamodel.md) | The entity shapes. The one boundary document a newcomer needs |
 | [`integration/registry-additions.md`](integration/registry-additions.md) | The live vocabularies — source classes, warning codes, `curation_level` |
 | [`integration/source-refs-design.md`](integration/source-refs-design.md) | §4.2/§4.3 are normative and implemented. §1's `sref_` scheme was never built |

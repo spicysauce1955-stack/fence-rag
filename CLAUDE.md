@@ -14,8 +14,8 @@ tree and says which are live and which are history.
 **The headline gap:** `[measured]` 2026-09-08 a snapshot publishes 9 `ParameterTable`s, 42
 `Part`s and 8 `PartType`s — and **0 `Procedure`s, 0 `Rule`s, 0 `FenceModel`s, 0 `Combination`s**.
 This base knows numbers, not method. `Procedure` is *built* (`steps.py`, `procedures.py`,
-`cli steps`) and publishes nothing because **91 step candidates across 2 documents have 0
-reviews**. `Rule` has no shape anywhere. Closing this outranks everything at the boundary.
+`cli steps`) and publishes nothing because **2,312 step candidates across 4 documents have 0
+reviews** (91 across 2 when this was written). `Rule` has no shape anywhere. Closing this outranks everything at the boundary.
 
 ## What this repo is
 
@@ -282,7 +282,7 @@ three Showtech China catalogs.
 ```
 corpus (read-only)          workspace/ (every output)
 manuals/ china/manuals/     catalog/   corpus-manifest.jsonl (one row per file)
-data/                       derived/   page images + region crops (5.0 GB, git-ignored)
+data/                       derived/   page images + region crops (4.5 GB, git-ignored)
         |                   indexes/   evidence.db (git-ignored)
         v                   reports/   audits, coverage, evaluation, review
    extract.py               tests/     evaluation results
@@ -384,7 +384,7 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   `sourcerefs.py` builds the Discovery read model on top, and `api.py` serves
   `GET /source-refs/{id}` and `POST /source-refs:batch` behind a bearer allowlist.
 - **A human review is the ONLY thing here that does not regenerate, and it now has a
-  file.** Elements, facts, the projection and even the 1,755 table readings all rebuild
+  file.** Elements, facts, the projection and even the 1,927 table readings all rebuild
   from the corpus or from committed inputs; a person's judgement does not.
   `workspace/catalog/review-ledger.jsonl` is the committed, deterministic export
   (`cli review --export` / `--import`), keyed on evidence — `crop_sha256` for a table
@@ -441,7 +441,8 @@ Things that will bite you if you don't know them (all measured, see the corpus a
 - **`ref_id` embeds a bbox, and a re-extraction can move it.** A 0.02pt shift
   changes the id completely and `delete_version_rows()` removes the rows the old
   id named, so a toolchain upgrade breaks published citations retroactively and
-  obligation 3 with them. All 519 currently resolve; `cli refs --verify` is the
+  obligation 3 with them. All **962** across 25 live snapshots currently resolve --
+  716 of them embed a bbox and would break on a re-segmentation; `cli refs --verify` is the
   guard. The fix is extraction editions — see `docs/four-layer-model-design.md`
   §5.1 and G38. **Do not change `ref_id`'s formula**; published snapshots depend
   on it byte-for-byte.

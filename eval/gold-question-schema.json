@@ -67,7 +67,7 @@
     "required_conditions": {
       "type": "object",
       "description": "the CONDITIONS the expected answer is scoped by, spelled the way parameters.CONDITION_SCOPE spells them -- this is the registry's vocabulary, not a free annotation. A quantity-valued dimension carries its unit in the value, because the domain declares mm and a bare number would read as millimetres: {\"wind_speed_mph\": 130, \"exposure_category\": \"C\", \"fence_height\": \"6 ft\"}",
-      "propertyNames": {"enum": ["code_edition", "exposure_category", "fence_height", "frost_depth_mm", "hvhz", "jurisdiction", "post_role", "slope_method", "wind_speed_mph"]}
+      "propertyNames": {"enum": ["code_edition", "exposure_category", "fence_height", "frost_depth_mm", "hvhz", "jurisdiction", "post_role", "post_size", "slope_method", "wind_speed_mph"]}
     },
     "required_selectors": {
       "type": "object",

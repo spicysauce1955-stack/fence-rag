@@ -17,3 +17,6 @@ workspace/tests/snapstore/
 workspace/reports/review-console.html
 workspace/catalog/emblem-linked-installation.pdf
 workspace/derived/console-img/
+
+# Model-extraction inputs supplied for the parser POC (large, regenerable)
+example/
