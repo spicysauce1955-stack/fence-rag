@@ -22,6 +22,10 @@ OCR_REVIEW_CONFIDENCE = 80.0
 # The negative lookbehind stops the number half of a fraction being captured on
 # its own: "40 1/2\" On Center" must not yield a 2-inch spacing.
 _NUM = r"(?<![\d/\u2044.])(\d+(?:[.½¾¼/\u2044]\d+)?)"
+# The same number, named, for a rule that also captures a qualifier and so
+# cannot rely on the value being group 1. `_scan_text` prefers a `value`
+# group where a pattern defines one.
+_NUM_NAMED = _NUM.replace("(\\d+", "(?P<value>\\d+", 1)
 _IN = r"(?:in\.?|inch(?:es)?|\")"
 _FT = r"(?:ft\.?|feet|foot|')"
 
@@ -55,6 +59,23 @@ PATTERNS: list[tuple[str, re.Pattern, str]] = [
         rf"{_DIAM_WORD}\s*(?:of\s*)?[:\-,]?\s*{_NUM}\s*(?:{_IN}|{_FT})", re.I), "in"),
     ("footing_diameter_in", re.compile(
         rf"{_NUM}\s*(?:{_IN}|{_FT})\s*(?:in\s+)?{_DIAM_WORD}", re.I), "in"),
+    # `Hole size for 4x4 posts = approximately 10"` -- the installation-guide
+    # vernacular for a footing diameter, which never uses the word. `[measured]`
+    # 2026-09-15 it appears 100 times across six guides and the two patterns
+    # above read none of them, because both require `diameter`/`dia` adjacent to
+    # the number and that narrowing is deliberate (see the comment above it).
+    #
+    # The post designation is captured, because the two sizes it separates are
+    # different values of the SAME parameter and both are printed inside one
+    # element beside a depth that is not post-dependent at all. A condition
+    # derived per element would attach both post sizes to both diameters and to
+    # the depth; this one is bound by the match that carried it, and is `stated`
+    # rather than `assumed` because the document puts the designation and the
+    # number in one clause.
+    ("footing_diameter_in", re.compile(
+        rf"hole\s+size\s+for\s+(?P<post>\d\s*[xX\u00d7]\s*\d)\s*posts?\s*"
+        rf"[:=]?\s*(?:approx(?:imately)?\.?\s*)?{_NUM_NAMED}"
+        rf"\s*(?:{_IN}|{_FT})", re.I), "in"),
     ("post_spacing_in", re.compile(
         rf"{_NUM}\s*(?:{_IN}|{_FT})?\s*(?:on\s*cent(?:er|re)|o\.?\s?c\.?)\b", re.I), "in"),
     ("racking_degrees", re.compile(rf"rack(?:s|ing|able)?\D{{0,24}}{_NUM}\s*(?:degrees?|deg\.?|°)", re.I), "deg"),
@@ -254,7 +275,8 @@ def _scan_text(text: str) -> list[dict]:
     scanned = blank_unit_parentheticals(text)
     for fact_type, rx, unit in PATTERNS:
         for m in rx.finditer(scanned):
-            raw = m.group(1)
+            named = m.groupdict()
+            raw = named.get("value") or m.group(1)
             key = (fact_type, raw.strip().lower())
             if key in seen:
                 continue
@@ -283,9 +305,19 @@ def _scan_text(text: str) -> list[dict]:
             lo_hi = PLAUSIBLE.get(fact_type)
             if lo_hi and norm is not None and not (lo_hi[0] <= norm <= lo_hi[1]):
                 continue   # not credible for this quantity
+            # A condition the MATCH carried, not one `_conditions` found nearby.
+            # It is `stated`: the document put the qualifier and the number in
+            # the same clause, which is exactly what `assumed` exists to deny.
+            match_conditions: dict = {}
+            post = named.get("post")
+            if post:
+                match_conditions["post_size"] = re.sub(
+                    r"\s*[xX\u00d7]\s*", "x", post.strip())
             results.append({"fact_type": fact_type, "unit_original": unit,
                             "match_text": match_text.strip(), "raw": raw,
                             "value_normalized": norm, "unit_normalized": norm_unit,
+                            "conditions": match_conditions,
+                            "condition_basis": "stated" if match_conditions else None,
                             "start": m.start(), "end": m.end()})
     return results
 
@@ -676,7 +708,16 @@ def extract_facts(*, document_id: str | None = None,
                 # captured condition is `assumed`, and no conditions at all is
                 # `unexamined`: nobody looked. Neither is `stated`, which would
                 # require the document to have said so.
-                basis = "assumed" if fact_conditions else "unexamined"
+                # A match-local condition overrides anything proximity found
+                # for the same key, and carries its own basis -- the document
+                # stated it, so calling it `assumed` would understate what we
+                # know and leave a reviewer re-checking a settled question.
+                stated_here = match.get("conditions") or {}
+                fact_conditions.update(stated_here)
+                if stated_here:
+                    basis = match.get("condition_basis") or "stated"
+                else:
+                    basis = "assumed" if fact_conditions else "unexamined"
                 # A3. Look for the second unit inside the value's own window,
                 # not the whole element, or a `(mm)` elsewhere on the page binds
                 # to the wrong number.
@@ -693,8 +734,10 @@ def extract_facts(*, document_id: str | None = None,
                      match["match_text"], match["value_normalized"],
                      match["unit_original"] or None, match["unit_normalized"],
                      json.dumps(fact_conditions), basis,
-                     "conditions captured by regex proximity, not asserted by the "
-                     "document" if fact_conditions else None,
+                     ("the document states the post designation and the size in "
+                      "the same clause" if stated_here else
+                      "conditions captured by regex proximity, not asserted by "
+                      "the document") if fact_conditions else None,
                      json.dumps([alt]) if alt else None,
                      evidence, "regex-v1", int(from_ocr), review, now()))
                 counts[fact_type] = counts.get(fact_type, 0) + 1

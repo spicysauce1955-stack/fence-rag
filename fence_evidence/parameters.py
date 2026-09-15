@@ -147,6 +147,12 @@ CONDITION_SCOPE = {
     "wind_speed_mph": "site",
     "fence_height": "bay",
     "post_role": "post",
+    # `[measured]` 2026-09-15. Six guides print a footing diameter per post
+    # designation -- 10" for a 4x4, 12" for a 5x5 -- 100 times. Both are
+    # `footing_diameter_mm`, which publishes; published bare, either one is
+    # wrong for half the posts it would claim to cover. A registry addition,
+    # not an amendment (CLAUDE.md, docs/integration/README.md).
+    "post_size": "post",
     "slope_method": "param",
 }
 
