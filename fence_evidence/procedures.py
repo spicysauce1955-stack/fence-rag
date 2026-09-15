@@ -106,7 +106,7 @@ def build_procedures(conn: sqlite3.Connection, *, source_ref_page=None,
     rows = conn.execute("""
             SELECT c.candidate_id, c.document_id, c.page_no, c.element_id,
                    c.ordinal, c.seq, c.char_start, c.char_end, c.text_raw,
-                   c.segment_kind, c.review_status, d.title,
+                   c.text_repair, c.segment_kind, c.review_status, d.title,
                    r.step_kind, r.step_scope, r.slot_target, r.text_final,
                    r.verdict
               FROM step_candidates c
@@ -123,12 +123,42 @@ def build_procedures(conn: sqlite3.Connection, *, source_ref_page=None,
 
     by_page: dict[tuple, list] = {}
     waiting: dict[tuple, int] = {}
+    unrepaired: dict[tuple, int] = {}
     titles: dict[tuple, str] = {}
     for r in rows:
         page = (r["document_id"], r["page_no"])
         titles[page] = r["title"] or r["document_id"]
         if (r["review_status"] in PUBLISHABLE and r["verdict"] in PUBLISHABLE
                 and r["step_kind"] and r["step_scope"]):
+            # The splitter offered a repair and the review did not address it.
+            #
+            # `text_i18n` below is `text_final or _body(text_raw)`, and `_body`
+            # strips a leader and collapses whitespace -- it does not repair.
+            # So publishing here writes the damage out verbatim:
+            #
+            #   _body("• N\never strike the PVC post without a wood support")
+            #     -> "N ever strike the PVC post without a wood support"
+            #
+            # which is the ordering trap CLAUDE.md records, surviving all the
+            # way to a published AssemblyStep: the damage HIDES the word the
+            # meaning turns on. `[measured]` 2026-09-15, 176 candidates can
+            # reach this state, 147 of them at high repair confidence.
+            #
+            # The console makes it likely rather than rare. It renders the raw
+            # text, then a line reading "proposed repair: <the fixed words>",
+            # then an accept button -- a reviewer pressing accept has been shown
+            # the repair and has every reason to think it is what gets recorded.
+            #
+            # Reaching for `text_repair` here would fix the symptom and break
+            # the rule: the splitter PROPOSES and a person DISPOSES, and the
+            # space form of this damage over-matches on 65% of distinct
+            # patterns (`docs/assembly-step-design.md` §3a). A machine repair
+            # publishing on an accept that never mentioned it is the laundering
+            # CUR-S0 forbids, one seam over. So this refuses and says why; the
+            # reviewer answers with `corrected` and the words they mean.
+            if r["text_repair"] is not None and r["text_final"] is None:
+                unrepaired[page] = unrepaired.get(page, 0) + 1
+                continue
             by_page.setdefault(page, []).append(r)
         elif r["review_status"] == "unreviewed":
             waiting[page] = waiting.get(page, 0) + 1
@@ -203,6 +233,21 @@ def build_procedures(conn: sqlite3.Connection, *, source_ref_page=None,
                               f"candidates are waiting for a person; until somebody "
                               f"confirms what each line is, none of them publishes"),
                  closes_by="knowledge", severity="informational")
+
+    for page in sorted(unrepaired):
+        document_id, page_no = page
+        n = unrepaired[page]
+        gaps.add(kind="missing_value",
+                 subject={"kind": "page", "id": f"{document_id}#p{page_no}",
+                          "tenant": tenant},
+                 code="step_repair_not_addressed",
+                 params={"page_no": page_no, "steps": n},
+                 would_close=(f"p{page_no} of \"{titles[page]}\": {n} reviewed step"
+                              f"{'s' if n != 1 else ''} came from a line the splitter "
+                              f"offered to repair, and the review did not say which "
+                              f"reading to publish; re-record with a corrected verdict "
+                              f"and the text the reviewer means"),
+                 closes_by="knowledge", severity="warns_line")
     return out, gaps.list()
 
 
