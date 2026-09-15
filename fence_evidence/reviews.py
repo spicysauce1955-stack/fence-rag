@@ -1712,3 +1712,205 @@ def rebuild_step_projection(conn: sqlite3.Connection) -> dict:
         applied += 1
     conn.commit()
     return {"applied": applied, "orphaned": orphaned}
+
+
+# ----------------------------------------------- a sitting's worth of decisions
+# `submit_step_review` records ONE judgement. A page of the Bufftech guide holds
+# ~55 candidates, so a sitting through the one-at-a-time CLI is 55 process
+# invocations, each carrying a candidate id, a kind, a scope and a slot that must
+# all be typed right -- and any one of which can fail halfway through, leaving
+# the owner unable to say which decisions landed. That surface has produced 0
+# step reviews since the table was built.
+#
+# So the batch is the unit. It is validated whole and written whole: one bad row
+# refuses all of them, because half a sitting cannot be re-run without
+# re-deciding the half that took.
+#
+# The fields a decision may carry, and nothing else. A typo -- `kind` for
+# `step_kind` -- would otherwise drop a person's classification silently and
+# record an accept that can never publish, which is the exact failure this
+# module exists to prevent at the other seams.
+STEP_DECISION_FIELDS = frozenset((
+    "candidate_id", "element_id", "char_start", "char_end", "text_seen",
+    "verdict", "step_kind", "step_scope", "slot_target", "text_final",
+    "notes", "reviewer"))
+
+
+def read_step_decisions(path) -> list[dict]:
+    """A decision file: JSONL, or a JSON array. Blank lines are ignored.
+
+    JSONL because the surface that produces it is a browser page with no server
+    -- one decision per line survives a clipboard, an append and a diff. An
+    EMPTY file is refused rather than read as an empty batch: a sitting that
+    recorded nothing must not report success, which is the vacuous-green class
+    `cli snapshot` and `cli refs` already refuse.
+    """
+    text = Path(path).read_text()
+    stripped = text.strip()
+    if not stripped:
+        raise ReviewRefused(
+            "error.empty_decision_file",
+            f"{path} holds no decisions; a sitting that recorded nothing is "
+            f"not a sitting that succeeded")
+    if stripped[0] == "[":
+        out = json.loads(stripped)
+        if not isinstance(out, list):
+            raise ReviewRefused("error.bad_decision_file",
+                                f"{path} is not a list of decisions")
+    else:
+        out = [json.loads(line) for line in text.splitlines() if line.strip()]
+    if not out:
+        raise ReviewRefused(
+            "error.empty_decision_file",
+            f"{path} holds no decisions; a sitting that recorded nothing is "
+            f"not a sitting that succeeded")
+    for i, d in enumerate(out):
+        if not isinstance(d, dict):
+            raise ReviewRefused("error.bad_decision_file",
+                                f"decision {i} in {path} is not an object")
+    return out
+
+
+def _resolve_decision(conn, d: dict, at: int, reviewer: str | None):
+    """`(kwargs, refusal)` — exactly one of them is None.
+
+    Everything a decision can get wrong is caught here, before anything is
+    written: an unknown field, a candidate that does not exist, an accept with
+    no classification, or text the candidate no longer holds.
+    """
+    def no(code, message):
+        return None, {"at": at, "code": code, "message": message,
+                      "candidate_id": d.get("candidate_id"),
+                      "element_id": d.get("element_id")}
+
+    unknown = sorted(set(d) - STEP_DECISION_FIELDS)
+    if unknown:
+        return no("error.unknown_field",
+                  f"decision {at} carries {', '.join(unknown)}, which this "
+                  f"loop does not read -- a dropped field is a dropped "
+                  f"judgement, so the batch stops here")
+
+    who = (d.get("reviewer") or reviewer or "").strip()
+    if not who:
+        return no("error.missing_reviewer",
+                  f"decision {at} names no reviewer")
+
+    verdict = d.get("verdict")
+    if verdict not in STEP_VERDICTS:
+        return no("error.bad_verdict",
+                  f"decision {at}: verdict must be one of "
+                  f"{', '.join(STEP_VERDICTS)}; got {verdict!r}")
+
+    step_kind, step_scope = d.get("step_kind"), d.get("step_scope")
+    if step_kind is not None and step_kind not in STEP_KINDS:
+        return no("error.bad_step_kind",
+                  f"decision {at}: kind must be one of {', '.join(STEP_KINDS)}; "
+                  f"got {step_kind!r}")
+    if step_scope is not None and step_scope not in STEP_SCOPES:
+        return no("error.bad_step_scope",
+                  f"decision {at}: scope must be one of "
+                  f"{', '.join(STEP_SCOPES)}; got {step_scope!r}")
+    # A rejection publishes nothing, so it has nothing to classify. Anything
+    # else does: `AssemblyStep.kind` and `scope` are required by the shape, so
+    # an accept missing either is a decision that LOOKS recorded and can never
+    # publish -- the silent-nothing state this whole exercise is closing.
+    if verdict != "rejected" and not (step_kind and step_scope):
+        return no("error.unclassified_step",
+                  f"decision {at}: an accepted or corrected step needs both a "
+                  f"kind and a scope; AssemblyStep requires both and a "
+                  f"half-classified step would publish nothing while reading "
+                  f"as decided")
+
+    if d.get("candidate_id") is not None:
+        row = conn.execute("SELECT * FROM step_candidates WHERE candidate_id=?",
+                           (d["candidate_id"],)).fetchone()
+        where = f"candidate {d['candidate_id']}"
+    elif d.get("element_id") is not None:
+        row = conn.execute(
+            """SELECT * FROM step_candidates
+                WHERE element_id=? AND char_start=? AND char_end=?""",
+            (d["element_id"], d.get("char_start"), d.get("char_end"))).fetchone()
+        where = (f"{d['element_id']} chars {d.get('char_start')}-"
+                 f"{d.get('char_end')}")
+    else:
+        return no("error.no_such_candidate",
+                  f"decision {at} names neither a candidate_id nor an "
+                  f"(element_id, char_start, char_end) anchor")
+    if row is None:
+        return no("error.no_such_candidate", f"decision {at}: no {where}")
+
+    text_seen = d.get("text_seen")
+    if text_seen is not None and text_seen != row["text_raw"]:
+        return no("error.text_moved",
+                  f"decision {at}: {where} no longer holds the text this "
+                  f"decision is about; it was re-cut after the reviewer "
+                  f"looked, so the decision is of something that is gone")
+
+    return {"element_id": row["element_id"], "char_start": row["char_start"],
+            "char_end": row["char_end"], "text_seen": row["text_raw"],
+            "reviewer": who, "verdict": verdict, "step_kind": step_kind,
+            "step_scope": step_scope, "slot_target": d.get("slot_target"),
+            "text_final": d.get("text_final"),
+            "notes": d.get("notes")}, None
+
+
+def apply_step_decisions(conn: sqlite3.Connection, decisions, *,
+                         reviewer: str | None = None,
+                         dry_run: bool = True) -> dict:
+    """Record a whole sitting of step judgements, or none of them.
+
+    Dry by default, for the reason `--import` is: a batch arrives from a file
+    somebody generated elsewhere, and reading it back should not be the act that
+    commits it.
+    """
+    ensure_step_reviews(conn)
+    decisions = list(decisions)
+    if not (reviewer or "").strip() and not all(
+            (d.get("reviewer") or "").strip() for d in decisions
+            if isinstance(d, dict)):
+        raise ReviewRefused(
+            "error.missing_reviewer",
+            "a sitting needs a reviewer: the name is the only thing separating "
+            "'software read this' from 'a person confirmed it'")
+
+    resolved, refusals = [], []
+    seen: dict[tuple, int] = {}
+    for at, d in enumerate(decisions):
+        if not isinstance(d, dict):
+            refusals.append({"at": at, "code": "error.bad_decision_file",
+                             "message": f"decision {at} is not an object"})
+            continue
+        kwargs, refusal = _resolve_decision(conn, d, at, reviewer)
+        if refusal is not None:
+            refusals.append(refusal)
+            continue
+        anchor = _step_anchor(kwargs["element_id"], kwargs["char_start"],
+                              kwargs["char_end"])
+        # Two decisions about one line is a person contradicting themselves in
+        # one file. Which one won would depend on iteration order, so neither
+        # does.
+        if anchor in seen:
+            refusals.append({
+                "at": at, "code": "error.duplicate_decision",
+                "message": (f"decision {at} decides the same line as decision "
+                            f"{seen[anchor]}; a batch must not contain two "
+                            f"verdicts about one candidate")})
+            continue
+        seen[anchor] = at
+        resolved.append(kwargs)
+
+    by_verdict: dict[str, int] = {}
+    for kwargs in resolved:
+        by_verdict[kwargs["verdict"]] = by_verdict.get(kwargs["verdict"], 0) + 1
+    out = {"decisions": len(decisions), "refusals": refusals,
+           "by_verdict": by_verdict, "recorded": 0, "applied": False}
+    if refusals or dry_run:
+        out["would_record"] = len(resolved)
+        return out
+
+    for kwargs in resolved:
+        submit_step_review(conn, **kwargs)
+        out["recorded"] += 1
+    conn.commit()
+    out["applied"] = True
+    return out
