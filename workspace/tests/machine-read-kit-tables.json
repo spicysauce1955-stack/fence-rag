@@ -1,0 +1,1081 @@
+{
+ "pages": [
+  {
+   "source_path": "manuals/barrette-outdoor-living/catalyst-capecod-sku-sheet.pdf",
+   "page_no": 2,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-cce7c312c4-0010 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Top Rail",
+       "1",
+       "2\" x 31/2\" x 94\""
+      ]
+     },
+     {
+      "cells": [
+       "Bottom Rail",
+       "1",
+       "2\" x 6\" x 94\""
+      ]
+     },
+     {
+      "cells": [
+       "Picket Caps",
+       "25",
+       "1½\" x 1½\""
+      ]
+     },
+     {
+      "cells": [
+       "Pickets",
+       "25",
+       "1½\" x 1½\" x 44\""
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-cce7c312c4-0010; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/barrette-outdoor-living/catalyst-capecod-sku-sheet.pdf",
+   "page_no": 3,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-0761f36ca0-0011 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Top Rail",
+       "1",
+       "2\" x 31/2\" x 94\""
+      ]
+     },
+     {
+      "cells": [
+       "Bottom Rail",
+       "1",
+       "2\" x 6\" x 94\""
+      ]
+     },
+     {
+      "cells": [
+       "Picket Caps",
+       "25",
+       "1½\" x 1½\""
+      ]
+     },
+     {
+      "cells": [
+       "Pickets",
+       "25",
+       "1½\" x 1½\" x 433/16\""
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-0761f36ca0-0011; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/barrette-outdoor-living/structural/catalyst-madison-horizontal-privacy-sku-sheet.pdf",
+   "page_no": 2,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-48fe7a742f-0013 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Top/Bottom Rail with Steel",
+       "2",
+       "2\" x 6\" x 71\""
+      ]
+     },
+     {
+      "cells": [
+       "T&G Boards",
+       "5",
+       "7/8\" x 7\" x 661/2\""
+      ]
+     },
+     {
+      "cells": [
+       "Lock Rings",
+       "4",
+       "N/A"
+      ]
+     },
+     {
+      "cells": [
+       "Aluminum End Channel",
+       "2",
+       "1\" x 11/2\" x 601/2\""
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-48fe7a742f-0013; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/barrette-outdoor-living/structural/catalyst-madison-horizontal-privacy-sku-sheet.pdf",
+   "page_no": 3,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-95b6934074-0013 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Top/Bottom Rail with Steel",
+       "2",
+       "2\" x 6\" x 71\""
+      ]
+     },
+     {
+      "cells": [
+       "Lock Rings",
+       "4",
+       "N/A"
+      ]
+     },
+     {
+      "cells": [
+       "T&G Boards",
+       "7",
+       "7/8\" x 7\" x 66 1/2\""
+      ]
+     },
+     {
+      "cells": [
+       "Aluminum End Channel",
+       "2",
+       "1\" x 11/2\" x 601/2\""
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-95b6934074-0013; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/barrette-outdoor-living/structural/catalyst-madison-horizontal-privacy-sku-sheet.pdf",
+   "page_no": 4,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-0b030f264c-0025 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Top/Bottom Rail wi",
+       "2",
+       "th Steel 2\" x 6\" x 71\""
+      ]
+     },
+     {
+      "cells": [
+       "Lock Rings",
+       "4",
+       "N/A"
+      ]
+     },
+     {
+      "cells": [
+       "T&G Boards",
+       "9",
+       "7/8\" x 7\" x 66 1/2\""
+      ]
+     },
+     {
+      "cells": [
+       "Aluminum End Cha",
+       "2",
+       "nnel 1\" x 11/2\" x 601/2\""
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-0b030f264c-0025; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/barrette-outdoor-living/structural/catalyst-madison-horizontal-privacy-sku-sheet.pdf",
+   "page_no": 5,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-e9bd27dbc2-0015 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "T&G Boards",
+       "10",
+       "⅞\" x 6\" x 66¾\""
+      ]
+     },
+     {
+      "cells": [
+       "U-Channel Post",
+       "2",
+       "1\" x 1⅞\" x 56¼\""
+      ]
+     },
+     {
+      "cells": [
+       "Rails",
+       "2",
+       "1¾\" x 7\" x 70\""
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-e9bd27dbc2-0015; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/barrette-outdoor-living/structural/catalyst-madison-horizontal-privacy-sku-sheet.pdf",
+   "page_no": 6,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-cffe01abcb-0015 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Rails",
+       "2",
+       "1¾\" x 7\" x 94\""
+      ]
+     },
+     {
+      "cells": [
+       "T&G Boards",
+       "10",
+       "7/8\" x 6\" x 90¾\""
+      ]
+     },
+     {
+      "cells": [
+       "Structural Post U-Channels",
+       "2",
+       "1\" x 17/8\" x 56¼\""
+      ]
+     },
+     {
+      "cells": [
+       "Pan Head Screw (10 pc)",
+       "1",
+       "#10 x ¾\""
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-cffe01abcb-0015; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/barrette-outdoor-living/structural/catalyst-madison-horizontal-privacy-sku-sheet.pdf",
+   "page_no": 7,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-d2efc105b3-0015 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Rails",
+       "2",
+       "1¾\" x 7\" x 70\""
+      ]
+     },
+     {
+      "cells": [
+       "T&G Boards",
+       "10",
+       "⅞\" x 6\" x 66¾\""
+      ]
+     },
+     {
+      "cells": [
+       "Structural Post Channels",
+       "2",
+       "1\" x 1⅞\" x 56¼\""
+      ]
+     },
+     {
+      "cells": [
+       "Pan Head Screw (10 pc)",
+       "1",
+       "#10 x ¾\""
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-d2efc105b3-0015; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/barrette-outdoor-living/structural/catalyst-madison-horizontal-privacy-sku-sheet.pdf",
+   "page_no": 8,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-df6c728133-0013 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Rails",
+       "2",
+       "1¾\" x 7\" x 94\""
+      ]
+     },
+     {
+      "cells": [
+       "T&G Boards",
+       "10",
+       "7/8\" x 6\" x 90¾\""
+      ]
+     },
+     {
+      "cells": [
+       "Structural Post U-Channels",
+       "2",
+       "1\" x 17/8\" x 56¼\""
+      ]
+     },
+     {
+      "cells": [
+       "Pan Head Screw (10 pc)",
+       "1",
+       "#10 x ¾\""
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-df6c728133-0013; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/weatherables/structural/weatherables-augusta-8ft-cad-page.html",
+   "page_no": 1,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-398603ee1a-0240 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Top & Bottom Rail",
+       "2",
+       "1.5\" x 5.5\" x 71.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Mid Rail",
+       "1",
+       "1.5\" x 5.5\" x 71.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Metal",
+       "3",
+       "1.25\" x 1.75\" x 71.5\""
+      ]
+     },
+     {
+      "cells": [
+       "U-Channel",
+       "4",
+       "1.25\" x 1.5\" x 39.5\""
+      ]
+     },
+     {
+      "cells": [
+       "T&G Pickets",
+       "22",
+       "0.875\" x 6\" x 43\""
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-398603ee1a-0240; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/weatherables/structural/weatherables-augusta-8ft-cad-page.html",
+   "page_no": 1,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-398603ee1a-0241 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Top & Bottom Rail",
+       "2",
+       "1.5\" x 5.5\" x 95.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Mid Rail",
+       "1",
+       "1.5\" x 5.5\" x 95.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Metal",
+       "3",
+       "1.25\" x 1.75\" x 95.5\""
+      ]
+     },
+     {
+      "cells": [
+       "U-Channel",
+       "4",
+       "1.25\" x 1.5\" x 39.5\""
+      ]
+     },
+     {
+      "cells": [
+       "T&G Pickets",
+       "30",
+       "0.875\" x 6\" x 43\""
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-398603ee1a-0241; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/weatherables/structural/weatherables-augusta-8ft-cad-page.html",
+   "page_no": 1,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-398603ee1a-0242 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Socket Posts",
+       "2",
+       "4\" x 4\" x 99.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Post Cap",
+       "2",
+       "4\" x 4\""
+      ]
+     },
+     {
+      "cells": [
+       "Top & Bottom Rails",
+       "2",
+       "1.5\" x 5.5\" x 38\""
+      ]
+     },
+     {
+      "cells": [
+       "Mid Rail",
+       "1",
+       "1.5\" x 5.5\" x 38\""
+      ]
+     },
+     {
+      "cells": [
+       "Metal",
+       "3",
+       "1.25\" x 1.75\" x 37.5\""
+      ]
+     },
+     {
+      "cells": [
+       "U-Channel",
+       "4",
+       "1.25\" x 1.5\" x 39.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Cross Brace",
+       "2",
+       "Cross Brace"
+      ]
+     },
+     {
+      "cells": [
+       "T&G Pickets",
+       "10",
+       "0.875\" x 6\" x 43\""
+      ]
+     },
+     {
+      "cells": [
+       "Vinyl Fence Glue",
+       "1",
+       "N/A"
+      ]
+     },
+     {
+      "cells": [
+       "Cross Brace Screws and Caps",
+       "2",
+       "N/A"
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-398603ee1a-0242; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/weatherables/structural/weatherables-augusta-8ft-cad-page.html",
+   "page_no": 1,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-398603ee1a-0243 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Socket Posts",
+       "2",
+       "4\" x 4\" x 99.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Post Cap",
+       "2",
+       "4\" x 4\""
+      ]
+     },
+     {
+      "cells": [
+       "Top & Bottom Rail",
+       "2",
+       "1.5\" x 5.5\" x 44\""
+      ]
+     },
+     {
+      "cells": [
+       "Mid Rail",
+       "1",
+       "1.5\" x 5.5\" x 44\""
+      ]
+     },
+     {
+      "cells": [
+       "Metal",
+       "3",
+       "1.25\" x 1.75\" x 43.5\""
+      ]
+     },
+     {
+      "cells": [
+       "U-Channel",
+       "4",
+       "1.25\" x 1.5\" x 39.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Cross Brace",
+       "2",
+       "Cross Brace"
+      ]
+     },
+     {
+      "cells": [
+       "T&G Pickets",
+       "12",
+       "0.875\" x 6\" x 43\""
+      ]
+     },
+     {
+      "cells": [
+       "Vinyl Fence Glue",
+       "1",
+       "N/A"
+      ]
+     },
+     {
+      "cells": [
+       "Cross Brace Screws and Caps",
+       "2",
+       "N/A"
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-398603ee1a-0243; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/weatherables/structural/weatherables-augusta-8ft-cad-page.html",
+   "page_no": 1,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-398603ee1a-0244 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Socket Posts",
+       "2",
+       "4\" x 4\" x 99.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Post Cap",
+       "2",
+       "4\" x 4\""
+      ]
+     },
+     {
+      "cells": [
+       "Top & Bottom Rail",
+       "2",
+       "1.5\" x 5.5\" x 62\""
+      ]
+     },
+     {
+      "cells": [
+       "Mid Rail",
+       "1",
+       "1.5\" x 5.5\" x 62\""
+      ]
+     },
+     {
+      "cells": [
+       "Metal",
+       "3",
+       "1.25\" x 1.75\" x 61.5\""
+      ]
+     },
+     {
+      "cells": [
+       "U-Channel",
+       "4",
+       "1.25\" x 1.5\" x 39.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Cross Brace",
+       "2",
+       "Cross Brace"
+      ]
+     },
+     {
+      "cells": [
+       "T&G Pickets",
+       "18",
+       "0.875\" x 6\" x 43\""
+      ]
+     },
+     {
+      "cells": [
+       "Vinyl Fence Glue",
+       "1",
+       "N/A"
+      ]
+     },
+     {
+      "cells": [
+       "Cross Brace Screws and Caps",
+       "2",
+       "N/A"
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-398603ee1a-0244; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/weatherables/structural/weatherables-pembroke-6ft-cad-page.html",
+   "page_no": 1,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-77275b2b5b-0239 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Top Rail",
+       "1",
+       "1.5\" x 5.5\" x 71.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Bottom Rail",
+       "1",
+       "1.5\" x 5.5\" x 71.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Metal",
+       "1",
+       "1.25\" x 1.75\" x 71.5\""
+      ]
+     },
+     {
+      "cells": [
+       "U-Channel",
+       "2",
+       "1.25\" x 1.5\" x 61\""
+      ]
+     },
+     {
+      "cells": [
+       "T&G Pickets",
+       "6",
+       "0.875\" x 11.3\" x 64.25\""
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-77275b2b5b-0239; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/weatherables/structural/weatherables-pembroke-6ft-cad-page.html",
+   "page_no": 1,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-77275b2b5b-0240 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Top Rail",
+       "1",
+       "1.5\" x 5.5\" x 95.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Bottom Rail",
+       "1",
+       "1.5\" x 5.5\" 95.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Metal",
+       "1",
+       "1.25\" x 1.75\" x 95.5\""
+      ]
+     },
+     {
+      "cells": [
+       "U-Channel",
+       "2",
+       "1.25\" x 1.5\" x 61\""
+      ]
+     },
+     {
+      "cells": [
+       "T&G Pickets",
+       "8",
+       "0.875\" x 11.3\" x 64.25\""
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-77275b2b5b-0240; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/weatherables/structural/weatherables-pembroke-6ft-cad-page.html",
+   "page_no": 1,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-77275b2b5b-0241 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Socket Posts",
+       "2",
+       "4\" x 4\" x 76\""
+      ]
+     },
+     {
+      "cells": [
+       "Post Cap",
+       "2",
+       "4\" x 4\""
+      ]
+     },
+     {
+      "cells": [
+       "Top Rail",
+       "1",
+       "1.5\" x 5.5\" x 42\""
+      ]
+     },
+     {
+      "cells": [
+       "Bottom Rail",
+       "1",
+       "1.5\" x 5.5\" x 42\""
+      ]
+     },
+     {
+      "cells": [
+       "Metal",
+       "1",
+       "1.25\" x 1.75\" x 41.5\""
+      ]
+     },
+     {
+      "cells": [
+       "U-Channel",
+       "2",
+       "1.25\" x 1.5\" x 61\""
+      ]
+     },
+     {
+      "cells": [
+       "Cross Brace",
+       "1",
+       "Cross Brace"
+      ]
+     },
+     {
+      "cells": [
+       "T&G Pickets",
+       "3",
+       "0.875\" x 11.3\" x 64.25\""
+      ]
+     },
+     {
+      "cells": [
+       "Vinyl Fence Glue",
+       "1",
+       "N/A"
+      ]
+     },
+     {
+      "cells": [
+       "Cross Brace Screws and Caps",
+       "1",
+       "N/A"
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-77275b2b5b-0241; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  },
+  {
+   "source_path": "manuals/weatherables/structural/weatherables-pembroke-6ft-cad-page.html",
+   "page_no": 1,
+   "reader": "machine-kit-tables-v1",
+   "is_table": true,
+   "table_kind": "kit_material_list",
+   "what_the_page_is": "Material list read mechanically from the canonical table element element-77275b2b5b-0242 (cells from the extraction layer; no crop rendered).",
+   "grid": {
+    "headers": [
+     "ITEM",
+     "QTY",
+     "DIMENSIONS"
+    ],
+    "rows": [
+     {
+      "cells": [
+       "Socket Posts",
+       "2",
+       "4\" x 4\" x 76\""
+      ]
+     },
+     {
+      "cells": [
+       "Post Cap",
+       "2",
+       "4\" x 4\""
+      ]
+     },
+     {
+      "cells": [
+       "Top Rail",
+       "1",
+       "1.5\" x 5.5\" x 64.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Bottom Rail",
+       "1",
+       "1.5\" x 5.5\" x 64.5\""
+      ]
+     },
+     {
+      "cells": [
+       "Metal",
+       "1",
+       "1.25\" x 1.75\" x 64\""
+      ]
+     },
+     {
+      "cells": [
+       "U-Channel",
+       "2",
+       "1.25\" x 1.5\" x 61\""
+      ]
+     },
+     {
+      "cells": [
+       "Cross Brace",
+       "1",
+       "Cross Brace"
+      ]
+     },
+     {
+      "cells": [
+       "T&G Pickets",
+       "5",
+       "0.875\" x 11.3\" x 64.25\""
+      ]
+     },
+     {
+      "cells": [
+       "Vinyl Fence Glue",
+       "1",
+       "N/A"
+      ]
+     },
+     {
+      "cells": [
+       "Cross Brace Screws and Caps",
+       "1",
+       "N/A"
+      ]
+     }
+    ]
+   },
+   "reading_confidence": "machine:canonical_cells",
+   "notes": "Mechanical reading of canonical table_cells for element element-77275b2b5b-0242; row-granular review (one candidate row per kit line, row_label = ITEM cell)."
+  }
+ ]
+}

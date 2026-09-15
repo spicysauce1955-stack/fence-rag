@@ -1055,7 +1055,27 @@ evaluation report states what each would have to prove.
   40,200 files / 5.17 GB, of which 9,889 are in scope, and **176 orphans /
   145.0 MB** — 120 stale region crops whose element ordinals moved in a
   re-extraction, 56 uncited crop-cache renders, zero page images and zero
-  table-candidate crops. `--apply` has not been run against the real store.
+  table-candidate crops.
+
+**`--apply` was first run against the real store on 2026-09-08, and it behaved.**
+`[measured]` 235 orphans / 0.34 GB deleted, 69 empty directories pruned, 0 errors,
+`runs_in_flight: []` and `too_young_to_judge: 0`. All were `regions` crops — stale
+region renders whose element ordinals moved in a re-extraction. Verified after:
+**25,961 of 25,961 published citations still resolve, 0 dangling**; 25 of 25 stored
+snapshots verify; 1,689 tests pass. The protection that made it safe is the root set,
+which includes `published_snapshot_cites` (962) and `review_crop_sha256` (44) — the two
+classes of file that cannot be regenerated.
+
+**Separately, and it was 40% larger than the orphans: the `visualization-tools/`
+`node_modules` was deleted by hand on 2026-09-08.** `[measured]` 474 MB. `gc` correctly
+never touched it — it is unmanaged by design, per the scope whitelist above — so the
+tool built for reclaiming space in `derived/` could never have reclaimed the biggest
+thing in it. `package.json`, `package-lock.json` and `four-layer-smoke.svg` were kept,
+so `npm ci` in that directory restores it. Nothing depends on it: the only code
+reference is `tests/test_gc.py`, which writes a synthetic path into a temp fixture.
+`derived/` went 5.3 GB -> 4.5 GB. Note for whoever reads `gc.py:18`: its docstring
+still cites this checkout as the worked example of an unmanaged subtree, which remains
+true of the directory even though `node_modules` is now gone.
 
   **Four ways it could have deleted something it should not**, found by an
   adversarial pass on the day it landed and closed the same day. (i) It **raced a
@@ -3274,6 +3294,2421 @@ second stage stays opt-in. It is now 0.005 short of that target rather than 0.02
 and still short, so it stays opt-in.
 
 ---
+
+## 3e. Update, 2026-09-03 — adversarial audit of published data
+
+Five adversaries were dispatched over the extracted, digested and published data, each
+briefed to falsify rather than confirm and to verify against the source PDFs rather than
+against this repository's own prose. **Two completed; three died on an account session
+limit having produced nothing** — the facts/units sweep, the provenance-chain audit and the
+tables/dataset audit are therefore **not done** and must not be read as clean.
+
+### G66 — obligation 14's published value rests on a sentence the current edition deleted
+
+`[measured]` and independently confirmed against the PDFs. **This is a defect in data that
+has already crossed the boundary.**
+
+`shared/bt-rail-pr-3rail-color` publishes `nominal_length_mm = 3657600` milli-mm — 12 ft —
+for the Blend/CertaGrain Post & Rail rail. The arithmetic is right and the citations
+resolve. The problem is what they cite:
+
+| | |
+|---|---|
+| cited editions | `bufftech-install-guide-e-2201cts` (2023-10) and siblings |
+| the sentence relied on | *"Standard rails are supplied in 16 foot lengths for White (12 foot rails for Blend products)"* |
+| the successor edition, **in the same snapshot** | `bufftech-fence-installation-guide-2024.pdf`, `2024-07`, sha `71c42837fd50` |
+| what the successor says on p40 | the section is renamed CertaGrain → **TimberGrain** and **that sentence is deleted** |
+| what the successor says on p38 | *"Standard rails are supplied in 16 foot lengths"* — **unconditional, no White/Blend split** |
+| occurrences of "foot lengths" anywhere in the 2024 edition | **one**, the unconditional 16 |
+
+So the manufacturer's current guide states 16 ft for all Post & Rail rails, and this
+platform publishes 12 ft for the Blend variant on the strength of an edition its own
+author replaced.
+
+**Why nothing caught it, which is the actual defect.** Publishing from a superseded source
+is not forbidden — `contract.md` §1.4 exists for exactly that, and 40.7% of promoted facts
+already cite a superseded document. What is forbidden is publishing it *unmarked*, because
+Planning applies the source policy and cannot apply it to a document this platform calls
+`unknown`. `[measured]`:
+
+* **0 `superseded_by` edges touch any Bufftech installation guide.** All 24 edges in the
+  store cover NOAs — 23 `hvhz_noa` plus one `unspecified`. `relations.py` detects
+  supersession by approval number, and an installation guide has none, so **the entire
+  install-manual half of the corpus has no supersession detection at all.** That is 70 of
+  144 documents.
+* **132 of 144 documents are `version_status: "unknown"`**; only 3 are `active` and 9
+  `superseded`. For this document the curated metadata literally reads
+  `2024-07 (BOL-Bufftech-and-Simtek-Instructions-4-24)` against a
+  `version_status_basis` of *"no explicit version marker in curated metadata"*.
+
+At `on_center_in: 96` the difference between 12 ft and 16 ft is a rail spanning 1.5 bays
+versus 2 — a different cut plan and a different rail count on every Blend Post & Rail job.
+Obligation 14's stated purpose is that Planning derives continuity from stock length
+against spacing, so this is the value doing real work.
+
+**Not fixed in this session, deliberately.** Three courses exist and choosing between them
+is a curation decision, not a code change: re-cut the value against the current edition;
+keep it and publish the supersession so Planning's policy can see it; or withdraw it to a
+`Gap` citing both editions. What *is* clear is that dated editions of the same guide must
+carry a `superseded_by` edge, and that a `version_status_basis` claiming no marker exists
+where the metadata holds one is not honest under obligation 6.
+
+### G67 — the step splitter's repair proposal measured precision and never measured recall
+
+`[measured]`. `steps.py::_propose_repair` stakes its confidence model on *"all 249
+newline-form repairs are real damage"*. That is a **precision** claim, and recall was never
+measured: `SPLIT_CAP_RE`'s `[a-z]{2,}` requires a two-letter tail, so **`T\no lower a
+post` and `B\ne sure to call underground` are invisible to it** — 20 real newline-form
+damage sites silently dropped, a 7.1% recall hole in the class the module says it trusts
+absolutely.
+
+The corollary is worse than the miss. `docs/assembly-step-design.md` §2 recorded *"damaged
+words in the text layer on p8 | 11"* as a `[measured]` figure. The real count is **12**.
+The 11 was the number of repairs the regex emitted, relabelled as a property of the page —
+a measurement of the instrument reported as a measurement of the world, and the one word it
+cannot see is exactly the one it did not count.
+
+### G68 — the 44-vs-49 bullet discrepancy is resolved: the ratified audit is wrong
+
+`docs/assembly-step-design.md` §2 recorded the disagreement and declined to chase it. It
+has now been chased. **44 is correct**, reproducible six ways: `pdftotext` in all four
+modes, the store, and a visual count of a 150-dpi render matching the store element by
+element (`5,3,5,5,6,3,2 | 4,3,5,1,2`). Every visible bullet has a text-layer counterpart;
+none is vector art.
+
+**49 is reproducible by no counting rule at all.** `•` = 44; `•` plus the lettered labels,
+the `Note:` and the `*Caution` = 48; `•` plus `-` sub-bullets = 55; every leader-led row
+including headings = 71. It is not another page (no page in the guide has 49) and not the
+OCR'd twin.
+
+`audit/01-audit-response.md` §2.4 writes it as `13 panel | 11 bay | 25 neither`, summing to
+49 with `25 = 51%` computed against it — so it is not a typo in a total, the error is
+inside the classification, and §5 of the design records that the working file holding that
+classification was never committed. An unverifiable count therefore sits in a **signed,
+ratified document delivered to Planning**, beside the words *"transcribed bullet by
+bullet"*. The 44–51% headline that N10 was argued from inherits the error, though not
+enough to change N10's conclusion — 25 of 44 is still 57%.
+
+The audit is history and is not being rewritten. This entry is the correction of record.
+
+### G69 — two structural links are printed on the page and exist in no column
+
+`[measured]` on the slice page, and neither is fixed.
+
+**A footnote is orphaned from the branch it governs.** Candidate 71 is
+`* Caution – In climates that experience freeze-thaw cycles, this installation method
+could result in post cracking over time. This would not be covered by the warranty.` It
+applies to **method b only**, whose label reads `b. Concrete and rebar*`. The only trace
+of the link is a bare `*` inside a `text_raw`. **A consumer publishing branch b's six
+steps ships a concrete-and-rebar procedure with the warranty exclusion silently
+detached** — the single worst thing in the slice, because the omission is the kind that
+costs somebody money rather than merely being wrong.
+
+**A `-` sub-bullet outside a lettered branch has no parent.** Candidate 9,
+`- Hole size for 4x4 posts = approximately 10"`, `depth=1`, `branch=NULL`, qualifies
+candidate 8, `Dig holes 30" deep or to frost line`. Branch sub-steps get a `branch`
+column; this one gets nothing, so parentage is recoverable only as "the previous depth-0
+sibling", which is a convention rather than data.
+
+Both want a column — a footnote marker and a parent — and both are deferred rather than
+guessed, because a wrong link is worse than an absent one.
+
+**Also left for the reviewer rather than another regex: 5 of the 54 steps are not
+actions.** The prohibition is now typed (`Never strike the PVC post…` → `prohibition`,
+which is what the design's §6 worked example always said). These five remain:
+
+| Candidate | What it actually is |
+|---|---|
+| `Assembly may be continued by installing all bottom rails first, or one section at a time` | an ordering **permission** — and the contract's own example of a guide denying its print order |
+| `It is critical that gate hinge and latch posts are solid… Two methods are available:` | rationale plus a branch header |
+| `For complete details, see gate installation instructions in hardware box` | a cross-reference to another document |
+| `Tabs will recoil to hold rail in post` | resulting behaviour, not an action |
+| `Hole size for 4x4 posts = approximately 10"` | a dimension |
+
+`segment_kind` classifies **structure** — what kind of line this is — not semantics. A
+person decides whether a line is an `AssemblyStep`, which is what §5 always said and what
+the classification proposer (still unbuilt) will offer a starting point for.
+
+### G70 — `unit_original` is not the reliable source-unit column after all
+
+`[measured]` 2026-09-03, run by hand after all three redeployed adversaries died on API
+529s. **This is the facts/units audit §3e recorded as not done; it is now done, and the
+provenance-chain and ParameterTable audits remain outstanding.**
+
+`CLAUDE.md` and G63 both say: *"`unit_original`, unchanged throughout, is and always was
+the reliable source-unit column."* That is the claim `parts.py::_stock_length_quantity`
+rests on — reading `unit_original` is the whole G63 workaround that stopped 16 ft
+publishing as 406,400 milli-mm instead of 4,876,800. **The claim is false, for three
+facts.**
+
+| fact | `value_original` | `unit_original` | what the source says |
+|---|---|---|---|
+| 21708 `post_spacing_in` | `10 ft.\n(3.05 m) on center` | **`in`** | feet |
+| 21841 `footing_diameter_in` | `2'dia.` | **`in`** | feet |
+| 21849 `footing_diameter_in` | `2'dia.` | **`in`** | feet |
+
+`value_normalized` is **correct in all three** — 120.0 and 24.0 inches respectively — so no
+number is wrong. What is wrong is the column that names the source's unit, in the direction
+that would matter: a consumer trusting `unit_original` to say what the page said gets
+`inches` for a page that printed feet.
+
+**Bounded, and none of it published.** All three have `from_candidate_id IS NULL`, none is
+promoted, and none of their elements appears in the current snapshot. Two are `flagged`
+(already in the OCR review queue) and one is `extracted`.
+
+**What this changes.** The workaround is still right — `unit_original` is right for all 62
+`stock_length_in` facts, which is the case it was built for — but the *reasoning* recorded
+in G63 and CLAUDE.md is stronger than the evidence. "Reliable" should read "reliable for
+`stock_length_in`, and wrong in 3 of 1,826 facts elsewhere." A reader who took the
+universal claim at face value and reused `unit_original` for a new fact type would inherit
+a defect nobody had bounded.
+
+**The rest of the facts audit, measured and clean:**
+
+* **Round-trip of every numeric fact.** 62 of 62 `stock_length_in` convert exactly
+  (0 mismatches), and 663 other numeric facts round-trip with only the 3 above deviating —
+  and those deviate because the source unit is mislabelled, not because the arithmetic is
+  wrong. **No factor-of-12, ×25.4 or ×304.8 error exists anywhere in the fact layer.**
+* **`unit_original` vs `unit_normalized` per type.** `stock_length_in` is the ONLY type
+  where they differ, 62 of 62 — exactly as G63 describes, and every other type is
+  identical on both. The G63 defect is contained to the type it was found in.
+* **Duplicate assertions.** 52 groups share `(element, fact_type, value)`, but 17 of those
+  are legitimate: one table cell genuinely asserts the same value under several condition
+  combinations — `footing_diameter_in 12.0` appears 4× from one element under
+  `fence_height` × `exposure_category`, which is correct table data, and its conditions
+  carry `hvhz_applicability: "no bracket printed"`, so G53's fix is working in the store.
+  **35 groups (73 rows) are identical on conditions too** and are real duplication: 33
+  `reinforcement`, 1 `exposure_category`, 1 `stock_length_in`. **0 are promoted and 0 are
+  published.** The `stock_length_in` one (`106.0`, `{"part": "post"}`, ×2) is worth naming
+  because it is in the type that does publish, and `_stock_length_evidence` takes its value
+  from the first row by `fact_id` while citing every row — agreeing duplicates are
+  harmless, but the multi-row case is not hypothetical in that type.
+
+### G71 — 125 dataset paths point outside the repository, and the guard cannot see it — FIXED (2026-09-06)
+
+`[measured]` 2026-09-03, found by an adversarial audit and verified by hand. **This is the
+"prove it on a clean checkout" failure in its purest form.**
+
+`local_path` entries across eleven tracked dataset files — six per-manufacturer, three
+structural, and the generated `master-dataset.json` — are absolute paths rooted at
+`/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/…`, a **different checkout on
+one machine**. 250 of 451 `local_path` values overall; 125 of 153 in `master-dataset.json`
+alone.
+
+| | |
+|---|---|
+| `manuals/` files on disk | 140 |
+| referenced paths after `build_master.py`'s `relpath` | 258 |
+| …of which **escape the repository** (`../play/…`) | **125** |
+| `Missing (broken local_path)` reported | **0** |
+| `Files on disk but NOT referenced` reported | **0** |
+
+**Both guard numbers are 0, and both are meaningless here.** `CLAUDE.md` names those two
+lines as the ones that matter after a rebuild. They pass only because
+`/home/user/Workspace/play/vinyl-fence-bom-pipeline/` still exists on this machine, so
+`os.path.isfile(BASE + "/../play/…")` normalises back onto a real file. On a fresh clone —
+the documented path, and the one the distribution design assumes — those 125 resolve to
+nothing.
+
+`cli dataset --verify` cannot see it either, and is not supposed to: it SHA-256s the 16
+source files as opaque bytes and answers "unchanged since baseline", not "internally
+consistent" or "portable". It reports `{"files": 16, "unchanged": true}` while every one of
+these paths is machine-local.
+
+**The two generated artifacts already disagree.** `data/documents-index.json` carries the
+correct repo-relative `manuals/certainteed-bufftech/bufftech-fence-installation-guide-2024.pdf`
+for the same document `master-dataset.json` records absolutely. Both are generated by the
+same script from the same inputs, and they were both introduced in the initial import — so
+the index was generated from a state the sources no longer match.
+
+**Why it matters beyond tidiness.** `CLAUDE.md` requires re-running `build_master.py` after
+any edit to a per-manufacturer or structural JSON. Doing that today rewrites 125
+`local_path` values to `../play/vinyl-fence-bom-pipeline/…` — a path escaping the repo —
+and commits them. Every manifest row records the SHA-256 it was built from, so the evidence
+system is insulated; the dataset itself is not.
+
+Not fixed here: correcting 250 paths across eleven committed files is a mechanical change,
+but it rewrites the hand-researched dataset and re-baselines `data-digests.json`, which is
+a decision about curated input rather than a bug fix.
+
+**`[measured]` 2026-09-06 — fixed, and the original entry overstated the damage.**
+
+The 250 paths are now repo-relative. Before the change, all 250 shared one prefix,
+`/home/user/Workspace/play/vinyl-fence-bom-pipeline/`, and stripping it is the whole fix:
+125 values in ten hand-researched source files (seven per-manufacturer, three structural),
+and the same 125 re-emitted into `master-dataset.json` by the builder, which embeds the
+source objects verbatim. The two China source files and four structural files were already
+correct and were not touched.
+
+**What the original entry got wrong.** *"On a fresh clone those 125 resolve to nothing"* is
+true of the path **strings** and false of the **content**, and the difference matters for how
+urgent this was:
+
+| | |
+|---|---|
+| distinct files behind the 250 absolute paths | **118** |
+| …present in this repo at the same tail after `manuals/` | **118 of 118** |
+| …listed in `workspace/catalog/distribution-manifest.json`, i.e. `cli fetch`-able from R2 | **118 of 118** |
+
+Nothing was unreachable and nothing had to be re-sourced. The defect was that a path which
+should have been repo-relative was written machine-absolute — a portability bug in metadata,
+not a hole in the corpus. Saying "resolve to nothing" invited a recovery effort that was
+never needed. State the failure at the layer it actually occupies.
+
+**What the original entry understated.** Its table records `Files on disk but NOT referenced:
+0`, and CLAUDE.md repeats that both guard lines are 0 today. Both numbers are read off the
+**committed** `data/documents-index.json`, which was generated back when the sources were
+still relative — they are not what a rebuild produces. Re-running `build_master.py` against
+the pre-fix sources actually printed:
+
+```
+Missing (broken local_path): 0            <- still accidental, /…/play/… happens to exist
+Files on disk but NOT referenced: 117     <- NOT 0
+```
+
+The orphan guard *was* firing, on 117 of 140 `manuals/` files, because the escaping
+`../play/…` strings never match the repo-relative on-disk set. Nobody had run the builder
+since the drift. Read a guard by running it, not by reading its last committed output.
+
+**After the fix, both guard numbers are 0 and both mean it:**
+
+```
+Total document entries indexed: 145      Verified on disk: 141
+Missing (broken local_path): 0           URL-only (no download): 4
+Non-portable (local_path escapes the repository root): 0
+Files on disk but NOT referenced in any documents[] entry: 0
+```
+
+All **485** path values across the 16 source files and the four generated artifacts are now
+repo-relative; **0** absolute, **0** escaping via `..`, **0** failing to resolve under the
+repository root. All 141 `local_path` values in `documents-index.json` resolve on disk *and*
+appear in the distribution manifest.
+
+**The rebuild is its own portability proof.** `data/documents-index.json`,
+`china/china-dataset.json` and `china/data/china-documents-index.json` came back
+**byte-identical** to their committed versions, and only `master-dataset.json` changed
+(125 insertions, 125 deletions, all path strings). That is the direct confirmation of this
+entry's own observation that the index had been generated from a state the sources no longer
+matched: correcting the sources reconciles the two generated artifacts without touching
+either one by hand. `china/data/` needed no edit, so `build_china.py` was re-run only to
+confirm it is a no-op.
+
+**The builder was also fixed, because the source fix alone does not stop this returning.**
+`build_master.py` and `build_china.py` computed `os.path.relpath(local_path, BASE)` for an
+absolute path and then asked `os.path.isfile(BASE + "/" + rel)`. For a path outside the
+repository that normalises straight back onto the foreign checkout, so an unportable
+reference was recorded as `file_exists: true` and counted in `Verified on disk`. Both
+scripts now share a `repo_relative()` helper that reports whether a path stays inside the
+root, never counts an escaping path as present, and prints a
+`Non-portable (local_path escapes the repository root)` line in the reconciliation summary.
+The generated JSON shape is unchanged — the new guard is a stdout line, so the artifacts
+stay comparable across this fix.
+
+`workspace/catalog/data-digests.json` was re-baselined with `cli dataset --write`;
+`cli dataset --verify` reports `{"files": 16, "unchanged": true}`. The whole suite passes
+(1,479 tests, 1 expected failure). Nothing under `manuals/` or `china/manuals/` was touched.
+
+Still open, and deliberately not fixed here: `cli dataset --verify` remains a byte baseline
+and still cannot see a portability defect — it answers "unchanged since baseline", never
+"internally consistent". A `local_path` that is repo-relative but names a file that does not
+exist would pass it. The builder's reconciliation summary is the only thing that checks that,
+and nothing runs the builder automatically.
+
+### G72 — supersession has holes the NOA lineage hides, and `ref_id` can collide on scanned pages
+
+`[measured]`, from the provenance audit. Two findings, plus one significant clean result.
+
+**Clean, and worth stating plainly: no published citation points at the wrong region.** The
+audit resolved every one of the **427 published `ref_id`s whose element comes from a PDF
+text layer** and checked word-centre containment against `pdftotext -bbox-layout`, plus
+rendered page crops for 9 OCR-sourced citations. No mismatch. All 24 `superseded_by` edges
+point the right way — `from` is the older document in every case, consistent with both
+dates and Miami-Dade approval ordering. Closure is complete: all 75 `content_hash` values
+distinct, every `belongs_to`, `superseded_by`, `also_filed_as` and `contributing_sources`
+reference resolving. ~91 OCR-sourced citations were not individually inspected, so this is
+thorough rather than exhaustive.
+
+**A document the corpus itself calls superseded has no relations at all.**
+`doc-79c89a8bd572` — Miami-Dade NOA 22-0217.05, whose curated title literally reads
+*"(superseded, expires 2027-05-25)"* and whose `version_status` is `superseded` — carries
+**zero relations of any kind**, in a lineage that is otherwise densely cross-linked. The
+store says it is superseded and cannot say by what. Two catalogue pairs are in the same
+position: `bufftech-catalog-brochure-2009` and `bufftech-catalog-2014` share product code
+`40-40-70610` five years apart with no edge, as do the Showtech PVC catalogues for 2022 and
+2024. This is the same shape as G66 one level up: supersession is detected by approval
+number, so anything without one falls through.
+
+**`ref_id` collides on scanned pages, and the colliding elements differ.** `ref_id` is
+`f(sha256, page_no, bbox)` and omits the element kind — a gap `refs.py` §5.2 documents as
+harmless, on the reasoning that colliding elements are duplicate copies. `[measured]`: 9,930
+ids cover more than one element, and **67 of those collisions have genuinely different
+text**. They concentrate where a whole-page bbox is shared, e.g. `doc-32e36a07ab44` p4,
+`ref_id 5a16c2e0ef675407`, bbox `[0, 0, 1224, 792]`:
+
+| element | kind | text |
+|---|---|---|
+| `element-f6ea6bf243-0118` | `ocr_supplement` | `eee TARLE ead 937° LJ wt 333-0569 Davis, withthe 13 Contre…` |
+| `element-f6ea6bf243-0119` | `drawing` | `SEE TABLE 1 ON SHEET 8 MAXIMUM POST SPACING \| NOT TO EXCEED 966”…` |
+
+Two unrelated texts, one id. **None of the 67 is currently cited**, so nothing published is
+wrong — but the docstring's justification is falsified, and the next citation minted on one
+of these NOA drawing pages is the one that breaks. Those pages are exactly the corpus's
+highest-value, hardest-to-read content (G2), so it is not an unlikely place to cite next.
+
+### G73 — every citation behind every published `ParameterTable` points at the page heading
+
+`[measured]` and confirmed in code. **The most serious finding of the audit, and it is in
+published data.**
+
+`promote_tables.py` binds a promoted fact's `element_id` like this:
+
+```sql
+(SELECT element_id FROM elements WHERE document_id=? AND page_no=? ORDER BY ordinal LIMIT 1)
+```
+
+— unconditionally **the first element on the page in reading order**, with no reference to
+where the table crop actually is. On a scanned NOA page the first OCR'd element is the page
+banner. `[measured]`: **108 of 108 promoted facts have `ordinal = 0`.**
+
+So every one of the 9 published `ParameterTable`s cites a heading:
+
+| table | cite resolves to |
+|---|---|
+| `footing_depth_mm`, `footing_diameter_mm` (Barrette NOA 24-0117.06) | *"Sherwood / Ashland Six Foot Fence Panel drawing"* — the title |
+| `footing_depth_mm`, `footing_diameter_mm` (CertainTeed NOA 22-0616.10) | *"Allegheny / EcoStone Six Foot Fence Panel drawing"* — the title |
+| `footing_schedule` (NOA 24-0117.05, 12-1106.11, 23-0314.05) | *"PARTS AND COMPONENTS (CONT.)"* — a heading |
+| `footing_schedule` (NOA 21-0125.07) | `"4908829980295,"` — **OCR noise** |
+| `footing_schedule` (Bufftech install guide) | *"Privacy Fence"* / *"Semi-Private Fence"* — a section banner |
+
+**`ref_id` resolves, and resolves to the wrong evidence.** A reader following
+`GET /source-refs/{id}` to see where a footing depth came from is shown the page title. The
+whole point of this platform — prohibition 11, obligation 3 — is that a number arrives with
+the region it was read from. Nine tables, 108 facts, every citation.
+
+**Why the provenance audit missed it, which is worth keeping.** That audit resolved all 427
+published text-layer `ref_id`s and checked that each bbox *contains the element's claimed
+text*. It does. The citation is internally consistent: it points at a heading and reports
+the heading's text. The check can only catch a ref that disagrees with **itself**, never
+one that agrees with itself and disagrees with the **fact it is attached to**. Two audits
+looked at these citations and only the one that asked *"is this the right element?"* found
+it.
+
+**The values are right.** Every published depth, diameter and post-spacing number was
+verified digit-for-digit against its source page, and the promotion gate held: all 108 trace
+to `table_read_candidates` rows with `review_status='accepted'` and a named human reviewer,
+and 10 sampled `crop_sha256` values still match their files on disk. The number is right;
+the pointer to where it came from is not.
+
+**FIXED 2026-09-03, and not the way this entry first proposed.** The first plan was to bind
+`element_id` to the element the crop covers, by intersecting the crop's bbox with
+`elements.bbox`. Investigating it showed that cannot work and should not: the reviewed crop
+is the **whole page** — `is_page=True`, `bbox=None` — because a person looked at the page
+image, not a sub-region. No geometry can recover a table rectangle that was never chosen,
+and inventing one would put a precise-looking box around a judgement nobody made at that
+precision.
+
+So the citation is the page, which is what was actually examined. `refs.ref_id(sha, page,
+None)` was already the page-level id and `refs.build_index` already marked it `is_page`;
+`crops.render_crop` already read `bbox=None` as "the whole page, not an error". The only
+missing piece was a way to mint one — `SnapshotBuilder.source_ref_page()` — and its absence
+is the whole reason `promote_tables` settled for the first element in reading order.
+
+`[measured]` after: **45 of 45 parameter citations resolve to a page, 0 to an element, 0
+dangling**; `cli refs --verify` reports 2,854 cites, 2,854 resolved, `resolved_as_page_only:
+45`. Published as snapshot `762967d3`. Registration was extracted to
+`SnapshotBuilder._register_doc` so both minters share one closure implementation rather than
+each carrying a copy that can drift.
+
+Note what this does NOT fix: `facts.element_id` for a promoted fact still holds the
+page's first element, because the column is `NOT NULL` and references `elements`. It is no
+longer the evidence anchor — the published citation is — but the store still carries a
+misleading value, and a reader joining `facts` to `elements` to see "where this came from"
+gets the banner. Recorded rather than papered over.
+
+### G74 — `uncovered` claims gaps the source explicitly closes
+
+`[measured]`, same audit. 16 of the 20 `uncovered` points published across the four
+`footing_schedule` tables are false.
+
+`_footing_schedules()` computes coverage with raw byte equality:
+
+```python
+covered_points = {canonical_bytes(r["conditions"]) for r in rows}
+uncovered = [p for p in points if canonical_bytes(p) not in covered_points]
+```
+
+A row that legitimately omits a dimension therefore covers nothing. The published rows are
+correct — the NOA page brackets exposure **B** as `NON HVHZ` but **C and D** as
+`HVHZ AND NON HVHZ`, so those rows carry `{"exposure_category": "C"}` with no `hvhz` key,
+which under `_matches()`'s documented semantics means *matches every `hvhz` value*. Byte
+equality cannot see that:
+
+```
+rows:      {"exposure_category":"B","hvhz":false}  {"exposure_category":"C"}  {"exposure_category":"D"}
+uncovered: {B,hvhz:true}  {C,hvhz:false}  {C,hvhz:true}  {D,hvhz:false}  {D,hvhz:true}
+                ^ genuine   ^^^^^^^^^^^^^^ all four false — the page answers them
+```
+
+The same file already has the right tool: `_matches(conditions, point)` — *"a row matches a
+point when every key it STATES agrees with it"* — and `_finish()` uses it for exactly this
+purpose. `_footing_schedules()` does not. It also contradicts `_translate_conditions`'s own
+docstring, which explains that keeping an omitted dimension in the domain exists precisely
+so these cases are **not** misreported as uncovered.
+
+This is the inverse of a silent wrong answer: it makes Planning warn on lines the source
+actually covers. **FIXED 2026-09-03** — `_uncovered_points()` uses `_matches`, and a test
+asserts the two agree for every point rather than trusting them to. `[measured]` after:
+`footing_schedule`'s uncovered list is `[{"exposure_category": "B", "hvhz": true}]` — the
+one genuine gap — down from five. Published in snapshot `762967d3`.
+
+---
+
+## 3f. Update, 2026-09-03 — second adversarial round
+
+Five more adversaries, aimed at what round 1 never touched (`warnings`, `gaps`,
+`source_docs`) and at the G73/G74 fix itself. Each was told round 1's conclusions are not
+evidence — round 1's provenance audit passed the very citations that pointed at page
+banners, because it asked whether a ref was self-consistent rather than whether it was the
+*right* evidence.
+
+### G75 — `version_status` is published from a raw column, and `versions.py` is never called
+
+`[measured]`. `SnapshotBuilder._register_doc` copies `documents.version_status`,
+`issue_date` and `expiration_date` verbatim from whichever document row a citation reaches
+first. It never calls `fence_evidence/versions.py`, which already implements the date-aware
+resolver — `select_active`, `inferred_in_force`, expiry withdrawal — over the 84
+`effective_date` and 75 `expiration_date` facts Phase 6 extracted across all 17 NOA
+documents. **The logic is built and the publisher does not use it.**
+
+Consequences, all in the current snapshet `762967d3`:
+
+* **64 of 75 published `SourceDoc`s are `version_status: "unknown"`.** At least 28 have a
+  document row carrying an explicit date, edition or revision.
+* **Two currently-valid Miami-Dade NOAs publish as `unknown`.** NOA 24-0117.05 (*"Expiration
+  Date: 03/13/2029 … Approval Date: 04/24/2025 … This NOA revises NOA #23-0314.05"*) and
+  NOA 24-0117.06 (*"Expiration Date: 04/04/2028"*). Both unexpired today, both carrying
+  `version_status_basis: "no explicit version marker in curated metadata"` — which the PDF's
+  own first page contradicts. That `unknown` propagates into **11 published parameter rows**
+  (`footing_schedule` ×3, `footing_depth_mm` ×8), so obligation 6's "honest `version_status`"
+  fails at the row level, not just in metadata.
+* **Registration is order-dependent.** NOA 24-0117.05 has four byte-identical filings whose
+  curated dates disagree — two rows filled, two blank. `_register_doc` keyed on "first
+  citation reached" picked a blank one, discarding real dates present two rows away for the
+  same bytes. Nothing makes that choice deterministic by design.
+* **Three documents publish `source_class: "marketing"`, the weakest class, wrongly.** One is
+  a genuine Miami-Dade NOA (*"NOTICE OF ACCEPTANCE … shall not be valid after the expiration
+  date"*), one a dimensioned spec sheet, one literal installation instructions. All three do
+  raise `source_class_unclassified` gaps, so the platform discloses that it does not know —
+  but the published field still asserts a positive, wrong class rather than an absent one.
+
+Also measured and **clean**: `also_filed_as` is complete and correct for all 11 published
+documents carrying one, checked against all 15 `same_content_as` clusters; and referential
+closure is exact — 75 distinct hashes cited, 75 published, no missing document and no dead
+weight.
+
+### G76 — the 289 published warnings, never audited before
+
+`[measured]`. Five findings, worst first.
+
+**Binary control characters publish as "verbatim, untranslated" warning text.** Two
+warnings carry a corrupted font layer: `'Note: See next page on\n_o\x89|orovbࢼomv1u;\x89vom\nthe
+post side of the hinge.'` `quality.is_mojibake()` judges a whole page's control ratio, and
+enough of that page is clean prose that the page-level average passes while this element is
+unreadable binary. Zero `mojibake_text_layer` issues recorded for it.
+
+**One warning fragments into 12 published objects.** The freeze-thaw caution — the code's
+own comment calls it *"83 instances, the most repeated warning in this corpus"* and says the
+design is *"one warning with several citations"* — publishes as **12 separate `Warning`s
+carrying 14 citations between them**. The dedup key is `" ".join(text.split())` over the raw
+element text, so page-number bleed and delimiter noise each mint a distinct identity:
+`'30 * Caution – …'`, `'36 * Caution – …'`, `'32 * Caution – …'`, `'* Caution - …'`,
+`'30 + Caution - …'`. The merge logic itself is sound — the underground-utilities warning
+correctly merges 11 documents into one — it is defeated by noise surviving into the key.
+
+**94.8% of published warnings are document-scoped, against the 68% the design was argued
+from.** 274 document, 13 step, 2 warranty. The 68% figure comes from a corpus-wide census of
+1,038 warning-shaped instances and is what justified defaulting to document scope; whatever
+step-level attachment that implied did not survive to publication, and the 27-point gap was
+recorded nowhere.
+
+**Four published "warnings" are not warnings.** All via `_LEXEME_ONLY`, which glues the next
+element in ordinal order onto a bare lexeme heading with no check that it is that heading's
+body: `'NOTES\nIllusions Fence Catalog 04/20/20'` (a heading plus the catalog's footer),
+`'IMPORTANT!\n5 . UNSTABLE GROUND OR ROCK?'` (paired with the *next section's heading*,
+dropping its real body), `'ADVERTENCIA:\nCanales en U'` (a floating part-label; the real
+bodily-injury warning sits two elements later and is published for 14 sibling documents but
+not these two).
+
+**A two-word heading drops content silently.** `_LEXEME_ONLY` and `_LEXEME_LED` both require
+exactly one lexeme word, so `IMPORTANT NOTE:` matches neither and its body — *"Installer
+must consult local code officials for compliance to building code requirements."* — is
+dropped with **no gap recorded**. The identical sentence under a single-word `IMPORTANT:`
+heading in another document **is** published. Same content, different heading spelling,
+opposite outcome, no trace. Of 579 warning-shaped elements, 157 are cited nowhere and 73
+have no matching text anywhere in the published set.
+
+### G77 — the SECTION_RE fix dropped 119 real steps, and this entry is the fix
+
+`[measured]`, and it is a regression this session introduced. Making a heading "short and
+unpunctuated" (G64's follow-up) was right; the guard shipped with it was not — returning
+early only when the block had no newline sent every numbered instruction that merely
+**wrapped** down the cut-scanning path, where it found no bullet leader and landed as
+`prose`. `prose` is chrome and not in `CARRIES_CONTENT`, so those steps were silently
+dropped: **119 occurrences across 20 installation manuals**, including `10. Slide the
+mid-rail and top rail into the second post (post B).` and `11. Pour concrete around post
+B…`. Half of one document's segments went this way.
+
+Two further defects the same path hid: the numbered branch never called `_classify`, so a
+whole-line numbered prohibition (`4. Do not hang your gate system off a single
+non-supported post.`) was typed `step`; and `PROHIBITION_RE` anchors at the start, so the
+`4. ` prefix blocked the match even once classification ran.
+
+**Fixed.** A numbered block is a `section` only if it reads like a heading, and otherwise is
+classified like anything else — wrapped or not. Classification strips a leading `4. ` before
+asking what the line is. A numbered heading that opens a bulleted block keeps its `section`
+kind, judged on the head alone rather than on a block that is long precisely because the
+bullets are in it. `[measured]` after: `prose` falls **131 → 12** (the 119 recovered
+exactly), prohibitions rise 191 → 194, 0 span violations, and the slice page is unchanged at
+71 candidates.
+
+Not fixed, recorded: `PROHIBITION_RE` misses mid-sentence negatives (38 corpus-wide, e.g.
+`… tighten with ½" deep socket wrench (do not overtighten)`) — arguably right, since the
+line *is* an action with a caveat. And 45 of 194 prohibitions (23.6%) are not hazards:
+customer-service redirects (`DO NOT return the product to the store`) and technique tips
+(`Avoid "soupy" concrete mix`). A hazard prohibition and a negative imperative are not the
+same thing, and `prohibition` currently means the latter.
+
+### G78 — a fifth of published gaps are false, and the biggest real gap class publishes none
+
+`[measured]` over all 67 gaps in snapshot `762967d3`. All 61 element-subject gaps come from
+`SnapshotBuilder.warnings()`.
+
+**Roughly 23% are FALSE — the text is complete and already in the store.** The truncation
+heuristic is `body[:1].islower()` plus a `_DANGLING` word list, and a lowercase first
+character is not evidence of truncation. It fires on: a bullet glyph the text layer renders
+as a literal `k` (*"k Check the inside of the larger pieces in your box…"* — complete, and
+the gap claims it breaks off), a decorative drop-cap split into its own element (`NOTE: D` →
+the next ordinal completes *"Depending on severity of rack…"*), a maths variable (`q =
+(0.00256)(K z)(K zt)…` — a whole formula, also not a warning), and ordinary lowercase text
+after `Note: `. In every case the complete sentence sits in `elements.text`, in the same row
+or the next ordinal on the same page. **A rebuild would close these, not a person** — yet
+they publish as `closes_by: knowledge`, asking a human to transcribe something already held.
+
+**15 of 52 `warning_truncated_mid_clause` gaps are NOA legal boilerplate**, matched only
+because `_HAZARD` contains the phrase *"failure to comply"*. They all cite the identical
+clause: *"Misuse of this NOA as an endorsement of any product, for sales, advertising or
+any other purposes shall automatically terminate this NOA. Failure to comply with any
+section of this NOA shall be cause for termination and removal of NOA."* Rendered at 200dpi
+the pages are crisp and trivially readable. This is administrative boilerplate, not
+installation safety content, and calling it a `warns_line` gap misrepresents both.
+
+**One gap misattributes an OCR confidence across elements.** `d243231fbf74595d` says the
+warning *"was read at 75.5% confidence"*; 75.5% is the confidence of the two-token heading
+`IMPORTANT !`, while the body it quotes was extracted at **95.31%**. `snapshot.py` reads the
+lexeme row's `ocr_confidence` rather than the body row's when the lookahead path is taken.
+
+**And the largest real gap class publishes nothing at all.** Cross-referencing all 374
+`quality_issues` against the 67 gaps' subjects finds essentially zero overlap. **73
+`table_not_reconstructed` issues across 13 documents produce not one published gap** — along
+with 172 low-OCR-confidence passages, 81 mojibake pages, 34 failed OCR supplements and 9
+empty-after-OCR pages. `warnings()` only looks at text matching a warning lexeme, so an
+entire class of *known* extraction failure is invisible to a consumer reading `gaps[]`.
+**This is precisely the "silence reads as coverage" failure the member exists to prevent**,
+and it is larger than everything the member currently publishes: a Planning consumer has no
+signal whatever that 13 documents hold tables this platform could not reconstruct — the same
+tables G2 calls the corpus's highest-value numbers.
+
+**FIXED 2026-09-03.** `SnapshotBuilder.quality_gaps()` publishes a gap for every extraction
+failure this platform detects, citing the page it is about — expressible only because
+`source_ref_page` now exists (G73). Published in snapshot `1899fbe2`: gaps **67 → 441**, and
+every class matches its store count exactly — 172 `ocr_below_confidence_floor`, 81
+`text_layer_mojibake`, **73 `table_not_reconstructed`**, 34 `ocr_supplement_failed`, 9
+`empty_after_ocr`, 3 `empty_page`. `source_docs` 75 → 85, as ten documents are now cited that
+nothing had cited before. All citations resolve; 0 dangling.
+
+They publish at `informational`, not `warns_line`. A page this platform read badly is a
+statement about its own knowledge, attached to no plan line, and 372 of them at `warns_line`
+would drown the channel G74 had just finished making trustworthy. `QUALITY_NOT_PUBLISHED`
+names the one class deliberately excluded — a DOCX has no page image by construction, which
+is a property of the format rather than a failure to read it — so the set stays exhaustive
+rather than merely long.
+
+**And the first cut of this fix reproduced the disease it was fixing.** `SnapshotBuilder.gap`
+deduped on `[kind, subject]` while `parameters._Gaps.add` deduped on `[kind, subject, code]`.
+Every quality gap is `illegible_source`, so a page carrying two distinct failures collapsed
+into one and the second vanished: **53 of 73 unreconstructed tables were silently dropped by
+the change written to publish them**, and the run reported `raised=372` against 291 gaps
+actually held. Research earlier in this session had explicitly warned that these two
+collectors disagree and that a builder raising two findings about one subject must fold a
+discriminator in or accept the loss knowingly. The warning was read and not heeded. Both
+collectors now key on `[kind, subject, code]` — one concept, one rule — and a test asserts
+they agree by behaviour rather than by reading their source, which is the third time this
+session a test has been caught asserting against itself.
+
+The category is not uniformly wrong: two sampled `illegible_source` gaps are correct and
+well-triaged, including one where OCR genuinely garbled an italic note interleaved with
+diagram graphics. And G40's disease has not recurred — no two `would_close` strings are
+identical; each names its own document, page and text tail.
+
+### G79 — one published table claims full coverage where its siblings restrict exposure B
+
+`[measured]`. Of the five published `footing_schedule` tables, four carry
+`{"exposure_category": "B", "hvhz": false}` and correctly flag `{B, hvhz: true}` as
+uncovered. The fifth — scope `mfr/certainteed-columbia-imperial-chesterfield`, citing p11 of
+`NOA-12-1106.11` — carries a bare `{"exposure_category": "B"}` and publishes
+**`uncovered: []`**. Its B values therefore present as valid under HVHZ, where its four
+siblings say they are not. **This is the dangerous direction: silence reading as coverage.**
+
+The chain: a table review recorded the span `NO HVHZ BRACKET PRINTED` for every row on that
+page; the 12 underlying facts consequently carry `hvhz_applicability: "no bracket printed"`;
+and `parameters.py` treats that — correctly, per G53's policy — as *"unrestricted on hvhz,
+matches every value"*. Given the input, the output follows.
+
+**Whether the input is right is unresolved and needs a person.** The OCR text for p11
+carries the `HVHZ: MIAMI-DADE AND BROWARD COUNTIES` legend but no bracket string, which is
+consistent with a reviewer seeing nothing legible to record; the sibling page p17 of
+NOA-23-0314.05 shows `HVHZ AND NON HVHZ` twice in its OCR. An adversary that rendered p11 at
+200dpi reports the bracket **is** printed, on the same drawing template as the siblings. If
+that is right, the review is wrong and this table should restrict B exactly as the other four
+do. It is one crop, and it is the user's own review to re-cut — `review --accept` with a
+corrected span is the mechanism.
+
+Recorded alongside it, a latent asymmetry that did not cause this but could: `_footing_schedules`
+derives a table's `dimensions` only from keys present in each row's own conditions, while
+`_finish` unions the fuller set `_translate_conditions` returns. Where every row wildcards a
+dimension, that dimension leaves the declared domain entirely. Post-G74 the coverage answer
+is the same either way, because a wildcard row genuinely covers every point — but a table
+that does not *declare* `hvhz` in its domain says something different to Planning than one
+that declares it and covers it.
+
+### G80 — the published-layer fix pass: five defects, and three found in the fixes
+
+`[measured]` 2026-09-03, snapshot `61da0f9d`. Five contained fixes to the publishing layer,
+each measured by an adversary before a line was written, because every rule here turns on a
+threshold and this codebase has repeatedly punished choosing one by eye.
+
+| | Before | After |
+|---|---|---|
+| gaps | 67 | **402** |
+| warnings | 289 | **287** |
+| warning citations | 458 | **623** |
+| `warning_truncated_mid_clause` gaps | 52 | **0** |
+| published citations resolving | 2,854 | **4,860**, 0 dangling |
+
+**1. Every detected extraction failure publishes** (G78). Covered above.
+
+**2. Undecodable text is gapped, not published.** Two warnings carried binary control
+characters as "verbatim, untranslated" text. `quality.is_mojibake` cannot see it, and the
+reason is worth keeping: the cipher substitutes letters onto OTHER printable ASCII, so
+`ascii_token_ratio` lands at 0.857–0.958 against its 0.85 limit on every affected page while
+`control_ratio` trips 2–4× over. A per-element legibility ratio at 0.015 rejects 176 of
+49,984 elements and 3 of 289 warnings, with zero legitimate rejections — `¼`, `•`, `–`, `©`,
+`ﬁ`, and French and Spanish accents all pass. **A measured, deliberate recall gap remains**:
+two elements of the same corruption score 0.0169 and 0.0, because a substitution onto valid
+ASCII is invisible to any character-class test. This bounds the damage; it does not end it.
+
+**3. Published dates come from evidence** (G75). `versions.document_dates` resolves both
+dates from the facts Phase 6 extracted for every filing independently, so the answer stops
+depending on which filing a citation reached first. **The trap the measurement caught before
+it shipped:** `versions.parse_date` and `dates.normalize_date` are two independent parsers
+that disagree, and `normalize_date` is the one implementing amendment 002 — refuse to guess
+when day and month are both ≤ 12 and unequal. Publishing `parse_date`'s ISO output directly
+would have overridden a ratified amendment's refusal with a confident guess on four
+documents, one of which correctly publishes `iso: null` today. Every value is re-normalised
+through `normalize_date`. `version_status` itself is untouched: `select_active` reports
+`inferred_in_force`, and collapsing an inference into the word a document uses about itself
+is the overclaim obligation 6 exists to prevent.
+
+**4. The truncation test was noise.** `body[:1].islower()` measured **precision 0.000 and
+recall 0.000** — it caught none of the 5 genuine defects and produced 21 false gaps alone,
+firing on a bullet glyph OCR'd as a literal `k`, on a drop cap, and on the maths variable in
+`q = (0.00256)(K z)…`. Removed. In its place, a dangling body is **joined forward** up to
+four elements before being judged, which *recovers* the warning rather than gapping it:
+`"Note: The latch is designed for"` becomes `"…for left and right hand applications."` 24 of
+26 danglers complete this way. And 15 gaps were Miami-Dade administrative boilerplate
+matched only because `_HAZARD` contains *"failure to comply"* — every one of the 15
+corpus-wide occurrences of that phrase is the same clause, so excluding it costs nothing.
+The OCR-confidence gate now reads the row the published body came from, not the heading's:
+one gap claimed a warning "was read at 75.5% confidence" when 75.5% belonged to the
+two-token heading and the quoted body was read at 95.31%.
+
+**5. One warning is one `Warning`** (G76). The dedup key ran over raw element text, so page
+bleed and delimiter variance minted a separate identity per copy and the corpus's
+most-repeated caution published as 12 objects. The key now strips a leading page number and
+footnote marker before a recognised lexeme, folds dash variants and case: 24 objects merge
+into 7, with **zero false merges** across all 289. Citations are now a **union**, not capped
+one-per-document — capping would have dropped the count from 458 to 448, losing evidence to
+a fix meant to consolidate it. The lexeme deliberately stays in the identity: 8 pairs share
+a body and differ only in a `WARNING:` heading, and a body-only key cannot tell that
+separate extraction defect from a real WARNING and a real CAUTION that coincide.
+
+**Three defects were found IN these fixes, all by measurement rather than by the tests.**
+
+* The first cut of fix 1 reproduced the disease it was fixing — 53 of 73 gaps collapsed by
+  a dedupe key mismatch this session had already been warned about in writing.
+* `quality_gaps` filtered `WHERE page_no IS NOT NULL`, so `encrypted_pdf` — a document-level
+  failure with a null page, and listed as publishable — could never publish. A detected
+  failure staying invisible, inside the change written to stop that.
+* The forward join returned the whole rebuilt string and the caller spliced it back over
+  text that already held the body, publishing `"Note: The Note: The donut can be The Note:
+  The donut can be level should sit…"`. Worse, four of the five genuinely garbled bodies
+  stopped being gapped and published as joined nonsense — **the fix silently traded a false
+  gap for a false warning**, which is the more dangerous direction. `_INTERLEAVED` now gaps a
+  body containing a second severity lexeme, which is what OCR reading two columns onto one
+  line looks like. One of the five (a paragraph fused with a diagram callout, no second
+  lexeme) still publishes joined; recorded rather than detected for n=1.
+
+**Severity is no longer blanket.** The first cut made every quality gap `informational`,
+justified as "a page we read badly is attached to no plan line". `[measured]`, that was
+false: 11 of the 13 documents carrying an unreconstructed table are the same documents
+backing published `ParameterTable` rows, and 93% of those gaps sit on a document that
+already backs a live value. A gap now warns a line when the document it names already backs
+something published — those pages are siblings of pages a plan depends on — and is
+informational when nothing cites the document.
+
+**Known and unfixed, recorded:** `Gap.id` is `sha256([kind, subject, code])`, so changing the
+dedupe key changed the id of all 67 carried-over gaps. Nothing in `contract.md` §1.2.1 states
+id stability across builds, but a consumer diffing two snapshots by gap id would see 67
+removed and 67 added that are in fact the same 67.
+
+### G81 — the `procedures` member is built; it publishes 0 because 0 are reviewed
+
+`[measured]`, snapshot with `procedures` wired. The slice is finished as far as it can go
+without a person, and the honest state is: **the pipeline is complete and proven, the queue
+is not.**
+
+What exists now, end to end:
+
+* `step_candidates` — 71 on the slice page, from `steps.propose`.
+* `step_reviews` + `submit_step_review` — a person's judgement, keyed on
+  `(element_id, char_start, char_end)` and never on `candidate_id`, which the splitter
+  re-mints on every run and re-minted four times in one day. `rebuild_step_projection`
+  restores the projection from the record alone, and a test proves a review survives a full
+  re-cut of the queue.
+* `cli steps --accept` — refuses a blank reviewer, a machine verdict, a `kind`/`scope`
+  outside the published vocabularies, an anchor naming nothing, and text that has moved
+  since the reviewer looked. Exit 2 on bad input.
+* `procedures.build_procedures` — the member, plus `verify()` checks for duplicate
+  `Procedure.id`, the `kind`/`scope`/`Edge.kind` vocabularies, and `requires` naming a key
+  inside its own procedure.
+
+**`procedures` publishes `[]` and a gap says why**: *"p8 … 71 step candidates are waiting for
+a person; until somebody confirms what each line is, none of them publishes."* That is the
+rule working, not the pipeline failing — `AssemblyStep.kind` and `scope` are required by the
+shape, so a candidate without a review cannot publish even partially. A half-classified step
+would be this platform asserting something nobody decided, which is A1/CUR-S0 in a new seam.
+
+**One defect found in this work, by running it rather than by a test.** `build_procedures`
+wrapped its query in `except sqlite3.Error: return [], []`, reasoning that a store predating
+the tables should publish nothing. `step_reviews` did not exist on the live store, the
+`LEFT JOIN` raised, the handler swallowed it, and the member published nothing **while
+reporting success** — no gap, no error, a snapshot id identical to the previous build. The
+same swallowed-failure shape this session has been fixing all day, written by me twenty
+minutes earlier. It now asks `sqlite_master` which tables exist and lets every other error
+raise.
+
+**The ledger now carries step reviews, at `LEDGER_SCHEMA` 2.** A store is rebuildable and a
+judgement is not, so a review that lived only in `step_reviews` was one `ingest --all` away
+from being gone. Adding a third kind moves the schema because the header carries one count
+per kind — which is exactly why it is a bump rather than a field nobody notices, and the
+existing test pinning the empty-ledger header caught it as designed.
+
+`read_ledger` accepts **schemas 1 and 2**: a file exported before today is a valid ledger
+that predates step reviews, and refusing it would strand every export already taken. A
+schema-1 header has no `step_reviews` key and no step lines, so its counts reconcile at 0
+with no special case. The line carries no `candidate_id` — the splitter re-mints it on every
+run — and `read_ledger` refuses one that does, the same guard the fact loop has against
+`fact_id`. On import the anchor must name exactly one candidate in the receiving store;
+zero or several is `unresolvable`, reported and skipped, never guessed at.
+
+`[measured]`: a review recorded in one store, exported, and replayed into a fresh store
+built from the same corpus reproduces exactly — `step_reviews.new = 1`, the candidate comes
+back `accepted` with its reviewer — and replaying a second time reports `identical`, which
+is what makes a replay idempotent. The committed ledger is re-exported at schema 2:
+71 table reviews, 204 fact reviews, 0 step reviews, because nothing on the slice page has
+been reviewed yet.
+
+---
+
+### G82 — Emblem purchase previews work; authored model publication remains open
+
+`[measured]`, 2026-09-06. The Emblem 73014714 work added a private model draft,
+source-linked packaged-item bindings, and executable purchase previews. It did
+not complete the contract datamodel or demonstrate its use in Planning. The
+initial commit omitted this measured gap entry and overstated the durability
+of one reviewed width. The follow-up review found three concrete defects.
+
+**Supplementary PDF.** A 1,444,864-byte retailer-linked installation PDF was
+unnecessarily added through LFS. Its URL and SHA-256 remain in the draft as
+the reproducible locator for the historical four-statement comparison. The
+PDF is now an ignored optional cache, removed from disk and Git tracking. The
+audit reports `not_checked_cache_missing` when absent; it never calls that a
+successful hash or text check. A cached file must still pass both checks.
+Removing its pointer from this branch's commit history prevents subsequent
+branch checkouts from fetching it; it does not purge GitHub's uploaded LFS object.
+
+**Two step reviews caused invalid publication.** Joining every review to its
+candidate duplicated the step key and could create an `after` edge to itself.
+Submission, projection replay, and publication now select the latest
+`reviewed_at`, with `step_review_id` breaking equal-time ties deterministically.
+Contrary to the assumption in the review request, replay previously used arrival
+order too. Five regression tests cover correction, newer rejection, backdated
+rejection, reversed insertion, and equal timestamps. Table and fact review
+ordering is unchanged.
+
+**The Developer width was not replayable.** Fact 22751 was hand-inserted as
+`manual-curation-v1`, and review 78fe49766acc86a1 claimed
+`status_before: extracted`, although no extractor produced it. The export itself
+acknowledged that there was no importer. With the user's authorization, the
+fact and review are withdrawn, along with the special width publisher and its
+registry additions. The earlier snapshot is tombstoned using the existing
+snapshot-store withdrawal mechanism. The source reading and the user's page
+confirmation remain draft evidence, not an active ledger review. No replacement
+review, extractor event, or importer is invented. An authored-fact ingestion
+path with validated anchors and fresh-store replay tests is still needed before
+this reading can publish through the ledger.
+
+**What remains open.** The preview derives supplier packages for a single panel
+and a seven-panel layout (a five-panel L plus a separate two-panel run), but the
+bindings and kit coverage remain private authoring data. `publishable` and
+`contract_consumer_verified` remain false. The model still lacks fitting inputs
+and required contract fields; no board count, cut list, installation readiness,
+or consumer compatibility follows from correct package counts. The separate
+Planning consumer is unavailable here. Existing procedure ownership and the
+derivation of dependencies from source order also remain outside this fix.
+
+`[measured]`: the corrected ledger parses at 71 table reviews, 204 fact reviews,
+and 0 step reviews. The local store has 1,826 facts; the withdrawn fact and
+review are absent. A rebuilt snapshot verifies with 9 parameters, and no live
+snapshot contains `actual_panel_width_mm`. The draft audit checks 118 citation
+occurrences, 3 corpus hashes and 23 spec fields: zero integrity errors, but
+55 required contract locations and 15 fitting inputs remain missing. External
+manual corroboration is explicitly unchecked in this run. The single-panel
+preview yields 1 kit, 2 end posts and 2 caps; the seven-panel preview yields
+7 kits, 4 end posts, 4 line posts, 1 corner post and 9 caps. Both match the
+independent examples. Corpus/dataset files and both frozen boundary documents
+are unchanged from the branch parent.
+
+The first full-suite run caught a rollback error: its removed ledger row still
+counted in the header (205 versus 204). Re-exporting with
+`python3 -m fence_evidence.cli review --export` corrected it, and `read_ledger`
+now accepts the result. This is why parsing and replay checks, rather than just
+counting rows in a report, belong in the completion checkpoint.
+
+Final `python3 tests/run_tests.py`: **1,416 tests, OK (1 expected failure)**,
+45.770 seconds. This includes 17 procedure tests and 17 draft-audit tests.
+`git diff --check` passes.
+
+---
+
+### G83 — procedure verification now exercises refusals on nonempty procedures
+
+`[measured]`, 2026-09-06. Review correctly identified that the procedure
+publisher had tests but its snapshot verification gate had no refusal tests:
+the verifier fixtures all carried `procedures: []`. The real-build test even
+looked for `verify(` in source text instead of executing a failing build.
+
+Twelve new verifier test methods comprise one positive baseline and eleven
+negative controls. They start from a valid two-step procedure and exercise
+missing/duplicate procedure IDs, duplicate/missing/blank step keys,
+missing/unknown kind and scope, missing citations, blank text, invalid edge
+kind, a dependency pointing into another procedure, and citation closure.
+The positive fixture must pass before each negative control is applied.
+The build test now injects that procedure through the publisher boundary:
+the complete object returns a snapshot, while removing the first step's kind
+raises `VerificationFailed` before any snapshot is returned.
+
+**A real omission surfaced.** Null, empty and whitespace-only step keys all
+passed the existing gate. The new test failed in all three cases before the
+fix. The gate now requires a nonempty string key; those cases are refused.
+Focused verification: **57 tests pass**, including the real-store build gate.
+Full `python3 tests/run_tests.py`: **1,428 tests, OK (1 expected failure)**,
+45.557 seconds. `git diff --check` passes.
+These are structural checks, not proof of source correctness, complete graph
+validation, or Planning compatibility. No live human step review was created.
+
+---
+
+### G84 — empty procedures and malformed shapes are explicit refusals
+
+`[measured]`, 2026-09-06. Follow-up review identified pre-existing omissions
+made visible by G83. A procedure with absent, null or empty steps passed
+verification; procedure-level citations were not required. Non-object procedures
+or steps raised `AttributeError`, and list/dict step keys raised `TypeError`
+before the key guard ran. These exceptions prevented publication but bypassed
+callers catching the documented `VerificationFailed`.
+
+Six new test methods reproduce these cases with subtests. Before the fix,
+the focused suite reported **5 assertion failures and 13 errors**. The gate
+now requires a nonempty steps list and procedure citations, checks procedure
+and step objects before accessing fields, and validates keys before hashing.
+The reported malformed shapes now raise `VerificationFailed` with their
+procedure/step location. An empty snapshot `procedures: []` remains valid;
+an empty procedure inside it is refused. Focused verification: **63 tests pass**.
+Full `python3 tests/run_tests.py`: **1,434 tests, OK (1 expected failure)**,
+45.972 seconds. Both frozen boundary checksums and `git diff --check` pass.
+
+G83's count is clarified: twelve new methods meant one positive baseline and
+eleven negative controls, plus the separately rewritten build test. These
+checks do not establish complete graph validation or source correctness; no
+live step review or contract amendment was made.
+
+---
+
+### G85 — Emblem identities publish; purchase quantities read cited authored rules
+
+`[measured]`, 2026-09-06. The existing component publisher now accepts an explicit
+manufacturer and assembly selection. The Emblem panel-family slice contributes
+six Parts (three posts, cap, rail, board) and one manufacturer PartType extension
+whose parent is `shared/infill`. Existing CertainTeed identities stay unchanged;
+gate kits, gate insert, hinges and latch are excluded. Dataset baseline checking
+still precedes reads. No research dimensions or quantities are promoted with
+component identity.
+
+The stored snapshot named in `workspace/reports/emblem-authored-publication-check.json`
+verifies with **17 Parts, 6 PartTypes and 0 FenceModels**. The six family IDs are
+not asserted to be the exact-SKU draft's seven Parts: the family dataset combines
+top/bottom rails, and its post identities span variants. This mapping is still
+needed before these objects can form one exact product model.
+
+The private model package now authors three quantity rules: kit per explicit
+full-kit bay, post per unique station, cap per selected post station. Each carries
+its source phrase, citation, model scope, Quantity per basis and authored rationale.
+`purchase_preview` requires these inputs and emits the basis count and calculation
+beside each purchase line. Citations support the reading; authored arithmetic
+is not represented as an extracted numeric fact or a new human review. A test
+changes a cap multiplier and proves both demand and derivation change; missing
+rules, unsupported bases, wrong model scopes, uncited and fractional-item rules
+are refused. Both saved layouts retain their independently checked counts:
+1 kit / 2 posts / 2 caps; 7 kits / 9 posts / 9 caps.
+
+**The requested FenceModel publication is not complete.** Reading the definitions
+found an actual wire ambiguity: current §3.5 groups `length_rule` as Quantity;
+the predecessor defines named length rules. No executable consumer schema here
+settles it. Rail placements, joint geometry, infill fitting inputs and exact
+post/kit bindings also remain unresolved. Publishing the fragment because
+`status: draft` bypasses none of those needs. The next input is the Planning
+loader/schema, followed by a supported requirement fixture and source-backed
+family quantity/geometry rules.
+
+**The audit overstated its missing-field count.** Its 55 absent paths include
+mutually exclusive PartRequirement modes. They are presence diagnostics, not
+55 established mandatory fields. The report and walkthrough now say so explicitly;
+this change does not claim to have built a complete schema validator. The draft
+audit checks 121 citation occurrences, 3 corpus hashes and 23 spec fields with
+zero integrity errors; external PDF bytes remain explicitly unchecked.
+
+The first full suite passed 1,443 tests. Additional review then reproduced a
+silent-ignore defect: rule conditions and pack-rounding fields changed no result.
+The evaluator now whitelists its supported rule and Quantity fields and refuses
+unsupported semantics. Regression cases cover both findings and quantity overrides.
+The focused generator has 24 test methods and the new Emblem identity slice has 5.
+Both frozen boundary checksums and `git diff --check` pass.
+Final `python3 tests/run_tests.py`: **1,443 tests, OK (1 expected failure)**,
+46.548 seconds.
+
+---
+
+### G86 — actual Planning consumer located and exercised
+
+`[measured]`, 2026-09-06. Read-only GitHub discovery located
+`spicysauce1955-stack/BOM`; a temporary checkout at
+`9de94eb06d8e997d9be098dedd5b6a6b2eb4024d` supplied the real loader and model types.
+No consumer code or remote state was changed. Its locked dependencies were
+installed into the temporary checkout to run the code, not inferred from docs.
+
+`scripts/probe_planning_consumer.py` loaded the actual G85 snapshot through
+`fenceai.knowledge.snapshot.load` and `ingest`: **17 Parts, 6 PartTypes, zero
+Part defects and zero gap defects**. The checked-in report pins both revisions
+and records the executed private requirement example. The consumer's 54 focused
+snapshot and part-aware model-validation tests pass.
+
+**One ambiguity resolved; a larger boundary measured.** The private requirement
+parser accepts integer `qty: 1` and `length_rule: centre_to_centre`; it refuses
+an unregistered name and a Quantity-valued length rule. The mutable datamodel
+documentation incorrectly grouped `length_rule` with Quantity; corrected without
+changing either frozen boundary document. Private `overlap_mm: 0` and other
+parser defaults are not source facts or approved public defaults.
+
+The snapshot loader deliberately carries `models`, `procedures`, `combinations`
+and `rules` without parsing them into private types. A hash-valid probe carrying
+a deliberately incomplete model loads and returns **models: 1 unconsumed**;
+the private FenceModel parser refuses that same object. The probe exists only
+in memory and is never stored as a published snapshot. Thus loading cannot
+be used as proof of model validity or BOM support.
+
+The missing input is no longer the repository location. The next work is a
+published-model adapter in Planning: agree the public requirement serialization,
+convert quantities explicitly, preserve provenance and refuse incomplete geometry,
+then bind published Parts/kit contents to products and run the two layouts.
+The existing source/geometry and family-to-SKU gaps remain. The saved report
+explicitly says `published_models_consumed: false` and `bom_generation_verified:
+false`; no successful BOM generation is claimed from this checkpoint.
+
+Validation: the executable consumer probe passes both negative controls and the
+carry-vs-parse control. Source-backed draft audit still reports zero integrity
+errors with incomplete field diagnostics (exit 2).
+The 17 local draft-audit tests pass, as do both frozen boundary checksums and
+`git diff --check`. The consumer checkout remains clean. No full-suite result
+is claimed for this probe/documentation checkpoint.
+
+---
+
+### G87 — fresh adversarial assembly review found defects beyond passing tests
+
+`[measured]`, 2026-09-06. Three independent agents reviewed the current work as
+an installer, a quantity/source adversary, and a Planning-boundary adversary.
+The parent also ran 80 deterministic layout transformations over the single-panel
+and seven-panel L-plus-separate-run cases. Input permutations, reversed bay
+directions, rotation, scaling and translation preserve demand and post roles;
+each line's derivations still sum to its total. These are schematic checks.
+
+**Reproduced and fixed.** A real line-post SKU substituted for the panel-kit SKU
+passed source checking. Kit description and SKU now must share a source row.
+An empty frame/infill/coverage graph passed vacuously; it is now refused for this
+supported panel shape. The assembly audit accepted missing or wrongly ordered
+actions, then invented the missing events from its hardcoded simulation. It now
+requires the supported nine-action workflow and constructs events from the
+validated trace, retaining source keys, instructions and evidence. Deleting the
+concrete, gravel/filler or adhesive entries is refused; unresolved quantities and
+their blockers must stay visible. This workflow is an example-specific check,
+not a newly asserted universal installation sequence.
+
+**Not fixed by a citation.** A 99-caps-per-station authored rule with the old
+one-cap explanation still computes 198 caps for two stations. Replacing a rule's
+evidence with an unrelated but real source phrase also passes identity checking.
+Those are semantic-admission gaps, not arithmetic errors. Output now explicitly
+marks quantity rules `unreviewed_authored` and `quantity_semantics_verified: false`.
+Kit inventory can likewise contain unreviewed claims; it is renamed
+`authored_kit_inventory_per_bay` and completeness is explicitly unverified. No
+automated source-identity check is represented as quantity or inventory approval.
+
+**The published graph cannot yet assemble this fence.** None of the seven draft
+Part IDs match the 17 published Part IDs. The six published Emblem Parts have
+empty specs. The actual Emblem fragment fails Planning's private parser in five
+locations: two missing rail placements, two incompatible Joint shapes, and a
+missing post requirement. Its snapshot loader carries the fragment as one
+unconsumed model instead. The probe now measures these facts directly and refuses
+Part/gap defects before recording a successful loader diagnostic. It still does
+not claim assembly acceptance or BOM generation.
+
+The baseline purchase counts remain 7 kits, 4 end posts, 4 line posts, 1 corner
+post and 9 caps; the authored kit inventory includes 14 end channels over seven
+panels. Physical clearance at the corner, effective board count/pitch, engagement
+dimensions, material quantities and site-dependent reinforcement remain unknown.
+Agent review is logical/source review; nobody physically assembled a fence.
+
+Reproduction evidence is in `workspace/reports/emblem-adversarial-assembly-check.json`
+and the expanded `workspace/reports/planning-consumer-probe.json`. New regression
+tests cover the refusal paths, source-row substitution and the 80 transformations.
+The complex simulation now has 60 events, all carrying source evidence, and
+prepares nine unique post holes. Final `python3 tests/run_tests.py`: **1,456 tests,
+OK (1 expected failure)** in 45.923 seconds. The expanded actual-consumer probe
+passes; both frozen boundary checksums and `git diff --check` pass.
+
+---
+
+### G88 — every published date was `iso: null`, and obligation 16 could not run
+
+`[measured]`, 2026-09-06. Found while looking at G79's crop, not by a test.
+
+`dates.normalize_date` anchored both of its patterns `^...$`, so it resolved a
+bare `03/13/2018` and returned `iso: null` for `Expiration Date: 03/13/2018`.
+The corpus prints the label with the date, `SnapshotBuilder` passes the original
+lexeme deliberately — `value_raw` is specified to keep it whole — and so the
+parser was never given a string it could match.
+
+```text
+'03/13/2018'                   -> 2018-03-13
+'Expiration Date: 03/13/2018'  -> None
+```
+
+`[measured]` on the published snapshot: **24 of 24 dates carried `iso: null`.
+16 were unambiguous and should have resolved**; the other 8 are the amendment's
+own cited case and are correctly refused. Because `iso` was null everywhere,
+obligation 16's lapse check had nothing to run on — a consumer could not detect
+that a sealed approval had expired, though the raw lexeme said so in words.
+After the fix, **3 documents are machine-detectably lapsed: 2013-03-13,
+2018-03-13 and 2024-03-13.**
+
+The fix searches inside the lexeme when the whole string is not itself a date.
+Three refusals are deliberate rather than incidental:
+
+- **Two different dates in one lexeme refuse.** A string carrying both an
+  approval and an expiration does not say which one the field means, and taking
+  the first is guessing. The same date printed twice is one candidate.
+- **Digit lookarounds bound the search**, so an acceptance number
+  (`12-1106.11`) is not mined for a date and `03/13/20188` is not read as 2018.
+- **Ambiguity is unchanged.** `Approval Date: 05/04/2023` still resolves to
+  null; the label must not change what amendment 002 refuses.
+
+Ten tests were added. Honest about which discriminate: **four fail against the
+old parser** (the labelled-date cases); the other six assert refusals the broken
+code also produced, so they guard the fix from over-reaching rather than detect
+the bug. `versions.parse_date` is untouched — G80 fix 3 established that the two
+parsers disagree and that `normalize_date` is the one implementing 002.
+
+**This moves published data and is visible at the boundary.** A rebuild produces
+`c772aaf8…` where the stored cut is `5b25c3b6…`; 16 date fields populate and
+three documents become detectably lapsed. T46 was already committed when this
+was found, so it is **not** in that turn and Planning has not been told. It
+needs a T47, or an addendum, before or with the next snapshot they pin.
+
+Not established: that any lapsed approval should stop publishing. Three
+documents now report a past expiration; what a consumer does with that is
+obligation 16's business and Planning's policy, and nothing here changes either.
+`python3 tests/run_tests.py`: **1,466 tests, OK (1 expected failure)**.
+
+---
+
+### G89 — G75's fix reached `SourceDoc` and stopped one member short
+
+`[measured]`, 2026-09-06. G75 established that a published date comes from
+evidence, not from the curated `documents` column. That landed in
+`SnapshotBuilder._document_dates`. `parameters.py` was three lines away and
+kept calling `normalize_date(fact["issue_date"])` on the raw column, so the two
+members of the same snapshot published different dates for the same document —
+while a comment in `parameters.py` asserted the opposite:
+
+> *"`belongs_to` joins it to the `SourceDoc` in the snapshot, which carries the
+> same dates."*
+
+`[measured]` on the built snapshot, before: **17 of 31 published rows carried
+no machine-readable `valid_until`, and 0 of 31 agreed with the `SourceDoc`
+their own `authority` names.** Two of those documents had lapsed —
+2018-03-13 and 2024-03-13.
+
+**Why that mattered rather than being untidy.** Obligation 16 is BINDING and
+reads `valid_until`: *"Planning pins `as_of` … and warns when a line's backing
+`valid_until` precedes it."* Against a null it compares with nothing and warns
+about nothing. Two published `footing_schedule` tables were backed by expired
+approvals and no consumer could see it from the field the obligation names.
+This is the project's recurring shape — silence reading as coverage — arriving
+in the one member that carries engineering numbers.
+
+The fix is one resolver, `versions.resolved_document_dates`, that both members
+call. Not a third parser: it is `_document_dates`' body moved down a layer, so
+`parse_date` still never reaches publication and amendment 002's refusal still
+holds. `[measured]` after: rows with no `valid_until` **17 → 3**, rows
+disagreeing with their `SourceDoc` **17 → 0**, and **6 rows now report a lapsed
+authority** where none could before.
+
+**What this does NOT do, deliberately.** It does not mark anything deprecated,
+expired or superseded. Obligation 16 says lapse is judged against a pinned
+`as_of`, *"never a clock"*, because generation must be a pure function — a
+clock read here would make the same project against the same snapshot warn
+differently on different days. And `version_status` is a closed BINDING
+vocabulary, `active | superseded | unknown`, with no value for *expired*;
+adding one is an amendment, not a registry addition. The decision that expired
+sources are deprecated is correct and is **Planning's to apply**; this change
+only gives them the date to apply it to. Note the contract's own figure before
+treating deprecation as deletion: **40.7% of this platform's human-gated facts
+come from a superseded document.**
+
+Five tests. Honest about which discriminate: three exercise the resolver
+directly (evidence beats a blank column, the column is still the fallback,
+002 still refuses through this path) and two assert the cross-member invariant
+on a real cut. The first draft of the fifth test asserted that both modules
+*mention* `resolved_document_dates` via `inspect.getsource` — the same
+source-text assertion this session already replaced once in
+`test_build_runs_verify_itself`, and it would pass against two functions that
+disagree. It compares published values instead.
+
+Still open: 3 rows carry no `valid_until` because no evidence and no column
+holds one. That is honest absence, not this defect.
+
+**Boundary-visible.** T47 told Planning the dates would populate; it was
+written before this was found, so the row-level change is not in it and needs
+a line in the next turn. `python3 tests/run_tests.py`: **1,471 tests, OK
+(1 expected failure)**.
+
+---
+
+### G90 — private FenceModel candidate closes joint and post parser gaps
+
+`[measured]`, 2026-09-06. The next requested slice was the three known parser
+gaps: rail placement, joint shape and post requirement. Two are now mapped in
+`workspace/catalog/emblem-73014714-consumer-model.json`; the source draft remains
+unchanged and the candidate records its hash and retained source joint objects.
+
+The private consumer uses `joint: channel`, not the published Joint object.
+The preparer translates only the existing kind-only shape; it refuses a Joint
+carrying additional numeric fields rather than silently dropping them. Post
+selection uses the consumer's own predicate AST: `post.kind` paired with
+`item.sku`, for end 73045785, line 73045783 and corner 73045784. This private
+catalog predicate names no Part, as required by the consumer's exclusivity rule.
+Its quantity is taken from the explicit one-post-per-station authored rule.
+This is not a published eligibility agreement or a claim of physical routing fit.
+
+Planning's parser now reports **two errors instead of five**, both missing rail
+placements. Its evaluator selects the intended SKU for each of the three roles
+and no SKU for gate, junction or transition, including an unrelated-product
+negative control. **23 consumer post-slot tests and 5 local mapping tests pass**.
+The preparation command exits 2 while the candidate is incomplete. No full
+FenceModel validation or BOM generation is claimed.
+
+**The remaining placement question is a real source gap.** Independent visual
+and text review of the exact project sheet, catalog and installation guide found
+72-inch actual panel height and 7-inch rails, but no explicit centreline offsets.
+Planning's placement represents a rail centreline. A 3.5-inch (88.9 mm) inward
+offset follows only if the panel height is outside-rail-face to outside-rail-face
+and each rail occupies a full 7-inch vertical envelope. The asymmetric profile's
+material centroid is not the datum. The manual's 2-inch ground clearance is not
+a substitute for a rail position within the panel. The user has been asked to
+confirm the datum or supply the two offsets; neither zero nor 3.5 inches is
+inserted while that answer is pending. Integer-mm projection would also need
+explicit treatment of 88.9 mm rather than silently truncating it.
+
+`scripts/prepare_emblem_consumer_model.py` reproduces the candidate and
+`workspace/reports/emblem-73014714-consumer-model-check.json` with the consumer's
+Python environment and `--consumer-root`, `--package`, `--output`, `--report`.
+Missing joint geometry, Part specs, fitting policies and unprovided private
+defaults remain listed as unresolved. Closing parser errors alone will not
+make a model physically complete. Both frozen boundary checksums pass.
+
+---
+
+### G91 — User-confirmed rail datum closes private parser gaps, not physical validation (2026-09-06)
+
+The user, identified in this session as Developer, answered “yes” to the precise
+interpretation that the 72-inch panel height runs between the outside bottom and
+top rail edges, each rail having a 7-inch vertical envelope. The separate
+`workspace/catalog/emblem-73014714-placement-confirmation.json` records that
+interpretation, the original response, source references and exact draft package
+hash. It is not an extracted fact, manufacturer-dimensioned datum or ledger review.
+G90's pending placement question is answered at this authoring level.
+
+The private preparer accepts `--placement-confirmation`. It rejects stale package
+hashes, different models/datums and incompatible confirmation inputs. The exact
+inward centre offset is 88.9 mm. An explicit authored nearest-whole-mm, half-up
+adapter policy projects it to 89 mm, retaining the 0.1 mm offset error. This is
+not a manufacturer tolerance. The 72-inch panel height is 1828.8 mm, projected to
+1829 mm for the diagnostic consumer placement check: actual consumer code returns
+bottom and top centres of 89 and 1740 mm respectively. The exact top centre would
+be 1739.9 mm. No ground clearance is added to either panel-relative position.
+
+**Measured:** seven focused tests pass (two added methods, including six refusal
+subcases). The actual consumer at `9de94eb06d8e997d9be098dedd5b6a6b2eb4024d`
+now parses the whole private candidate with zero parser errors, down from two.
+Its placement resolver and all six post-role cases execute successfully. Both
+frozen boundary checksums pass. Exit 0 from the preparer means parser acceptance
+only; the report explicitly records full model validation as not run because the
+exact Part library and catalog are incomplete. No full-suite claim is made here.
+
+**Remaining:** exact Part dimensions, channel depth and insertion/engagement,
+infill fitting rules, quantity/length defaults and grade/height support still
+require authored evidence. Private parser defaults remain unverified; publication,
+installation readiness and BOM-generation verification remain false. No published
+model adapter or reviewed model import path has been added. This checkpoint closes
+the three known private syntax blockers, not the contract publication work.
+
+---
+
+### G92 — Cross-source evidence improves Emblem coverage; revision identity still matters (2026-09-06)
+
+The renewed external search found the manufacturer's Emblem family page states
+7/8-inch board thickness and directly links the exact 73014714 project plan.
+This improves the previously rejected legacy-dataset claim to a manufacturer
+family assertion with an explicit model link. It has not yet been captured with
+content hashes, admitted through review or published as an exact Part spec.
+
+The exact SKU retailer page links a cutdown guide stating a 3-inch rail allowance
+beyond finished panel width. That supports a scoped cutting rule, not an automatic
+97-inch stock length or board engagement depth. A newer manufacturer Emblem
+manual, 34118672 REV 5.25, explicitly lists 15 boards, 2 rails and 2 U-channels
+in both language tables. Transfer to the legacy SKU remains unproven: the current
+manufacturer shopping link selects 73058414. Its link labelled Emblem instructions
+actually opens a Manchester composite manual, which was rejected.
+
+**Measured:** two promising gap candidates (board thickness and kit board count),
+one strengthened cutdown applicability link, zero new published facts or model
+fields. Live source text and destination identities were checked; the attempted
+PDF screenshot failed. No implementation changes or test-suite claim. Numeric
+board engagement, channel depth, effective pitch and stock board length remain
+unresolved in this bounded search. Exact source links, locators, scope decisions
+and next capture/review steps are in
+`workspace/reports/emblem-cross-source-findings.md`. No PDF bytes were committed.
+
+---
+
+### G93 — Execute partial semantic validation of the parsed Emblem candidate (2026-09-06)
+
+Actual consumer `validate_model` was executed on the G91 candidate with an empty
+Catalog and no PartLibrary. It returned three errors: the board's base/top refs
+have no supported length rule, and both rails declare channel joints with zero
+channel depth. Parser acceptance remains true; semantic acceptance is false even
+before Part-dependent dimensional checks. The empty catalog is a diagnostic
+fixture, not supplier evidence, and omitting the library skips dimensional checks.
+`workspace/reports/emblem-semantic-gap-check.json` binds the findings to the
+candidate hash. This is not full validation or BOM execution.
+
+The producer independently hardcodes `models: []` in `snapshot.py`; collecting
+geometry alone cannot make it publish a model. Completion requires reviewed,
+source-linked exact Part specs, joint depth/engagement and clearance, infill
+fitting and length rules, explicit quantities, a truthful authored-model admission
+and publication path, and the consumer's published-wire adapter. Then validate
+with the real Part library/catalog and generate single and complex layout BOMs.
+Neither channel-to-butt substitution nor parser defaults closes an evidence gap.
+No production behavior changed in this diagnostic checkpoint.
+
+---
+
+### G94 — Independent adversarial review exposes parser loss and fitting hazards (2026-09-06)
+
+Three read-only agents independently checked source applicability, geometry and
+assembly/BOM logic. Root reproduced the three semantic errors and four fields
+silently discarded by the private parser: authorship, cites, contributing_sources,
+and infill profile_edges. The last discards tongue/groove information. Consumer
+fit defaults can spread residual width into privacy gaps. This is a demonstrated
+synthetic hazard, not a claim that a published Emblem BOM was generated incorrectly.
+
+The preparer now executes partial semantic validation, lists unconsumed authored
+paths, binds the report to the candidate hash, and exits 2 for an incomplete
+candidate even when parsing succeeds. This supersedes G91's parser-only exit-0
+behavior. Eight focused tests pass, including actual-consumer CLI refusal with
+and without the placement confirmation. Exact Part-library/catalog checks and
+BOM generation remain explicitly unexecuted. Both frozen checksums pass.
+
+Reviewers also established that horizontal rail face height must map to the
+consumer's Part.thickness_mm: a direct height_mm/width_mm transfer loses that
+geometry. A kit's board count must not become multiplicity per fitted board.
+U-channels remain absent from the executable component graph. Source review
+supports a family-to-model 7/8-inch board-thickness assertion and independently
+corroborates the 3-inch TOTAL rail allowance; the newer 15-board kit's applicability
+remains unresolved. No speculative dimensions, fixed board count or fitting policy
+were inserted to clear a validation error.
+
+Detailed evidence and dispositions:
+`workspace/reports/emblem-independent-review.md` and
+`workspace/reports/emblem-cross-source-findings.md`. Reviewers report 39 consumer
+geometry/post tests and 54 purchase plus two assembly adversarial tests passing;
+these scopes are separate, not a combined full-suite count. Root's full suite
+then passed: 1479 tests in 53.389 seconds, one expected failure. The first sandboxed
+run had 14 local-socket permission errors; the authorized rerun resolved them.
+Other work was concurrently modifying the shared checkout, so this full-suite
+measurement is for the working tree, not an isolated commit. Missing numeric
+channel depth, engagement and effective pitch remain source work; public model
+admission/publication and consumption remain implementation work.
+
+---
+
+### G95 — A `Procedure`'s shape is checked once, before any field is read (2026-09-06)
+
+`[measured]`, 2026-09-06. G84 hardened three *reported* malformed shapes in
+`verify()`'s `procedures` block — a non-object procedure, a non-object step, an
+unhashable step key — one at a time. Field-by-field hardening does not converge
+here: twelve fields are each read as the type the reader assumes they have, and
+ten more shapes still escaped.
+
+**Before.** A scratch enumeration of 49 malformed shapes (kept in the session
+scratchpad, reproducible from `_ok()` + `_procedure()` in
+`tests/test_snapshot_verify.py`): **10 `AttributeError`, 10 `TypeError`, 19
+published silently, 10 already `VerificationFailed`.** The exceptions stop
+publication, but not through the documented `VerificationFailed` a caller
+catches, and with no procedure/step location on them. The silent nineteen are
+worse than the crashes: `cites = "r1"`, `7`, `[{}]`, `[None]` all published a
+step whose evidence resolves to nothing, because the check was a truthiness
+test on a value nobody had established was a list; `text_i18n = b"t"` published
+because bytes has `.strip()`; and `slots` — the one field carrying arbitrary
+JSON in from `cli steps --accept --slot` — was read by nothing at all.
+
+One case is the point of the exercise: `requires: [{"kind": "after", "step":
+[]}]` raised `TypeError: unhashable type: 'list'` at `edge["step"] not in
+keys`. That is the **same defect G84 fixed one level up**, at the step key,
+missed one level down. Validating before hashing is not a fix you can apply to
+one field.
+
+**After.** The shape is declared once, as three tables — `PROCEDURE_SHAPE`,
+`STEP_SHAPE`, `EDGE_SHAPE` — and checked once per object, before any field is
+touched; the caller stops on a shape failure rather than reading a field whose
+type it has just been told it cannot trust. Of the same 49 shapes, **46 now
+raise `VerificationFailed` with the procedure/step location on it**. The three
+that pass are intended: `id: "installation"` is a valid id (the enumeration's
+positive control), and absent or null `slots` reads as "no slots", the same way
+absent or null `requires` already read as "no edges". Absent and null are
+deliberately *not* shape failures anywhere: the semantic checks name the
+omission better than a type name can ("no id", "empty text", "kind None is not
+one of ...").
+
+`procedures: []` stays valid, which is not a detail: **9 of 9 stored,
+non-tombstoned snapshots publish `procedures: 0`** (the 6 tombstoned ones have
+no `procedures` key at all). `cli snapshot --verify-stored` → 9 checked, 9
+passed, 0 failed. `cli refs --verify` → 6,984 of 6,984 cites resolve, 0
+dangling. `TestTheRealBuildPasses` builds against the live store and verifies.
+Both frozen boundary checksums print OK. `tests/test_snapshot_verify.py`
+63 → **80 tests**; full `python3 tests/run_tests.py` 1,479 → **1,496 tests, OK
+(1 expected failure)**, 49.9 s.
+
+**What it deliberately does NOT do.**
+
+- It does not touch the other nine declared lists, which have the identical
+  hole. `[measured]`: a scalar in `source_docs`, `warnings`, `gaps`,
+  `part_types` or `parts` raises `TypeError`, and a scalar in `models`,
+  `parameters`, `combinations` or `rules` **passes verification entirely**.
+  Only `procedures` is guarded here. Fixing the rest is not one line — each
+  block would need the same stop-on-malformed discipline, or the type check
+  merely adds a message before the same crash.
+- It does not check `SlotTarget` variants. `slots` must be a list of objects;
+  `[{}]` and `[{"kind": "NotASlot"}]` publish. §3.6's union
+  (`PanelSlot | PostSlot | Footing | SiteFixture | Elapsed | Reused`) is not
+  enumerated in a closed vocabulary anywhere in this platform, and inventing
+  one here would be this side deciding a shape it does not own.
+- It does not validate `Procedure.scope` (`EntityRef | null`), which nothing
+  reads and every published procedure sets to `null`.
+- It does not check the `requires` graph: an `after` cycle between two steps of
+  one procedure still publishes. Only that each edge names a step of its own
+  procedure, which was already checked.
+- It changes no vocabulary, no `ref_id`, and nothing at the boundary. No
+  amendment; §1.5's surfaces do not move.
+- And it establishes nothing about whether a published step is TRUE. The note
+  at the top of `snapshot.py` still holds: structural validity is testable,
+  semantic correspondence is reviewable.
+
+**Which tests discriminate, and which merely guard.** 17 new methods in
+`TestProcedureShapeGate`. Reverting `snapshot.py` to `HEAD` and running them
+gives **62 subtest-level failures across 14 of the 17**: 24 of those are
+`ERROR`s — the wrong exception type escaping — and 38 are `FAIL`s, refusals
+that were not made. **Three methods are guards, not controls**, and pass equally
+against the broken code: `test_an_empty_procedures_list_still_passes`,
+`test_absent_or_null_slots_and_requires_pass`, and
+`test_a_well_formed_slot_passes`. They exist to fail if somebody tightens the
+rule without saying so — the first of them is the one standing between this
+change and every stored snapshot — but they discriminate nothing about the
+defect and are not counted as evidence that it is fixed.
+
+Mutation-tested: each new refusal disabled one at a time, focused module rerun.
+**16 of 17 go red; the no-op control mutation (an added comment) stays green**,
+so the harness does not produce false reds.
+
+| refusal disabled | result |
+| --- | --- |
+| control — a no-op comment | GREEN (as intended) |
+| `procedures` must be a list | RED (2 failures, 2 errors) |
+| `procedure.id` is a string | RED (4) |
+| `procedure.cites` are SourceRefs | RED (6) |
+| `step.key` is a string | **GREEN — see below** |
+| `step.kind` is a string | RED (3 failures, 2 errors) |
+| `step.scope` is a string | RED (3 failures, 2 errors) |
+| `step.cites` are SourceRefs | RED (10) |
+| a SourceRef is a nonempty `{id, belongs_to}` | RED (7) |
+| `step.text_i18n` is a string | RED (1 failure, 6 errors) |
+| `step.requires` is a list of objects | RED (2 failures, 7 errors) |
+| `step.slots` is a list of objects | RED (8) |
+| `edge.kind` is a string | RED (1 failure, 2 errors) |
+| `edge.step` is a string | RED (2 failures, 2 errors) |
+| stop on a malformed procedure (the `continue`) | RED (1) |
+| stop on a malformed step (the `continue`) | RED (18 errors) |
+| stop on a malformed edge (the `continue`) | RED (4 errors) |
+
+The one green is honest and is **redundancy, not an untested refusal**:
+`STEP_SHAPE`'s `key` entry refuses exactly the shapes G84's own `key` check
+already refuses, with the same wording, so no behaviour distinguishes them. It
+is kept so the table is a complete declaration of what the block reads rather
+than a list with one silent exception, and the line carries a comment saying
+so. Two refusals *became* discriminated only because the first mutation run
+found them green — the procedure-level `continue` now has
+`test_a_malformed_field_is_not_also_reported_as_a_missing_one`, which asserts
+that a wrong-typed `cites` is not ALSO reported as an absent one. Without the
+mutation run, that `continue` would have shipped as untested code.
+
+---
+
+### G96 — Map rail face height and represent two end U-channels (2026-09-06)
+
+The private preparer now authors three draft consumer Parts: two rails and one
+end U-channel. Horizontal rail source height_mm 177.8 maps to consumer thickness_mm
+178, retaining the source SpecField, original specs and explicit 0.2 mm rounding
+error. The 57.15 mm source width is not mistaken for elevation face height.
+Ambiguous heights, non-horizontal rails and uncited/invalid heights refuse.
+
+Two source-backed U-channels become two per-panel fixing requirements naming one
+Part: first board tongue and last board groove, one each. Handedness is retained
+in authoring evidence but not enforced by the current consumer. These are component
+requirements, not additional purchases: the kit contains both, and purchase credit
+remains unimplemented. Private matching specs remain incomplete; source rail width
+and colour survive in metadata, and channel geometry remains unknown.
+
+**Measured:** 11 focused tests pass, including real-consumer execution and refusals
+for duplicate height and changed channel inventory. A diagnostic activates only
+in-memory draft copies, resolves rail heights through resolve_model_parts, then
+runs resolve_panel on the channel-only fixing spec. Both heights resolve to 178 mm;
+channel counts resolve to one per named end, 2 per panel and 14 for seven panels.
+The synthetic 1 mm context cannot affect per-panel counts; it is not Emblem geometry.
+An independent reviewer reproduced the results and found no blocking defect in
+this limited probe. Both frozen checksums and git diff --check pass.
+
+The same three semantic errors remain: two channel depths and the board length
+rule. Full validation, handed placement consumption and kit purchase credit remain
+false; CLI exits 2. Original source package and user confirmation are unchanged.
+Updated candidate/report: `workspace/catalog/emblem-73014714-consumer-model.json`
+and `workspace/reports/emblem-73014714-consumer-model-check.json`. No published
+model, full panel fit or exact supplier BOM is claimed.
+
+---
+
+### G98 — Emblem assembly rules and executable kit/edge capabilities; publication still blocked
+
+Measured 2026-09-06. G96 left the board length rule implicit and the consumer
+unable to retain physical members while crediting their purchase from a kit.
+The private candidate now authors `between_frame` from the cited bottom/top rail
+assembly steps, one board per fitted occurrence, one rail per named slot and one
+cap per station. These are unreviewed authored rules, not extracted ledger facts.
+Rail width and colour matching constraints accompany the sourced face-height
+projection. Conflicting quantities, conditional rules, duplicate inventory and
+numeric readings inconsistent with raw inch tokens refuse preparation.
+
+First-tongue/last-groove U-channel bindings are now explicit. The consumer patch
+preserves profile edges, binds accessory positions to fitted board ends and
+separates physical from purchase quantities for kit-supplied geometry. Exact Part
+identity and sufficient explicit packaged stock length are required for cut-member
+credits. Synthetic tests cover partial/full/surplus supplies, rails, boards,
+channels, generation, demand, fulfillment and elevation. An adversary found a
+known tongue/groove edge could neighbour an unclassified board; fixed and retested.
+Unsupported profiled/handed `trim_last` and `extension_clip` now refuse direct
+resolution rather than silently leaving a residual opening. This does not implement
+end-board trimming or prove any Emblem dimension.
+
+Authored records can enter snapshot preflight through `--authored-model`. Admission
+requires cited explicit geometry, referenced published Parts, a trusted external
+human review bound to model/evidence/Part content and a supplied semantic validator.
+The CLI does not import trusted reviews or supply a completed adapter. Exclusions
+now emit cited Knowledge/Planning gaps; deduplicating gaps does not lose their
+reasons. Page references are bound to the cited source version. Independent review
+caught unchecked grade/height citations, unsupported containment/assembly and
+malformed/inactive Parts; negative controls now refuse them. Nested containment
+and ambiguous Part IDs remain explicitly unsupported rather than falsely reviewed.
+
+Measured checks: **1,529 repository tests pass, one existing expected failure**;
+**41 focused producer/candidate/adapter tests pass** after final changes;
+**2,549 full consumer tests pass**; a subsequently added seven-panel regression
+raises focused capability coverage to **15 passing tests**, independently rerun.
+The seven-panel L-shaped plus detached fixture produces nine posts, purchases
+seven kits, and retains fourteen rails and fourteen channels without duplicate
+component purchases. Both frozen boundary
+checksums and `git diff --check` pass. Consumer patch base is
+`9de94eb06d8e997d9be098dedd5b6a6b2eb4024d`; it includes the new tests and is delivered
+as `workspace/reports/emblem-consumer-capabilities.patch`, not a consumer deployment.
+
+Actual Emblem remains incomplete: the private parser accepts it, but partial
+semantic validation still refuses **two missing rail-channel depths**. Board
+engagement, effective pitch, exact stock dimensions/component identities and
+fitting policy also remain unresolved; fewer validator messages do not mean those
+checks ran. The exact-source cross-reference found useful replacement-product
+leads but no justified numerical substitution. A concrete measurement request is
+prepared and unsent. Original source package, confirmation and review ledger are
+unchanged. Snapshot dry-run returns **models=[]** with two actionable authored-model
+gaps; this is expected refusal, not a finished datamodel/BOM.
+
+A further software boundary is now measured: public `PostSlot.joint` is silently
+dropped by the private consumer. A post receiving rails is distinct from a rail
+receiving boards; copying those fields to rail slots would change their meaning.
+Post-host/shared-bay receiving semantics and a lossless public adapter remain work,
+separate from manufacturer evidence collection. See
+`workspace/reports/emblem-public-adapter-boundary.md` and the completion/source audit
+reports for exact mismatches and rejected shortcuts. No full Emblem physical fit,
+public model admission or installation-ready purchase list is claimed.
+
+---
+
+### G99 — Validate the actual Emblem instances against definitions and relationships
+
+Measured 2026-09-06, following a requested adversarial and datamodel review.
+Three agents compared instances with the frozen contract, binding
+knowledge-datamodel definitions, relationship/ownership design and actual consumer
+classes; root checked canonical source and entity joins, and a separate agent
+independently reproduced key fixes made by their implementers. The earlier preflight
+positive fixture was not a complete public instance: Part fields/provenance and
+Member Joint were missing, one synthetic Part stood in for unrelated roles, and
+support relationships were insufficiently checked. These are real validation
+and fixture defects, even though the actual unreviewed Emblem never published.
+
+The document cross-reference also found delegated §2.4 still put `admitted_by`
+in published Provenance, contradicting frozen contract v1.1 Amendment 001.
+The mutable definition now follows the frozen contract: `version_status` is
+required, and policy admission belongs to a planning-run output. No frozen file
+changed. More importantly, private `field_evidence` would not preserve numeric
+values' full provenance on the returned model. The helper now always refuses
+`consumer_numeric_provenance_mapping_unresolved`, even after a successful external
+callback, until a lossless published mapping is defined and implemented. An
+independent fresh-review/callback test confirms zero published models.
+
+The preflight now checks complete referenced Part metadata, SpecField values and
+Provenance; requires Member Joint; refuses unsupported shared-host behavior; and
+requires distinct perpendicular supporting frames. Positive integer versions are
+no longer incorrectly rejected in favor of an invented string-only rule. The
+fixture uses distinct typed Parts and appropriate length rules, and explicitly
+states its positive result uses a stub semantic callback. It proves preflight,
+not a lossless wire adapter or physical fence. Independent fresh-review mutations
+refuse the repaired paths; a 1,463-case malformed-input sweep raised no crashes.
+
+The new `scripts/validate_emblem_instances.py` composes the actual snapshot gate,
+canonical reference index, source hashes, PartType spine and instance graph.
+**Three source PDFs match their recorded hashes; 26 SourceRefs resolve to the
+expected document bytes; seven draft Parts use valid shared PartTypes.** Existing
+literal draft requirements and base/top frame references close. That does not
+complete the instances: the private Part library lacks its referenced board and
+cap, the actual candidate has no kit-to-components credit relationship, and public
+Member/Post Joint, geometry, quantities and fitting remain incomplete. The public
+draft is a fragment; the private candidate is not a public-wire instance.
+
+An adversary showed that merely copying the source package hash can accompany an
+altered quantity. The audit now also regenerates the candidate from the original
+source package and confirmation and compares content. Eight tests cover real
+instances, dangling/duplicate/invalid references, empty noncoverage and stale or
+forged derivation claims. Source and review artifacts remain unchanged.
+
+Consumer review found G98's synthetic full-kit panels had a **20 mm opening**:
+those tests proved accounting, not privacy coverage. An explicit private full
+coverage policy and genuinely covered synthetic fixtures now test that separately;
+empty/invalid openings, negative margins and out-of-bounds fitted members refuse.
+Generic truncation remains permitted without the opt-in. A fixing length rule was
+silently ignored, and insufficient kit stock could escape generation as raw
+ValueError; unsupported fixing lengths now refuse and contextual GenerationFailure
+reaches the API as HTTP 422. These repairs do not author missing Emblem dimensions.
+
+Measured final root regression: **1,540 tests pass, one existing expected failure**.
+Consumer regression: **2,558 tests pass, seven existing warnings**; 22 focused
+capability tests independently pass. The 31 authored/publication/instance tests
+also pass against the committed snapshot code, excluding concurrent verifier work.
+Both frozen checksums and whitespace checks pass. Current measured consumer results,
+patch digest and bounded independent review are in
+`workspace/reports/emblem-consumer-adversarial-review.md` and
+`workspace/reports/emblem-datamodel-validation-review.md`. The cumulative consumer
+patch remains delivered against its recorded base, not deployed.
+
+**No complete Emblem model is admitted.** The generated instance audit and snapshot
+preflight expose Knowledge and Planning gaps rather than asserting success from an
+empty models list. Remaining work is exact fitting/stock/component evidence,
+public post-host/shared-bay receiving semantics, a lossless adapter and a real
+kit-component relationship, followed by review of the completed source-bound
+object. Fewer parser errors and passing synthetic tests do not close these gaps.
+
+---
+
+### G100 — Close private Part identities and implement bounded post receiving mechanics
+
+Measured 2026-09-06. Continued the remaining blockers with three agents and
+independent source/geometry adversaries. The private candidate now defines its
+board and cap, closing every literal requirement against five draft Parts.
+Board colour and cap SKU 73013956 are source-backed; nominal dimensions are
+retained separately, never promoted to installed pitch or internal fit geometry.
+Thirteen identity mutations and canonical source-text cross-checks guard this
+mapping. Stored Parts remain draft, the original package and confirmation unchanged.
+
+The exact panel kit now has an authored relationship plan to the named rail,
+board and channel Parts: 1 bottom rail, 1 top rail, unknown board count, 2 channels.
+All stock lengths remain unknown and the cap remains separate. No executable
+partial kit or invented package credits were added. The Part-aware consumer
+validator now runs on in-memory copies of the five definitions and exposes missing
+board width and empty channel specs, alongside the expected failures from an empty
+diagnostic catalog. Literal identity closure is not physical fit or publication.
+
+The consumer implements explicit post receiving geometry for a bounded private
+subset: level horizontal individual rails, plumb end/line posts, known outside
+face widths and authored per-end engagements. Cuts and drawing extents agree;
+shared-post clearance is checked once with world-height/physical-station context.
+Independent review found a real cross-row collision bypass with asymmetric rail
+thicknesses, plus tilted-post and ineffective-test issues; all were reproduced and
+fixed. Unsupported corners, slopes, through members and crossing rail bands refuse.
+The private engagement fields still need an agreed public mapping; they do not
+retroactively add fields to the contract or fill any Emblem measurement.
+
+Filed **Amendment 008**, trigger D, with exact proposed geometry-provenance
+serialization, costs, tests and a complete synthetic example. Both dispositions
+are pending; it governs nothing. The frozen contract remains unchanged and the
+numeric-provenance publication refusal remains in force. No ratification, human
+source review or manufacturer measurement was fabricated.
+
+Measured checks: **1,547 evidence tests pass, one existing expected failure**;
+**21 candidate tests pass** again after adding the Part-aware diagnostic;
+**2,584 consumer tests pass, seven existing warnings**. Independent bounded
+geometry and source checks pass. Consumer changes remain a cumulative patch, not
+a deployment. Current artifact hashes, exact scope, remaining source request and
+proposal are summarized in `workspace/reports/emblem-blocker-progress.md`.
+
+The actual model still refuses admission and physical BOM verification. Remaining
+external inputs are an applicable exact-model component drawing/BOM or recorded
+sample measurements, plus bilateral disposition of the provenance proposal.
+Remaining software includes the public receiver/engagement adapter and complete
+kit consumption after its source constraints are known. Existing supported private
+mechanics were implemented and tested rather than treating all blockers as a
+request for more documents.
+
+---
+
+### G101 — Separate publication validity from physical generation readiness
+
+Measured 2026-09-07. Three independent agents rechecked the frozen contract,
+actual datamodel declarations, source geometry and the revised gate. The prior
+profile incorrectly treated human review, active-only entities, nonempty Part
+specs and consumer fit success as universal publication requirements. Contract
+obligation 6 permits honestly classified unreviewed knowledge; the datamodel
+explicitly permits null post, infill and insertion margin values. The gate now
+separates readiness diagnostics from structural exclusions and emits cited gaps
+for explicit nullable values. Missing required fields remain errors.
+
+Adversarial review caught and fixed three concrete errors: absent Part.spec
+silently becoming [], unknown insertion margin bypassing a known engagement
+exceeding pocket depth, and contradictory same-ID review rows depending on input
+order. Exact optional review references remain content-bound; rejected or
+conflicting ledger records cannot silently become an acceptance. No absence of
+review is promoted to a human review or higher curation level.
+
+Real snapshot tests confirm that two missing rail margins survive builder gap
+deduplication with canonical source context. The actual Emblem object still does
+not publish. Source rereading also corrected the minimum-geometry list: Member.joint
+is entirely absent, and board groove receiving depth is distinct from rail
+pockets and post receiving depth. Insertion margins may be null with gaps; that
+permission supplies none of the required nonnullable depths or engagements.
+
+Numeric provenance is already required by the existing contract. The precise
+multi-value geometry association is not declared or implemented losslessly in
+this profile. Amendment 008 is one pending proposal, not the only theoretically
+possible representation and not a universal prerequisite for every model. The
+private parser still loses provenance, so its acceptance cannot close this gate.
+No source dimension, agreement or controlled boundary change was fabricated.
+
+Measured validation: **1,553 full-suite tests pass, one existing expected
+failure**, 56.279 seconds. After the final tied-review regression, **30 focused
+tests pass**, independently repeated. The actual instance audit resolves **26
+canonical SourceRefs** and reports **complete_model_admitted=false**; the real
+snapshot verifies with **models=[]**. Frozen hashes pass. No consumer code changed;
+G100's 2,584 consumer tests remain historical evidence, not a new run.
+
+Remaining work is applicable exact-model geometry and fitting evidence, public
+value/provenance mapping and the adapter, plus exact packaged inventory for a
+complete purchasable BOM. A source-backed partial publication must preserve its
+gaps; removing real rails/boards/posts merely to fit a schema is not completion.
+See the corrected field-level request in emblem-remaining-inputs.md and current
+emblem-blocker-progress.md. Concurrent snapshot verifier edits remain separate.
+
+### G102 — Persist exact Emblem readings and publish four source-backed Parts
+
+`[measured]`, 2026-09-07. The agreed target now includes publication of exact
+Emblem 73014714 **and validated assembly/component BOM**. Kit-based purchasing
+is a subsequent checkpoint. Neither the complete model nor assembly is complete.
+
+Inspection confirmed that the unified `claims` table in the four-layer design
+has not shipped. `fence_evidence/emblem_claims.py` therefore uses the existing
+`facts` / `fact_reviews` lifecycle, with a deterministic pinned-source recipe,
+not a second claims store. Seven unreviewed readings are persisted: board nominal
+width, panel colour, rail width/height, cap nominal width/depth and cap colour.
+Each verifies canonical text, source SHA, shared ownership and same-page/edition
+applicability anchors. Re-import is idempotent, preserves decisions and refuses
+conflicting or ambiguous original readings. No live human review was created.
+
+The actual Part builder now emits the exact board, provisional rail A/B and cap
+73013956 from those persisted readings. Every spec carries classified provenance
+and canonical applicability references. Parts remain draft; published rail values
+are exactly 57150 and 177800 milli-mm. Board nominal width remains 152400 milli-mm
+and is not executable pitch; cap nominal width/depth are not mating clearances.
+Existing family Parts retain their separate IDs. The original source-bound draft,
+placement confirmation, source files and frozen boundary files were not edited.
+
+`python3 scripts/advance_emblem.py --apply` imported seven readings and stored
+verified local snapshot
+`d4017b1b21c32b4e625cfcfde8106037c617a6bb2d39bc209446e5fcd5b9b144`.
+An idempotent rerun inserted none. It contains four exact Parts and still
+`models=[]`. The same snapshot identity and verification succeed with committed
+HEAD `snapshot.py`, independently of the pre-existing working-tree verifier
+edits. No snapshot was sent to a remote service.
+
+The generated `workspace/reports/emblem-workflow-progress.{json,md}` records
+field-level exclusions and the six distinct missing receiving/engagement datums.
+The original draft also lacks authored shape fields and their lifecycle mapping;
+the geometry list is not a complete definition of remaining software work.
+The report includes the newly published Parts' refs when checking admission,
+avoiding false citation-closure errors from checking only the original draft.
+`docs/curation/emblem-publication-workflow.md` records reproduction and transitions.
+
+The actual consumer rerun (`emblem-workflow-consumer-check.json`) parses the
+private candidate and exercises bounded capabilities, but still fails on rail
+receiving depth and board width/fit inputs. The diagnostic catalog is empty;
+no-match errors are not evidence of product unavailability. Private parsing still
+drops authorship/citations; no lossless public model adapter or assembly was
+validated. Amendment 008 remains pending, and the numeric mapping guard remains.
+
+Validation: full repository suite **1,565 tests**, one existing expected failure
+(57.887 seconds), passing. After the checklist reference-closure correction,
+**11 focused lifecycle tests** pass (3.172 seconds). These include synthetic
+correction/rejection replay through the existing ledger into a fresh store with
+different fact IDs, independent cap-axis correction, duplicate/changed-source
+refusals, exact fractional rail conversion, and actual snapshot projection.
+Synthetic reviews were confined to test stores. Frozen checksums pass.
+
+### G103 — Adversarial agents expose and repair Emblem lifecycle defects
+
+`[measured]`, 2026-09-07. At the user's explicit request, three independent
+agents reviewed source integrity, fact/review/publication lifecycle, and
+verification/reporting. They found no discrepancy in the seven current source
+anchors, but reproduced defects beyond G102's single-review happy path.
+
+Fact-review export sorted by timestamp while live review precedence used arrival
+order. A backdated rejection could therefore replay as acceptance. Export now
+preserves arrival order per evidence anchor; imports refuse incompatible or
+incomplete histories that would make an older decision win. A second check inside
+the write transaction catches a competing review submitted after preflight. Old
+ledgers that already lost ordering cannot reconstruct it without another record.
+
+Emblem import checked existence before taking its lock: two callers could create
+14 readings. It now takes a write lock before validation, with savepoint handling
+for caller-owned transactions. Publication validates projected reviews against
+the latest ledger record and current source ref, refusing forged annotations and
+reviews whose evidence region moved. Exact Fraction arithmetic replaces Decimal
+context arithmetic, which silently rounded sufficiently long corrections.
+
+Part versions no longer stay at 1 when reviewed content changes. Each is now a
+`sha256:` hash of all public Part content except version. This fits the public
+validator's existing string-version support and is stable across replay with
+different local fact IDs. **Private Planning Part types still require integers**;
+direct compatibility is not claimed, and preserving these public version
+identities is explicitly part of the unfinished adapter. Hash versions identify
+content, not chronological order. Archived numeric-version snapshots are intact.
+
+Progress Markdown now reports actual published/withheld Parts after rejection.
+The canonical integration fixture resets only the Emblem recipe's rows inside a
+disposable copied store, so valid live reviews cannot break an original-value
+assertion. Rejection subtests are independent. New controls cover concurrency,
+rollback, source-region changes, forged/stale projections, precision, version
+identity and conflicting replay histories.
+
+Snapshot `b5048772101e18513a9cbd2c913978da05046fced986e03c42afddc5c5b19ec7`
+verifies using current and committed HEAD snapshot code. Its four exact Parts
+match G102 apart from version identities; all seven live readings remain
+unchanged and unreviewed. Full Emblem admission and assembly validation remain
+false. No source, placement confirmation, frozen file or live human review was
+changed; pre-existing snapshot and concurrent conversation edits remain separate.
+
+Review details: `workspace/reports/emblem-workflow-adversarial-review.md`.
+Independent reruns passed 60 Emblem tests and 132 review tests. The full suite
+before the final chronology-race regression ran 1,578 tests in 59.871 seconds,
+OK with one existing expected failure. The final full run is recorded below.
+
+Final full suite after the chronology-race fix: **1,579 tests in 59.536 seconds**,
+OK with one existing expected failure. Log:
+`workspace/tests/emblem-adversarial-final-suite.log`. Frozen checksums and diff
+whitespace checks pass.
+
+### G104 — Read actual Emblem Parts in Planning and make geometry disposition reviewable
+
+*2026-09-07.* Planning's public Part reader now preserves positive integer or
+nonempty opaque string versions without coercion. Ingestion retains inactive
+public definitions; judged specifications carry their original version and
+provenance. Private generation revisions and selection remain separate. The
+actual snapshot round-trips all four exact draft Parts, with no activation or
+assembly claim. SourceDoc receipts preserve typed citation joins, not unknown
+raw extension metadata.
+
+Adversarial reviews found and corrected an overly broad source-document report
+and an alias through the admission date that allowed receipt edits to mutate
+input. Six manual fault probes refuse missing Parts, dropped receipts, changed
+values/versions, missing source documents, and lost inactivity.
+
+The private geometry disposition packet adds executable examples and refusal
+vectors for Joint and FromBottom/FromTop numeric associations, including null
+obligations and precision loss. It is a bounded proposal checker, not complete
+model validation. Amendment 008 remains pending; both frozen documents verify
+unchanged. No manufacturer measurements or human reviews were fabricated.
+
+Reports: `workspace/reports/emblem-public-parts-consumer-check.json` and
+`workspace/reports/emblem-geometry-disposition.md`. Consumer edits are preserved
+as a cumulative patch with a base/hash receipt in
+`workspace/reports/emblem-consumer-public-receipts-patch.json`; they are local
+and have not been deployed. Public-to-generation geometry mapping and exact
+receiving depths, engagements, installed pitch and fitting evidence still block
+a complete model and validated assembly/component BOM.
+
+Root regression: **1,589 tests in 61.712 seconds**, OK with one existing
+expected failure (`workspace/tests/emblem-blockers-full-suite.log`). Final
+consumer regression: **2,603 passed, 7 warnings in 71.50 seconds**
+(`workspace/tests/emblem-blockers-consumer-final-suite.log`). The patch receipt
+records both runs and the verified base/hash.
+
+### G105 — Useful partial Emblem knowledge has its own completion gate
+
+*2026-09-07.* User clarified that missing geometry must not prevent supported
+knowledge from being supplied. `advance_emblem.py` now defaults to objective
+`knowledge`: a verified nonempty exact Part slice succeeds even when complete
+model/assembly validation remains false. `--objective assembly` retains the
+stricter outcome. No frozen shape or model admission rule was weakened.
+
+The generated knowledge JSON/Markdown carries current published specifications,
+original readings, classifications and citations, plus separately labeled,
+canonical-checked assembly interpretations. Rejected definitions do not reappear
+as defaults; corrected values retain exact milli-unit precision. Follow-up
+questions are tied to requested cuts/counts, purchases or layout instructions,
+not prerequisites to reading the available knowledge.
+
+Actual default run with `--apply` succeeded with four draft Parts and four
+source-checked assembly readings. Output:
+`workspace/reports/emblem-workflow-progress-knowledge.md`. This is a local
+answer document alongside the verified snapshot, not a new deployed endpoint or
+an admitted executable model. The assembly objective still refuses completion.
+
+Adversarial review found empty-card wording and hidden classifications; both
+were corrected with regressions. Full suite before these final presentation
+changes:1594 tests in60.045s, OK with one expected failure. Six focused knowledge
+cases pass after the changes. No fabricated measurements or human reviews.
+
+### G106 — everything we publish is scoped to an identity nothing can resolve, and nothing said so
+
+*2026-09-08.* `conversation.md` T51 §2, measured by Planning: across **6,563
+stored generation runs, an `mfr/*` id appears at no path under `.graph` or
+`.strategy`**. Not one published `ParameterTable` has ever governed anything. A
+table is scoped `{kind: "fence_model", id: "mfr/certainteed-columbia-imperial-
+chesterfield"}`; the consumer's evaluator matches a scope by plain equality
+against its own `FenceModel` id (`M-SLAT`, `M-LEGACY`, `M-VINYL`). The two
+namespaces have never met.
+
+**Neither system reported it, and that is the actual defect.** The rounding
+breach in T50 §3 lived in published data for weeks because nothing exercised the
+path end to end. Worse, this platform published **18 more Parts into a third
+unreachable namespace** (`mfr/weatherables`, the Augusta and Pembroke slices) in
+a single session and reported nothing — noticed only while writing a commit
+message, and recorded in T53 §4.
+
+**Built: `reach.py` and `cli reach`.** `[measured]` on the current store — 25
+snapshots carry a scoped object, **11 identity families, 0 declared
+associations**, and the worst single snapshot has **51 of 51 scoped objects
+reaching nobody**. `KNOWN_IDENTITIES` pins the eleven and
+`tests/test_scope_reach.py` fails when a snapshot publishes a twelfth: a new
+family is not a defect, publishing one without noticing is, and that is the one
+thing the pin prevents. It would have fired on `mfr/weatherables`.
+
+**Why a report and not a `Gap`.** §1.2.1's eight gap kinds are BINDING and
+closed, and none means *"published to an identity no consumer can resolve"*.
+Inventing one is an amendment, not a registry addition. The knowledge is not
+missing; its reachability is.
+
+**`DECLARED_ASSOCIATIONS` is deliberately empty.** We hold `mfr/*`; the consumer
+holds `M-VINYL`. Asserting the two are the same would be inventing a product
+identity, the same class of error as the wrong manufacturer attribution caught
+in G62. Filling it in requires the consumer to declare what it can bind, on the
+shape §2 already uses for condition dimensions.
+
+**Open.** The join itself. T52 §2 puts three candidates to Planning — we publish
+`FenceModel`s and they bind our id (the designed path, blocked on 008 and real
+evidence); we publish an alias table (impossible, we do not hold their
+namespace); or the join is per-job configuration and belongs to neither side.
+The alarm does not choose. It ends the silence, which is what let the question
+go unasked for weeks.
+
+Exit-code contract: exit 1 only when an undeclared identity appears, or when no
+snapshot carries a scoped object at all (the vacuous-green refusal `cli refs
+--verify` already makes, G39). Everything being unreachable is the current state
+and exits 0 — a guard that always fails is a guard everybody learns to ignore.
+
+1,689 tests pass, 1 expected failure.
+
+---
+
+### G107 — the committed measurements are stale, and both got *better* without anyone noticing
+
+*2026-09-08.* Found by running `cli evaluate` and `cli audit` on a clean tree
+before touching anything, as the baseline for build item 2. Both rewrote their
+committed artifacts.
+
+`[measured]` `workspace/reports/evaluation-report.md` (committed) against a
+fresh run on the same store:
+
+| | committed | measured today |
+|---|---|---|
+| evidence support | 0.6450 | **0.6499** |
+| `conditional_table_lookup` passing | 3 of 7 | **4 of 7** |
+| failing ids | gq-113, gq-004, gq-006, **gq-007** | gq-113, gq-004, gq-006 |
+
+`[measured]` `workspace/tests/projection-audit.json` (committed) against a fresh
+`cli audit`: elements 81,794 → **82,282**; projected 54,209 → **54,677**; pages
+2,147 → **2,149**; headings 20,925 → **20,945**. The two extra pages are
+consistent with the two retained CAD web pages that `docs/README.md` already
+flags as arriving after the distribution manifest was cut, but that is a
+reading, not a measurement.
+
+**Why this is a gap and not a chore.** Nothing regressed — the store got
+slightly better and the report kept saying the old number. That is the failure
+mode: an acceptance artifact that only gets regenerated when somebody
+deliberately re-measures is not a guard, and a reader taking `0.6450` from the
+committed report is quoting a number this platform no longer produces. The same
+class as G106 — *the defect is that neither side reported it* — one layer in.
+`tests/test_slot_filter_wiring.py` already asserts that
+`evaluation-report.md` "must always be what this platform returns"; it passes,
+so whatever it checks is not this.
+
+**Deliberately not fixed in this change.** Refreshing 700 lines of measurement
+artifact inside a commit that builds the query surface would hide it. The fresh
+outputs were discarded and the committed ones restored, so the numbers above are
+reproducible by anyone running the two commands. **Open:** regenerate both
+deliberately, and decide whether a test should fail when they drift.
+
+---
+
+**Proposed 2026-09-09, not built: date the artifact, do not police it.**
+
+The obvious guard — fail the suite when the committed report disagrees with a
+fresh run — is unkeepable, and saying why is most of the design. It goes red on
+any legitimate ingest, on any extractor improvement, and on a machine where the
+corpus is only partly fetched. `[measured]` this session moved
+`evidence_support` not at all (0.6499024 before and after) but moved the fact
+table under it by 17 renamed types and 18 re-derived condition dicts; a drift
+guard would have had nothing to say about either, which is the point — it
+measures the wrong thing. A guard everybody learns to skip is worse than no
+guard, and `cli reach`'s exit-code contract already records that lesson in this
+repository's own words.
+
+Three cheaper things, in order of what they buy:
+
+1. **Stamp every committed measurement artifact with what produced it.** The
+   report already carries its numbers; it does not carry the store's identity.
+   Add a header line naming the `SCHEMA_VERSION`, the document and fact counts,
+   and the ISO date — the same shape `manifest` rows already use. Then
+   staleness is *visible to a reader* without anything having to fail, and
+   `[measured]` the two artifacts G107 found were stale by 488 elements and two
+   pages, which such a header would have shown at a glance.
+2. **Make `cli evaluate` and `cli audit` refuse to overwrite silently.**
+   `--name` already exists and this session used it to take a baseline without
+   touching the committed report. Make the DEFAULT name write beside the
+   committed one and print the diff, so regenerating is a deliberate act with a
+   visible result rather than an invisible overwrite. `[measured]` the
+   `--second-stage` flag once overwrote `evaluation-report.md` with a different
+   configuration's numbers, and the fix then was to separate the paths; this is
+   the same fix one step further.
+3. **A test that the artifact is INTERNALLY consistent**, not that it is
+   current: every acceptance verdict in the committed report follows from the
+   unrounded numbers in the committed JSON beside it. That is checkable, never
+   goes red on an ingest, and it is the failure G65 actually names — a PASS
+   graded on a rounded 0.700 against a real 0.699512.
+
+None of the three is a drift guard, and that is deliberate: the thing worth
+guaranteeing is that a reader can tell *when* a number was taken, not that it
+was taken *recently*.
+
+---
+
+### G108 — the store holds two names for one condition axis, and only one can publish
+
+*2026-09-09.* Found while investigating why nine of the gold set's twelve
+`required_conditions` dimensions have no home in `parameters.CONDITION_SCOPE`.
+The answer for most of them is that they should not have one. The answer for
+`fence_height_ft` is that it is **the registry's `fence_height` under a
+different name and unit, and it is live in this store.**
+
+`[measured]` `fence_evidence/facts.py:223` — `_COND_HEIGHT` writes
+`cond["fence_height_ft"] = _to_float(...)`, a bare float in feet.
+`promote_tables.KEY_COLUMNS` maps `fence\s*height` to **`fence_height`**, which
+publishes as an `Interval` of `Quantity` in mm (`domain: "range(mm)"`). Both
+names are in the store right now:
+
+| key | rows | review_status |
+|---|---|---|
+| `fence_height_ft` | 18 | 8 `extracted`, 8 `extracted`/2 `flagged` across 6 fact types — **0 accepted** |
+| `fence_height` | 24 | **all 24 `accepted`** |
+
+`[measured]` `_translate_conditions({"fence_height_ft": 8.0})` returns
+`({}, set(), ('condition_scope_undeclared', 'fence_height_ft'), None)` — the
+publisher refuses it. So nothing has broken: none of the 18 is promotable, and
+the 24 that publish use the right name.
+
+**Why it is a gap and not a non-event.** The refusal is the only thing standing
+between the two names, and it fires at publish time rather than at extraction.
+The moment a curator accepts one of those 18 rows — which is exactly what the
+review queue exists for — the fact becomes unpublishable for a reason that has
+nothing to do with the evidence, and the message names a "condition scope"
+rather than a misspelt key. It is the same shape as the `lang`/`corpus_track`
+shortcut `tests/test_basis_columns.py` guards: one axis, two vocabularies, and a
+guard in only one of the two places.
+
+**CLOSED 2026-09-09**, and the recommendation needed one correction on the way.
+
+*Recommended here:* *"repoint `_COND_HEIGHT` at `fence_height` and emit an
+`Interval`."* **The extractor must not emit an `Interval`.**
+`_translate_conditions` hands the value to `parameters._parse_fence_height`,
+which parses a **label** — `str(value)` of a dict would fail it just as surely
+as the wrong key failed `CONDITION_SCOPE`, only with a different message. So
+`_conditions` writes the source's own lexeme (`[measured]` 2026-09-09 the
+eighteen rows say `8'` ×4, `4'` ×4, `16'` ×2, `12'` ×2, `8 foot` ×2,
+`6 feet`, `6'`, `3.5ft`, `10ft.` — the trailing `high`/`tall`/`height` sits
+OUTSIDE `_COND_HEIGHT`'s capture group, so it cannot reach the lexeme), which
+is what
+prohibition 7 asks for anyway, and `_parse_fence_height` gained the point
+branch: a stated height is an interval whose bounds coincide and are both
+inclusive. `_quantity_from_lexeme` widened to read the spelled-out unit forms,
+which is widening only — every lexeme that parsed before parses to the same
+value, and `[measured]` the corpus's only two `fence_height` labels
+(`Up to 48"`, `49" to 76"`) are byte-identical through the change.
+
+*Recommended here:* *"it wants a re-extraction."* **A targeted backfill, not
+`cli facts --extract`.** `[measured]` the 18 rows sit on 9 documents carrying
+274 regex facts between them, so a re-extraction would rewrite 274 rows to
+correct 18, inside a change about names — and it would move every `fact_id` on
+those documents, which is the one thing a fact review is anchored against
+surviving. So `facts.backfill_condition_keys` runs `_conditions` over each
+affected element's own text and rewrites only that column. It is a
+re-extraction of the FIELD: `[measured]` all 18 conditions dicts reproduce
+identically from today's extractor, so nothing was invented, and a pure key
+rename would have had to manufacture a source lexeme the float `8.0` does not
+carry.
+
+**And it refuses rather than guesses.** A row whose recomputation differs
+anywhere but the height axis is left alone and reported — the extractor has
+moved since those rows were written, and silently adopting a different exposure
+category under cover of a naming fix is the G62 error. `[measured]` `refused`
+is empty today; it fired correctly during mutation testing, on a row
+deliberately given an inconsistent pair.
+
+Guards in `tests/test_naming.py::TestRule1OneConditionAxisOneName`: the static
+one reads the assignments out of `facts._conditions` with `ast`, so it sees
+every key the function CAN emit rather than the ones a fixture happens to
+trigger; a functional one round-trips a written height back through
+`_parse_fence_height`; a third puts the whole dict through the real publisher;
+and a store guard holds the backfill. All four mutation-checked.
+
+**Also measured, and separate:** `required_conditions` in the gold set is
+**inert**. `evaluate.py:517` is its only reader, on the `facts` interface, and
+none of the seven annotated questions declares an interface — so no code has
+ever executed or validated those twelve names. `eval/gold-question-schema.json`
+types the field as a bare object with no key constraint, which is how a
+thirteenth name gets invented next.
+
+---
+
+
+### G109 — one snapshot published `Part.version` as two different types, and one of them nobody could recompute
+
+*2026-09-09.* `docs/naming.md` §4, defect D-5, closed the same day it was
+written down. `[measured]` snapshot `0e04d171…`: the integer `1` on 27 parts and
+the string `"sha256:<64hex>"` on 15. `snapshot.PART_SHAPE` omitted the field
+entirely, and `_shape_failures` is an allowlist — a field absent from the shape
+publishes at whatever type it happens to hold — so nothing could have caught it.
+
+**A reason for the string form was recorded, contrary to what `naming.md` said.**
+G103 (2026-09-07) states it: *"Part versions no longer stay at 1 when reviewed
+content changes. Each is now a `sha256:` hash of all public Part content except
+version… Hash versions identify content, not chronological order."* `naming.md`
+D-5's *"No reason for the string form is recorded anywhere"* was wrong, and so
+was its *"`contract.md` pins `Combination.members` as `[Part@version]`"* — that
+sentence is in `knowledge-datamodel.md:1395`, and `contract.md` never names
+`Combination.members` at all. Both are corrected there now. The substantive
+observations survived: the two types did coexist, and nothing checked.
+
+**The integer was the defective form.** `[measured]` it is `1` on every
+int-versioned part in all 24 stored snapshots that carry parts, and there is no
+bump path anywhere in the package — no `next_version`, no increment. So a
+corrected value shipped under the version its predecessor shipped under, which
+is exactly what G103 fixed for the four `*_claims.py` slices and never fixed for
+`parts.py`. Pinning `Part@1` pins nothing.
+
+**Fixed:** `canonical.part_version` is now the single definition — `sha256:` plus
+the content hash of the part with `version` excluded — and all five mint sites
+call it. `parts.py` mints AFTER the stock-length pass rather than inside the dict
+literal, because `spec`, `cites` and `contributing_sources` are all still empty
+at that point.
+
+**A second, live defect fell out of the same read.** `augusta_drawing_claims`
+re-hashed a picket dict that ALREADY carried a version, chaining the two, so the
+published value could not be recomputed from the published payload. `[measured]`
+2026-09-09: 14 of the 15 string-versioned parts in `0e04d171…` reproduce from
+their own bytes; `mfr/weatherables/augusta-8x6-picket` did not. That is one
+published `Part.version` a consumer could not verify. It is fixed forward; the
+stored snapshot still carries it, because a stored snapshot is write-once.
+
+**What could NOT be closed, and it is a finding rather than an omission.**
+`PART_SHAPE` carries the WEAK rule — `is_object_version`, a positive integer or
+a non-empty string — not the strong one. `snapshot_store.verify_stored` re-runs
+`verify()` over stored payloads, so a gate refusing the integer `1` would mark 24
+write-once snapshots non-compliant for having obeyed the rule of their day. The
+strong rule lives at the builder, where `tests/test_naming.py` holds it: every
+built part's version is the content hash of the part it names. The weak rule is
+also exactly the predicate `authored_models`' audit and Planning's own
+`_version_identity` already enforce, so one definition now serves all three.
+
+`tests/test_naming.py::TestRule4PartVersionNamesOneThing`, five tests,
+mutation-checked four ways: the counter returning, the hash including its own
+field, the picket's chained re-hash, and `PART_SHAPE` losing the field.
+
+---
+
+### G110 — the supersession chain returned one arbitrary path per hop, and which path depended on where you asked
+
+*2026-09-09.* `relations.supersession_chain` walked ancestors and descendants
+with `LIMIT 1` and no `ORDER BY`, so a lineage that branches returned one route
+through it and silently dropped the rest.
+
+`[measured]` NOA `12-1106.11` (`doc-32e36a07ab44`) has **six** direct successors;
+the walk returned one, and `21-0125.07` — a real member — was absent. Worse, the
+route depended on the entry point: resolving `24-0117.05` returned a 3-member
+chain, `12-1106.11` a 4-member one, over one graph. Corpus-wide, `[measured]` 24
+`superseded_by` edges over 11 documents in two lineages; 7 documents supersede
+more than one document and 4 are superseded by more than one — a maximum
+out-degree of 4 and a maximum in-degree of 7. Branching is the shape of this data.
+
+**Nothing published was wrong.** `SourceDoc.superseded_by` comes from
+`snapshot._successors`, an unbounded query ordered by `sha256`, and
+`query._supersession` reads that on purpose — its comment already names this bug.
+What was wrong is every answer `cli resolve`, `versions.chain_for` and the
+`resolve` interface gave about a chain, and `select_active`'s claim that
+*"nothing in the chain supersedes it"*, which was computed over a subset.
+
+**Fixed:** the walk collects the whole connected component and orders it
+oldest-first by longest-ancestor-path rank, tie-broken on `document_id`. Order is
+the caller's, never SQLite's — `canonical.py`'s rule applied to a read, and
+load-bearing because `select_active` reads `chain[-1]` positionally.
+`[measured]` after: all three of `24-0117.05`, `12-1106.11` and `23-0314.05`
+return the same 8-member chain and the same active document.
+
+**The trap the fix had to clear, and it was the whole difficulty.** The four
+filings of `24-0117.05` share one sha256 (`2f446717ee75…`), each independently
+reads `in_force`, and none is marked active. Over the complete DAG `select_active`
+sees all four at once, and its own *">1 in force is a conflict"* rule would have
+called four copies of one approval a conflict — trading a silent omission for a
+spurious refusal on the exact lineage the walk was fixed for, and breaking
+`test_contract.py`'s pin and `test_versions.py`'s `inferred_in_force` assertion
+for the right domain reason. So `_one_per_approval` collapses candidates that
+share bytes, and only bytes: two documents that are not the same file never share
+a hash, so a genuine disagreement still reaches the conflict rule intact. That
+property is what makes the collapse safe rather than convenient, and it is
+mutation-tested from both sides.
+
+`tests/test_versions.py::TestTheChainIsTheWholeDagNotOnePath`, five tests.
+
+---
+
+### G111 — we asked Planning for eleven locale bundles the contract exempts, and meanwhile three codes we really do emit have no bundle at all
+
+*2026-09-09.* `docs/naming.md` §5, defect E-1, investigated and answered: the
+document is stale, and the missing emitter is not a defect.
+
+`[measured]` `grep -rn "WARN_" --include=*.py .` returns **zero hits** — there is
+no `WARN_*` constant in this codebase and no commit ever shipped an emitter.
+`[measured]` across all 31 stored snapshots: 7,187 published warnings, **0**
+carrying a `code`, and one field set in every one of the 25 non-empty snapshots
+(`text_raw`, `lang`, `lang_basis`, `severity_lexeme`, `attaches_to`, `cites`).
+
+**That is compliant.** Obligation 10: *"`code` and `params` are an optional
+overlay — 142 of 226 distinct warnings here appear exactly once, and only 3 recur
+with different values."* And `contract.md` §2's registry table puts these objects
+in the exempt half: *"**Source** warnings … **Exempt from the bundle rule.** The
+`SOURCE_*` codes are NOT these."* Eleven classes of sentence lifted verbatim from
+manufacturers' documents are source warnings by the contract's own definition, so
+`registry-additions.md` §6's ask for *"21 platform codes… ten `SOURCE_*`, eleven
+`WARN_*`"* contradicted §2 — which the same document states correctly forty
+sections earlier and then breaks.
+
+**Nobody was blocked, and that is not the same as nobody being misled.**
+`[measured]` Planning declined the ask at `conversation.md` T7 on their own
+reasoning (*"Register and implement per your own judgment"*), and their `en`/`he`
+bundles carry **zero** `WARN_*` keys. The ask nonetheless stood uncorrected in a
+boundary document for thirteen days, and `docs/build-plan.md` C1 asserted
+*"Planning still needs the two locale bundles"* for the whole of that time. Both
+are corrected. The §3 census itself was honest and mostly reproducible —
+`[measured]` nine of eleven `Published`/`Cites` pairs reproduce to the digit
+against the 289-warning snapshot and all eleven exemplar `ref_id`s resolve; the
+two that miss do so because the original classifier matched a disjunction wider
+than the exemplar phrase, and that classifier was a one-off script never
+committed. Its `Elements`/`Docs` columns do not reproduce and contradict this
+document's own G42 table (`WARN_FROST_LINE` 18/16 there against 254/28 here);
+both are now marked unreproducible until one is re-measured with a stated
+pattern.
+
+**OPEN, and it is the real defect this investigation found.** The two
+`SOURCE_*` lists have drifted three codes in each direction. `[measured]`
+2026-09-09:
+
+| | |
+|---|---|
+| We emit, they have no bundle | `SOURCE_CONTENT_DUPLICATED`, `SOURCE_NOT_FETCHED`, `SOURCE_STATUS_BASIS_FILENAME` |
+| They bundle, we cannot emit | `SOURCE_CELL_BOX_MISSING`, `SOURCE_DERIVED_NOT_ACCEPTABLE`, `SOURCE_READING_NOT_HUMAN_REVIEWED` |
+
+The first row is the live one: those three render as raw English on a Hebrew
+screen. Neither CI can see it — their
+`test_source_warning_code_list_is_current` checks a **vendored fixture** rather
+than this platform, and this platform has no test asserting the other direction
+at all. Raised at the boundary as `conversation.md` T61. The fix is a shared
+enumeration, not a bigger fixture, and it is not this session's to choose
+unilaterally.
+
+---
+
+### G112 — every edition of one approval is a different product, so the only exact answer about Chesterfield is an approval that expired in 2018
+
+*2026-09-09.* Written up, deliberately not fixed. Root cause of the trap the
+query surface now reports, and a companion to G106.
+
+`parameters._default_scope` builds a `fence_model` id by slugging
+`"{manufacturer} {product_family}"`. `product_family` is read off the document,
+so **each edition of one approval lineage prints a slightly different family
+string and gets a different product id.** `[measured]` snapshot `0e04d171…`
+publishes nine `ParameterTable`s under **seven** distinct `mfr/*` ids, five of
+which are the same CertainTeed/Barrette lineage:
+
+```
+mfr/certainteed-columbia-imperial-chesterfield
+mfr/certainteed-columbia-imperial-chesterfield-breezewood-brookline
+mfr/certainteed-columbia-imperial-chesterfield-chesterfield-w-lattice-breezewood-brookline
+mfr/barrette-outdoor-living-inc-vinyl-privacy-semi-privacy-fence-family-certainteed-era-model-names
+mfr/certainteed-general-bufftech-fence-installation-posts-rails-racking-stepping
+```
+
+`[measured]` asking the query surface for `footing depth exposure C` at
+`exposure_category=C`, scoped to `fence_model:mfr/certainteed-columbia-imperial-chesterfield`:
+**exactly one row grades `scope: "exact"`**, it is the `footing_schedule` whose
+`valid_until` is **2018-03-13**. The current approval -- `doc-3c8ab51045c7`, NOA
+23-0314.05 -- grades `scope: "other"` because its id carries **five** more
+tokens (`-chesterfield-w-lattice-breezewood-brookline`). (An earlier draft of
+this gap said "three more words" and pointed at `doc-7a08132799a1`, which is
+NOA 21-0125.07 and is itself titled *superseded*; both were wrong and are
+corrected here rather than quietly.)
+
+**The answer is not silently wrong, and that matters.** The expired row publishes
+`version_status: "superseded"` and `superseded_by_in_answer` naming all three
+successors with their scope ids, on `basis: "supersession_graph"`. A consumer
+reading currency gets the truth. A consumer filtering on `scope == "exact"` — the
+obvious thing to do with a graded field — gets the 2018 approval alone.
+
+**Not fixed, and not by oversight.** Every route out of this asserts a product
+identity, and `[measured]` `models: 0`, `combinations: 0` — nothing this platform
+publishes says those five ids are one lineage, because nothing this platform
+holds knows it. Deciding they are is the same class of error as the wrong rail
+attribution caught in G62: a plausible, checkable-looking claim about a product
+that no document states. G106's `DECLARED_ASSOCIATIONS` is empty for exactly this
+reason and stays empty.
+
+The options, with what each costs:
+
+1. **Slug the approval lineage instead of the printed family string.** The
+   supersession graph knows **four** of the five are one lineage (G110 made that
+   walk complete and entry-independent), so an id could be derived from the
+   lineage's oldest member -- **but not for the fifth.**
+   `mfr/certainteed-general-bufftech-fence-installation-posts-rails-racking-stepping`
+   resolves to `doc-3a8071e73dba`, the *Bufftech Installation Guide*, an
+   `installation_manual` with **zero** supersession edges (`[measured]`
+   `supersession_chain` returns a 1-member chain). It has no lineage to slug, so
+   this option cannot cover the case as written -- which is itself an instance of
+   the conflation this gap is about: same manufacturer is not same lineage. Cost: it changes every published `scope.id`, which is
+   in 9 distinct write-once tables (225 rows across 25 snapshots), and it
+   asserts that one approval lineage is one
+   *product* — which is false in general, since one NOA covers several model
+   names and a model can appear in two lineages.
+2. **Publish a `FenceModel` per lineage and let scopes point at it.** The
+   designed path (obligation 5's shape, T52 §2's first candidate). Cost: it is
+   blocked on amendment 008 and on real evidence, and `FenceModel` is one of the
+   four members with a measured count of zero. It is the right answer and it is
+   not available yet.
+3. **Report the collision rather than resolve it** — a gap, or a field on the
+   answer, saying "four other scopes in this snapshot share this authority's
+   lineage". Cost: §1.2.1's eight gap kinds are BINDING and closed, and none
+   means this; a new one is an amendment, not a registry addition. Same wall
+   G106 hit, and the same reason `cli reach` became a report rather than a gap.
+4. **Do nothing and let currency carry it.** What happens today. Cost: it works
+   only for a consumer that reads `currency`, and `scope` is the field whose
+   whole purpose is to be filtered on.
+
+`[inferred]` option 3 in `reach.py`'s shape — a report and an alarm, not a
+published member — is the cheapest thing that ends the silence, and option 2
+remains the answer. Nothing here should be built before Planning says what it can
+bind, which is the same sentence G106 ends on.
+
+---
+
 
 ## 4. If work resumes, in order
 

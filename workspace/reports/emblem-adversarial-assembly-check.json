@@ -1,0 +1,1193 @@
+{
+  "scenarios": [
+    {
+      "scenario": "single",
+      "counts": {
+        "73013956": 2,
+        "73014714": 1,
+        "73045785": 2
+      },
+      "metamorphic_cases": 40,
+      "independent_assembly_audit_passed": true,
+      "audit": {
+        "example_checks_passed": true,
+        "errors": [],
+        "expected_catalog_item_counts": {
+          "73014714": 1,
+          "73013956": 2,
+          "73045785": 2
+        },
+        "connected_runs": 1,
+        "unique_stations": 2,
+        "kit_contained_u_channels": 2,
+        "assembly_simulation": [],
+        "unresolved_installation_materials": [
+          {
+            "item": "concrete",
+            "required": true,
+            "purchase_quantity": null,
+            "blocker": "site footing dimensions and selected concrete yield",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            }
+          },
+          {
+            "item": "gravel/filler",
+            "required": true,
+            "purchase_quantity": null,
+            "blocker": "site footing dimensions and resolve guide gravel-depth passages",
+            "evidence": {
+              "element_id": "element-744c97279b-0012",
+              "text_raw": "Dig first two post holes in diameter based on size\nchart below* and down to your specified frost line.\nInsert filler/gravel into the bottom of both holes and\nthen set first post in post hole.",
+              "cite": {
+                "id": "00a6d694d9457a85",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            }
+          },
+          {
+            "item": "vinyl adhesive",
+            "required": true,
+            "manufacturer_model_candidate": "73047688",
+            "purchase_quantity": null,
+            "blocker": "adhesive coverage and chosen supplier package size",
+            "evidence": {
+              "element_id": "element-b540e75926-0055",
+              "text_raw": "4 oz. Tube Vinyl Adhesive",
+              "cite": {
+                "id": "716f5e54296d8f1d",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            },
+            "use_evidence": {
+              "element_id": "element-66549cef10-0011",
+              "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+              "cite": {
+                "id": "f67db6fc7eef1aa8",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            }
+          }
+        ],
+        "installation_ready": false,
+        "limitations": [
+          "Authored example only; no fit or structural verification.",
+          "Retailer packaging/multipacks are not established.",
+          "Installation-material quantities remain unresolved."
+        ]
+      }
+    },
+    {
+      "scenario": "complex",
+      "counts": {
+        "73013956": 9,
+        "73014714": 7,
+        "73045783": 4,
+        "73045784": 1,
+        "73045785": 4
+      },
+      "metamorphic_cases": 40,
+      "independent_assembly_audit_passed": true,
+      "audit": {
+        "example_checks_passed": true,
+        "errors": [],
+        "expected_catalog_item_counts": {
+          "73014714": 7,
+          "73013956": 9,
+          "73045785": 4,
+          "73045783": 4,
+          "73045784": 1
+        },
+        "connected_runs": 2,
+        "unique_stations": 9,
+        "kit_contained_u_channels": 14,
+        "assembly_simulation": [
+          {
+            "action": "prepare_holes",
+            "source_trace_key": "prepare_holes",
+            "stations": [
+              "A0",
+              "A1"
+            ],
+            "run": "A",
+            "evidence": {
+              "element_id": "element-744c97279b-0012",
+              "text_raw": "Dig first two post holes in diameter based on size\nchart below* and down to your specified frost line.\nInsert filler/gravel into the bottom of both holes and\nthen set first post in post hole.",
+              "cite": {
+                "id": "00a6d694d9457a85",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Prepare two holes and required foundation material."
+          },
+          {
+            "action": "fix_first_post",
+            "source_trace_key": "fix_first_post",
+            "station": "A0",
+            "run": "A",
+            "evidence": {
+              "element_id": "element-744c97279b-0013",
+              "text_raw": "Add wet or dry concrete mix according to the\nmanufacturer\u2019s instruction to the top of the hole for\nfirst post only and level it.",
+              "cite": {
+                "id": "50f0603a94782ab0",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Level and concrete the FIRST post; keep the second movable for panel engagement."
+          },
+          {
+            "action": "insert_bottom_rail",
+            "source_trace_key": "insert_bottom_rail",
+            "bay": "A-panel-1",
+            "run": "A",
+            "start_station": "A0",
+            "receiving_station": "A1",
+            "evidence": {
+              "element_id": "element-15b181bc58-0001",
+              "text_raw": "When included in kit, place aluminum insert into\nbottom rail, then insert bottom rail into bottom\npost route hole of first post only (Fig. 5). Panels\nwith 7\" rails and 8x6 panels do not require\naluminum inserts.",
+              "cite": {
+                "id": "a1a497f768e428c9",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert bottom rail into first post route; apply the correct style branch for inserts."
+          },
+          {
+            "action": "attach_end_channels",
+            "source_trace_key": "attach_end_channels",
+            "bay": "A-panel-1",
+            "run": "A",
+            "start_station": "A0",
+            "receiving_station": "A1",
+            "evidence": {
+              "element_id": "element-15b181bc58-0008",
+              "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+              "cite": {
+                "id": "57482180d5ddbd37",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Attach one U-channel to first-board tongue edge and one to last-board groove edge."
+          },
+          {
+            "action": "insert_boards",
+            "source_trace_key": "insert_boards",
+            "bay": "A-panel-1",
+            "run": "A",
+            "start_station": "A0",
+            "receiving_station": "A1",
+            "evidence": {
+              "element_id": "element-15b181bc58-0015",
+              "text_raw": "Insert boards into bottom rail ensuring\nU-channels are on both ends. Start from first\ninstalled post and work towards second post\n(Fig. 7).",
+              "cite": {
+                "id": "e856d15ed6bcbc68",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert boards into bottom rail, with U-channels at the two ends."
+          },
+          {
+            "action": "place_top_rail",
+            "source_trace_key": "place_top_rail",
+            "bay": "A-panel-1",
+            "run": "A",
+            "start_station": "A0",
+            "receiving_station": "A1",
+            "evidence": {
+              "element_id": "element-15b181bc58-0020",
+              "text_raw": "a. Insert the top rail into the first top hole post\nroute then guide over top of boards (Fig. 8).",
+              "cite": {
+                "id": "d3ce088342977ece",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage first post upper route and guide top rail over boards."
+          },
+          {
+            "action": "engage_second_post",
+            "source_trace_key": "engage_second_post",
+            "bay": "A-panel-1",
+            "run": "A",
+            "start_station": "A0",
+            "receiving_station": "A1",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage completed panel with second post routes before fixing that post."
+          },
+          {
+            "action": "fix_second_post",
+            "source_trace_key": "fix_second_post",
+            "bay": "A-panel-1",
+            "run": "A",
+            "start_station": "A0",
+            "receiving_station": "A1",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Plumb, level and concrete the second post."
+          },
+          {
+            "action": "prepare_holes",
+            "source_trace_key": "prepare_holes",
+            "stations": [
+              "A2"
+            ],
+            "run": "A",
+            "evidence": {
+              "element_id": "element-744c97279b-0012",
+              "text_raw": "Dig first two post holes in diameter based on size\nchart below* and down to your specified frost line.\nInsert filler/gravel into the bottom of both holes and\nthen set first post in post hole.",
+              "cite": {
+                "id": "00a6d694d9457a85",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Prepare two holes and required foundation material."
+          },
+          {
+            "action": "insert_bottom_rail",
+            "source_trace_key": "insert_bottom_rail",
+            "bay": "A-panel-2",
+            "run": "A",
+            "start_station": "A1",
+            "receiving_station": "A2",
+            "evidence": {
+              "element_id": "element-15b181bc58-0001",
+              "text_raw": "When included in kit, place aluminum insert into\nbottom rail, then insert bottom rail into bottom\npost route hole of first post only (Fig. 5). Panels\nwith 7\" rails and 8x6 panels do not require\naluminum inserts.",
+              "cite": {
+                "id": "a1a497f768e428c9",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert bottom rail into first post route; apply the correct style branch for inserts."
+          },
+          {
+            "action": "attach_end_channels",
+            "source_trace_key": "attach_end_channels",
+            "bay": "A-panel-2",
+            "run": "A",
+            "start_station": "A1",
+            "receiving_station": "A2",
+            "evidence": {
+              "element_id": "element-15b181bc58-0008",
+              "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+              "cite": {
+                "id": "57482180d5ddbd37",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Attach one U-channel to first-board tongue edge and one to last-board groove edge."
+          },
+          {
+            "action": "insert_boards",
+            "source_trace_key": "insert_boards",
+            "bay": "A-panel-2",
+            "run": "A",
+            "start_station": "A1",
+            "receiving_station": "A2",
+            "evidence": {
+              "element_id": "element-15b181bc58-0015",
+              "text_raw": "Insert boards into bottom rail ensuring\nU-channels are on both ends. Start from first\ninstalled post and work towards second post\n(Fig. 7).",
+              "cite": {
+                "id": "e856d15ed6bcbc68",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert boards into bottom rail, with U-channels at the two ends."
+          },
+          {
+            "action": "place_top_rail",
+            "source_trace_key": "place_top_rail",
+            "bay": "A-panel-2",
+            "run": "A",
+            "start_station": "A1",
+            "receiving_station": "A2",
+            "evidence": {
+              "element_id": "element-15b181bc58-0020",
+              "text_raw": "a. Insert the top rail into the first top hole post\nroute then guide over top of boards (Fig. 8).",
+              "cite": {
+                "id": "d3ce088342977ece",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage first post upper route and guide top rail over boards."
+          },
+          {
+            "action": "engage_second_post",
+            "source_trace_key": "engage_second_post",
+            "bay": "A-panel-2",
+            "run": "A",
+            "start_station": "A1",
+            "receiving_station": "A2",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage completed panel with second post routes before fixing that post."
+          },
+          {
+            "action": "fix_second_post",
+            "source_trace_key": "fix_second_post",
+            "bay": "A-panel-2",
+            "run": "A",
+            "start_station": "A1",
+            "receiving_station": "A2",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Plumb, level and concrete the second post."
+          },
+          {
+            "action": "prepare_holes",
+            "source_trace_key": "prepare_holes",
+            "stations": [
+              "A3"
+            ],
+            "run": "A",
+            "evidence": {
+              "element_id": "element-744c97279b-0012",
+              "text_raw": "Dig first two post holes in diameter based on size\nchart below* and down to your specified frost line.\nInsert filler/gravel into the bottom of both holes and\nthen set first post in post hole.",
+              "cite": {
+                "id": "00a6d694d9457a85",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Prepare two holes and required foundation material."
+          },
+          {
+            "action": "insert_bottom_rail",
+            "source_trace_key": "insert_bottom_rail",
+            "bay": "A-panel-3",
+            "run": "A",
+            "start_station": "A2",
+            "receiving_station": "A3",
+            "evidence": {
+              "element_id": "element-15b181bc58-0001",
+              "text_raw": "When included in kit, place aluminum insert into\nbottom rail, then insert bottom rail into bottom\npost route hole of first post only (Fig. 5). Panels\nwith 7\" rails and 8x6 panels do not require\naluminum inserts.",
+              "cite": {
+                "id": "a1a497f768e428c9",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert bottom rail into first post route; apply the correct style branch for inserts."
+          },
+          {
+            "action": "attach_end_channels",
+            "source_trace_key": "attach_end_channels",
+            "bay": "A-panel-3",
+            "run": "A",
+            "start_station": "A2",
+            "receiving_station": "A3",
+            "evidence": {
+              "element_id": "element-15b181bc58-0008",
+              "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+              "cite": {
+                "id": "57482180d5ddbd37",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Attach one U-channel to first-board tongue edge and one to last-board groove edge."
+          },
+          {
+            "action": "insert_boards",
+            "source_trace_key": "insert_boards",
+            "bay": "A-panel-3",
+            "run": "A",
+            "start_station": "A2",
+            "receiving_station": "A3",
+            "evidence": {
+              "element_id": "element-15b181bc58-0015",
+              "text_raw": "Insert boards into bottom rail ensuring\nU-channels are on both ends. Start from first\ninstalled post and work towards second post\n(Fig. 7).",
+              "cite": {
+                "id": "e856d15ed6bcbc68",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert boards into bottom rail, with U-channels at the two ends."
+          },
+          {
+            "action": "place_top_rail",
+            "source_trace_key": "place_top_rail",
+            "bay": "A-panel-3",
+            "run": "A",
+            "start_station": "A2",
+            "receiving_station": "A3",
+            "evidence": {
+              "element_id": "element-15b181bc58-0020",
+              "text_raw": "a. Insert the top rail into the first top hole post\nroute then guide over top of boards (Fig. 8).",
+              "cite": {
+                "id": "d3ce088342977ece",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage first post upper route and guide top rail over boards."
+          },
+          {
+            "action": "engage_second_post",
+            "source_trace_key": "engage_second_post",
+            "bay": "A-panel-3",
+            "run": "A",
+            "start_station": "A2",
+            "receiving_station": "A3",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage completed panel with second post routes before fixing that post."
+          },
+          {
+            "action": "fix_second_post",
+            "source_trace_key": "fix_second_post",
+            "bay": "A-panel-3",
+            "run": "A",
+            "start_station": "A2",
+            "receiving_station": "A3",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Plumb, level and concrete the second post."
+          },
+          {
+            "action": "prepare_holes",
+            "source_trace_key": "prepare_holes",
+            "stations": [
+              "A4"
+            ],
+            "run": "A",
+            "evidence": {
+              "element_id": "element-744c97279b-0012",
+              "text_raw": "Dig first two post holes in diameter based on size\nchart below* and down to your specified frost line.\nInsert filler/gravel into the bottom of both holes and\nthen set first post in post hole.",
+              "cite": {
+                "id": "00a6d694d9457a85",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Prepare two holes and required foundation material."
+          },
+          {
+            "action": "insert_bottom_rail",
+            "source_trace_key": "insert_bottom_rail",
+            "bay": "A-panel-4",
+            "run": "A",
+            "start_station": "A3",
+            "receiving_station": "A4",
+            "evidence": {
+              "element_id": "element-15b181bc58-0001",
+              "text_raw": "When included in kit, place aluminum insert into\nbottom rail, then insert bottom rail into bottom\npost route hole of first post only (Fig. 5). Panels\nwith 7\" rails and 8x6 panels do not require\naluminum inserts.",
+              "cite": {
+                "id": "a1a497f768e428c9",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert bottom rail into first post route; apply the correct style branch for inserts."
+          },
+          {
+            "action": "attach_end_channels",
+            "source_trace_key": "attach_end_channels",
+            "bay": "A-panel-4",
+            "run": "A",
+            "start_station": "A3",
+            "receiving_station": "A4",
+            "evidence": {
+              "element_id": "element-15b181bc58-0008",
+              "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+              "cite": {
+                "id": "57482180d5ddbd37",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Attach one U-channel to first-board tongue edge and one to last-board groove edge."
+          },
+          {
+            "action": "insert_boards",
+            "source_trace_key": "insert_boards",
+            "bay": "A-panel-4",
+            "run": "A",
+            "start_station": "A3",
+            "receiving_station": "A4",
+            "evidence": {
+              "element_id": "element-15b181bc58-0015",
+              "text_raw": "Insert boards into bottom rail ensuring\nU-channels are on both ends. Start from first\ninstalled post and work towards second post\n(Fig. 7).",
+              "cite": {
+                "id": "e856d15ed6bcbc68",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert boards into bottom rail, with U-channels at the two ends."
+          },
+          {
+            "action": "place_top_rail",
+            "source_trace_key": "place_top_rail",
+            "bay": "A-panel-4",
+            "run": "A",
+            "start_station": "A3",
+            "receiving_station": "A4",
+            "evidence": {
+              "element_id": "element-15b181bc58-0020",
+              "text_raw": "a. Insert the top rail into the first top hole post\nroute then guide over top of boards (Fig. 8).",
+              "cite": {
+                "id": "d3ce088342977ece",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage first post upper route and guide top rail over boards."
+          },
+          {
+            "action": "engage_second_post",
+            "source_trace_key": "engage_second_post",
+            "bay": "A-panel-4",
+            "run": "A",
+            "start_station": "A3",
+            "receiving_station": "A4",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage completed panel with second post routes before fixing that post."
+          },
+          {
+            "action": "fix_second_post",
+            "source_trace_key": "fix_second_post",
+            "bay": "A-panel-4",
+            "run": "A",
+            "start_station": "A3",
+            "receiving_station": "A4",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Plumb, level and concrete the second post."
+          },
+          {
+            "action": "prepare_holes",
+            "source_trace_key": "prepare_holes",
+            "stations": [
+              "A5"
+            ],
+            "run": "A",
+            "evidence": {
+              "element_id": "element-744c97279b-0012",
+              "text_raw": "Dig first two post holes in diameter based on size\nchart below* and down to your specified frost line.\nInsert filler/gravel into the bottom of both holes and\nthen set first post in post hole.",
+              "cite": {
+                "id": "00a6d694d9457a85",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Prepare two holes and required foundation material."
+          },
+          {
+            "action": "insert_bottom_rail",
+            "source_trace_key": "insert_bottom_rail",
+            "bay": "A-panel-5",
+            "run": "A",
+            "start_station": "A4",
+            "receiving_station": "A5",
+            "evidence": {
+              "element_id": "element-15b181bc58-0001",
+              "text_raw": "When included in kit, place aluminum insert into\nbottom rail, then insert bottom rail into bottom\npost route hole of first post only (Fig. 5). Panels\nwith 7\" rails and 8x6 panels do not require\naluminum inserts.",
+              "cite": {
+                "id": "a1a497f768e428c9",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert bottom rail into first post route; apply the correct style branch for inserts."
+          },
+          {
+            "action": "attach_end_channels",
+            "source_trace_key": "attach_end_channels",
+            "bay": "A-panel-5",
+            "run": "A",
+            "start_station": "A4",
+            "receiving_station": "A5",
+            "evidence": {
+              "element_id": "element-15b181bc58-0008",
+              "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+              "cite": {
+                "id": "57482180d5ddbd37",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Attach one U-channel to first-board tongue edge and one to last-board groove edge."
+          },
+          {
+            "action": "insert_boards",
+            "source_trace_key": "insert_boards",
+            "bay": "A-panel-5",
+            "run": "A",
+            "start_station": "A4",
+            "receiving_station": "A5",
+            "evidence": {
+              "element_id": "element-15b181bc58-0015",
+              "text_raw": "Insert boards into bottom rail ensuring\nU-channels are on both ends. Start from first\ninstalled post and work towards second post\n(Fig. 7).",
+              "cite": {
+                "id": "e856d15ed6bcbc68",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert boards into bottom rail, with U-channels at the two ends."
+          },
+          {
+            "action": "place_top_rail",
+            "source_trace_key": "place_top_rail",
+            "bay": "A-panel-5",
+            "run": "A",
+            "start_station": "A4",
+            "receiving_station": "A5",
+            "evidence": {
+              "element_id": "element-15b181bc58-0020",
+              "text_raw": "a. Insert the top rail into the first top hole post\nroute then guide over top of boards (Fig. 8).",
+              "cite": {
+                "id": "d3ce088342977ece",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage first post upper route and guide top rail over boards."
+          },
+          {
+            "action": "engage_second_post",
+            "source_trace_key": "engage_second_post",
+            "bay": "A-panel-5",
+            "run": "A",
+            "start_station": "A4",
+            "receiving_station": "A5",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage completed panel with second post routes before fixing that post."
+          },
+          {
+            "action": "fix_second_post",
+            "source_trace_key": "fix_second_post",
+            "bay": "A-panel-5",
+            "run": "A",
+            "start_station": "A4",
+            "receiving_station": "A5",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Plumb, level and concrete the second post."
+          },
+          {
+            "action": "glue_cap",
+            "source_trace_key": "glue_caps",
+            "station": "A0",
+            "run": "A",
+            "evidence": {
+              "element_id": "element-66549cef10-0011",
+              "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+              "cite": {
+                "id": "f67db6fc7eef1aa8",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Apply adhesive inside cap rims and attach to posts."
+          },
+          {
+            "action": "glue_cap",
+            "source_trace_key": "glue_caps",
+            "station": "A1",
+            "run": "A",
+            "evidence": {
+              "element_id": "element-66549cef10-0011",
+              "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+              "cite": {
+                "id": "f67db6fc7eef1aa8",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Apply adhesive inside cap rims and attach to posts."
+          },
+          {
+            "action": "glue_cap",
+            "source_trace_key": "glue_caps",
+            "station": "A2",
+            "run": "A",
+            "evidence": {
+              "element_id": "element-66549cef10-0011",
+              "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+              "cite": {
+                "id": "f67db6fc7eef1aa8",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Apply adhesive inside cap rims and attach to posts."
+          },
+          {
+            "action": "glue_cap",
+            "source_trace_key": "glue_caps",
+            "station": "A3",
+            "run": "A",
+            "evidence": {
+              "element_id": "element-66549cef10-0011",
+              "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+              "cite": {
+                "id": "f67db6fc7eef1aa8",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Apply adhesive inside cap rims and attach to posts."
+          },
+          {
+            "action": "glue_cap",
+            "source_trace_key": "glue_caps",
+            "station": "A4",
+            "run": "A",
+            "evidence": {
+              "element_id": "element-66549cef10-0011",
+              "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+              "cite": {
+                "id": "f67db6fc7eef1aa8",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Apply adhesive inside cap rims and attach to posts."
+          },
+          {
+            "action": "glue_cap",
+            "source_trace_key": "glue_caps",
+            "station": "A5",
+            "run": "A",
+            "evidence": {
+              "element_id": "element-66549cef10-0011",
+              "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+              "cite": {
+                "id": "f67db6fc7eef1aa8",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Apply adhesive inside cap rims and attach to posts."
+          },
+          {
+            "action": "prepare_holes",
+            "source_trace_key": "prepare_holes",
+            "stations": [
+              "B0",
+              "B1"
+            ],
+            "run": "B",
+            "evidence": {
+              "element_id": "element-744c97279b-0012",
+              "text_raw": "Dig first two post holes in diameter based on size\nchart below* and down to your specified frost line.\nInsert filler/gravel into the bottom of both holes and\nthen set first post in post hole.",
+              "cite": {
+                "id": "00a6d694d9457a85",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Prepare two holes and required foundation material."
+          },
+          {
+            "action": "fix_first_post",
+            "source_trace_key": "fix_first_post",
+            "station": "B0",
+            "run": "B",
+            "evidence": {
+              "element_id": "element-744c97279b-0013",
+              "text_raw": "Add wet or dry concrete mix according to the\nmanufacturer\u2019s instruction to the top of the hole for\nfirst post only and level it.",
+              "cite": {
+                "id": "50f0603a94782ab0",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Level and concrete the FIRST post; keep the second movable for panel engagement."
+          },
+          {
+            "action": "insert_bottom_rail",
+            "source_trace_key": "insert_bottom_rail",
+            "bay": "B-panel-1",
+            "run": "B",
+            "start_station": "B0",
+            "receiving_station": "B1",
+            "evidence": {
+              "element_id": "element-15b181bc58-0001",
+              "text_raw": "When included in kit, place aluminum insert into\nbottom rail, then insert bottom rail into bottom\npost route hole of first post only (Fig. 5). Panels\nwith 7\" rails and 8x6 panels do not require\naluminum inserts.",
+              "cite": {
+                "id": "a1a497f768e428c9",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert bottom rail into first post route; apply the correct style branch for inserts."
+          },
+          {
+            "action": "attach_end_channels",
+            "source_trace_key": "attach_end_channels",
+            "bay": "B-panel-1",
+            "run": "B",
+            "start_station": "B0",
+            "receiving_station": "B1",
+            "evidence": {
+              "element_id": "element-15b181bc58-0008",
+              "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+              "cite": {
+                "id": "57482180d5ddbd37",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Attach one U-channel to first-board tongue edge and one to last-board groove edge."
+          },
+          {
+            "action": "insert_boards",
+            "source_trace_key": "insert_boards",
+            "bay": "B-panel-1",
+            "run": "B",
+            "start_station": "B0",
+            "receiving_station": "B1",
+            "evidence": {
+              "element_id": "element-15b181bc58-0015",
+              "text_raw": "Insert boards into bottom rail ensuring\nU-channels are on both ends. Start from first\ninstalled post and work towards second post\n(Fig. 7).",
+              "cite": {
+                "id": "e856d15ed6bcbc68",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert boards into bottom rail, with U-channels at the two ends."
+          },
+          {
+            "action": "place_top_rail",
+            "source_trace_key": "place_top_rail",
+            "bay": "B-panel-1",
+            "run": "B",
+            "start_station": "B0",
+            "receiving_station": "B1",
+            "evidence": {
+              "element_id": "element-15b181bc58-0020",
+              "text_raw": "a. Insert the top rail into the first top hole post\nroute then guide over top of boards (Fig. 8).",
+              "cite": {
+                "id": "d3ce088342977ece",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage first post upper route and guide top rail over boards."
+          },
+          {
+            "action": "engage_second_post",
+            "source_trace_key": "engage_second_post",
+            "bay": "B-panel-1",
+            "run": "B",
+            "start_station": "B0",
+            "receiving_station": "B1",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage completed panel with second post routes before fixing that post."
+          },
+          {
+            "action": "fix_second_post",
+            "source_trace_key": "fix_second_post",
+            "bay": "B-panel-1",
+            "run": "B",
+            "start_station": "B0",
+            "receiving_station": "B1",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Plumb, level and concrete the second post."
+          },
+          {
+            "action": "prepare_holes",
+            "source_trace_key": "prepare_holes",
+            "stations": [
+              "B2"
+            ],
+            "run": "B",
+            "evidence": {
+              "element_id": "element-744c97279b-0012",
+              "text_raw": "Dig first two post holes in diameter based on size\nchart below* and down to your specified frost line.\nInsert filler/gravel into the bottom of both holes and\nthen set first post in post hole.",
+              "cite": {
+                "id": "00a6d694d9457a85",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Prepare two holes and required foundation material."
+          },
+          {
+            "action": "insert_bottom_rail",
+            "source_trace_key": "insert_bottom_rail",
+            "bay": "B-panel-2",
+            "run": "B",
+            "start_station": "B1",
+            "receiving_station": "B2",
+            "evidence": {
+              "element_id": "element-15b181bc58-0001",
+              "text_raw": "When included in kit, place aluminum insert into\nbottom rail, then insert bottom rail into bottom\npost route hole of first post only (Fig. 5). Panels\nwith 7\" rails and 8x6 panels do not require\naluminum inserts.",
+              "cite": {
+                "id": "a1a497f768e428c9",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert bottom rail into first post route; apply the correct style branch for inserts."
+          },
+          {
+            "action": "attach_end_channels",
+            "source_trace_key": "attach_end_channels",
+            "bay": "B-panel-2",
+            "run": "B",
+            "start_station": "B1",
+            "receiving_station": "B2",
+            "evidence": {
+              "element_id": "element-15b181bc58-0008",
+              "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+              "cite": {
+                "id": "57482180d5ddbd37",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Attach one U-channel to first-board tongue edge and one to last-board groove edge."
+          },
+          {
+            "action": "insert_boards",
+            "source_trace_key": "insert_boards",
+            "bay": "B-panel-2",
+            "run": "B",
+            "start_station": "B1",
+            "receiving_station": "B2",
+            "evidence": {
+              "element_id": "element-15b181bc58-0015",
+              "text_raw": "Insert boards into bottom rail ensuring\nU-channels are on both ends. Start from first\ninstalled post and work towards second post\n(Fig. 7).",
+              "cite": {
+                "id": "e856d15ed6bcbc68",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Insert boards into bottom rail, with U-channels at the two ends."
+          },
+          {
+            "action": "place_top_rail",
+            "source_trace_key": "place_top_rail",
+            "bay": "B-panel-2",
+            "run": "B",
+            "start_station": "B1",
+            "receiving_station": "B2",
+            "evidence": {
+              "element_id": "element-15b181bc58-0020",
+              "text_raw": "a. Insert the top rail into the first top hole post\nroute then guide over top of boards (Fig. 8).",
+              "cite": {
+                "id": "d3ce088342977ece",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage first post upper route and guide top rail over boards."
+          },
+          {
+            "action": "engage_second_post",
+            "source_trace_key": "engage_second_post",
+            "bay": "B-panel-2",
+            "run": "B",
+            "start_station": "B1",
+            "receiving_station": "B2",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Engage completed panel with second post routes before fixing that post."
+          },
+          {
+            "action": "fix_second_post",
+            "source_trace_key": "fix_second_post",
+            "bay": "B-panel-2",
+            "run": "B",
+            "start_station": "B1",
+            "receiving_station": "B2",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Plumb, level and concrete the second post."
+          },
+          {
+            "action": "glue_cap",
+            "source_trace_key": "glue_caps",
+            "station": "B0",
+            "run": "B",
+            "evidence": {
+              "element_id": "element-66549cef10-0011",
+              "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+              "cite": {
+                "id": "f67db6fc7eef1aa8",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Apply adhesive inside cap rims and attach to posts."
+          },
+          {
+            "action": "glue_cap",
+            "source_trace_key": "glue_caps",
+            "station": "B1",
+            "run": "B",
+            "evidence": {
+              "element_id": "element-66549cef10-0011",
+              "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+              "cite": {
+                "id": "f67db6fc7eef1aa8",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Apply adhesive inside cap rims and attach to posts."
+          },
+          {
+            "action": "glue_cap",
+            "source_trace_key": "glue_caps",
+            "station": "B2",
+            "run": "B",
+            "evidence": {
+              "element_id": "element-66549cef10-0011",
+              "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+              "cite": {
+                "id": "f67db6fc7eef1aa8",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            },
+            "instruction": "Apply adhesive inside cap rims and attach to posts."
+          }
+        ],
+        "unresolved_installation_materials": [
+          {
+            "item": "concrete",
+            "required": true,
+            "purchase_quantity": null,
+            "blocker": "site footing dimensions and selected concrete yield",
+            "evidence": {
+              "element_id": "element-66549cef10-0009",
+              "text_raw": "Insert the completed fence panel into the route\nholes of the second fence post. Plumb and\nlevel the post and add concrete according to\nmanufacturers instructions to top of hole (Fig. 21).",
+              "cite": {
+                "id": "ca6879cdc1cc3790",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            }
+          },
+          {
+            "item": "gravel/filler",
+            "required": true,
+            "purchase_quantity": null,
+            "blocker": "site footing dimensions and resolve guide gravel-depth passages",
+            "evidence": {
+              "element_id": "element-744c97279b-0012",
+              "text_raw": "Dig first two post holes in diameter based on size\nchart below* and down to your specified frost line.\nInsert filler/gravel into the bottom of both holes and\nthen set first post in post hole.",
+              "cite": {
+                "id": "00a6d694d9457a85",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            }
+          },
+          {
+            "item": "vinyl adhesive",
+            "required": true,
+            "manufacturer_model_candidate": "73047688",
+            "purchase_quantity": null,
+            "blocker": "adhesive coverage and chosen supplier package size",
+            "evidence": {
+              "element_id": "element-b540e75926-0055",
+              "text_raw": "4 oz. Tube Vinyl Adhesive",
+              "cite": {
+                "id": "716f5e54296d8f1d",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            },
+            "use_evidence": {
+              "element_id": "element-66549cef10-0011",
+              "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+              "cite": {
+                "id": "f67db6fc7eef1aa8",
+                "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+              }
+            }
+          }
+        ],
+        "installation_ready": false,
+        "limitations": [
+          "Authored example only; no fit or structural verification.",
+          "Retailer packaging/multipacks are not established.",
+          "Installation-material quantities remain unresolved."
+        ]
+      }
+    }
+  ],
+  "scope": "Schematic count and authored sequence checks, not physical fit or Planning generation.",
+  "installation_ready": false,
+  "review_roles": [
+    "installer and sequence",
+    "quantity and source adversary",
+    "Planning integration adversary"
+  ],
+  "fixed_findings": [
+    "kit description/SKU row mismatch accepted",
+    "empty panel graph accepted",
+    "missing or reordered assembly actions accepted and reconstructed",
+    "unresolved installation materials could disappear"
+  ],
+  "explicit_remaining_limits": [
+    "Quantity source relevance/admission remains unreviewed.",
+    "Kit inventory is authored and its completeness is unverified.",
+    "Draft Part IDs have zero overlap with published Parts; six published Emblem Parts have no specs.",
+    "Actual Emblem fragment is not a valid private Planning model; published models remain unconsumed.",
+    "Physical fit, board count, clearances, materials and BOM generation remain unverified."
+  ]
+}

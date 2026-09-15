@@ -29,6 +29,57 @@ def _warn_unfetched() -> int:
     return len(missing)
 
 
+def _parse_conditions(pairs: list[str]) -> dict:
+    """`DIM=VALUE` into what the published rows are actually conditioned on.
+
+    Booleans are coerced because `hvhz` publishes as `true`/`false` and the
+    string `"true"` matches no row -- an answer that then looks like an absence
+    of knowledge rather than a mistyped argument.
+
+    Lengths are accepted in **millimetres only**, and that is deliberate: a
+    Quantity is an integer count of thousandths (`canonical.py` refuses floats),
+    and accepting inches here would put a unit conversion in the CLI, which is
+    exactly where G63 put a number twelve times too small.
+    """
+    out: dict = {}
+    for pair in pairs or []:
+        if "=" not in pair:
+            raise ValueError(f"--condition wants DIM=VALUE; got {pair!r}")
+        dimension, _, raw = pair.partition("=")
+        dimension, raw = dimension.strip(), raw.strip()
+        if not dimension or not raw:
+            raise ValueError(f"--condition wants DIM=VALUE; got {pair!r}")
+        out[dimension] = _condition_value(raw)
+    return out
+
+
+def _condition_value(raw: str):
+    lowered = raw.lower()
+    if lowered in ("true", "false"):
+        return lowered == "true"
+    if lowered.endswith("mm") and lowered[:-2].strip().isdigit():
+        return {"amount_milli": int(lowered[:-2].strip()) * 1000, "unit": "mm",
+                "value_raw": [raw]}
+    if lowered.endswith(("in", '"')):
+        raise ValueError(
+            f"--condition {raw!r}: lengths are accepted in millimetres only "
+            f"(e.g. 1829mm). Converting here would put a unit conversion in "
+            f"the CLI, which is where G63's twelvefold error came from.")
+    try:
+        return int(raw)
+    except ValueError:
+        return raw
+
+
+def _parse_scope(raw: str | None) -> dict | None:
+    if raw is None:
+        return None
+    kind, sep, identifier = raw.partition(":")
+    if not sep or not kind.strip() or not identifier.strip():
+        raise ValueError(f"--scope wants KIND:ID; got {raw!r}")
+    return {"kind": kind.strip(), "id": identifier.strip()}
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="fence-evidence",
                                  description="Source-preserving evidence system "
@@ -52,11 +103,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--version-status")
     p.add_argument("--element-type")
     p.add_argument("--full", action="store_true", help="print full element text")
-    p.add_argument("--second-stage", action="store_true",
-                   help="also search within each retrieved page for elements covering "
-                        "query terms the matched unit missed (opt-in: measured at 0.6946 "
-                        "unit support against a 0.70 acceptance target, see "
-                        "docs/second-stage-evaluation.md)")
+    # Opt-OUT since 2026-09-14, mirroring --no-dedupe-text. On the graded
+    # (natural-question) column this is worth +0.031 evidence support, 5 gold
+    # questions better and none worse. It does not reach the 0.70 target and is
+    # not claimed to; see docs/coverage-remediation-plan.md §2.
+    p.add_argument("--no-second-stage", dest="second_stage", action="store_false",
+                   help="measure without the within-page second stage, which "
+                        "otherwise searches each retrieved page for elements "
+                        "covering query terms the matched unit missed")
     # The projection audit's R3 and R5, measured 2026-09-03 (state-and-gaps
     # G64). R3 earned its default -- two gold questions better, none worse --
     # so the flag turns it OFF; R5 did not, so its flag turns it on.
@@ -94,7 +148,9 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("evaluate", help="Phase 4: run the gold evaluation set")
     p.add_argument("-k", type=int, default=10)
-    p.add_argument("--second-stage", action="store_true")
+    p.add_argument("--no-second-stage", dest="second_stage", action="store_false",
+                   help="measure without the within-page second stage (see "
+                        "`search --no-second-stage`)")
     p.add_argument("--no-dedupe-text", dest="dedupe_text", action="store_false",
                    help="measure without R3 (see `search --no-dedupe-text`)")
     p.add_argument("--page-cap", type=int, default=None,
@@ -109,12 +165,53 @@ def main(argv: list[str] | None = None) -> int:
                    help="report basename (default: `evaluation`, or "
                         "`evaluation-second-stage` with --second-stage)")
 
+    p = sub.add_parser("steps", help="propose or list AssemblyStep candidates")
+    p.add_argument("--propose", action="store_true",
+                   help="split list elements into step candidates (idempotent; "
+                        "never overwrites a review)")
+    p.add_argument("--pair-numbered", action="store_true",
+                   help="pair 'N.' glyph elements with body paragraphs by "
+                        "bbox overlap into step candidates (the numbered-flow "
+                        "seam `--propose` does not read; idempotent)")
+    p.add_argument("--queue", action="store_true", help="what is waiting for a person")
+    p.add_argument("--import-proposals", nargs="+", metavar="READING",
+                   help="fill proposed_kind/scope/slot from one or more "
+                        "independent readings (step_4_mapping JSON). Anchored on "
+                        "(document, page, text): a step no candidate holds is "
+                        "refused, a reviewed candidate is never touched, and two "
+                        "readers who disagree leave the column NULL with both "
+                        "readings in proposal_basis")
+    p.add_argument("--dry-run", action="store_true",
+                   help="with --import-proposals: measure, write nothing")
+    p.add_argument("--disagreements", action="store_true",
+                   help="with --import-proposals: also list the candidates the "
+                        "readers read differently")
+    p.add_argument("--document", help="document_id or source_path")
+    p.add_argument("--page", type=int, help="one page only")
+    p.add_argument("--limit", type=int, default=200)
+    p.add_argument("--accept", metavar="CANDIDATE_ID",
+                   help="record a person's judgement about one step candidate")
+    p.add_argument("--reviewer", help="the name that separates 'software read "
+                                      "this' from 'a person confirmed it'")
+    p.add_argument("--verdict", choices=("accepted", "corrected", "rejected"),
+                   default="accepted")
+    p.add_argument("--step-kind", choices=("assembly", "installation", "preparation",
+                                           "part_modification", "maintenance"))
+    p.add_argument("--step-scope", choices=("panel", "bay", "post", "run", "site"))
+    p.add_argument("--slot", help="SlotTarget as JSON, e.g. "
+                                  "'{\"kind\": \"PostSlot\", \"key\": \"post\"}'")
+    p.add_argument("--text", help="the text you confirmed, if you corrected it")
+    p.add_argument("--notes")
+
     p = sub.add_parser("audit", help="relevance audit of the retrieval projection (read-only)")
     p.add_argument("-k", type=int, default=10)
 
     p = sub.add_parser("table-review",
                        help="load reader transcriptions of scanned tables and compare them")
     p.add_argument("--load-dir", help="directory of agent-read-*.json files")
+    p.add_argument("--pattern", default="agent-read-*.json",
+                   help="file pattern for --load-dir (default agent-read-*.json; "
+                        "machine readers use their own pattern and reader_kind)")
     p.add_argument("--agreement", nargs=2, metavar=("READER_A", "READER_B"))
     p.add_argument("--mark-agreed", nargs=2, metavar=("READER_A", "READER_B"),
                    help="flag cells two readers read identically as agent_verified "
@@ -139,6 +236,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--get", metavar="ID", help="fetch one by hash")
     p.add_argument("--dry-run", action="store_true",
                    help="build and report without storing")
+    p.add_argument("--authored-model", action="append", default=[], metavar="JSON",
+                   help="preflight an authored model record; excluded models publish actionable gaps")
     p.add_argument("--verify-stored", action="store_true",
                    help="re-run the obligations over every snapshot already on "
                         "disk; exits non-zero if any fails. The build-time gate "
@@ -152,6 +251,37 @@ def main(argv: list[str] | None = None) -> int:
                         "citation that no longer resolves")
     p.add_argument("--index", action="store_true",
                    help="rebuild the ref index and report its shape")
+
+    p = sub.add_parser("query",
+                       help="here is the situation: what applies, how strongly, "
+                            "and on what evidence?")
+    p.add_argument("--snapshot", metavar="ID",
+                   help="the snapshot to answer from. Required: an answer names "
+                        "the snapshot it was computed from (conversation.md "
+                        "T58 §3), and there is deliberately no 'latest' -- a "
+                        "snapshot carries no build time. `snapshot --list`.")
+    p.add_argument("--question", metavar="TEXT",
+                   help="free text; searched against the corpus for evidence")
+    p.add_argument("--condition", metavar="DIM=VALUE", action="append",
+                   default=[],
+                   help="a condition dimension the situation states, e.g. "
+                        "exposure_category=C, hvhz=true, fence_height=1829mm. "
+                        "An unrecognised dimension is refused, never dropped.")
+    p.add_argument("--scope", metavar="KIND:ID",
+                   help="the product the caller is asking about, e.g. "
+                        "fence_model:mfr/certainteed-columbia-imperial-"
+                        "chesterfield")
+    p.add_argument("--task", metavar="TASK",
+                   help="what the caller is doing; ranks sources")
+    p.add_argument("--role", metavar="ROLE", help="who is asking")
+    p.add_argument("-k", "--limit", type=int, default=10,
+                   help="evidence passages to return (default 10)")
+
+    p = sub.add_parser("reach",
+                       help="what our published objects are scoped TO, and how "
+                            "much of it nothing outside this repo can resolve")
+    p.add_argument("--root", metavar="DIR",
+                   help="read snapshots from DIR instead of workspace/snapshots/")
 
     p = sub.add_parser("review",
                        help="the human review loop: accept or correct a machine "
@@ -183,8 +313,14 @@ def main(argv: list[str] | None = None) -> int:
                    help="replay a ledger into this store. Dry run without --apply; "
                         "refuses the whole file if any line disagrees with a "
                         "review already recorded here")
+    p.add_argument("--apply-steps", dest="apply_steps", metavar="PATH",
+                   help="record a whole sitting of step decisions from a JSONL "
+                        "file (the review console writes one). Needs --reviewer. "
+                        "Dry run without --apply; one bad row refuses the batch, "
+                        "because half a sitting cannot be re-run without "
+                        "re-deciding the half that took")
     p.add_argument("--apply", action="store_true",
-                   help="with --import: actually write")
+                   help="with --import or --apply-steps: actually write")
 
     p = sub.add_parser("fact-review",
                        help="the human review loop for regex-extracted facts "
@@ -428,6 +564,130 @@ def main(argv: list[str] | None = None) -> int:
             report_name=default_report_name(args.name, args.second_stage,
                                             dedupe_text=args.dedupe_text,
                                             page_cap=args.page_cap))["summary"])
+    elif args.cmd == "steps":
+        if sum([args.propose, args.pair_numbered, args.queue, bool(args.accept),
+                bool(args.import_proposals)]) != 1:
+            _print({"error": "choose exactly one of --propose, --pair-numbered, "
+                             "--queue, --accept or --import-proposals"})
+            return 2
+        if args.accept and not (args.reviewer or "").strip():
+            _print({"error": "--accept needs --reviewer: the name is the only thing "
+                             "separating 'software read this' from 'a person "
+                             "confirmed it'"})
+            return 2
+        if args.accept and args.verdict != "rejected" and not (
+                args.step_kind and args.step_scope):
+            _print({"error": "--accept needs --step-kind and --step-scope; "
+                             "AssemblyStep requires both and a half-classified "
+                             "step would assert something nobody decided"})
+            return 2
+        from .steps import propose
+        from .store import connect as _connect
+        conn = _connect()
+        try:
+            if args.accept:
+                from .reviews import ReviewRefused, submit_step_review
+                row = conn.execute(
+                    "SELECT * FROM step_candidates WHERE candidate_id=?",
+                    (args.accept,)).fetchone()
+                if row is None:
+                    _print({"error": f"no step candidate {args.accept}"})
+                    return 1
+                try:
+                    out = submit_step_review(
+                        conn, element_id=row["element_id"],
+                        char_start=row["char_start"], char_end=row["char_end"],
+                        text_seen=row["text_raw"], reviewer=args.reviewer,
+                        verdict=args.verdict, step_kind=args.step_kind,
+                        step_scope=args.step_scope,
+                        slot_target=json.loads(args.slot) if args.slot else None,
+                        text_final=args.text, notes=args.notes)
+                except ReviewRefused as exc:
+                    _print({"error": exc.code, "message": str(exc)})
+                    return 1
+                _print({**out, "candidate_id": args.accept,
+                        "text": row["text_raw"]})
+            elif args.pair_numbered:
+                if not args.document:
+                    _print({"error": "--pair-numbered needs --document"})
+                    return 2
+                row = conn.execute(
+                    "SELECT document_id FROM documents WHERE document_id=? OR source_path=?",
+                    (args.document, args.document)).fetchone()
+                if row is None:
+                    _print({"error": f"no such document: {args.document!r}"})
+                    return 1
+                from .steps import pair_numbered_flow
+                total = pair_numbered_flow(conn, document_id=row[0], page_no=args.page)
+                paired = conn.execute(
+                    """SELECT COUNT(*) FROM step_candidates
+                        WHERE document_id=? AND proposal_basis
+                          LIKE 'numbered_flow_pair:%'""",
+                    (row[0],)).fetchone()[0]
+                _print({"document_id": row[0], "page": args.page,
+                        "candidates": total,
+                        "numbered_flow_paired": paired,
+                        "reviewed": conn.execute(
+                            "SELECT COUNT(*) FROM step_candidates "
+                            "WHERE document_id=? AND reviewer IS NOT NULL",
+                            (row[0],)).fetchone()[0]})
+            elif args.import_proposals:
+                from .step_proposals import (ProposalRefused, disagreements,
+                                             import_proposals)
+                try:
+                    out = import_proposals(conn, args.import_proposals,
+                                           document=args.document,
+                                           apply=not args.dry_run)
+                except ProposalRefused as exc:
+                    _print({"error": "error.unresolved_document",
+                            "message": str(exc)})
+                    return 1
+                if args.disagreements:
+                    out["disagreements"] = disagreements(
+                        conn, limit=args.limit) if not args.dry_run else []
+                _print(out)
+            elif args.propose:
+                if not args.document:
+                    _print({"error": "--propose needs --document"})
+                    return 2
+                row = conn.execute(
+                    "SELECT document_id FROM documents WHERE document_id=? OR source_path=?",
+                    (args.document, args.document)).fetchone()
+                if row is None:
+                    _print({"error": f"no such document: {args.document!r}"})
+                    return 1
+                total = propose(conn, document_id=row[0], page_no=args.page)
+                by_kind = {r[0]: r[1] for r in conn.execute(
+                    """SELECT segment_kind, COUNT(*) FROM step_candidates
+                        WHERE document_id=? GROUP BY 1""", (row[0],))}
+                _print({"document_id": row[0], "page": args.page,
+                        "candidates": total, "by_kind": by_kind,
+                        "reviewed": conn.execute(
+                            "SELECT COUNT(*) FROM step_candidates "
+                            "WHERE document_id=? AND reviewer IS NOT NULL",
+                            (row[0],)).fetchone()[0]})
+            else:
+                where, params = "", []
+                if args.document:
+                    row = conn.execute(
+                        "SELECT document_id FROM documents "
+                        "WHERE document_id=? OR source_path=?",
+                        (args.document, args.document)).fetchone()
+                    if row is None:
+                        _print({"error": f"no such document: {args.document!r}"})
+                        return 1
+                    where, params = "AND document_id=?", [row[0]]
+                rows = conn.execute(
+                    f"""SELECT candidate_id, page_no, ordinal, seq, segment_kind,
+                               depth, branch, repair_confidence, text_repair, text_raw
+                          FROM step_candidates
+                         WHERE review_status='unreviewed' {where}
+                         ORDER BY page_no, ordinal, seq LIMIT ?""",
+                    params + [args.limit]).fetchall()
+                _print({"unreviewed": len(rows),
+                        "queue": [dict(r) for r in rows]})
+        finally:
+            conn.close()
     elif args.cmd == "audit":
         _warn_unfetched()
         from .audit import run_audit
@@ -439,7 +699,8 @@ def main(argv: list[str] | None = None) -> int:
         conn = _c()
         out = {}
         if args.load_dir:
-            out["loaded"] = tr.load_directory(conn, _P(args.load_dir))
+            out["loaded"] = tr.load_directory(conn, _P(args.load_dir),
+                                              pattern=args.pattern)
         if args.mark_agreed:
             out["marked_agent_verified"] = tr.mark_agent_verified(conn, tuple(args.mark_agreed))
         if args.agreement:
@@ -475,6 +736,9 @@ def main(argv: list[str] | None = None) -> int:
             _print({"error": "choose one of --build, --dry-run, --list, --get, "
                              "--verify-stored"})
             return 2
+        if args.authored_model and not (args.build or args.dry_run):
+            _print({"error": "--authored-model requires --build or --dry-run"})
+            return 2
         if args.verify_stored:
             from .snapshot_store import verify_stored
             res = verify_stored()
@@ -492,13 +756,28 @@ def main(argv: list[str] | None = None) -> int:
         elif args.list:
             _print(list_snapshots())
         else:
-            snap = build_snapshot(tenant=args.tenant, regime=args.regime)
+            records = []
+            for path in args.authored_model:
+                try:
+                    with open(path, encoding="utf-8") as source:
+                        record = json.load(source)
+                    if not isinstance(record, dict):
+                        raise ValueError("authored model record must be an object")
+                    records.append(record)
+                except (OSError, ValueError) as exc:
+                    _print({"error": f"cannot read authored model {path}: {exc}"})
+                    return 2
+            snap = build_snapshot(tenant=args.tenant, regime=args.regime,
+                                  **({"authored_records": records} if records else {}))
             summary = {"snapshot_id": snap["snapshot_id"],
                        "tenant": snap["tenant"], "regime": snap["regime"],
                        "retain_until": snap["retain_until"],
                        "source_docs": len(snap["source_docs"]),
                        "warnings": len(snap["warnings"]),
                        "gaps": len(snap["gaps"]),
+                       "models": len(snap["models"]),
+                       "authored_model_gaps": [g for g in snap["gaps"]
+                                               if g["because"]["code"].startswith("authored_model_")],
                        "stored": False}
             if args.build:
                 put_snapshot(snap)
@@ -510,10 +789,16 @@ def main(argv: list[str] | None = None) -> int:
         # Checked before the imports, so a usage error does not depend on a
         # module being importable.
         modes = (bool(args.queue), args.accept is not None, bool(args.rebuild),
-                 bool(args.export), args.import_path is not None)
+                 bool(args.export), args.import_path is not None,
+                 args.apply_steps is not None)
         if sum(modes) != 1:
             _print({"error": "choose one of --queue, --accept, --rebuild, "
-                             "--export, --import"})
+                             "--export, --import, --apply-steps"})
+            return 2
+        if args.apply_steps is not None and not (args.reviewer or "").strip():
+            _print({"error": "--apply-steps requires --reviewer: the name is the "
+                             "only thing separating 'software read this' from "
+                             "'a person confirmed it'"})
             return 2
         import json as _json
         from pathlib import Path as _P
@@ -528,6 +813,22 @@ def main(argv: list[str] | None = None) -> int:
                 _print(reviews.rebuild_projection(conn))
             elif args.export:
                 _print(reviews.export_reviews(conn, args.out))
+            elif args.apply_steps is not None:
+                # The end of a sitting. Whole-batch: `apply_step_decisions`
+                # writes all of the decisions or none of them, and a refusal
+                # exits non-zero for `--import`'s reason -- a script must not be
+                # able to read a refused sitting as an applied one.
+                try:
+                    decisions = reviews.read_step_decisions(args.apply_steps)
+                    out = reviews.apply_step_decisions(
+                        conn, decisions, reviewer=args.reviewer,
+                        dry_run=not args.apply)
+                except reviews.ReviewRefused as e:
+                    _print({"error": e.code, "message": str(e)})
+                    return 1
+                _print(out)
+                if out["refusals"]:
+                    return 1
             elif args.import_path is not None:
                 try:
                     out = reviews.import_reviews(conn, args.import_path,
@@ -679,6 +980,67 @@ def main(argv: list[str] | None = None) -> int:
             print(f"dry run: {report['orphan_files']} orphaned file(s), "
                   f"{report['orphan_bytes'] / 1e9:.3f} GB. Re-run with --apply "
                   f"to delete them.", file=sys.stderr)
+    elif args.cmd == "query":
+        from .query import QueryRefused, Situation, answer_query
+        from .snapshot_store import SnapshotMissing
+        if not args.snapshot:
+            _print({"error": "an answer names the snapshot it was computed "
+                             "from: pass --snapshot ID. There is no 'latest' "
+                             "-- a snapshot carries no build time. "
+                             "`snapshot --list` shows what is held."})
+            return 2
+        try:
+            conditions = _parse_conditions(args.condition)
+            scope = _parse_scope(args.scope)
+        except ValueError as bad:
+            _print({"error": str(bad)})
+            return 2
+        situation = Situation(question=args.question, conditions=conditions,
+                              scope=scope, task=args.task, role=args.role,
+                              limit=args.limit)
+        from .store import connect
+        conn = connect(read_only=True) if args.question else None
+        try:
+            answer = answer_query(situation, snapshot_id=args.snapshot,
+                                  conn=conn)
+        except (QueryRefused, SnapshotMissing) as refused:
+            # A refusal is not an empty answer, and printing `{}` with exit 0
+            # is the vacuous-green class `snapshot` and `refs` already refuse.
+            _print({"error": str(refused)})
+            return 2
+        finally:
+            if conn is not None:
+                conn.close()
+        _print(answer.to_dict())
+    elif args.cmd == "reach":
+        from pathlib import Path as _Path
+        from .reach import reachability_report
+        report = reachability_report(
+            root=_Path(args.root) if args.root else None)
+        _print(report)
+        # Exit 1 for the ONE condition a person must act on: something was
+        # published under an identity nobody declared. Everything being
+        # unreachable is the current state (conversation.md T51 §2) and is
+        # reported at exit 0 -- a guard that always fails is a guard everybody
+        # learns to ignore, which is how this went unnoticed for weeks.
+        if report["unknown_identities"]:
+            print("FAILED: a snapshot publishes an identity family that is not "
+                  "in reach.KNOWN_IDENTITIES: "
+                  f"{', '.join(report['unknown_identities'])}. Nothing outside "
+                  "this repository can resolve it. Add it there deliberately "
+                  "and say in conversation.md that it exists.", file=sys.stderr)
+            return 1
+        # Same vacuous-green refusal as `refs --verify` (G39): zero snapshots
+        # carrying a scoped object means nothing was checked, not that nothing
+        # is stranded.
+        if report["snapshots_with_scoped_objects"] == 0:
+            print("FAILED: nothing was checked -- no stored snapshot publishes "
+                  "a scoped Part or ParameterTable. A green exit here would "
+                  "mean zero identities were examined, not that they resolve.",
+                  file=sys.stderr)
+            return 1
+        return 0
+
     elif args.cmd == "refs":
         from .refs import build_index, verify_snapshots
         from .store import connect
@@ -779,6 +1141,10 @@ def main(argv: list[str] | None = None) -> int:
             _print({"schema_version": SCHEMA_VERSION,
                     "columns_added": result["added"],
                     "columns_retired": result["retired"],
+                    # A backfill that moves no column has to be visible too, or
+                    # "it ran and moved nothing" reads as "it never ran".
+                    "fact_types_renamed": result["fact_types_renamed"],
+                    "condition_keys_backfilled": result["condition_keys_backfilled"],
                     "lang": backfill_lang(conn)})
         finally:
             conn.close()

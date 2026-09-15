@@ -1,5 +1,15 @@
 # v0.4 — four things that need your agreement
 
+> **HISTORICAL — a closed approval request; the approval is recorded in `audit/07`, not here.**
+> Three of its four items moved after it was written: `Gap` lists six kinds where the ratified
+> contract has **eight** (`disputed` and `illegible_source` were added by the very round this
+> opened); `SlotRef` was ratified **RESERVED** and undefined by amendment 004; and
+> `Member.continuity` was demoted to derived rather than accepted as an authored field, so the
+> shape described here was rejected. Its closing note that a downward-truncating rule expansion
+> was "fixed" meant one call site — the same clause was breached twice more, at `fit_pattern`
+> (T49 §1) and `max_span_mm` (T50 §3).
+
+
 ```text
 Status:   Approval request. From the Planning & BOM team.
 Size:     Deliberately short. Four items, and nothing else in it.

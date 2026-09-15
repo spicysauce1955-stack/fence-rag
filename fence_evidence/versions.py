@@ -301,12 +301,23 @@ def expiry_status(dates: dict, as_of: str | None = None) -> dict:
 
 def enrich_chain(conn: sqlite3.Connection, chain: list[dict],
                  as_of: str | None = None) -> list[dict]:
-    """Attach dates and an expiry verdict to each member of a supersession chain."""
+    """Attach dates, an expiry verdict and content identity to each member.
+
+    `content_hashes` is what lets `select_active` tell two filings of one
+    approval from two approvals. CLAUDE.md: 14 groups of byte-identical files
+    are filed under different manufacturers, linked with `same_content_as` and
+    *never deduplicated* -- so one lineage really does hold four documents whose
+    bytes are the same file, and a decision that counts them as four is wrong
+    about the world, not merely noisy.
+    """
     enriched = []
     for member in chain:
         m = dict(member)
         m["dates"] = document_dates(conn, m["document_id"])
         m["expiry"] = expiry_status(m["dates"], as_of=as_of)
+        m["content_hashes"] = [r[0] for r in conn.execute(
+            "SELECT DISTINCT sha256 FROM document_versions WHERE document_id=? "
+            "ORDER BY sha256", (m["document_id"],))]
         # Evidence about which printing this is. Never a status; see
         # document_edition.
         m["edition"] = document_edition(conn, m["document_id"])
@@ -469,6 +480,40 @@ def _no_answer(kind: str, basis: str, candidates: list[str] | None = None) -> di
     return out
 
 
+def _one_per_approval(members: list[dict]) -> list[dict]:
+    """Collapse byte-identical filings of one approval to a single candidate.
+
+    `[measured]` 2026-09-09: the four filings of NOA `24-0117.05` share one
+    sha256 (`2f446717ee75...`), each independently reads `in_force`, and none
+    is marked active. The old `supersession_chain` hid this by returning one
+    arbitrary path per hop, so `select_active` never saw more than one of them
+    at a time and reported `inferred_in_force`. Over the complete DAG it sees
+    all four, and the >1 rule below would call four copies of one approval a
+    conflict -- trading a silent omission for a spurious refusal on the exact
+    lineage the walk was fixed for.
+
+    Grouping is on the bytes and nothing weaker. Two documents that are not the
+    same file never share a hash, so a genuine disagreement between two
+    approvals still reaches the conflict rule intact -- which is the property
+    that makes the collapse safe rather than convenient. A member with no
+    `content_hashes` (a synthetic chain, or a document with no ingested
+    version) is its own group, so this can only ever narrow a set it was
+    already going to refuse.
+
+    The kept member is the lowest `document_id` in its group. It is an
+    arbitrary choice among identical bytes and is stated to be one: any of them
+    resolves the same values, and a stable pick is what keeps two runs over one
+    store agreeing.
+    """
+    groups: dict = {}
+    for member in members:
+        key = tuple(member.get("content_hashes") or [member["document_id"]])
+        kept = groups.get(key)
+        if kept is None or member["document_id"] < kept["document_id"]:
+            groups[key] = member
+    return [groups[k] for k in sorted(groups)]
+
+
 def select_active(chain: list[dict], as_of: str | None = None) -> dict:
     """Which member of an enriched chain is in force, and on what evidence.
 
@@ -497,7 +542,8 @@ def select_active(chain: list[dict], as_of: str | None = None) -> dict:
         return _no_answer(
             "none", f"every member of the chain ({len(chain)}) is marked superseded")
 
-    marked = [m for m in candidates if m.get("version_status") == "active"]
+    marked = _one_per_approval(
+        [m for m in candidates if m.get("version_status") == "active"])
     if len(marked) > 1:
         return _no_answer(
             "conflict",
@@ -507,8 +553,9 @@ def select_active(chain: list[dict], as_of: str | None = None) -> dict:
         selected, kind = marked[0], "marked"
         basis = "marked active by the corpus"
     else:
-        in_force = [m for m in candidates
-                    if (m.get("expiry") or {}).get("status") == "in_force"]
+        in_force = _one_per_approval(
+            [m for m in candidates
+             if (m.get("expiry") or {}).get("status") == "in_force"])
         if len(in_force) > 1:
             return _no_answer(
                 "conflict",
@@ -565,3 +612,45 @@ def chain_for(conn: sqlite3.Connection, document_id: str,
         if d:
             rows.append(dict(d))
     return enrich_chain(conn, rows, as_of=as_of)
+
+
+def resolved_document_dates(conn: sqlite3.Connection, document_id: str,
+                            issue_raw: str | None,
+                            expiration_raw: str | None) -> tuple:
+    """`(issue_date, expiration_date, evidence_note)` for one document.
+
+    G75's rule in ONE place: evidence beats the curated column, and every value
+    is re-normalised through `dates.normalize_date` before publication. That is
+    not belt and braces -- `parse_date` above and `normalize_date` are two
+    independent parsers that DISAGREE, and `normalize_date` is the one
+    implementing amendment 002's refusal to guess.
+
+    G89: this function exists because G75's fix reached `SourceDoc` and not the
+    `ParameterTable` rows beside it. `parameters.py` kept reading the raw
+    `documents` column, so a rule and the `SourceDoc` its `authority` names
+    published DIFFERENT dates -- 17 of 31 rows carried no expiry while their
+    document carried one, and two of those documents had lapsed. Both callers
+    now resolve here, which is what makes `parameters.py`'s claim that the
+    `SourceDoc` "carries the same dates" true rather than aspirational.
+    """
+    from .dates import normalize_date
+
+    try:
+        found = document_dates(conn, document_id)
+    except sqlite3.Error:
+        found = {}
+    out, seen = [], []
+    for key, column in (("effective", issue_raw), ("expiration", expiration_raw)):
+        raw = None
+        entry = (found or {}).get(key) or {}
+        for source in entry.get("sources") or []:
+            raw = source.get("original") or source.get("value") or raw
+            if raw:
+                break
+        date = normalize_date(raw) if raw else None
+        if date is None:
+            date = normalize_date(column)
+        else:
+            seen.append(f"{key} {date['iso'] or 'ambiguous'}")
+        out.append(date)
+    return out[0], out[1], ", ".join(seen)

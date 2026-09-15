@@ -1,0 +1,237 @@
+"""Model changes must affect preview output; input layouts contain no answers."""
+import copy
+import json
+import sqlite3
+import unittest
+
+import context  # noqa: F401
+from context import requires_store
+from fence_evidence.paths import EVIDENCE_DB, REPO_ROOT
+from fence_evidence.purchase_preview import generate, PreviewError
+
+
+class TestPurchasePreview(unittest.TestCase):
+    def setUp(self):
+        def anchor(text):
+            return {'text_raw': text, 'element_id': 'e', 'cite': {'id': 'r', 'belongs_to': 'source'}}
+        def part(pid, kind):
+            return {'id': pid, 'type': {'namespace': 'shared', 'key': kind}, 'name_i18n': {'en': pid}}
+        self.package = {
+            'scope': {'model_number': 'KIT-X', 'product_description': 'Kit product'},
+            'identity_anchors': [anchor('KIT-X'), anchor('Kit product')],
+            'source_docs': [{'content_hash': 'source'}],
+            'part_fragments': [part(pid, kind) for pid, kind in [('rail', 'rail'), ('board', 'infill'),
+                              ('end', 'post'), ('line', 'post'), ('corner', 'post'), ('cap', 'post_cap')]],
+            'part_identity_anchors': [
+                {'part_id': role, 'post_role': role, 'description': anchor(role + ' post'),
+                 'model_number': anchor('PRODUCT-' + role)} for role in ['end', 'line', 'corner']
+            ] + [{'part_id': 'cap', 'description': anchor('post top'), 'model_number': anchor('CAP-X')}],
+            'model_fragment': {'id': 'model', 'name_i18n': {'en': 'Kit model'},
+                'default_spec': {'frame': [{'key': 'bottom', 'requirement': {'part_id': 'rail'}},
+                                          {'key': 'top', 'requirement': {'part_id': 'rail'}}],
+                                 'infill': {'pattern': [{'key': 'board', 'requirement': {'part_id': 'board'}}]}},
+                'post': {'cap': {'part_id': 'cap'}}},
+            'pending_bindings': [{'target': '/model_fragment/post/requirement',
+                                  'candidates': [{'post_role': r, 'part_id': r} for r in ['end', 'line', 'corner']]}],
+            'purchase_projection': {'panel_kit_covers': [
+                {'slot_kind': kind, 'slot_key': key, 'part_id': pid} for kind, key, pid in
+                [('frame', 'bottom', 'rail'), ('frame', 'top', 'rail'), ('infill', 'board', 'board')]]},
+            'packaged_assembly_inventory': [{'component_key': 'boards', 'quantity_each': None}],
+        }
+        self.layout = {'kind': 'full_panel_schematic', 'expected_run_count': 1,
+                       'stations': [{'id': 'a', 'schematic_point': [0, 0]}, {'id': 'b', 'schematic_point': [1, 0]}],
+                       'bays': [{'id': 'bay', 'from': 'a', 'to': 'b', 'model_id': 'model', 'supply': 'full_kit'}]}
+        self.package['purchase_quantity_rules'] = [
+            {'id': target, 'target': target, 'model_id': 'model',
+             'basis': 'full_panel_bay' if target == 'panel_kit' else 'unique_post_station',
+             'quantity_per_basis': {'amount_milli': 1000, 'unit': 'each', 'value_raw': ['fixture count']},
+             'authorship': 'third_party_authored', 'derivation': 'One item for each authored occurrence.',
+             'evidence': [anchor('fixture count')]}
+            for target in ['panel_kit', 'post', 'post_cap']]
+
+    def test_quantity_rule_change_changes_demand_and_preserves_derivation(self):
+        self.package['purchase_quantity_rules'][2]['quantity_per_basis']['amount_milli'] = 2000
+        self.package['purchase_quantity_rules'][2]['derivation'] = (
+            'Synthetic two-item rule to test arithmetic, not an Emblem source claim.')
+        self.assertEqual(self.counts()['CAP-X'], 4)
+        line = next(x for x in generate(self.package, self.layout)['purchase_lines']
+                    if x['manufacturer_model_number'] == 'CAP-X')
+        trace = line['quantity_derivations'][0]
+        self.assertEqual((trace['basis_count'], trace['quantity_each']), (2, 4))
+        self.assertEqual(trace['cites'], [{'id': 'r', 'belongs_to': 'source'}])
+
+    def test_missing_quantity_rules_refused(self):
+        del self.package['purchase_quantity_rules']
+        with self.assertRaisesRegex(PreviewError, 'explicit quantity rules'):
+            self.counts()
+
+    def test_missing_kit_description_refused(self):
+        self.package['identity_anchors'].pop()
+        with self.assertRaisesRegex(PreviewError, 'kit product description anchor'):
+            self.counts()
+
+    def test_empty_panel_does_not_pass_vacuous_coverage(self):
+        self.package['model_fragment']['default_spec']['frame'] = []
+        self.package['model_fragment']['default_spec']['infill']['pattern'] = []
+        self.package['purchase_projection']['panel_kit_covers'] = []
+        with self.assertRaisesRegex(PreviewError, 'nonempty frame and infill'):
+            self.counts()
+
+    def test_unsupported_inventory_count_is_explicitly_unvalidated(self):
+        self.package['packaged_assembly_inventory'] = [
+            {'component_key': 'boards', 'quantity_each': 999}]
+        out = generate(self.package, self.layout)
+        self.assertEqual(out['inventory_validation'], 'unreviewed_authored')
+        self.assertFalse(out['inventory_completeness_verified'])
+        self.assertFalse(out['quantity_semantics_verified'])
+
+    def test_rule_arithmetic_does_not_claim_source_supported_admission(self):
+        self.package['purchase_quantity_rules'][2]['quantity_per_basis']['amount_milli'] = 99000
+        out = generate(self.package, self.layout)
+        self.assertEqual(out['quantity_rule_admission'], 'unreviewed_authored')
+        self.assertFalse(out['quantity_semantics_verified'])
+        self.assertEqual(next(line['quantity_each'] for line in out['purchase_lines']
+                              if line['manufacturer_model_number'] == 'CAP-X'), 198)
+
+    def test_invalid_quantity_rule_refused(self):
+        for patch in ({'basis': 'per_run'}, {'model_id': 'other'}, {'evidence': []},
+                      {'condition': {'post_role': 'corner'}},
+                      {'rounding': 'ceil_to_pack', 'pack_size': 10},
+                      {'quantity_per_basis': {'amount_milli': 1000, 'unit': 'each',
+                                              'value_raw': ['fixture count'], 'override': 10}},
+                      {'quantity_per_basis': {'amount_milli': 1500, 'unit': 'each'}}):
+            with self.subTest(patch=patch):
+                package = copy.deepcopy(self.package)
+                package['purchase_quantity_rules'][0].update(patch)
+                with self.assertRaises(PreviewError):
+                    generate(package, self.layout)
+
+    def counts(self):
+        return {line['manufacturer_model_number']: line['quantity_each']
+                for line in generate(self.package, self.layout)['purchase_lines']}
+
+    def test_reads_model_identities_not_hardcoded_emblem_numbers(self):
+        self.assertEqual(self.counts(), {'KIT-X': 1, 'PRODUCT-end': 2, 'CAP-X': 2})
+
+    def test_cap_model_change_changes_output(self):
+        self.package['part_identity_anchors'][-1]['model_number']['text_raw'] = 'CAP-Y'
+        self.assertIn('CAP-Y', self.counts())
+        self.assertNotIn('CAP-X', self.counts())
+
+    def test_explicit_no_cap_removes_demand(self):
+        self.package['model_fragment']['post']['cap'] = None
+        self.assertEqual(self.counts(), {'KIT-X': 1, 'PRODUCT-end': 2})
+
+    def test_missing_cap_is_not_no_cap(self):
+        del self.package['model_fragment']['post']['cap']
+        with self.assertRaisesRegex(PreviewError, 'cap requirement is missing'):
+            self.counts()
+
+    def test_wrong_cap_type_fails(self):
+        self.package['model_fragment']['post']['cap']['part_id'] = 'end'
+        with self.assertRaisesRegex(PreviewError, 'wrong Part type'):
+            self.counts()
+
+    def test_missing_identity_fails(self):
+        self.package['part_identity_anchors'].pop()
+        with self.assertRaisesRegex(PreviewError, 'identity missing'):
+            self.counts()
+
+    def test_swapped_post_candidates_fail(self):
+        self.package['pending_bindings'][0]['candidates'][0]['part_id'] = 'line'
+        with self.assertRaisesRegex(PreviewError, 'post-role binding'):
+            self.counts()
+
+    def test_missing_kit_coverage_fails(self):
+        self.package['purchase_projection']['panel_kit_covers'].pop()
+        with self.assertRaisesRegex(PreviewError, 'kit coverage'):
+            self.counts()
+
+    def test_different_model_fails(self):
+        self.layout['bays'][0]['model_id'] = 'other'
+        with self.assertRaisesRegex(PreviewError, 'different model'):
+            self.counts()
+
+    def test_cut_intent_cannot_be_silently_ignored(self):
+        self.layout['bays'][0]['cut_length_mm'] = 1000
+        with self.assertRaisesRegex(PreviewError, 'unsupported bay fields'):
+            self.counts()
+
+    def test_rejects_example_answers_as_layout_input(self):
+        self.layout['purchase_lines'] = [{'manufacturer_model_number': 'WRONG', 'quantity_each': 999}]
+        with self.assertRaisesRegex(PreviewError, 'unsupported layout fields'):
+            self.counts()
+
+    def test_unknown_board_count_preserved(self):
+        out = generate(self.package, self.layout)
+        self.assertIsNone(out['authored_kit_inventory_per_bay'][0]['quantity_each'])
+        self.assertFalse(out['publishable'])
+        self.assertFalse(out['source_identity_verified'])
+
+    def test_is_deterministic_and_does_not_mutate_inputs(self):
+        before = copy.deepcopy((self.package, self.layout))
+        self.assertEqual(generate(self.package, self.layout), generate(self.package, self.layout))
+        self.assertEqual(before, (self.package, self.layout))
+
+    def test_corner_role_derived_without_role_answers(self):
+        self.layout['stations'].append({'id': 'c', 'schematic_point': [1, 1]})
+        self.layout['bays'].append({'id': 'bay2', 'from': 'b', 'to': 'c', 'model_id': 'model', 'supply': 'full_kit'})
+        self.assertEqual(self.counts(), {'KIT-X': 2, 'PRODUCT-end': 2, 'PRODUCT-corner': 1, 'CAP-X': 3})
+
+    def test_does_not_override_future_contract_requirement(self):
+        self.package['model_fragment']['post']['requirement'] = {'part_id': 'end'}
+        with self.assertRaisesRegex(PreviewError, 'must not override'):
+            self.counts()
+
+    def test_additional_fixings_are_not_silently_omitted(self):
+        self.package['model_fragment']['default_spec']['fixings'] = [{'key': 'extra-bracket'}]
+        with self.assertRaisesRegex(PreviewError, 'fixings need explicit'):
+            self.counts()
+
+    def test_post_reinforcement_is_not_silently_omitted(self):
+        self.package['model_fragment']['post']['contains'] = [{'key': 'insert'}]
+        with self.assertRaisesRegex(PreviewError, 'reinforcement or containment'):
+            self.counts()
+
+    def test_rail_containment_is_not_silently_omitted(self):
+        self.package['model_fragment']['default_spec']['frame'][0]['contains'] = [{'key': 'insert'}]
+        with self.assertRaisesRegex(PreviewError, 'contained panel parts'):
+            self.counts()
+
+    def test_incompatible_kit_and_cap_identity_collision_rejected(self):
+        self.package['part_identity_anchors'][-1]['model_number']['text_raw'] = 'KIT-X'
+        with self.assertRaisesRegex(PreviewError, 'incompatible purchase meanings'):
+            self.counts()
+
+    def test_surface_mount_intent_is_not_silently_ignored(self):
+        self.layout['stations'][0]['mounting'] = 'surface_mounted'
+        with self.assertRaisesRegex(PreviewError, 'unsupported station intent'):
+            self.counts()
+
+    def test_empty_manifest_cannot_claim_verified_evidence(self):
+        self.package['sources'] = []
+        with self.assertRaisesRegex(PreviewError, 'source manifest does not cover'):
+            generate(self.package, self.layout, conn=object())
+
+
+@requires_store
+class TestRealKitIdentityBinding(unittest.TestCase):
+    def test_post_sku_cannot_masquerade_as_panel_kit(self):
+        draft = REPO_ROOT / 'workspace/catalog/emblem-73014714-model-draft.json'
+        layout_path = REPO_ROOT / 'workspace/catalog/emblem-single-layout.json'
+        if not draft.is_file() or not layout_path.is_file():
+            self.skipTest('Emblem private draft/layout unavailable')
+        package = json.loads(draft.read_text())
+        layout = json.loads(layout_path.read_text())
+        package['scope']['product_description'] = '6x8 Emblem Privacy Fence Kit - White (F)'
+        with sqlite3.connect(f'file:{EVIDENCE_DB}?mode=ro', uri=True) as conn:
+            conn.row_factory = sqlite3.Row
+            valid = generate(package, layout, conn=conn)
+            self.assertTrue(valid['source_identity_verified'])
+            self.assertFalse(valid['quantity_semantics_verified'])
+            line_anchor = next(a['model_number'] for a in package['part_identity_anchors']
+                               if a.get('post_role') == 'line')
+            package['scope']['model_number'] = line_anchor['text_raw']
+            package['identity_anchors'].append(copy.deepcopy(line_anchor))
+            with self.assertRaisesRegex(PreviewError, 'different source rows'):
+                generate(package, layout, conn=conn)

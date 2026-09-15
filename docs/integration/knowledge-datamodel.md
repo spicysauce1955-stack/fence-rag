@@ -261,9 +261,16 @@ Provenance {                                                            ← NEW
   cites           [SourceRef]
   source_class    SourceClass
   curation_level  0 | 1 | 2
-  admitted_by     { policy_version, rank }    which source-policy row won
+  version_status active | superseded | unknown
 }
 ```
+
+**Corrected against frozen contract v1.1, Amendment 001 (§1.1, §1.4 and
+obligation 6).** The earlier `admitted_by` field in this block contradicted the
+ratified contract: Knowledge publishes source classification and version status;
+Planning applies policy at run time and records `admitted_by` on the run output.
+It is not part of published Provenance. This correction follows the existing
+amendment and changes no boundary promise.
 
 **N15.** v0.1 put `source_class` and `curation_level` on `ParameterTable` rows and
 nowhere else, while invariant 8 said "every published value." You were right that
@@ -320,7 +327,16 @@ Provenance.cites[j].belongs_to          every cite-bearing value joins here
   ↑
 Part.contributing_sources               a convenience ROLL-UP, not the mechanism
 FenceModel.contributing_sources         — the set of docs behind one definition
+                                        MEMBERS ARE BARE 64-HEX CONTENT HASHES
 ```
+
+> **Correction, 2026-09-08 — `contributing_sources` carries content hashes, not `SourceDoc`s.**
+> The payload has always sent bare 64-hex content hashes. This document said `[SourceDoc]` in
+> three places and was wrong; Planning's reading was right (`conversation.md` T44 §4, agreed
+> T46 §7) — a roll-up carrying each document's class and dates inline would be a second
+> authority over facts the snapshot's `source_docs` already owns. The `length_rule` correction
+> from the same turn landed on 2026-09-06; this one was missed in that pass and is applied here.
+> A publisher following the old text would have emitted objects Planning does not accept.
 
 `contributing_sources` stays, because *"which documents is this definition built
 from"* is a question a reviewer asks directly and should not have to compute. But it
@@ -506,7 +522,7 @@ Part {
   spec                  [SpecField + Provenance]                        ← CHANGED
   authorship            Authorship
   cites                 [SourceRef]
-  contributing_sources  [SourceDoc]                                     ← NEW
+  contributing_sources  [str]  64-hex content hashes, NOT [SourceDoc]   ← NEW
 }
 ```
 
@@ -527,7 +543,7 @@ FenceModel {
   post                  PostSlot | null                null = NO OPINION
   assembly              [AssemblyStep]
   authorship · cites
-  contributing_sources  [SourceDoc]                                     ← NEW
+  contributing_sources  [str]  64-hex content hashes, NOT [SourceDoc]   ← NEW
 }
 
 PolicyContribution { param, value, knowledge_type, authority }
@@ -929,13 +945,25 @@ or a reader cannot tell a measured cavity from a computed one.
 PartRequirement {
   part_id      "" means this slot names no part
   role         filled from Part.type during resolution — never authored
-  qty · length_rule · overlap    Quantity
+  qty · overlap                 Quantity
+  length_rule                   registered rule name | null
   option_axis · sku_by_option
   eligibility  Eligibility{ members | predicate }
 }
 ```
 
-Unchanged. Four shapes, derived from the fields rather than stored: `part`,
+`length_rule` names a computation, not a measured length. The earlier grouping
+of it with `Quantity` was erroneous. Measured against Planning commit
+`9de94eb06d8e997d9be098dedd5b6a6b2eb4024d`, its private parser accepts registered
+names (`between_frame`, `centre_to_centre`, `clear_between_posts`, `overlap`,
+`panel_height`) or null and refuses a Quantity object. That private type uses
+integer `qty` and `overlap_mm`; it is not a published-wire adapter. Planning's
+snapshot loader currently carries `models` unconsumed. Do not copy private
+defaults or treat private parsing as agreement on published serialization.
+The executable probe and pinned evidence are recorded in
+`workspace/reports/planning-consumer-probe.json` (repository-root path).
+
+Four shapes, derived from the fields rather than stored: `part`,
 `authored_predicate`, `authored_members` (tenant commerce, not yours to publish),
 and `unspecified` (refused at load).
 
@@ -1347,7 +1375,7 @@ source policy's internals.
 |---|---|---|
 | `Part.type` | `PartType` | Filed as. Namespace decides who may extend. |
 | `Part.spec` | `[SpecField + Provenance]` | What it is. Dimensions derive from here. |
-| `Part.contributing_sources` | `[SourceDoc]` | **NEW.** Pinned, so a run can see a lapsed authority. |
+| `Part.contributing_sources` | `[str]` — bare 64-hex **content hashes**, not `[SourceDoc]` | **NEW.** Pinned, so a run can see a lapsed authority. Corrected 2026-09-08; see the note at §2.5. |
 | `SourceRef.belongs_to` | `SourceDoc.content_hash` | **NEW.** Joins a per-field citation to the provenance block. |
 | `FrameSlot.requirement` | `Part.id` **unpinned** | Generation resolves latest active; the run stamps what it resolved. |
 | `Member.base_ref` / `top_ref` | `FrameSlot.key` | Sibling reference: which frame members it runs between. |
@@ -1398,7 +1426,7 @@ overstated what a validator can do.
    bare `_mm` field, and no exceptions for values that look small enough not to
    matter; that judgement is what produced twenty-three of them in v0.2.
 8. **Every published value carries a resolvable `SourceRef`, an honest
-   `Authorship`, and its `source_class` and `curation_level`.** *(C3, resolved
+   `Authorship`, and its `source_class`, `curation_level` and `version_status`.** *(C3, resolved
    `conversation.md` T39.) A membership or containment edge — this component
    belongs to this panel, this panel is a member of the Chesterfield line — is
    not itself a value: it is authored structure (invariant 10), and carries no

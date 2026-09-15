@@ -1,5 +1,15 @@
 # Where we stand
 
+> **HISTORICAL — a state file that the negotiation thread replaced, 2026-08-25.**
+> Nearly every operative sentence is now false: the contract is **v1.3** not v1.1, the boundary
+> is not closed (T55 lists five open asks), *"not one human review has happened"* was falsified
+> on 2026-08-31 (37 crops, 1,202 reviewed readings), items 1/2/4 of "what we do next" were built,
+> and *"the source policy — zero lines of implementation"* is contradicted by T49-T51 debugging
+> `source_policy.py`. **Live boundary state lives in `docs/integration/conversation.md`'s
+> per-turn ledgers.** This file decayed precisely because it was the state file and the thread
+> took over without anyone retiring it.
+
+
 ```text
 Status:  contract.md frozen and RATIFIED at v1.1, both signatures 2026-08-25.
          The cold read before signature found obligation 6 contradicting §1.4 —

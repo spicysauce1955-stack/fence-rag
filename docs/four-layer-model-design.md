@@ -1,7 +1,15 @@
 # Four layers, one claim table, and extraction editions
 
 ```text
-Status:    Design, APPROVED for planning 2026-08-26. Nothing here is implemented.
+Status:    PARTLY BUILT. Plan 1 (refs) and plan 2 (extraction editions) SHIPPED --
+           `refs.py`, `cli refs --verify`, `store.py` editions, `current_editions`.
+           Plan 3 (the unified `claims` table) was NOT built and is not planned:
+           `facts.from_candidate_id` and `promote_tables.py` remain.
+           Stale below: contract is v1.3 not v1.1; published cites 519 not 431;
+           SCHEMA_VERSION is 8 not 4.
+           NOW BLOCKING: §5.1's extraction editions. Under docs/knowledge-loop.md
+           an override names a value by its citation id, so an unstable ref_id
+           orphans a person's correction rather than merely breaking a citation.
 Written:   2026-08-26, after a reassessment prompted by two questions —
            "isn't the layering getting too complicated and entangled?" and
            "what if each layer just pointed at the previous one?"
@@ -42,7 +50,7 @@ tables** — `cur_claims`, `cur_claim_evidence`, `cur_table_readings`,
 and more. It re-models `facts`, `table_read_candidates`, `relations`,
 `quality_issues`, `documents`, and the gap/warning/procedure shapes
 `snapshot.py` already builds. It is **entirely unimplemented**, and its one
-load-bearing idea (C0) shipped as build-plan A1 on 2026-08-25.
+load-bearing idea (CUR-S0) shipped as build-plan A1 on 2026-08-25.
 
 The useful fraction landed; the rest remains a *competing* design every reader
 must reconcile against the code.

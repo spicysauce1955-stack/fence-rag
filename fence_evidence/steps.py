@@ -1,0 +1,634 @@
+"""Splitting an installation-guide bullet block into step candidates.
+
+A `list` element holds a whole bullet block — `• Insert post in hole • Determine
+rough height • Fill hole…` is ONE row with ONE bounding box. The unit an
+`AssemblyStep` is about therefore does not exist in the store, and this module
+manufactures it: one segment per bullet, carrying a character span back into the
+element it came from.
+
+Nothing here classifies a step into `kind`/`scope`/`slots`; that is judgement and
+it belongs to a person (`docs/assembly-step-design.md` §5). This module only
+decides where one bullet stops and the next begins, which is mechanical — and
+turned out to be much less obvious than it looks.
+
+**It classifies rather than discards.** A footnote, a `Note:` rider and a lettered
+branch label are all emitted with a `kind`, because a reviewer needs to see
+everything on the page, and a splitter that silently eats the parts it does not
+understand loses them invisibly.
+
+`[measured]` 2026-09-03 over 70 installation manuals, 6,105 `list` elements and
+4,629 bullets. Every rule below is a measured hazard, not a precaution:
+
+* **`•` is not the only leader, and `text_source` disambiguates.** OCR emits zero
+  U+2022 — not once in 834 OCR'd list elements — and renders the glyph as `*`.
+  But in the text layer `*` is a FOOTNOTE marker (71 elements, nearly all the
+  same `* Caution – In climates that experience freeze-thaw cycles…`). Reading a
+  text-layer `*` as a bullet manufactures steps the page does not contain;
+  ignoring an OCR `*` loses 464 real ones.
+* **`-` is a real second-level bullet** — 753 text-layer elements.
+* **The whitespace after a leader is four characters**: U+0020 (2,656),
+  U+2002 EN SPACE (1,921), TAB (52) and U+00A0.
+* **A `•` segment can contain a whole nested procedure.** 60 corpus-wide; the
+  worst is an 871-character block holding a two-branch lettered choice and 13
+  sub-steps. Split, no segment exceeds 587 characters.
+* **A trailing `Note:` is a rider, not part of the instruction** — 14 segments
+  end with one and none begins with one.
+* **319 segments begin with a split capital** (`T\\namp`, `I nsert`) — pdftotext
+  emitting a bullet's leading character as its own text run. That is the token
+  any verb-based reading looks at first, so it is proposed for repair and NEVER
+  repaired in place. The separator carries the confidence: 263 newline-form
+  proposals are all real damage, while the 56 space-form ones include the
+  English article, so `A cut panel bracket` and `A template can speed
+  attachment` are excluded by name and the rest ship as `low`.
+
+Corpus-wide after these rules: 6,105 `list` elements produce 7,931 segments —
+6,399 `step`, 791 `branch`, 528 `section`, 131 `prose`, 59 `footnote`, 23
+`note` — with **0 span violations and 0 elements losing a character**.
+"""
+from __future__ import annotations
+
+import json
+import re
+from dataclasses import dataclass
+
+# The three characters that follow a leader. A bare `\s` would also swallow the
+# newline that ends the previous segment, and `.lstrip(" ")` misses two of them.
+LEADER_GAP = " \t  "
+
+# Which kinds carry content a reader must not lose, as opposed to structural
+# chrome. Filter on this, not on a literal.
+#
+# `branch` is here because `[measured]` 791 segments are branch-kind and 626 of
+# them hold a full instruction, not just a label -- filtering `kind == "step"`
+# dropped 10.0% of everything. `note` is here because the note it excluded on
+# the slice page is `Note: Pickets will attach to rail on the side with the
+# small holes`, a rail-orientation constraint: lose it and the fence is built
+# with the pickets on the wrong face. `prohibition` is here for the same
+# reason in reverse -- it is the one kind whose omission is dangerous rather
+# than merely wrong.
+#
+# `section` and `prose` are chrome. `footnote` is deliberately NOT chrome
+# either, but it needs its anchor before it can be placed; see G69.
+CARRIES_CONTENT = ("step", "branch", "note", "prohibition", "footnote")
+
+# Retained name for the narrower question "is this an action". Prefer
+# CARRIES_CONTENT for anything user-facing.
+INSTRUCTION_KINDS = ("step", "branch")
+
+# `N. Title` typed as `list` rather than `heading` — the section spine a bullet
+# block hangs off. 783 elements corpus-wide begin with one.
+SECTION_RE = re.compile(r"^\s*\d{1,2}\s*[.)]\s+\S")
+# ...but only 550 of those 783 are actually headings. The rest are numbered
+# INSTRUCTIONS — `3. Insert bottom rail into bottom post route holes.` — from
+# manufacturers who number their procedure instead of bulleting it, and
+# returning the whole block as one `section` produced zero steps for those
+# documents. A heading is short, single-line and unpunctuated; anything else
+# numbered is a step. `[measured]`: 233 of 783 are instruction-shaped, 218 of
+# them ending in sentence punctuation.
+SECTION_MAX_CHARS = 45
+# `a.` / `b.` — a lettered alternative inside one bullet. Matched against a
+# single line, never against the block: `re.match(block, pos)` does NOT anchor
+# `^` at `pos`, so a block-level match silently never fires. That bug shipped
+# into the first version of this file and cost the branch scoping entirely.
+# Case-insensitive: `[measured]` 123 elements print `A.`/`B.` where the slice
+# page prints `a.`/`b.`, and the SAME gate-post instruction appears in the
+# corpus both ways. Lowercase-only matching left 118 of them as one
+# undifferentiated blob and presented two MUTUALLY EXCLUSIVE methods as a
+# sequence -- a reader would do both.
+BRANCH_RE = re.compile(r"^([A-Za-z])[.)]\s+\S")
+# The lettered label is to a branch what the glyph is to a bullet: chrome in
+# front of the instruction. It has to come off before anything asks what the
+# line SAYS, for exactly the reason `_classify` strips a leading `4. ` --
+# `PROHIBITION_RE` anchors at the start, so `c. Never cut the top of the post`
+# read as an ordinary alternative. `[measured]` that line is printed by 5
+# documents and was typed `branch` in every one.
+BRANCH_LABEL_RE = re.compile(r"^[A-Za-z][.)][" + re.escape(LEADER_GAP) + r"]*")
+# A rider the guide prints under an instruction; never the start of one.
+RIDER_RE = re.compile(r"^(Note|NOTE|Caution|CAUTION|Tip|TIP)\b\s*[:.-]?", re.ASCII)
+# A prohibition is not a step, and the design's own worked example says so:
+# `Never strike the PVC post without a wood support` publishes as a `Warning`.
+# `RIDER_RE` only covers labelled riders, so an imperative negative was typed
+# `step` -- 6 of the slice page's 55 "steps" were not steps, and this was the
+# one that mattered.
+PROHIBITION_RE = re.compile(r"^(never|do not|don't|do +n[o']t|avoid)\b", re.I)
+# pdftotext emitting a leading character as its own run, in both spellings.
+# The optional `N. ` prefix lets a numbered section heading be repaired too:
+# `10. H ang Gate/Install Hardware` is on the slice page.
+# The tail length differs by separator, and that is measured rather than tidy.
+# A NEWLINE after a lone capital is damage even with a one-letter tail: `T\no
+# lower a post` (12 sites) and `B\ne sure to call underground` (8) were
+# invisible to a `{2,}` tail and account for a 7.1% recall hole (G67). A bare
+# SPACE before a single letter is ordinary English far more often than damage
+# -- `Insert post A to the left` -- so the space form keeps `{2,}`.
+SPLIT_CAP_NEWLINE_RE = re.compile(r"^(?:\d{1,2}[.)]\s+)?([A-Z])(\n)([a-z]+)\b")
+SPLIT_CAP_SPACE_RE = re.compile(r"^(?:\d{1,2}[.)]\s+)?([A-Z])( )([a-z]{2,})\b")
+# A capital that is a word on its own, so a space after it is ordinary English
+# rather than damage. `[measured]`: the ONLY false-positive families in 320
+# proposals are `A cut panel bracket` (9) and `A template can speed
+# attachment` (8) -- 17 of 320, and both are the article "A".
+#
+# `I` is deliberately NOT here. `I nsert` is 48 occurrences and every one is
+# real damage; adding the pronoun to this set on symmetry grounds would
+# suppress the single largest true-positive family in the corpus.
+STANDALONE_CAPITALS = frozenset({"A"})
+
+
+@dataclass(frozen=True)
+class Segment:
+    """One classified slice of a bullet block.
+
+    `text` is verbatim — `block[start:end]` reproduces it exactly, which is what
+    lets a review anchor on (element, span, text) and a citation stay honest.
+    `repair` is a PROPOSAL and never replaces `text`.
+    """
+    text: str
+    start: int
+    end: int
+    leader: str
+    depth: int          # 0 a top-level bullet, 1 a `-` sub-bullet
+    kind: str           # step | note | branch | footnote | section | prose
+    branch: str | None  # the lettered alternative this sits under, if any
+    repair: str | None  # proposed BODY text, when damage is detected
+    repair_confidence: str | None = None   # high | low, see `_propose_repair`
+
+    @property
+    def is_instruction(self) -> bool:
+        return self.kind in INSTRUCTION_KINDS
+
+    @property
+    def body(self) -> str:
+        """The instruction without its leader glyph, whitespace collapsed.
+
+        `text` stays verbatim because the span and the review anchor depend on
+        it; `body` is what a reader and a classifier actually want.
+        """
+        inner = self.text[1:] if self.leader else self.text
+        return " ".join(inner.split())
+
+
+def _is_heading(block: str) -> bool:
+    """A numbered line that titles a section rather than instructing.
+
+    Short and not a sentence. `1. Getting Started` is a heading;
+    `3. Insert bottom rail into bottom post route holes.` is a step that happens
+    to be numbered.
+
+    Judged on the FLATTENED text, deliberately. An earlier version required a
+    heading to be one physical line, which let the split-capital artifact decide
+    the classification: the slice page prints `10. H\nang Gate/Install
+    Hardware`, where the newline is the damage rather than a line break, and it
+    was dropped to `prose`. Length and punctuation already exclude the
+    multi-instruction blocks the line test was aimed at.
+    """
+    flat = " ".join(block.split())
+    return len(flat) <= SECTION_MAX_CHARS and not flat.endswith((".", ";", ":"))
+
+
+def _leaders(text_source: str) -> tuple[str, ...]:
+    """Which characters open a bullet, for this element's provenance.
+
+    The asterisk flips meaning on `text_source` and nothing else: a footnote
+    marker in the text layer, the bullet glyph under OCR.
+    """
+    return ("*", "-") if text_source == "ocr" else ("•", "-")
+
+
+def _propose_repair(text: str) -> tuple[str | None, str | None]:
+    """A repair for a split first word, with how much to trust it.
+
+    Returns `(repair, confidence)`. The repair is the **body** text — it does
+    not carry the leader glyph, so it can never be substituted for `Segment.text`
+    wholesale.
+
+    Only the first token is considered: the defect is pdftotext emitting a
+    bullet's leading character as its own run, so it is systematically at the
+    START of a segment and a match anywhere else is far more likely to be real
+    text.
+
+    **The separator is the signal, and an earlier version destroyed it** by
+    flattening whitespace before matching, which made the `[ \n]` alternation
+    dead. `[measured]` over 320 proposals: all 249 newline-form repairs are real
+    damage; of the 71 space-form ones, 17 are the English article in `A cut
+    panel bracket` and `A template can speed attachment`. So a newline split is
+    `high`, a space split is `low`, and a space after a capital that is a word
+    in its own right is not proposed at all.
+    """
+    stripped = text.lstrip()
+    m = SPLIT_CAP_NEWLINE_RE.match(stripped) or SPLIT_CAP_SPACE_RE.match(stripped)
+    if not m:
+        return None, None
+    cap, sep, tail = m.group(1), m.group(2), m.group(3)
+    if sep == " " and cap in STANDALONE_CAPITALS:
+        return None, None
+    prefix = stripped[:m.start(1)]
+    repaired = prefix + cap + tail + stripped[m.end():]
+    return " ".join(repaired.split()), ("high" if sep == "\n" else "low")
+
+
+def _classify(body: str, leader: str, depth: int, branch: str | None,
+              text_source: str) -> str:
+    """A `*`-led rider is a footnote only where `*` is NOT the bullet glyph.
+
+    Under OCR the asterisk IS the bullet, so an OCR bullet opening with
+    `Caution` is an ordinary note. Keying this on the leader alone was right by
+    luck on the one line it hit and wrong as a mechanism.
+    """
+    # Classify the REPAIRED reading where one is proposed. The damage hides the
+    # very word this rule looks for: `• N\never strike the PVC post` flattens to
+    # `N ever strike`, so a prohibition detector reading the raw text cannot see
+    # `never` and types the page's one dangerous line as an ordinary step. This
+    # is why the repair is computed before the kind and not after it.
+    repair, _ = _propose_repair(body)
+    flat = repair or " ".join(body.split())
+    # Strip a leading `4. ` before asking what the line is: a numbered line
+    # carries its number, and `PROHIBITION_RE` anchors at the start, so
+    # `4. Do not hang your gate system off a single non-supported post.`
+    # was read as an ordinary step.
+    flat = re.sub(r"^\d{1,2}[.)]\s+", "", flat)
+    if PROHIBITION_RE.match(flat):
+        return "prohibition"
+    if not RIDER_RE.match(body.lstrip()):
+        return "step"
+    if leader == "*" and depth == 0 and branch is None and text_source != "ocr":
+        return "footnote"
+    return "note"
+
+
+def split_block(block: str, *, text_source: str = "pdf_text_layer") -> list[Segment]:
+    """Split one element's text into classified segments, discarding nothing.
+
+    Returns segments in source order. Spans never overlap and always slice back
+    to their own text.
+    """
+    if not block or not block.strip():
+        return []
+
+    leaders = _leaders(text_source)
+    footnote_leader = "*" if text_source != "ocr" else None
+
+    numbered = bool(SECTION_RE.match(block))
+    if numbered and _is_heading(block):
+        # A numbered line is a heading only if it reads like one. Otherwise it
+        # is an instruction that happens to be numbered, and returning it as a
+        # `section` produced zero steps for every manufacturer who numbers a
+        # procedure instead of bulleting it.
+        repair, confidence = _propose_repair(block)
+        return [Segment(text=block, start=0, end=len(block), leader="",
+                        depth=0, kind="section", branch=None, repair=repair,
+                        repair_confidence=confidence)]
+
+    # Line-based, because `[measured]` no bullet in this corpus ever starts
+    # mid-line inside a `list` element -- 0 of 3,146 bulleted elements. The
+    # mid-line separators (`site.com • (800) 336-2383`) are all headings and
+    # paragraphs, which this never sees.
+    offsets, pos = [], 0
+    for line in block.split("\n"):
+        offsets.append((pos, line))
+        pos += len(line) + 1
+
+    cuts: list[tuple[int, str, int, str | None]] = []
+    # A mid-line leader is a bullet only under OCR. `[measured]`: in the text
+    # layer 0 of 3,146 bulleted elements put one mid-line, and the mid-line `•`
+    # that does occur is a footer separator (`site.com • (800) 336-2383`). Under
+    # OCR, 10 elements carry two unrelated instructions on one line because the
+    # scan read across a two-column gutter.
+    split_mid_line = text_source == "ocr"
+    for start, line in offsets:
+        stripped = line.lstrip()
+        indent = len(line) - len(stripped)
+        m = BRANCH_RE.match(stripped)
+        if m:
+            cuts.append((start + indent, "", 0, m.group(1)))
+            continue
+        if not stripped:
+            continue
+        ch = stripped[0]
+        if len(stripped) > 1 and stripped[1] in LEADER_GAP:
+            if ch in leaders:
+                cuts.append((start + indent, ch, 1 if ch == "-" else 0, None))
+            elif ch == footnote_leader:
+                cuts.append((start + indent, ch, 0, None))
+        if split_mid_line:
+            for m in re.finditer(r"(?<=\S)[" + re.escape("".join(LEADER_GAP)) + r"]+"
+                                 r"([" + re.escape("".join(leaders)) + r"])"
+                                 r"[" + re.escape("".join(LEADER_GAP)) + r"]", line):
+                pos = start + m.start(1)
+                if pos > start + indent:
+                    cuts.append((pos, m.group(1), 0, None))
+
+    cuts.sort(key=lambda c: c[0])
+    if not cuts:
+        repair, confidence = _propose_repair(block)
+        # A numbered instruction with no bullets inside it is a STEP, wrapped or
+        # not, and it is classified like any other -- so a numbered prohibition
+        # is typed as one. An earlier version returned early only when the block
+        # had no newline, which sent every numbered instruction that merely
+        # wrapped down this path to land as `prose`: chrome, excluded from
+        # CARRIES_CONTENT, silently dropped. `[measured]` 119 real action steps
+        # across 20 manuals, half of one document's segments among them.
+        kind = _classify(block, "", 0, None, text_source) if numbered else "prose"
+        return [Segment(text=block, start=0, end=len(block), leader="", depth=0,
+                        kind=kind, branch=None, repair=repair,
+                        repair_confidence=confidence)]
+
+    out: list[Segment] = []
+    if cuts[0][0] > 0 and block[:cuts[0][0]].strip():
+        head = block[:cuts[0][0]]
+        repair, confidence = _propose_repair(head)
+        # `1. Getting Started` followed by its bullets: the head is the section
+        # title, not stray prose. Judged on the head alone, because the block as
+        # a whole is long precisely BECAUSE the bullets are in it.
+        head_kind = ("section" if SECTION_RE.match(head) and _is_heading(head)
+                     else _classify(head, "", 0, None, text_source))
+        out.append(Segment(text=head, start=0, end=cuts[0][0], leader="",
+                           depth=0, kind=head_kind, branch=None, repair=repair,
+                           repair_confidence=confidence))
+
+    current_branch: str | None = None
+    for n, (start, leader, depth, label) in enumerate(cuts):
+        end = cuts[n + 1][0] if n + 1 < len(cuts) else len(block)
+        text = block[start:end]
+        if label is not None:
+            current_branch = label
+            # A lettered label was given its kind directly and never asked
+            # `_classify` what it said, so the one kind that must override an
+            # alternative could not. `branch` carries content, so nothing was
+            # lost -- but `c. Never cut the top of the post` published as an
+            # `AssemblyStep` instructing the installer to do the thing the page
+            # forbids, which is the same defect, on the same line, that typing
+            # a prohibition `step` was. Only `prohibition` overrides: it is the
+            # one kind whose omission is dangerous rather than merely wrong,
+            # and `[measured]` 997 of the corpus's 1,002 branch segments are
+            # ordinary instructions that must stay scoped to their alternative.
+            #
+            # The repair is proposed here too, and not only for tidiness: the
+            # damage HIDES the word the kind turns on (`N\never` flattens to
+            # `N ever`), so a branch that proposed no repair could not have seen
+            # a damaged prohibition even in principle. 0 branch segments carry
+            # such damage today; the ordering is the point, not the count.
+            body = BRANCH_LABEL_RE.sub("", text.lstrip(), count=1)
+            repair, confidence = _propose_repair(body)
+            kind = _classify(body, "", 0, label, text_source)
+            out.append(Segment(text=text, start=start, end=end, leader="", depth=0,
+                               kind=(kind if kind == "prohibition" else "branch"),
+                               branch=label, repair=repair,
+                               repair_confidence=confidence))
+            continue
+        if depth == 0 and leader:
+            # A new top-level bullet closes any open lettered alternative.
+            # Without this, `current_branch` was set at a label and cleared by
+            # nothing, so a later depth-0 bullet inherited a branch it does not
+            # belong to. 0 occurrences today; one document layout away from
+            # publishing a step under the wrong alternative.
+            current_branch = None
+        body = text[1:].lstrip(LEADER_GAP) if leader else text
+        kind = _classify(body, leader, depth, current_branch, text_source)
+        out.extend(_split_rider(text, start, leader, depth, kind, current_branch))
+    return out
+
+
+def _split_rider(text: str, pos: int, leader: str, depth: int, kind: str,
+                 branch: str | None) -> list[Segment]:
+    """Peel a trailing `Note:` line off an instruction.
+
+    The rider keeps its own span, so nothing is lost and the reviewer sees both.
+    A rider is only ever trailing — no corpus segment begins with one — so a
+    match on the first line means the whole segment IS the note.
+    """
+    lines = text.split("\n")
+    cut = None
+    for n, line in enumerate(lines):
+        if n and RIDER_RE.match(line.strip()):
+            cut = n
+            break
+    body = text[1:].lstrip(LEADER_GAP) if leader else text
+    if cut is None:
+        repair, confidence = _propose_repair(body)
+        return [Segment(text=text, start=pos, end=pos + len(text), leader=leader,
+                        depth=depth, kind=kind, branch=branch, repair=repair,
+                        repair_confidence=confidence)]
+    head_len = sum(len(l) + 1 for l in lines[:cut])
+    head, tail = text[:head_len], text[head_len:]
+    head_body = head[1:].lstrip(LEADER_GAP) if leader else head
+    repair, confidence = _propose_repair(head_body)
+    return [
+        Segment(text=head, start=pos, end=pos + head_len, leader=leader,
+                depth=depth, kind=kind, branch=branch, repair=repair,
+                repair_confidence=confidence),
+        Segment(text=tail, start=pos + head_len, end=pos + len(text), leader="",
+                depth=depth, kind="note", branch=branch, repair=None),
+    ]
+
+
+# ---------------------------------------------------- numbered-flow pairing
+# The second extraction seam: manuals whose layout types each step NUMBER as
+# its own tiny element and each step BODY as a separate paragraph. The
+# Weatherables master installation guide is built this way — p7's Solid
+# Privacy flow is eleven `1.` `2.` `3.`… glyph elements beside eleven body
+# paragraphs — and `propose()` reads only `list` elements, so those pages
+# produced one candidate from twenty-two substantial paragraphs.
+#
+# The pairing is mechanical: a glyph pairs with the body whose vertical band
+# its own band overlaps, in the same page and column (x-overlap keeps a
+# two-column figure's callouts from stealing a body). `[measured]`
+# 2026-09-07 over the whole corpus: 466 glyph-paired steps across 111 pages
+# in 22 documents sit in this channel and nowhere else.
+# `[measured]` on the master install's p7: elements 0010 and 0011 each hold
+# THREE numbered steps' worth of text (the layout typed one paragraph element
+# for glyph 1's body and let steps 2-3's sentences continue inside it). A
+# glyph/body candidate therefore anchors a paragraph that may continue past
+# the glyph's own step; `proposal_basis` records which glyph fired, and the
+# reviewer's `proposed_kind` judgement stays theirs. The candidate is still
+# one span of one element, so nothing is double-proposed and the queue stays
+# review-granular.
+GLYPH_RE = re.compile(r"^\s*(\d{1,2})[.)]\s*$")
+# A glyph band is a small strip; a body can wrap for many lines. A glyph
+# points at the body whose top it overlaps — allowing the glyph to sit a few
+# points ABOVE the body's first line (common baseline slack) or inside it.
+GLYPH_BODY_TOP_SLACK = 45.0
+GLYPH_BODY_TOP_LIFT = 8.0
+# A glyph element is a number, not prose; a body is prose, not a number.
+BODY_MIN_CHARS = 25
+
+
+def _y_band(bbox_json):
+    """`(y0, y1)` from a stored bbox list, or None when unparseable."""
+    try:
+        v = json.loads(bbox_json)
+        return float(v[1]), float(v[3])
+    except (TypeError, ValueError, IndexError):
+        return None
+
+
+def _x_band(bbox_json):
+    try:
+        v = json.loads(bbox_json)
+        return float(v[0]), float(v[2])
+    except (TypeError, ValueError, IndexError):
+        return None
+
+
+def pair_numbered_flow(conn, *, document_id: str, page_no: int | None = None) -> int:
+    """Propose step candidates from `N.`-glyph/body element pairs.
+
+    The same queue, the same review gate and the same non-destructive keying
+    as `propose()` — a candidate is a span of an element, and reviewed rows
+    are never touched. What differs is the seam: instead of splitting one
+    `list` element, this joins two elements the layout pulled apart, so the
+    candidate anchors on the BODY element's span (the instruction text a
+    reviewer must read), and `proposal_basis` records the glyph pairing so
+    the proposal's provenance is measurable and the reviewer sees both
+    elements.
+
+    Returns the number of candidates now on record for that scope.
+    """
+    from .store import now
+    ensure_step_candidates(conn)
+    where = "e.document_id = ? AND e.text_source = 'pdf_text_layer' AND e.bbox IS NOT NULL"
+    params: list = [document_id]
+    if page_no is not None:
+        where += " AND e.page_no = ?"
+        params.append(page_no)
+    rows = conn.execute(
+        f"""SELECT e.element_id, e.version_id, e.page_no, e.ordinal, e.text,
+                   COALESCE(NULLIF(e.text,''), e.ocr_text) AS body,
+                   e.text_source, e.bbox
+              FROM elements e
+             WHERE {where}
+             ORDER BY e.page_no, e.ordinal""", params).fetchall()
+    by_page: dict[int, list] = {}
+    for row in rows:
+        by_page.setdefault(row["page_no"], []).append(row)
+    stamp = now()
+    proposed = 0
+    for elements in by_page.values():
+        glyphs = [r for r in elements
+                  if GLYPH_RE.fullmatch((r["text"] or "").strip() or "")]
+        if not glyphs:
+            continue
+        bodies = [r for r in elements
+                  if len((r["body"] or "").strip()) >= BODY_MIN_CHARS
+                  and not GLYPH_RE.fullmatch((r["text"] or "").strip() or "")]
+        for glyph in glyphs:
+            g_band, g_x = _y_band(glyph["bbox"]), _x_band(glyph["bbox"])
+            if g_band is None or g_x is None:
+                continue
+            best = None
+            best_key = None
+            for body in bodies:
+                b_band, b_x = _y_band(body["bbox"]), _x_band(body["bbox"])
+                if b_band is None or b_x is None:
+                    continue
+                # Column check: the glyph must overlap the body horizontally,
+                # or sit just left of it (number-in-margin layouts).
+                if g_x[1] < b_x[0] - 40 or g_x[0] > b_x[1] + 40:
+                    continue
+                # Vertical pairing: the glyph band overlaps the body's top
+                # region (its own height plus the slack a wrapped first line
+                # can sit above it).
+                if (b_band[0] <= g_band[1] + GLYPH_BODY_TOP_SLACK
+                        and b_band[1] >= g_band[0] - GLYPH_BODY_TOP_LIFT):
+                    # Closest-first-line wins: the true body starts on the
+                    # glyph's own line, so the smallest top-to-top distance
+                    # beats a section heading further down the page that
+                    # merely falls inside the slack window. `[measured]` on
+                    # the master install's p7: glyph `8.` at y[338,351] had
+                    # both its real body (`If there is a small gap…`,
+                    # top 338) and the NEXT section's heading (top 386)
+                    # inside the window; top-most wins chose the heading.
+                    key = (abs(b_band[0] - g_band[0]), b_band[0])
+                    if best is None or key < best_key:
+                        best, best_key = body, key
+            if best is None:
+                continue
+            text = best["body"]
+            cursor = conn.execute(
+                """SELECT 1 FROM step_candidates WHERE element_id=?
+                                              AND char_start=0 AND char_end=?""",
+                (best["element_id"], len(text))).fetchone()
+            if cursor is not None:
+                continue    # already proposed (split_block or an earlier run)
+            conn.execute(
+                """INSERT OR IGNORE INTO step_candidates
+                   (document_id, version_id, page_no, element_id, ordinal, seq,
+                    char_start, char_end, text_raw, text_repair,
+                    repair_confidence, text_source, segment_kind,
+                    leader, depth, branch, proposal_basis, created_at)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (document_id, best["version_id"], best["page_no"],
+                 best["element_id"], best["ordinal"], 0,
+                 0, len(text), text, None, None, best["text_source"],
+                 "step", "", 0, None,
+                 "numbered_flow_pair: glyph element " + glyph["element_id"]
+                 + " (text " + repr(glyph["text"].strip()) + ")", stamp))
+            proposed += 1
+    conn.commit()
+    scope = "AND page_no = ?" if page_no is not None else ""
+    args = [document_id] + ([page_no] if page_no is not None else [])
+    return conn.execute(
+        f"SELECT COUNT(*) FROM step_candidates WHERE document_id = ? {scope}",
+        args).fetchone()[0]
+
+
+# --------------------------------------------------------------- proposing
+def ensure_step_candidates(conn) -> None:
+    """Create `step_candidates` if this store predates it.
+
+    `store.connect` runs `ensure_columns` but never `executescript(SCHEMA)`, so
+    a new *table* is invisible to an existing store until `cli migrate` runs.
+    Same reasoning, and same shape, as `reviews.ensure_fact_reviews`.
+    """
+    from .store import STEP_CANDIDATES_DDL
+    conn.executescript(STEP_CANDIDATES_DDL)
+
+
+def propose(conn, *, document_id: str, page_no: int | None = None) -> int:
+    """Write step candidates for one document, or one page of it.
+
+    Returns the number of candidates now on record for that scope. Idempotent
+    and **non-destructive**: a candidate is keyed on `(element_id, char_start,
+    char_end)`, so re-proposing over reviewed rows leaves their review alone.
+    That matters more than it looks -- a review is the one thing here that does
+    not regenerate, and a proposer that cleared the queue would destroy exactly
+    the work it cannot reproduce.
+
+    Only `list` elements are read. `[measured]` 46 `paragraph` elements in the
+    corpus also carry real bulleted steps that the layout classifier did not
+    type as `list`; they are out of scope for this slice and a gap names them.
+    """
+    from .store import now
+    ensure_step_candidates(conn)
+    where = "e.document_id = ? AND e.element_type = 'list'"
+    params: list = [document_id]
+    if page_no is not None:
+        where += " AND e.page_no = ?"
+        params.append(page_no)
+    rows = conn.execute(
+        f"""SELECT e.element_id, e.version_id, e.page_no, e.ordinal, e.text_source,
+                   COALESCE(NULLIF(e.text,''), e.ocr_text) AS body
+              FROM elements e
+             WHERE {where}
+             ORDER BY e.page_no, e.ordinal""", params).fetchall()
+    stamp = now()
+    for row in rows:
+        if not row["body"]:
+            continue
+        segments = split_block(row["body"], text_source=row["text_source"] or "")
+        for seq, seg in enumerate(segments):
+            conn.execute(
+                """INSERT OR IGNORE INTO step_candidates
+                   (document_id, version_id, page_no, element_id, ordinal, seq,
+                    char_start, char_end, text_raw, text_repair,
+                    repair_confidence, text_source, segment_kind,
+                    leader, depth, branch, created_at)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (document_id, row["version_id"], row["page_no"], row["element_id"],
+                 row["ordinal"], seq, seg.start, seg.end, seg.text, seg.repair,
+                 seg.repair_confidence, row["text_source"],
+                 seg.kind, seg.leader, seg.depth, seg.branch, stamp))
+    conn.commit()
+    scope = "AND page_no = ?" if page_no is not None else ""
+    args = [document_id] + ([page_no] if page_no is not None else [])
+    return conn.execute(
+        f"SELECT COUNT(*) FROM step_candidates WHERE document_id = ? {scope}",
+        args).fetchone()[0]

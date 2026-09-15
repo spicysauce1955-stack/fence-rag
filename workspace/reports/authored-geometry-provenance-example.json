@@ -1,0 +1,81 @@
+{
+  "artifact_kind": "hypothetical_numeric_provenance_boundary_proposal",
+  "schema_status": "not_agreed",
+  "publishable": false,
+  "manufacturer_fact": false,
+  "explanation": "Synthetic values and citation identity demonstrate serialization only; this is not an Emblem measurement or review.",
+  "proposed_owner_fragment": {
+    "key": "bottom_rail",
+    "joint": {
+      "kind": "channel",
+      "channel_depth": {
+        "amount_milli": 25000,
+        "unit": "mm",
+        "value_raw": [
+          "25 mm (synthetic)"
+        ]
+      },
+      "insertion_margin": {
+        "amount_milli": 1000,
+        "unit": "mm",
+        "value_raw": [
+          "1 mm (synthetic)"
+        ]
+      },
+      "shared_host_gap": null,
+      "gap_reason": null,
+      "field_provenance": {
+        "/channel_depth": {
+          "cites": [
+            {
+              "id": "synthetic-reference-for-proposal-only",
+              "belongs_to": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ],
+          "source_class": "ai_proposal",
+          "curation_level": 0,
+          "version_status": "unknown"
+        },
+        "/insertion_margin": {
+          "cites": [
+            {
+              "id": "synthetic-reference-for-proposal-only",
+              "belongs_to": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ],
+          "source_class": "ai_proposal",
+          "curation_level": 0,
+          "version_status": "unknown"
+        }
+      }
+    }
+  },
+  "source_docs": [
+    {
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_class": "ai_proposal",
+      "version_status": "unknown",
+      "version_status_basis": "Synthetic non-source used only to illustrate proposed serialization",
+      "issue_date": {
+        "iso": null,
+        "value_raw": []
+      },
+      "expiration_date": {
+        "iso": null,
+        "value_raw": []
+      },
+      "superseded_by": null
+    }
+  ],
+  "source_refs": [
+    {
+      "id": "synthetic-reference-for-proposal-only",
+      "belongs_to": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "unresolved_fields": [
+    "No manufacturer evidence exists for these hypothetical values.",
+    "Owner field_provenance is proposed, not an adopted boundary field.",
+    "No consumer execution or human review is claimed."
+  ]
+}

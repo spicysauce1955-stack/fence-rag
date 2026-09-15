@@ -131,7 +131,7 @@ the interface.
 The store's current position: **1,714 facts, none reviewed by a person.** Until
 2026-08-25 it was 1,976, of which 324 had been promoted automatically on cross-family
 agreement. That mechanism is gone — `table_review.PROMOTABLE` is now `("accepted",
-"corrected")`, `state-and-gaps.md` G17 records the change, and what `docs/curation/` C0
+"corrected")`, `state-and-gaps.md` G17 records the change, and what `docs/curation/` CUR-S0
 proposed landed on its own as build-plan A1. **The level-2 population is zero**, which is
 the honest number until human review begins.
 

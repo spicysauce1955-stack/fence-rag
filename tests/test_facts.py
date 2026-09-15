@@ -29,7 +29,9 @@ class TestNormalisation(unittest.TestCase):
                            ["Installation", "HVHZ"])
         self.assertEqual(cond["exposure_category"], "C")
         self.assertEqual(cond["wind_speed_mph"], 130.0)
-        self.assertEqual(cond["fence_height_ft"], 6.0)
+        # G108: the axis is `fence_height`, and its value is the source's own
+        # lexeme, because `parameters._parse_fence_height` reads a label.
+        self.assertEqual(cond["fence_height"], "6 ft")
         self.assertTrue(cond["hvhz"])
 
 

@@ -30,7 +30,7 @@ import sqlite3
 from dataclasses import asdict, dataclass
 from datetime import date, timedelta
 
-from .canonical import canonical_bytes, content_hash
+from .canonical import canonical_bytes, content_hash, is_object_version
 from .dates import normalize_date
 from .lang import detect_lang
 from .refs import ref_id
@@ -147,7 +147,13 @@ _RULE_WARNING = re.compile(
 _NOT_A_WARNING = re.compile(
     r"NOTICE OF ACCEPTANCE"                 # 76 hits: a Miami-Dade form header
     r"|never fades|never blisters|never peels"   # marketing copy
-    r"|^\s*(safety glasses|safety goggles)\s*$",  # a line in a tool inventory
+    r"|^\s*(safety glasses|safety goggles)\s*$"   # a line in a tool inventory
+    # Miami-Dade administrative boilerplate, matched by `_HAZARD` only because
+    # it contains "failure to comply". `[measured]`: every one of the 15
+    # corpus-wide occurrences of that phrase is this identical clause, so
+    # excluding it drops 15 false gaps with ZERO collateral. Keyed on the
+    # NOA-specific wording rather than on `doc_type`, which spans four values.
+    r"|removal of NOA|terminate this NOA",
     re.IGNORECASE)
 
 # A body that stops mid-clause. Publishing it as "verbatim" is technically true
@@ -156,8 +162,49 @@ _DANGLING = re.compile(
     r"(?:\b(?:to|the|a|an|and|or|of|in|on|at|as|is|are|be|with|for|from|by|your"
     r"|you|it|this|that|will|may|can|need|needs|into|onto|over|under)\b|-)\s*$",
     re.IGNORECASE)
+# A second severity lexeme INSIDE a body means OCR read two columns onto one
+# line -- `"Note: Do not over-tighten the Note: Line up and drive the"` is two
+# different notes fused word by word. Joining forward makes such a body longer
+# without making it true, so it must be gapped rather than published: this is
+# the one case where a dangling body is garbled rather than merely split.
+_INTERLEAVED = re.compile(rf"\S\s+({_LEXEMES})\s*[:!]", re.IGNORECASE)
 MIN_BODY_CHARS = 12
 OCR_TRUST_FLOOR = 80.0
+
+
+
+def _join_forward(rows, i, body, limit=4):
+    """Complete a dangling body from the elements that follow it, or None.
+
+    A warning that ends on a function word is usually SPLIT across layout
+    elements rather than cut off by the page. `[measured]` over the 52 gaps
+    that claimed truncation: 24 of the 26 real danglers complete within four
+    forward elements, and joining them RECOVERS the warning instead of merely
+    suppressing a false gap -- `"Note: The latch is designed for"` becomes
+    `"Note: The latch is designed for left and right hand applications."`
+
+    Returns `(added_text, anchor_row)` -- only what was APPENDED, never the
+    whole rebuilt string. Returning the join caused the caller to splice it back
+    on top of text that already contained the body, publishing
+    `"Note: The Note: The donut can be The Note: The donut can be ..."`.
+
+    Stops at a page or document boundary, at a new severity lexeme, and as soon
+    as the joined text reads as a finished sentence.
+    """
+    here = rows[i]
+    out, added = body, []
+    for nxt in rows[i + 1:i + 1 + limit]:
+        if (nxt["document_id"] != here["document_id"]
+                or nxt["page_no"] != here["page_no"]):
+            return None, here
+        more = (nxt["text"] or "").strip() or (nxt["ocr_text"] or "").strip()
+        if not more or _LEXEME_ONLY.match(more) or _LEXEME_LED.match(more):
+            return None, here
+        added.append(more)
+        out = f"{out} {more}".strip()
+        if not _DANGLING.search(out):
+            return " ".join(added), nxt
+    return None, here
 
 
 def _where(row) -> str:
@@ -293,6 +340,38 @@ class Gap:
     on: str | None = None  # `disputed` only
 
 
+# The class that makes nothing admissible under §1.4. Published wherever this
+# platform cannot justify a stronger reading, so the conservative answer is
+# never an arbitrary one.
+WEAKEST_SOURCE_CLASS = "marketing"
+
+
+def resolve_source_class(doc_types) -> str | None:
+    """The §1.4 class for bytes filed under several `doc_type`s.
+
+    `[measured]` 2026-09-14 the bytes `c4eb900c...` are filed as
+    `unspecified` (-> marketing) and as `csi_spec` (-> industry_standard), and
+    the snapshot published `marketing` because `_register_doc` is idempotent per
+    hash and kept whichever filing a citation reached first. §1.4 makes
+    `marketing` inadmissible for every task, so an arrival-order accident made a
+    Miami-Dade NOA unusable. Same defect, same function, as G75 closed for the
+    dates.
+
+    A filing that cannot be classified never outranks one that can. Two filings
+    that both classify and disagree return None: ranking them would mint a
+    precedence order this project has never agreed, and refusing is what it does
+    everywhere else. The caller raises a gap naming both.
+    """
+    classified = {SOURCE_CLASS[t] for t in doc_types if t not in UNCLASSIFIED}
+    if len(classified) == 1:
+        return classified.pop()
+    if not classified:
+        # Nothing better exists. Weakest class plus `source_class_unclassified`,
+        # which is the deliberate conservative default and stays unchanged.
+        return SOURCE_CLASS[next(iter(doc_types))]
+    return None
+
+
 class SnapshotBuilder:
     def __init__(self, conn: sqlite3.Connection, *, tenant: str, regime: str):
         self.conn = conn
@@ -304,6 +383,297 @@ class SnapshotBuilder:
         self._gap_keys: set[bytes] = set()
 
     # -- provenance ---------------------------------------------------------
+    def _document_dates(self, row) -> tuple[dict | None, dict | None, str]:
+        """`(issue_date, expiration_date, evidence_note)` for one document.
+
+        Evidence beats the curated column. Every value is re-normalised through
+        `dates.normalize_date` before publication, and that is not belt and
+        braces: `versions.parse_date` and `dates.normalize_date` are two
+        independent parsers that DISAGREE. `normalize_date` implements
+        amendment 002 -- when both day and month are <= 12 and unequal, refuse
+        to guess -- and `versions.parse_date` guesses unconditionally.
+        Publishing its ISO output directly would override a ratified
+        amendment's refusal with a confident guess on four documents, one of
+        which correctly publishes `iso: null` today.
+
+        `version_status` itself is deliberately NOT derived here.
+        `select_active` distinguishes `marked` from `inferred_in_force`, and
+        collapsing an inference into the same word a document uses about itself
+        is the kind of overclaim obligation 6 exists to prevent.
+        """
+        from .versions import resolved_document_dates
+        return resolved_document_dates(self.conn, row["document_id"],
+                                       row["issue_date"], row["expiration_date"])
+
+    def _register_doc(self, row) -> None:
+        """Register the `SourceDoc` a ref belongs to. Idempotent per hash.
+
+        Shared by `source_ref` and `source_ref_page` — the registration IS the
+        closure mechanism (§1.2.1), so two minters must not each carry their
+        own copy of it and drift.
+        """
+        if row["sha256"] in self._docs:
+            return
+        # Dates come from EVIDENCE first, the curated column only as a
+        # fallback. `documents.issue_date`/`expiration_date` are blank for most
+        # documents and, for one NOA with four byte-identical filings,
+        # disagree -- two rows filled, two blank -- and whichever row a
+        # citation reached first won. `versions.document_dates` resolves both
+        # from the `effective_date`/`expiration_date` facts Phase 6 extracted
+        # for every filing independently, so the answer stops depending on
+        # arrival order (G75).
+        issue_date, expiration_date, evidence = self._document_dates(row)
+        # The class is resolved across EVERY filing of these bytes, not taken
+        # from whichever one a citation reached first. See
+        # `resolve_source_class`; this is G75's fix applied to the class.
+        filings = [r[0] for r in self.conn.execute(
+            """SELECT d.doc_type FROM document_versions v
+                 JOIN documents d ON d.document_id = v.document_id
+                WHERE v.sha256 = ?""", (row["sha256"],))]
+        resolved_class = resolve_source_class(filings or [row["doc_type"]])
+        self._docs[row["sha256"]] = SourceDoc(
+            content_hash=row["sha256"],
+            # On a genuine disagreement `resolve_source_class` returns None and
+            # we publish the weakest class -- the same conservative default the
+            # unclassified path already documents, so a contested document
+            # cannot make anything wrongly admissible while the gap stands.
+            source_class=resolved_class or WEAKEST_SOURCE_CLASS,
+            version_status=row["version_status"],
+            version_status_basis=(
+                # The stored basis says "no explicit version marker in curated
+                # metadata". That is true about the COLUMN and false about what
+                # this platform holds, once its own pages have been read.
+                f"{row['version_status_basis']}; dates read from the document: "
+                f"{evidence}" if evidence else row["version_status_basis"]),
+            issue_date=issue_date,
+            expiration_date=expiration_date,
+            superseded_by=self._successors(row["document_id"]),
+            # The class published above came from THIS record, which is the
+            # first filing of these bytes that a citation reached. The other
+            # filings travel beside it rather than being dropped.
+            also_filed_as=self._other_filings(row["sha256"],
+                                              row["document_id"]))
+
+        if resolved_class is None:
+            # Two filings of one document classify differently. Refusing to rank
+            # them is the same posture as everywhere else; the gap names both so
+            # a person can settle it.
+            self.gap(kind="conflict",
+                     subject={"kind": "source_document", "id": row["document_id"],
+                              "tenant": None},
+                     code="source_class_disagreement",
+                     params={"doc_types": sorted(set(filings)),
+                             "content_hash": row["sha256"]},
+                     would_close=f"decide the source class of {_label(row)}, filed "
+                                 f"under {sorted(set(filings))!r} which map to "
+                                 f"different §1.4 classes",
+                     closes_by="knowledge", severity="warns_line")
+        # Raised when NO filing of these bytes could be classified -- the case
+        # where the weakest class is published for want of anything better. A
+        # group rescued by a sibling filing is classified and needs no gap;
+        # gating on `resolved_class is None` instead silently dropped all 8 of
+        # these, because a solo `unspecified` resolves to marketing, not None.
+        if not any(t not in UNCLASSIFIED for t in filings):
+                self.gap(kind="missing_value", subject={"kind": "source_document", "id": row["document_id"], "tenant": None},
+                         code="source_class_unclassified",
+                         params={"doc_type": row["doc_type"],
+                                 "content_hash": row["sha256"]},
+                         would_close=f"classify the source class of {_label(row)} "
+                                     f"(filed as {row['doc_type']!r}); it is "
+                                     f"published at the weakest class, so it cannot "
+                                     f"make anything wrongly admissible until it is",
+                         closes_by="knowledge", severity="informational")
+
+    # Which detected extraction failures publish, and how. Every `kind` in
+    # `quality_issues` must appear here: a class that is neither published nor
+    # deliberately excluded is the exact defect G78 found, where 73
+    # unreconstructed tables produced no gap at all.
+    #
+    # `because.code` values are registry additions, which `AMENDING.md` §4
+    # states are explicitly NOT amendments and need no negotiation.
+    # `quality_issues.kind` -> (published gap kind, published `because.code`,
+    # `would_close`). The middle column is a SECOND NAME for the store's own
+    # `kind`, and `naming.md` §1 admits one only where it marks a role or a
+    # layer: here it marks the layer, store -> published, and three of the
+    # seven actually differ across it --
+    #
+    #     mojibake_text_layer  -> text_layer_mojibake
+    #     low_ocr_confidence   -> ocr_below_confidence_floor
+    #     empty_page_after_ocr -> empty_after_ocr
+    #
+    # The other four cross unchanged. `naming.md` §5 recorded these as three
+    # undocumented renames (defect E-2); they are documented here rather than
+    # unwound, because the published spellings are in 25 write-once snapshots
+    # and the store's are in `quality_issues` rows nothing re-derives on a
+    # rename. Read the published side as the noun-first form the `SOURCE_*`
+    # registry uses (`SOURCE_TEXT_LAYER_MOJIBAKE`), which is what the crossing
+    # names are aligned to and what the store's are not.
+    #
+    # The `warning_*` prefix on the codes in `warnings()` below is a different
+    # sub-scheme of `because.code` again, and it does NOT name a severity --
+    # it names the pass that raised the gap. `severity` is its own field.
+    QUALITY_GAP_KINDS = {
+        "table_not_reconstructed": (
+            "illegible_source", "table_not_reconstructed",
+            "a person should read the table on this page and record its cells; "
+            "the page names conditional data that no cell grid was recovered from"),
+        "mojibake_text_layer": (
+            "illegible_source", "text_layer_mojibake",
+            "the text layer on this page decodes to mojibake and was rejected; "
+            "a person should read the page image"),
+        "low_ocr_confidence": (
+            "illegible_source", "ocr_below_confidence_floor",
+            "this page was read by OCR below the confidence floor; a person "
+            "should confirm what it says against the page image"),
+        "empty_page_after_ocr": (
+            "illegible_source", "empty_after_ocr",
+            "neither the text layer nor OCR recovered any text from this page"),
+        "empty_page": (
+            "illegible_source", "empty_page",
+            "this page yielded no text at all"),
+        "ocr_supplement_failed": (
+            "illegible_source", "ocr_supplement_failed",
+            "the OCR supplement for this page did not run to completion"),
+        "encrypted_pdf": (
+            "illegible_source", "encrypted_pdf",
+            "this document is encrypted and could not be read"),
+    }
+    # Detected, and deliberately NOT published: a DOCX has no page image by
+    # construction, which is a property of the format rather than a failure to
+    # read the source. Named here so the set stays exhaustive.
+    QUALITY_NOT_PUBLISHED = frozenset({"no_page_image_for_docx"})
+
+    def quality_gaps(self) -> int:
+        """Publish a `Gap` for every extraction failure this platform detected.
+
+        `warnings()` only inspects text that matches a warning lexeme, so until
+        G78 an entire class of KNOWN failure was invisible to a consumer
+        reading `gaps[]` -- 73 unreconstructed tables across 13 documents, 172
+        low-OCR passages, 81 mojibake pages. Silence read as coverage, which is
+        the one thing this member exists to prevent.
+
+        The subject carries the page, not just the document: `gap()` dedupes on
+        `[kind, subject]`, so a document-scoped subject would collapse every
+        affected page of a document into one gap and lose the rest.
+
+        The gap cites the page it is about, which only became expressible with
+        `source_ref_page` (G73). A page whose `pages` row is missing, or which
+        belongs to another tenant, raises no gap rather than taking the build
+        down -- a citation that cannot be minted must not become a citation
+        that lies.
+        """
+        raised = 0
+        # Which documents something published already cites. A failure on a
+        # page of a document that BACKS a live value is actionable -- it is a
+        # sibling page of one a plan depends on -- so it warns a line; a
+        # failure on a document nothing cites is background. `[measured]` 11 of
+        # the 13 documents carrying an unreconstructed table are documents that
+        # back a published `ParameterTable`, which is why the first cut's blanket
+        # `informational` was justified by a claim that was false for most of them.
+        backing = set(self._docs)
+        # No `page_no IS NOT NULL` filter: `encrypted_pdf` is a DOCUMENT-level
+        # failure with a null page, and excluding it reproduced in miniature
+        # the exact defect this method exists to fix.
+        for row in self.conn.execute("""
+                SELECT q.document_id, q.page_no, q.kind, q.severity, q.detail,
+                       d.title
+                  FROM quality_issues q
+                  JOIN documents d ON d.document_id = q.document_id
+                 ORDER BY q.document_id, q.page_no IS NULL, q.page_no, q.kind"""):
+            spec = self.QUALITY_GAP_KINDS.get(row["kind"])
+            if spec is None:
+                continue
+            gap_kind, code, advice = spec
+            title = row["title"] or row["document_id"]
+            if row["page_no"] is None:
+                # Document-level: no page to cite, so the subject is the
+                # document and `cites` is empty, which `verify()` permits for a
+                # non-element subject.
+                self.gap(kind=gap_kind,
+                         subject={"kind": "source_document",
+                                  "id": row["document_id"], "tenant": None},
+                         code=code, params={"detail": row["detail"] or ""},
+                         cites=[],
+                         would_close=f"\"{title}\": {advice}",
+                         closes_by="knowledge", severity="informational")
+                raised += 1
+                continue
+            try:
+                ref = self.source_ref_page(row["document_id"], row["page_no"])
+            except (KeyError, TenantLeak):
+                continue
+            self.gap(kind=gap_kind,
+                     subject={"kind": "page",
+                              "id": f"{row['document_id']}#p{row['page_no']}",
+                              "tenant": None},
+                     code=code,
+                     params={"page_no": row["page_no"], "detail": row["detail"] or ""},
+                     cites=[ref],
+                     # `pN`, not `page N`: G40's guard looks for `\bp\d+\b`,
+                     # and every other gap in the snapshot reads that way.
+                     would_close=f"p{row['page_no']} of \"{title}\": {advice}",
+                     closes_by="knowledge",
+                     # An `info` issue is never a line warning. Otherwise the
+                     # question is whether this document already backs a
+                     # published value: if it does, this page is a sibling of
+                     # one a plan depends on and the curator working that
+                     # document needs it; if nothing cites the document, the
+                     # gap is background about this platform's own reading.
+                     severity=("informational"
+                               if row["severity"] == "info"
+                               or ref.belongs_to not in backing
+                               else "warns_line"))
+            raised += 1
+        return raised
+
+    def source_ref_page(self, document_id: str, page_no: int, *, content_hash: str | None = None) -> SourceRef:
+        """Mint a reference to a WHOLE PAGE, registering its document.
+
+        The page is a first-class locus: `refs.ref_id(sha, page_no, None)` is
+        its id, `refs.build_index` marks it `is_page`, and `crops.render_crop`
+        already reads `bbox=None` as "the whole page, not an error". The only
+        thing missing was a way to mint one, and its absence is what produced
+        G73: `promote_tables` needed an evidence anchor for a reviewed table,
+        had no page-level ref available, and settled for the first element on
+        the page in reading order -- the banner on every scanned NOA. 108 of
+        108 promoted facts cited a heading.
+
+        A table review in this store is a review of a PAGE crop: `is_page=True`,
+        `bbox=None`. A person looked at the page image, so no geometry can
+        recover a table rectangle after the fact and the page is the honest
+        citation -- it is exactly, and only, what was examined.
+
+        Registers the `SourceDoc` as a side effect, like `source_ref`, so
+        closure stays structural rather than checked. Tenancy is enforced
+        before registration for the same reason it is there.
+        """
+        key = f"page:{document_id}:{page_no}"
+        if content_hash is not None:
+            key += f":{content_hash}"
+        if key in self._refs:
+            return self._refs[key]
+        row = self.conn.execute("""
+            SELECT p.page_no, v.sha256, d.document_id, d.doc_type,
+                   d.title, d.version_status, d.version_status_basis,
+                   d.issue_date, d.expiration_date, d.owner_tenant
+              FROM pages p
+              JOIN document_versions v ON v.version_id = p.version_id
+              JOIN documents d         ON d.document_id = v.document_id
+             WHERE d.document_id = ? AND p.page_no = ?
+               AND (? IS NULL OR v.sha256 = ?)""",
+            (document_id, page_no, content_hash, content_hash)).fetchone()
+        if row is None:
+            raise KeyError(f"no such page: {document_id} p{page_no}")
+        if not visible_to(row["owner_tenant"], self.tenant):
+            raise TenantLeak(
+                f"page {page_no} of {document_id} belongs to tenant "
+                f"{row['owner_tenant']!r}, not {self.tenant!r}")
+        self._register_doc(row)
+        ref = SourceRef(id=ref_id(row["sha256"], row["page_no"], None),
+                        belongs_to=row["sha256"])
+        self._refs[key] = ref
+        return ref
+
     def source_ref(self, element_id: str) -> SourceRef:
         """Mint a reference, registering its document. Closure happens here."""
         if element_id in self._refs:
@@ -341,31 +711,7 @@ class SnapshotBuilder:
                 f"{self.tenant!r}. Nothing of one tenant's reaches another's "
                 f"snapshot (obligation 7).")
 
-        if row["sha256"] not in self._docs:
-            self._docs[row["sha256"]] = SourceDoc(
-                content_hash=row["sha256"],
-                source_class=SOURCE_CLASS[row["doc_type"]],
-                version_status=row["version_status"],
-                version_status_basis=row["version_status_basis"],
-                issue_date=normalize_date(row["issue_date"]),
-                expiration_date=normalize_date(row["expiration_date"]),
-                superseded_by=self._successors(row["document_id"]),
-                # The class published above came from THIS record, which is the
-                # first filing of these bytes that a citation reached. The other
-                # filings travel beside it rather than being dropped.
-                also_filed_as=self._other_filings(row["sha256"],
-                                                  row["document_id"]))
-            if row["doc_type"] in UNCLASSIFIED:
-                self.gap(kind="missing_value", subject={"kind": "source_document", "id": row["document_id"], "tenant": None},
-                         code="source_class_unclassified",
-                         params={"doc_type": row["doc_type"],
-                                 "content_hash": row["sha256"]},
-                         would_close=f"classify the source class of {_label(row)} "
-                                     f"(filed as {row['doc_type']!r}); it is "
-                                     f"published at the weakest class, so it cannot "
-                                     f"make anything wrongly admissible until it is",
-                         closes_by="knowledge", severity="informational")
-
+        self._register_doc(row)
         ref = SourceRef(id=ref_id(row["sha256"], row["page_no"], row["bbox"]),
                         belongs_to=row["sha256"])
         self._refs[element_id] = ref
@@ -447,7 +793,13 @@ class SnapshotBuilder:
         # `subject` is a dict (amendment 004) -- canonical_bytes() gives a
         # deterministic byte key the same way parameters.py's own group key
         # already does for a [parameter, scope] pair.
-        key = canonical_bytes([kind, subject])
+        # Keyed on `code` as well as `[kind, subject]`, matching
+        # `parameters._Gaps.add`. Two collectors with two different rules for
+        # one concept is how 53 of 73 unreconstructed tables were silently
+        # dropped by the change written to publish them: every quality gap is
+        # `illegible_source`, so a page with two distinct failures collapsed to
+        # one and the second vanished. One concept, one rule.
+        key = canonical_bytes([kind, subject, code])
         if key in self._gap_keys:      # one gap per subject per kind
             return
         self._gap_keys.add(key)
@@ -565,9 +917,36 @@ class SnapshotBuilder:
                                      f"and record the instruction",
                          closes_by="knowledge", severity="informational")
                 continue
-            if _DANGLING.search(body) or body[:1].islower():
-                # ends on a function word or starts mid-sentence: the column or
-                # the page cut it. Verbatim-but-truncated is worse than absent.
+            # A body that dangles is usually SPLIT, not truncated: the sentence
+            # continues in the next element on the page. Join forward before
+            # judging, which recovers the warning instead of gapping it --
+            # `[measured]` 24 of 26 danglers complete within four elements.
+            if _DANGLING.search(body):
+                added, used = _join_forward(rows, i, body)
+                if added is not None:
+                    body = f"{body} {added}".strip()
+                    text = f"{text} {added}".strip()
+                    anchor = used
+            if _INTERLEAVED.search(body):
+                self.gap(kind="illegible_source",
+                         subject={"kind": "element", "id": r["element_id"], "tenant": None},
+                         code="warning_columns_interleaved",
+                         params={"page_no": r["page_no"], "tail": _tail(body, 30)},
+                         cites=[self.source_ref(r["element_id"])],
+                         would_close=f"OCR read two columns of {_where(r)} onto one "
+                                     f"line, fusing two notes ({_tail(body)!r}); a "
+                                     f"person should read the page image and record "
+                                     f"them separately",
+                         closes_by="knowledge", severity="warns_line")
+                continue
+            if _DANGLING.search(body):
+                # Still dangling after the join: genuinely cut off. `[measured]`
+                # the old test also fired on `body[:1].islower()`, which caught
+                # ZERO of the 5 real defects (precision 0.000, recall 0.000)
+                # and produced 21 false gaps on its own -- a lowercase first
+                # character is not evidence of truncation. It fired on a bullet
+                # glyph OCR'd as a literal `k`, on a drop cap, and on the maths
+                # variable in `q = (0.00256)(K z)...`. Removed.
                 self.gap(kind="illegible_source", subject={"kind": "element", "id": r["element_id"], "tenant": None},
                          code="warning_truncated_mid_clause",
                          params={"ends_with": _tail(body, 30),
@@ -578,18 +957,23 @@ class SnapshotBuilder:
                                      f"page image and record the sentence whole",
                          closes_by="knowledge", severity="warns_line")
                 continue
-            if (r["text_source"] in ("ocr", "image_ocr")
-                    and (r["ocr_confidence"] or 0) < OCR_TRUST_FLOOR):
+            # `anchor`, not `r`: where a lexeme heading's body came from the
+            # NEXT element, the confidence that matters is that element's.
+            # `[measured]` one published gap claimed a warning "was read at
+            # 75.5% confidence" -- 75.5% belonged to the two-token heading
+            # `IMPORTANT !`, while the body it quoted was read at 95.31%.
+            if (anchor["text_source"] in ("ocr", "image_ocr")
+                    and (anchor["ocr_confidence"] or 0) < OCR_TRUST_FLOOR):
                 self.gap(kind="illegible_source", subject={"kind": "element", "id": r["element_id"], "tenant": None},
                          code="warning_ocr_below_confidence_floor",
                          # Integers in thousandths: obligation 1 forbids a
                          # float in either direction, and canonical_bytes()
                          # refuses one rather than rounding it silently.
-                         params={"confidence_milli": round(r["ocr_confidence"] * 1000),
+                         params={"confidence_milli": round(anchor["ocr_confidence"] * 1000),
                                  "floor_milli": round(OCR_TRUST_FLOOR * 1000)},
                          cites=[self.source_ref(r["element_id"])],
                          would_close=f"OCR read the warning on {_where(r)} at "
-                                     f"{r['ocr_confidence']:.1f}% against a "
+                                     f"{anchor['ocr_confidence']:.1f}% against a "
                                      f"{OCR_TRUST_FLOOR:.0f}% floor and produced "
                                      f"{_tail(body)!r}; a person should read the "
                                      f"page image",
@@ -612,17 +996,42 @@ class SnapshotBuilder:
                          closes_by="knowledge", severity="informational")
                 continue
 
+            if _undecodable_ratio(body) > UNDECODABLE_LIMIT:
+                # The font layer is corrupted and the text decodes to
+                # ciphertext. Publishing it as "verbatim, untranslated" is
+                # technically true and useless. `quality.is_mojibake` cannot
+                # catch it -- the cipher substitutes onto printable ASCII, so
+                # `ascii_token_ratio` stays above its limit on every affected
+                # page while `control_ratio` trips 2-4x over.
+                self.gap(kind="illegible_source",
+                         subject={"kind": "element", "id": r["element_id"], "tenant": None},
+                         code="warning_text_undecodable",
+                         params={"ratio_milli": round(_undecodable_ratio(body) * 1000),
+                                 "page_no": r["page_no"]},
+                         cites=[self.source_ref(r["element_id"])],
+                         would_close=f"the warning on {_where(r)} decodes to "
+                                     f"unreadable characters; its font layer is "
+                                     f"corrupted and a person should read the "
+                                     f"page image",
+                         closes_by="knowledge", severity="warns_line")
+                continue
+
             path = json.loads(r["heading_path"] or "[]")
             step = next((h for h in reversed(path)
                          if _STEP_HEADING.match(h) and not _NOT_A_STEP.search(h)), None)
 
-            key = " ".join(text.split())       # identity on content, not whitespace
+            key = _warning_key(text)           # G76: identity on the warning
             ref = self.source_ref(anchor["element_id"])
             if key in seen:
                 # The same text printed in several documents is one warning with
                 # several citations. 14 groups of files here are byte-identical
                 # under different manufacturers.
-                if ref.belongs_to not in {c["belongs_to"] for c in seen[key]["cites"]}:
+                # UNION, not one-per-document. The old cap was safe only while
+                # fragmentation kept each object to a single document; now that
+                # twelve fragments of one caution merge, capping would drop the
+                # citation count from 458 to 448 -- losing evidence to a fix
+                # meant to consolidate it.
+                if asdict(ref) not in seen[key]["cites"]:
                     seen[key]["cites"].append(asdict(ref))
                 continue
 
@@ -665,6 +1074,84 @@ GAP_KINDS = frozenset({
     "illegible_source"})
 DECLARED_LISTS = ("source_docs", "warnings", "gaps", "part_types", "parts",
                   "models", "procedures", "parameters", "combinations", "rules")
+
+
+
+# --- warning identity, and text we must not publish -------------------------
+# `[measured]` 2026-09-03 over the 289 published warnings.
+
+# A lead marker plus a severity lexeme, at the start of a warning. Widened from
+# `_LEAD` to cover `+` and the dash variants, because the corpus prints the same
+# caution with `*`, `+`, `–` and `-` and with a bled-through page number in
+# front of it: `30 * Caution –`, `4A. * Caution -`, `42 * caution -`.
+_KEY_LEAD = re.compile(
+    r"^\s*(?:[0-9]{1,3}[A-Za-z]?[.)]?\s*)?[*+\u2013\u2014-]?\s*"
+    r"(NOTE|NOTES|CAUTION|WARNING|IMPORTANT|NOTICE|DANGER|ATTENTION|"
+    r"ADVERTENCIA|AVERTISSEMENT|TIP)\s*[:!]?\s*", re.I)
+
+
+def _warning_key(text: str) -> str:
+    """The identity two warnings share when they are the same warning.
+
+    The old key was `" ".join(text.split())` over the RAW element text, so
+    page-number bleed and delimiter variance each minted a separate identity
+    and the corpus's most-repeated caution published as TWELVE objects.
+
+    Normalises only what is demonstrably noise: a leading page number and
+    footnote marker before a recognised lexeme, the lexeme's own case, dash
+    variants, and whitespace. `[measured]`: merges 24 objects into 7 with ZERO
+    false merges across all 289.
+
+    What it deliberately does NOT do is drop the lexeme from the identity. 8
+    pairs share a body and differ only in whether a `WARNING:` heading is
+    present -- a separate extraction defect, where a body consumed as a
+    heading's body is then re-published bare -- and a body-only key has no
+    principled way to tell that from a real WARNING and a real CAUTION that
+    happen to say the same sentence.
+    """
+    flat = " ".join((text or "").split())
+    m = _KEY_LEAD.match(flat)
+    if m:
+        flat = f"{m.group(1).upper()}||{flat[m.end():]}"
+    return flat.replace("\u2013", "-").replace("\u2014", "-").casefold()
+
+
+# Characters a fence document legitimately prints: ASCII, the Latin supplements
+# and extensions (accents, `¼`, `°`, `©`), general punctuation (`•`, `–`, `″`),
+# currency/letterlike/arrows/maths, dingbats, Greek (engineering symbols),
+# ligatures (`ﬁ` from InDesign), and spacing modifiers (`˚`).
+def _is_legible_char(ch: str) -> bool:
+    if ch in "\n\t" or ch.isprintable():
+        code = ord(ch)
+        return not (0xE000 <= code <= 0xF8FF          # private use
+                    or 0xFFF0 <= code <= 0xFFFF       # specials, incl. U+FFFD
+                    or 0xD800 <= code <= 0xDFFF)      # surrogates
+    return False
+
+
+def _undecodable_ratio(text: str) -> float:
+    """Share of characters that no fence document would print.
+
+    A page whose font layer is corrupted decodes to text like
+    `_o\x89|orovbࢼomv1u;\x89vom`. `quality.is_mojibake` cannot catch it: the
+    cipher substitutes most letters onto OTHER printable ASCII, so
+    `ascii_token_ratio` lands just above its 0.85 limit on every affected page
+    (0.857-0.958) while `control_ratio` trips 2-4x over. Only ~10-15% of a
+    corrupted page's tokens carry a stray byte at all.
+
+    `[measured]` at the 0.015 threshold: 176 of 49,984 elements and 3 of 289
+    warnings are rejected, and every rejected warning is genuine ciphertext.
+    Known and deliberate recall gap: two elements of the SAME corruption score
+    0.0169 and 0.0, because a substitution onto valid ASCII is invisible to any
+    character-class test. This bounds the damage; it does not end it.
+    """
+    if not text:
+        return 0.0
+    bad = sum(1 for ch in text if not _is_legible_char(ch))
+    return bad / len(text)
+
+
+UNDECODABLE_LIMIT = 0.015
 
 
 class VerificationFailed(RuntimeError):
@@ -744,6 +1231,328 @@ def _also_filed_as(doc: dict, fail: list) -> None:
                     f"order; the list is hashed, so its order is not free")
 
 
+# --- the shape of a published `Procedure`, checked once, before it is read ---
+# G92. Every check in the `procedures` block below reads a field as the type it
+# assumes the field has: `for edge in requires` iterates, `text_i18n.strip()`
+# calls, `edge["step"] not in keys` HASHES. A value of the wrong type escaped as
+# `AttributeError` or `TypeError` — which stops publication, but not through the
+# documented `VerificationFailed` a caller can catch, and with no procedure/step
+# location on it — or, for the fields tested only for truthiness, published.
+#
+# The lesson G84 drew one level up ("validate before hashing") does not
+# generalise field by field: twelve fields would need twelve guards, and the
+# thirteenth field added would have none. So the shape is declared once and
+# checked once, before any field is touched. A field added to a table below is
+# covered by construction.
+#
+# Absent and null are deliberately NOT shape failures. The semantic checks name
+# the omission better than a type name can — "no id", "procedure must have
+# cites", "empty text", "kind None is not one of ..." — and refusing them twice
+# would say it worse.
+def _is_source_ref(v) -> bool:
+    """A published citation is `{id, belongs_to}`, both nonempty strings.
+
+    `[{}]` and `[None]` were the shapes that published: a truthiness test on
+    the list sees one element and stops looking. An empty object satisfies
+    obligation 3's letter (a cite is present) and nothing of its point.
+    """
+    return (isinstance(v, dict)
+            and isinstance(v.get("id"), str) and v["id"].strip() != ""
+            and isinstance(v.get("belongs_to"), str) and v["belongs_to"].strip() != "")
+
+
+def _list_of(predicate):
+    return lambda v: isinstance(v, list) and all(predicate(x) for x in v)
+
+
+_SOURCE_REFS = "a list of SourceRefs, each {id, belongs_to}"
+# (field, predicate, what the field must be). `steps` is absent on purpose: its
+# own check below refuses every non-list already, and says "nonempty" too.
+PROCEDURE_SHAPE = (
+    ("id", lambda v: isinstance(v, str), "a string"),
+    ("cites", _list_of(_is_source_ref), _SOURCE_REFS),
+)
+STEP_SHAPE = (
+    # Listed for completeness, and REDUNDANT: G84's own `key` check below
+    # refuses exactly these shapes, with this wording. No test can tell the two
+    # apart, and G92 says so rather than leaving it to be discovered.
+    ("key", lambda v: isinstance(v, str), "a nonempty string"),
+    ("kind", lambda v: isinstance(v, str), "a string"),
+    ("scope", lambda v: isinstance(v, str), "a string"),
+    ("cites", _list_of(_is_source_ref), _SOURCE_REFS),
+    ("text_i18n", lambda v: isinstance(v, str), "a string"),
+    ("requires", _list_of(lambda e: isinstance(e, dict)), "a list of Edge objects"),
+    # Defect 2: `slots` was read by nothing here, and it is the one field
+    # carrying arbitrary JSON in from `cli steps --accept --slot`. `SlotTarget`
+    # is a tagged union of objects (`knowledge-datamodel.md` §3.6) and
+    # `reviews.record_step_review` types its own parameter `dict | None`, so a
+    # list of objects is what the producer produces. The VARIANTS are not
+    # checked — see G92 for what that leaves open.
+    ("slots", _list_of(lambda s: isinstance(s, dict)),
+     "a list of SlotTarget objects"),
+)
+EDGE_SHAPE = (
+    ("kind", lambda v: isinstance(v, str), "a string"),
+    # The one that matters: `edge["step"] not in keys` is a set membership test,
+    # so an unhashable value here raised `TypeError` — the same defect G84 fixed
+    # one level up, at the step key, and missed one level down.
+    ("step", lambda v: isinstance(v, str), "a string"),
+)
+
+
+# --- the same gate for the other nine members -------------------------------
+# G97. G92 gave `procedures` a shape gate and left the other nine declared
+# members without one, which is the state the gap entry recorded and this
+# extends. Measured over 443 enumerated malformed shapes: `source_docs`,
+# `warnings`, `gaps`, `part_types` and `parts` escaped as `AttributeError` or
+# `TypeError` — publication stops, but not through the documented
+# `VerificationFailed`, and with no member/index on it — while `models`,
+# `parameters`, `combinations` and `rules` were read by NOTHING and published
+# whatever they were handed. `parameters` is the live one: it publishes 9
+# tables and 31 rows today.
+#
+# Every field below is one the contract or its delegated `knowledge-datamodel.md`
+# §3 declares a type for. Where the contract is silent, or the type is a union
+# this side does not own, the field is NOT checked and G97 says which and why —
+# the restraint G92 applied to `SlotTarget` is the same restraint here, and
+# `Gap.subject` is its sharpest case: §1.1 RESERVES `SlotRef` and leaves it
+# undefined, so a member of that union has no shape to check against at all.
+#
+# Absent and null are NOT shape failures here either, for G92's reason.
+def _is_str(v) -> bool:
+    return isinstance(v, str)
+
+
+def _is_dict(v) -> bool:
+    return isinstance(v, dict)
+
+
+def _is_list(v) -> bool:
+    return isinstance(v, list)
+
+
+def _is_int(v) -> bool:
+    """§1.1: quantities and levels are integers. `bool` is an `int` in Python.
+
+    `curation_level: True` would otherwise read as level 1 — a person compared
+    it to the source image — on a value nobody reviewed.
+    """
+    return isinstance(v, int) and not isinstance(v, bool)
+
+
+def _is_date(v) -> bool:
+    """§1.1 BINDING: `Date { iso: str | null, value_raw: [str] }`.
+
+    A bare `"2025-04-24"` is the shape somebody reaches for first, and it is
+    exactly what the typed `Date` replaced (amendment 002): a string carries no
+    `value_raw`, so the source's own stamp is gone and `null` cannot be told
+    from "the source states none".
+    """
+    return (isinstance(v, dict)
+            and (v.get("iso") is None or isinstance(v.get("iso"), str))
+            and (v.get("value_raw") is None
+                 or (isinstance(v["value_raw"], list)
+                     and all(isinstance(x, str) for x in v["value_raw"]))))
+
+
+def _seq_of(predicate):
+    """A JSON array, as the builders here actually produce one.
+
+    `SourceDoc.superseded_by` and `.also_filed_as` are declared `tuple` and
+    `canonical_bytes` writes a tuple as an array, so a tuple is a well-formed
+    payload at this boundary, not a malformed one. Refusing it fails the real
+    build -- measured: the first run of this gate refused every stored
+    snapshot's `superseded_by` for being `()`. `_also_filed_as` reached the
+    same conclusion independently and tests `isinstance(also, (list, tuple))`.
+
+    G92's `_list_of` deliberately keeps refusing a tuple for `procedures`; see
+    G97 for why that divergence is recorded rather than resolved here.
+    """
+    return lambda v: (isinstance(v, (list, tuple))
+                      and all(predicate(x) for x in v))
+
+
+_OBJECTS = _seq_of(_is_dict)
+_HASHES = _seq_of(_is_str)
+_REFS = _seq_of(_is_source_ref)
+_DATE = "a Date {iso, value_raw}"
+_I18N = "an i18n object of language to text"
+_REFS_DESC = _SOURCE_REFS
+
+# §1.1. `also_filed_as` is absent on purpose: `_also_filed_as` above already
+# refuses every non-list, with a message that names the field and the registry
+# rule behind it.
+SOURCE_DOC_SHAPE = (
+    ("content_hash", _is_str, "a string"),
+    ("source_class", _is_str, "a string"),
+    ("version_status", _is_str, "a string"),
+    ("version_status_basis", _is_str, "a string"),
+    ("issue_date", _is_date, _DATE),
+    ("expiration_date", _is_date, _DATE),
+    # Typed here rather than left alone because this platform is its only
+    # producer and `walk`'s HASH_BEARING pass already reads it as a list of
+    # content hashes -- `enumerate(7)` was a `TypeError` with no location.
+    ("superseded_by", _HASHES, "a list of content hashes"),
+)
+
+# Obligation 10 and `knowledge-datamodel.md` §3.7. `attaches_to.ref` is NOT
+# typed: §3.7 gives the field no type, and it is a content hash for a document
+# and an entity id otherwise -- `walk` already guards its own read with
+# `isinstance`.
+WARNING_SHAPE = (
+    ("text_raw", _is_str, "a string"),
+    ("lang", _is_str, "a string"),
+    ("cites", _list_of(_is_source_ref), _REFS_DESC),
+    ("attaches_to", _is_dict, "an object {kind, ref}"),
+    ("severity_lexeme", _is_str, "a string"),
+    ("code", _is_str, "a string"),
+    ("params", _is_dict, "an object"),
+)
+ATTACHES_TO_SHAPE = (
+    # `kind not in ATTACHES_TO_KINDS` is a frozenset membership test, so an
+    # unhashable kind raised `TypeError` before the vocabulary check could run.
+    ("kind", _is_str, "a string"),
+)
+
+# §1.2.1. `subject` is NOT typed -- see the block comment above.
+GAP_SHAPE = (
+    ("id", _is_str, "a string"),
+    ("kind", _is_str, "a string"),
+    ("because", _is_dict, "an object {code, params}"),
+    ("cites", _list_of(_is_source_ref), _REFS_DESC),
+    ("would_close", _is_str, "a string"),
+    ("closes_by", _is_str, "a string"),
+    ("severity", _is_str, "a string"),
+    ("on", _is_str, "a string"),
+)
+BECAUSE_SHAPE = (
+    # `params` keeps its own check below: "because.params must be an object" is
+    # the wording two tests already assert and says it no worse than this would.
+    ("code", _is_str, "a string"),
+)
+
+# §2.1 and `knowledge-datamodel.md` §2.1.
+PART_TYPE_SHAPE = (
+    ("key", _is_str, "a string"),
+    ("namespace", _is_str, "a string"),
+    ("parent", _is_dict, "a PartTypeRef object {namespace, key}"),
+    ("label_i18n", _is_dict, _I18N),
+)
+PART_TYPE_REF_SHAPE = (
+    ("namespace", _is_str, "a string"),
+    ("key", _is_str, "a string"),
+)
+
+# §1.1's `Provenance`, which rides on every published value.
+PROVENANCE_SHAPE = (
+    ("cites", _list_of(_is_source_ref), _REFS_DESC),
+    ("source_class", _is_str, "a string"),
+    ("curation_level", _is_int, "an integer 0, 1 or 2"),
+    ("version_status", _is_str, "a string"),
+)
+
+# `knowledge-datamodel.md` §3.1 and §2.2. `SpecField.value` is NOT typed:
+# §2.2 declares it `Quantity | Token` and gives `Token` no shape of its own.
+SPEC_FIELD_SHAPE = (
+    ("key", _is_str, "a string"),
+    ("agree", _is_str, "a string"),
+    ("provenance", _is_dict, "a Provenance object"),
+)
+PART_SHAPE = (
+    ("id", _is_str, "a string"),
+    # D-5, `naming.md` §4. One snapshot published this as the integer `1` on 27
+    # parts and as `"sha256:<64hex>"` on 15, and the field was absent here --
+    # `_shape_failures` is an allowlist, so an undeclared field publishes at
+    # whatever type it happens to hold. The rule is deliberately the weak one:
+    # `verify()` also runs over write-once snapshots published before
+    # `canonical.part_version` existed, and refusing `1` here would mark 24
+    # stored snapshots non-compliant for having obeyed the rule of their day.
+    # New builds mint a content hash and nothing else; `tests/test_naming.py`
+    # holds the builder to it.
+    ("version", is_object_version, "a positive integer or a non-empty string"),
+    ("status", _is_str, "a string"),
+    ("type", _is_dict, "a PartTypeRef object {namespace, key}"),
+    ("name_i18n", _is_dict, _I18N),
+    ("spec", _OBJECTS, "a list of SpecField objects"),
+    ("authorship", _is_str, "a string"),
+    ("cites", _list_of(_is_source_ref), _REFS_DESC),
+    ("contributing_sources", _HASHES, "a list of content hashes"),
+)
+
+# `knowledge-datamodel.md` §3.2. `height_support` and `default_spec` are typed
+# only as objects: the first is the union `Continuous(min,max,step) |
+# Discrete([heights])` and the second is `PanelSpec`, a tree this gate does not
+# descend. `version` is not typed at all -- §3.2 gives it none.
+FENCE_MODEL_SHAPE = (
+    ("id", _is_str, "a string"),
+    ("status", _is_str, "a string"),
+    ("name_i18n", _is_dict, _I18N),
+    ("grade", _is_str, "a string"),
+    ("height_support", _is_dict, "an object"),
+    ("option_axes", _OBJECTS, "a list of Axis objects"),
+    ("variants", _OBJECTS, "a list of Variant objects"),
+    ("layout_policy", _OBJECTS, "a list of PolicyContribution objects"),
+    ("default_spec", _is_dict, "a PanelSpec object"),
+    ("post", _is_dict, "a PostSlot object or null"),
+    ("assembly", _OBJECTS, "a list of AssemblyStep objects"),
+    ("authorship", _is_str, "a string"),
+    ("cites", _list_of(_is_source_ref), _REFS_DESC),
+    ("contributing_sources", _HASHES, "a list of content hashes"),
+)
+
+# §1.3. `rows[].value` is NOT typed: the contract declares it
+# `Quantity | Token | [[Quantity,Quantity], …]`, a three-way union whose middle
+# member has no shape here, and picking one would be this side deciding it.
+# `rows[].authority` is not typed either -- §1.3 names the field and no type.
+PARAMETER_TABLE_SHAPE = (
+    ("parameter", _is_str, "a string"),
+    ("scope", _is_dict, "an EntityRef object"),
+    ("task", _is_str, "a string"),
+    ("hit_policy", _is_str, "a string"),
+    ("value_type", _is_str, "a string"),
+    ("domain", _is_dict, "an object mapping each dimension to its values"),
+    ("domain_basis", _is_str, "a string"),
+    # Obligation 13: one scope per published condition key, so a mapping.
+    ("condition_scope", _is_dict, "an object mapping each dimension to its scope"),
+    ("rows", _OBJECTS, "a list of row objects"),
+    ("uncovered", _OBJECTS, "a list of uncovered-point objects"),
+)
+PARAMETER_ROW_SHAPE = (
+    ("conditions", _is_dict, "an object mapping each dimension to a value"),
+    ("condition_basis", _is_str, "a string"),
+    ("provenance", _is_dict, "a Provenance object"),
+    # §1.1 BINDING names these two by name as `Date`s.
+    ("valid_from", _is_date, _DATE),
+    ("valid_until", _is_date, _DATE),
+)
+
+# `knowledge-datamodel.md` §3.9. `members` and `claims` are typed as lists and
+# no further: `PartRef@version` and `ParameterTableRef` are named there and
+# defined nowhere. `valid_from`/`valid_until` are NOT typed as `Date`s -- §1.1's
+# BINDING date list names `SourceDoc`'s two and `ParameterTable.rows[]`'s two,
+# and does not name these.
+COMBINATION_SHAPE = (
+    ("id", _is_str, "a string"),
+    ("members", _is_list, "a list of PartRefs"),
+    ("claims", _is_list, "a list of ParameterTableRefs"),
+    ("cites", _list_of(_is_source_ref), _REFS_DESC),
+)
+
+
+def _shape_failures(obj: dict, at: str, shape, fail: list) -> bool:
+    """Append one failure per declared field of the wrong type; True if any.
+
+    The caller stops on True: nothing below may read a field whose type it has
+    just been told it cannot trust.
+    """
+    before = len(fail)
+    for name, ok, described in shape:
+        value = obj.get(name)
+        if name in obj and value is not None and not ok(value):
+            fail.append(f"{at}: {name} must be {described}, not {value!r}")
+    return len(fail) > before
+
+
 def verify(snapshot: dict) -> None:
     """Run the obligations that are checkable over a finished object.
 
@@ -763,11 +1572,41 @@ def verify(snapshot: dict) -> None:
         fail.append(f"regime {snapshot.get('regime')!r} is not one of the two. A "
                     f"snapshot serves exactly one standards regime and declares it.")
 
+    # G97. Every declared member is a list before anything iterates one. An
+    # empty list is the live value for five of the ten and stays valid; a scalar
+    # is not an empty list, it is an unpublishable payload. Substituting `[]`
+    # after the refusal is what lets the rest of this function collect the other
+    # failures rather than stopping at the first `enumerate(7)`.
+    members = {}
+    for key in DECLARED_LISTS:
+        value = snapshot.get(key, [])
+        if not isinstance(value, list):
+            fail.append(f"`{key}` must be a list, not "
+                        f"{type(value).__name__}; publish [] rather than a "
+                        f"value that cannot hold {key}")
+            value = []
+        members[key] = value
+
     held = set()
-    for d in snapshot.get("source_docs", []):
-        if d["content_hash"] in held:
-            fail.append(f"duplicate source_doc {d['content_hash'][:12]}...")
-        held.add(d["content_hash"])
+    for i, d in enumerate(members["source_docs"]):
+        at = f"source_docs[{i}]"
+        if not isinstance(d, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(d, at, SOURCE_DOC_SHAPE, fail):
+            continue
+        content_hash = d.get("content_hash")
+        if not isinstance(content_hash, str) or not content_hash.strip():
+            # No prior message said this, because `d["content_hash"]` raised
+            # `KeyError` instead. It is the join every `belongs_to` resolves
+            # through, so a doc without one is citable by nothing.
+            fail.append(f"{at}: no content_hash. §1.2.1's closure rule resolves "
+                        f"every SourceRef's belongs_to through it, so a doc "
+                        f"without one can be cited by nothing")
+        elif content_hash in held:
+            fail.append(f"duplicate source_doc {content_hash[:12]}...")
+        else:
+            held.add(content_hash)
         if d.get("source_class") not in SOURCE_CLASSES:
             fail.append(f"source_class {d.get('source_class')!r} is outside the "
                         f"closed vocabulary; the source policy ranks on it")
@@ -795,7 +1634,14 @@ def verify(snapshot: dict) -> None:
                 fail.append(f"{path}.ref: closure - attaches_to names "
                             f"{ref[:12]}..., not in source_docs")
             for key in HASH_BEARING:
-                for i, h in enumerate(node.get(key) or []):
+                # G97: `enumerate` on a scalar raised `TypeError` here, before
+                # any shape gate below could name the member it came from. The
+                # gates type both fields; this guard is what lets a wrong type
+                # be REPORTED rather than crashed past.
+                hashes = node.get(key)
+                if not isinstance(hashes, (list, tuple)):
+                    hashes = ()
+                for i, h in enumerate(hashes):
                     if isinstance(h, str) and h not in held:
                         fail.append(f"{path}.{key}[{i}]: closure - {h[:12]}... is "
                                     f"not in source_docs")
@@ -812,8 +1658,17 @@ def verify(snapshot: dict) -> None:
             fail.append(f"{path}: a float ({node!r}) cannot cross")
     walk(snapshot)
 
-    for i, w in enumerate(snapshot.get("warnings", [])):
+    for i, w in enumerate(members["warnings"]):
         at = f"warnings[{i}]"
+        if not isinstance(w, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(w, at, WARNING_SHAPE, fail):
+            continue
+        attaches_to = w.get("attaches_to")
+        if isinstance(attaches_to, dict) and _shape_failures(
+                attaches_to, f"{at}.attaches_to", ATTACHES_TO_SHAPE, fail):
+            continue
         if not w.get("cites"):
             fail.append(f"{at}: obligation 3 - every published value carries at "
                         f"least one resolvable SourceRef")
@@ -825,8 +1680,17 @@ def verify(snapshot: dict) -> None:
         elif kind not in ATTACHES_TO_KINDS:
             fail.append(f"{at}: attaches_to.kind {kind!r} is not one of the seven")
 
-    for i, g in enumerate(snapshot.get("gaps", [])):
+    for i, g in enumerate(members["gaps"]):
         at = f"gaps[{i}]"
+        if not isinstance(g, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(g, at, GAP_SHAPE, fail):
+            continue
+        because = g.get("because")
+        if isinstance(because, dict) and _shape_failures(
+                because, f"{at}.because", BECAUSE_SHAPE, fail):
+            continue
         if not g.get("would_close"):
             fail.append(f"{at}: obligation 8 - a gap says what would close it")
         if g.get("closes_by") not in ("knowledge", "planning"):
@@ -849,7 +1713,8 @@ def verify(snapshot: dict) -> None:
         # this check was added for.
         if g.get("cites") is None:
             fail.append(f"{at}: `cites` is absent; publish [] rather than omitting it")
-        elif not g["cites"] and (g.get("subject") or {}).get("kind") == "element":
+        elif (not g["cites"] and isinstance(g.get("subject"), dict)
+                and g["subject"].get("kind") == "element"):
             fail.append(f"{at}: obligation 8 - an element-scoped gap names a region "
                         f"and so has evidence; cite it")
         if g.get("severity") not in SEVERITIES:
@@ -876,8 +1741,16 @@ def verify(snapshot: dict) -> None:
     # `_source_class`'s own discipline in parameters.py.
     from .part_types import SPINE
     part_type_keys = set()
-    for i, pt in enumerate(snapshot.get("part_types", [])):
+    for i, pt in enumerate(members["part_types"]):
         at = f"part_types[{i}]"
+        if not isinstance(pt, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(pt, at, PART_TYPE_SHAPE, fail):
+            continue
+        if isinstance(pt.get("parent"), dict) and _shape_failures(
+                pt["parent"], f"{at}.parent", PART_TYPE_REF_SHAPE, fail):
+            continue
         namespace = pt.get("namespace")
         if namespace == "shared":
             fail.append(f"{at}: obligation 5 - `shared` is Planning's namespace; "
@@ -893,12 +1766,90 @@ def verify(snapshot: dict) -> None:
         if parent.get("namespace") != "shared" or parent.get("key") not in SPINE:
             fail.append(f"{at}: parent {parent} does not terminate in the spine")
 
+    # `procedures`. The shape is `knowledge-datamodel.md` §3.6 and the
+    # vocabularies are closed, so a value outside them is refused here rather
+    # than reaching a consumer that has no case for it.
+    STEP_KINDS = frozenset({"assembly", "installation", "preparation",
+                            "part_modification", "maintenance"})
+    STEP_SCOPES = frozenset({"panel", "bay", "post", "run", "site"})
+    EDGE_KINDS = frozenset({"after", "not_before", "before", "exclusive_with"})
+    procedure_ids = set()
+    # `procedures: []` is the live value in every stored snapshot and stays
+    # valid. G97 moved the list-type refusal that stood here up to the one loop
+    # that now makes it for all ten members; the message is unchanged.
+    for i, proc in enumerate(members["procedures"]):
+        at = f"procedures[{i}]"
+        if not isinstance(proc, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(proc, at, PROCEDURE_SHAPE, fail):
+            continue
+        pid = proc.get("id")
+        if not isinstance(pid, str) or not pid.strip():
+            fail.append(f"{at}: no id. N13 makes it load-bearing -- without one "
+                        f"`Warning.attaches_to{{kind: procedure}}` cannot address "
+                        f"this procedure and a correction reaches no siblings")
+        elif pid in procedure_ids:
+            fail.append(f"{at}: duplicate Procedure.id {pid!r}")
+        else:
+            procedure_ids.add(pid)
+        if not isinstance(proc.get("cites"), list) or not proc["cites"]:
+            fail.append(f"{at}: procedure must have cites")
+        steps = proc.get("steps")
+        if not isinstance(steps, list) or not steps:
+            fail.append(f"{at}: steps must be a nonempty list")
+            continue
+        # Validate before hashing: malformed keys must be reported, not crash.
+        valid_keys = [st["key"] for st in steps if isinstance(st, dict)
+                      and isinstance(st.get("key"), str) and st["key"].strip()]
+        keys = set(valid_keys)
+        if len(keys) != len(valid_keys):
+            fail.append(f"{at}: two steps share a key")
+        for j, st in enumerate(steps):
+            sat = f"{at}.steps[{j}]"
+            if not isinstance(st, dict):
+                fail.append(f"{sat}: must be an object")
+                continue
+            if _shape_failures(st, sat, STEP_SHAPE, fail):
+                continue
+            if not isinstance(st.get("key"), str) or not st["key"].strip():
+                fail.append(f"{sat}: key must be a nonempty string")
+            if st.get("kind") not in STEP_KINDS:
+                fail.append(f"{sat}: kind {st.get('kind')!r} is not one of "
+                            f"{sorted(STEP_KINDS)}")
+            if st.get("scope") not in STEP_SCOPES:
+                fail.append(f"{sat}: scope {st.get('scope')!r} is not one of "
+                            f"{sorted(STEP_SCOPES)}")
+            if not (st.get("cites") or []):
+                fail.append(f"{sat}: no cites; a published step must say where "
+                            f"it was read from")
+            if not (st.get("text_i18n") or "").strip():
+                fail.append(f"{sat}: empty text")
+            for k, edge in enumerate(st.get("requires") or []):
+                if _shape_failures(edge, f"{sat}.requires[{k}]", EDGE_SHAPE, fail):
+                    continue
+                if edge.get("kind") not in EDGE_KINDS:
+                    fail.append(f"{sat}: requires kind {edge.get('kind')!r} is not "
+                                f"one of {sorted(EDGE_KINDS)}")
+                if edge.get("step") not in keys:
+                    fail.append(f"{sat}: requires names {edge.get('step')!r}, which "
+                                f"is not a step of this procedure")
+
     PART_STATUSES = frozenset({"draft", "active", "retired"})
     SPEC_AGREE = frozenset({"==", "!=", "<=", ">=", "in", "supplies"})
     declared_part_types = [{"namespace": pt.get("namespace"), "key": pt.get("key")}
-                           for pt in snapshot.get("part_types", [])]
-    for i, p in enumerate(snapshot.get("parts", [])):
+                           for pt in members["part_types"]
+                           if isinstance(pt, dict)]
+    for i, p in enumerate(members["parts"]):
         at = f"parts[{i}]"
+        if not isinstance(p, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(p, at, PART_SHAPE, fail):
+            continue
+        if isinstance(p.get("type"), dict) and _shape_failures(
+                p["type"], f"{at}.type", PART_TYPE_REF_SHAPE, fail):
+            continue
         if p.get("status") not in PART_STATUSES:
             fail.append(f"{at}: status {p.get('status')!r} is not "
                         f"draft|active|retired")
@@ -914,12 +1865,59 @@ def verify(snapshot: dict) -> None:
                         f"in this snapshot")
         for j, sf in enumerate(p.get("spec") or []):
             sat = f"{at}.spec[{j}]"
+            # `spec` is typed a list of objects by PART_SHAPE, so `sf` is one.
+            if _shape_failures(sf, sat, SPEC_FIELD_SHAPE, fail):
+                continue
+            if isinstance(sf.get("provenance"), dict) and _shape_failures(
+                    sf["provenance"], f"{sat}.provenance", PROVENANCE_SHAPE, fail):
+                continue
             if sf.get("agree") not in SPEC_AGREE:
                 fail.append(f"{sat}: agree {sf.get('agree')!r} is not one of "
                             f"the six")
             if not (sf.get("provenance") or {}).get("cites"):
                 fail.append(f"{sat}: obligation 3 - a spec value carries a "
                             f"resolvable SourceRef")
+
+    # G97. The four members nothing read at all. There is no semantic check
+    # here yet to run after the shape gate -- the gate IS the check, which is
+    # exactly why a malformed one published rather than crashing.
+    for i, m in enumerate(members["models"]):
+        at = f"models[{i}]"
+        if not isinstance(m, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        _shape_failures(m, at, FENCE_MODEL_SHAPE, fail)
+
+    for i, table in enumerate(members["parameters"]):
+        at = f"parameters[{i}]"
+        if not isinstance(table, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        if _shape_failures(table, at, PARAMETER_TABLE_SHAPE, fail):
+            continue
+        for j, row in enumerate(table.get("rows") or []):
+            rat = f"{at}.rows[{j}]"
+            # `rows` is typed a list of objects above, so `row` is one.
+            if _shape_failures(row, rat, PARAMETER_ROW_SHAPE, fail):
+                continue
+            if isinstance(row.get("provenance"), dict):
+                _shape_failures(row["provenance"], f"{rat}.provenance",
+                                PROVENANCE_SHAPE, fail)
+
+    for i, c in enumerate(members["combinations"]):
+        at = f"combinations[{i}]"
+        if not isinstance(c, dict):
+            fail.append(f"{at}: must be an object")
+            continue
+        _shape_failures(c, at, COMBINATION_SHAPE, fail)
+
+    # `Rule` is named in §1.2's payload and defined in no document on either
+    # side, so object-ness is the whole of what can be checked without this
+    # side inventing the type. Obligation 17's reasoning for `Combination`
+    # applies harder here: nothing consumes one yet.
+    for i, r in enumerate(members["rules"]):
+        if not isinstance(r, dict):
+            fail.append(f"rules[{i}]: must be an object")
 
     if fail:
         raise VerificationFailed(
@@ -928,14 +1926,15 @@ def verify(snapshot: dict) -> None:
 
 
 def build_snapshot(*, tenant: str, regime: str = "us_astm",
-                   conn: sqlite3.Connection | None = None) -> dict:
+                   conn: sqlite3.Connection | None = None, authored_records=(),
+                   authored_reviews=(), authored_model_validator=None) -> dict:
     """Assemble, canonicalise and hash. Provenance first -- closure needs it."""
     validate_tenant(tenant)     # before a connection is opened, not after
     own = conn is None
     conn = conn or connect(read_only=True)
     try:
         b = SnapshotBuilder(conn, tenant=tenant, regime=regime)
-        warnings = b.warnings()            # mints refs, registers docs, raises gaps
+        warnings = b.warnings()   # mints refs, registers docs, raises gaps
 
         # Parameter tables are built through the SAME ref minter, so §1.2.1's
         # closure rule stays STRUCTURAL rather than merely checked: minting a
@@ -947,7 +1946,8 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
         # the builder, so the closure rule stays structural.
         parameters, parameter_gaps = build_parameter_tables(
             conn, tenant=tenant,
-            source_ref=lambda eid: asdict(b.source_ref(eid)))
+            source_ref=lambda eid: asdict(b.source_ref(eid)),
+            source_ref_page=lambda d, pg: asdict(b.source_ref_page(d, pg)))
         for g in parameter_gaps:
             b.gap(kind=g["kind"], subject=g["subject"],
                   code=g["because"]["code"], params=g["because"].get("params") or {},
@@ -967,7 +1967,9 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
 
         # PartType/Part (obligation 5, and the identity half of obligation 14):
         # same ref minter, same closure-is-structural reasoning as above.
-        from .part_types import PartTypeRegistry, build_part_types, load_slice_components
+        from .part_types import (PartTypeRegistry, build_part_types,
+                                 load_augusta_components, load_emblem_components,
+                                 load_pembroke_components, load_slice_components)
         from .parts import build_parts
         components = load_slice_components()      # DatasetChanged -> build fails closed
         part_type_registry = PartTypeRegistry()
@@ -975,6 +1977,48 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
         parts, part_gaps = build_parts(
             components, part_type_registry, conn=conn,
             source_ref=lambda eid: asdict(b.source_ref(eid)))
+        emblem_components = load_emblem_components()
+        emblem_registry = PartTypeRegistry("Freedom Outdoor Living")
+        emblem_types, emblem_type_gaps = build_part_types(
+            emblem_components, emblem_registry)
+        emblem_parts, emblem_part_gaps = build_parts(
+            emblem_components, emblem_registry, conn=conn,
+            identity_namespace=emblem_registry.namespace,
+            source_ref=lambda eid: asdict(b.source_ref(eid)))
+        # Weatherables Augusta: authored composition components carry identity
+        # and per-panel counts (C3 authored membership, bases recorded in the
+        # dataset); the shared mfr/weatherables namespace also fires the
+        # scoped drawing/specsheet recipe once for value-backed Parts.
+        augusta_components = load_augusta_components()
+        augusta_registry = PartTypeRegistry("Weatherables")
+        augusta_types, augusta_type_gaps = build_part_types(
+            augusta_components, augusta_registry)
+        augusta_parts, augusta_part_gaps = build_parts(
+            augusta_components, augusta_registry, conn=conn,
+            identity_namespace=augusta_registry.namespace,
+            source_ref=lambda eid: asdict(b.source_ref(eid)))
+        # Weatherables Pembroke: the same authored-composition treatment, on
+        # the same shared mfr/weatherables namespace; the scoped HTML/specsheet
+        # recipe fires for its value-backed Parts.
+        pembroke_components = load_pembroke_components()
+        pembroke_registry = PartTypeRegistry("Weatherables")
+        pembroke_types, pembroke_type_gaps = build_part_types(
+            pembroke_components, pembroke_registry)
+        pembroke_parts, pembroke_part_gaps = build_parts(
+            pembroke_components, pembroke_registry, conn=conn,
+            identity_namespace=pembroke_registry.namespace,
+            source_ref=lambda eid: asdict(b.source_ref(eid)))
+        # The Augusta and Pembroke slices share the manufacturer namespace and
+        # mint the same extension rows (picket, post_stiffener_aluminum) twice;
+        # dedup by (namespace, key), matching the verify() uniqueness rule.
+        _weatherables_types = {((pt["namespace"], pt["key"])): pt
+                               for pt in augusta_types + pembroke_types}
+        part_types = sorted(part_types + emblem_types
+                            + list(_weatherables_types.values()),
+                            key=lambda pt: (pt["namespace"], pt["key"]))
+        parts = sorted(parts + emblem_parts + augusta_parts + pembroke_parts, key=lambda part: part["id"])
+        part_type_gaps += emblem_type_gaps + augusta_type_gaps + pembroke_type_gaps
+        part_gaps += emblem_part_gaps + augusta_part_gaps + pembroke_part_gaps
         for g in (*part_type_gaps, *part_gaps):
             b.gap(kind=g["kind"], subject=g["subject"],
                   code=g["because"]["code"], params=g["because"].get("params") or {},
@@ -986,6 +2030,29 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
         # meaning. `retain_until` is deliberately outside it: it moves with the
         # clock, and hashing it would mean two builds over identical knowledge
         # never matched -- which is the opposite of what obligation 1 asks for.
+        from .procedures import build_procedures
+        procedures, procedure_gaps = build_procedures(
+            conn, tenant=tenant,
+            source_ref_page=lambda d, pg: asdict(b.source_ref_page(d, pg)))
+        for g in procedure_gaps:
+            b.gap(kind=g["kind"], subject=g["subject"],
+                  code=g["because"]["code"], params=g["because"].get("params"),
+                  cites=[SourceRef(**c) for c in g.get("cites") or []],
+                  would_close=g["would_close"], closes_by=g["closes_by"],
+                  severity=g["severity"], on=g.get("on"))
+
+        from .authored_publication import build_authored_models
+        models = build_authored_models(
+            b, list(authored_records), parts, reviews=authored_reviews,
+            model_validator=authored_model_validator)
+
+        # G78. Every extraction failure this platform already DETECTED,
+        # published as a gap. Runs LAST of the ref-minting passes, and that
+        # ordering is load-bearing: its severity rule asks whether a document
+        # already backs a published value, which is only knowable once
+        # warnings, parameters and parts have registered theirs.
+        b.quality_gaps()
+
         members = {
             "tenant": tenant,
             "regime": regime,
@@ -998,7 +2065,7 @@ def build_snapshot(*, tenant: str, regime: str = "us_astm",
             # declared and empty rather than absent: an absent key reads as an
             # oversight, an empty list reads as "we publish none of these yet".
             "part_types": part_types, "parts": parts,
-            "models": [], "procedures": [],
+            "models": models, "procedures": procedures,
             "parameters": parameters, "combinations": [], "rules": [],
         }
         canonical_bytes(members)           # refuses floats, sets, unsortable keys

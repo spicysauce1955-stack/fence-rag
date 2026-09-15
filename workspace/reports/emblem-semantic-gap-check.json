@@ -1,0 +1,17 @@
+{
+  "candidate_hash": "b769316821cbbc0928406872f25b01a171ccc8ce9255ad064c6b33cad867fdf9",
+  "probe_kind": "partial_semantic_validation_with_empty_catalog_and_no_part_library",
+  "parser_accepts": true,
+  "semantic_errors": [
+    "infill member 'board': base_ref and top_ref with length_rule=None is not yet supported (phase 2): only 'between_frame' measures against the frame, so these refs would be read by nothing and the member would still be cut to the rule it declares",
+    "frame slot 'bottom_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have \u2014 the drawing would show a housed joint and the cut list would read as a butt one. Give the channel its depth, or call the joint 'butt'",
+    "frame slot 'top_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have \u2014 the drawing would show a housed joint and the cut list would read as a butt one. Give the channel its depth, or call the joint 'butt'"
+  ],
+  "limitations": [
+    "Catalog is intentionally empty: product availability errors are diagnostic, not evidence of supplier absence.",
+    "No Part library supplied: consumer skips Part-dependent dimensional checks.",
+    "This is not complete semantic validation or BOM generation."
+  ],
+  "publication_builder": "fence_evidence/snapshot.py currently hardcodes models=[]",
+  "bom_generation_verified": false
+}

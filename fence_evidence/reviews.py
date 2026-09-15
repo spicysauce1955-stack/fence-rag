@@ -1132,10 +1132,16 @@ def reattach_fact_reviews(conn: sqlite3.Connection, *, superseded=None,
 # the Phase 2 design says of a table review. See G46.
 
 LEDGER_PATH = CATALOG_DIR / "review-ledger.jsonl"
-LEDGER_SCHEMA = 1
+# 2 since step reviews joined: the header carries per-kind counts, so a third
+# kind changes its shape. `read_ledger` accepts 1 as well -- a file exported
+# before step reviews existed is a valid ledger, and refusing it would strand
+# every export already taken.
+LEDGER_SCHEMA = 2
+LEDGER_SCHEMAS_READABLE = (1, 2)
 LEDGER_HEADER_KIND = "ledger"
 KIND_TABLE_REVIEW = "table_review"
 KIND_FACT_REVIEW = "fact_review"
+KIND_STEP_REVIEW = "step_review"
 
 _TABLE_REVIEW_COLUMNS = ("review_id", "crop_sha256", "document_id", "page_no",
                          "reviewer", "reviewed_at", "verdict", "grid", "spans",
@@ -1146,6 +1152,13 @@ _FACT_REVIEW_COLUMNS = ("fact_review_id", "ref_id", "document_id", "page_no",
                         "element_id", "fact_type", "reviewer", "reviewed_at",
                         "verdict", "value_before", "status_before",
                         "reviewed_value", "notes")
+# `candidate_id` is deliberately absent for the same reason `fact_id` is: the
+# splitter re-mints it on every run. The anchor is the evidence -- the element,
+# the span within it, and the text the reviewer actually saw.
+_STEP_REVIEW_COLUMNS = ("step_review_id", "element_id", "char_start", "char_end",
+                        "text_seen", "document_id", "page_no", "reviewer",
+                        "reviewed_at", "verdict", "step_kind", "step_scope",
+                        "slot_target", "text_final", "status_before", "notes")
 
 
 def _table_review_record(row) -> dict:
@@ -1168,11 +1181,24 @@ def _fact_review_record(row) -> dict:
     return rec
 
 
+def _step_review_record(row) -> dict:
+    rec = {"kind": KIND_STEP_REVIEW}
+    for col in _STEP_REVIEW_COLUMNS:
+        rec[col] = row[col]
+    return rec
+
+
 def _ledger_sort_key(rec):
     if rec["kind"] == KIND_TABLE_REVIEW:
         return (rec["kind"], rec["crop_sha256"], rec["reviewed_at"], rec["review_id"])
+    if rec["kind"] == KIND_STEP_REVIEW:
+        # Ordered on fields that do not move, like the other two.
+        return (rec["kind"], rec["element_id"], str(rec["char_start"]),
+                str(rec["char_end"]), rec["reviewed_at"], rec["step_review_id"])
+    # Fact projection uses arrival order, including backdated decisions. The
+    # stable sort groups evidence without changing that order within a group.
     return (rec["kind"], rec["element_id"], rec["fact_type"],
-            rec["value_before"] or "", rec["reviewed_at"], rec["fact_review_id"])
+            rec["value_before"] or "")
 
 
 def build_ledger(conn: sqlite3.Connection) -> list[dict]:
@@ -1183,14 +1209,18 @@ def build_ledger(conn: sqlite3.Connection) -> list[dict]:
     has been recorded in this store"* is a statement worth committing.
     """
     ensure_fact_reviews(conn)
-    body = [_table_review_record(r) for r in
-            conn.execute("SELECT * FROM table_reviews")]
+    ensure_step_reviews(conn)
+    tables = [_table_review_record(r) for r in
+              conn.execute("SELECT * FROM table_reviews")]
     facts = [_fact_review_record(r) for r in
-             conn.execute("SELECT * FROM fact_reviews")]
-    body.extend(facts)
+             conn.execute("SELECT * FROM fact_reviews ORDER BY rowid")]
+    steps_ = [_step_review_record(r) for r in
+              conn.execute("SELECT * FROM step_reviews")]
+    body = tables + facts + steps_
     body.sort(key=_ledger_sort_key)
     header = {"kind": LEDGER_HEADER_KIND, "schema": LEDGER_SCHEMA,
-              "fact_reviews": len(facts), "table_reviews": len(body) - len(facts)}
+              "fact_reviews": len(facts), "table_reviews": len(tables),
+              "step_reviews": len(steps_)}
     return [header] + body
 
 
@@ -1243,13 +1273,13 @@ def read_ledger(path) -> tuple[dict, list[dict]]:
     if not isinstance(header, dict) or header.get("kind") != LEDGER_HEADER_KIND:
         raise ReviewRefused("error.malformed_ledger",
                             f"{p} does not begin with a ledger header")
-    if header.get("schema") != LEDGER_SCHEMA:
+    if header.get("schema") not in LEDGER_SCHEMAS_READABLE:
         raise ReviewRefused(
             "error.malformed_ledger",
             f"{p} is schema {header.get('schema')!r}; this build reads "
             f"{LEDGER_SCHEMA}")
     body = parsed[1:]
-    counts = {KIND_TABLE_REVIEW: 0, KIND_FACT_REVIEW: 0}
+    counts = {KIND_TABLE_REVIEW: 0, KIND_FACT_REVIEW: 0, KIND_STEP_REVIEW: 0}
     for i, rec in enumerate(body, start=2):
         if not isinstance(rec, dict):
             raise ReviewRefused("error.malformed_ledger",
@@ -1259,6 +1289,7 @@ def read_ledger(path) -> tuple[dict, list[dict]]:
             raise ReviewRefused("error.malformed_ledger",
                                 f"{p} line {i} has kind {kind!r}")
         required = (_TABLE_REVIEW_COLUMNS if kind == KIND_TABLE_REVIEW
+                    else _STEP_REVIEW_COLUMNS if kind == KIND_STEP_REVIEW
                     else _FACT_REVIEW_COLUMNS)
         missing = [c for c in required if c not in rec]
         if missing:
@@ -1270,10 +1301,19 @@ def read_ledger(path) -> tuple[dict, list[dict]]:
                 f"{p} line {i} carries a fact_id. A fact id moves on every "
                 f"re-extraction and is resolved from the evidence on import; "
                 f"a ledger that names one is describing a store, not a review")
+        if kind == KIND_STEP_REVIEW and "candidate_id" in rec:
+            raise ReviewRefused(
+                "error.malformed_ledger",
+                f"{p} line {i} carries a candidate_id. The splitter re-mints it "
+                f"on every run; a ledger that names one is describing a store, "
+                f"not a review")
         counts[kind] += 1
     for kind, key in ((KIND_TABLE_REVIEW, "table_reviews"),
-                      (KIND_FACT_REVIEW, "fact_reviews")):
-        if header.get(key) != counts[kind]:
+                      (KIND_FACT_REVIEW, "fact_reviews"),
+                      (KIND_STEP_REVIEW, "step_reviews")):
+        # A schema-1 header has no `step_reviews` key and no step lines, which
+        # reconciles at 0 without needing a special case.
+        if header.get(key, 0) != counts[kind]:
             raise ReviewRefused(
                 "error.malformed_ledger",
                 f"{p} header says {header.get(key)!r} {key} and the body holds "
@@ -1285,6 +1325,39 @@ def _differences(ledger_rec: dict, store_rec: dict) -> dict:
     return {k: {"ledger": ledger_rec.get(k), "store": store_rec.get(k)}
             for k in sorted(set(ledger_rec) | set(store_rec))
             if ledger_rec.get(k) != store_rec.get(k)}
+
+
+def _fact_review_order_conflicts(conn, body, inserts):
+    """Refuse replay histories that append an older decision after a newer one.
+
+    New decisions can extend an existing history only when the ledger includes
+    that history as its prefix. A subset containing only known decisions is safe
+    when its relative order agrees; it must not reorder the local history.
+    """
+    groups = {}
+    for rec in body:
+        if rec["kind"] == KIND_FACT_REVIEW:
+            anchor = (rec["element_id"], rec["fact_type"], rec["value_before"])
+            groups.setdefault(anchor, []).append(rec["fact_review_id"])
+    new_ids = {rec["fact_review_id"] for kind, rec, _ in inserts
+               if kind == KIND_FACT_REVIEW}
+    conflicts = []
+    for anchor, incoming in groups.items():
+        existing = [r[0] for r in conn.execute("""
+            SELECT fact_review_id FROM fact_reviews
+             WHERE element_id=? AND fact_type=? AND value_before IS ?
+             ORDER BY rowid""", anchor)]
+        positions = {rid: i for i, rid in enumerate(existing)}
+        shared = [positions[rid] for rid in incoming if rid in positions]
+        extends = any(rid in new_ids for rid in incoming)
+        if (shared != sorted(set(shared))
+                or (extends and incoming[:len(existing)] != existing)):
+            conflicts.append({"kind": KIND_FACT_REVIEW,
+                              "id": incoming[0], "code": "review_order_conflict",
+                              "existing_order": existing,
+                              "incoming_order": incoming,
+                              "why": "Ledger order conflicts with the existing fact-review history; no decisions were imported."})
+    return conflicts
 
 
 def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> dict:
@@ -1301,7 +1374,9 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
     * **conflict** -- the id is here and says something *else*. Two records of
       one person's decision disagree, and that is for a person to resolve. The
       whole import is refused; nothing at all is written, including the lines
-      that would have been fine.
+      that would have been fine. Incompatible fact-review order also refuses
+      the import: an older missing decision must not replace a newer one by
+      arriving last during a partial replay.
 
     On success the projections are rebuilt from the records, so the store's
     `facts` and `table_read_candidates` annotations follow the reviews rather
@@ -1309,6 +1384,9 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
     """
     header, body = read_ledger(path)
     ensure_fact_reviews(conn)
+    ensure_step_reviews(conn)
+    per_kind = {k: {"new": 0, "identical": 0, "unresolvable": 0}
+                for k in (KIND_TABLE_REVIEW, KIND_FACT_REVIEW, KIND_STEP_REVIEW)}
 
     inserts: list[tuple[str, dict, int | None]] = []
     identical = conflicts = unresolvable = 0
@@ -1327,8 +1405,47 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
                                                 "differs": differs})
                 else:
                     identical += 1
+                    per_kind[KIND_TABLE_REVIEW]["identical"] += 1
                 continue
             inserts.append((KIND_TABLE_REVIEW, rec, None))
+            per_kind[KIND_TABLE_REVIEW]["new"] += 1
+            continue
+
+        if rec["kind"] == KIND_STEP_REVIEW:
+            existing = conn.execute(
+                "SELECT * FROM step_reviews WHERE step_review_id = ?",
+                (rec["step_review_id"],)).fetchone()
+            if existing is not None:
+                differs = _differences(rec, _step_review_record(existing))
+                if differs:
+                    conflicts += 1
+                    detail["conflicts"].append({"kind": rec["kind"],
+                                                "id": rec["step_review_id"],
+                                                "differs": differs})
+                else:
+                    identical += 1
+                    per_kind[KIND_STEP_REVIEW]["identical"] += 1
+                continue
+            # The anchor must name exactly one candidate in THIS store. A
+            # review whose span no longer exists is reported, never guessed at
+            # -- the same rule the fact loop applies to its own anchor.
+            hit = conn.execute(
+                """SELECT COUNT(*) FROM step_candidates
+                    WHERE element_id=? AND char_start=? AND char_end=?""",
+                (rec["element_id"], rec["char_start"], rec["char_end"])).fetchone()[0]
+            if hit != 1:
+                unresolvable += 1
+                per_kind[KIND_STEP_REVIEW]["unresolvable"] += 1
+                detail["unresolvable"].append({
+                    "kind": rec["kind"], "id": rec["step_review_id"],
+                    "element_id": rec["element_id"],
+                    "span": [rec["char_start"], rec["char_end"]],
+                    "why": ("no step candidate in this store covers that span"
+                            if hit == 0 else
+                            "more than one candidate covers that span")})
+                continue
+            inserts.append((KIND_STEP_REVIEW, rec, None))
+            per_kind[KIND_STEP_REVIEW]["new"] += 1
             continue
 
         existing = conn.execute("SELECT * FROM fact_reviews WHERE fact_review_id = ?",
@@ -1342,11 +1459,13 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
                                             "differs": differs})
             else:
                 identical += 1
+                per_kind[KIND_FACT_REVIEW]["identical"] += 1
             continue
         candidates, others = _facts_matching(conn, rec["element_id"],
                                              rec["fact_type"], rec["value_before"])
         if len(candidates) != 1:
             unresolvable += 1
+            per_kind[KIND_FACT_REVIEW]["unresolvable"] += 1
             detail["unresolvable"].append({
                 "kind": rec["kind"], "id": rec["fact_review_id"],
                 "element_id": rec["element_id"], "fact_type": rec["fact_type"],
@@ -1359,11 +1478,18 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
                         "did not")})
             continue
         inserts.append((KIND_FACT_REVIEW, rec, candidates[0]))
+        per_kind[KIND_FACT_REVIEW]["new"] += 1
 
+    order_conflicts = _fact_review_order_conflicts(conn, body, inserts)
+    conflicts += len(order_conflicts)
+    detail["conflicts"].extend(order_conflicts)
     out = {"records": len(body), "inserted": len(inserts), "identical": identical,
            "conflicts": conflicts, "unresolvable": unresolvable,
            "applied": False, "refused": bool(conflicts), "detail": detail,
-           "projection": None, "dry_run": bool(dry_run)}
+           "projection": None, "dry_run": bool(dry_run),
+           "table_reviews": per_kind[KIND_TABLE_REVIEW],
+           "fact_reviews": per_kind[KIND_FACT_REVIEW],
+           "step_reviews": per_kind[KIND_STEP_REVIEW]}
     if dry_run or conflicts:
         return out
 
@@ -1371,7 +1497,26 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
     if started_here:
         conn.execute("BEGIN IMMEDIATE")
     try:
+        # Another writer may have extended the history after the preflight.
+        # Check again while the write transaction protects its precedence.
+        order_conflicts = _fact_review_order_conflicts(conn, body, inserts)
+        if order_conflicts:
+            out['conflicts'] += len(order_conflicts)
+            out['detail']['conflicts'].extend(order_conflicts)
+            out['refused'] = True
+            if started_here:
+                conn.rollback()
+            return out
         for kind, rec, fact_id in inserts:
+            if kind == KIND_STEP_REVIEW:
+                conn.execute("""INSERT INTO step_reviews
+                    (step_review_id, element_id, char_start, char_end, text_seen,
+                     document_id, page_no, reviewer, reviewed_at, verdict,
+                     step_kind, step_scope, slot_target, text_final,
+                     status_before, notes)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    tuple(rec[c] for c in _STEP_REVIEW_COLUMNS))
+                continue
             if kind == KIND_TABLE_REVIEW:
                 conn.execute("""INSERT INTO table_reviews
                     (review_id, crop_sha256, document_id, page_no, reviewer,
@@ -1399,5 +1544,373 @@ def import_reviews(conn: sqlite3.Connection, path, *, dry_run: bool = True) -> d
         raise
     out["applied"] = True
     out["projection"] = {"tables": rebuild_projection(conn),
-                         "facts": rebuild_fact_projection(conn)}
+                         "facts": rebuild_fact_projection(conn),
+                         "steps": rebuild_step_projection(conn)}
+    return out
+
+
+# ------------------------------------------------- step reviews (the slice)
+# The vocabularies a reviewer may choose from, straight out of
+# `knowledge-datamodel.md` §3.6. Closed sets: a value outside them cannot be
+# published, so it is refused at the door rather than at the wire.
+STEP_KINDS = ("assembly", "installation", "preparation", "part_modification",
+              "maintenance")
+STEP_SCOPES = ("panel", "bay", "post", "run", "site")
+STEP_VERDICTS = ("accepted", "corrected", "rejected")
+STEP_STATUS_FOR_VERDICT = {"accepted": "accepted", "corrected": "corrected",
+                           "rejected": "rejected"}
+# What a rebuild may overwrite. `unreviewed` is the default a candidate is born
+# with; anything else here was written by a review and only a review may move
+# it. Same reasoning as REVIEW_STATUSES for the table loop.
+STEP_STATUSES = tuple(STEP_STATUS_FOR_VERDICT.values())
+
+
+def ensure_step_reviews(conn: sqlite3.Connection) -> None:
+    """Create `step_reviews` if this store predates it."""
+    from .store import STEP_REVIEWS_DDL
+    conn.executescript(STEP_REVIEWS_DDL)
+
+
+def _step_anchor(element_id: str, char_start: int, char_end: int) -> tuple:
+    """The evidence a step review is about: a span of one element.
+
+    NOT `candidate_id`. The splitter re-runs and re-mints every id -- four times
+    in one day on the slice page -- so a review keyed on a row id would be
+    silently orphaned by an ordinary re-proposal.
+    """
+    return (element_id, char_start, char_end)
+
+
+def submit_step_review(conn: sqlite3.Connection, *, element_id: str,
+                       char_start: int, char_end: int, text_seen: str,
+                       reviewer: str, verdict: str, step_kind: str | None = None,
+                       step_scope: str | None = None,
+                       slot_target: dict | None = None,
+                       text_final: str | None = None,
+                       notes: str | None = None) -> dict:
+    """Record one person's judgement about one step candidate.
+
+    Refuses rather than guesses: a blank reviewer, a verdict outside
+    `STEP_VERDICTS`, a `kind`/`scope` outside the published vocabularies, an
+    anchor naming no candidate, or text that is not what the candidate holds
+    now. That last is the echo check -- if the splitter has moved since the
+    person looked, the review is of something that no longer exists.
+    """
+    from .store import now
+    ensure_step_reviews(conn)
+    if not (reviewer or "").strip():
+        raise ReviewRefused(
+            "error.missing_reviewer",
+            "a step review needs a reviewer: the name is the only thing "
+            "separating 'software read this' from 'a person confirmed it'")
+    if verdict not in STEP_VERDICTS:
+        raise ReviewRefused(
+            "error.bad_verdict",
+            f"verdict must be one of {', '.join(STEP_VERDICTS)}; got {verdict!r}. "
+            f"No machine verdict belongs here -- that is what A1/CUR-S0 revoked.")
+    if step_kind is not None and step_kind not in STEP_KINDS:
+        raise ReviewRefused("error.bad_step_kind",
+                            f"kind must be one of {', '.join(STEP_KINDS)}")
+    if step_scope is not None and step_scope not in STEP_SCOPES:
+        raise ReviewRefused("error.bad_step_scope",
+                            f"scope must be one of {', '.join(STEP_SCOPES)}")
+
+    row = conn.execute(
+        """SELECT * FROM step_candidates
+            WHERE element_id=? AND char_start=? AND char_end=?""",
+        _step_anchor(element_id, char_start, char_end)).fetchone()
+    if row is None:
+        raise ReviewRefused(
+            "error.no_such_candidate",
+            f"no step candidate at {element_id} chars {char_start}-{char_end}")
+    if row["text_raw"] != text_seen:
+        raise ReviewRefused(
+            "error.text_moved",
+            f"the candidate at {element_id} chars {char_start}-{char_end} no "
+            f"longer holds the text this review is about; it was re-cut after "
+            f"the reviewer looked, so the review is of something that is gone")
+
+    reviewed_at = now()
+    payload = json.dumps({"verdict": verdict, "kind": step_kind,
+                          "scope": step_scope, "slot": slot_target,
+                          "text": text_final, "notes": notes},
+                         sort_keys=True, separators=(",", ":"))
+    # The payload is folded into the id for the reason `review_id` folds it in:
+    # `now()` has one-second resolution, so two submissions in one second would
+    # otherwise collide and INSERT OR REPLACE would drop the first.
+    step_review_id = hashlib.sha256(
+        f"{element_id}:{char_start}:{char_end}:{reviewer}:{reviewed_at}:{payload}"
+        .encode()).hexdigest()[:16]
+
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        conn.execute(
+            """INSERT OR REPLACE INTO step_reviews
+               (step_review_id, element_id, char_start, char_end, text_seen,
+                document_id, page_no, reviewer, reviewed_at, verdict, step_kind,
+                step_scope, slot_target, text_final, status_before, notes)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (step_review_id, element_id, char_start, char_end, text_seen,
+             row["document_id"], row["page_no"], reviewer, reviewed_at, verdict,
+             step_kind, step_scope,
+             json.dumps(slot_target, sort_keys=True) if slot_target else None,
+             text_final, row["review_status"], notes))
+        latest = conn.execute(
+            """SELECT * FROM step_reviews
+                WHERE element_id=? AND char_start=? AND char_end=?
+                ORDER BY reviewed_at DESC, step_review_id DESC LIMIT 1""",
+            (element_id, char_start, char_end)).fetchone()
+        _project_step(conn, element_id, char_start, char_end,
+                      STEP_STATUS_FOR_VERDICT[latest["verdict"]],
+                      latest["reviewer"], latest["reviewed_at"])
+        conn.execute("COMMIT")
+    except Exception:
+        conn.execute("ROLLBACK")
+        raise
+    return {"step_review_id": step_review_id, "verdict": verdict,
+            "reviewer": reviewer, "reviewed_at": reviewed_at}
+
+
+def _project_step(conn, element_id, char_start, char_end, status, reviewer,
+                  reviewed_at) -> None:
+    """The ONLY writer of the projection columns. Sets every one on every call,
+    including back to NULL, so a rebuild cannot leave a stale half-state."""
+    conn.execute(
+        """UPDATE step_candidates
+              SET review_status=?, reviewer=?, reviewed_at=?
+            WHERE element_id=? AND char_start=? AND char_end=?""",
+        (status, reviewer, reviewed_at, element_id, char_start, char_end))
+
+
+def rebuild_step_projection(conn: sqlite3.Connection) -> dict:
+    """Regenerate the projection from `step_reviews` alone.
+
+    This is what makes a review survive a re-cut of the queue: the candidates
+    are rebuildable, the reviews are not, and the anchor is evidence rather
+    than a row id. Latest review time wins; review id breaks timestamp ties
+    deterministically, including after an import with a different arrival order.
+    """
+    ensure_step_reviews(conn)
+    conn.execute(
+        f"""UPDATE step_candidates SET review_status='unreviewed',
+                   reviewer=NULL, reviewed_at=NULL
+             WHERE review_status IN ({','.join('?' * len(STEP_STATUSES))})""",
+        STEP_STATUSES)
+    applied = orphaned = 0
+    for r in conn.execute("""SELECT * FROM step_reviews
+                             ORDER BY reviewed_at, step_review_id"""):
+        hit = conn.execute(
+            """SELECT 1 FROM step_candidates
+                WHERE element_id=? AND char_start=? AND char_end=?""",
+            (r["element_id"], r["char_start"], r["char_end"])).fetchone()
+        if hit is None:
+            orphaned += 1
+            continue
+        _project_step(conn, r["element_id"], r["char_start"], r["char_end"],
+                      STEP_STATUS_FOR_VERDICT[r["verdict"]], r["reviewer"],
+                      r["reviewed_at"])
+        applied += 1
+    conn.commit()
+    return {"applied": applied, "orphaned": orphaned}
+
+
+# ----------------------------------------------- a sitting's worth of decisions
+# `submit_step_review` records ONE judgement. A page of the Bufftech guide holds
+# ~55 candidates, so a sitting through the one-at-a-time CLI is 55 process
+# invocations, each carrying a candidate id, a kind, a scope and a slot that must
+# all be typed right -- and any one of which can fail halfway through, leaving
+# the owner unable to say which decisions landed. That surface has produced 0
+# step reviews since the table was built.
+#
+# So the batch is the unit. It is validated whole and written whole: one bad row
+# refuses all of them, because half a sitting cannot be re-run without
+# re-deciding the half that took.
+#
+# The fields a decision may carry, and nothing else. A typo -- `kind` for
+# `step_kind` -- would otherwise drop a person's classification silently and
+# record an accept that can never publish, which is the exact failure this
+# module exists to prevent at the other seams.
+STEP_DECISION_FIELDS = frozenset((
+    "candidate_id", "element_id", "char_start", "char_end", "text_seen",
+    "verdict", "step_kind", "step_scope", "slot_target", "text_final",
+    "notes", "reviewer"))
+
+
+def read_step_decisions(path) -> list[dict]:
+    """A decision file: JSONL, or a JSON array. Blank lines are ignored.
+
+    JSONL because the surface that produces it is a browser page with no server
+    -- one decision per line survives a clipboard, an append and a diff. An
+    EMPTY file is refused rather than read as an empty batch: a sitting that
+    recorded nothing must not report success, which is the vacuous-green class
+    `cli snapshot` and `cli refs` already refuse.
+    """
+    text = Path(path).read_text()
+    stripped = text.strip()
+    if not stripped:
+        raise ReviewRefused(
+            "error.empty_decision_file",
+            f"{path} holds no decisions; a sitting that recorded nothing is "
+            f"not a sitting that succeeded")
+    if stripped[0] == "[":
+        out = json.loads(stripped)
+        if not isinstance(out, list):
+            raise ReviewRefused("error.bad_decision_file",
+                                f"{path} is not a list of decisions")
+    else:
+        out = [json.loads(line) for line in text.splitlines() if line.strip()]
+    if not out:
+        raise ReviewRefused(
+            "error.empty_decision_file",
+            f"{path} holds no decisions; a sitting that recorded nothing is "
+            f"not a sitting that succeeded")
+    for i, d in enumerate(out):
+        if not isinstance(d, dict):
+            raise ReviewRefused("error.bad_decision_file",
+                                f"decision {i} in {path} is not an object")
+    return out
+
+
+def _resolve_decision(conn, d: dict, at: int, reviewer: str | None):
+    """`(kwargs, refusal)` — exactly one of them is None.
+
+    Everything a decision can get wrong is caught here, before anything is
+    written: an unknown field, a candidate that does not exist, an accept with
+    no classification, or text the candidate no longer holds.
+    """
+    def no(code, message):
+        return None, {"at": at, "code": code, "message": message,
+                      "candidate_id": d.get("candidate_id"),
+                      "element_id": d.get("element_id")}
+
+    unknown = sorted(set(d) - STEP_DECISION_FIELDS)
+    if unknown:
+        return no("error.unknown_field",
+                  f"decision {at} carries {', '.join(unknown)}, which this "
+                  f"loop does not read -- a dropped field is a dropped "
+                  f"judgement, so the batch stops here")
+
+    who = (d.get("reviewer") or reviewer or "").strip()
+    if not who:
+        return no("error.missing_reviewer",
+                  f"decision {at} names no reviewer")
+
+    verdict = d.get("verdict")
+    if verdict not in STEP_VERDICTS:
+        return no("error.bad_verdict",
+                  f"decision {at}: verdict must be one of "
+                  f"{', '.join(STEP_VERDICTS)}; got {verdict!r}")
+
+    step_kind, step_scope = d.get("step_kind"), d.get("step_scope")
+    if step_kind is not None and step_kind not in STEP_KINDS:
+        return no("error.bad_step_kind",
+                  f"decision {at}: kind must be one of {', '.join(STEP_KINDS)}; "
+                  f"got {step_kind!r}")
+    if step_scope is not None and step_scope not in STEP_SCOPES:
+        return no("error.bad_step_scope",
+                  f"decision {at}: scope must be one of "
+                  f"{', '.join(STEP_SCOPES)}; got {step_scope!r}")
+    # A rejection publishes nothing, so it has nothing to classify. Anything
+    # else does: `AssemblyStep.kind` and `scope` are required by the shape, so
+    # an accept missing either is a decision that LOOKS recorded and can never
+    # publish -- the silent-nothing state this whole exercise is closing.
+    if verdict != "rejected" and not (step_kind and step_scope):
+        return no("error.unclassified_step",
+                  f"decision {at}: an accepted or corrected step needs both a "
+                  f"kind and a scope; AssemblyStep requires both and a "
+                  f"half-classified step would publish nothing while reading "
+                  f"as decided")
+
+    if d.get("candidate_id") is not None:
+        row = conn.execute("SELECT * FROM step_candidates WHERE candidate_id=?",
+                           (d["candidate_id"],)).fetchone()
+        where = f"candidate {d['candidate_id']}"
+    elif d.get("element_id") is not None:
+        row = conn.execute(
+            """SELECT * FROM step_candidates
+                WHERE element_id=? AND char_start=? AND char_end=?""",
+            (d["element_id"], d.get("char_start"), d.get("char_end"))).fetchone()
+        where = (f"{d['element_id']} chars {d.get('char_start')}-"
+                 f"{d.get('char_end')}")
+    else:
+        return no("error.no_such_candidate",
+                  f"decision {at} names neither a candidate_id nor an "
+                  f"(element_id, char_start, char_end) anchor")
+    if row is None:
+        return no("error.no_such_candidate", f"decision {at}: no {where}")
+
+    text_seen = d.get("text_seen")
+    if text_seen is not None and text_seen != row["text_raw"]:
+        return no("error.text_moved",
+                  f"decision {at}: {where} no longer holds the text this "
+                  f"decision is about; it was re-cut after the reviewer "
+                  f"looked, so the decision is of something that is gone")
+
+    return {"element_id": row["element_id"], "char_start": row["char_start"],
+            "char_end": row["char_end"], "text_seen": row["text_raw"],
+            "reviewer": who, "verdict": verdict, "step_kind": step_kind,
+            "step_scope": step_scope, "slot_target": d.get("slot_target"),
+            "text_final": d.get("text_final"),
+            "notes": d.get("notes")}, None
+
+
+def apply_step_decisions(conn: sqlite3.Connection, decisions, *,
+                         reviewer: str | None = None,
+                         dry_run: bool = True) -> dict:
+    """Record a whole sitting of step judgements, or none of them.
+
+    Dry by default, for the reason `--import` is: a batch arrives from a file
+    somebody generated elsewhere, and reading it back should not be the act that
+    commits it.
+    """
+    ensure_step_reviews(conn)
+    decisions = list(decisions)
+    if not (reviewer or "").strip() and not all(
+            (d.get("reviewer") or "").strip() for d in decisions
+            if isinstance(d, dict)):
+        raise ReviewRefused(
+            "error.missing_reviewer",
+            "a sitting needs a reviewer: the name is the only thing separating "
+            "'software read this' from 'a person confirmed it'")
+
+    resolved, refusals = [], []
+    seen: dict[tuple, int] = {}
+    for at, d in enumerate(decisions):
+        if not isinstance(d, dict):
+            refusals.append({"at": at, "code": "error.bad_decision_file",
+                             "message": f"decision {at} is not an object"})
+            continue
+        kwargs, refusal = _resolve_decision(conn, d, at, reviewer)
+        if refusal is not None:
+            refusals.append(refusal)
+            continue
+        anchor = _step_anchor(kwargs["element_id"], kwargs["char_start"],
+                              kwargs["char_end"])
+        # Two decisions about one line is a person contradicting themselves in
+        # one file. Which one won would depend on iteration order, so neither
+        # does.
+        if anchor in seen:
+            refusals.append({
+                "at": at, "code": "error.duplicate_decision",
+                "message": (f"decision {at} decides the same line as decision "
+                            f"{seen[anchor]}; a batch must not contain two "
+                            f"verdicts about one candidate")})
+            continue
+        seen[anchor] = at
+        resolved.append(kwargs)
+
+    by_verdict: dict[str, int] = {}
+    for kwargs in resolved:
+        by_verdict[kwargs["verdict"]] = by_verdict.get(kwargs["verdict"], 0) + 1
+    out = {"decisions": len(decisions), "refusals": refusals,
+           "by_verdict": by_verdict, "recorded": 0, "applied": False}
+    if refusals or dry_run:
+        out["would_record"] = len(resolved)
+        return out
+
+    for kwargs in resolved:
+        submit_step_review(conn, **kwargs)
+        out["recorded"] += 1
+    conn.commit()
+    out["applied"] = True
     return out

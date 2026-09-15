@@ -176,3 +176,91 @@ class TestGoldSet(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestRequiredConditionsUseTheRegistrysNames(unittest.TestCase):
+    """`required_conditions` was inert, and drifted while nothing read it.
+
+    `[measured]` 2026-09-09: 7 questions carried the field, using 12 dimension
+    names of which 3 existed in `parameters.CONDITION_SCOPE`. `evaluate.py`'s
+    `_evaluate_facts` is its only reader and runs only for a question declaring
+    `interface: "facts"` — and **zero of the 78 questions declares one**, so no
+    code has ever executed or validated those names. `eval/gold-question-
+    schema.json` typed the field as a bare object, which is how a thirteenth
+    name gets invented next. G108 records the same defect one layer down.
+
+    Nine of the twelve names had no home. Four were an existing dimension under
+    another name or unit and are now spelled the registry's way. The other five
+    are not condition dimensions and must not become them: `post_size_in`,
+    `line_post_size_in`, `post_group` and `wind_kit` are product identity, and
+    Planning declined exactly this shape in writing for `material` ("Declining,
+    not deferring") — the instrument is `ParameterTable.scope` plus the
+    `Part`/`PartType` spine. `footing_depth_in` was rejected with a measurement
+    in ratified amendment 006. They keep their information in
+    `required_selectors`, a separate field, because one key over two
+    vocabularies is defect E-3 and this file is not the place to repeat it.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.questions = load_gold()
+
+    def declared(self):
+        return SCHEMA["properties"]["required_conditions"]["propertyNames"]["enum"]
+
+    def test_the_schema_declares_exactly_the_registrys_dimensions(self):
+        """One definition per vocabulary (`naming.md` §6). The schema is JSON
+        and cannot import Python, so the copy is checked rather than avoided —
+        the same reason `query.KNOWN_DIMENSIONS` is built FROM
+        `CONDITION_SCOPE` instead of retyped beside it."""
+        from fence_evidence.parameters import CONDITION_SCOPE
+        self.assertEqual(self.declared(), sorted(CONDITION_SCOPE))
+
+    def test_every_required_condition_names_a_declared_dimension(self):
+        declared = set(self.declared())
+        checked = 0
+        for q in self.questions:
+            for key in q.get("required_conditions") or {}:
+                checked += 1
+                with self.subTest(question=q["id"], key=key):
+                    self.assertIn(key, declared)
+        self.assertGreater(checked, 0, "no required_conditions were checked")
+
+    def test_a_quantity_valued_condition_carries_its_unit(self):
+        """`fence_height` publishes `domain: "range(mm)"`, so a bare `6` reads
+        as six millimetres. The value is a label the publisher parses, exactly
+        as `parameters._parse_fence_height` reads one off a table."""
+        from fence_evidence.parameters import _parse_fence_height
+        checked = 0
+        for q in self.questions:
+            value = (q.get("required_conditions") or {}).get("fence_height")
+            if value is None:
+                continue
+            checked += 1
+            with self.subTest(question=q["id"], value=value):
+                self.assertIsNotNone(_parse_fence_height(str(value)))
+        self.assertGreater(checked, 0, "no fence_height conditions were checked")
+
+    def test_a_selector_is_never_something_the_registry_already_declares(self):
+        """The split has to stay real: a name that gains a scope belongs in
+        `required_conditions`, not in the field that exists for names that
+        deliberately have none."""
+        declared = set(self.declared())
+        for q in self.questions:
+            for key in q.get("required_selectors") or {}:
+                with self.subTest(question=q["id"], key=key):
+                    self.assertNotIn(key, declared)
+
+    def test_one_source_column_is_not_two_names(self):
+        """`[measured]` 2026-09-09: gq-005 and gq-112 read the SAME CLFMI
+        column — line post size, `2 3/8` — under `line_post_size_in` and
+        `post_size_in`. §1: a second name for one value is admissible only when
+        it marks a role or a layer."""
+        clfmi = [q for q in self.questions
+                 if any("CLFMI" in d for d in q.get("expected_documents") or [])]
+        self.assertGreaterEqual(len(clfmi), 2, "the CLFMI questions moved")
+        for q in clfmi:
+            keys = set(q.get("required_selectors") or {})
+            with self.subTest(question=q["id"]):
+                self.assertNotIn("post_size_in", keys,
+                                 "the CLFMI table's column is the line post's")

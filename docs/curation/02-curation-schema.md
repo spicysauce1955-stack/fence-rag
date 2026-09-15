@@ -1,5 +1,15 @@
 # 2 — Proposed curation schema
 
+> **HISTORICAL — the 52-table `cur_*` schema was never built and will not be.**
+> `[measured]` zero `cur_*` tables exist; `SCHEMA_VERSION` is 8 and `store.migrate` is a real
+> versioned additive runner, contradicting this document's premise. Its `store.py:NN` line
+> citations have all drifted. **What shipped instead, and where its reasoning survives:** §2.11
+> became `crops.py` (which cites this section by name), §2.5.3 became `source-refs-design.md`,
+> and §2.5.5's review gate became `table_reviews` / `fact_reviews` / `step_reviews` plus
+> `review-ledger.jsonl`. Read §2.7 (conflicts) and §2.9 (gaps) — they are the reasoning behind
+> the hard/soft rule in `docs/knowledge-loop.md` §8.
+
+
 All new tables carry a `cur_` prefix. The prefix is the boundary the write guard
 enforces, and the guard is a real chokepoint rather than a convention:
 `sqlite3.Connection.set_authorizer` (stdlib, present on the 3.45.1 here) denies
@@ -197,7 +207,7 @@ listed rather than left as untyped `TEXT`:
 | `procedure_status` | `cur_procedures`, `cur_procedure_steps` | `candidate` · `in_review` · `accepted` · `rejected` |
 | `conflict_resolution` | `cur_conflicts` | `unresolved` · `resolved_by_authority` · `resolved_by_version` · `resolved_by_review` · `not_a_conflict` |
 
-`grid_status='reviewed'` is the token acceptance criterion F3 counts, so it has
+`grid_status='reviewed'` is the token acceptance criterion CUR-F3 counts, so it has
 to be a defined value rather than a convention.
 
 ### Revision status, and its mapping to what already exists
@@ -791,7 +801,7 @@ decides.
 > `table_review.PROMOTABLE` is `("accepted", "corrected", "cross_family_verified")`
 > today — two agent readings from *different model families* already promote, and
 > 324 facts in the store were written that way with no human in the loop.
-> Curation revokes that. C0 removes `cross_family_verified` from `PROMOTABLE`,
+> Curation revokes that. CUR-S0 removes `cross_family_verified` from `PROMOTABLE`,
 > and the 324 existing rows are recorded as a grandfathered exception that
 > migrates as `candidate` like everything else.
 

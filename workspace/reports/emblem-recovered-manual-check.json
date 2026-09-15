@@ -1,0 +1,27 @@
+{
+  "url": "https://pdf.lowes.com/productdocuments/1c328a11-74cb-411d-b7af-c1b2a3513614/64773145.pdf",
+  "path": "workspace/catalog/emblem-linked-installation.pdf",
+  "sha256": "20a881589b9f9035b3f6e5bc6c38e80747659cd1c4df0fb0ea3558a058a33a95",
+  "matches_previous_recorded_hash": true,
+  "cross_edition_statement_checks": [
+    {
+      "relationship": "u_channels_on_two_end_boards",
+      "matches_recovered_text": true
+    },
+    {
+      "relationship": "u_channel_handedness",
+      "matches_recovered_text": true
+    },
+    {
+      "relationship": "boards_into_bottom_rail",
+      "matches_recovered_text": true
+    },
+    {
+      "relationship": "top_rail_over_boards",
+      "matches_recovered_text": true
+    }
+  ],
+  "all_four_match": true,
+  "canonical_ingestion": false,
+  "extraction": "pdftotext -f 4 -l 4 -x 0 -y 0 -W 280 -H 792 -layout; text column excludes interleaved figure labels"
+}

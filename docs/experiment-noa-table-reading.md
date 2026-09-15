@@ -1,5 +1,14 @@
 # Experiment design — reading the scanned NOA table pages
 
+> **HISTORICAL — the method this designs was never built, and will not be.**
+> The S1-S4 per-cell OCR pipeline (`noa-cell-ocr-v1`) appears nowhere in the code. What actually
+> filled the review queue was LLM visual reading — a different method entirely, recorded in
+> `docs/superpowers/specs/2026-08-30-llm-assisted-extraction-design.md`. The `Status: RAN` line
+> below refers to readings produced by that other path. **Lasting value:** §1's measured record
+> of everything that failed (pdfplumber, 400/500 dpi, `ocr_supplement`), and §5's review-gate
+> rules, which shipped nearly verbatim as `table_reviews`.
+
+
 ```text
 Status: RAN. 1,225 readings loaded; see §'Superseded by measurement'
         below and docs/state-and-gaps.md G13/G17.

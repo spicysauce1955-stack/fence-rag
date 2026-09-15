@@ -629,7 +629,7 @@
       "doc_type": "installation_manual",
       "title": "Vinyl Fence Assembly and Installation Instructions - Owner's Manual V3.0 (Picket, Closed Top & Semi-Privacy)",
       "url": "https://images.thdstatic.com/catalog/pdfImages/a9/a9ed344a-a27c-41b8-9626-2af85c17ba83.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/owners-manual-vinyl-fence-v3.pdf",
+      "local_path": "manuals/barrette-outdoor-living/owners-manual-vinyl-fence-v3.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Picket / Closed Top / Semi-Privacy",
       "date_or_version": "34106379BOM V3, 1/14 (copyright 2014)"
@@ -638,7 +638,7 @@
       "doc_type": "warranty",
       "title": "Vinyl Fence Transferable Limited Lifetime / 30-Year Warranty",
       "url": "https://images.thdstatic.com/catalog/pdfImages/b0/b084e14f-53d6-40a4-8453-25df6442bc2f.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/warranty-vinyl-fence-30yr.pdf",
+      "local_path": "manuals/barrette-outdoor-living/warranty-vinyl-fence-30yr.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Vinyl Fence (general)",
       "date_or_version": "Effective for purchases after Jan 1, 2017"
@@ -647,7 +647,7 @@
       "doc_type": "installation_manual",
       "title": "Picket, Closed Top and Semi-Privacy Panel Kit Installation Instructions",
       "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VFPicketClosedSemiPanelKitWEB.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-picket-closedtop-semiprivacy-panel-kit.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-picket-closedtop-semiprivacy-panel-kit.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Picket / Closed Top / Semi-Privacy",
       "date_or_version": "WEB 7/21"
@@ -656,7 +656,7 @@
       "doc_type": "installation_manual",
       "title": "Semi-Privacy Enclosure Installation Instructions",
       "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/SemiPrivacyEnclosureWEB.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-semiprivacy-enclosure.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-semiprivacy-enclosure.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Semi-Privacy",
       "date_or_version": "2021/07"
@@ -665,7 +665,7 @@
       "doc_type": "installation_manual",
       "title": "Privacy Gate Installation Instructions",
       "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VF-Privacy-Gate-Install.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-privacy-gate.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-privacy-gate.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Privacy Gate",
       "date_or_version": "2021/07"
@@ -674,7 +674,7 @@
       "doc_type": "installation_manual",
       "title": "Vinyl Fence Transition Brackets Installation Instructions",
       "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/BARRETTE-WEB_TransitionBrackets_Install.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-transition-brackets.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-transition-brackets.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Transition Brackets (slope/step hardware)",
       "date_or_version": "WEB REV 3.21"
@@ -683,7 +683,7 @@
       "doc_type": "installation_manual",
       "title": "Transition Panel Kit Installation Instructions",
       "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/VFTransitionPanelKit.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-transition-panel-kit.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-transition-panel-kit.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Transition Panel Kit (slope/step hardware)",
       "date_or_version": "2021/07"
@@ -692,7 +692,7 @@
       "doc_type": "installation_manual",
       "title": "5x5 Vinyl Fence Post Surface Mount Installation Instructions",
       "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/5x5PostSurfaceMountWEB.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-5x5-post-surface-mount.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-5x5-post-surface-mount.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "5x5 Post Surface Mount (34111488)",
       "date_or_version": "REV 2.21"
@@ -701,7 +701,7 @@
       "doc_type": "installation_manual",
       "title": "Racking a Vinyl Gate for Full Privacy Styles",
       "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/BARRETTE-WEB_RackingGate.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-racking-gate.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-racking-gate.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Full Privacy Gate (racking / slope accommodation)",
       "date_or_version": "WEB REV 3.21"
@@ -710,7 +710,7 @@
       "doc_type": "installation_manual",
       "title": "Cameron Privacy Vinyl Fence Panel Installation Instructions",
       "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/Cameron-Privacy-Vinyl-Panel-Instructions-WEB.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-cameron-privacy-vinyl-panel.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-cameron-privacy-vinyl-panel.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Cameron",
       "date_or_version": "WEB-REV 7.21"
@@ -719,7 +719,7 @@
       "doc_type": "installation_manual",
       "title": "Post & Rail Gates Installation Instructions",
       "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/Vinyl-post-Rail-Gates-Install-Instructions.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-post-rail-gates.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-post-rail-gates.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Post & Rail Gates",
       "date_or_version": "2021/07"
@@ -728,7 +728,7 @@
       "doc_type": "installation_manual",
       "title": "Privacy & Picket Gates Installation Instructions",
       "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/06/BOM-34111485-Privacy-Picket_Gates-Inserts_v2WEB.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-privacy-picket-gates.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-privacy-picket-gates.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Privacy & Picket Gates (34111485)",
       "date_or_version": "v2 WEB, 2021/06"
@@ -737,7 +737,7 @@
       "doc_type": "installation_manual",
       "title": "Horizontal Privacy Vinyl Gate Kit Installation Instructions",
       "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2022/10/HorizontalPrivacyGateInstructions.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-horizontal-privacy-gate-kit.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-horizontal-privacy-gate-kit.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Horizontal Privacy Vinyl Gate Kit",
       "date_or_version": "2022/10"
@@ -746,7 +746,7 @@
       "doc_type": "installation_manual",
       "title": "Horizontal Privacy Vinyl Fence Kit Instructions",
       "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/12/BOM-34111282_HorizontalPrivacyFencePanel.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-horizontal-privacy-fence-panel.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-horizontal-privacy-fence-panel.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Horizontal Privacy Vinyl Fence (34111282)",
       "date_or_version": "2021/12"
@@ -755,7 +755,7 @@
       "doc_type": "installation_manual",
       "title": "Vinyl Post/Rail & Ranch Rail Installation Instructions",
       "url": "https://www.barretteoutdoorliving.com/wp-content/uploads/2021/07/Vinyl-Ppost-and-Ranch-Rail-Install.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/install-post-rail-ranch-rail.pdf",
+      "local_path": "manuals/barrette-outdoor-living/install-post-rail-ranch-rail.pdf",
       "manufacturer": "Barrette Outdoor Living",
       "model_or_line": "Post/Rail & Ranch Rail",
       "date_or_version": "2021/07"
@@ -764,7 +764,7 @@
       "doc_type": "installation_manual",
       "title": "Bufftech and SimTek Fence Installation Guide",
       "url": "https://bufftech.com/wp-content/uploads/sites/2/2024/07/BOL-Bufftech-and-Simtek-Instructions-4-24.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
+      "local_path": "manuals/barrette-outdoor-living/bufftech-simtek-fence-install-guide.pdf",
       "manufacturer": "Barrette Outdoor Living (Bufftech / SimTek)",
       "model_or_line": "Bufftech / SimTek (premium vinyl and molded fence lines)",
       "date_or_version": "4/24"
@@ -773,7 +773,7 @@
       "doc_type": "installation_manual",
       "title": "Bufftech Gate Installation Guide",
       "url": "https://bufftech.com/wp-content/uploads/sites/2/2023/10/bufftech-install-guide-e-2201cts.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
+      "local_path": "manuals/barrette-outdoor-living/bufftech-gate-install-guide.pdf",
       "manufacturer": "Barrette Outdoor Living (Bufftech)",
       "model_or_line": "Bufftech Gates",
       "date_or_version": "e-2201cts"
@@ -782,7 +782,7 @@
       "doc_type": "warranty",
       "title": "Bufftech Fence Limited Lifetime Warranty",
       "url": "https://bufftech.com/wp-content/uploads/sites/2/2023/10/2024_BOL_VF_Warranty-2-24.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/bufftech-fence-limited-lifetime-warranty.pdf",
+      "local_path": "manuals/barrette-outdoor-living/bufftech-fence-limited-lifetime-warranty.pdf",
       "manufacturer": "Barrette Outdoor Living (Bufftech)",
       "model_or_line": "Bufftech Vinyl Fence",
       "date_or_version": "2/24"
@@ -791,7 +791,7 @@
       "doc_type": "warranty",
       "title": "Vinyl, Molded & Composite Fence Warranty (Catalyst Fence Solutions)",
       "url": "https://www.catalystfence.com/wp-content/uploads/Vinyl-Molded-Composite-Fence-Warranty_CAT26-D-634250_WEB.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/catalyst-vinyl-molded-composite-fence-warranty.pdf",
+      "local_path": "manuals/barrette-outdoor-living/catalyst-vinyl-molded-composite-fence-warranty.pdf",
       "manufacturer": "Catalyst Fence Solutions (Barrette Outdoor Living / Bufftech successor brand)",
       "model_or_line": "Vinyl / Molded / Composite Fence",
       "date_or_version": "CAT26-D-634250"
@@ -800,7 +800,7 @@
       "doc_type": "installation_manual",
       "title": "Vinyl Privacy & Picket Gates Installation Instructions (Catalyst)",
       "url": "https://www.catalystfence.com/wp-content/uploads/CAT-Vinyl_Privacy_Picket-Gates-Rev-1-25_WEB.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/catalyst-vinyl-privacy-picket-gates.pdf",
+      "local_path": "manuals/barrette-outdoor-living/catalyst-vinyl-privacy-picket-gates.pdf",
       "manufacturer": "Catalyst Fence Solutions",
       "model_or_line": "Vinyl Privacy & Picket Gates",
       "date_or_version": "Rev 1/25"
@@ -809,7 +809,7 @@
       "doc_type": "installation_manual",
       "title": "Picket, Closed Top & Semi-Privacy Vinyl Fence Kit Installation Instructions (Catalyst)",
       "url": "https://www.catalystfence.com/wp-content/uploads/CAT-VFPicketClosedSemiPanelKit-WEB.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/catalyst-install-picket-closedtop-semiprivacy-kit.pdf",
+      "local_path": "manuals/barrette-outdoor-living/catalyst-install-picket-closedtop-semiprivacy-kit.pdf",
       "manufacturer": "Catalyst Fence Solutions",
       "model_or_line": "Picket / Closed Top / Semi-Privacy",
       "date_or_version": "current (catalystfence.com)"
@@ -818,7 +818,7 @@
       "doc_type": "cut_sheet",
       "title": "Cape Cod - Catalyst Vinyl/Molded Fence SKU Pages (dimensions, SKUs, post/rail/picket sizes)",
       "url": "https://www.catalystfence.com/wp-content/uploads/Cape-Cod_Catalyst-VF-MF-Sku-Pages_CAT25-D-514650_12-25.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/catalyst-capecod-sku-sheet.pdf",
+      "local_path": "manuals/barrette-outdoor-living/catalyst-capecod-sku-sheet.pdf",
       "manufacturer": "Catalyst Fence Solutions",
       "model_or_line": "Cape Cod Classic Picket",
       "date_or_version": "CAT25-D-514650, Rev 12/25"
@@ -827,7 +827,7 @@
       "doc_type": "cut_sheet",
       "title": "Fence Accents - Catalyst SKU Sheet (post caps, blank posts, transition brackets, gate kits, hinges, latches, drop rods)",
       "url": "https://www.catalystfence.com/wp-content/uploads/Catalyst-Sku_Fence-Accents_CAT25-D-532100_WEB.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/catalyst-fence-accents-hardware-sku-sheet.pdf",
+      "local_path": "manuals/barrette-outdoor-living/catalyst-fence-accents-hardware-sku-sheet.pdf",
       "manufacturer": "Catalyst Fence Solutions",
       "model_or_line": "Fence Accents / Hardware (cross-line: vinyl + aluminum)",
       "date_or_version": "CAT25-D-532100, Rev 1/26"

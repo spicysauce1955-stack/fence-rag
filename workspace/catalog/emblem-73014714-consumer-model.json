@@ -1,0 +1,1382 @@
+{
+  "artifact_kind": "private_consumer_model_authoring_candidate",
+  "source_package_hash": "2a40d62828ae7da4c5018efb48efea6fbb52683c72a69211467534eb2537c768",
+  "model": {
+    "id": "mfr/freedom-outdoor-living-emblem-73014714",
+    "version": 1,
+    "status": "draft",
+    "name_i18n": {
+      "en": "Emblem Privacy Fence Kit \u2014 6x8 White \u2014 73014714"
+    },
+    "authorship": "third_party_authored",
+    "cites": [
+      {
+        "id": "54e47378f4737168",
+        "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      },
+      {
+        "id": "5ec7031e0f3bd7b3",
+        "belongs_to": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b"
+      },
+      {
+        "id": "aeaf7e66a05b4d28",
+        "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+      },
+      {
+        "id": "57482180d5ddbd37",
+        "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+      },
+      {
+        "id": "e856d15ed6bcbc68",
+        "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+      },
+      {
+        "id": "d3ce088342977ece",
+        "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+      }
+    ],
+    "default_spec": {
+      "frame": [
+        {
+          "key": "bottom_rail",
+          "orientation": "horizontal",
+          "requirement": {
+            "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+            "qty": 1
+          },
+          "joint": "channel",
+          "placement": {
+            "kind": "from_bottom",
+            "offset_mm": 89
+          }
+        },
+        {
+          "key": "top_rail",
+          "orientation": "horizontal",
+          "requirement": {
+            "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+            "qty": 1
+          },
+          "joint": "channel",
+          "placement": {
+            "kind": "from_top",
+            "offset_mm": 89
+          }
+        }
+      ],
+      "infill": {
+        "orientation": "vertical",
+        "pattern": [
+          {
+            "key": "board",
+            "base_ref": "bottom_rail",
+            "top_ref": "top_rail",
+            "requirement": {
+              "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+              "length_rule": "between_frame",
+              "qty": 1
+            },
+            "profile_edges": {
+              "start": "tongue",
+              "end": "groove"
+            }
+          }
+        ],
+        "supply": "components",
+        "justification": "start"
+      },
+      "fixings": [
+        {
+          "key": "u_channel_first_board_tongue",
+          "basis": "per_panel",
+          "qty_per_basis": 1,
+          "edge_binding": {
+            "member_key": "board",
+            "position": "first",
+            "profile_edge": "tongue"
+          },
+          "requirement": {
+            "part_id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
+            "qty": 1
+          }
+        },
+        {
+          "key": "u_channel_last_board_groove",
+          "basis": "per_panel",
+          "qty_per_basis": 1,
+          "edge_binding": {
+            "member_key": "board",
+            "position": "last",
+            "profile_edge": "groove"
+          },
+          "requirement": {
+            "part_id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
+            "qty": 1
+          }
+        }
+      ]
+    },
+    "post": {
+      "key": "post",
+      "cap": {
+        "part_id": "mfr/freedom-outdoor-living/73013956",
+        "qty": 1
+      },
+      "requirement": {
+        "part_id": "",
+        "role": "post",
+        "qty": 1,
+        "eligibility": {
+          "predicate": {
+            "op": "or",
+            "items": [
+              {
+                "op": "and",
+                "items": [
+                  {
+                    "op": "cmp",
+                    "cmp": "==",
+                    "left": {
+                      "op": "field",
+                      "path": "post.kind"
+                    },
+                    "right": {
+                      "op": "lit",
+                      "value": "line"
+                    }
+                  },
+                  {
+                    "op": "cmp",
+                    "cmp": "==",
+                    "left": {
+                      "op": "field",
+                      "path": "item.sku"
+                    },
+                    "right": {
+                      "op": "lit",
+                      "value": "73045783"
+                    }
+                  }
+                ]
+              },
+              {
+                "op": "and",
+                "items": [
+                  {
+                    "op": "cmp",
+                    "cmp": "==",
+                    "left": {
+                      "op": "field",
+                      "path": "post.kind"
+                    },
+                    "right": {
+                      "op": "lit",
+                      "value": "corner"
+                    }
+                  },
+                  {
+                    "op": "cmp",
+                    "cmp": "==",
+                    "left": {
+                      "op": "field",
+                      "path": "item.sku"
+                    },
+                    "right": {
+                      "op": "lit",
+                      "value": "73045784"
+                    }
+                  }
+                ]
+              },
+              {
+                "op": "and",
+                "items": [
+                  {
+                    "op": "cmp",
+                    "cmp": "==",
+                    "left": {
+                      "op": "field",
+                      "path": "post.kind"
+                    },
+                    "right": {
+                      "op": "lit",
+                      "value": "end"
+                    }
+                  },
+                  {
+                    "op": "cmp",
+                    "cmp": "==",
+                    "left": {
+                      "op": "field",
+                      "path": "item.sku"
+                    },
+                    "right": {
+                      "op": "lit",
+                      "value": "73045785"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "contributing_sources": [
+      "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b",
+      "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24",
+      "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+    ]
+  },
+  "source_joints": {
+    "bottom_rail": {
+      "kind": "channel"
+    },
+    "top_rail": {
+      "kind": "channel"
+    }
+  },
+  "post_binding_evidence": [
+    {
+      "element_id": "element-b540e75926-0035",
+      "text_raw": "5in. x 5in. x 108in. Line Post - White (F)",
+      "cite": {
+        "id": "df7d58fbdfa124b1",
+        "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      }
+    },
+    {
+      "element_id": "element-b540e75926-0036",
+      "text_raw": "73045783",
+      "cite": {
+        "id": "e27012dc3edf290f",
+        "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      }
+    },
+    {
+      "element_id": "element-b540e75926-0039",
+      "text_raw": "5in. x 5in. x 108in. Corner Post - White (F)",
+      "cite": {
+        "id": "b456ffc7928e48c4",
+        "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      }
+    },
+    {
+      "element_id": "element-b540e75926-0040",
+      "text_raw": "73045784",
+      "cite": {
+        "id": "8ec72dda71224b68",
+        "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      }
+    },
+    {
+      "element_id": "element-b540e75926-0043",
+      "text_raw": "5in. x 5in. x 108in. End Post - White (F)",
+      "cite": {
+        "id": "70bb914fc3e9c02a",
+        "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      }
+    },
+    {
+      "element_id": "element-b540e75926-0044",
+      "text_raw": "73045785",
+      "cite": {
+        "id": "3299b0fb58f9d53c",
+        "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      }
+    }
+  ],
+  "post_quantity_rule": {
+    "id": "emblem-73014714-post",
+    "target": "post",
+    "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+    "basis": "unique_post_station",
+    "quantity_per_basis": {
+      "amount_milli": 1000,
+      "unit": "each",
+      "value_raw": [
+        "3. Calculate # of posts needed:\n\u2022 1 post per panel + 1 end post to end the fence run\n\u2022 1 end/gate post per gate (don\u2019t forget 2 post\ninserts for each gate)"
+      ]
+    },
+    "authorship": "third_party_authored",
+    "derivation": "One post at each unique station in the supported open paths. The source N+1 rule applies per run; shared internal stations are counted once.",
+    "evidence": [
+      {
+        "element_id": "element-b540e75926-0070",
+        "text_raw": "3. Calculate # of posts needed:\n\u2022 1 post per panel + 1 end post to end the fence run\n\u2022 1 end/gate post per gate (don\u2019t forget 2 post\ninserts for each gate)",
+        "cite": {
+          "id": "5f2efc0cc9661d0c",
+          "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+        }
+      }
+    ]
+  },
+  "expected_post_skus": {
+    "line": "73045783",
+    "corner": "73045784",
+    "end": "73045785"
+  },
+  "placement_inputs_required": [],
+  "placement_datum_note": "User-confirmed interpretation; source pages do not explicitly dimension the endpoints. Integer-mm approximation is adapter authoring, not a manufacturer tolerance.",
+  "private_defaults_are_not_source_facts": [
+    "channel depth and insertion margin",
+    "board engagements/gap/face offset",
+    "infill excess and margin policies",
+    "requirement length rule and overlap",
+    "grade and height support"
+  ],
+  "publishable": false,
+  "installation_ready": false,
+  "bom_generation_verified": false,
+  "limitations": [
+    "Private SKU predicate is catalog authoring, not a published PartRequirement.",
+    "Exact-SKU Part library and physical geometry remain incomplete."
+  ],
+  "placement_confirmation": {
+    "artifact_kind": "private_model_placement_confirmation",
+    "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+    "source_package_hash": "2a40d62828ae7da4c5018efb48efea6fbb52683c72a69211467534eb2537c768",
+    "status": "user_confirmed_interpretation",
+    "reviewer": "Developer",
+    "confirmed_on": "2026-09-06",
+    "user_response": "yes",
+    "confirmed_statement": "72 inches is the height from the bottom outside edge of the bottom rail to the top outside edge of the top rail; each rail has a 7-inch vertical envelope.",
+    "datum": "outside_bottom_rail_to_outside_top_rail",
+    "panel_height_inches": "72",
+    "rail_vertical_envelope_inches": "7",
+    "source_cites": [
+      {
+        "id": "54e47378f4737168",
+        "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      },
+      {
+        "id": "5ec7031e0f3bd7b3",
+        "belongs_to": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b"
+      }
+    ],
+    "source_limit": "The source pages state panel and rail dimensions but do not explicitly dimension these endpoints. This records the user confirmation, not a manufacturer-verified datum or an extracted-fact review."
+  },
+  "placement_projection": {
+    "exact_inward_offset_mm": "88.9",
+    "consumer_inward_offset_mm": 89,
+    "rounding_policy": "nearest whole millimetre, half up; authored adapter policy",
+    "offset_rounding_error_mm": "0.1"
+  },
+  "component_authoring": {
+    "private_parts": [
+      {
+        "id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+        "version": 1,
+        "status": "draft",
+        "type": "rail",
+        "name_i18n": {
+          "en": "Emblem 73014714 rail A (provisional identity)"
+        },
+        "spec": [
+          {
+            "key": "thickness_mm",
+            "agree": "==",
+            "value": 178,
+            "unit": "mm"
+          },
+          {
+            "key": "width_mm",
+            "agree": "==",
+            "value": 57,
+            "unit": "mm"
+          },
+          {
+            "key": "colour",
+            "agree": "==",
+            "value": "white"
+          }
+        ]
+      },
+      {
+        "id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+        "version": 1,
+        "status": "draft",
+        "type": "rail",
+        "name_i18n": {
+          "en": "Emblem 73014714 rail B (provisional identity)"
+        },
+        "spec": [
+          {
+            "key": "thickness_mm",
+            "agree": "==",
+            "value": 178,
+            "unit": "mm"
+          },
+          {
+            "key": "width_mm",
+            "agree": "==",
+            "value": 57,
+            "unit": "mm"
+          },
+          {
+            "key": "colour",
+            "agree": "==",
+            "value": "white"
+          }
+        ]
+      },
+      {
+        "id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+        "version": 1,
+        "status": "draft",
+        "type": "infill",
+        "name_i18n": {
+          "en": "Emblem 73014714 tongue-and-groove board"
+        },
+        "spec": [
+          {
+            "key": "colour",
+            "agree": "==",
+            "value": "white"
+          }
+        ]
+      },
+      {
+        "id": "mfr/freedom-outdoor-living/73013956",
+        "version": 1,
+        "status": "draft",
+        "type": "post_cap",
+        "name_i18n": {
+          "en": "White contemporary post top"
+        },
+        "spec": [
+          {
+            "key": "colour",
+            "agree": "==",
+            "value": "white"
+          },
+          {
+            "key": "sku",
+            "agree": "==",
+            "value": "73013956"
+          }
+        ]
+      },
+      {
+        "id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
+        "version": 1,
+        "status": "draft",
+        "type": "end_channel",
+        "name_i18n": {
+          "en": "Emblem end U-channel"
+        },
+        "spec": []
+      }
+    ],
+    "identity_mappings": [
+      {
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+        "source_part": {
+          "id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+          "version": 1,
+          "status": "draft",
+          "type": {
+            "namespace": "shared",
+            "key": "infill"
+          },
+          "name_i18n": {
+            "en": "Emblem 73014714 tongue-and-groove board"
+          },
+          "authorship": "third_party_authored",
+          "cites": [
+            {
+              "id": "54e47378f4737168",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            },
+            {
+              "id": "e00d82aba830a6eb",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            },
+            {
+              "id": "5d7cfd7597583e43",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          ],
+          "contributing_sources": [
+            "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          ],
+          "spec": [
+            {
+              "key": "nominal_width_mm",
+              "agree": "==",
+              "value": {
+                "amount_milli": 152400,
+                "unit": "mm",
+                "value_raw": [
+                  "6 in."
+                ]
+              },
+              "provenance": {
+                "cites": [
+                  {
+                    "id": "e00d82aba830a6eb",
+                    "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                  }
+                ],
+                "source_class": "spec_sheet",
+                "curation_level": 0,
+                "version_status": "unknown"
+              }
+            },
+            {
+              "key": "colour",
+              "agree": "==",
+              "value": {
+                "key": "white",
+                "value_raw": [
+                  "White"
+                ]
+              },
+              "provenance": {
+                "cites": [
+                  {
+                    "id": "5d7cfd7597583e43",
+                    "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                  }
+                ],
+                "source_class": "spec_sheet",
+                "curation_level": 0,
+                "version_status": "unknown"
+              }
+            }
+          ]
+        },
+        "fit_geometry_verified": false,
+        "unconsumed_dimensions": [
+          {
+            "key": "nominal_width_mm",
+            "agree": "==",
+            "value": {
+              "amount_milli": 152400,
+              "unit": "mm",
+              "value_raw": [
+                "6 in."
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "e00d82aba830a6eb",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          }
+        ],
+        "reason": "Nominal dimensions are not manufactured dimensions, installed pitch or internal clearance. The panel-kit SKU is not a board SKU.",
+        "component_sku": null
+      },
+      {
+        "part_id": "mfr/freedom-outdoor-living/73013956",
+        "source_part": {
+          "id": "mfr/freedom-outdoor-living/73013956",
+          "version": 1,
+          "status": "draft",
+          "type": {
+            "namespace": "shared",
+            "key": "post_cap"
+          },
+          "name_i18n": {
+            "en": "White contemporary post top"
+          },
+          "authorship": "third_party_authored",
+          "cites": [
+            {
+              "id": "54e47378f4737168",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            },
+            {
+              "id": "a437381210d0e693",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          ],
+          "contributing_sources": [
+            "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+          ],
+          "spec": [
+            {
+              "key": "nominal_width_mm",
+              "agree": "==",
+              "value": {
+                "amount_milli": 127000,
+                "unit": "mm",
+                "value_raw": [
+                  "5in."
+                ]
+              },
+              "provenance": {
+                "cites": [
+                  {
+                    "id": "a437381210d0e693",
+                    "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                  }
+                ],
+                "source_class": "spec_sheet",
+                "curation_level": 0,
+                "version_status": "unknown"
+              }
+            },
+            {
+              "key": "nominal_depth_mm",
+              "agree": "==",
+              "value": {
+                "amount_milli": 127000,
+                "unit": "mm",
+                "value_raw": [
+                  "5in."
+                ]
+              },
+              "provenance": {
+                "cites": [
+                  {
+                    "id": "a437381210d0e693",
+                    "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                  }
+                ],
+                "source_class": "spec_sheet",
+                "curation_level": 0,
+                "version_status": "unknown"
+              }
+            },
+            {
+              "key": "colour",
+              "agree": "==",
+              "value": {
+                "key": "white",
+                "value_raw": [
+                  "White"
+                ]
+              },
+              "provenance": {
+                "cites": [
+                  {
+                    "id": "a437381210d0e693",
+                    "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                  }
+                ],
+                "source_class": "spec_sheet",
+                "curation_level": 0,
+                "version_status": "unknown"
+              }
+            }
+          ]
+        },
+        "fit_geometry_verified": false,
+        "unconsumed_dimensions": [
+          {
+            "key": "nominal_width_mm",
+            "agree": "==",
+            "value": {
+              "amount_milli": 127000,
+              "unit": "mm",
+              "value_raw": [
+                "5in."
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "a437381210d0e693",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          },
+          {
+            "key": "nominal_depth_mm",
+            "agree": "==",
+            "value": {
+              "amount_milli": 127000,
+              "unit": "mm",
+              "value_raw": [
+                "5in."
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "a437381210d0e693",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          }
+        ],
+        "reason": "Nominal dimensions are not manufactured dimensions, installed pitch or internal clearance.",
+        "sku_identity_anchor": {
+          "part_id": "mfr/freedom-outdoor-living/73013956",
+          "description": {
+            "element_id": "element-b540e75926-0051",
+            "text_raw": "5in. x 5in. Contemporary Post Top - White",
+            "cite": {
+              "id": "a437381210d0e693",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          },
+          "model_number": {
+            "element_id": "element-b540e75926-0052",
+            "text_raw": "73013956",
+            "cite": {
+              "id": "1356341c0f1a6c05",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          },
+          "review_status": "assistant_checked_not_Developer_approved"
+        }
+      }
+    ],
+    "rail_dimension_mappings": [
+      {
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+        "slot_key": "bottom_rail",
+        "source_spec": {
+          "key": "height_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 177800,
+            "unit": "mm",
+            "value_raw": [
+              "7 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        "original_part_specs": [
+          {
+            "key": "width_mm",
+            "agree": "==",
+            "value": {
+              "amount_milli": 57150,
+              "unit": "mm",
+              "value_raw": [
+                "2-\u00bc in."
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "b2766cd38e5d8624",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          },
+          {
+            "key": "height_mm",
+            "agree": "==",
+            "value": {
+              "amount_milli": 177800,
+              "unit": "mm",
+              "value_raw": [
+                "7 in."
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "b2766cd38e5d8624",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          },
+          {
+            "key": "colour",
+            "agree": "==",
+            "value": {
+              "key": "white",
+              "value_raw": [
+                "White"
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "5d7cfd7597583e43",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          }
+        ],
+        "consumer_key": "thickness_mm",
+        "datum": "vertical face height of horizontal rail, not wall thickness",
+        "exact_mm": "177.8",
+        "projected_mm": 178,
+        "rounding_error_mm": "0.2",
+        "rounding_policy": "nearest whole millimetre, half up"
+      },
+      {
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+        "slot_key": "top_rail",
+        "source_spec": {
+          "key": "height_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 177800,
+            "unit": "mm",
+            "value_raw": [
+              "7 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        "original_part_specs": [
+          {
+            "key": "width_mm",
+            "agree": "==",
+            "value": {
+              "amount_milli": 57150,
+              "unit": "mm",
+              "value_raw": [
+                "2-\u00bc in."
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "b2766cd38e5d8624",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          },
+          {
+            "key": "height_mm",
+            "agree": "==",
+            "value": {
+              "amount_milli": 177800,
+              "unit": "mm",
+              "value_raw": [
+                "7 in."
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "b2766cd38e5d8624",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          },
+          {
+            "key": "colour",
+            "agree": "==",
+            "value": {
+              "key": "white",
+              "value_raw": [
+                "White"
+              ]
+            },
+            "provenance": {
+              "cites": [
+                {
+                  "id": "5d7cfd7597583e43",
+                  "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+                }
+              ],
+              "source_class": "spec_sheet",
+              "curation_level": 0,
+              "version_status": "unknown"
+            }
+          }
+        ],
+        "consumer_key": "thickness_mm",
+        "datum": "vertical face height of horizontal rail, not wall thickness",
+        "exact_mm": "177.8",
+        "projected_mm": 178,
+        "rounding_error_mm": "0.2",
+        "rounding_policy": "nearest whole millimetre, half up"
+      }
+    ],
+    "rail_matching_mappings": [
+      {
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+        "source_spec": {
+          "key": "width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 57150,
+            "unit": "mm",
+            "value_raw": [
+              "2-\u00bc in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        "exact_mm": "57.15",
+        "projected_mm": 57,
+        "rounding_error_mm": "-0.15",
+        "private_spec": {
+          "key": "width_mm",
+          "agree": "==",
+          "value": 57,
+          "unit": "mm"
+        }
+      },
+      {
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+        "source_spec": {
+          "key": "colour",
+          "agree": "==",
+          "value": {
+            "key": "white",
+            "value_raw": [
+              "White"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        "private_spec": {
+          "key": "colour",
+          "agree": "==",
+          "value": "white"
+        }
+      },
+      {
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+        "source_spec": {
+          "key": "width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 57150,
+            "unit": "mm",
+            "value_raw": [
+              "2-\u00bc in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "b2766cd38e5d8624",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        "exact_mm": "57.15",
+        "projected_mm": 57,
+        "rounding_error_mm": "-0.15",
+        "private_spec": {
+          "key": "width_mm",
+          "agree": "==",
+          "value": 57,
+          "unit": "mm"
+        }
+      },
+      {
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+        "source_spec": {
+          "key": "colour",
+          "agree": "==",
+          "value": {
+            "key": "white",
+            "value_raw": [
+              "White"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "5d7cfd7597583e43",
+                "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        "private_spec": {
+          "key": "colour",
+          "agree": "==",
+          "value": "white"
+        }
+      }
+    ],
+    "u_channel_placements": [
+      {
+        "slot_key": "u_channel_first_board_tongue",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
+        "edge": "first_board_tongue",
+        "quantity_each": 1,
+        "evidence": {
+          "element_id": "element-15b181bc58-0008",
+          "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+          "cite": {
+            "id": "57482180d5ddbd37",
+            "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+          }
+        }
+      },
+      {
+        "slot_key": "u_channel_last_board_groove",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
+        "edge": "last_board_groove",
+        "quantity_each": 1,
+        "evidence": {
+          "element_id": "element-15b181bc58-0008",
+          "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+          "cite": {
+            "id": "57482180d5ddbd37",
+            "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+          }
+        }
+      }
+    ],
+    "u_channel_inventory_evidence": {
+      "component_key": "end_u_channel",
+      "quantity_each": 2,
+      "edges": [
+        "first_board_tongue",
+        "last_board_groove"
+      ],
+      "coverage": "included_in_manual_kit_component_list; exact-SKU applicability supported by linked manual",
+      "evidence": {
+        "element_id": "element-efcc3971c4-0017",
+        "text_raw": "U-Channels",
+        "cite": {
+          "id": "a63ff62245d7c789",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      },
+      "count_evidence": {
+        "element_id": "element-15b181bc58-0006",
+        "text_raw": "Attach U-channels to two end boards (Fig. 6).",
+        "cite": {
+          "id": "aeaf7e66a05b4d28",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      },
+      "edge_evidence": {
+        "element_id": "element-15b181bc58-0008",
+        "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+        "cite": {
+          "id": "57482180d5ddbd37",
+          "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+        }
+      },
+      "contract_mapping": "Part type and handed slot representation remain unresolved; this is private kit inventory"
+    },
+    "scope": "full panel only; incomplete private component representation",
+    "handed_placement_consumed": false,
+    "kit_purchase_credit_consumed": false,
+    "limitations": [
+      "Handed bindings are authored; actual placement remains unverified until panel fitting inputs are sourced.",
+      "Channels ship in the panel kit; separate component demand must not become extra purchases.",
+      "Private rail dimensions and colour constrain matching, but component SKU identities and channel matching specs remain incomplete.",
+      "Board effective width/stock length and cap/channel fit geometry remain unresolved despite closed identity references."
+    ]
+  },
+  "assembly_authoring": {
+    "field_evidence": [
+      {
+        "target": "default_spec.infill.pattern.0.requirement",
+        "authorship": "third_party_authored",
+        "derivation": "One physical board per fitted repeat; cut length between rail faces plus separately evidenced seating at both ends.",
+        "anchors": [
+          {
+            "element_id": "element-15b181bc58-0015",
+            "text_raw": "Insert boards into bottom rail ensuring\nU-channels are on both ends. Start from first\ninstalled post and work towards second post\n(Fig. 7).",
+            "cite": {
+              "id": "e856d15ed6bcbc68",
+              "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+            }
+          },
+          {
+            "element_id": "element-15b181bc58-0020",
+            "text_raw": "a. Insert the top rail into the first top hole post\nroute then guide over top of boards (Fig. 8).",
+            "cite": {
+              "id": "d3ce088342977ece",
+              "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+            }
+          }
+        ]
+      },
+      {
+        "target": "default_spec.infill.justification",
+        "authorship": "third_party_authored",
+        "derivation": "Author the local start axis at the first installed post to follow the instructed assembly direction; this axis convention is not a manufacturer coordinate datum.",
+        "anchors": [
+          {
+            "element_id": "element-15b181bc58-0015",
+            "text_raw": "Insert boards into bottom rail ensuring\nU-channels are on both ends. Start from first\ninstalled post and work towards second post\n(Fig. 7).",
+            "cite": {
+              "id": "e856d15ed6bcbc68",
+              "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+            }
+          }
+        ]
+      },
+      {
+        "target": "default_spec.frame.bottom_rail.requirement.qty",
+        "authorship": "third_party_authored",
+        "derivation": "One of each named top and bottom rail per full panel.",
+        "anchors": [
+          {
+            "element_id": "element-b540e75926-0008",
+            "text_raw": "\u2022 2-\u00bc in. x 7 in. top & bottom rails",
+            "cite": {
+              "id": "b2766cd38e5d8624",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          }
+        ]
+      },
+      {
+        "target": "default_spec.frame.top_rail.requirement.qty",
+        "authorship": "third_party_authored",
+        "derivation": "One of each named top and bottom rail per full panel.",
+        "anchors": [
+          {
+            "element_id": "element-b540e75926-0008",
+            "text_raw": "\u2022 2-\u00bc in. x 7 in. top & bottom rails",
+            "cite": {
+              "id": "b2766cd38e5d8624",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          }
+        ]
+      },
+      {
+        "target": "post.cap.qty",
+        "authorship": "third_party_authored",
+        "derivation": "Author one selected post top per post station from the instruction to attach post tops to posts; the instruction does not print a numeric kit count.",
+        "anchors": [
+          {
+            "element_id": "element-66549cef10-0011",
+            "text_raw": "Apply glue on inside rim of post tops then attach\nto posts (Fig. 22). Repeat these steps until\ncompleted.",
+            "cite": {
+              "id": "f67db6fc7eef1aa8",
+              "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+            }
+          }
+        ]
+      }
+    ],
+    "remaining_inputs": [
+      "effective board pitch/overlap",
+      "end allowance and excess policy",
+      "base/top engagement",
+      "receiving channel depths",
+      "stock lengths and source-defined cut allowances"
+    ],
+    "review_status": "unreviewed_authored",
+    "physical_fit_verified": false
+  },
+  "kit_membership_authoring": {
+    "artifact_kind": "private_authored_kit_membership",
+    "supplier_model_number": "73014714",
+    "identity_anchor": {
+      "element_id": "element-b540e75926-0018",
+      "text_raw": "73014714",
+      "cite": {
+        "id": "304c96b69b330708",
+        "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+      }
+    },
+    "model_id": "mfr/freedom-outdoor-living-emblem-73014714",
+    "authorship": "third_party_authored",
+    "review_status": "unreviewed_authored",
+    "relationships": [
+      {
+        "component_key": "bottom_rail",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+        "slot_keys": [
+          "bottom_rail"
+        ],
+        "quantity_each": 1,
+        "stock_length_mm": null,
+        "source_inventory": {
+          "component_key": "bottom_rail",
+          "quantity_each": 1,
+          "coverage": "included_in_panel_kit",
+          "evidence": {
+            "element_id": "element-b540e75926-0008",
+            "text_raw": "\u2022 2-\u00bc in. x 7 in. top & bottom rails",
+            "cite": {
+              "id": "b2766cd38e5d8624",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          }
+        }
+      },
+      {
+        "component_key": "top_rail",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+        "slot_keys": [
+          "top_rail"
+        ],
+        "quantity_each": 1,
+        "stock_length_mm": null,
+        "source_inventory": {
+          "component_key": "top_rail",
+          "quantity_each": 1,
+          "coverage": "included_in_panel_kit",
+          "evidence": {
+            "element_id": "element-b540e75926-0008",
+            "text_raw": "\u2022 2-\u00bc in. x 7 in. top & bottom rails",
+            "cite": {
+              "id": "b2766cd38e5d8624",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          }
+        }
+      },
+      {
+        "component_key": "tongue_and_groove_boards",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+        "slot_keys": [
+          "board"
+        ],
+        "quantity_each": null,
+        "stock_length_mm": null,
+        "source_inventory": {
+          "component_key": "tongue_and_groove_boards",
+          "quantity_each": null,
+          "coverage": "included_in_panel_kit; exact count unverified",
+          "evidence": {
+            "element_id": "element-b540e75926-0007",
+            "text_raw": "\u2022 6 in. tongue & groove boards",
+            "cite": {
+              "id": "e00d82aba830a6eb",
+              "belongs_to": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+            }
+          }
+        }
+      },
+      {
+        "component_key": "end_u_channel",
+        "part_id": "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel",
+        "slot_keys": [
+          "u_channel_first_board_tongue",
+          "u_channel_last_board_groove"
+        ],
+        "quantity_each": 2,
+        "stock_length_mm": null,
+        "source_inventory": {
+          "component_key": "end_u_channel",
+          "quantity_each": 2,
+          "edges": [
+            "first_board_tongue",
+            "last_board_groove"
+          ],
+          "coverage": "included_in_manual_kit_component_list; exact-SKU applicability supported by linked manual",
+          "evidence": {
+            "element_id": "element-efcc3971c4-0017",
+            "text_raw": "U-Channels",
+            "cite": {
+              "id": "a63ff62245d7c789",
+              "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+            }
+          },
+          "count_evidence": {
+            "element_id": "element-15b181bc58-0006",
+            "text_raw": "Attach U-channels to two end boards (Fig. 6).",
+            "cite": {
+              "id": "aeaf7e66a05b4d28",
+              "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+            }
+          },
+          "edge_evidence": {
+            "element_id": "element-15b181bc58-0008",
+            "text_raw": "Attach U-Channel to \"tongue\" side of first board,\nand \"groove\" side of last board.",
+            "cite": {
+              "id": "57482180d5ddbd37",
+              "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+            }
+          },
+          "contract_mapping": "Part type and handed slot representation remain unresolved; this is private kit inventory"
+        }
+      }
+    ],
+    "runtime_requirements_added": false,
+    "emission_status": "blocked_incomplete_inventory_and_stock",
+    "remaining_inputs": [
+      "Exact kit board count with applicable source evidence",
+      "Manufactured rail and board lengths for package credits",
+      "Applicable channel fit and length semantics"
+    ],
+    "separately_purchased_part_ids": [
+      "mfr/freedom-outdoor-living/73013956"
+    ],
+    "limitations": [
+      "Membership is authored structure; it is not a complete supplier Product or executable kit requirement.",
+      "Missing board count remains null; fitted demand is never substituted for packaged inventory.",
+      "Post selection remains a separate station-scoped purchase rule."
+    ]
+  }
+}

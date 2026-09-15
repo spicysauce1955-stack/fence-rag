@@ -1,0 +1,985 @@
+{
+  "scope": "Augusta 8x6 assembly slice: composition, counts, sequence evidence, authored model candidate",
+  "sources": [
+    {
+      "path": "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png",
+      "sha256": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf",
+      "sha256": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
+      "sha256": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
+      "sha256": "cb90e6a275ac5ff050a4c10d33d82b6478922683cd6d2c857e5c50a3dcb6c629"
+    },
+    {
+      "path": "manuals/weatherables/structural/weatherables-augusta-8ft-cad-page.html",
+      "sha256": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+    }
+  ],
+  "imported": {
+    "cad": [
+      {
+        "fact_id": 22768,
+        "inserted": false
+      },
+      {
+        "fact_id": 22769,
+        "inserted": false
+      },
+      {
+        "fact_id": 22770,
+        "inserted": false
+      },
+      {
+        "fact_id": 22771,
+        "inserted": false
+      },
+      {
+        "fact_id": 22772,
+        "inserted": false
+      },
+      {
+        "fact_id": 22773,
+        "inserted": false
+      },
+      {
+        "fact_id": 22774,
+        "inserted": false
+      }
+    ],
+    "install": [
+      {
+        "fact_id": 22779,
+        "inserted": false
+      }
+    ],
+    "specsheet": [
+      {
+        "fact_id": 22776,
+        "inserted": false
+      },
+      {
+        "fact_id": 22777,
+        "inserted": false
+      }
+    ],
+    "cadpage": [
+      {
+        "fact_id": 22780,
+        "inserted": false
+      },
+      {
+        "fact_id": 22781,
+        "inserted": false
+      },
+      {
+        "fact_id": 22782,
+        "inserted": false
+      },
+      {
+        "fact_id": 22783,
+        "inserted": false
+      },
+      {
+        "fact_id": 22784,
+        "inserted": false
+      },
+      {
+        "fact_id": 22785,
+        "inserted": false
+      },
+      {
+        "fact_id": 22786,
+        "inserted": false
+      },
+      {
+        "fact_id": 22787,
+        "inserted": false
+      },
+      {
+        "fact_id": 22788,
+        "inserted": false
+      },
+      {
+        "fact_id": 22789,
+        "inserted": false
+      },
+      {
+        "fact_id": 22790,
+        "inserted": false
+      }
+    ]
+  },
+  "snapshot_id": "95c770b849cb6817daaa03fc397bcc55e78bc9f48c51eff2e00dd548bdb44e58",
+  "snapshot_path": "workspace/snapshots/95c770b849cb6817daaa03fc397bcc55e78bc9f48c51eff2e00dd548bdb44e58.json",
+  "snapshot_stored": true,
+  "consumer_checks_passed": true,
+  "composition_parts": [
+    {
+      "id": "mfr/weatherables/wea-augusta-metal-insert",
+      "version": 1,
+      "status": "active",
+      "type": {
+        "namespace": "mfr/weatherables",
+        "key": "post_stiffener_aluminum"
+      },
+      "name_i18n": {
+        "en": "Augusta Metal Rail Insert (1.25\" x 1.75\")"
+      },
+      "spec": [],
+      "authorship": "third_party_authored",
+      "cites": [],
+      "contributing_sources": []
+    },
+    {
+      "id": "mfr/weatherables/wea-augusta-picket-tg",
+      "version": 1,
+      "status": "active",
+      "type": {
+        "namespace": "mfr/weatherables",
+        "key": "picket"
+      },
+      "name_i18n": {
+        "en": "Augusta 7/8\" x 6\" Tongue & Groove Picket"
+      },
+      "spec": [],
+      "authorship": "third_party_authored",
+      "cites": [],
+      "contributing_sources": []
+    },
+    {
+      "id": "mfr/weatherables/wea-augusta-post-5x5",
+      "version": 1,
+      "status": "active",
+      "type": {
+        "namespace": "shared",
+        "key": "post"
+      },
+      "name_i18n": {
+        "en": "5\"x5\" Line/End/Corner Post (3 routed holes)"
+      },
+      "spec": [],
+      "authorship": "third_party_authored",
+      "cites": [],
+      "contributing_sources": []
+    },
+    {
+      "id": "mfr/weatherables/wea-augusta-rail-slotted",
+      "version": 1,
+      "status": "active",
+      "type": {
+        "namespace": "shared",
+        "key": "rail"
+      },
+      "name_i18n": {
+        "en": "Augusta Slotted Rail (1.5\" x 5.5\")"
+      },
+      "spec": [],
+      "authorship": "third_party_authored",
+      "cites": [],
+      "contributing_sources": []
+    },
+    {
+      "id": "mfr/weatherables/wea-augusta-u-channel",
+      "version": 1,
+      "status": "active",
+      "type": {
+        "namespace": "shared",
+        "key": "bar"
+      },
+      "name_i18n": {
+        "en": "1.5\" U-Channel"
+      },
+      "spec": [],
+      "authorship": "third_party_authored",
+      "cites": [],
+      "contributing_sources": []
+    }
+  ],
+  "value_parts": [
+    {
+      "id": "mfr/weatherables/augusta-8x6-metal-insert",
+      "type": {
+        "namespace": "shared",
+        "key": "reinforcement"
+      },
+      "status": "draft",
+      "name_i18n": {
+        "en": "Weatherables Augusta metal rail insert — 8ft CAD page material list (8x6 panel); exact SKU unverified"
+      },
+      "authorship": "third_party_authored",
+      "spec": [
+        {
+          "key": "width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 31750,
+            "unit": "mm",
+            "value_raw": [
+              "1.25 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d47dc37a5972660a",
+                "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "height_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 44450,
+            "unit": "mm",
+            "value_raw": [
+              "1.75 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d47dc37a5972660a",
+                "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "length_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 1816100,
+            "unit": "mm",
+            "value_raw": [
+              "71.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d47dc37a5972660a",
+                "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "kit_count_per_panel",
+          "agree": "==",
+          "value": {
+            "key": "count",
+            "value_raw": [
+              "3 each"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d47dc37a5972660a",
+                "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "cites": [
+        {
+          "id": "d47dc37a5972660a",
+          "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+        }
+      ],
+      "contributing_sources": [
+        "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+      ],
+      "version": "sha256:7961cd667efe28c01ff63105eb0a20572b61dc36bb6e82c4d6234be0b8186d9c"
+    },
+    {
+      "id": "mfr/weatherables/augusta-8x6-picket",
+      "type": {
+        "namespace": "shared",
+        "key": "infill"
+      },
+      "status": "draft",
+      "name_i18n": {
+        "en": "Weatherables Augusta tongue-and-groove picket — specsheet style and 8ft CAD page material list; exact SKU unverified"
+      },
+      "authorship": "third_party_authored",
+      "spec": [
+        {
+          "key": "nominal_thickness_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 22225,
+            "unit": "mm",
+            "value_raw": [
+              "7/8 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "fba738057e8aef78",
+                "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "nominal_width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 152400,
+            "unit": "mm",
+            "value_raw": [
+              "6 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "fba738057e8aef78",
+                "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "stock_length_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 1092200,
+            "unit": "mm",
+            "value_raw": [
+              "43 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d47dc37a5972660a",
+                "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "kit_count_per_panel",
+          "agree": "==",
+          "value": {
+            "key": "count",
+            "value_raw": [
+              "22 each"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d47dc37a5972660a",
+                "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "cites": [
+        {
+          "id": "d47dc37a5972660a",
+          "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+        },
+        {
+          "id": "fba738057e8aef78",
+          "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+        }
+      ],
+      "contributing_sources": [
+        "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb",
+        "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+      ],
+      "version": "sha256:629f87f40d3788ae84934bbdca121aed982529a8779115a1c3b7cca66c6ff4df"
+    },
+    {
+      "id": "mfr/weatherables/augusta-8x6-rail",
+      "type": {
+        "namespace": "shared",
+        "key": "rail"
+      },
+      "status": "draft",
+      "name_i18n": {
+        "en": "Weatherables Augusta rail — 8x6 privacy CAD drawing rail; exact SKU unverified"
+      },
+      "authorship": "third_party_authored",
+      "spec": [
+        {
+          "key": "width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 38100,
+            "unit": "mm",
+            "value_raw": [
+              "1.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "798c70ec3e3cfe5b",
+                "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "height_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 139700,
+            "unit": "mm",
+            "value_raw": [
+              "5.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "798c70ec3e3cfe5b",
+                "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "length_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 1816100,
+            "unit": "mm",
+            "value_raw": [
+              "71.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "798c70ec3e3cfe5b",
+                "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "cites": [
+        {
+          "id": "798c70ec3e3cfe5b",
+          "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+        }
+      ],
+      "contributing_sources": [
+        "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      ],
+      "version": "sha256:1f7e469703259cdfa40ce9c8ebfe14f82b1a4a4b7d304016ce9a3880b2676e95"
+    },
+    {
+      "id": "mfr/weatherables/augusta-8x6-u-channel",
+      "type": {
+        "namespace": "shared",
+        "key": "bar"
+      },
+      "status": "draft",
+      "name_i18n": {
+        "en": "Weatherables Augusta U-channel — 8ft CAD page material list (8x6 panel); exact SKU unverified"
+      },
+      "authorship": "third_party_authored",
+      "spec": [
+        {
+          "key": "width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 31750,
+            "unit": "mm",
+            "value_raw": [
+              "1.25 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d47dc37a5972660a",
+                "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "depth_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 38100,
+            "unit": "mm",
+            "value_raw": [
+              "1.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d47dc37a5972660a",
+                "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "length_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 1003300,
+            "unit": "mm",
+            "value_raw": [
+              "39.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d47dc37a5972660a",
+                "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "kit_count_per_panel",
+          "agree": "==",
+          "value": {
+            "key": "count",
+            "value_raw": [
+              "4 each"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d47dc37a5972660a",
+                "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "cites": [
+        {
+          "id": "d47dc37a5972660a",
+          "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+        }
+      ],
+      "contributing_sources": [
+        "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+      ],
+      "version": "sha256:1f98d68f2882bb0754d6a8404a8db20106380fbc2f73b86b72425075af3a3387"
+    }
+  ],
+  "models_admitted": 0,
+  "model_exclusions": [
+    {
+      "model_id": "mfr/weatherables-augusta-8x6-privacy",
+      "content_hash": "7708c2e02a05049e7824f37198fa1b8da8f3577088151d70dade4fbee9d4a18e",
+      "issues": [
+        {
+          "path": "/default_spec/frame/0/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/2/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/base_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/top_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/1/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/1/base_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/1/top_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/",
+          "code": "consumer_numeric_provenance_mapping_unresolved",
+          "message": "Numeric model values need published provenance under contract obligation 6; this profile only stores private field citations and has no agreed lossless publication mapping."
+        }
+      ],
+      "would_close": "Resolve the listed required shape, source, provenance and any explicit review-integrity failures without inventing missing values."
+    }
+  ],
+  "model_readiness": [
+    {
+      "model_id": "mfr/weatherables-augusta-8x6-privacy",
+      "content_hash": "7708c2e02a05049e7824f37198fa1b8da8f3577088151d70dade4fbee9d4a18e",
+      "review_status": "unreviewed",
+      "generation_ready": false,
+      "consumer_validation_executed": false,
+      "publication_blocked": true,
+      "issues": [
+        {
+          "path": "/status",
+          "code": "inactive_model",
+          "message": "This valid published status does not select an active generation definition."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/insertion_margin",
+          "code": "missing_value",
+          "message": "Establish the insertion margin for this joint from applicable evidence or an explicitly classified authored value."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/insertion_margin",
+          "code": "missing_value",
+          "message": "Establish the insertion margin for this joint from applicable evidence or an explicitly classified authored value."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/default_spec/frame/2/joint/insertion_margin",
+          "code": "missing_value",
+          "message": "Establish the insertion margin for this joint from applicable evidence or an explicitly classified authored value."
+        },
+        {
+          "path": "/default_spec/frame/2/requirement/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/joint/insertion_margin",
+          "code": "missing_value",
+          "message": "Establish the insertion margin for this joint from applicable evidence or an explicitly classified authored value."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/default_spec/infill/pattern/1/joint/insertion_margin",
+          "code": "missing_value",
+          "message": "Establish the insertion margin for this joint from applicable evidence or an explicitly classified authored value."
+        },
+        {
+          "path": "/default_spec/infill/pattern/1/requirement/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/default_spec/fixings/0/requirement/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/post",
+          "code": "missing_value",
+          "message": "Supply an applicable post requirement if this model should express a post-selection opinion."
+        },
+        {
+          "path": "/",
+          "code": "consumer_validation_missing",
+          "message": "No consumer validation was executed; this does not by itself forbid publication."
+        }
+      ],
+      "publication_blockers": [
+        {
+          "path": "/default_spec/frame/0/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/2/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/base_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/top_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/1/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/1/base_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/1/top_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/",
+          "code": "consumer_numeric_provenance_mapping_unresolved",
+          "message": "Numeric model values need published provenance under contract obligation 6; this profile only stores private field citations and has no agreed lossless publication mapping."
+        }
+      ]
+    }
+  ],
+  "nullable_gaps": [],
+  "consumer": {
+    "consumer_root": "/tmp/fence-planning-bom",
+    "checks": [
+      {
+        "check": "consumer_environment",
+        "ok": true,
+        "detail": "consumer venv ok"
+      },
+      {
+        "check": "composition_parts_ingest",
+        "ok": true,
+        "detail": {
+          "mfr/weatherables/wea-augusta-post-5x5": true,
+          "mfr/weatherables/wea-augusta-rail-slotted": true,
+          "mfr/weatherables/wea-augusta-picket-tg": true,
+          "mfr/weatherables/wea-augusta-u-channel": true,
+          "mfr/weatherables/wea-augusta-metal-insert": true
+        }
+      },
+      {
+        "check": "draft_value_parts_inactive",
+        "ok": true,
+        "detail": {
+          "expected": [
+            "mfr/weatherables/augusta-8x6-metal-insert",
+            "mfr/weatherables/augusta-8x6-picket",
+            "mfr/weatherables/augusta-8x6-rail",
+            "mfr/weatherables/augusta-8x6-u-channel"
+          ],
+          "actual": [
+            "mfr/weatherables/augusta-8x6-metal-insert",
+            "mfr/weatherables/augusta-8x6-picket",
+            "mfr/weatherables/augusta-8x6-rail",
+            "mfr/weatherables/augusta-8x6-u-channel"
+          ]
+        }
+      },
+      {
+        "check": "consumer_dialect_candidate_parses",
+        "ok": true,
+        "detail": []
+      },
+      {
+        "check": "producer_draft_fragment_refused_by_consumer",
+        "ok": true,
+        "detail": [
+          "['default_spec', 'frame', 0, 'placement', 'from_bottom', 'offset_mm']: Field required",
+          "['default_spec', 'frame', 0, 'joint']: Input should be 'butt', 'channel', 'groove', 'bracket' or 'overlap'",
+          "['default_spec', 'frame', 0, 'requirement', 'qty']: Input should be a valid integer",
+          "['default_spec', 'frame', 1, 'placement', 'from_bottom', 'offset_mm']: Field required"
+        ]
+      },
+      {
+        "check": "consumer_refuses_fitted_dimensions_without_geometry",
+        "ok": true,
+        "detail": {
+          "geometry_refusals": [
+            "frame slot 'bottom_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have — the drawin",
+            "frame slot 'mid_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have — the drawing w",
+            "frame slot 'top_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have — the drawing w",
+            "infill member 'picket': joint='groove' with no engagement at either end and no channel in either frame slot claims a mec"
+          ],
+          "other_errors": []
+        }
+      },
+      {
+        "check": "offsets_are_millimetre_magnitude",
+        "ok": true,
+        "detail": {
+          "offsets": [
+            69,
+            1212,
+            2355
+          ],
+          "exact_centerlines_mm": [
+            69.85,
+            1212.85,
+            2355.85
+          ],
+          "losses_recorded_by_transformer": true
+        }
+      },
+      {
+        "check": "height_survives_parsing",
+        "ok": true,
+        "detail": {
+          "heights_mm": [
+            2425
+          ],
+          "exact_value": "95.5 in = 2425.7 mm; floors to 2425 with recorded 0.7 mm loss"
+        }
+      },
+      {
+        "check": "pattern_is_single_row",
+        "ok": true,
+        "detail": {
+          "pattern_keys": [
+            "picket"
+          ],
+          "upper_run": "withheld under consumer_infill_single_cycle with its two u-channel segments"
+        }
+      },
+      {
+        "check": "panel_resolution_behaves_as_declared",
+        "ok": true,
+        "detail": {
+          "asserted_outcome": "expected_dimensionless_draft_refusal (dimension-availability refusal; receiving geometry NOT evaluated) or resolved-nonempty",
+          "actual": {
+            "outcome": "expected_dimensionless_draft_refusal",
+            "error_type": "ValueError",
+            "error": "member pattern never advances: widths [0] with gaps [0] move 0 mm per repeat, so no finite number of members fills the axis"
+          }
+        }
+      },
+      {
+        "check": "mapping_completeness_holds",
+        "ok": true,
+        "detail": {
+          "draft_member_keys": [
+            "picket",
+            "picket_upper"
+          ],
+          "mapped_member_keys": [
+            "picket"
+          ],
+          "withheld_member_keys": [
+            "picket_upper"
+          ],
+          "complete": true,
+          "draft_u_channel_segments": 4,
+          "mapped_u_channel_segments": 2,
+          "withheld_u_channel_segments": 2,
+          "fixing_count_complete": true
+        }
+      },
+      {
+        "check": "unvalidated_capabilities_marked",
+        "ok": true,
+        "detail": {
+          "assembly": false,
+          "fitting": false,
+          "cutting": false,
+          "purchasing": false
+        }
+      }
+    ]
+  },
+  "consumer_validation_scope": "Consumer checks prove: ingestion, dialect fidelity (unit conversion with every precision loss recorded — lengths and placements floor, counts refuse fractional values; height field; single-row pattern; centerline placement datum), parser acceptance, mapping completeness (mapped + withheld == draft members AND draft counts), that validate_model and the real panel resolver REFUSE undeclared geometry — with a closed outcome enumeration: only the expected dimension-availability refusal or a genuinely computed nonempty result passes; missing records, unexpected errors, and empty results all fail. They do NOT prove assembly, fitting, cutting or purchasing: capability_validation marks all four validated=false with reasons, and they stay unvalidated until receiving geometry and step reviews exist. The panel-resolution refusal is the resolver refusing to fill an axis from an inactive, dimension-less draft Part — the boundary between \"validated parsing\" and \"validated assembly\" is demonstrated, not claimed. The advance script refuses to store the snapshot and exits nonzero if any check fails.",
+  "human_reviews_created": false,
+  "remaining_gaps": [
+    "Receiving geometry (rail slot depth, picket seating, post rail-socket depth) is absent from all retained sources; fitted dimensions, seated cut lengths and engagement checks remain unvalidated.",
+    "AssemblyStep publication awaits human review of the proposed step candidates (master installation instructions).",
+    "FenceModel publication remains blocked by the unresolved numeric provenance mapping (Amendment 008 pending).",
+    "Purchasing quantities: installed per-panel counts are authored (3 rails, 4 u-channel segments across two runs); picket counts require installed pitch and run length; channel stock length and kit inventory are not source-stated."
+  ]
+}

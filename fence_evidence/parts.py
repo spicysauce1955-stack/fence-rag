@@ -65,7 +65,7 @@ from __future__ import annotations
 import json
 import sqlite3
 
-from .canonical import canonical_bytes
+from .canonical import canonical_bytes, part_version
 from .parameters import (MILLI_PER_UNIT, _UNIT_ALIASES, _Gaps, _default_source_ref,
                          _magnitude, _round_half_up)
 
@@ -130,13 +130,17 @@ def _stock_length_evidence(conn: sqlite3.Connection | None) -> dict:
 
 
 def build_parts(components: list[dict], registry, *, source_ref=None,
-                conn: sqlite3.Connection | None = None) -> tuple[list[dict], list[dict]]:
+                conn: sqlite3.Connection | None = None,
+                identity_namespace: str | None = None) -> tuple[list[dict], list[dict]]:
     """`(components, registry)` -> `([Part], [Gap])`.
 
     `registry` is a `part_types.PartTypeRegistry` already walked by
     `part_types.build_part_types` over the SAME `components` list -- reused,
     not rebuilt, so a component this platform already gapped as unmapped is
     skipped here rather than gapped twice.
+
+    New manufacturer slices may choose an identity namespace independently of
+    the shared PartType. The default preserves existing published identities.
     """
     from .parameters import CURATION_LEVEL, _source_class     # lazy: no cycle, matches parameters.py's own discipline
 
@@ -149,10 +153,9 @@ def build_parts(components: list[dict], registry, *, source_ref=None,
         ref = registry.resolve(c["component_type"])
         if ref is None:
             continue        # already gapped as unmapped_part_kind by build_part_types
-        part_id = _part_id(c["component_id"], ref["namespace"])
+        part_id = _part_id(c["component_id"], identity_namespace or ref["namespace"])
         parts_by_id[c["component_id"]] = {
             "id": part_id,
-            "version": 1,
             "status": "active",
             "type": ref,
             "name_i18n": {"en": c["component_name"] or c["component_id"]},
@@ -206,5 +209,35 @@ def build_parts(components: list[dict], registry, *, source_ref=None,
         part["cites"] = cites
         part["contributing_sources"] = sorted({c["belongs_to"] for c in cites})
 
+    # AFTER the stock-length pass above, never inside the dict literal that
+    # builds the part: `version` is a hash of everything else the part carries,
+    # and `spec`, `cites` and `contributing_sources` are all still empty at
+    # that point. Minting early is the ordering mistake that produced the one
+    # unreproducible published version this platform has shipped -- see
+    # `canonical.part_version`. The counter this replaced was the literal `1`
+    # with no bump path anywhere in the package (G103, D-5 in `naming.md` §4).
+    for part in parts_by_id.values():
+        part["version"] = part_version(part)
+
     parts = sorted(parts_by_id.values(), key=lambda p: p["id"])
+    # Scoped value recipes fire on the composition's own component ids, NOT
+    # on the identity namespace: Augusta and Pembroke share the mfr/weatherables
+    # namespace, and a namespace test would run each recipe once per slice,
+    # duplicating every recipe Part. The dataset's component ids are the slice's
+    # own authored selection and stay stable across slices.
+    component_ids = {c["component_id"] for c in components}
+    from .emblem_claims import NAMESPACE, build_emblem_parts
+    if component_ids and set(component_ids) <= {
+            "freedom-5x5-line-post", "freedom-5x5-corner-post", "freedom-5x5-end-post",
+            "freedom-5x5-post-top", "freedom-emblem-rail", "freedom-emblem-board"}:
+        from .emblem_drawing_claims import build_parts as build_drawing_parts
+        parts = sorted(parts + build_emblem_parts(conn, mint) + build_drawing_parts(conn, mint), key=lambda p: p['id'])
+    from .part_types import AUGUSTA_COMPONENT_IDS
+    if component_ids and component_ids <= AUGUSTA_COMPONENT_IDS:
+        from .augusta_drawing_claims import build_parts as build_augusta_parts
+        parts = sorted(parts + build_augusta_parts(conn, mint), key=lambda p: p['id'])
+    from .part_types import PEMBROKE_COMPONENT_IDS
+    if component_ids and component_ids <= PEMBROKE_COMPONENT_IDS:
+        from .pembroke_cadpage_claims import build_parts as build_pembroke_parts
+        parts = sorted(parts + build_pembroke_parts(conn, mint), key=lambda p: p['id'])
     return parts, gaps.list()

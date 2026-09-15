@@ -1,0 +1,114 @@
+{
+  "batch_id": "emblem-parts-001",
+  "profile": "persisted-facts-to-parts-v1",
+  "tenant": "default",
+  "scope": "Existing exact Emblem73014714 draft Part specifications; no assembly claims publication",
+  "sources": [
+    {
+      "path": "manuals/freedom-outdoor-living/73014714-6x8Emblem-White-ProjectPlanning.pdf",
+      "sha256": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23"
+    }
+  ],
+  "snapshot": "workspace/snapshots/b5048772101e18513a9cbd2c913978da05046fced986e03c42afddc5c5b19ec7.json",
+  "part_ids": [
+    "mfr/freedom-outdoor-living/emblem-73014714-board",
+    "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+    "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+    "mfr/freedom-outdoor-living/73013956"
+  ],
+  "bindings": [
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+      "spec_key": "nominal_width_mm",
+      "extractor": "source-reading:emblem-73014714:v1",
+      "fact_type": "nominal_board_width_in",
+      "element_id": "element-b540e75926-0007"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+      "spec_key": "colour",
+      "extractor": "source-reading:emblem-73014714:v1",
+      "fact_type": "component_colour",
+      "element_id": "element-b540e75926-0016"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+      "spec_key": "width_mm",
+      "extractor": "source-reading:emblem-73014714:v1",
+      "fact_type": "rail_width_in",
+      "element_id": "element-b540e75926-0008"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+      "spec_key": "height_mm",
+      "extractor": "source-reading:emblem-73014714:v1",
+      "fact_type": "rail_height_in",
+      "element_id": "element-b540e75926-0008"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+      "spec_key": "colour",
+      "extractor": "source-reading:emblem-73014714:v1",
+      "fact_type": "component_colour",
+      "element_id": "element-b540e75926-0016"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+      "spec_key": "width_mm",
+      "extractor": "source-reading:emblem-73014714:v1",
+      "fact_type": "rail_width_in",
+      "element_id": "element-b540e75926-0008"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+      "spec_key": "height_mm",
+      "extractor": "source-reading:emblem-73014714:v1",
+      "fact_type": "rail_height_in",
+      "element_id": "element-b540e75926-0008"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+      "spec_key": "colour",
+      "extractor": "source-reading:emblem-73014714:v1",
+      "fact_type": "component_colour",
+      "element_id": "element-b540e75926-0016"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/73013956",
+      "spec_key": "nominal_width_mm",
+      "extractor": "source-reading:emblem-73014714:v1",
+      "fact_type": "nominal_cap_width_in",
+      "element_id": "element-b540e75926-0051"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/73013956",
+      "spec_key": "nominal_depth_mm",
+      "extractor": "source-reading:emblem-73014714:v1",
+      "fact_type": "nominal_cap_depth_in",
+      "element_id": "element-b540e75926-0051"
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/73013956",
+      "spec_key": "colour",
+      "extractor": "source-reading:emblem-73014714:v1",
+      "fact_type": "cap_colour",
+      "element_id": "element-b540e75926-0051"
+    }
+  ],
+  "implementation_files": [
+    "fence_evidence/emblem_claims.py",
+    "fence_evidence/parts.py",
+    "fence_evidence/reviews.py",
+    "fence_evidence/snapshot.py"
+  ],
+  "historical_evidence": [
+    "workspace/reports/emblem-public-parts-consumer-check.json (consumer receipt run, not rerun here)",
+    "workspace/reports/emblem-recovered-manual-check.json (assembly applicability only; excluded from this Part slice)"
+  ],
+  "limitations": [
+    "Unified claims table remains proposed; this profile uses facts/fact_reviews.",
+    "Assembly relationships outside the claims lifecycle are excluded from the accepted slice.",
+    "Full model mapping, physical fit and purchasing are not verified by this checkpoint.",
+    "Only existing persisted-facts-to-Parts projections are supported; no generic extractor is introduced."
+  ]
+}

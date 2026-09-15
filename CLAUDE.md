@@ -2,12 +2,27 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Read this first
+
+**[`docs/knowledge-loop.md`](docs/knowledge-loop.md) says what this project is for.** It was
+agreed with the project owner on 2026-09-08 and it governs *purpose and direction*: this is the
+foundation knowledge layer an AI agent reasons from — not a parts catalogue — it talks only to
+the Planning/BOM backend and never to an end user, and it has exactly two edges (a query
+outward, overrides inward). [`docs/README.md`](docs/README.md) indexes every document in the
+tree and says which are live and which are history.
+
+**The headline gap:** `[measured]` 2026-09-08 a snapshot publishes 9 `ParameterTable`s, 42
+`Part`s and 8 `PartType`s — and **0 `Procedure`s, 0 `Rule`s, 0 `FenceModel`s, 0 `Combination`s**.
+This base knows numbers, not method. `Procedure` is *built* (`steps.py`, `procedures.py`,
+`cli steps`) and publishes nothing because **2,312 step candidates across 4 documents have 0
+reviews** (91 across 2 when this was written). `Rule` has no shape anywhere. Closing this outranks everything at the boundary.
+
 ## What this repo is
 
 Two things that must not be confused:
 
 1. A **research corpus + dataset** — vinyl-fence installation and structural-engineering source
-   documents (137 PDFs, 6 CAD PNGs, 1 DOCX; 2147 pages) plus hand-researched JSON describing their
+   documents (137 PDFs, 6 CAD PNGs, **2 retained CAD web pages (HTML)**, 1 DOCX; 2147 pages — 146 files) plus hand-researched JSON describing their
    contents. This is the read-only input.
 2. The **fence evidence system** (`fence_evidence/`) — a source-preserving evidence store and
    SQLite FTS5 retrieval layer over that corpus, which answers questions like *"what footing depth
@@ -24,6 +39,29 @@ at v1.3** — binding at the boundary, silent on everything inside it),
 contract it implements, including 12 numbered prohibitions), `docs/target-architecture.md`
 (informative future direction), `rag-pipeline-plan.md` (historical, superseded, kept only because
 the spec and the guide cite it).
+
+**[`docs/naming.md`](docs/naming.md) is DECIDED and partly enforced** (2026-09-09).
+Every name this project mints — data fields, ids, code vocabularies, Python symbols,
+tests, documents and document ids. Almost none of it is new; the repository already had
+these conventions and had never written them down, which is how `fence_height_ft` came to
+exist beside `fence_height` (G108) and how five document-id namespaces came to collide.
+`tests/test_naming.py` and `tests/test_gold_set.py` enforce the nine rules cheap
+enough to check. **Add a convention there with its check, or with a stated reason
+there is none** — §11 lists what stays unenforced and why. The load-bearing ones:
+a second name for one value must mark a role or a layer; a unit suffix appears iff the
+value is a quantity and its unit is not declared elsewhere, **and it must be a unit the
+row actually carries**; `_mm` means `Quantity` and an unsuffixed key means `Token`;
+`UPPER_SNAKE` is a registry code that crosses to Planning
+and `error.*` is transport; a test name is a behaviour sentence and its docstring is the
+why; an id namespace is global across `docs/`.
+
+**Worked 2026-09-09**, the day after it was written: six defects closed, `max_rack`
+filed as amendment 011, `review_status` put to the owner as
+`docs/review-status-migration-plan.md` rather than migrated, and **four figures in
+`naming.md` itself corrected** — its B-1 count (13, not 11), its "no reason for the
+string form is recorded anywhere" (G103 records it), its attribution of
+`Combination.members` to `contract.md` (it is `knowledge-datamodel.md`), and its "nine
+lines apart" (31). See G109-G112.
 
 `docs/layering.md` is a **proposal** naming five layers (raw → canonical → assertions →
 entities → published) and one rule: *every reference points down a layer, never up*. The rule
@@ -66,7 +104,7 @@ order, and `audit/10-ratification-v1.0.md` §3.2 is the non-compliance this plat
 signature — **partly closed as of 2026-08-25**. Its live violation (obligation 6) and its
 three representational gaps (obligations 4, 15, 10) closed with build-plan A1-A5, all
 five of which landed 2026-08-25. Obligation 5 (the `PartType` spine) closed
-2026-08-31: 11 `Part`s and 5 `mfr/certainteed` `PartType` extensions publish for one
+2026-08-31: `Part`s and `PartType` extensions publish (**42 and 8** as of 2026-09-08; 11 and 5 when this was written) for one
 vertical slice (Chesterfield + the one assembly with real obligation-14 evidence),
 built with adversarial validation that caught and reversed a wrong data attribution
 before it shipped. Obligation 14 (`stock_length`) closed 2026-09-03: `SpecField.value:
@@ -77,8 +115,11 @@ computing them surfaced a corpus-wide `unit_normalized` defect (G63, 33 of 62
 number twelve times too small. A same-day attempt to fix it at the extractor was
 itself wrong — it made `unit_normalized` name the source's unit, contradicting this
 platform's real invariant that the column always names `value_normalized`'s unit
-instead — caught by adversarial review and reverted; `unit_original`, unchanged
-throughout, is and always was the reliable source-unit column. Still fully
+instead — caught by adversarial review and reverted. `unit_original` is the column to
+read for a source's unit, and it is right for all 62 `stock_length_in` facts — but
+**"always reliable" is overstated and G70 bounds it**: 3 facts elsewhere say `in` for a
+page that printed feet. Their values are correct and none is published, but do not reuse
+`unit_original` for a new fact type without re-measuring it. Still fully
 unbuilt: `FenceModel`, `Procedure`, `Rule`,
 `Combination`. `docs/state-and-gaps.md` G62/G63 has the full account. Curation level 2 is
 **no longer thin as of 2026-08-31**: a person has reviewed 37 of 44 flagged crops (up
@@ -98,11 +139,11 @@ projection: a capability matrix, a `cur_*` schema of claims-not-facts, a single-
 slice, a staged plan, and acceptance criteria. It sits in **tier 3 — this team's internals**, and
 the contract is silent on it. It remains **a proposal under review**: nothing in it is implemented,
 no corpus-wide curation has run, and the projection has not been regenerated. Read
-`docs/curation/README.md` first. One exception to "proposal": its C0 — removing
+`docs/curation/README.md` first. One exception to "proposal": its CUR-S0 — removing
 `cross_family_verified` from `table_review.PROMOTABLE`, which let two agent readings promote a fact
 with no human review — was a **commitment** made in writing at ratification, and **landed
 2026-08-25** as item A1 of `docs/build-plan.md`. `PROMOTABLE` is now `("accepted", "corrected")`,
-the 324 machine-promoted facts are un-promoted, and all 1,225 readings are retained with their
+the 324 machine-promoted facts are un-promoted, and all readings are retained (**1,927** as of 2026-09-08; the 1,225 and 1,755 figures elsewhere in this file are both superseded) with their
 crops as a review queue. See `docs/state-and-gaps.md` G17.
 
 ## Commands
@@ -120,6 +161,8 @@ python3 -m fence_evidence.cli report          # regenerate workspace/reports/
 python3 -m fence_evidence.cli audit           # relevance audit of the retrieval projection
 python3 -m fence_evidence.cli migrate         # additive schema migration + backfills; safe to re-run
 python3 -m fence_evidence.cli dataset --verify   # data/ still matches its SHA-256 baseline
+python3 -m fence_evidence.cli query --snapshot ID --question "footing depth exposure C" \
+    --condition exposure_category=C --scope fence_model:mfr/certainteed-columbia-imperial-chesterfield
 python3 -m fence_evidence.cli snapshot --build   # publish source_docs + warnings + gaps
 python3 -m fence_evidence.cli snapshot --list
 python3 -m fence_evidence.cli refs --verify     # every published citation still resolves
@@ -128,7 +171,13 @@ python3 -m fence_evidence.cli review --queue     # what is waiting for a person
 python3 -m fence_evidence.cli review --accept CROP --reviewer NAME   # record a review
 python3 -m fence_evidence.cli review --export    # the durable review ledger (G49)
 python3 -m fence_evidence.cli review --import PATH --apply   # replay it into this store
-python3 -m fence_evidence.cli fact-review --queue    # 266 OCR-flagged facts waiting
+python3 -m fence_evidence.cli fact-review --queue    # 180 OCR-flagged facts waiting
+python3 -m fence_evidence.cli steps --propose --document PATH [--page N]  # split bullets into step candidates
+python3 -m fence_evidence.cli steps --queue          # step candidates waiting for a person
+
+# the review console -- what is waiting for a person, generated from the store
+python3 scripts/render_console_images.py   # page images, once (poppler, ~2.3 MB)
+python3 scripts/build_review_console.py    # -> workspace/reports/review-console.html
 python3 -m fence_evidence.cli snapshot --verify-stored   # do PUBLISHED snapshots still pass?
 python3 -m fence_evidence.cli backfill-spans --apply     # recover merged cells (G41)
 python3 -m fence_evidence.cli serve --token TOK  # the API behind Planning's screens
@@ -162,8 +211,15 @@ about the files that happen to be there.
 The two `scripts/build_*.py` dataset builders are pure-stdlib, idempotent, and safe to re-run; they
 overwrite their outputs. They print a reconciliation summary — the lines that matter are
 `Missing (broken local_path)` and `Files on disk but NOT referenced` (orphans), both of which should
-be **0**. Any edit to a per-manufacturer or structural JSON requires re-running the corresponding
-builder and committing the regenerated output; `master-dataset.json`, `china-dataset.json` and the
+be **0**. **They are 0 today and both are currently meaningless** — 250 of 451 `local_path` values
+are absolute paths into a *different checkout on this machine*
+(`/home/user/Workspace/play/vinyl-fence-bom-pipeline/…`), 125 of them escaping the repository root
+after `relpath`, and the guard passes only because that stray directory happens to exist here. On a
+fresh clone they resolve to nothing. `cli dataset --verify` cannot see it either: it hashes the 16
+source files as opaque bytes and answers "unchanged", not "portable". Read `docs/state-and-gaps.md`
+G71 before trusting either number, and **before re-running a builder** — doing so today rewrites
+those 125 paths to `../play/…` and commits them. Any edit to a per-manufacturer or structural JSON
+requires re-running the corresponding builder and committing the regenerated output; `master-dataset.json`, `china-dataset.json` and the
 two `*documents-index.json` files are generated artifacts, never hand-edited. Re-running them can
 change the curated metadata the evidence system reads, which is why every manifest row records the
 SHA-256 it was built from.
@@ -226,7 +282,7 @@ three Showtech China catalogs.
 ```
 corpus (read-only)          workspace/ (every output)
 manuals/ china/manuals/     catalog/   corpus-manifest.jsonl (one row per file)
-data/                       derived/   page images + region crops (5.0 GB, git-ignored)
+data/                       derived/   page images + region crops (4.5 GB, git-ignored)
         |                   indexes/   evidence.db (git-ignored)
         v                   reports/   audits, coverage, evaluation, review
    extract.py               tests/     evaluation results
@@ -237,7 +293,8 @@ data/                       derived/   page images + region crops (5.0 GB, git-i
                     |
                     +----->  canonical.py -> snapshot.py -> snapshot_store.py
                              a published Snapshot: hashed, verified, write-once
-                             (source_docs + warnings + gaps only, so far)
+                             (source_docs, warnings, gaps, parts, part_types, parameters —
+                             models/procedures/rules/combinations still 0)
 ```
 
 The split that matters: **canonical** tables (`documents`, `document_versions`, `pages`,
@@ -315,11 +372,19 @@ Things that will bite you if you don't know them (all measured, see the corpus a
 - **`retain_until` is deliberately outside the snapshot hash.** It moves with the clock, so
   hashing it would mean two builds over identical knowledge never matched. What exactly belongs
   in "the canonical member list" is not fully specified; that is a reading, not a quote.
+- **`segment_kind` on a `step_candidate` classifies STRUCTURE, not semantics.** `step` means
+  "this is a bullet that reads like an instruction", not "this is an `AssemblyStep`". On the
+  slice page 5 of 54 such rows are an ordering permission, a rationale, a cross-reference, a
+  resulting behaviour and a dimension — a person decides, and `docs/state-and-gaps.md` G69
+  lists them. `prohibition` is separate because the design's worked example says
+  `Never strike the PVC post…` publishes as a `Warning`, and typing it `step` was a real
+  defect. Note the ordering trap it exposed: the damage HIDES the prohibition, because
+  `N\never` flattens to `N ever`, so the kind must be decided on the repaired reading.
 - **`crops.py` is wired as of 2026-08-28.** `cropcache.py` renders through it,
   `sourcerefs.py` builds the Discovery read model on top, and `api.py` serves
   `GET /source-refs/{id}` and `POST /source-refs:batch` behind a bearer allowlist.
 - **A human review is the ONLY thing here that does not regenerate, and it now has a
-  file.** Elements, facts, the projection and even the 1,755 table readings all rebuild
+  file.** Elements, facts, the projection and even the 1,927 table readings all rebuild
   from the corpus or from committed inputs; a person's judgement does not.
   `workspace/catalog/review-ledger.jsonl` is the committed, deterministic export
   (`cli review --export` / `--import`), keyed on evidence — `crop_sha256` for a table
@@ -330,10 +395,12 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   store and replaying the ledger reproduces them exactly. See G49.
 - **The review loop has grown well past its first use, and the numbers have moved a
   lot since 2026-08-30.** `[measured]` 2026-08-31: **37 of 44 crops reviewed** (up
-  from 3), 1,218 of 1,755 readings carry a reviewer (1,194 `accepted`, 8 `corrected`),
-  110 promoted facts, **9 published `ParameterTable`s** (up from 4 — `max_span_mm` and
-  `footing_schedule` publish for the first time as of 2026-08-31). The other **13
-  readings are still `unreviewed` and 524 sit at `cross_family_verified`**, which is
+  from 3), 110 promoted facts, **9 published
+  `ParameterTable`s** (up from 4 — `max_span_mm` and `footing_schedule` publish for
+  the first time as of 2026-08-31). `[measured]` **2026-09-08: 1,927 readings, 1,202
+  reviewed, 185 still `unreviewed`, 524 at `cross_family_verified`.** This paragraph
+  previously said "the other 13 readings are still unreviewed", which read as
+  nearly-finished while the queue had in fact grown fourteenfold, which is
   level 1 and publishes nothing. Do not read "level 2 is populated" as "the corpus is
   curated" — 7 of 144 documents have any promoted table fact. Full account, updated
   faster than this file: `docs/state-and-gaps.md` G58/G59.
@@ -345,15 +412,37 @@ Things that will bite you if you don't know them (all measured, see the corpus a
   the row as matching every `hvhz` value while the dimension stays in the domain. The token
   is anchored to the whole span — a hedged span asserts nothing. See G53.
 - **Tenant isolation is enforced at the ref minter, not by a filter.** `documents.owner_tenant`
-  is the whole axis — NULL is shared, which is all 144 corpus documents — and
+  is the whole axis — NULL is shared, which is all 146 corpus documents — and
   `SnapshotBuilder.source_ref` refuses to mint a citation into another tenant's document, so a
   cross-tenant value is unpublishable rather than filtered. Two fields leak WITHOUT a ref:
   `also_filed_as` and `superseded_by` publish facts about *other* documents. Both are scoped;
   if you add a third such field, scope it. `docs/state-and-gaps.md` G48.
+- **`Part.version` is a content hash, and `canonical.part_version` is the one place
+  that mints it.** Never `'sha256:' + content_hash(part)` by hand: the field is
+  excluded from its own hash, and doing that by hand went wrong once —
+  `augusta_drawing_claims` re-hashed a dict that already carried a version, so one
+  published version could not be recomputed from the published payload. The integer
+  `1` it replaced never incremented anywhere, so `Part@1` pinned nothing (G109).
+  `PART_SHAPE` types the field only as *positive int | non-empty string*, because
+  `snapshot --verify-stored` re-runs `verify()` over 24 write-once snapshots that
+  publish the integer; the strong rule is at the builder and in `tests/test_naming.py`.
+- **`facts._conditions()` writes `fence_height`, carrying the source's own lexeme** —
+  `8' tall`, not the float `8.0`, and not an `Interval`. The publisher parses a LABEL
+  (`parameters._parse_fence_height`), so a dict fails it exactly as the old
+  `fence_height_ft` key did. Every key that function can emit must be in
+  `parameters.CONDITION_SCOPE`; a test reads the assignments out of the source with
+  `ast` and fails if one is not (G108).
+- **`relations.supersession_chain` returns the whole DAG, oldest first**, not one path.
+  It took `LIMIT 1` per hop until 2026-09-09, so a branching lineage returned an
+  arbitrary route and the route depended on where you entered. If you widen what it
+  feeds, remember why `versions._one_per_approval` exists: the four byte-identical
+  filings of NOA `24-0117.05` are one approval, and counting them as four turns a
+  correct answer into a spurious `conflict` (G110).
 - **`ref_id` embeds a bbox, and a re-extraction can move it.** A 0.02pt shift
   changes the id completely and `delete_version_rows()` removes the rows the old
   id named, so a toolchain upgrade breaks published citations retroactively and
-  obligation 3 with them. All 519 currently resolve; `cli refs --verify` is the
+  obligation 3 with them. All **962** across 25 live snapshots currently resolve --
+  716 of them embed a bbox and would break on a re-segmentation; `cli refs --verify` is the
   guard. The fix is extraction editions — see `docs/four-layer-model-design.md`
   §5.1 and G38. **Do not change `ref_id`'s formula**; published snapshots depend
   on it byte-for-byte.

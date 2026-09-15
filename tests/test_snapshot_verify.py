@@ -16,6 +16,8 @@ person accepted and the person was wrong. A green verify proves the object is
 well-formed. It proves nothing about whether it is true.
 """
 import unittest
+from copy import deepcopy
+from unittest.mock import patch
 
 import context  # noqa: F401  -- puts the repo root on sys.path
 from context import requires_store
@@ -40,6 +42,315 @@ def _ok():
         "gaps": [], "part_types": [], "parts": [], "models": [],
         "procedures": [], "parameters": [], "combinations": [], "rules": [],
     }
+
+
+def _procedure():
+    cite = {"id": "r1", "belongs_to": "h1"}
+    return {"id": "installation", "scope": None, "cites": [cite], "steps": [
+        {"key": "prepare", "kind": "preparation", "scope": "site",
+         "slots": [], "requires": [], "cites": [cite], "text_i18n": "Prepare the site."},
+        {"key": "install", "kind": "installation", "scope": "post",
+         "slots": [], "requires": [{"kind": "after", "step": "prepare"}],
+         "cites": [cite], "text_i18n": "Install the post."}]}
+
+
+class TestProcedureVerificationGate(unittest.TestCase):
+    def setUp(self):
+        self.snapshot = _ok()
+        self.snapshot["procedures"] = [_procedure()]
+        verify(self.snapshot)  # Each negative control starts from a valid object.
+
+    def refuses(self, fragment):
+        with self.assertRaises(VerificationFailed) as caught:
+            verify(self.snapshot)
+        self.assertIn(fragment, str(caught.exception))
+
+    def test_nonempty_procedure_passes(self):
+        verify(self.snapshot)
+
+    def test_missing_or_empty_steps(self):
+        for fields in ({}, {"steps": None}, {"steps": []}):
+            with self.subTest(fields=fields):
+                proc = _procedure()
+                del proc["steps"]
+                proc.update(fields)
+                self.snapshot["procedures"] = [proc]
+                self.refuses("steps must be a nonempty list")
+
+    def test_procedure_requires_its_own_citations(self):
+        for cites in (None, []):
+            with self.subTest(cites=cites):
+                self.snapshot["procedures"][0]["cites"] = cites
+                self.refuses("procedure must have cites")
+
+    def test_nonobject_procedure(self):
+        for proc in (None, "procedure", [], 7):
+            with self.subTest(proc=proc):
+                self.snapshot["procedures"] = [proc]
+                self.refuses("procedures[0]: must be an object")
+
+    def test_nonobject_step(self):
+        for step in (None, "step", [], 7):
+            with self.subTest(step=step):
+                self.snapshot["procedures"][0]["steps"] = [step]
+                self.refuses("steps[0]: must be an object")
+
+    def test_unhashable_step_key(self):
+        for key in ([], {}):
+            with self.subTest(key=key):
+                self.snapshot["procedures"][0]["steps"][0]["key"] = key
+                self.refuses("key must be a nonempty string")
+
+    def test_steps_must_be_a_list(self):
+        for steps in ("step", {"key": "step"}, 7):
+            with self.subTest(steps=steps):
+                self.snapshot["procedures"][0]["steps"] = steps
+                self.refuses("steps must be a nonempty list")
+
+    def test_missing_procedure_id(self):
+        del self.snapshot["procedures"][0]["id"]
+        self.refuses("no id")
+
+    def test_duplicate_procedure_id(self):
+        self.snapshot["procedures"].append(deepcopy(self.snapshot["procedures"][0]))
+        self.refuses("duplicate Procedure.id")
+
+    def test_duplicate_step_key(self):
+        self.snapshot["procedures"][0]["steps"][1]["key"] = "prepare"
+        self.refuses("two steps share a key")
+
+    def test_missing_or_blank_step_key(self):
+        for key in (None, "", "   "):
+            with self.subTest(key=key):
+                self.snapshot["procedures"][0]["steps"][1]["key"] = key
+                self.refuses("key must be a nonempty string")
+
+    def test_missing_or_unknown_kind(self):
+        for value in (None, "unknown"):
+            with self.subTest(value=value):
+                self.snapshot["procedures"][0]["steps"][0]["kind"] = value
+                self.refuses("steps[0]: kind")
+
+    def test_missing_or_unknown_scope(self):
+        for value in (None, "unknown"):
+            with self.subTest(value=value):
+                self.snapshot["procedures"][0]["steps"][0]["scope"] = value
+                self.refuses("steps[0]: scope")
+
+    def test_missing_cites(self):
+        self.snapshot["procedures"][0]["steps"][0]["cites"] = []
+        self.refuses("no cites")
+
+    def test_blank_text(self):
+        self.snapshot["procedures"][0]["steps"][0]["text_i18n"] = "  "
+        self.refuses("empty text")
+
+    def test_unknown_edge_kind(self):
+        self.snapshot["procedures"][0]["steps"][1]["requires"][0]["kind"] = "maybe_after"
+        self.refuses("requires kind")
+
+    def test_edge_outside_its_procedure(self):
+        other = deepcopy(self.snapshot["procedures"][0])
+        other["id"] = "other"
+        other["steps"][0]["key"] = "elsewhere"
+        other["steps"][1]["requires"][0]["step"] = "elsewhere"
+        self.snapshot["procedures"].append(other)
+        self.snapshot["procedures"][0]["steps"][1]["requires"][0]["step"] = "elsewhere"
+        self.refuses("not a step of this procedure")
+
+    def test_step_citation_must_close(self):
+        self.snapshot["procedures"][0]["steps"][0]["cites"] = [
+            {"id": "external", "belongs_to": "absent"}]
+        self.refuses("closure")
+
+
+class TestProcedureShapeGate(unittest.TestCase):
+    """G92. Every field is the type this gate reads it as, or the snapshot is
+    refused *as a snapshot*.
+
+    G84 fixed three reported shapes one at a time — a non-object procedure, a
+    non-object step, an unhashable step key. Ten more escaped the same way, as
+    `AttributeError` or `TypeError`: an exception that stops publication but is
+    not the documented `VerificationFailed`, carries no procedure/step location,
+    and is not what a caller catching the gate's own exception will catch. Three
+    more were worse than a crash — they published, because the check was a
+    truthiness test on a value nobody had established was a list.
+
+    These controls fail against the pre-G92 gate with the exception type in the
+    traceback rather than with an assertion, which is the point of them.
+    """
+
+    def setUp(self):
+        self.snapshot = _ok()
+        self.snapshot["procedures"] = [_procedure()]
+        verify(self.snapshot)  # Each negative control starts from a valid object.
+
+    def refuses(self, fragment):
+        with self.assertRaises(VerificationFailed) as caught:
+            verify(self.snapshot)
+        self.assertIn(fragment, str(caught.exception))
+
+    def step(self, field, value, j=0):
+        self.snapshot["procedures"][0]["steps"][j][field] = value
+
+    # --- Defect 1: shapes that escaped as the wrong exception type ----------
+
+    def test_requires_must_be_a_list_of_objects(self):
+        """`for edge in requires` iterated a string one character at a time and
+        a scalar not at all; `edge.get` then ran on whatever came out."""
+        for value in ("after", ["after"], [None], [7], 7, {"kind": "after"},
+                      "", True, ({"kind": "after", "step": "prepare"},)):
+            with self.subTest(value=value):
+                self.step("requires", value, j=1)
+                self.refuses("requires must be a list of Edge objects")
+
+    def test_an_edge_step_key_is_validated_before_it_is_hashed(self):
+        """The same defect G84 fixed one level up, missed one level down:
+        `edge["step"] not in keys` is a set membership test, so an unhashable
+        value raised `TypeError` before any check could report it."""
+        for value in ([], {}, 7, ("prepare",)):
+            with self.subTest(value=value):
+                self.step("requires", [{"kind": "after", "step": value}], j=1)
+                self.refuses("requires[0]: step must be a string")
+
+    def test_an_edge_kind_is_validated_before_the_vocabulary_is_hashed(self):
+        for value in ([], {}, {"after"}):
+            with self.subTest(value=value):
+                self.step("requires", [{"kind": value, "step": "prepare"}], j=1)
+                self.refuses("requires[0]: kind must be a string")
+
+    def test_text_i18n_must_be_a_string(self):
+        """`text_i18n` is a plain string here (`procedures.py` builds one). A
+        dict is the shape somebody will reach for first, and `.strip()` is what
+        met it. `b"t"` is the one that PUBLISHED: bytes has `.strip()`."""
+        for value in ({"en": "t"}, ["t"], 7, ("t",), b"t", True):
+            with self.subTest(value=value):
+                self.step("text_i18n", value)
+                self.refuses("text_i18n must be a string")
+
+    def test_kind_is_validated_before_the_vocabulary_is_hashed(self):
+        for value in (["installation"], {"a": 1}, {"installation"}, b"assembly"):
+            with self.subTest(value=value):
+                self.step("kind", value)
+                self.refuses("kind must be a string")
+
+    def test_scope_is_validated_before_the_vocabulary_is_hashed(self):
+        for value in (["site"], {"a": 1}, {"site"}, b"site"):
+            with self.subTest(value=value):
+                self.step("scope", value)
+                self.refuses("scope must be a string")
+
+    def test_procedure_id_must_be_a_string(self):
+        for value in (7, [], {}, b"installation"):
+            with self.subTest(value=value):
+                self.snapshot["procedures"][0]["id"] = value
+                self.refuses("id must be a string")
+
+    def test_procedures_itself_must_be_a_list(self):
+        for value in (7, None, "procedures", {"a": 1}):
+            with self.subTest(value=value):
+                self.snapshot["procedures"] = value
+                self.refuses("`procedures` must be a list")
+
+    # --- Defect 1, the half that published rather than crashing -------------
+
+    def test_step_cites_must_be_source_refs(self):
+        """A truthiness test on `cites` sees one element and stops looking, so
+        a bare string, an integer and a list of empty objects all published a
+        step whose evidence nothing can resolve."""
+        for value in ("r1", 7, [{}], [None], True, {"id": "r1"},
+                      [{"id": "r1"}], [{"belongs_to": "h1"}],
+                      [{"id": "", "belongs_to": "h1"}],
+                      [{"id": "r1", "belongs_to": 7}]):
+            with self.subTest(value=value):
+                self.step("cites", value)
+                self.refuses("cites must be a list of SourceRefs")
+
+    def test_procedure_cites_must_be_source_refs(self):
+        """G84 tightened this to `isinstance(list)`; a list of empty objects
+        still satisfied it."""
+        for value in ("c", 7, [{}], [None], [{"id": "r1"}]):
+            with self.subTest(value=value):
+                self.snapshot["procedures"][0]["cites"] = value
+                self.refuses("cites must be a list of SourceRefs")
+
+    # --- Defect 2: `slots` was read by nothing at all -----------------------
+
+    def test_slots_must_be_a_list_of_objects(self):
+        """`slots` carries arbitrary JSON in from `cli steps --accept --slot`,
+        wrapped in a list by `procedures.py`. Nothing looked at it."""
+        for value in ("slot", 7, {"kind": "PostSlot"}, [7], [None],
+                      [[{"kind": "PostSlot"}]], True):
+            with self.subTest(value=value):
+                self.step("slots", value)
+                self.refuses("slots must be a list of SlotTarget objects")
+
+    # --- what the gate deliberately still accepts ---------------------------
+
+    def test_absent_or_null_slots_and_requires_pass(self):
+        """Absent and null read as "none of these", which is how every reader
+        here already treats them. This is a guard on a decision, not a defect
+        control: it fails only if somebody tightens the rule without saying so.
+        """
+        for field in ("slots", "requires"):
+            for value in (None, "absent"):
+                with self.subTest(field=field, value=value):
+                    self.snapshot = _ok()
+                    self.snapshot["procedures"] = [_procedure()]
+                    step = self.snapshot["procedures"][0]["steps"][0]
+                    if value == "absent":
+                        step.pop(field)
+                    else:
+                        step[field] = value
+                    verify(self.snapshot)       # must not raise
+
+    def test_a_well_formed_slot_passes(self):
+        self.step("slots", [{"kind": "PostSlot", "key": "post"}])
+        verify(self.snapshot)                   # must not raise
+
+    def test_an_empty_procedures_list_still_passes(self):
+        """Every stored snapshot publishes `procedures: 0`. A shape gate that
+        refused the empty list would refuse all of them."""
+        self.snapshot["procedures"] = []
+        verify(self.snapshot)                   # must not raise
+
+    def test_a_shape_failure_names_where_it_is(self):
+        """A location is the difference between this and the `TypeError` it
+        replaces: `AttributeError: 'dict' object has no attribute 'strip'` says
+        nothing about which step of which procedure."""
+        self.snapshot["procedures"][0]["steps"][1]["text_i18n"] = {"en": "t"}
+        with self.assertRaises(VerificationFailed) as caught:
+            verify(self.snapshot)
+        self.assertIn("procedures[0].steps[1]: text_i18n", str(caught.exception))
+
+    def test_a_malformed_field_is_not_also_reported_as_a_missing_one(self):
+        """The gate stops reading a procedure whose shape it has just been told
+        it cannot trust. A wrong-typed `cites` is not an absent `cites`, and
+        reporting both sends the reader to fix the wrong thing.
+
+        This is the control on the `continue`: without it the semantic checks
+        run on fields of unknown type, which is exactly how the crashes above
+        happened one field at a time.
+        """
+        self.snapshot["procedures"][0]["cites"] = 7
+        with self.assertRaises(VerificationFailed) as caught:
+            verify(self.snapshot)
+        message = str(caught.exception)
+        self.assertIn("cites must be a list of SourceRefs", message)
+        self.assertNotIn("procedure must have cites", message)
+
+    def test_every_malformed_field_is_reported_not_just_the_first(self):
+        """The gate collects; it does not stop at the first bad field. A
+        one-at-a-time report turns a malformed payload into several round
+        trips."""
+        self.step("kind", [])
+        self.step("scope", {})
+        self.step("slots", 7)
+        with self.assertRaises(VerificationFailed) as caught:
+            verify(self.snapshot)
+        message = str(caught.exception)
+        for fragment in ("kind must be", "scope must be", "slots must be"):
+            self.assertIn(fragment, message)
 
 
 class TestVerifyAccepts(unittest.TestCase):
@@ -138,9 +449,27 @@ class TestTheRealBuildPasses(unittest.TestCase):
 
     def test_build_runs_verify_itself(self):
         """The gate is inside the builder, so a caller cannot skip it."""
-        import inspect
         from fence_evidence import snapshot
-        self.assertIn("verify(", inspect.getsource(snapshot.build_snapshot))
+
+        def published(conn, *, source_ref_page, **kwargs):
+            anchor = conn.execute("SELECT document_id, page_no FROM elements "
+                                  "WHERE page_no IS NOT NULL LIMIT 1").fetchone()
+            cite = source_ref_page(anchor["document_id"], anchor["page_no"])
+            proc = _procedure()
+            proc["cites"] = [cite]
+            for step in proc["steps"]:
+                step["cites"] = [cite]
+            if invalid:
+                del proc["steps"][0]["kind"]
+            return [proc], []
+
+        with patch("fence_evidence.procedures.build_procedures", side_effect=published):
+            invalid = False
+            built = snapshot.build_snapshot(tenant="acme")
+            self.assertEqual(len(built["procedures"][0]["steps"]), 2)
+            invalid = True
+            with self.assertRaisesRegex(VerificationFailed, r"steps\[0\]: kind"):
+                snapshot.build_snapshot(tenant="acme")
 
 
 if __name__ == "__main__":
@@ -366,4 +695,3 @@ class TestTheGateEnforcesWhatTheContractBinds(unittest.TestCase):
         self._fails(lambda s: s.__setitem__(
             "gaps", [_gap(because={"code": "c", "params": "not a dict"})]),
             "must be an object")
-

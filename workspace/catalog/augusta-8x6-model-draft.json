@@ -1,0 +1,802 @@
+{
+  "artifact_kind": "private_model_draft",
+  "draft_revision": 1,
+  "publishable": false,
+  "review_status": "unreviewed",
+  "contract_reference": "docs/integration/contract.md v1.1; FenceModel default_spec per knowledge-datamodel.md §5",
+  "scope": "Weatherables Augusta privacy panel, 8 ft tall x 6 ft wide configuration (CAD drawing 'augusta 8x6 privacy'); exact SKU unverified",
+  "interpretation": {
+    "panel_height": "95.5 in overall height per CAD left-middle dimension label; nominal 8 ft (specsheet: Height 6ft, 7ft & 8ft)",
+    "panel_width": "72 in nominal width per CAD top-center label (pixel-verified against the 8x8 CAD's 96in template position); rails 71.5 in",
+    "rail_count": "three (CAD section chain 5.5+39.5+5.5+39.5+5.5 = 95.5; brochure: posts for the Augusta fence will have 3 route holes; master install Solid Privacy with Mid-Rail flow)",
+    "rail_positions": "drawing-derived authored placements, recorded as rail CENTERLINES in exact milli-mm (5.5in envelope halves): bottom 69850, mid 1212850, top 2355850; the CAD section chain gives the envelope boundaries [0,139700], [1143000,1282700], [2286000,2425700]; datum interpreted as outside-of-opening to outside-of-opening, unconfirmed",
+    "receiving_geometry": "unresolved: rail slot depths receiving pickets, picket seating depths and post rail-socket depths are not stated in any retained source; all are explicit nulls",
+    "u_channel_count": "four installed channel segments in the three-rail configuration: the Solid Privacy with Mid-Rail flow puts channels on the first and last lower-run pickets and repeats above the middle rail; purchase-stock quantity is a separate, unstated question",
+    "kit_inventory": "Manufacturer 8ft CAD page material list (8x6 panel): 3 rails, 3 metal inserts (1.25x1.75x71.5), 4 U-channels (1.25x1.5x39.5), 22 T&G pickets (0.875x6x43); posts not in the panel kit"
+  },
+  "sources": [
+    {
+      "path": "manuals/weatherables/structural/weatherables-cad-augusta-8x6-privacy.png",
+      "sha256": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf",
+      "sha256": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
+      "sha256": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
+      "sha256": "cb90e6a275ac5ff050a4c10d33d82b6478922683cd6d2c857e5c50a3dcb6c629"
+    }
+  ],
+  "model_fragment": {
+    "id": "mfr/weatherables-augusta-8x6-privacy",
+    "version": 1,
+    "status": "draft",
+    "name_i18n": {
+      "en": "Weatherables Augusta Privacy Fence — 8ft tall x 6ft wide CAD configuration; exact SKU unverified"
+    },
+    "authorship": "third_party_authored",
+    "cites": [
+      {
+        "id": "8dd31b9cd39429da",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      },
+      {
+        "id": "240a4b3bf97f6cda",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      },
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "grade": "residential",
+    "height_support": {
+      "kind": "discrete",
+      "heights": [
+        {
+          "amount_milli": 2425700,
+          "unit": "mm",
+          "value_raw": [
+            "95.5 in. (CAD overall height; nominal 8 ft)"
+          ]
+        }
+      ]
+    },
+    "option_axes": [],
+    "variants": [],
+    "layout_policy": [],
+    "assembly": [],
+    "default_spec": {
+      "frame": [
+        {
+          "key": "bottom_rail",
+          "orientation": "horizontal",
+          "placement": {
+            "kind": "from_bottom",
+            "offset": {
+              "amount_milli": 69850,
+              "unit": "mm",
+              "value_raw": [
+                "centerline of the [0, 139700] milli-mm envelope: 5.5in rail whose outside face sits at the panel bottom (drawing-derived; datum unconfirmed)"
+              ]
+            }
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/augusta-8x6-rail",
+            "qty": {
+              "amount_milli": 1000,
+              "unit": "each",
+              "value_raw": [
+                "1"
+              ]
+            },
+            "length_rule": "between_frame",
+            "overlap": {
+              "amount_milli": 0,
+              "unit": "mm",
+              "value_raw": [
+                "0 mm (authored choice: no overlap for this member; sources state none)"
+              ]
+            }
+          },
+          "joint": {
+            "kind": "channel",
+            "channel_depth": null,
+            "insertion_margin": null,
+            "shared_host_gap": null,
+            "gap_reason": null
+          }
+        },
+        {
+          "key": "mid_rail",
+          "orientation": "horizontal",
+          "placement": {
+            "kind": "from_bottom",
+            "offset": {
+              "amount_milli": 1212850,
+              "unit": "mm",
+              "value_raw": [
+                "centerline of the [1143000, 1282700] milli-mm envelope (5.5 + 39.5 in chain boundary)"
+              ]
+            }
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/augusta-8x6-rail",
+            "qty": {
+              "amount_milli": 1000,
+              "unit": "each",
+              "value_raw": [
+                "1"
+              ]
+            },
+            "length_rule": "between_frame",
+            "overlap": {
+              "amount_milli": 0,
+              "unit": "mm",
+              "value_raw": [
+                "0 mm (authored choice: no overlap for this member; sources state none)"
+              ]
+            }
+          },
+          "joint": {
+            "kind": "channel",
+            "channel_depth": null,
+            "insertion_margin": null,
+            "shared_host_gap": null,
+            "gap_reason": null
+          }
+        },
+        {
+          "key": "top_rail",
+          "orientation": "horizontal",
+          "placement": {
+            "kind": "from_bottom",
+            "offset": {
+              "amount_milli": 2355850,
+              "unit": "mm",
+              "value_raw": [
+                "centerline of the [2286000, 2425700] milli-mm envelope (top of the 95.5in chain)"
+              ]
+            }
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/augusta-8x6-rail",
+            "qty": {
+              "amount_milli": 1000,
+              "unit": "each",
+              "value_raw": [
+                "1"
+              ]
+            },
+            "length_rule": "between_frame",
+            "overlap": {
+              "amount_milli": 0,
+              "unit": "mm",
+              "value_raw": [
+                "0 mm (authored choice: no overlap for this member; sources state none)"
+              ]
+            }
+          },
+          "joint": {
+            "kind": "channel",
+            "channel_depth": null,
+            "insertion_margin": null,
+            "shared_host_gap": null,
+            "gap_reason": null
+          }
+        }
+      ],
+      "infill": {
+        "orientation": "vertical",
+        "justification": "start",
+        "excess": "trim_last",
+        "edge_margin": {
+          "amount_milli": 0,
+          "unit": "mm",
+          "value_raw": [
+            "u-channels cover end gaps (master install); no numeric margin stated"
+          ]
+        },
+        "supply": "components",
+        "pattern": [
+          {
+            "key": "picket",
+            "base_ref": "bottom_rail",
+            "top_ref": "mid_rail",
+            "base_engagement": null,
+            "top_engagement": null,
+            "gap_after": {
+              "amount_milli": 0,
+              "unit": "mm",
+              "value_raw": [
+                "T&G interlock; no numeric gap stated"
+              ]
+            },
+            "face_offset": {
+              "amount_milli": 0,
+              "unit": "mm",
+              "value_raw": [
+                "flush"
+              ]
+            },
+            "profile_edges": {
+              "start": "tongue",
+              "end": "groove"
+            },
+            "requirement": {
+              "part_id": "mfr/weatherables/augusta-8x6-picket",
+              "qty": {
+                "amount_milli": 11000,
+                "unit": "each",
+                "value_raw": [
+                  "11 per run: material list 22 pickets / 2 runs (manufacturer kit inventory, not an installed-pitch derivation)"
+                ]
+              },
+              "length_rule": "panel_height",
+              "overlap": {
+                "amount_milli": 0,
+                "unit": "mm",
+                "value_raw": [
+                  "0 mm (authored choice: no overlap for this member; sources state none)"
+                ]
+              }
+            },
+            "joint": {
+              "kind": "groove",
+              "channel_depth": null,
+              "insertion_margin": null,
+              "shared_host_gap": null,
+              "gap_reason": null
+            }
+          },
+          {
+            "key": "picket_upper",
+            "base_ref": "mid_rail",
+            "top_ref": "top_rail",
+            "base_engagement": null,
+            "top_engagement": null,
+            "gap_after": {
+              "amount_milli": 0,
+              "unit": "mm",
+              "value_raw": [
+                "T&G interlock; no numeric gap stated"
+              ]
+            },
+            "face_offset": {
+              "amount_milli": 0,
+              "unit": "mm",
+              "value_raw": [
+                "flush"
+              ]
+            },
+            "profile_edges": {
+              "start": "tongue",
+              "end": "groove"
+            },
+            "requirement": {
+              "part_id": "mfr/weatherables/augusta-8x6-picket",
+              "qty": {
+                "amount_milli": 11000,
+                "unit": "each",
+                "value_raw": [
+                  "11 per run: material list 22 pickets / 2 runs (manufacturer kit inventory, not an installed-pitch derivation)"
+                ]
+              },
+              "length_rule": "panel_height",
+              "overlap": {
+                "amount_milli": 0,
+                "unit": "mm",
+                "value_raw": [
+                  "0 mm (authored choice: no overlap for this member; sources state none)"
+                ]
+              }
+            },
+            "joint": {
+              "kind": "groove",
+              "channel_depth": null,
+              "insertion_margin": null,
+              "shared_host_gap": null,
+              "gap_reason": null
+            }
+          }
+        ]
+      },
+      "fixings": [
+        {
+          "key": "u_channel_end_cover",
+          "basis": "per_panel",
+          "qty_per_basis": {
+            "amount_milli": 4000,
+            "unit": "each",
+            "value_raw": [
+              "4 (two runs: first and last picket of the lower run, then repeat above the middle rail)"
+            ]
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/augusta-8x6-u-channel",
+            "qty": {
+              "amount_milli": 4000,
+              "unit": "each",
+              "value_raw": [
+                "4 installed segments per panel: first and last picket of each of the two runs"
+              ]
+            },
+            "length_rule": null,
+            "overlap": {
+              "amount_milli": 0,
+              "unit": "mm",
+              "value_raw": [
+                "0 mm (authored choice: u-channel slides onto picket; no overlap length stated)"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "post": null,
+    "contributing_sources": [
+      "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d",
+      "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b",
+      "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c",
+      "cb90e6a275ac5ff050a4c10d33d82b6478922683cd6d2c857e5c50a3dcb6c629",
+      "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+    ]
+  },
+  "field_evidence": {
+    "/default_spec/frame/0/joint/channel_depth": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/1/joint/channel_depth": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/2/joint/channel_depth": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/1/placement/offset": [
+      {
+        "id": "698f2af8dc126b3f",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/2/placement/offset": [
+      {
+        "id": "675c8ce1a33863ab",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/infill/pattern/0/base_engagement": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/top_engagement": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/1/base_engagement": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/1/top_engagement": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/edge_margin": [
+      {
+        "id": "0d828806b08545a1",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/fixings/0/qty_per_basis": [
+      {
+        "id": "d47dc37a5972660a",
+        "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+      }
+    ],
+    "/height_support/heights/0": [
+      {
+        "id": "240a4b3bf97f6cda",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/0/joint/kind": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/0/orientation": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/0/requirement/qty": [
+      {
+        "id": "c90716e52c4df4c1",
+        "belongs_to": "cb90e6a275ac5ff050a4c10d33d82b6478922683cd6d2c857e5c50a3dcb6c629"
+      }
+    ],
+    "/default_spec/frame/0/requirement/length_rule": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/0/requirement/overlap": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/1/joint/kind": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/1/orientation": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/1/requirement/qty": [
+      {
+        "id": "c90716e52c4df4c1",
+        "belongs_to": "cb90e6a275ac5ff050a4c10d33d82b6478922683cd6d2c857e5c50a3dcb6c629"
+      }
+    ],
+    "/default_spec/frame/1/requirement/length_rule": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/1/requirement/overlap": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/2/joint/kind": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/2/orientation": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/2/requirement/qty": [
+      {
+        "id": "c90716e52c4df4c1",
+        "belongs_to": "cb90e6a275ac5ff050a4c10d33d82b6478922683cd6d2c857e5c50a3dcb6c629"
+      }
+    ],
+    "/default_spec/frame/2/requirement/length_rule": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/2/requirement/overlap": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/infill/pattern/0/joint/kind": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/profile_edges": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/gap_after": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/face_offset": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/requirement/length_rule": [
+      {
+        "id": "698f2af8dc126b3f",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/infill/pattern/0/requirement/overlap": [
+      {
+        "id": "698f2af8dc126b3f",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/infill/pattern/1/joint/kind": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/1/profile_edges": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/1/gap_after": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/1/face_offset": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/1/requirement/length_rule": [
+      {
+        "id": "698f2af8dc126b3f",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/infill/pattern/1/requirement/overlap": [
+      {
+        "id": "698f2af8dc126b3f",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/infill/orientation": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/justification": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/excess": [
+      {
+        "id": "0d828806b08545a1",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/supply": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/fixings/0/basis": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/fixings/0/requirement/part_id": [
+      {
+        "id": "7cd327b1cb2b9848",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/grade": [
+      {
+        "id": "fba738057e8aef78",
+        "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+      }
+    ],
+    "/default_spec/frame/0/joint/shared_host_gap": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/0/joint/gap_reason": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/0/placement": [
+      {
+        "id": "698f2af8dc126b3f",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/1/joint/shared_host_gap": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/1/joint/gap_reason": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/1/placement": [
+      {
+        "id": "698f2af8dc126b3f",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/2/joint/shared_host_gap": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/2/joint/gap_reason": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame/2/placement": [
+      {
+        "id": "698f2af8dc126b3f",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/infill/pattern/0/joint/shared_host_gap": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/joint/gap_reason": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/joint/channel_depth": [
+      {
+        "id": "698f2af8dc126b3f",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/infill/pattern/1/joint/shared_host_gap": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/1/joint/gap_reason": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/1/joint/channel_depth": [
+      {
+        "id": "698f2af8dc126b3f",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/fixings/0/requirement/length_rule": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/fixings/0/requirement/qty": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/height_support": [
+      {
+        "id": "240a4b3bf97f6cda",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/frame": [
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "/default_spec/fixings/0/requirement/overlap": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/requirement/qty": [
+      {
+        "id": "d47dc37a5972660a",
+        "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+      }
+    ],
+    "/default_spec/infill/pattern/1/requirement/qty": [
+      {
+        "id": "d47dc37a5972660a",
+        "belongs_to": "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+      }
+    ]
+  },
+  "measurement_limits": [
+    "channel_depth, insertion_margin and engagement nulls are declared absences: no retained source states rail slot depth, picket seating depth or post rail-socket depth for this configuration.",
+    "Rail placement offsets are drawing-derived authored choices from the CAD section chain, not manufacturer-stated datums; the chain-to-opening datum interpretation is unconfirmed.",
+    "Picket qty is null in each run: the count follows from run length and installed pitch, neither of which is source-stated; it must not be filled with an invented default.",
+    "The model fragment authors no post opinion: a composition-only post Part carries no citable evidence values, and no source states Augusta post dimensions or SKU identity.",
+    "Rail placement offsets are CENTERLINES (consumer placement semantics); the 5.5in envelope halves to 69.85mm, which is exact in milli-mm but not in whole millimetres — the consumer conversion floors with a recorded loss.",
+    "Kit counts are manufacturer inventory statements, not installed-pitch derivations: the picket stock length 43in exceeds the 39.5in run by an implied 3.5in seating, which is config-dependent and still not a measured engagement."
+  ],
+  "unresolved_fields": [
+    {
+      "path_pattern": "/model_fragment",
+      "fields": [
+        "option_axes",
+        "variants",
+        "layout_policy",
+        "assembly"
+      ],
+      "reason": "Empty lists are explicit: no option axes, variants, policies or validated procedures are authored for this configuration yet."
+    },
+    {
+      "path_pattern": "/model_fragment/post/cap",
+      "fields": [
+        "part_id"
+      ],
+      "reason": "The cap requirement reuses the post Part ID as a placeholder: no authored post-cap component exists for Augusta yet; a dedicated cap component needs dataset authoring."
+    },
+    {
+      "path_pattern": "/model_fragment/default_spec/infill/pattern/*",
+      "fields": [
+        "requirement.qty"
+      ],
+      "reason": "Picket count per run is not source-stated; derived counts require installed pitch and run length."
+    },
+    {
+      "path_pattern": "/model_fragment/post",
+      "fields": [
+        "post"
+      ],
+      "reason": "No post Part with citable value evidence exists in the parts snapshot: the dataset carries an authored Augusta post component (5x5, 3 routed rail-socket holes, sourced from brochure and master install), but authored identity alone cannot satisfy the model profile's citation requirement, and no source states post socket depth or SKU identity. The model authors no post-selection opinion until a post Part with citable evidence exists."
+    }
+  ],
+  "delivery_objective": "Useful partial knowledge: composition, counts and sequence evidence for the Augusta 8x6 configuration; fitted dimensions and cuts remain refused until receiving geometry exists."
+}

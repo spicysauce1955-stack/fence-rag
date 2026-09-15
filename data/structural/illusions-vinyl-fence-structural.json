@@ -43,7 +43,7 @@
         "V3700-6", "V3701-6"
       ],
       "note_on_scope": "Drawing set is 18 sheets total; sheets viewed (1-16) cover the styles listed above (privacy T&G, lattice-top privacy, and spaced-picket series up to 8ft). Remaining sheets not distinctly captured (PDF page extraction returned duplicate content for the tail pages) -- likely additional picket/gate style variants of the same series, not confirmed.",
-      "local_file": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf"
+      "local_file": "manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf"
     }
   ],
   "racking_stepping_supplement": {
@@ -137,7 +137,7 @@
     {
       "title": "Miami-Dade NOA 14-1209.01 -- Illusions Vinyl Fence (full 18-sheet PE-stamped structural drawing set, evidence page, and cover page)",
       "type": "engineering_letter_and_structural_drawings",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf",
+      "local_path": "manuals/illusions-vinyl-fence/structural/noa-14-1209.01-PE-stamped-structural-drawings-dixon-engineering.pdf",
       "source_url": "https://illusionsfence.com/wp-content/uploads/2015/07/NOA-14-1209.01.pdf",
       "new_in_this_pass": false,
       "note": "File was already present in manuals/illusions-vinyl-fence/ from pass 1, but its structural content (PE engineer of record, foundation calcs, dimensioned per-style drawings, test report numbers) had not been extracted/documented. Copied into the new structural/ subfolder with a descriptive name; content mined in this pass."

@@ -57,7 +57,7 @@ a 100%-scanned 56-page legacy manual sit in the same family, so a curation rule
 that only works on clean text will visibly fail here.
 6. **Documented curated-data errors to check against.** All four contradictions
 found in G16 are in `certainteed-bufftech-structural.json`; three describe this
-family and are scored by doc 5's R9, while the fourth (NOA 22-0616.10, SimTek)
+family and are scored by doc 5's CUR-R9, while the fourth (NOA 22-0616.10, SimTek)
 is about a Tier-C document and moves to slice 2. The slice is therefore the one
 place where curation output can be compared against a known-wrong prior.
 

@@ -77,7 +77,14 @@ class TestSchemaDeclaration(unittest.TestCase):
             "documents.owner_tenant",
             # schema_version 7 -- G6, the fact review loop
             "facts.reviewed_value", "facts.reviewed_value_normalized",
-            "facts.reviewer", "facts.reviewed_at"})
+            "facts.reviewer", "facts.reviewed_at",
+            # schema_version 8 -- two columns step_candidates was already
+            # computing and discarding on write. `repair_confidence` left a
+            # reviewer unable to tell a trusted newline-form repair from the
+            # `A cut panel bracket` class; `text_source` records which text
+            # column the spans index, which matters for the 834 `list`
+            # elements whose text lives only in `ocr_text`.
+            "step_candidates.repair_confidence", "step_candidates.text_source"})
 
     def test_the_fact_review_columns_carry_no_default(self):
         """Obligation 6 arriving through the migration is the same defect A1 cost

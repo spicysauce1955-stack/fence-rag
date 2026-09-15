@@ -1,0 +1,208 @@
+{
+  "artifact_kind": "private_amendment_008_disposition_packet",
+  "schema_status": "pending_both_dispositions_and_ratification",
+  "publishable": false,
+  "consumer_adapter_implemented": false,
+  "manufacturer_evidence": false,
+  "scope": "Proposed Joint and FromBottom/FromTop numeric associations only; not complete model validation.",
+  "target_registry": {
+    "Joint": {
+      "/channel_depth": {
+        "unit": "mm",
+        "nullable": false
+      },
+      "/insertion_margin": {
+        "unit": "mm",
+        "nullable": true
+      },
+      "/shared_host_gap": {
+        "unit": "mm",
+        "nullable": true
+      }
+    },
+    "FromBottom": {
+      "/offset": {
+        "unit": "mm",
+        "nullable": false
+      }
+    },
+    "FromTop": {
+      "/offset": {
+        "unit": "mm",
+        "nullable": false
+      }
+    }
+  },
+  "vectors": [
+    {
+      "case": "Joint_exact_round_trip",
+      "result": "preserved",
+      "owner_hash": "e2a48d3b0cd1e5d37c8ecd01f88784b37b2e670bd0a8073730fc7f640129a2a7",
+      "null_obligations": [
+        {
+          "target": "/shared_host_gap",
+          "meaning": "explicit_null; no numeric default authorized"
+        }
+      ]
+    },
+    {
+      "case": "FromBottom_exact_round_trip",
+      "result": "preserved",
+      "owner_hash": "1e267ce2168847b131f6633187c3462c19d28121dfa9b51d9dd2da1861c607c2",
+      "null_obligations": []
+    },
+    {
+      "case": "FromTop_exact_round_trip",
+      "result": "preserved",
+      "owner_hash": "1e267ce2168847b131f6633187c3462c19d28121dfa9b51d9dd2da1861c607c2",
+      "null_obligations": []
+    },
+    {
+      "case": "dropped_map",
+      "result": "refused",
+      "reason": "missing map or undeclared target"
+    },
+    {
+      "case": "unknown_target",
+      "result": "refused",
+      "reason": "missing map or undeclared target"
+    },
+    {
+      "case": "dropped_classification",
+      "result": "refused",
+      "reason": "missing or malformed classification: /offset"
+    },
+    {
+      "case": "lost_precision",
+      "result": "refused",
+      "reason": "wrong target value kind: /offset"
+    },
+    {
+      "case": "missing_value_default",
+      "result": "refused",
+      "reason": "missing explicit target: /offset"
+    },
+    {
+      "case": "null_required_value",
+      "result": "refused",
+      "reason": "null is not a numeric reading: /offset"
+    },
+    {
+      "case": "unresolvable_citation",
+      "result": "refused",
+      "reason": "duplicate or unresolvable synthetic citation"
+    },
+    {
+      "case": "runtime_admission_on_wire",
+      "result": "refused",
+      "reason": "missing or malformed classification: /offset"
+    }
+  ],
+  "example_owners": {
+    "Joint": {
+      "kind": "channel",
+      "channel_depth": {
+        "amount_milli": 25000,
+        "unit": "mm",
+        "value_raw": [
+          "25 mm (synthetic)"
+        ]
+      },
+      "insertion_margin": {
+        "amount_milli": 1000,
+        "unit": "mm",
+        "value_raw": [
+          "1 mm (synthetic)"
+        ]
+      },
+      "shared_host_gap": null,
+      "gap_reason": null,
+      "field_provenance": {
+        "/channel_depth": {
+          "cites": [
+            {
+              "id": "synthetic-reference-for-proposal-only",
+              "belongs_to": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ],
+          "source_class": "ai_proposal",
+          "curation_level": 0,
+          "version_status": "unknown"
+        },
+        "/insertion_margin": {
+          "cites": [
+            {
+              "id": "synthetic-reference-for-proposal-only",
+              "belongs_to": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ],
+          "source_class": "ai_proposal",
+          "curation_level": 0,
+          "version_status": "unknown"
+        }
+      }
+    },
+    "FromBottom": {
+      "offset": {
+        "amount_milli": 88900,
+        "unit": "mm",
+        "value_raw": [
+          "3.5 in. (synthetic precision fixture)"
+        ]
+      },
+      "field_provenance": {
+        "/offset": {
+          "cites": [
+            {
+              "id": "synthetic-reference-for-proposal-only",
+              "belongs_to": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ],
+          "source_class": "ai_proposal",
+          "curation_level": 0,
+          "version_status": "unknown"
+        }
+      }
+    }
+  },
+  "synthetic_source_refs": [
+    {
+      "id": "synthetic-reference-for-proposal-only",
+      "belongs_to": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "synthetic_source_docs": [
+    {
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_class": "ai_proposal",
+      "version_status": "unknown",
+      "version_status_basis": "Synthetic non-source used only to illustrate proposed serialization",
+      "issue_date": {
+        "iso": null,
+        "value_raw": []
+      },
+      "expiration_date": {
+        "iso": null,
+        "value_raw": []
+      },
+      "superseded_by": null
+    }
+  ],
+  "precision": {
+    "placement_milli_mm": 88900,
+    "placement_exact_mm": "88.9",
+    "synthetic_repeat_count": 15,
+    "synthetic_pitch_milli_mm": 152400,
+    "exact_repeated_milli_mm": 2286000,
+    "rounded_input_repeated_milli_mm": 2280000,
+    "loss_milli_mm": 6000,
+    "limitation": "Nominal board width is not installed pitch. These synthetic arithmetic vectors prove no Emblem fit."
+  },
+  "remaining": [
+    "Both teams must disposition Amendment 008 and its target registry; no acceptance is inferred.",
+    "Member, PartRequirement, FixingRule, InfillSpec, HeightSupport and other placement variants remain outside this fixture.",
+    "A production public adapter must preserve associations and exact arithmetic; this validator is never called by publication.",
+    "Joint kind, host relationships, fitting policy and length rules need independently supported semantics.",
+    "Null obligations here are private review diagnostics, not implemented public Gap emission."
+  ]
+}

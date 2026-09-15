@@ -1,7 +1,13 @@
 # `GET /source-refs/{id}` — design
 
 ```text
-Status:    Design, for review. Nothing here is implemented.
+Status:    IMPLEMENTED. `crops.py` is wired, `sourcerefs.py` builds the read model,
+           `api.py` serves GET /source-refs/{id} and POST /source-refs:batch.
+           §4.2/§4.3 are normative and live.
+           STALE, DO NOT COPY: §1's `sref_` locator is SUPERSEDED by `refs.py` --
+           live ids are bare 16-hex, and every `sref_...` below illustrates a
+           scheme that was never built. §4.4's /image and /page-image sub-routes
+           are also unbuilt; api.py refuses a ref_id containing `/`.
 Written by: the Knowledge team (this repo), in response to contract.md §4.
 Authority: Advisory on internals. The only binding items it satisfies are
            contract.md §3.1.3 ("every value carries at least one resolvable

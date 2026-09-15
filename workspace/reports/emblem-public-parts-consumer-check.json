@@ -1,0 +1,60 @@
+{
+  "scope": "Actual published Part ingestion and provenance retention only",
+  "snapshot_id": "b5048772101e18513a9cbd2c913978da05046fced986e03c42afddc5c5b19ec7",
+  "input_unchanged": true,
+  "part_checks": [
+    {
+      "part_id": "mfr/freedom-outdoor-living/73013956",
+      "version": "sha256:fa54ad984e9e728fe264fc3c0b878b7f657e9d6e58467e24ed9e5e8948e837bb",
+      "exact_public_round_trip": true,
+      "source_document_hashes_resolve": true,
+      "draft_remains_inactive": true,
+      "not_a_generation_spec": true
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-board",
+      "version": "sha256:cee2525fc36feba83d3380ce1b094b733570fbb9a77f5c4d1b875e1e39adb7d4",
+      "exact_public_round_trip": true,
+      "source_document_hashes_resolve": true,
+      "draft_remains_inactive": true,
+      "not_a_generation_spec": true
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-a",
+      "version": "sha256:da323da0d82bc736572d1e27c8c765ee87fcef124b9cb398d52e2b896431cbec",
+      "exact_public_round_trip": true,
+      "source_document_hashes_resolve": true,
+      "draft_remains_inactive": true,
+      "not_a_generation_spec": true
+    },
+    {
+      "part_id": "mfr/freedom-outdoor-living/emblem-73014714-rail-b",
+      "version": "sha256:b0ad5809ac475d711805eb39db8e1bf5cac01d08c0d26a95829fbcf57ecf3bc1",
+      "exact_public_round_trip": true,
+      "source_document_hashes_resolve": true,
+      "draft_remains_inactive": true,
+      "not_a_generation_spec": true
+    }
+  ],
+  "part_ingestion_verified": true,
+  "part_defects": [],
+  "quarantined_gap_count": 0,
+  "model_count": 0,
+  "assembly_validated": false,
+  "source_document_guarantee": "Typed SourceDoc receipts retain citation hash joins; unknown extension metadata is not preserved.",
+  "remaining": [
+    "Public geometry/authoring mapping still needs an agreed representation and executable support.",
+    "Private generation Part versions and selection are not changed by this receipt path.",
+    "Source geometry, effective board pitch and fitting evidence remain incomplete."
+  ],
+  "consumer_files": [
+    {
+      "path": "src/fenceai/knowledge/parts.py",
+      "sha256": "230bae88e2b987e569d6acfc2543029ef7316450ddf6034f3c2235a75dc80cd5"
+    },
+    {
+      "path": "src/fenceai/knowledge/snapshot.py",
+      "sha256": "4d4814c2de1928e0c5ca62a095ae595e2a0e43beb632de5ba25839aae1bbb46c"
+    }
+  ]
+}

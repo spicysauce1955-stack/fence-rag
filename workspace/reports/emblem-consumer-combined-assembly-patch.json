@@ -1,0 +1,10 @@
+{
+  "patch": "workspace/reports/emblem-consumer-combined-assembly.patch",
+  "base_commit": "9de94eb06d8e997d9be098dedd5b6a6b2eb4024d",
+  "sha256": "6211736344ac9c5390fa426c8803f0660d8b2c8bff64f1665998cf037a815351",
+  "file_count": 21,
+  "reverse_apply_check": "passed",
+  "scope": "Cumulative consumer changes including combined synthetic assembly tests; not deployed",
+  "validation": "65 related tests passed, including 17 combined cases; independent review and cut-boundary probes",
+  "emblem_assembly_validated": false
+}

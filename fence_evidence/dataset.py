@@ -53,7 +53,7 @@ WHY = ("A baseline of the hand-researched dataset before any curation phase "
        "claims contradicted by their own sources (state-and-gaps G16), which "
        "are still present verbatim because correcting someone's research is "
        "their call. If a value is ever silently amended, this is what makes the "
-       "change visible rather than invisible. Acceptance criterion P1b.")
+       "change visible rather than invisible. Acceptance criterion CUR-P1b.")
 
 
 class DatasetChanged(RuntimeError):

@@ -1,0 +1,991 @@
+{
+  "scope": "Pembroke 6x6 assembly slice: composition, counts, authored model candidate",
+  "sources": [
+    {
+      "path": "manuals/weatherables/structural/weatherables-pembroke-6ft-cad-page.html",
+      "sha256": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf",
+      "sha256": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
+      "sha256": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
+      "sha256": "cb90e6a275ac5ff050a4c10d33d82b6478922683cd6d2c857e5c50a3dcb6c629"
+    },
+    {
+      "path": "manuals/weatherables/structural/weatherables-cad-pembroke-6ft-privacy.png",
+      "sha256": "3fd74eaceddba4ac85905552e2419fdcfe4e4b29d258cb49b5c3f2aba5fcd8b8"
+    }
+  ],
+  "imported": {
+    "cadpage": [
+      {
+        "fact_id": 22791,
+        "inserted": false
+      },
+      {
+        "fact_id": 22792,
+        "inserted": false
+      },
+      {
+        "fact_id": 22793,
+        "inserted": false
+      },
+      {
+        "fact_id": 22794,
+        "inserted": false
+      },
+      {
+        "fact_id": 22795,
+        "inserted": false
+      },
+      {
+        "fact_id": 22796,
+        "inserted": false
+      },
+      {
+        "fact_id": 22797,
+        "inserted": false
+      },
+      {
+        "fact_id": 22798,
+        "inserted": false
+      },
+      {
+        "fact_id": 22799,
+        "inserted": false
+      },
+      {
+        "fact_id": 22800,
+        "inserted": false
+      },
+      {
+        "fact_id": 22801,
+        "inserted": false
+      },
+      {
+        "fact_id": 22802,
+        "inserted": false
+      },
+      {
+        "fact_id": 22803,
+        "inserted": false
+      },
+      {
+        "fact_id": 22804,
+        "inserted": false
+      }
+    ],
+    "install": [
+      {
+        "fact_id": 22805,
+        "inserted": false
+      }
+    ],
+    "specsheet": [
+      {
+        "fact_id": 22806,
+        "inserted": false
+      },
+      {
+        "fact_id": 22807,
+        "inserted": false
+      },
+      {
+        "fact_id": 22808,
+        "inserted": true
+      }
+    ]
+  },
+  "snapshot_id": "0e04d171388eca3ffab0da325206dd83981bfe1c57c2d2b9c97adc87f8cf6844",
+  "snapshot_path": "workspace/snapshots/0e04d171388eca3ffab0da325206dd83981bfe1c57c2d2b9c97adc87f8cf6844.json",
+  "snapshot_stored": true,
+  "consumer_checks_passed": true,
+  "emblem_interference": {
+    "ok": true,
+    "emblem_parts_compared": 13,
+    "changed": [],
+    "missing": [],
+    "added": []
+  },
+  "composition_parts": [
+    {
+      "id": "mfr/weatherables/wea-pembroke-metal-insert",
+      "version": 1,
+      "status": "active",
+      "type": {
+        "namespace": "mfr/weatherables",
+        "key": "post_stiffener_aluminum"
+      },
+      "name_i18n": {
+        "en": "Pembroke Metal Rail Insert (1.25\" x 1.75\")"
+      },
+      "spec": [],
+      "authorship": "third_party_authored",
+      "cites": [],
+      "contributing_sources": []
+    },
+    {
+      "id": "mfr/weatherables/wea-pembroke-picket-tg",
+      "version": 1,
+      "status": "active",
+      "type": {
+        "namespace": "mfr/weatherables",
+        "key": "picket"
+      },
+      "name_i18n": {
+        "en": "Pembroke 7/8\" x 11.3\" Tongue & Groove Picket"
+      },
+      "spec": [],
+      "authorship": "third_party_authored",
+      "cites": [],
+      "contributing_sources": []
+    },
+    {
+      "id": "mfr/weatherables/wea-pembroke-post-4x4",
+      "version": 1,
+      "status": "active",
+      "type": {
+        "namespace": "shared",
+        "key": "post"
+      },
+      "name_i18n": {
+        "en": "4\"x4\" Socket Post"
+      },
+      "spec": [],
+      "authorship": "third_party_authored",
+      "cites": [],
+      "contributing_sources": []
+    },
+    {
+      "id": "mfr/weatherables/wea-pembroke-rail-slotted",
+      "version": 1,
+      "status": "active",
+      "type": {
+        "namespace": "shared",
+        "key": "rail"
+      },
+      "name_i18n": {
+        "en": "Pembroke Slotted Rail (1.5\" x 5.5\")"
+      },
+      "spec": [],
+      "authorship": "third_party_authored",
+      "cites": [],
+      "contributing_sources": []
+    },
+    {
+      "id": "mfr/weatherables/wea-pembroke-u-channel",
+      "version": 1,
+      "status": "active",
+      "type": {
+        "namespace": "shared",
+        "key": "bar"
+      },
+      "name_i18n": {
+        "en": "1.5\" U-Channel"
+      },
+      "spec": [],
+      "authorship": "third_party_authored",
+      "cites": [],
+      "contributing_sources": []
+    }
+  ],
+  "value_parts": [
+    {
+      "id": "mfr/weatherables/pembroke-6x6-metal-insert",
+      "type": {
+        "namespace": "shared",
+        "key": "reinforcement"
+      },
+      "status": "draft",
+      "name_i18n": {
+        "en": "Weatherables Pembroke metal rail insert (bottom rail) — 6ft CAD page material list (6x6 panel); exact SKU unverified"
+      },
+      "authorship": "third_party_authored",
+      "spec": [
+        {
+          "key": "width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 31750,
+            "unit": "mm",
+            "value_raw": [
+              "1.25 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "height_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 44450,
+            "unit": "mm",
+            "value_raw": [
+              "1.75 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "length_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 1816100,
+            "unit": "mm",
+            "value_raw": [
+              "71.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "kit_count_per_panel",
+          "agree": "==",
+          "value": {
+            "key": "count",
+            "value_raw": [
+              "1 each"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "cites": [
+        {
+          "id": "d40f1cdb998fac7f",
+          "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+        }
+      ],
+      "contributing_sources": [
+        "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+      ],
+      "version": "sha256:528a60b3892ac1bbb8afd03a7f3b13291809841fb6e9339fbcd50e90f674c236"
+    },
+    {
+      "id": "mfr/weatherables/pembroke-6x6-picket",
+      "type": {
+        "namespace": "shared",
+        "key": "infill"
+      },
+      "status": "draft",
+      "name_i18n": {
+        "en": "Weatherables Pembroke wide-board tongue-and-groove picket — specsheet Classic block and 6ft CAD page material list; exact SKU unverified"
+      },
+      "authorship": "third_party_authored",
+      "spec": [
+        {
+          "key": "nominal_thickness_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 22225,
+            "unit": "mm",
+            "value_raw": [
+              "7/8 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d429e017069b3963",
+                "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "nominal_width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 287020,
+            "unit": "mm",
+            "value_raw": [
+              "11.3 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d429e017069b3963",
+                "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "tongue_groove_wall_gauge_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 1397,
+            "unit": "mm",
+            "value_raw": [
+              ".055 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d429e017069b3963",
+                "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+              }
+            ],
+            "source_class": "spec_sheet",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "stock_length_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 1631950,
+            "unit": "mm",
+            "value_raw": [
+              "64.25 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "kit_count_per_panel",
+          "agree": "==",
+          "value": {
+            "key": "count",
+            "value_raw": [
+              "6 each"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "cites": [
+        {
+          "id": "d40f1cdb998fac7f",
+          "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+        },
+        {
+          "id": "d429e017069b3963",
+          "belongs_to": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+        }
+      ],
+      "contributing_sources": [
+        "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606",
+        "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+      ],
+      "version": "sha256:dd59d3d984695641c63f7352b92d1f002eb4d7b9b8767d40359dafe31c5144b4"
+    },
+    {
+      "id": "mfr/weatherables/pembroke-6x6-rail",
+      "type": {
+        "namespace": "shared",
+        "key": "rail"
+      },
+      "status": "draft",
+      "name_i18n": {
+        "en": "Weatherables Pembroke rail — 6ft CAD page material list (6x6 panel); exact SKU unverified"
+      },
+      "authorship": "third_party_authored",
+      "spec": [
+        {
+          "key": "width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 38100,
+            "unit": "mm",
+            "value_raw": [
+              "1.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "height_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 139700,
+            "unit": "mm",
+            "value_raw": [
+              "5.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "length_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 1816100,
+            "unit": "mm",
+            "value_raw": [
+              "71.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "kit_count_per_panel",
+          "agree": "==",
+          "value": {
+            "key": "count",
+            "value_raw": [
+              "2 each"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "cites": [
+        {
+          "id": "d40f1cdb998fac7f",
+          "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+        }
+      ],
+      "contributing_sources": [
+        "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+      ],
+      "version": "sha256:e44fc3ae9a60a01388e7fd66156bf7c57212846e30f044eb0122d62d65158f82"
+    },
+    {
+      "id": "mfr/weatherables/pembroke-6x6-u-channel",
+      "type": {
+        "namespace": "shared",
+        "key": "bar"
+      },
+      "status": "draft",
+      "name_i18n": {
+        "en": "Weatherables Pembroke U-channel — 6ft CAD page material list (6x6 panel); exact SKU unverified"
+      },
+      "authorship": "third_party_authored",
+      "spec": [
+        {
+          "key": "width_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 31750,
+            "unit": "mm",
+            "value_raw": [
+              "1.25 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "depth_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 38100,
+            "unit": "mm",
+            "value_raw": [
+              "1.5 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "length_mm",
+          "agree": "==",
+          "value": {
+            "amount_milli": 1549400,
+            "unit": "mm",
+            "value_raw": [
+              "61 in."
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        },
+        {
+          "key": "kit_count_per_panel",
+          "agree": "==",
+          "value": {
+            "key": "count",
+            "value_raw": [
+              "2 each"
+            ]
+          },
+          "provenance": {
+            "cites": [
+              {
+                "id": "d40f1cdb998fac7f",
+                "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+              }
+            ],
+            "source_class": "marketing",
+            "curation_level": 0,
+            "version_status": "unknown"
+          }
+        }
+      ],
+      "cites": [
+        {
+          "id": "d40f1cdb998fac7f",
+          "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+        }
+      ],
+      "contributing_sources": [
+        "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+      ],
+      "version": "sha256:cab7b0e2b2597a5ead345cc3211708a82c649150c9f26dd85a3c2af2c3b54078"
+    }
+  ],
+  "models_admitted": 0,
+  "model_exclusions": [
+    {
+      "model_id": "mfr/weatherables-pembroke-6x6-privacy",
+      "content_hash": "f1405b339da447ade6f43ca37230b18d199a8a6081d44cf22f55ae674647df7a",
+      "issues": [
+        {
+          "path": "/default_spec/frame/0/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/base_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/top_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/",
+          "code": "consumer_numeric_provenance_mapping_unresolved",
+          "message": "Numeric model values need published provenance under contract obligation 6; this profile only stores private field citations and has no agreed lossless publication mapping."
+        }
+      ],
+      "would_close": "Resolve the listed required shape, source, provenance and any explicit review-integrity failures without inventing missing values."
+    }
+  ],
+  "model_readiness": [
+    {
+      "model_id": "mfr/weatherables-pembroke-6x6-privacy",
+      "content_hash": "f1405b339da447ade6f43ca37230b18d199a8a6081d44cf22f55ae674647df7a",
+      "review_status": "unreviewed",
+      "generation_ready": false,
+      "consumer_validation_executed": false,
+      "publication_blocked": true,
+      "issues": [
+        {
+          "path": "/status",
+          "code": "inactive_model",
+          "message": "This valid published status does not select an active generation definition."
+        },
+        {
+          "path": "/default_spec/frame/0/joint/insertion_margin",
+          "code": "missing_value",
+          "message": "Establish the insertion margin for this joint from applicable evidence or an explicitly classified authored value."
+        },
+        {
+          "path": "/default_spec/frame/0/requirement/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/insertion_margin",
+          "code": "missing_value",
+          "message": "Establish the insertion margin for this joint from applicable evidence or an explicitly classified authored value."
+        },
+        {
+          "path": "/default_spec/frame/1/requirement/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/joint/insertion_margin",
+          "code": "missing_value",
+          "message": "Establish the insertion margin for this joint from applicable evidence or an explicitly classified authored value."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/requirement/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/default_spec/fixings/0/requirement/part_id",
+          "code": "inactive_part",
+          "message": "This valid published Part is not an active generation candidate."
+        },
+        {
+          "path": "/post",
+          "code": "missing_value",
+          "message": "Supply an applicable post requirement if this model should express a post-selection opinion."
+        },
+        {
+          "path": "/",
+          "code": "consumer_validation_missing",
+          "message": "No consumer validation was executed; this does not by itself forbid publication."
+        }
+      ],
+      "publication_blockers": [
+        {
+          "path": "/default_spec/frame/0/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/frame/1/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/joint/channel_depth",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/base_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/default_spec/infill/pattern/0/top_engagement",
+          "code": "invalid_quantity",
+          "message": "A cited integer-milli Quantity with raw reading is required."
+        },
+        {
+          "path": "/",
+          "code": "consumer_numeric_provenance_mapping_unresolved",
+          "message": "Numeric model values need published provenance under contract obligation 6; this profile only stores private field citations and has no agreed lossless publication mapping."
+        }
+      ]
+    }
+  ],
+  "nullable_gaps": [],
+  "consumer": {
+    "consumer_root": "/tmp/fence-planning-bom",
+    "checks": [
+      {
+        "check": "candidate_matches_current_draft",
+        "ok": true,
+        "detail": {
+          "declared": "31eb8eca0bb141894c0fd0ca68a0e182a306e4dd8d60b68666f5befd7328368a",
+          "actual": "31eb8eca0bb141894c0fd0ca68a0e182a306e4dd8d60b68666f5befd7328368a"
+        }
+      },
+      {
+        "check": "consumer_environment",
+        "ok": true,
+        "detail": "consumer venv ok"
+      },
+      {
+        "check": "composition_parts_ingest",
+        "ok": true,
+        "detail": {
+          "mfr/weatherables/wea-pembroke-post-4x4": true,
+          "mfr/weatherables/wea-pembroke-rail-slotted": true,
+          "mfr/weatherables/wea-pembroke-picket-tg": true,
+          "mfr/weatherables/wea-pembroke-u-channel": true,
+          "mfr/weatherables/wea-pembroke-metal-insert": true
+        }
+      },
+      {
+        "check": "draft_value_parts_inactive",
+        "ok": true,
+        "detail": {
+          "expected": [
+            "mfr/weatherables/pembroke-6x6-metal-insert",
+            "mfr/weatherables/pembroke-6x6-picket",
+            "mfr/weatherables/pembroke-6x6-rail",
+            "mfr/weatherables/pembroke-6x6-u-channel"
+          ],
+          "actual": [
+            "mfr/weatherables/pembroke-6x6-metal-insert",
+            "mfr/weatherables/pembroke-6x6-picket",
+            "mfr/weatherables/pembroke-6x6-rail",
+            "mfr/weatherables/pembroke-6x6-u-channel"
+          ]
+        }
+      },
+      {
+        "check": "consumer_dialect_candidate_parses",
+        "ok": true,
+        "detail": []
+      },
+      {
+        "check": "producer_draft_fragment_refused_by_consumer",
+        "ok": true,
+        "detail": [
+          "['default_spec', 'frame', 0, 'placement', 'from_bottom', 'offset_mm']: Field required",
+          "['default_spec', 'frame', 0, 'joint']: Input should be 'butt', 'channel', 'groove', 'bracket' or 'overlap'",
+          "['default_spec', 'frame', 0, 'requirement', 'qty']: Input should be a valid integer",
+          "['default_spec', 'frame', 1, 'placement', 'from_bottom', 'offset_mm']: Field required"
+        ]
+      },
+      {
+        "check": "consumer_refuses_fitted_dimensions_without_geometry",
+        "ok": true,
+        "detail": {
+          "geometry_refusals": [
+            "frame slot 'bottom_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have — the drawin",
+            "frame slot 'top_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have — the drawing w",
+            "infill member 'picket': joint='groove' with no engagement at either end and no channel in either frame slot claims a mec"
+          ],
+          "other_errors": []
+        }
+      },
+      {
+        "check": "offsets_are_millimetre_magnitude",
+        "ok": true,
+        "detail": {
+          "offsets": [
+            69,
+            1758
+          ],
+          "derived_from_draft_mm": [
+            69,
+            1758
+          ],
+          "offset_losses_recorded": 2,
+          "losses": [
+            0.85,
+            0.95
+          ]
+        }
+      },
+      {
+        "check": "height_survives_parsing",
+        "ok": true,
+        "detail": {
+          "heights_mm": [
+            1828
+          ],
+          "derived_from_draft_mm": [
+            1828
+          ],
+          "losses": [
+            0.8
+          ]
+        }
+      },
+      {
+        "check": "pattern_is_single_row_fully_mapped",
+        "ok": true,
+        "detail": {
+          "pattern_keys": [
+            "picket"
+          ],
+          "note": "two-rail panel: the single picket run maps completely; no consumer_infill_single_cycle withholding exists for this configuration"
+        }
+      },
+      {
+        "check": "panel_resolution_behaves_as_declared",
+        "ok": true,
+        "detail": {
+          "asserted_outcome": "expected_dimensionless_draft_refusal (dimension-availability refusal; receiving geometry NOT evaluated) or resolved-nonempty",
+          "actual": {
+            "outcome": "expected_dimensionless_draft_refusal",
+            "error_type": "ValueError",
+            "error": "member pattern never advances: widths [0] with gaps [0] move 0 mm per repeat, so no finite number of members fills the axis"
+          }
+        }
+      },
+      {
+        "check": "mapping_completeness_holds",
+        "ok": true,
+        "detail": {
+          "draft_member_keys": [
+            "picket"
+          ],
+          "mapped_member_keys": [
+            "picket"
+          ],
+          "withheld_member_keys": [],
+          "complete": true,
+          "draft_u_channel_segments": 2,
+          "mapped_u_channel_segments": 2,
+          "withheld_u_channel_segments": 0,
+          "fixing_count_complete": true
+        }
+      },
+      {
+        "check": "fixing_count_complete_holds",
+        "ok": true,
+        "detail": {
+          "draft_member_keys": [
+            "picket"
+          ],
+          "mapped_member_keys": [
+            "picket"
+          ],
+          "withheld_member_keys": [],
+          "complete": true,
+          "draft_u_channel_segments": 2,
+          "mapped_u_channel_segments": 2,
+          "withheld_u_channel_segments": 0,
+          "fixing_count_complete": true
+        }
+      },
+      {
+        "check": "unvalidated_capabilities_marked",
+        "ok": true,
+        "detail": {
+          "assembly": false,
+          "fitting": false,
+          "cutting": false,
+          "purchasing": false
+        }
+      }
+    ]
+  },
+  "consumer_validation_scope": "Consumer checks prove: ingestion, dialect fidelity (unit conversion with every precision loss recorded — lengths and placements floor, counts refuse fractional values; height field; single-run pattern fully mapped with no withholding; centerline placement datum), parser acceptance, mapping completeness (mapped + withheld == draft members AND draft counts — here 2 mapped u-channel segments == the authored 2, nothing withheld), that validate_model and the real panel resolver REFUSE undeclared geometry — with a closed outcome enumeration: only the expected dimension-availability refusal or a genuinely computed nonempty result passes; missing records, unexpected errors, and empty results all fail. They do NOT prove assembly, fitting, cutting or purchasing: capability_validation marks all four validated=false with reasons, and they stay unvalidated until receiving geometry and step reviews exist. The panel-resolution refusal is the resolver refusing to fill an axis from an inactive, dimension-less draft Part — the boundary between \"validated parsing\" and \"validated assembly\" is demonstrated, not claimed. The advance script refuses to store the snapshot and exits nonzero if any check fails, and the Emblem byte-comparison (non-interference) gates the same store.",
+  "human_reviews_created": false,
+  "remaining_gaps": [
+    "Receiving geometry (rail slot depth, picket seating beyond the implied 3.25in, post rail-socket depth) is absent from all retained sources; fitted dimensions, seated cut lengths and engagement checks remain unvalidated.",
+    "Exact SKU identity for the 6x6 kit; per-style color availability beyond the dataset list needs per-SKU verification.",
+    "FenceModel publication remains blocked by the unresolved numeric provenance mapping (Amendment 008 pending).",
+    "Purchasing quantities: installed per-panel counts are manufacturer kit inventory (2 rails, 1 metal insert, 6 pickets, 2 u-channels); posts, caps and concrete are separate purchases and the panel kit lists none.",
+    "The local CAD raster canonical OCR is unusable (2 garbled labels, mean conf 0); its corroborating labels (72 width, 5.5/61/5.5 chain) are recorded in workspace/reports/pembroke-source-review/findings.md as diagnostic re-OCR evidence only — no fact anchors to that OCR and no Part cites the PNG."
+  ]
+}

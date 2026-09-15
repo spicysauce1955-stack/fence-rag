@@ -1,0 +1,584 @@
+{
+  "artifact_kind": "private_model_draft",
+  "draft_revision": 1,
+  "publishable": false,
+  "review_status": "unreviewed",
+  "contract_reference": "docs/integration/contract.md v1.1; FenceModel default_spec per knowledge-datamodel.md §5",
+  "scope": "Weatherables Pembroke privacy panel, 6 ft tall x 6 ft wide configuration (manufacturer Pembroke 6ft CAD page, Material List - 6x6 Panel); exact SKU unverified",
+  "interpretation": {
+    "panel_height": "72 in overall height, authored closure 61 + 2*5.5 = 72 from the 6x6 material list (U-channel length 61 equals the single picket run between two 5.5in rails); nominal 6 ft (specsheet Classic block: Height 4ft-8ft; CAD page title Pembroke 6ft)",
+    "panel_width": "72 in nominal width per diagnostic re-OCR of the local CAD drawing top-center label (pixel-verified; canonical OCR is unusable and no fact is anchored to it); rails 71.5 in per material list (0.25 in inset each side, the same convention as the Augusta 6ft-wide and Pembroke 6x8 lists)",
+    "rail_count": "two (material list: Top Rail 1 + Bottom Rail 1; master install Solid Privacy flow: bottom rail with the aluminum insert and top rail; drawing section chain 5.5 + 61 + 5.5 = 72)",
+    "rail_positions": "drawing-derived authored placements, recorded as rail CENTERLINES in exact milli-mm (5.5in envelope halves): bottom 69850, top 1758950; the section chain gives the envelope boundaries [0,139700] and [1689100,1828800]; datum interpreted as outside-of-opening to outside-of-opening, unconfirmed",
+    "receiving_geometry": "unresolved: rail slot depths receiving pickets, picket seating depths and post rail-socket depths are not stated in any retained source; all are explicit nulls",
+    "u_channel_count": "two installed channel segments in the two-rail configuration: the Solid Privacy flow puts a u-channel on the first and last picket of the single run; the material list states U-Channel 2 independently",
+    "kit_inventory": "Manufacturer Pembroke 6ft CAD page material list (6x6 Panel): 2 rails, 1 metal insert (1.25x1.75x71.5), 2 U-channels (1.25x1.5x61), 6 T&G pickets (0.875x11.3x64.25); posts not in the panel kit"
+  },
+  "sources": [
+    {
+      "path": "manuals/weatherables/structural/weatherables-pembroke-6ft-cad-page.html",
+      "sha256": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-master-installation-instructions-2024.pdf",
+      "sha256": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-privacy-fencing-specsheet.pdf",
+      "sha256": "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+    },
+    {
+      "path": "manuals/weatherables/weatherables-fencing-brochure.pdf",
+      "sha256": "cb90e6a275ac5ff050a4c10d33d82b6478922683cd6d2c857e5c50a3dcb6c629"
+    },
+    {
+      "path": "manuals/weatherables/structural/weatherables-cad-pembroke-6ft-privacy.png",
+      "sha256": "3fd74eaceddba4ac85905552e2419fdcfe4e4b29d258cb49b5c3f2aba5fcd8b8"
+    }
+  ],
+  "model_fragment": {
+    "id": "mfr/weatherables-pembroke-6x6-privacy",
+    "version": 1,
+    "status": "draft",
+    "name_i18n": {
+      "en": "Weatherables Pembroke Privacy Fence — 6ft tall x 6ft wide CAD configuration; exact SKU unverified"
+    },
+    "authorship": "third_party_authored",
+    "cites": [
+      {
+        "id": "d40f1cdb998fac7f",
+        "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+      },
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      },
+      {
+        "id": "4f94caa7fb11f5c5",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "grade": "residential",
+    "height_support": {
+      "kind": "discrete",
+      "heights": [
+        {
+          "amount_milli": 1828800,
+          "unit": "mm",
+          "value_raw": [
+            "72 in. authored closure from the 6x6 material list: U-channel length 61 + 2 x rail height 5.5 = 72 (nominal 6 ft; CAD page title and specsheet height options)"
+          ]
+        }
+      ]
+    },
+    "option_axes": [],
+    "variants": [],
+    "layout_policy": [],
+    "assembly": [],
+    "default_spec": {
+      "frame": [
+        {
+          "key": "bottom_rail",
+          "orientation": "horizontal",
+          "placement": {
+            "kind": "from_bottom",
+            "offset": {
+              "amount_milli": 69850,
+              "unit": "mm",
+              "value_raw": [
+                "centerline of the [0, 139700] milli-mm envelope: 5.5in rail whose outside face sits at the panel bottom (drawing-derived; datum unconfirmed)"
+              ]
+            }
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/pembroke-6x6-rail",
+            "qty": {
+              "amount_milli": 1000,
+              "unit": "each",
+              "value_raw": [
+                "1"
+              ]
+            },
+            "length_rule": "between_frame",
+            "overlap": {
+              "amount_milli": 0,
+              "unit": "mm",
+              "value_raw": [
+                "0 mm (authored choice: no overlap for this member; sources state none)"
+              ]
+            }
+          },
+          "joint": {
+            "kind": "channel",
+            "channel_depth": null,
+            "insertion_margin": null,
+            "shared_host_gap": null,
+            "gap_reason": null
+          }
+        },
+        {
+          "key": "top_rail",
+          "orientation": "horizontal",
+          "placement": {
+            "kind": "from_bottom",
+            "offset": {
+              "amount_milli": 1758950,
+              "unit": "mm",
+              "value_raw": [
+                "centerline of the [1689100, 1828800] milli-mm envelope (top of the 5.5 + 61 + 5.5 = 72 in chain)"
+              ]
+            }
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/pembroke-6x6-rail",
+            "qty": {
+              "amount_milli": 1000,
+              "unit": "each",
+              "value_raw": [
+                "1"
+              ]
+            },
+            "length_rule": "between_frame",
+            "overlap": {
+              "amount_milli": 0,
+              "unit": "mm",
+              "value_raw": [
+                "0 mm (authored choice: no overlap for this member; sources state none)"
+              ]
+            }
+          },
+          "joint": {
+            "kind": "channel",
+            "channel_depth": null,
+            "insertion_margin": null,
+            "shared_host_gap": null,
+            "gap_reason": null
+          }
+        }
+      ],
+      "infill": {
+        "orientation": "vertical",
+        "justification": "start",
+        "excess": "trim_last",
+        "edge_margin": {
+          "amount_milli": 0,
+          "unit": "mm",
+          "value_raw": [
+            "u-channels cover end gaps (master install); no numeric margin stated"
+          ]
+        },
+        "supply": "components",
+        "pattern": [
+          {
+            "key": "picket",
+            "base_ref": "bottom_rail",
+            "top_ref": "top_rail",
+            "base_engagement": null,
+            "top_engagement": null,
+            "gap_after": {
+              "amount_milli": 0,
+              "unit": "mm",
+              "value_raw": [
+                "T&G interlock; no numeric gap stated"
+              ]
+            },
+            "face_offset": {
+              "amount_milli": 0,
+              "unit": "mm",
+              "value_raw": [
+                "flush"
+              ]
+            },
+            "profile_edges": {
+              "start": "tongue",
+              "end": "groove"
+            },
+            "requirement": {
+              "part_id": "mfr/weatherables/pembroke-6x6-picket",
+              "qty": {
+                "amount_milli": 6000,
+                "unit": "each",
+                "value_raw": [
+                  "6 per panel: material list 6x6 Panel T&G Pickets 6 (manufacturer kit inventory, single run, not an installed-pitch derivation)"
+                ]
+              },
+              "length_rule": "panel_height",
+              "overlap": {
+                "amount_milli": 0,
+                "unit": "mm",
+                "value_raw": [
+                  "0 mm (authored choice: no overlap for this member; sources state none)"
+                ]
+              }
+            },
+            "joint": {
+              "kind": "groove",
+              "channel_depth": null,
+              "insertion_margin": null,
+              "shared_host_gap": null,
+              "gap_reason": null
+            }
+          }
+        ]
+      },
+      "fixings": [
+        {
+          "key": "u_channel_end_cover",
+          "basis": "per_panel",
+          "qty_per_basis": {
+            "amount_milli": 2000,
+            "unit": "each",
+            "value_raw": [
+              "2 (single run: first and last picket; material list states U-Channel 2 independently)"
+            ]
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/pembroke-6x6-u-channel",
+            "qty": {
+              "amount_milli": 2000,
+              "unit": "each",
+              "value_raw": [
+                "2 installed segments per panel: first and last picket of the single run"
+              ]
+            },
+            "length_rule": null,
+            "overlap": {
+              "amount_milli": 0,
+              "unit": "mm",
+              "value_raw": [
+                "0 mm (authored choice: u-channel slides onto picket; no overlap length stated)"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "post": null,
+    "contributing_sources": [
+      "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606",
+      "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b",
+      "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c"
+    ]
+  },
+  "field_evidence": {
+    "/default_spec/frame/0/joint/channel_depth": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/1/joint/channel_depth": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/0/placement/offset": [
+      {
+        "id": "4f94caa7fb11f5c5",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/1/placement/offset": [
+      {
+        "id": "4f94caa7fb11f5c5",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/0/requirement/qty": [
+      {
+        "id": "d40f1cdb998fac7f",
+        "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+      }
+    ],
+    "/default_spec/frame/0/requirement/length_rule": [
+      {
+        "id": "4f94caa7fb11f5c5",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/0/requirement/overlap": [
+      {
+        "id": "4f94caa7fb11f5c5",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/1/requirement/qty": [
+      {
+        "id": "d40f1cdb998fac7f",
+        "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+      }
+    ],
+    "/default_spec/frame/1/requirement/length_rule": [
+      {
+        "id": "4f94caa7fb11f5c5",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/1/requirement/overlap": [
+      {
+        "id": "4f94caa7fb11f5c5",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/base_engagement": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/top_engagement": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/requirement/qty": [
+      {
+        "id": "d40f1cdb998fac7f",
+        "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+      }
+    ],
+    "/default_spec/infill/pattern/0/joint/kind": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/profile_edges": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/gap_after": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/face_offset": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/requirement/length_rule": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/requirement/overlap": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/edge_margin": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/excess": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/orientation": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/justification": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/supply": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/fixings/0/qty_per_basis": [
+      {
+        "id": "d40f1cdb998fac7f",
+        "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+      }
+    ],
+    "/default_spec/fixings/0/basis": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/fixings/0/requirement/qty": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/fixings/0/requirement/part_id": [
+      {
+        "id": "5764b0c9159123a8",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/fixings/0/requirement/length_rule": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/fixings/0/requirement/overlap": [
+      {
+        "id": "143b7b5676bf5d6e",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/height_support/heights/0": [
+      {
+        "id": "d40f1cdb998fac7f",
+        "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+      }
+    ],
+    "/height_support": [
+      {
+        "id": "d40f1cdb998fac7f",
+        "belongs_to": "4b763b3c4761c02972e9685a1f8434920764dbb1b26a8911717ecc09b7f16606"
+      }
+    ],
+    "/default_spec/frame/0/joint/kind": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/0/orientation": [
+      {
+        "id": "4f94caa7fb11f5c5",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/0/joint/shared_host_gap": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/0/joint/gap_reason": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/1/joint/kind": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/1/orientation": [
+      {
+        "id": "4f94caa7fb11f5c5",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/1/joint/shared_host_gap": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/1/joint/gap_reason": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/joint/shared_host_gap": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/joint/gap_reason": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/infill/pattern/0/joint/channel_depth": [
+      {
+        "id": "2d5f60bcdb9b5961",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/0/placement": [
+      {
+        "id": "4f94caa7fb11f5c5",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/default_spec/frame/1/placement": [
+      {
+        "id": "4f94caa7fb11f5c5",
+        "belongs_to": "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b"
+      }
+    ],
+    "/grade": [
+      {
+        "id": "bcfae99b87f8a413",
+        "belongs_to": "eed66dadc0d18a5133646621797b322d2476d9bbffa417fe16de3b34556b7713"
+      }
+    ]
+  },
+  "measurement_limits": [
+    "channel_depth, insertion_margin and engagement nulls are declared absences: no retained source states rail slot depth, picket seating depth or post rail-socket depth for this configuration.",
+    "Rail placement offsets are drawing-derived authored choices from the section chain (5.5 + 61 + 5.5 = 72), not manufacturer-stated datums; the chain-to-opening datum interpretation is unconfirmed. The local CAD raster's canonical OCR is unusable (2 garbled labels, mean confidence 0) — the chain was recovered by diagnostic re-OCR at 16-24x upscale plus glyph-pixel analysis and closes exactly against the material list's U-channel length (72 - 2*5.5 = 61); no fact is anchored to that OCR.",
+    "Panel height 72 in is an authored arithmetic closure over the material list (61 + 2*5.5), not a direct dimension statement; the drawing's overall-height label corroborates at pixel level but cannot anchor a fact.",
+    "The model fragment authors no post opinion: a composition-only post Part carries no citable evidence values, and no retained source states Pembroke post socket depth or SKU identity (the gate lists name 4x4x76 socket posts, but no panel-list or specsheet value states the panel kit's post).",
+    "Rail placement offsets are CENTERLINES (consumer placement semantics); the 5.5in envelope halves to 69.85mm, exact in milli-mm but not whole millimetres — the consumer conversion floors with a recorded loss.",
+    "Kit counts are manufacturer inventory statements, not installed-pitch derivations: the picket stock length 64.25in exceeds the 61in run by an implied 3.25in seating, which is config-dependent and still not a measured engagement.",
+    "6 pickets x 11.3in nominal width covers 67.8in of a 72in run only with tongue-and-groove engagement; the per-board installed coverage is not source-stated and must not be inferred."
+  ],
+  "unresolved_fields": [
+    {
+      "path_pattern": "/model_fragment",
+      "fields": [
+        "option_axes",
+        "variants",
+        "layout_policy",
+        "assembly"
+      ],
+      "reason": "Empty lists are explicit: no option axes, variants, policies or validated procedures are authored for this configuration yet."
+    },
+    {
+      "path_pattern": "/model_fragment/post",
+      "fields": [
+        "post"
+      ],
+      "reason": "No post Part with citable value evidence exists in the parts snapshot: the dataset carries an authored Pembroke post component (4x4 socket post, 1.5x5.5 routed rail-socket holes per the master install, 4x4x76 per the gate list), but authored identity alone cannot satisfy the model profile's citation requirement, and no source states post socket depth or SKU identity. The model authors no post-selection opinion until a post Part with citable evidence exists."
+    },
+    {
+      "path_pattern": "/model_fragment/grade",
+      "fields": [
+        "grade"
+      ],
+      "reason": "No retained source states a fence-grade classification for this configuration. The warranty document's Protection Coverage statement (Individual Residential Homeowners - Limited Lifetime Material Warranty for all vinyl extrusions) is a warranty-scope statement supporting the authored \"residential\" value only as warranty scope, not as a structural grade rating; a source-stated grade remains open."
+    },
+    {
+      "path_pattern": "/model_fragment/default_spec",
+      "fields": [
+        "metal_insert_requirement"
+      ],
+      "reason": "The bottom-rail metal insert (1 per panel, 1.25x1.75x71.5in) is manufacturer kit inventory recorded in the dataset composition (wea-pembroke-metal-insert qty_per_panel 1) and published as a value Part, but the model fragment authors no requirement for it: the consumer fixings channel draws per-panel quantities at the panel centre unless edge-bound (the Augusta centre-dot defect), no source states the insert's seating inside the rail, and the consumer requirement shapes cannot express \"contained in the bottom rail member\" without transitive contents validation. A resolved BOM from this model alone would buy 0 inserts; purchasing must read the dataset composition and the value Part. This omission is deliberate refusal, not silent loss."
+    }
+  ],
+  "delivery_objective": "Useful partial knowledge: composition, counts and stock dimensions for the Pembroke 6x6 configuration; fitted dimensions and cuts remain refused until receiving geometry exists."
+}

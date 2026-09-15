@@ -35,6 +35,23 @@ def normalize_doc(doc, fallback_manufacturer):
         "local_path": local_path,
     }
 
+def repo_relative(local_path, base):
+    """Repo-relative form of a documents[] path, and whether it stays inside.
+
+    A `local_path` that resolves outside the repository root is not portable --
+    it names a file on one machine, not in this checkout. Counting such a path
+    as verified because that machine happens to have the file is exactly how
+    state-and-gaps G71 stayed invisible for a release: 125 absolute paths into a
+    sibling checkout reported `Missing (broken local_path): 0`. Keep the value
+    so the defect is visible, but never count it as present.
+    """
+    if not local_path:
+        return None, False
+    rel = os.path.relpath(local_path, base) if os.path.isabs(local_path) else local_path
+    portable = not os.path.normpath(rel).startswith("..")
+    return rel, portable
+
+
 STRUCTURAL_DIR = os.path.join(DATA_DIR, "structural")
 STRUCTURAL_SUPPLEMENT_MAP = {
     "certainteed-bufftech.json": "certainteed-bufftech-structural.json",
@@ -93,16 +110,16 @@ for path in glob.glob(os.path.join(BASE, "manuals", "**", "*"), recursive=True):
         on_disk.add(os.path.relpath(path, BASE))
 
 indexed_paths = set()
+non_portable = []
 index_rows = []
 for doc in all_documents:
     local_path = doc.get("local_path")
-    rel = None
-    exists = False
-    if local_path:
-        rel = os.path.relpath(local_path, BASE) if os.path.isabs(local_path) else local_path
-        exists = os.path.isfile(os.path.join(BASE, rel)) if rel else False
-        if exists:
-            indexed_paths.add(rel)
+    rel, portable = repo_relative(local_path, BASE)
+    exists = bool(rel) and portable and os.path.isfile(os.path.join(BASE, rel))
+    if rel and not portable:
+        non_portable.append(rel)
+    if exists:
+        indexed_paths.add(rel)
     index_rows.append({
         "manufacturer": doc.get("manufacturer"),
         "doc_type": doc.get("doc_type"),
@@ -132,6 +149,9 @@ print(f"Total document entries indexed: {len(index_rows)}")
 print(f"Verified on disk: {sum(1 for r in index_rows if r['file_exists'])}")
 print(f"Missing (broken local_path): {sum(1 for r in index_rows if r['local_path'] and not r['file_exists'])}")
 print(f"URL-only (no download): {sum(1 for r in index_rows if not r['local_path'])}")
+print(f"Non-portable (local_path escapes the repository root): {len(non_portable)}")
+for p in sorted(set(non_portable)):
+    print("  NON-PORTABLE:", p)
 print(f"Files on disk but NOT referenced in any documents[] entry: {len(orphan_files)}")
 for o in orphan_files:
     print("  ORPHAN:", o)

@@ -58,8 +58,10 @@ class TestDryRun(unittest.TestCase):
 
     @requires_corpus
     def test_a_dry_run_counts_the_real_corpus_objects_and_duplicates(self):
-        """144 corpus paths hold 128 distinct objects; the 16 redundant
-        paths are skipped rather than uploaded twice."""
+        """146 corpus paths hold 130 distinct objects; the 16 redundant
+        paths are skipped rather than uploaded twice. (146/130 since the
+        Augusta 8ft CAD page and Pembroke 6ft CAD page HTMLs were retained
+        as sources.)"""
         rows = load_corpus_manifest()
         if not rows:
             self.skipTest("corpus manifest not built")
@@ -68,12 +70,12 @@ class TestDryRun(unittest.TestCase):
         rec = _Recorder()
         with mock.patch.object(publish, "_request", rec):
             out = publish.publish_objects(CFG, rows, dry_run=True)
-        self.assertEqual(len(rows), 144)
-        self.assertEqual(out["unique_objects"], 128)
+        self.assertEqual(len(rows), 146)
+        self.assertEqual(out["unique_objects"], 130)
         self.assertEqual(out["skipped_duplicate_paths"], 16)
         self.assertEqual(out["unique_objects"] + out["skipped_duplicate_paths"],
                          len(rows))
-        self.assertEqual(out["bytes"], 376489773)
+        self.assertEqual(out["bytes"], 377135378)
 
 
 class TestIntegrityGuard(unittest.TestCase):

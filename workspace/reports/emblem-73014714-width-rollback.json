@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "width_publication_rollback_check",
+  "withdrawn_fact_absent": true,
+  "withdrawn_review_absent": true,
+  "ledger_counts": {
+    "ledger": 1,
+    "fact_review": 204,
+    "table_review": 71
+  },
+  "live_fact_count": 1826,
+  "snapshot_tombstoned": true,
+  "tombstone_reason": "Withdrawn with user authorization: local hand-authored width fact and Developer ledger acceptance had no reproducible fact-import path. Narrow dimension publisher removed. Source reading is retained as a nonpublished draft; this payload must not be consumed.",
+  "live_actual_panel_width_mm_snapshots": [],
+  "rebuilt_snapshot_verified": true,
+  "rebuilt_snapshot_parameter_count": 9,
+  "restored_files_match_f39f9e6": true,
+  "source_reading_status": "draft_only_not_ingested_not_reviewed",
+  "private_model_and_purchase_previews_preserved": true
+}

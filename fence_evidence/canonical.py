@@ -84,3 +84,53 @@ def canonical_bytes(obj) -> bytes:
 def content_hash(obj) -> str:
     """The sha256 of an object's canonical bytes, as hex."""
     return hashlib.sha256(canonical_bytes(obj)).hexdigest()
+
+
+def is_object_version(value) -> bool:
+    """Is `value` admissible as a published object's `version`?
+
+    A positive integer or a non-empty string, and nothing else. This is the
+    weak rule, and it is weak on purpose: `snapshot.verify()` runs over
+    write-once snapshots that were published before `part_version` existed, so
+    a gate that refused the integer `1` would retroactively invalidate 24
+    stored snapshots rather than catching anything. The strong rule -- a new
+    build mints a content hash and only a content hash -- belongs at the
+    builder, and `tests/test_naming.py` holds it there.
+
+    `type(value) is int` rather than `isinstance`: `True` is an `int` in
+    Python, and a boolean version is a caller mistake, not a version 1.
+
+    Both this platform's `authored_models` audit and Planning's own
+    `_version_identity` validator already enforce exactly this predicate.
+    Same rule, one definition here, so the two cannot drift apart.
+    """
+    if type(value) is int:
+        return value > 0
+    return isinstance(value, str) and bool(value.strip())
+
+
+def part_version(part: dict) -> str:
+    """A `Part`'s version: `sha256:` + the content hash of the part WITHOUT it.
+
+    G103, 2026-09-07: *"Part versions no longer stay at 1 when reviewed content
+    changes. Each is now a `sha256:` hash of all public Part content except
+    version... Hash versions identify content, not chronological order."* The
+    integer form it replaced was the literal `1`, minted once and never
+    incremented anywhere in this package, so a corrected value shipped under
+    the version its predecessor shipped under -- which is precisely what
+    `knowledge-datamodel.md`'s `Combination.members == [Part@version]` pins
+    against.
+
+    **The version field is excluded from its own hash**, and this function
+    exists because doing that by hand went wrong once: `augusta_drawing_claims`
+    re-hashed a picket dict that already carried a version, chaining the two so
+    the published value could not be recomputed from the published payload.
+    `[measured]` 2026-09-09: 14 of 15 string-versioned parts in snapshot
+    `0e04d171` reproduced from their own bytes; that picket did not.
+
+    Idempotent: passing a part that already carries its version returns the
+    same string. Fails noisily -- `CanonicalError` -- on a part that cannot be
+    serialised, rather than minting a version over bytes nobody can reproduce.
+    """
+    return "sha256:" + content_hash(
+        {key: value for key, value in part.items() if key != "version"})

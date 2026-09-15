@@ -1,5 +1,14 @@
 # Phase checkpoints
 
+> **HISTORICAL — an accurate record that stops on 2026-08-28.**
+> `[measured]` the file contains no 2026-09 entries, while 32 gaps (G75-G106) and the entire
+> Emblem / Augusta / Pembroke arc happened afterwards. Its per-phase records are correct as
+> period documents and should not be edited into a status doc — but do not read any number here
+> as current. Two claims are now plainly false: that no reading has been reviewed by a person
+> (1,202 have) and that `parameters` publishes nothing (9 tables). Current state:
+> `docs/state-and-gaps.md`. Purpose and direction: `docs/knowledge-loop.md`.
+
+
 One entry per phase of `guide.md`, in the form the guide requires: what was
 implemented, what was tested, what remains incomplete, known extraction
 failures, decisions made, and the evidence that acceptance criteria passed.

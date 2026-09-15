@@ -49,7 +49,6 @@
           1,
           9,
           15,
-          16,
           17
         ]
       },
@@ -69,7 +68,8 @@
         "method": "pdftoppm -r 200 -png 'manuals/certainteed-bufftech/structural/NOA-23-0314.05-...pdf' $SP/ct23 ; tesseract $SP/ct23-09.png - --psm 6 ; tesseract $SP/ct23-01.png - --psm 6",
         "confirmed": true,
         "quote": "signed and sealed by Pedro De Figueiredo, P.E., on 01/26/2021 (page 1); 'No. 52609' / 'PE 52609' inside the seal on drawing sheets",
-        "notes": "The clean spelling 'Pedro De Figueiredo' comes from page 1 (OCR reliable). OCR of the seal on the drawing sheets mangles the surname (e.g. 'Pedro De Figutredo') but reproduces the licence number 52609 correctly on pages 9, 15, 16 and 17."
+        "notes": "The clean spelling 'Pedro De Figueiredo' comes from page 1 (OCR reliable). OCR of the seal on the drawing sheets mangles the surname (e.g. 'Pedro De Figutredo') but reproduces the licence number 52609 correctly on pages 9, 15, 16 and 17.",
+        "annotation_note": "2026-09-14: page 16 dropped — it carries neither `52609` nor `Pedro De Figueiredo`; its 73 elements are drawing fragments. Pages 9/15/17 carry both."
       }
     },
     {
@@ -112,10 +112,10 @@
       "question": "I'm installing Bufftech Chesterfield fence in Miami-Dade in Exposure C. If I pour a 36 inch deep footing, what is the maximum post spacing the NOA allows?",
       "answerable": true,
       "expected_documents": [
-        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf"
       ],
       "expected_pages": {
-        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf": [
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf": [
           17
         ]
       },
@@ -134,16 +134,19 @@
       ],
       "required_conditions": {
         "exposure_category": "C",
-        "footing_depth_in": 36,
         "hvhz": true,
         "wind_speed_mph": 115
+      },
+      "required_selectors": {
+        "footing_depth_in": 36
       },
       "expects_image_evidence": true,
       "verification": {
         "method": "pdftoppm -r 400 -png -f 17 -l 17 '<NOA-23-0314.05>.pdf' $SP/ct23hi ; python3 crop(300,3100,2500,4100) ; tesseract $SP/t1hi.png - --psm 6 ; and read the cropped PNG visually with the Read tool",
         "confirmed": true,
         "quote": "TABLE 1 MAXIMUM POST SPACING AND FOOTING DIMENSIONS | WIND EXPOSURE / FOOTING DEPTH / MAX. POST SPACING | C 36\" 88\" HVHZ AND NON HVHZ",
-        "notes": "Read visually from the rendered page image; the full table is B 30\"/97\" and B 24\"/66\" (NON HVHZ only), C 36\"/88\" and C 30\"/68\" (HVHZ and non-HVHZ), D 36\"/75\" and D 30\"/56\" (HVHZ and non-HVHZ). OCR of this table is only partly reliable: the C row ('36' and '88') is recovered by tesseract at both 200 and 400 dpi, but the B and D rows are garbled. Note the hand-curated JSON in data/structural/ mislabels the B 24\"/66\" row as HVHZ - the drawing shows both B rows as NON HVHZ. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. '88' survives at all four resolutions; '36' only at 150/200/400 and 'HVHZ AND NON HVHZ' only at 200/300/400, so both were dropped from the term list even though they are on the page. The answer value must ultimately be confirmed from the page image."
+        "notes": "Read visually from the rendered page image; the full table is B 30\"/97\" and B 24\"/66\" (NON HVHZ only), C 36\"/88\" and C 30\"/68\" (HVHZ and non-HVHZ), D 36\"/75\" and D 30\"/56\" (HVHZ and non-HVHZ). OCR of this table is only partly reliable: the C row ('36' and '88') is recovered by tesseract at both 200 and 400 dpi, but the B and D rows are garbled. Note the hand-curated JSON in data/structural/ mislabels the B 24\"/66\" row as HVHZ - the drawing shows both B rows as NON HVHZ. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. '88' survives at all four resolutions; '36' only at 150/200/400 and 'HVHZ AND NON HVHZ' only at 200/300/400, so both were dropped from the term list even though they are on the page. The answer value must ultimately be confirmed from the page image.",
+        "annotation_note": "2026-09-14: redirected from NOA-23-0314.05 to 24-0117.05. The store records 23-0314.05 as version_status='superseded' with four superseded_by edges to 24-0117.05, and this question asks what is in force. The successor's page 17 also carries answer terms the superseded copy loses to OCR. See docs/keyword-ruler-audit.md."
       }
     },
     {
@@ -176,7 +179,9 @@
       "required_conditions": {
         "wind_speed_mph": 130,
         "exposure_category": "B",
-        "fence_height_ft": 6,
+        "fence_height": "6 ft"
+      },
+      "required_selectors": {
         "line_post_size_in": "2 3/8",
         "post_group": "Group IA Schedule 40, ASTM F1083 Regular Grade (30,000 psi yield)"
       },
@@ -218,7 +223,7 @@
       "required_conditions": {
         "wind_speed_mph": 130,
         "exposure_category": "D",
-        "panel_height_in": 72
+        "fence_height": "72 in"
       },
       "expects_image_evidence": false,
       "verification": {
@@ -256,8 +261,10 @@
         "post hole diameter 5x5 vs 8x8"
       ],
       "required_conditions": {
-        "post_size_in": "8x8",
         "wind_speed_mph": 75
+      },
+      "required_selectors": {
+        "post_size_in": "8x8"
       },
       "expects_image_evidence": false,
       "verification": {
@@ -297,8 +304,8 @@
       "required_conditions": {
         "wind_speed_mph": 120,
         "exposure_category": "C",
-        "wall_height_ft": 6,
-        "standard": "ASCE 7-16"
+        "fence_height": "6 ft",
+        "code_edition": "ASCE 7-16"
       },
       "expects_image_evidence": false,
       "verification": {
@@ -549,7 +556,6 @@
           12
         ],
         "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf": [
-          1,
           17
         ]
       },
@@ -573,7 +579,8 @@
         "method": "pdftoppm -r 200 -png 'manuals/freedom-outdoor-living/structural/MiamiDade-NOA-22-0217.05-Barrette-Extruded-PVC-Vinyl-Fence.pdf' $SP/b22 ; pdftoppm -r 400 -png -f 12 -l 12 (same) $SP/b22hi ; visual read of crops of $SP/b22-12.png ; and pdftoppm -r 200 -png -f 17 -l 17 'manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf' + visual read of the Table 1 crop",
         "confirmed": true,
         "quote": "22-0217.05 sheet 9 of 9: 'Ø18\"' with '41\"' below GRADE LINE, 'CONCRETE 3000 P.S.I. MINIMUM', '6\"' 'GRAVEL FILL'.  24-0117.05 sheet 9 of 9: '12\" DIAMETER FOOTING', '3000 PSI CONCRETE', 'SEE FOOTING TABLE FOR MINIMUM DEPTH'",
-        "notes": "The 18\" diameter and 41\" depth were read visually from the rendered page; OCR of that page is very poor (at 400 dpi only '918\"' is recovered for Ø18\", and 41 is not recovered at all), so expected_answer_terms are limited to strings tesseract does return. NOA 22-0217.05 page 1: applicant Barrette Outdoor Living, 740 North Main Street; revises & renews NOA #18-0410.01; approved 03/31/2022, expires 05/25/2027 - i.e. both acceptances are simultaneously in force for 'Extruded PVC Vinyl Fencing'. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. On 22-0217.05 page 12 only the title-block string 'PVC VINYL FENCING NOA' is stable; 'CONCRETE', 'GRAVEL', 'GRADE', '18' and '41' are all resolution-dependent or absent, so the conflicting footing numbers themselves are image-only evidence."
+        "notes": "The 18\" diameter and 41\" depth were read visually from the rendered page; OCR of that page is very poor (at 400 dpi only '918\"' is recovered for Ø18\", and 41 is not recovered at all), so expected_answer_terms are limited to strings tesseract does return. NOA 22-0217.05 page 1: applicant Barrette Outdoor Living, 740 North Main Street; revises & renews NOA #18-0410.01; approved 03/31/2022, expires 05/25/2027 - i.e. both acceptances are simultaneously in force for 'Extruded PVC Vinyl Fencing'. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. On 22-0217.05 page 12 only the title-block string 'PVC VINYL FENCING NOA' is stable; 'CONCRETE', 'GRAVEL', 'GRADE', '18' and '41' are all resolution-dependent or absent, so the conflicting footing numbers themselves are image-only evidence.",
+        "annotation_note": "2026-09-14: page 1 of 24-0117.05 dropped — the NOA cover carries none of the six answer terms (its engineer is Robert Nieminen, not Jacek Sluzynski). The 'two live NOAs' premise is UNRESOLVED: the store marks 22-0217.05 superseded with no supersession relations. Owner to settle."
       }
     },
     {
@@ -704,10 +711,10 @@
       "question": "Show me the post and footing cross-section from the current Bufftech vinyl fence NOA - what footing diameter, concrete strength and post reinforcement does it detail?",
       "answerable": true,
       "expected_documents": [
-        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf"
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf"
       ],
       "expected_pages": {
-        "manuals/certainteed-bufftech/structural/NOA-23-0314.05-CertainTeed-Chesterfield-Columbia-Imperial-Breezewood-Brookline-current-2023-2029.pdf": [
+        "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf": [
           17
         ]
       },
@@ -729,7 +736,8 @@
         "method": "pdftoppm -r 200 -png -f 17 -l 17 '<NOA-23-0314.05>.pdf' $SP/ct23 ; python3 crop(1050,700,2100,2200) -> $SP/ct23p17_footing.png ; Read tool on that PNG",
         "confirmed": true,
         "quote": "12\" DIAMETER FOOTING ... ALUMINUM REINFORCEMENT POST LENGHT-1\" - BREEZEWOOD 48\" - ALL OTHERS ... EXISTING SOIL ... SEE FOOTING TABLE FOR MINIMUM DEPTH: 12\" DIAM. X DEPTH 3000 PSI CONCRETE ... GRAVEL FILL",
-        "notes": "Read visually. Note the drawing itself misspells LENGTH as 'LENGHT'. OCR returns '3000 PSI CONCRETE', 'EXISTING SOIL', 'GRAVEL' and '12\" DIAM' but not the rotated '12\" DIAMETER FOOTING' label, hence image evidence is required. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. 'GRAVEL' (150/200/400) and '12' (150/200 only) were dropped; the 12\" footing diameter and the aluminium-reinforcement callout are rotated text that tesseract does not read at all, which is exactly why this is a visual_evidence item."
+        "notes": "Read visually. Note the drawing itself misspells LENGTH as 'LENGHT'. OCR returns '3000 PSI CONCRETE', 'EXISTING SOIL', 'GRAVEL' and '12\" DIAM' but not the rotated '12\" DIAMETER FOOTING' label, hence image evidence is required. OCR-term robustness was checked by rendering the page at 150/200/300/400 dpi and running tesseract --psm 6 at each; only terms recovered at every resolution were kept in expected_answer_terms. 'GRAVEL' (150/200/400) and '12' (150/200 only) were dropped; the 12\" footing diameter and the aluminium-reinforcement callout are rotated text that tesseract does not read at all, which is exactly why this is a visual_evidence item.",
+        "annotation_note": "2026-09-14: redirected from NOA-23-0314.05 to 24-0117.05. The store records 23-0314.05 as version_status='superseded' with four superseded_by edges to 24-0117.05, and this question asks what is in force. The successor's page 17 also carries answer terms the superseded copy loses to OCR. See docs/keyword-ruler-audit.md."
       }
     },
     {

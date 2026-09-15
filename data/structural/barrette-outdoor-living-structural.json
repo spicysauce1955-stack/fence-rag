@@ -84,7 +84,7 @@
       "design_engineer_of_record": "Robert Nieminen, P.E. (FL Lic. #59166), Nemo etc.",
       "missile_impact_rating": "None",
       "source_url": "https://www.miamidade.gov/building/library/productcontrol/noa/24011705.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf"
+      "local_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf"
     },
     {
       "noa_number": "24-0117.06",
@@ -100,7 +100,7 @@
       "missile_impact_rating": "None",
       "possible_csi_codes": ["32 31 00 Fences and Gates", "32 31 23 Plastic Fences and Gates", "32 31 26 Wire Fences and Gates", "32 31 29 Wood Fences and Gates", "32 31 17 Expanded Metal Fences and Gates"],
       "source_url": "https://www.miamidade.gov/building/library/productcontrol/noa/24011706.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-24-0117.06-simtek-fence.pdf"
+      "local_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.06-simtek-fence.pdf"
     },
     {
       "noa_number": "10-1217.01",
@@ -109,7 +109,7 @@
       "status": "Superseded (retained for historical/basis reference)",
       "key_fact_from_search_snippet": "This fence is approved for sustained wind velocity of 75 MPH (90 MPH for 3 second gust) when the post centers are located 96\" on center -- shows the wind-speed/spacing basis has been stable since at least 2010, and that the later NOAs' Table 1 (which adds exposure-category and footing-depth granularity) is a refinement of this original single-condition rating.",
       "source_url": "http://www.miamidade.gov/building/library/productcontrol/noa/10121701.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf"
+      "local_path": "manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf"
     },
     {
       "noa_number": "10-1217.02",
@@ -117,7 +117,7 @@
       "applicant": "Barrette Outdoor Living, Inc.",
       "status": "Superseded (retained for historical/basis reference)",
       "source_url": "http://www.miamidade.gov/building/library/productcontrol/noa/10121702.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-10-1217.02-vinyl-fencing-legacy.pdf"
+      "local_path": "manuals/barrette-outdoor-living/structural/noa-10-1217.02-vinyl-fencing-legacy.pdf"
     },
     {
       "note": "Miami-Dade product-control search also lists other manufacturers' fence NOAs (Deacero, VEKA, UFP Industries, All Season Fencing, PlyGem) for competitive/benchmark context, but only the two Barrette Outdoor Living, Inc. entries above are in-scope for this dataset.",
@@ -308,7 +308,7 @@
       "doc_type": "engineering_approval",
       "title": "Miami-Dade NOA 24-0117.05 - Extruded PVC Vinyl Fencing (Columbia, Imperial, Chesterfield, Breezewood, Brookline models)",
       "url": "https://www.miamidade.gov/building/library/productcontrol/noa/24011705.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
+      "local_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.05-vinyl-fencing.pdf",
       "manufacturer": "Barrette Outdoor Living, Inc.",
       "model_or_line": "Vinyl Privacy/Semi-Privacy Fence family (CertainTeed-era model names)",
       "date_or_version": "Approved 04/24/2025, expires 03/13/2029"
@@ -317,7 +317,7 @@
       "doc_type": "engineering_approval",
       "title": "Miami-Dade NOA 24-0117.06 - Polyethylene Plastic Shell Fence (SimTek: Allegheny, EcoStone, Sherwood, Ashland models)",
       "url": "https://www.miamidade.gov/building/library/productcontrol/noa/24011706.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-24-0117.06-simtek-fence.pdf",
+      "local_path": "manuals/barrette-outdoor-living/structural/noa-24-0117.06-simtek-fence.pdf",
       "manufacturer": "Barrette Outdoor Living, Inc.",
       "model_or_line": "SimTek molded/stone-look fence family",
       "date_or_version": "Approved 04/24/2025, expires 04/04/2028"
@@ -326,7 +326,7 @@
       "doc_type": "engineering_approval",
       "title": "Miami-Dade NOA 10-1217.01 - Extruded PVC Vinyl Fencing (legacy/historical)",
       "url": "http://www.miamidade.gov/building/library/productcontrol/noa/10121701.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf",
+      "local_path": "manuals/barrette-outdoor-living/structural/noa-10-1217.01-vinyl-fencing-legacy.pdf",
       "manufacturer": "Barrette Outdoor Living, Inc.",
       "model_or_line": "Vinyl Fence (general, 2010-era)",
       "date_or_version": "2010 filing (superseded)"
@@ -335,7 +335,7 @@
       "doc_type": "engineering_approval",
       "title": "Miami-Dade NOA 10-1217.02 - Extruded PVC Vinyl Fencing (legacy/historical, companion filing)",
       "url": "http://www.miamidade.gov/building/library/productcontrol/noa/10121702.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/noa-10-1217.02-vinyl-fencing-legacy.pdf",
+      "local_path": "manuals/barrette-outdoor-living/structural/noa-10-1217.02-vinyl-fencing-legacy.pdf",
       "manufacturer": "Barrette Outdoor Living, Inc.",
       "model_or_line": "Vinyl Fence (general, 2010-era)",
       "date_or_version": "2010 filing (superseded)"
@@ -344,7 +344,7 @@
       "doc_type": "cut_sheet",
       "title": "Madison - Solid Horizontal Privacy - Catalyst VF/MF SKU Pages (dimensions, SKUs by height/width/rail tier)",
       "url": "https://www.catalystfence.com/wp-content/uploads/Madison_Catalyst-VF-MF-Sku-Pages_CAT25-D-514650_12-25.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/catalyst-madison-horizontal-privacy-sku-sheet.pdf",
+      "local_path": "manuals/barrette-outdoor-living/structural/catalyst-madison-horizontal-privacy-sku-sheet.pdf",
       "manufacturer": "Catalyst Fence Solutions",
       "model_or_line": "Madison Solid Horizontal Privacy",
       "date_or_version": "CAT25-D-514650, Rev 12/25"
@@ -353,7 +353,7 @@
       "doc_type": "installation_manual",
       "title": "Vinyl Post & Rail/Ranch Rail Installation Instructions (current Catalyst version, works with Coronado & Sedona)",
       "url": "https://www.catalystfence.com/wp-content/uploads/Catalyst-Installation-Instructions-Vinyl-Post-Rail_Ranch-Rail.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/barrette-outdoor-living/structural/catalyst-vinyl-post-rail-ranch-rail-install-current.pdf",
+      "local_path": "manuals/barrette-outdoor-living/structural/catalyst-vinyl-post-rail-ranch-rail-install-current.pdf",
       "manufacturer": "Catalyst Fence Solutions",
       "model_or_line": "Coronado / Sedona Ranch Rail",
       "date_or_version": "WEB REV 1.25",

@@ -1,5 +1,15 @@
 # LLM-assisted extraction — design
 
+> **HISTORICAL — a design that became a session diary, and both halves are superseded.**
+> Phase 1 shipped (`chatgpt-web-1` in `table_review.READER_FAMILY`). Phase 3's `Procedure` spike
+> was replaced by `docs/assembly-step-design.md` and the shipped `steps.py`/`procedures.py`.
+> Phase 2 (`PanelSpec`) is still unbuilt. Its §3 table is wrong in four of seven rows today
+> (`parameters` 4→9, `parts` 0→42, `part_types` 0→8, `procedures` member built), its header says
+> contract v1.1 while its own §15 records v1.3 being cut, and §8-§15 is a running log superseded
+> turn-by-turn by `docs/integration/conversation.md`. **This is the least reliable file in
+> `docs/` for a cold read.**
+
+
 ```text
 Status:    Design, approved 2026-08-30. Records four manual spikes and the
            plan that follows from them. §8 records Phase 1's execution the

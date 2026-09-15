@@ -8,16 +8,16 @@ page whose mean word confidence is below 80 is created as `flagged`, not
 
 | Measure | Value |
 |---|---|
-| facts | 1826 |
-| with conditions attached | 284 |
+| facts | 2003 |
+| with conditions attached | 461 |
 | facts without a source element | 0 |
 
 ## By review status
 
 | Status | Count |
 |---|---|
-| extracted | 1452 |
-| flagged | 164 |
+| extracted | 1613 |
+| flagged | 180 |
 | accepted | 108 |
 | reviewed | 92 |
 | rejected | 10 |
@@ -47,14 +47,50 @@ the fact back where it started.
 | approval_id | 271 | 42 | 265 |
 | wind_speed_mph | 269 | 50 | 160 |
 | footing_depth_in | 205 | 1 | 24 |
+| footing_diameter_in | 141 | 2 | 15 |
 | depth_below_grade_in | 101 | 0 | 16 |
 | effective_date | 84 | 12 | 84 |
+| stock_length_in | 79 | 0 | 0 |
 | expiration_date | 75 | 1 | 75 |
-| stock_length_in | 62 | 0 | 0 |
 | post_spacing_in | 46 | 0 | 2 |
-| footing_diameter_in | 37 | 2 | 11 |
 | exposure_category | 15 | 0 | 0 |
 | racking_degrees | 5 | 2 | 5 |
+| u_channel_designation_in | 3 | 0 | 0 |
+| u_channel_width_in | 2 | 0 | 0 |
+| u_channel_length_in | 2 | 0 | 0 |
+| u_channel_depth_in | 2 | 0 | 0 |
+| rail_width_in | 2 | 0 | 0 |
+| rail_height_in | 2 | 0 | 0 |
+| rail_drawing_width_in | 2 | 2 | 2 |
+| rail_drawing_length_in | 2 | 2 | 2 |
+| rail_drawing_height_in | 2 | 2 | 2 |
+| picket_width_in | 2 | 0 | 0 |
+| picket_thickness_in | 2 | 0 | 0 |
+| picket_stock_length_in | 2 | 0 | 0 |
+| metal_insert_width_in | 2 | 0 | 0 |
+| metal_insert_length_in | 2 | 0 | 0 |
+| metal_insert_height_in | 2 | 0 | 0 |
+| kit_qty_u_channels | 2 | 0 | 0 |
+| kit_qty_rails | 2 | 0 | 0 |
+| kit_qty_pickets | 2 | 0 | 0 |
+| kit_qty_metal_inserts | 2 | 0 | 0 |
+| rail_length_in | 1 | 0 | 0 |
+| picket_tongue_groove_wall_gauge_in | 1 | 0 | 0 |
+| panel_drawing_picket_run_upper_in | 1 | 1 | 1 |
+| panel_drawing_picket_run_lower_in | 1 | 1 | 1 |
+| panel_drawing_overall_width_in | 1 | 1 | 1 |
+| panel_drawing_overall_height_in | 1 | 1 | 1 |
+| nominal_cap_width_in | 1 | 0 | 0 |
+| nominal_cap_depth_in | 1 | 0 | 0 |
+| nominal_board_width_in | 1 | 0 | 0 |
+| end_channel_drawing_width_in | 1 | 1 | 1 |
+| end_channel_drawing_length_in | 1 | 1 | 1 |
+| end_channel_drawing_depth_in | 1 | 1 | 1 |
+| component_colour | 1 | 0 | 0 |
+| cap_colour | 1 | 0 | 0 |
+| board_drawing_thickness_in | 1 | 1 | 1 |
+| board_drawing_profile_width_in | 1 | 1 | 1 |
+| board_drawing_length_in | 1 | 1 | 1 |
 
 ## Where the conditions came from
 
@@ -68,13 +104,13 @@ not assert an inference it never made.
 | condition basis | Count | Means |
 |---|---|---|
 | unexamined | 1542 | no conditions, and nothing looked for any |
-| stated | 167 | the document said so |
-| assumed | 117 | captured by regex proximity, not asserted by the document |
+| stated | 313 | the document said so |
+| assumed | 148 | captured by regex proximity, not asserted by the document |
 
 ## Second units, where a source states one
 
 Obligation 4: where a source states two units and they disagree, publish both.
-**7** of 1826 facts carry an alternate lexeme in `value_alternates`,
+**7** of 2003 facts carry an alternate lexeme in `value_alternates`,
 of which **4 disagree** with the primary value.
 
 **Read that second number carefully.** The schema can now represent a disagreeing
@@ -111,8 +147,8 @@ English-language export catalogues. Measured: zero CJK-bearing elements corpus-w
 
 | lang | basis | Elements |
 |---|---|---|
-| en | assumed | 58033 |
-| und | unknown | 22453 |
+| en | assumed | 58517 |
+| und | unknown | 22457 |
 | es | assumed | 674 |
 | fr | assumed | 634 |
 

@@ -771,7 +771,7 @@
       "doc_type": "installation_manual",
       "title": "Bufftech Fence Installation Guide (incl. SimTek) - 2024 Edition",
       "url": "https://bufftech.com/wp-content/uploads/sites/2/2024/07/BOL-Bufftech-and-Simtek-Instructions-4-24.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-fence-installation-guide-2024.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-fence-installation-guide-2024.pdf",
       "manufacturer": "CertainTeed / Barrette Outdoor Living",
       "model_or_line": "All Bufftech fence styles (Post & Rail, Privacy, Semi-Private, HV-Post system, SimTek)",
       "date_or_version": "2024-07 (BOL-Bufftech-and-Simtek-Instructions-4-24)"
@@ -780,7 +780,7 @@
       "doc_type": "installation_manual",
       "title": "Bufftech Gate Installation Guide",
       "url": "https://bufftech.com/wp-content/uploads/sites/2/2023/10/bufftech-install-guide-e-2201cts.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-gate-installation-guide.pdf",
       "manufacturer": "CertainTeed / Barrette Outdoor Living",
       "model_or_line": "All Bufftech gate styles",
       "date_or_version": "2023-10 (bufftech-install-guide-e-2201cts)"
@@ -789,7 +789,7 @@
       "doc_type": "installation_manual",
       "title": "Bufftech Installation Guide (American Fence & Supply reseller copy)",
       "url": "https://www.afence.com/mm5/graphics/pdf/Bufftech%20Installation.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-installation-guide-afence.pdf",
       "manufacturer": "CertainTeed",
       "model_or_line": "General Bufftech fence installation (posts, rails, racking/stepping)",
       "date_or_version": null
@@ -798,7 +798,7 @@
       "doc_type": "installation_manual",
       "title": "Vinyl Fence Installation Guideline (CertainTeed doc code 40-40-70743)",
       "url": "https://www.deltafenceman.com/wp-content/uploads/2018/07/FRD_Bufftech_Installation_Guide_40-40-70743.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-installation-guide-40-40-70743.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-installation-guide-40-40-70743.pdf",
       "manufacturer": "CertainTeed",
       "model_or_line": "General Bufftech fence and gate installation, incl. Florida HVHZ line post stiffener detail",
       "date_or_version": "40-40-70743"
@@ -807,7 +807,7 @@
       "doc_type": "installation_manual",
       "title": "Bufftech Semi-Private Fence Installation Instructions",
       "url": "https://www.avinylfence.com/wp-content/uploads/2020/11/INSTALL-bufftech-semiprivate.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-install-semiprivate.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-install-semiprivate.pdf",
       "manufacturer": "CertainTeed",
       "model_or_line": "Semi-Private Fence (Imperial, Columbia, Millbrook)",
       "date_or_version": null
@@ -816,7 +816,7 @@
       "doc_type": "cut_sheet",
       "title": "CertainTeed Bufftech Vinyl Fence Products Brochure/Catalog (2009-10 edition)",
       "url": "https://www.fenc-co.com/bufftech_brochure.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-catalog-brochure-2009.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-catalog-brochure-2009.pdf",
       "manufacturer": "CertainTeed",
       "model_or_line": "Full Bufftech product line (all styles, colors, specifications table)",
       "date_or_version": "Code No. 40-40-70610, (c) 10/09"
@@ -825,7 +825,7 @@
       "doc_type": "cut_sheet",
       "title": "CertainTeed Bufftech Vinyl Fence Products Catalog (2014 edition)",
       "url": "https://www.metropolitanfence.com/wp-content/uploads/files/pdfs/bufftech-catalog.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-catalog-2014.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-catalog-2014.pdf",
       "manufacturer": "CertainTeed",
       "model_or_line": "Full Bufftech product line (all styles, colors, specifications table, WindZone/racking degrees)",
       "date_or_version": "Code No. 40-40-70610, (c) 01/14"
@@ -834,7 +834,7 @@
       "doc_type": "cut_sheet",
       "title": "Bufftech Vinyl Fence Catalog (reseller copy, StandardFencing)",
       "url": "http://www.standardfencing.com/catalogs/vinyl.pdf",
-      "local_path": "/home/user/Workspace/play/vinyl-fence-bom-pipeline/manuals/certainteed-bufftech/bufftech-vinyl-catalog-standardfencing.pdf",
+      "local_path": "manuals/certainteed-bufftech/bufftech-vinyl-catalog-standardfencing.pdf",
       "manufacturer": "CertainTeed",
       "model_or_line": "Full Bufftech product line (scanned/image-based, text not machine-extractable)",
       "date_or_version": null

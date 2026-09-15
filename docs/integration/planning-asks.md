@@ -1,5 +1,14 @@
 # What Planning needs from this platform, and when
 
+> **HISTORICAL — the round closed, and its headline ask was retired by measurement.**
+> §1, *"the one above everything else: the cell bounding box"*, was answered in
+> `knowledge-asks.md` §1.1: 44 of 44 queue pages carry `table_not_reconstructed` with 0 `table`
+> elements, so the work would box 17,499 cells and touch **not one row of the queue it was meant
+> to unblock**. §2's publishes were delivered, §3's lists became `registry-additions.md`, and
+> §9.1's *"we don't enforce `SourcePolicy` at all yet"* is contradicted by T49-T51.
+> **Still true and still right:** §6b — nothing consumes `Combination`; deprioritise it.
+
+
 ```text
 Status:   v0.4 + §9, added 2026-08-27 — our response to knowledge-asks.md v0.2's
           review of the conforming fixture. Working list, maintained by the

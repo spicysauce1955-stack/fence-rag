@@ -21,7 +21,12 @@ from .lang import detect_lang
 from .tenancy import TenantLeak, validate_owner
 from .paths import EVIDENCE_DB, ensure_writable
 
-SCHEMA_VERSION = 7
+# 9: the B-1/B-2 fact-type renames and the G108 condition-key backfill. Those
+# are DATA migrations with no DDL, and the stamp is bumped anyway on purpose --
+# without it a store that has never run `cli migrate` is indistinguishable from
+# one that has, and the only symptom is a guard in `tests/test_naming.py`
+# failing with a message about unit suffixes rather than "run migrate".
+SCHEMA_VERSION = 9
 
 SCHEMA = """
 PRAGMA journal_mode=WAL;
@@ -409,12 +414,117 @@ CREATE INDEX IF NOT EXISTS ix_fact_reviews_fact ON fact_reviews(fact_id);
 CREATE INDEX IF NOT EXISTS ix_fact_reviews_ref ON fact_reviews(ref_id);
 """
 
+# Step candidates -- the assertion layer between an element and a `Procedure`.
+#
+# A `list` element in an installation guide holds a whole bullet block, so the
+# unit an `AssemblyStep` is about has no row of its own. `steps.split_block`
+# manufactures it and this table holds the result: one row per segment, naming
+# the element it was cut from and the character span within it.
+#
+# `char_start`/`char_end` are the span, and they are load-bearing twice over:
+# they are how a candidate proves it is a real slice of its source, and they are
+# half the review anchor. A crop digest cannot be the anchor here -- `[measured]`
+# 0 of 28 elements on the slice page have a rendered crop -- and `ref_id` cannot
+# either, because it embeds a bbox and does not survive a re-extraction (G38).
+#
+# `text_raw` is verbatim. `text_repair` is a PROPOSAL and is never substituted
+# for it: 195 of 4,629 segments begin with a split capital (`T\namp`, `I nsert`)
+# but only 7 of the 20 distinct space-form artifacts are real damage, so a
+# person disposes.
+#
+# The last four columns are a PROJECTION of `step_reviews`, exactly as
+# `table_read_candidates`' are of `table_reviews`. A candidate that no person
+# has reviewed publishes nothing, ever (A1/CUR-S0).
+#
+# Pointers run DOWN: a candidate names its element; nothing on `elements` names
+# a candidate.
+# A person's judgement about one step candidate. The RECORD; the four columns on
+# `step_candidates` are its projection, exactly as `table_reviews` is to
+# `table_read_candidates`.
+#
+# Keyed on evidence, never on a row id: `candidate_id` moves whenever the
+# splitter is re-run, and it has been re-run four times in one day. The anchor
+# is (element_id, char_start, char_end, text_raw) -- the element, the span
+# within it, and the text the reviewer actually saw. A crop digest cannot serve
+# here (0 of 28 elements on the slice page have a rendered crop) and neither can
+# `ref_id`, which embeds a bbox and does not survive a re-extraction (G38).
+#
+# `kind`/`scope`/`slot` are what the person decided; `text_final` is the text
+# they confirmed, which may be a repair the proposer offered or their own
+# correction. `*_before` make the record self-contained so a rebuild can restore
+# the pre-review state, which is what makes a rejection reversible (G47).
+STEP_REVIEWS_DDL = """
+CREATE TABLE IF NOT EXISTS step_reviews (
+    step_review_id  TEXT PRIMARY KEY,
+    element_id      TEXT NOT NULL,
+    char_start      INTEGER NOT NULL,
+    char_end        INTEGER NOT NULL,
+    text_seen       TEXT NOT NULL,      -- the anchor: what the reviewer looked at
+    document_id     TEXT NOT NULL,
+    page_no         INTEGER NOT NULL,
+    reviewer        TEXT NOT NULL,      -- asserted; unverifiable here
+    reviewed_at     TEXT NOT NULL,
+    verdict         TEXT NOT NULL,      -- accepted | corrected | rejected
+    step_kind       TEXT,               -- AssemblyStep.kind
+    step_scope      TEXT,               -- AssemblyStep.scope
+    slot_target     TEXT,               -- SlotTarget, JSON
+    text_final      TEXT,               -- the text the person confirmed
+    status_before   TEXT NOT NULL,
+    notes           TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_step_reviews_anchor
+    ON step_reviews(element_id, char_start, char_end);
+"""
+
+STEP_CANDIDATES_DDL = """
+CREATE TABLE IF NOT EXISTS step_candidates (
+    candidate_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+    document_id     TEXT NOT NULL,
+    version_id      TEXT NOT NULL,
+    page_no         INTEGER NOT NULL,
+    element_id      TEXT NOT NULL,
+    ordinal         INTEGER NOT NULL,     -- the element's, for source order
+    seq             INTEGER NOT NULL,     -- position within the element
+    char_start      INTEGER NOT NULL,
+    char_end        INTEGER NOT NULL,
+    text_raw        TEXT NOT NULL,        -- verbatim slice; never rewritten
+    text_repair     TEXT,                 -- proposed, never applied
+    -- How much the proposal is worth. Computed by `steps._propose_repair` and
+    -- for one commit thrown away on write, which left a reviewer working the
+    -- queue with no signal at all: the `low` class is the one that contains
+    -- the `A cut panel bracket` false positives.
+    repair_confidence TEXT,               -- high | low
+    -- WHICH column the offsets index. `propose()` reads
+    -- COALESCE(NULLIF(text,''), ocr_text), and 834 `list` elements corpus-wide
+    -- have text IS NULL -- for those the span indexes `ocr_text`, and anyone
+    -- slicing `elements.text` gets None with nothing to explain why.
+    text_source     TEXT,
+    segment_kind    TEXT NOT NULL,        -- step | note | branch | footnote | section | prose
+    leader          TEXT NOT NULL,
+    depth           INTEGER NOT NULL,
+    branch          TEXT,
+    proposed_kind   TEXT,                 -- AssemblyStep.kind, machine-proposed
+    proposed_scope  TEXT,                 -- AssemblyStep.scope, machine-proposed
+    proposed_slot   TEXT,                 -- SlotTarget, machine-proposed
+    proposal_basis  TEXT,                 -- which rule fired, for measuring it
+    review_status   TEXT NOT NULL DEFAULT 'unreviewed',
+    reviewer        TEXT,
+    reviewed_at     TEXT,
+    created_at      TEXT NOT NULL,
+    UNIQUE(element_id, char_start, char_end)
+);
+CREATE INDEX IF NOT EXISTS ix_step_candidates_doc
+    ON step_candidates(document_id, page_no);
+CREATE INDEX IF NOT EXISTS ix_step_candidates_element
+    ON step_candidates(element_id);
+"""
+
 # Appended rather than written inline so `reviews.ensure_fact_reviews` can apply
 # this one fragment. `connect()` runs `ensure_columns` but never
 # `executescript(SCHEMA)`, so a store that predates a new TABLE meets it as
 # `no such table` in whatever command runs next -- the table-shaped version of
 # the silent no-op ADDED_COLUMNS exists for.
-SCHEMA = SCHEMA + FACT_REVIEWS_DDL
+SCHEMA = SCHEMA + FACT_REVIEWS_DDL + STEP_CANDIDATES_DDL + STEP_REVIEWS_DDL
 
 
 def now() -> str:
@@ -434,6 +544,14 @@ def now() -> str:
 # byte-compare serialised rows between a migrated and a re-ingested store.
 # Additive only: no drops, no renames, no type changes. Those need a rebuild.
 ADDED_COLUMNS = [
+    # schema_version 8 -- step_candidates gained two columns it was already
+    # computing. `repair_confidence` was produced by `steps._propose_repair`
+    # and thrown away on write, leaving a reviewer with no way to tell the
+    # trusted newline-form repairs from the `A cut panel bracket` class;
+    # `text_source` records WHICH text column the spans index, which matters
+    # for the 834 `list` elements whose text lives only in `ocr_text`.
+    ("step_candidates", "repair_confidence", "TEXT"),
+    ("step_candidates", "text_source", "TEXT"),
     # schema_version 2 -- build-plan A2/A3/A4
     ("elements", "lang", "TEXT"),
     ("elements", "lang_basis", "TEXT"),
@@ -938,11 +1056,21 @@ def migrate(conn: sqlite3.Connection) -> dict:
          no-op once done, and it refuses if step 3 has not run;
       5. `backfill_tool_fingerprint` fills the new column from the run each row
          already names -- no re-extraction, no source file read;
-      6. the view goes back, now that every column it names exists.
+      6. the view goes back, now that every column it names exists;
+      7. `facts.rename_fact_types` moves 17 fact types onto names whose unit
+         suffix matches the unit their rows carry (`naming.md` §2, B-1/B-2).
+         A backfill, not a re-extraction: no `fact_id` moves, so no fact review
+         is unbound. Lazy import, matching `parameters.py`'s discipline --
+         `facts` imports this module;
+      8. `facts.backfill_condition_keys` re-derives `conditions` for the 18
+         facts still naming the retired `fence_height_ft` axis (G108), and
+         refuses any row whose recomputation disagrees about a different
+         dimension.
 
     Every step is a no-op on an up-to-date store, so running this twice does
     exactly as much as running it once.
     """
+    from .facts import backfill_condition_keys, rename_fact_types
     conn.execute("DROP VIEW IF EXISTS current_editions")
     conn.executescript(SCHEMA)
     added = ensure_columns(conn)
@@ -951,13 +1079,17 @@ def migrate(conn: sqlite3.Connection) -> dict:
     fingerprinted = backfill_tool_fingerprint(conn)
     ensure_views(conn)
     retired = retire_columns(conn)
+    renamed = rename_fact_types(conn)
+    conditions = backfill_condition_keys(conn)
     conn.execute("INSERT OR REPLACE INTO schema_meta(key, value) VALUES ('schema_version', ?)",
                  (str(SCHEMA_VERSION),))
     conn.commit()
     # Both directions, so a caller can report them. `retired['refused']` is the
     # half that needs a person: a column still holding data is never dropped.
     return {"added": added, "retired": retired, "version_unique": unique,
-            "tool_fingerprints_backfilled": fingerprinted}
+            "tool_fingerprints_backfilled": fingerprinted,
+            "fact_types_renamed": renamed,
+            "condition_keys_backfilled": conditions}
 
 
 def tool_fingerprint(tool_versions: dict) -> str:

@@ -1,0 +1,297 @@
+{
+  "artifact_kind": "private_consumer_model_candidate",
+  "source_package_hash": "67c82c275160b924175256dab9ebdbd6bbc1c5ff73f79374b1537444a2de8437",
+  "model": {
+    "id": "mfr/weatherables-augusta-8x6-privacy",
+    "version": 1,
+    "status": "draft",
+    "name_i18n": {
+      "en": "Weatherables Augusta Privacy Fence — 8ft tall x 6ft wide CAD configuration; exact SKU unverified"
+    },
+    "authorship": "third_party_authored",
+    "grade": "residential",
+    "height_support": {
+      "kind": "discrete",
+      "heights_mm": [
+        2425
+      ]
+    },
+    "option_axes": [],
+    "variants": [],
+    "layout_policy": [],
+    "assembly": [],
+    "default_spec": {
+      "frame": [
+        {
+          "key": "bottom_rail",
+          "orientation": "horizontal",
+          "placement": {
+            "kind": "from_bottom",
+            "offset_mm": 69
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/augusta-8x6-rail",
+            "qty": 1,
+            "length_rule": "clear_between_posts"
+          },
+          "channel_depth_mm": 0,
+          "insertion_margin_mm": 0,
+          "joint": "channel"
+        },
+        {
+          "key": "mid_rail",
+          "orientation": "horizontal",
+          "placement": {
+            "kind": "from_bottom",
+            "offset_mm": 1212
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/augusta-8x6-rail",
+            "qty": 1,
+            "length_rule": "clear_between_posts"
+          },
+          "channel_depth_mm": 0,
+          "insertion_margin_mm": 0,
+          "joint": "channel"
+        },
+        {
+          "key": "top_rail",
+          "orientation": "horizontal",
+          "placement": {
+            "kind": "from_bottom",
+            "offset_mm": 2355
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/augusta-8x6-rail",
+            "qty": 1,
+            "length_rule": "clear_between_posts"
+          },
+          "channel_depth_mm": 0,
+          "insertion_margin_mm": 0,
+          "joint": "channel"
+        }
+      ],
+      "infill": {
+        "orientation": "vertical",
+        "justification": "start",
+        "excess": "space",
+        "edge_margin_mm": 0,
+        "supply": "components",
+        "pattern": [
+          {
+            "key": "picket",
+            "base_ref": "bottom_rail",
+            "top_ref": "mid_rail",
+            "requirement": {
+              "part_id": "mfr/weatherables/augusta-8x6-picket",
+              "length_rule": "between_frame",
+              "qty": 1
+            },
+            "profile_edges": {
+              "start": "tongue",
+              "end": "groove"
+            },
+            "joint": "groove"
+          }
+        ]
+      },
+      "fixings": [
+        {
+          "key": "u_channel_end_cover_first",
+          "basis": "per_panel",
+          "qty_per_basis": 1,
+          "edge_binding": {
+            "member_key": "picket",
+            "position": "first",
+            "profile_edge": "tongue"
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/augusta-8x6-u-channel",
+            "qty": 1
+          }
+        },
+        {
+          "key": "u_channel_end_cover_last",
+          "basis": "per_panel",
+          "qty_per_basis": 1,
+          "edge_binding": {
+            "member_key": "picket",
+            "position": "last",
+            "profile_edge": "groove"
+          },
+          "requirement": {
+            "part_id": "mfr/weatherables/augusta-8x6-u-channel",
+            "qty": 1
+          }
+        }
+      ]
+    },
+    "post": null,
+    "cites": [
+      {
+        "id": "8dd31b9cd39429da",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      },
+      {
+        "id": "240a4b3bf97f6cda",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      },
+      {
+        "id": "798c70ec3e3cfe5b",
+        "belongs_to": "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d"
+      }
+    ],
+    "contributing_sources": [
+      "88612b32b98d57e504ddaa3fa53873712ad490d471e2d1da8311893a148d022d",
+      "db02aeeed4ebbf704032d7775112a73fe68d01a74a3ab31bd8d516b8a2b1b20b",
+      "87dea78b1ccfc7e7ff526d59b51a668132481323beca9129208de46084ad739c",
+      "cb90e6a275ac5ff050a4c10d33d82b6478922683cd6d2c857e5c50a3dcb6c629",
+      "5586a6d4ee7a97134faed86c4846addd43628b7ff87bd78c9ee359b6047ef9cb"
+    ]
+  },
+  "publishable": false,
+  "installation_ready": false,
+  "bom_generation_verified": false,
+  "transformation_evidence": {
+    "placements": [
+      {
+        "slot": "bottom_rail",
+        "offset_mm": 69,
+        "basis": "centerline of the [0, 139700] milli-mm envelope: 5.5in rail whose outside face sits at the panel bottom (drawing-derived; datum unconfirmed)",
+        "classification": "drawing-derived authored placement (centerline); unconfirmed datum"
+      },
+      {
+        "slot": "mid_rail",
+        "offset_mm": 1212,
+        "basis": "centerline of the [1143000, 1282700] milli-mm envelope (5.5 + 39.5 in chain boundary)",
+        "classification": "drawing-derived authored placement (centerline); unconfirmed datum"
+      },
+      {
+        "slot": "top_rail",
+        "offset_mm": 2355,
+        "basis": "centerline of the [2286000, 2425700] milli-mm envelope (top of the 95.5in chain)",
+        "classification": "drawing-derived authored placement (centerline); unconfirmed datum"
+      }
+    ],
+    "placement_datum": "the draft authors rail CENTERLINES (consumer placement semantics; the CAD section chain gives 5.5in envelope boundaries, halved to centerlines); the Emblem candidate established the same convention (from_bottom 88.9mm = half its 7in envelope)",
+    "unit_conversions": [
+      "draft Quantity objects carry integer thousandths of a millimetre; the consumer Mm is integer millimetres.",
+      "Counts (qty, qty_per_basis) convert by exact division: a fractional count REFUSES, never silently truncates.",
+      "Lengths and placements floor to whole millimetres with every loss recorded in precision_losses below."
+    ],
+    "precision_losses": [
+      {
+        "field": "placement/offset",
+        "value_raw": "centerline of the [0, 139700] milli-mm envelope: 5.5in rail whose outside face sits at the panel bottom (drawing-derived; datum unconfirmed)",
+        "exact_mm": 69.85,
+        "published_mm": 69,
+        "loss_mm": 0.85
+      },
+      {
+        "field": "placement/offset",
+        "value_raw": "centerline of the [1143000, 1282700] milli-mm envelope (5.5 + 39.5 in chain boundary)",
+        "exact_mm": 1212.85,
+        "published_mm": 1212,
+        "loss_mm": 0.85
+      },
+      {
+        "field": "placement/offset",
+        "value_raw": "centerline of the [2286000, 2425700] milli-mm envelope (top of the 95.5in chain)",
+        "exact_mm": 2355.85,
+        "published_mm": 2355,
+        "loss_mm": 0.85
+      },
+      {
+        "field": "height",
+        "value_raw": "95.5 in. (CAD overall height; nominal 8 ft)",
+        "exact_mm": 2425.7,
+        "published_mm": 2425,
+        "loss_mm": 0.7
+      }
+    ],
+    "private_defaults_are_not_source_facts": [
+      "channel_depth_mm and insertion_margin_mm: 0 = undeclared, absent from all retained sources",
+      "picket engagements: undeclared; a between_frame cut length without engagements is face-to-face only",
+      "picket pattern qty=1 is consumer cycle semantics (the pattern repeats to fill the run; handed edge bindings require qty 1); the manufacturer kit count 22 (11 per run) lives in the draft and dataset as cited inventory",
+      "rail placements are drawing-derived authored choices from the CAD section chain; datum unconfirmed"
+    ],
+    "withheld_from_consumer_shape": [
+      "all null receiving depths from the producer draft (stayed absent, never defaulted)",
+      "per-panel quantity Tokens (counts live in the dataset and the publication report, not the consumer model)",
+      "the upper picket run and its two u-channel segments: recorded with reason and closure path in withheld_mappings, not silent"
+    ]
+  },
+  "limitations": [
+    "channel_depth, insertion_margin and engagement nulls are declared absences: no retained source states rail slot depth, picket seating depth or post rail-socket depth for this configuration.",
+    "Rail placement offsets are drawing-derived authored choices from the CAD section chain, not manufacturer-stated datums; the chain-to-opening datum interpretation is unconfirmed.",
+    "Picket qty is null in each run: the count follows from run length and installed pitch, neither of which is source-stated; it must not be filled with an invented default.",
+    "The model fragment authors no post opinion: a composition-only post Part carries no citable evidence values, and no source states Augusta post dimensions or SKU identity.",
+    "Rail placement offsets are CENTERLINES (consumer placement semantics); the 5.5in envelope halves to 69.85mm, which is exact in milli-mm but not in whole millimetres — the consumer conversion floors with a recorded loss.",
+    "Kit counts are manufacturer inventory statements, not installed-pitch derivations: the picket stock length 43in exceeds the 39.5in run by an implied 3.5in seating, which is config-dependent and still not a measured engagement.",
+    "Upper picket run (between mid_rail and top_rail): withheld from the consumer mapping under consumer_infill_single_cycle — the consumer infill fits one repeating cycle per panel, so two stacked rows between different rail pairs cannot be expressed without alternating across the width. Its two u-channel segments are withheld with it. Both runs remain recorded in the draft model_fragment and the dataset composition. See withheld_mappings.",
+    "Rail length rule: the sources state rails slide INTO routed post sockets, and the draft knows the 71.5in rail stock, but the consumer's routed-rail length path requires a PostSlot.receiving_joint (post socket depth), which no retained source states and this candidate does not author. clear_between_posts is therefore published as the registry rule the routed path extends — with NO invented socket engagement — and any future resolved cut length will undercount the known stock until a receiving joint is authored from real evidence.",
+    "This candidate is a diagnostic input for consumer validation, not the production route.",
+    "Consumer validation of this candidate does not admit any FenceModel to the published snapshot."
+  ],
+  "withheld_mappings": [
+    {
+      "path": "/model/default_spec/infill/pattern/picket_upper",
+      "draft_base_ref": "mid_rail",
+      "draft_top_ref": "top_rail",
+      "code": "consumer_infill_single_cycle",
+      "reason": "the consumer infill fits one repeating member cycle per panel (fit.py: member_widths_mm[i % len(pattern)]); two stacked rows between different rail pairs cannot be expressed without alternating across the width",
+      "would_close": "consumer support for per-row span derivation from each member's base_ref/top_ref, or a multi-row infill capability",
+      "closes_by": "planning",
+      "recorded_in": [
+        "draft model_fragment (both rows)",
+        "dataset composition (both runs, u-channel basis)"
+      ]
+    },
+    {
+      "path": "/model/default_spec/fixings/u_channel_end_cover (upper run)",
+      "code": "consumer_infill_single_cycle",
+      "reason": "the upper run is withheld under consumer_infill_single_cycle, so its two u-channel segments (first and last picket above the mid rail) cannot be edge-bound to a mapped member",
+      "would_close": "the same consumer multi-row infill capability that unblocks the upper run",
+      "closes_by": "planning",
+      "recorded_in": [
+        "draft fixings qty 4 installed segments",
+        "dataset qty_per_panel basis"
+      ]
+    }
+  ],
+  "mapping_completeness": {
+    "draft_member_keys": [
+      "picket",
+      "picket_upper"
+    ],
+    "mapped_member_keys": [
+      "picket"
+    ],
+    "withheld_member_keys": [
+      "picket_upper"
+    ],
+    "complete": true,
+    "draft_u_channel_segments": 4,
+    "mapped_u_channel_segments": 2,
+    "withheld_u_channel_segments": 2,
+    "fixing_count_complete": true
+  },
+  "capability_validation": {
+    "assembly": {
+      "validated": false,
+      "why": "no FenceModel admitted (Amendment 008 pending) and no procedures published (step reviews outstanding)"
+    },
+    "fitting": {
+      "validated": false,
+      "why": "receiving geometry absent from all retained sources; engagements and channel depths undeclared"
+    },
+    "cutting": {
+      "validated": false,
+      "why": "cut lengths need engagements and socket depths, all undeclared; a resolved between_frame length today is face-to-face only, not a seated-piece cut"
+    },
+    "purchasing": {
+      "validated": false,
+      "why": "installed per-panel counts are authored, but picket counts, channel stock length and kit inventory are not source-stated"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "patch": "workspace/reports/emblem-consumer-source-sequence.patch",
+  "base_commit": "9de94eb06d8e997d9be098dedd5b6a6b2eb4024d",
+  "sha256": "b92edd42c67ebbb8fe661df3e12f696b4680f19da85f144a5d0ab42915b30489",
+  "file_count": 22,
+  "reverse_apply_check": "passed",
+  "consumer_validation": "2625 passed,7 warnings in71.37s",
+  "root_validation": "39 related tests passed",
+  "source_validation": "3 PDF hashes and5 canonical anchors match; linked revised manual absent",
+  "scope": "Cumulative local consumer patch; no deployment or exact-model assembly validation"
+}

@@ -1,0 +1,204 @@
+{
+  "consumer_revision": "9de94eb06d8e997d9be098dedd5b6a6b2eb4024d",
+  "consumer_source_diff_sha256": "63d15fbc9bb7ee2c81da20ec56962f358d08f714c2657b2207cfc1b6db584978",
+  "post_requirement_parses": true,
+  "post_role_matrix": {
+    "end": [
+      "73045785"
+    ],
+    "line": [
+      "73045783"
+    ],
+    "corner": [
+      "73045784"
+    ],
+    "gate": [],
+    "junction": [],
+    "transition": []
+  },
+  "private_model_parser_errors": [],
+  "whole_model_parses": true,
+  "candidate_hash": "da79a6ef0ecf7852fea7fc41cea10cd1b619c542606a27da16f996039514ffb8",
+  "partial_semantic_validation": {
+    "executed": true,
+    "errors": [
+      "frame slot 'bottom_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have \u2014 the drawing would show a housed joint and the cut list would read as a butt one. Give the channel its depth, or call the joint 'butt'",
+      "frame slot 'top_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have \u2014 the drawing would show a housed joint and the cut list would read as a butt one. Give the channel its depth, or call the joint 'butt'"
+    ],
+    "catalog_basis": "empty diagnostic fixture, not supplier evidence",
+    "part_library_basis": "absent; Part-dependent checks skipped"
+  },
+  "unconsumed_authored_paths": [
+    [
+      "authorship"
+    ],
+    [
+      "cites"
+    ],
+    [
+      "contributing_sources"
+    ]
+  ],
+  "profile_edges_preserved_by_parser": true,
+  "component_resolution_probe": {
+    "scope": "isolated rail dimensions and channel counts, no physical panel fit",
+    "active_parts_are_in_memory_test_copies": true,
+    "edge_bindings_removed_for_count_only_probe": true,
+    "rail_face_heights_mm": {
+      "bottom_rail": 178,
+      "top_rail": 178
+    },
+    "synthetic_rail_attribute_matching": {
+      "mfr/freedom-outdoor-living/emblem-73014714-rail-a": {
+        "declared_attributes_match": true,
+        "wrong_colour_refused": true,
+        "wrong_width_refused": true
+      },
+      "mfr/freedom-outdoor-living/emblem-73014714-rail-b": {
+        "declared_attributes_match": true,
+        "wrong_colour_refused": true,
+        "wrong_width_refused": true
+      }
+    },
+    "u_channel_counts_per_panel": {
+      "u_channel_first_board_tongue": 1,
+      "u_channel_last_board_groove": 1
+    },
+    "u_channels_for_1_and_7_panels": {
+      "1": 2,
+      "7": 14
+    },
+    "handed_placement_consumed": false,
+    "kit_purchase_credit_consumed": false
+  },
+  "part_aware_semantic_validation": {
+    "executed": true,
+    "scope": "diagnostic copies of draft definitions; empty catalog, not physical-fit proof",
+    "errors": [
+      "mfr/freedom-outdoor-living/73013956@v1: no product in the catalog covers this spec, so every slot naming it would report no_eligible_item on every bay of every job",
+      "mfr/freedom-outdoor-living/emblem-73014714-board@v1: no product in the catalog covers this spec, so every slot naming it would report no_eligible_item on every bay of every job",
+      "mfr/freedom-outdoor-living/emblem-73014714-end-u-channel@v1: the spec is empty, which is a conjunction of nothing and therefore true of every product \u2014 a part that matches everything is not a specification",
+      "mfr/freedom-outdoor-living/emblem-73014714-rail-a@v1: no product in the catalog covers this spec, so every slot naming it would report no_eligible_item on every bay of every job",
+      "mfr/freedom-outdoor-living/emblem-73014714-rail-b@v1: no product in the catalog covers this spec, so every slot naming it would report no_eligible_item on every bay of every job",
+      "frame slot 'bottom_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have \u2014 the drawing would show a housed joint and the cut list would read as a butt one. Give the channel its depth, or call the joint 'butt'",
+      "frame slot 'top_rail': joint='channel' with channel_depth_mm=0 claims a mechanic the numbers do not have \u2014 the drawing would show a housed joint and the cut list would read as a butt one. Give the channel its depth, or call the joint 'butt'",
+      "infill member 'board': width_mm must be positive, got 0",
+      "slot bottom_rail: no item in the catalog covers this spec, so nothing could ever supply it. Same reason an empty member list is refused \u2014 it would publish cleanly and then report `no_eligible_item` on every bay of every job built to this model",
+      "slot top_rail: no item in the catalog covers this spec, so nothing could ever supply it. Same reason an empty member list is refused \u2014 it would publish cleanly and then report `no_eligible_item` on every bay of every job built to this model",
+      "slot board: no item in the catalog covers this spec, so nothing could ever supply it. Same reason an empty member list is refused \u2014 it would publish cleanly and then report `no_eligible_item` on every bay of every job built to this model",
+      "slot u_channel_first_board_tongue: no item in the catalog covers this spec, so nothing could ever supply it. Same reason an empty member list is refused \u2014 it would publish cleanly and then report `no_eligible_item` on every bay of every job built to this model",
+      "slot u_channel_last_board_groove: no item in the catalog covers this spec, so nothing could ever supply it. Same reason an empty member list is refused \u2014 it would publish cleanly and then report `no_eligible_item` on every bay of every job built to this model"
+    ],
+    "active_parts_are_in_memory_test_copies": true,
+    "actual_authored_parts_remain_draft": true
+  },
+  "consumer_boundary": {
+    "adapter_implemented": false,
+    "ready": false,
+    "consumer_reference_revision": "9de94eb06d8e997d9be098dedd5b6a6b2eb4024d",
+    "parser_executed": true,
+    "parser_accepts": true,
+    "semantic_validation_executed": false,
+    "issues": [
+      {
+        "code": "publication_adapter_missing",
+        "path": "/model",
+        "message": "No reviewed public FenceModel-to-consumer adapter is implemented by this diagnostic."
+      },
+      {
+        "code": "source_admission_unverified",
+        "path": "/model",
+        "message": "Exact dimensions, selection, fitting and quantity evidence require reviewed source admission and a complete Part library/catalog."
+      },
+      {
+        "code": "missing_explicit_value",
+        "path": "/model/default_spec/frame/0/channel_depth_mm",
+        "message": "Frame channel_depth_mm must not come from a parser default."
+      },
+      {
+        "code": "missing_explicit_value",
+        "path": "/model/default_spec/frame/0/insertion_margin_mm",
+        "message": "Frame insertion_margin_mm must not come from a parser default."
+      },
+      {
+        "code": "invalid_channel_depth",
+        "path": "/model/default_spec/frame/0/channel_depth_mm",
+        "message": "Channel depth must be a sourced positive integer millimetre projection."
+      },
+      {
+        "code": "missing_explicit_value",
+        "path": "/model/default_spec/frame/1/channel_depth_mm",
+        "message": "Frame channel_depth_mm must not come from a parser default."
+      },
+      {
+        "code": "missing_explicit_value",
+        "path": "/model/default_spec/frame/1/insertion_margin_mm",
+        "message": "Frame insertion_margin_mm must not come from a parser default."
+      },
+      {
+        "code": "invalid_channel_depth",
+        "path": "/model/default_spec/frame/1/channel_depth_mm",
+        "message": "Channel depth must be a sourced positive integer millimetre projection."
+      },
+      {
+        "code": "missing_fitting_rule",
+        "path": "/model/default_spec/infill/excess",
+        "message": "Infill excess requires explicit authoring."
+      },
+      {
+        "code": "missing_fitting_rule",
+        "path": "/model/default_spec/infill/edge_margin_mm",
+        "message": "Infill edge_margin_mm requires explicit authoring."
+      },
+      {
+        "code": "missing_explicit_value",
+        "path": "/model/default_spec/infill/pattern/0/base_engagement_mm",
+        "message": "Board base_engagement_mm must not come from a parser default."
+      },
+      {
+        "code": "missing_explicit_value",
+        "path": "/model/default_spec/infill/pattern/0/top_engagement_mm",
+        "message": "Board top_engagement_mm must not come from a parser default."
+      },
+      {
+        "code": "missing_explicit_value",
+        "path": "/model/default_spec/infill/pattern/0/gap_after_mm",
+        "message": "Board gap_after_mm must not come from a parser default."
+      },
+      {
+        "code": "unconsumed_authored_fields",
+        "path": "/model",
+        "message": "Parser discards authored fields; an adapter must preserve provenance and implement or refuse behavioral fields."
+      }
+    ],
+    "unconsumed_paths": [
+      "/authorship",
+      "/cites",
+      "/contributing_sources"
+    ],
+    "capability_probe": {
+      "executed": true,
+      "handed_geometry": true,
+      "drawn_purchase_credits": true,
+      "fixture_is_product_evidence": false
+    }
+  },
+  "placement_confirmed": true,
+  "placement_confirmation_kind": "user_confirmed_interpretation",
+  "resolved_centrelines_mm_at_rounded_1829_mm_panel_height": {
+    "bottom_rail": [
+      89
+    ],
+    "top_rail": [
+      1740
+    ]
+  },
+  "full_model_validation": "not_run_exact_part_library_and_catalog_incomplete",
+  "bom_generation_verified": false,
+  "candidate_complete": false,
+  "completion_blockers": [
+    "Exact Part library and catalog unavailable",
+    "Authored geometry and fitting policies incomplete",
+    "Published model adapter unavailable"
+  ]
+}

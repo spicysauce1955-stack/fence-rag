@@ -1,0 +1,87 @@
+{
+  "scope": "Retained local source bytes and exact canonical assembly evidence only",
+  "package_hash": "2a40d62828ae7da4c5018efb48efea6fbb52683c72a69211467534eb2537c768",
+  "checks": [
+    {
+      "relationship": "u_channels_on_two_end_boards",
+      "element_id": "element-15b181bc58-0006",
+      "cite": {
+        "id": "aeaf7e66a05b4d28",
+        "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+      },
+      "page": 4,
+      "text_matches": true,
+      "source_matches": true,
+      "region_matches": true
+    },
+    {
+      "relationship": "u_channel_handedness",
+      "element_id": "element-15b181bc58-0008",
+      "cite": {
+        "id": "57482180d5ddbd37",
+        "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+      },
+      "page": 4,
+      "text_matches": true,
+      "source_matches": true,
+      "region_matches": true
+    },
+    {
+      "relationship": "boards_into_bottom_rail",
+      "element_id": "element-15b181bc58-0015",
+      "cite": {
+        "id": "e856d15ed6bcbc68",
+        "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+      },
+      "page": 4,
+      "text_matches": true,
+      "source_matches": true,
+      "region_matches": true
+    },
+    {
+      "relationship": "top_rail_over_boards",
+      "element_id": "element-15b181bc58-0020",
+      "cite": {
+        "id": "d3ce088342977ece",
+        "belongs_to": "bd9303b55da9118d79918db3f786d5d62fc3ae0e4b09c5ef075b0c09e5571d24"
+      },
+      "page": 4,
+      "text_matches": true,
+      "source_matches": true,
+      "region_matches": true
+    },
+    {
+      "relationship": "wind-code installation",
+      "element_id": "element-0a5a50fd45-0001",
+      "cite": {
+        "id": "55f8a0feb2a76bed",
+        "belongs_to": "b26763aef9b2b9ff4f32951d7e0072aa43cc5146a45228549048e534af73570b"
+      },
+      "page": 11,
+      "text_matches": true,
+      "source_matches": true,
+      "region_matches": true
+    }
+  ],
+  "sources": [
+    {
+      "path": "manuals/freedom-outdoor-living/73014714-6x8Emblem-White-ProjectPlanning.pdf",
+      "matches": true
+    },
+    {
+      "path": "manuals/freedom-outdoor-living/FREEDOM-WEB-PrivacyKit_Ready-to-Assemble-Privacy-Vinyl-Fence-Install.pdf",
+      "matches": true
+    },
+    {
+      "path": "manuals/freedom-outdoor-living/2024-Freedom-VF-Catalog-01-24_SpecialOrderCatalog.pdf",
+      "matches": true
+    }
+  ],
+  "verified": true,
+  "emblem_fit_validated": false,
+  "limitations": [
+    "This command checks retained canonical sources only; recovered revised-manual comparison is recorded separately in emblem-recovered-manual-check.json.",
+    "Assembly relations do not supply numerical overlap, receiving depths or channel lengths.",
+    "No review, source admission, or publication decision is created."
+  ]
+}

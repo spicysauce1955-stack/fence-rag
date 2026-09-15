@@ -1,0 +1,82 @@
+{
+  "record_kind": "draft_source_reading",
+  "source_path": "manuals/freedom-outdoor-living/73014714-6x8Emblem-White-ProjectPlanning.pdf",
+  "source_sha256": "e90a649e0b96895fbc80d438132d5738f10d9b14b1669eb776a61436758f3a23",
+  "page_no": 1,
+  "reviewed_page_image": "workspace/derived/doc-1e71ed3bf8a5/pages/0001.png",
+  "reviewed_page_ref_id": "54e47378f4737168",
+  "evidence_anchors": {
+    "product": {
+      "element_id": "element-b540e75926-0016",
+      "text": "6x8 Emblem Privacy Fence Kit - White (F)",
+      "bbox": [
+        60.89,
+        274.01,
+        217.3,
+        281.43
+      ],
+      "ref_id": "5d7cfd7597583e43"
+    },
+    "dimensions": {
+      "element_id": "element-b540e75926-0017",
+      "text": "72in. H x 94in. W",
+      "bbox": [
+        343.5,
+        274.01,
+        406.03,
+        281.43
+      ],
+      "ref_id": "2e8e21301a601e1e"
+    },
+    "model_number": {
+      "element_id": "element-b540e75926-0018",
+      "text": "73014714",
+      "bbox": [
+        438.1,
+        274.01,
+        473.68,
+        281.43
+      ],
+      "ref_id": "304c96b69b330708"
+    }
+  },
+  "converted_value": {
+    "amount_milli": 2387600,
+    "unit": "mm",
+    "value_raw": [
+      "94in. W"
+    ]
+  },
+  "publication_status": "not_published",
+  "recovery_note": "Draft evidence only. Not a ledger entry or fact import payload; no active fact/review exists. Future publication needs a reproducible supported authoring/review path.",
+  "publishable": false,
+  "source_reading": {
+    "document_id": "doc-1e71ed3bf8a5",
+    "version_id": "doc-1e71ed3bf8a5@e90a649e0b96",
+    "page_no": 1,
+    "element_id": "element-b540e75926-0017",
+    "fact_type": "actual_panel_width_in",
+    "subject": "Freedom Outdoor Living Emblem 6x8 White privacy fence kit, model 73014714",
+    "value_original": "94in. W",
+    "value_normalized": 94.0,
+    "unit_original": "in.",
+    "unit_normalized": "in",
+    "conditions": "{\"colour\": \"White\", \"model_number\": \"73014714\", \"nominal_size\": \"6x8\"}",
+    "evidence_text": "72in. H x 94in. W",
+    "ocr_derived": 0,
+    "condition_basis": "stated",
+    "condition_basis_note": "Product name, actual dimensions and model number occur in the same row A on page 1; user confirmed them against the full page image.",
+    "value_alternates": null,
+    "origin": "manual_draft_reading_not_ingested"
+  },
+  "conversation_confirmation": {
+    "reviewer_name_supplied": "Developer",
+    "scope": "User confirmed the five displayed product readings against the full page. Preserved as conversation evidence only; no active or replayable fact review is claimed."
+  },
+  "withdrawal": {
+    "former_fact_id": 22751,
+    "former_review_id": "78fe49766acc86a1",
+    "withdrawn_snapshot_id": "27cb8b01fb9b23a5908d72030c7233d76906fa5be3139c258193944dd0615389",
+    "reason": "Hand-authored fact could not be recreated by standard ledger replay. User authorized removal of its fact/review and narrow dimension publication; historical IDs identify withdrawn records only."
+  }
+}

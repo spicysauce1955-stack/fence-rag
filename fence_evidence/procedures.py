@@ -1,0 +1,257 @@
+"""`Procedure` and `AssemblyStep` — the snapshot member, built from reviewed steps.
+
+Declared in the payload since the contract was signed and empty ever since.
+This fills it, under one rule: **a step candidate with no reviewer publishes
+nothing, ever.** That is A1/CUR-S0 applied to a new seam — machine agreement was
+once laundered into curation level 2 and 324 facts had to be un-promoted, and
+the whole architecture here exists so that cannot happen again.
+
+What is mechanical and what is judgement, kept apart:
+
+* the TEXT is verbatim from a cited element, and the citation is exact;
+* the KIND, SCOPE and SLOT are a person's decision, read from `step_reviews`
+  and published only where one exists.
+
+`AssemblyStep.kind` and `scope` are required by the shape, so a candidate
+without a review cannot be published even in part. That is why an unreviewed
+page produces a `Gap` rather than a partial `Procedure`: a half-classified step
+would be this platform asserting something nobody decided.
+
+A step cites its PAGE, not its element. The reviewed evidence is the page image
+a person looked at, and the same reasoning that produced `source_ref_page` in
+G73 applies here: the citation should name what was actually examined.
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+import sqlite3
+
+from .refs import ref_id
+
+# Only these publish. `rejected` is a decision too -- it means a person looked
+# and said no -- and it publishes nothing, which is the point.
+PUBLISHABLE = ("accepted", "corrected")
+
+
+def _default_source_ref_page(conn: sqlite3.Connection):
+    """Standalone minter, so this module is testable without a builder.
+
+    The integrator passes `SnapshotBuilder.source_ref_page`, which registers the
+    document as a side effect and so keeps §1.2.1's closure rule structural
+    rather than merely checked.
+    """
+    def mint(document_id: str, page_no: int) -> dict:
+        row = conn.execute(
+            """SELECT v.sha256 FROM pages p
+                 JOIN document_versions v ON v.version_id = p.version_id
+                WHERE v.document_id = ? AND p.page_no = ?""",
+            (document_id, page_no)).fetchone()
+        if row is None:
+            raise KeyError(f"no such page: {document_id} p{page_no}")
+        return {"id": ref_id(row["sha256"], page_no, None),
+                "belongs_to": row["sha256"]}
+    return mint
+
+
+def _procedure_id(document_id: str, page_no: int) -> str:
+    """Stable across revisions, which N13 says is load-bearing: without it
+    `Warning.attaches_to{kind: procedure}` cannot address one, and a correction
+    to one copy of a repeated procedure reaches none of the others."""
+    return "proc-" + hashlib.sha256(
+        f"{document_id}:{page_no}".encode()).hexdigest()[:12]
+
+
+def _step_key(element_id: str, char_start: int, char_end: int) -> str:
+    """Derived from the evidence, so it is the same key on every rebuild."""
+    return "step-" + hashlib.sha256(
+        f"{element_id}:{char_start}:{char_end}".encode()).hexdigest()[:12]
+
+
+
+def _scope_of(conn, document_id: str) -> dict:
+    """The `EntityRef` a procedure is about, resolved exactly as a table's is.
+
+    Delegates to `parameters._default_scope` rather than reimplementing it: two
+    resolvers for "which product is this document about" is how a procedure and
+    a parameter table read off one guide come to disagree, and the import is
+    cheap. It is imported inside the function because `parameters` imports from
+    this package's snapshot side and a module-level import would close a cycle.
+    """
+    from .parameters import _default_scope
+    row = conn.execute(
+        "SELECT document_id, manufacturer, product_family FROM documents "
+        "WHERE document_id = ?", (document_id,)).fetchone()
+    return _default_scope(row)
+
+
+def build_procedures(conn: sqlite3.Connection, *, source_ref_page=None,
+                     tenant: str | None = None) -> tuple[list[dict], list[dict]]:
+    """`(procedures, gaps)`, both plain dicts ready for the wire."""
+    from .parameters import _Gaps
+    mint = source_ref_page or _default_source_ref_page(conn)
+    gaps = _Gaps()
+
+    # Explicitly: does this store have the tables at all? An older store has
+    # neither and correctly publishes nothing. What must NOT happen is catching
+    # `sqlite3.Error` around the query and treating every failure as "no data" --
+    # the first version did exactly that, `step_reviews` was missing from the
+    # live store, and the member silently published nothing while reporting
+    # success. A swallowed error is the defect this codebase keeps finding.
+    have = {r[0] for r in conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table'")}
+    if not {"step_candidates", "step_reviews"} <= have:
+        return [], []
+
+    rows = conn.execute("""
+            SELECT c.candidate_id, c.document_id, c.page_no, c.element_id,
+                   c.ordinal, c.seq, c.char_start, c.char_end, c.text_raw,
+                   c.text_repair, c.segment_kind, c.review_status, d.title,
+                   r.step_kind, r.step_scope, r.slot_target, r.text_final,
+                   r.verdict
+              FROM step_candidates c
+              JOIN documents d ON d.document_id = c.document_id
+              LEFT JOIN step_reviews r
+                ON r.step_review_id = (
+                    SELECT latest.step_review_id FROM step_reviews latest
+                     WHERE latest.element_id = c.element_id
+                       AND latest.char_start = c.char_start
+                       AND latest.char_end = c.char_end
+                     ORDER BY latest.reviewed_at DESC, latest.step_review_id DESC
+                     LIMIT 1)
+             ORDER BY c.document_id, c.page_no, c.ordinal, c.seq""").fetchall()
+
+    by_page: dict[tuple, list] = {}
+    waiting: dict[tuple, int] = {}
+    unrepaired: dict[tuple, int] = {}
+    titles: dict[tuple, str] = {}
+    for r in rows:
+        page = (r["document_id"], r["page_no"])
+        titles[page] = r["title"] or r["document_id"]
+        if (r["review_status"] in PUBLISHABLE and r["verdict"] in PUBLISHABLE
+                and r["step_kind"] and r["step_scope"]):
+            # The splitter offered a repair and the review did not address it.
+            #
+            # `text_i18n` below is `text_final or _body(text_raw)`, and `_body`
+            # strips a leader and collapses whitespace -- it does not repair.
+            # So publishing here writes the damage out verbatim:
+            #
+            #   _body("• N\never strike the PVC post without a wood support")
+            #     -> "N ever strike the PVC post without a wood support"
+            #
+            # which is the ordering trap CLAUDE.md records, surviving all the
+            # way to a published AssemblyStep: the damage HIDES the word the
+            # meaning turns on. `[measured]` 2026-09-15, 176 candidates can
+            # reach this state, 147 of them at high repair confidence.
+            #
+            # The console makes it likely rather than rare. It renders the raw
+            # text, then a line reading "proposed repair: <the fixed words>",
+            # then an accept button -- a reviewer pressing accept has been shown
+            # the repair and has every reason to think it is what gets recorded.
+            #
+            # Reaching for `text_repair` here would fix the symptom and break
+            # the rule: the splitter PROPOSES and a person DISPOSES, and the
+            # space form of this damage over-matches on 65% of distinct
+            # patterns (`docs/assembly-step-design.md` §3a). A machine repair
+            # publishing on an accept that never mentioned it is the laundering
+            # CUR-S0 forbids, one seam over. So this refuses and says why; the
+            # reviewer answers with `corrected` and the words they mean.
+            if r["text_repair"] is not None and r["text_final"] is None:
+                unrepaired[page] = unrepaired.get(page, 0) + 1
+                continue
+            by_page.setdefault(page, []).append(r)
+        elif r["review_status"] == "unreviewed":
+            waiting[page] = waiting.get(page, 0) + 1
+
+    out: list[dict] = []
+    for page in sorted(by_page):
+        document_id, page_no = page
+        try:
+            cite = mint(document_id, page_no)
+        except KeyError:
+            continue
+        steps = []
+        for r in by_page[page]:
+            key = _step_key(r["element_id"], r["char_start"], r["char_end"])
+            steps.append({
+                "key": key,
+                "kind": r["step_kind"],
+                "scope": r["step_scope"],
+                "slots": [json.loads(r["slot_target"])] if r["slot_target"] else [],
+                # EMPTY, and that is obligation 11 read literally:
+                #
+                #   "Publish `requires` where a document ASSERTS a dependency
+                #    ... and leave it empty where the document merely prints one
+                #    step after another. Two guides here explicitly DENY their
+                #    own print order."
+                #
+                # This used to synthesise `{"kind": "after"}` between every
+                # consecutive pair, on a comment asserting that page order is "a
+                # STATED order, so `after` is a reading rather than an
+                # inference". It is not, and the contract cites the counter-
+                # evidence by name: a guide that prints A before B and then says
+                # the order does not matter would have been published claiming
+                # that it does. Order survives in the list; it is not an edge.
+                #
+                # A real edge -- `after`, `not_before`, `before`,
+                # `exclusive_with` -- is a reviewer's call and enters through
+                # `step_reviews`, never through the position of a bullet.
+                "requires": [],
+                "cites": [cite],
+                "text_i18n": r["text_final"] or _body(r["text_raw"]),
+            })
+        out.append({
+            "id": _procedure_id(document_id, page_no),
+            # `knowledge-datamodel.md:1392` defines `null` as *owned by no
+            # product* -- a positive claim. This published `null` because the
+            # guide's `FenceModel` does not exist yet, which is *product
+            # unknown*: a different fact, asserted as the first one.
+            #
+            # `parameters._default_scope` already answers this for a
+            # `ParameterTable` read off the same documents, and reusing it means
+            # a procedure and a table from one guide agree about what they are
+            # about -- and land in one identity namespace, which `reach.py`
+            # counts. It resolves a `fence_model` ref in the `mfr/` namespace
+            # where the curated metadata names a family, and the document itself
+            # where it does not. It never invents an entity.
+            #
+            # `null` is left for a curator to state deliberately, which is the
+            # only way "owned by no product" is ever true rather than unknown.
+            "scope": _scope_of(conn, document_id),
+            "steps": steps,
+            "cites": [cite],
+        })
+
+    for page in sorted(waiting):
+        document_id, page_no = page
+        gaps.add(kind="missing_value",
+                 subject={"kind": "page", "id": f"{document_id}#p{page_no}",
+                          "tenant": tenant},
+                 code="steps_awaiting_review",
+                 params={"page_no": page_no, "waiting": waiting[page]},
+                 would_close=(f"p{page_no} of \"{titles[page]}\": {waiting[page]} step "
+                              f"candidates are waiting for a person; until somebody "
+                              f"confirms what each line is, none of them publishes"),
+                 closes_by="knowledge", severity="informational")
+
+    for page in sorted(unrepaired):
+        document_id, page_no = page
+        n = unrepaired[page]
+        gaps.add(kind="missing_value",
+                 subject={"kind": "page", "id": f"{document_id}#p{page_no}",
+                          "tenant": tenant},
+                 code="step_repair_not_addressed",
+                 params={"page_no": page_no, "steps": n},
+                 would_close=(f"p{page_no} of \"{titles[page]}\": {n} reviewed step"
+                              f"{'s' if n != 1 else ''} came from a line the splitter "
+                              f"offered to repair, and the review did not say which "
+                              f"reading to publish; re-record with a corrected verdict "
+                              f"and the text the reviewer means"),
+                 closes_by="knowledge", severity="warns_line")
+    return out, gaps.list()
+
+
+def _body(text: str) -> str:
+    """The instruction without its leader glyph, whitespace collapsed."""
+    inner = text[1:] if text[:1] in "•*-" else text
+    return " ".join(inner.split())

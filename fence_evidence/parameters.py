@@ -72,6 +72,7 @@ from fractions import Fraction
 
 from .canonical import canonical_bytes
 from .dates import normalize_date
+from .versions import resolved_document_dates
 from .promote_tables import NO_BRACKET_PRINTED
 from .refs import ref_id
 from .reviews import effective_fact_value
@@ -146,6 +147,12 @@ CONDITION_SCOPE = {
     "wind_speed_mph": "site",
     "fence_height": "bay",
     "post_role": "post",
+    # `[measured]` 2026-09-15. Six guides print a footing diameter per post
+    # designation -- 10" for a 4x4, 12" for a 5x5 -- 100 times. Both are
+    # `footing_diameter_mm`, which publishes; published bare, either one is
+    # wrong for half the posts it would claim to cover. A registry addition,
+    # not an amendment (CLAUDE.md, docs/integration/README.md).
+    "post_size": "post",
     "slope_method": "param",
 }
 
@@ -368,8 +375,16 @@ def _quantity_from_lexeme(lexeme: str) -> dict | None:
     """
     unit = "in" if '"' in lexeme else ("ft" if "'" in lexeme else None)
     if unit is None:
-        for token, u in (("mm", "mm"), ("cm", "cm")):
-            if re.search(rf"\d\s*{token}\b", lexeme, re.IGNORECASE):
+        # The spelled-out forms arrived with G108: `facts._conditions` writes
+        # the source's own words, and a document that says `6 feet tall` never
+        # prints a prime. Longest first, so `inches` is not read as `in`
+        # followed by rubbish. Widening only: every lexeme that parsed before
+        # parses to the same value now, and the ones that gain a reading were
+        # refused outright.
+        for token, u in (("mm", "mm"), ("cm", "cm"),
+                         ("inches", "in"), ("inch", "in"), ("in", "in"),
+                         ("feet", "ft"), ("foot", "ft"), ("ft", "ft")):
+            if re.search(rf"\d\s*{token}\.?\b", lexeme, re.IGNORECASE):
                 unit = u
                 break
     magnitude = _magnitude(lexeme)
@@ -406,6 +421,17 @@ def _parse_fence_height(label: str | None) -> dict | None:
         if lo is None or hi is None:
             return None
         return {"min": lo, "max": hi,
+                "min_inclusive": True, "max_inclusive": True,
+                "value_raw": [text]}
+    # A single stated height -- `8'`, `6 feet` -- is a POINT, which is an
+    # interval whose bounds coincide and are both inclusive, not a missing
+    # value. G108: `facts._conditions` writes exactly this shape, and without
+    # this branch the axis would still be refused, only with a different
+    # message. Two dicts rather than one shared object: `min` and `max` are
+    # separate published members and must not alias.
+    point = _quantity_from_lexeme(text)
+    if point is not None:
+        return {"min": point, "max": _quantity_from_lexeme(text),
                 "min_inclusive": True, "max_inclusive": True,
                 "value_raw": [text]}
     return None
@@ -553,6 +579,30 @@ def _matches(conditions: dict, point: dict) -> bool:
     return all(point.get(k) == v for k, v in conditions.items())
 
 
+def _uncovered_points(rows: list[dict], points: list[dict]) -> list[dict]:
+    """Which enumerated points no published row answers.
+
+    Must use `_matches`, not equality on the serialised conditions. A row that
+    STATES fewer dimensions covers MORE points: the NOA page brackets exposure
+    B as `NON HVHZ` but C and D as `HVHZ AND NON HVHZ`, so the C and D rows
+    carry no `hvhz` key at all and match both values of it.
+
+    Byte equality could not see that, and published 16 false `uncovered`
+    points out of 20 across four `footing_schedule` tables -- claiming gaps the
+    source explicitly closes. `_finish()` had used `_matches` for this all
+    along; `_footing_schedules()` had not, which also contradicted
+    `_translate_conditions`'s own docstring: keeping an omitted dimension in
+    the domain exists precisely so these are not misreported as uncovered.
+
+    The failure direction matters. This is not a silent wrong answer -- it
+    makes Planning warn on a line the source answers -- but `uncovered` is one
+    of two channels by which this platform says what it does not know, and a
+    channel that cries wolf stops being read. G74.
+    """
+    return [p for p in points
+            if not any(_matches(r["conditions"], p) for r in rows)]
+
+
 def _is_fallback(row: dict) -> bool:
     """Obligation 15's unconditioned row.
 
@@ -671,6 +721,34 @@ def _source_class(doc_type: str | None) -> str:
     return SOURCE_CLASS.get(doc_type or "unspecified", "marketing")
 
 
+def _default_source_ref_page(conn: sqlite3.Connection):
+    """Standalone page-level minter, mirroring `_default_source_ref`.
+
+    Same reasoning as its sibling: the integrator should pass
+    `SnapshotBuilder.source_ref_page`, which registers the document and so
+    makes closure structural. This exists so the module stays testable alone,
+    and mints the identical id because `refs.ref_id` has one owner.
+    """
+    cache: dict[tuple, dict] = {}
+
+    def mint_page(document_id: str, page_no: int) -> dict:
+        key = (document_id, page_no)
+        if key in cache:
+            return cache[key]
+        row = conn.execute("""
+            SELECT v.sha256 FROM pages p
+              JOIN document_versions v ON v.version_id = p.version_id
+             WHERE v.document_id = ? AND p.page_no = ?""",
+            (document_id, page_no)).fetchone()
+        if row is None:
+            raise KeyError(f"no such page: {document_id} p{page_no}")
+        cache[key] = {"id": ref_id(row["sha256"], page_no, None),
+                      "belongs_to": row["sha256"]}
+        return cache[key]
+
+    return mint_page
+
+
 def _default_source_ref(conn: sqlite3.Connection):
     """Mint a `SourceRef` from an element id, the way `snapshot.py` does.
 
@@ -735,9 +813,12 @@ class _Gaps:
 
     Deliberately NOT `snapshot.Gap`: importing it at module level would make the
     wiring a cycle, and the integrator can pass these straight through
-    `SnapshotBuilder.gap(**g)` or extend the list. One difference worth knowing:
-    `snapshot` keys its dedupe on `kind:subject` alone, while these ids fold in
-    `because.code`, so two different findings about one parameter both survive.
+    `SnapshotBuilder.gap(**g)` or extend the list. Both collectors fold
+    `because.code` into the dedupe key, so two different findings about one
+    subject both survive. They did NOT always agree: `snapshot` keyed on
+    `kind:subject` alone until G78, and the divergence silently dropped 53 of
+    73 unreconstructed-table gaps -- every one is `illegible_source`, so a page
+    with two distinct failures collapsed to one.
     """
 
     def __init__(self):
@@ -790,7 +871,7 @@ def _subject(parameter: str, scope: dict, point: dict | None = None) -> dict:
 # the builder
 
 def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
-                           source_ref=None,
+                           source_ref=None, source_ref_page=None,
                            tenant: str | None = None) -> tuple[list[dict], list[dict]]:
     """Promoted facts -> (`[ParameterTable]`, `[Gap]`), both deterministic.
 
@@ -807,6 +888,7 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
     """
     scope_of = scope_resolver or _default_scope
     mint = source_ref or _default_source_ref(conn)
+    mint_page = source_ref_page or _default_source_ref_page(conn)
     gaps = _Gaps()
     groups: dict[bytes, dict] = {}
     # (document_id, page_no, row_index) -> {fact_type: {"row": row, "scope": scope}}
@@ -833,7 +915,16 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
             "parameter": parameter, "unit": unit, "scope": scope,
             "rows": [], "dimensions": set(), "observed": {}})
 
-        cites = [mint(fact["element_id"])]
+        # G73. A table-promoted fact cites its PAGE, not an element. The
+        # review behind it is a review of a whole-page crop (`is_page=True`,
+        # `bbox=None`) -- a person looked at the page image -- and
+        # `promote_tables` had no page ref available, so it bound `element_id`
+        # to the first element in reading order: the banner on every scanned
+        # NOA. All 108 promoted facts cited a heading, and the citation
+        # resolved cleanly to the wrong evidence.
+        cites = [mint_page(fact["document_id"], fact["page_no"])
+                 if fact["from_candidate_id"] is not None
+                 else mint(fact["element_id"])]
         unread_columns = (fact["condition_basis"] != "stated"
                           and "could not classify" in
                               (fact["condition_basis_note"] or ""))
@@ -947,8 +1038,16 @@ def build_parameter_tables(conn: sqlite3.Connection, *, scope_resolver=None,
             # the nearest addressable authority this store holds is the document
             # itself -- there is no issuer field. `belongs_to` joins it to the
             # `SourceDoc` in the snapshot, which carries the same dates.
-            "valid_from": normalize_date(fact["issue_date"]),
-            "valid_until": normalize_date(fact["expiration_date"]),
+            #
+            # G89: "the same dates" was false. This read the raw `documents`
+            # column while `SourceDoc` resolved through evidence, so 17 of 31
+            # rows published no expiry beside a document that had one -- two of
+            # them lapsed, which obligation 16's check could not see because it
+            # reads `valid_until`. Both members now resolve in one place.
+            **dict(zip(("valid_from", "valid_until"),
+                       resolved_document_dates(conn, fact["document_id"],
+                                               fact["issue_date"],
+                                               fact["expiration_date"])[:2])),
             "authority": cites[0]["belongs_to"],
         }
         group["rows"].append(row)
@@ -1131,8 +1230,7 @@ def _footing_schedules(schedule_candidates: dict) -> tuple[list[dict], set]:
                 "valid_until": bucket["valid_until"],
                 "authority": bucket["authority"],
             })
-        covered_points = {canonical_bytes(r["conditions"]) for r in rows}
-        uncovered = [p for p in points if canonical_bytes(p) not in covered_points]
+        uncovered = _uncovered_points(rows, points)
 
         tables.append({
             "parameter": SCHEDULE_PARAMETER,
